@@ -1,0 +1,242 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
+  <Profiles />
+  <Settings>
+    <Setting Name="HKey1" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">44</Value>
+    </Setting>
+    <Setting Name="HKey1Text" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Print Screen</Value>
+    </Setting>
+    <Setting Name="DuckList" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Akbronco Prime Blueprint,15
+Akbronco Prime Link,45
+Aklex Prime Blueprint,45
+Aklex Prime Link,100
+Akstiletto Prime Blueprint,100
+Akstiletto Prime Barrel,45
+Akstiletto Prime Receiver,45
+Akstiletto Prime Link,45
+Ankyros Prime Blueprint,15
+Ankyros Prime Blade,100
+Ankyros Prime Gauntlet,15
+Ash Prime Blueprint,45
+Ash Prime Neuroptics Blueprint,45
+Ash Prime Chassis Blueprint,15
+Ash Prime Systems Blueprint,65
+Banshee Prime Blueprint,45
+Banshee Prime Neuroptics Blueprint,15
+Banshee Prime Chassis Blueprint,100
+Banshee Prime Systems Blueprint,100
+Bo Prime Blueprint,15
+Bo Prime Ornament,15
+Bo Prime Handle,45
+Boar Prime Blueprint,15
+Boar Prime Barrel,45
+Boar Prime Receiver,15
+Boar Prime Stock,100
+Boltor Prime Blueprint,100
+Boltor Prime Barrel,15
+Boltor Prime Receiver,45
+Boltor Prime Stock,15
+Braton Prime Blueprint,25
+Braton Prime Barrel,15
+Braton Prime Receiver,45
+Braton Prime Stock,15
+Bronco Prime Blueprint,15
+Bronco Prime Barrel,45
+Bronco Prime Receiver,15
+Burston Prime Blueprint,15
+Burston Prime Barrel,45
+Burston Prime Receiver,15
+Burston Prime Stock,15
+Carrier Prime Blueprint,15
+Carrier Prime Carapace,15
+Carrier Prime Cerebrum,65
+Carrier Prime Systems,15
+Cernos Prime Blueprint,45
+Cernos Prime Upper Limb,15
+Cernos Prime Lower Limb,100
+Cernos Prime Grip,15
+Cernos Prime String,45
+Dakra Prime Blueprint,45
+Dakra Prime Blade,100
+Dakra Prime Handle,15
+Dual Kamas Prime Blueprint,15
+Dual Kamas Prime Blade,100
+Dual Kamas Prime Handle,45
+Ember Prime Blueprint,100
+Ember Prime Neuroptics Blueprint,15
+Ember Prime Chassis Blueprint,15
+Ember Prime Systems Blueprint,45
+Euphona Prime Blueprint,15
+Euphona Prime Barrel,45
+Euphona Prime Receiver,100
+Fang Prime Blueprint,15
+Fang Prime Blade,15
+Fang Prime Handle,25
+Fragor Prime Blueprint,100
+Fragor Prime Head,15
+Fragor Prime Handle,65
+Frost Prime Blueprint,100
+Frost Prime Neuroptics Blueprint,15
+Frost Prime Chassis Blueprint,15
+Frost Prime Systems Blueprint,45
+Galatine Prime Blueprint,100
+Galatine Prime Blade,15
+Galatine Prime Handle,45
+Glaive Prime Blueprint,100
+Glaive Prime Blade,45
+Glaive Prime Disc,45
+Helios Prime Blueprint,45
+Helios Prime Carapace,15
+Helios Prime Cerebrum,100
+Helios Prime Systems,45
+Hikou Prime Blueprint,15
+Hikou Prime Stars,15
+Hikou Prime Pouch,15
+Kavasa Prime Kubrow Collar Blueprint,45
+Kavasa Prime Kubrow Band Blueprint,45
+Kavasa Prime Kubrow Buckle Blueprint,65
+Latron Prime Blueprint,15
+Latron Prime Barrel,15
+Latron Prime Receiver,15
+Latron Prime Stock,15
+Lex Prime Blueprint,25
+Lex Prime Barrel,15
+Lex Prime Receiver,15
+Loki Prime Blueprint,15
+Loki Prime Neuroptics Blueprint,15
+Loki Prime Chassis Blueprint,45
+Loki Prime Systems Blueprint,100
+Mag Prime Blueprint,100
+Mag Prime Neuroptics Blueprint,15
+Mag Prime Chassis Blueprint,45
+Mag Prime Systems Blueprint,15
+Nekros Prime Blueprint,100
+Nekros Prime Neuroptics Blueprint,45
+Nekros Prime Chassis Blueprint,15
+Nekros Prime Systems Blueprint,100
+Nikana Prime Blueprint,100
+Nikana Prime Blade,100
+Nikana Prime Hilt,100
+Nova Prime Blueprint,45
+Nova Prime Neuroptics Blueprint,15
+Nova Prime Chassis Blueprint,100
+Nova Prime Systems Blueprint,15
+Nyx Prime Blueprint,15
+Nyx Prime Neuroptics Blueprint,100
+Nyx Prime Chassis Blueprint,100
+Nyx Prime Systems Blueprint,45
+Odonata Prime Blueprint,45
+Odonata Prime Harness Blueprint,15
+Odonata Prime Wings Blueprint,45
+Odonata Prime Systems Blueprint,15
+Orthos Prime Blueprint,45
+Orthos Prime Blade,45
+Orthos Prime Handle,15
+Paris Prime Blueprint,15
+Paris Prime Upper Limb,25
+Paris Prime Lower Limb,15
+Paris Prime Grip,45
+Paris Prime String,15
+Reaper Prime Blueprint,15
+Reaper Prime Blade,45
+Reaper Prime Handle,15
+Rhino Prime Blueprint,100
+Rhino Prime Neuroptics Blueprint,100
+Rhino Prime Chassis Blueprint,45
+Rhino Prime Systems Blueprint,15
+Saryn Prime Blueprint,100
+Saryn Prime Neuroptics Blueprint,45
+Saryn Prime Chassis Blueprint,100
+Saryn Prime Systems Blueprint,15
+Scindo Prime Blueprint,45
+Scindo Prime Blade,100
+Scindo Prime Handle,45
+Sicarus Prime Blueprint,15
+Sicarus Prime Barrel,15
+Sicarus Prime Receiver,100
+Soma Prime Blueprint,15
+Soma Prime Barrel,15
+Soma Prime Receiver,45
+Soma Prime Stock,100
+Spira Prime Blueprint,15
+Spira Prime Blade,100
+Spira Prime Pouch,100
+Tigris Prime Blueprint,100
+Tigris Prime Barrel,45
+Tigris Prime Receiver,45
+Tigris Prime Stock,15
+Trinity Prime Blueprint,45
+Trinity Prime Neuroptics Blueprint,25
+Trinity Prime Chassis Blueprint,45
+Trinity Prime Systems Blueprint,15
+Valkyr Prime Blueprint,15
+Valkyr Prime Neuroptics Blueprint,45
+Valkyr Prime Chassis Blueprint,100
+Valkyr Prime Systems Blueprint,100
+Vasto Prime Blueprint,45
+Vasto Prime Barrel,15
+Vasto Prime Receiver,15
+Vauban Prime Blueprint,100
+Vauban Prime Neuroptics Blueprint,100
+Vauban Prime Chassis Blueprint,100
+Vauban Prime Systems Blueprint,100
+Vectis Prime Blueprint,45
+Vectis Prime Barrel,15
+Vectis Prime Receiver,100
+Vectis Prime Stock,65
+Venka Prime Blueprint,45
+Venka Prime Blades,15
+Venka Prime Gauntlet,100
+Volt Prime Blueprint,45
+Volt Prime Neuroptics Blueprint,45
+Volt Prime Chassis Blueprint,45
+Volt Prime Systems Blueprint,45
+Wyrm Prime Blueprint,15
+Wyrm Prime Carapace,15
+Wyrm Prime Cerebrum,15
+Wyrm Prime Systems,45
+</Value>
+    </Setting>
+    <Setting Name="LastUpdate" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="HKey2" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">220</Value>
+    </Setting>
+    <Setting Name="HKey2Text" Type="System.String" Scope="User">
+      <Value Profile="(Default)">\</Value>
+    </Setting>
+    <Setting Name="Animate" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Commands" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Debug" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Resources" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Alloy Plate,Draco(Ceres) / Malva(Venus)
+Argon Crystal,Void Survival / Defence
+Circuits,Draco(Ceres) / Malva(Venus)
+Control Module,Void Survival / Defence
+Cryotic,Hieracon(Pluto)
+Ferrite,Tikal(Earth)
+Gallium,Assur(Uranus) / War(Mars)
+Morphics,Wahiba(Mars) / Tolstoj(Mercury)
+Nano Spores,ODD / Akkad(Eris)
+Neural Sensors,Themisto or IO(Jupiter)
+Neurodes,Tikal(Earth) / Zabala(Eris)
+Orokin Cell,ODS / Draco(Ceres)
+Oxium,IO(Jupiter) / Baal(Europa)
+Plastids,Ophelia(Uranus) / Zabala(Eris)
+Polymer Bundle,Ophelia or Assur(Uranus)
+Rubedo,Void Survival / Defence
+Salvage,Cameria(Jupiter) / Wahiba(Mars)
+Tellurium,Ophelia or Caelus(Uranus)</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
