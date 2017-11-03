@@ -11,18 +11,19 @@ Public Class Main
     Dim appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Dim scTog As Integer = 0 ' Toggle that only allows a single screen capture
     Dim count As Integer = 0 ' Number of Pics in appData
-    Dim Sess As Integer = 0  ' Number of Screens in this Session
+    Dim Sess As Integer = 0  ' Number of Screenshots this session
+    Dim PPM As Integer = 0   ' Potential Platinum Made this session
     Dim pCount As Integer = 0 ' Current plat price to scan
     Dim CliptoImage As Image         ' Stored image
-    Dim HKeyTog As Integer = 0           ' Toggle Var for setting the activation key
-    Dim pbWait As Integer = 0            ' Variable to set to make the timer wait
-    Dim lbTemp As String                 ' Stores the keychar
+    Dim HKeyTog As Integer = 0       ' Toggle Var for setting the activation key
+    Dim pbWait As Integer = 0        ' Variable to set to make the timer wait
+    Dim lbTemp As String             ' Stores the keychar
     Dim drag As Boolean = False
     Dim mouseX As Integer
     Dim mouseY As Integer
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.MaximizeBox = False
-        lbStatus.Text = "Status:    Updating..."
+        lbStatus.ForeColor = Color.Yellow
         Me.Refresh()
         If (Not System.IO.Directory.Exists(appData + "\WFInfo")) Then
             System.IO.Directory.CreateDirectory(appData + "\WFInfo")
@@ -36,6 +37,8 @@ Public Class Main
             Clipboard.GetImage()
             CliptoImage = Clipboard.GetImage()
         End If
+
+        OnlineStatus.Navigate("https://sites.google.com/site/wfinfoapp/online")
     End Sub
 
     Private Async Sub tPB_Tick(sender As Object, e As EventArgs) Handles tPB.Tick
@@ -71,7 +74,7 @@ Public Class Main
                             keyState = 0
                         End If
                         If keyState = 0 Then
-                            lbStatus.Text = "Status:    Busy"
+                            lbStatus.ForeColor = Color.Yellow
                             tPPrice.Stop()
                             scTog = 0
                             If Fullscreen Then
@@ -112,6 +115,7 @@ Public Class Main
                                         If Not img Is Nothing Then
                                             pbDebug.Image = img
                                         End If
+                                        'Clipboard.SetText(LevDist("banshee prime systems))
                                         If Debug Then
                                             Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\") + 1
                                             img.Save(appData & "\WFInfo\tests\" & nextFile & ".jpg", Imaging.ImageFormat.Jpeg)
@@ -124,6 +128,7 @@ Public Class Main
                                     End If
                                 Next
                                 qItems.Clear()
+                                Dim HighestPlat As Integer = 0
                                 For i = 0 To unique.Count - 1
                                     Dim guess As String = unique(i)
                                     If Not unique(i) = "Forma Blueprint" Then
@@ -138,6 +143,11 @@ Public Class Main
                                             plat = GetPlat(guess)
                                             PlatPrices.Add(guess & "," & plat)
                                         End If
+                                        If Not plat = "Unknown" Then
+                                            If CType(plat, Integer) > HighestPlat Then
+                                                HighestPlat = CType(plat, Integer)
+                                            End If
+                                        End If
                                         If guess.Length > 27 Then
                                             qItems.Add(guess.Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
                                         Else
@@ -151,11 +161,13 @@ Public Class Main
                                 Overlay.Display()
                                 count += 1
                                 Sess += 1
-                                lbStatus.Text = "Status:    Ready"
-                                lbSession.Text = "Checks this Session:   " & Sess
+                                PPM += HighestPlat
+                                lbStatus.ForeColor = Color.Lime
+                                lbChecks.Text = "Checks this Session:            " & Sess
+                                lbPPM.Text = "Platinum this Session:          " & PPM
                                 tPPrice.Start()
                             Catch ex As Exception
-                                lbStatus.Text = "Status:    Ready[Failed]"
+                                lbStatus.ForeColor = Color.Orange
                                 addLog(ex.ToString)
                                 tPPrice.Start()
                             End Try
@@ -164,7 +176,7 @@ Public Class Main
                 End If
             End If
         Catch ex As Exception
-            lbStatus.Text = "Status:    Ready[Failed]"
+            lbStatus.ForeColor = Color.Orange
             addLog(ex.ToString)
             tPPrice.Start()
         End Try
@@ -200,17 +212,17 @@ Public Class Main
                     Case 4
                         startX = (img.Width * 0.055) + (img.Width * 0.225 * pos)
                         startY = img.Height * 0.395
-                        height = img.Height * 0.06
+                        height = img.Height * 0.03
                         width = img.Width * 0.22
                     Case 3
                         startX = (img.Width * 0.055) + (img.Width * 0.225 * pos) + (img.Width * 0.11)
                         startY = img.Height * 0.395
-                        height = img.Height * 0.06
+                        height = img.Height * 0.03
                         width = img.Width * 0.22
                     Case 2
                         startX = (img.Width * 0.055) + (img.Width * 0.225 * (pos + 1))
                         startY = img.Height * 0.395
-                        height = img.Height * 0.06
+                        height = img.Height * 0.03
                         width = img.Width * 0.22
                 End Select
         End Select
@@ -275,11 +287,50 @@ Public Class Main
                 My.Computer.FileSystem.WriteAllText(LocStorage & "\config\localconfig.vdf", SettingsStorage, False)
             End If
         End If
+        Dim tempPPMPD As String = ""
+        Dim tempChecksPD As String = ""
+        Dim isToday As Boolean = False
+        For Each str As String In My.Settings.PPMPD.Split(vbNewLine)
+            If Not str = "" Then
+                If Not DateAdd(DateInterval.Day, 15, CType(str.Split("|")(0), Date)) < Today Then
+                    If CType(str.Split("|")(0), Date) = Today Then
+                        isToday = True
+                        tempPPMPD &= vbNewLine & Today & "|" & str.Split("|")(1) + PPM
+                    Else
+                        tempPPMPD &= vbNewLine & str
+                    End If
+                End If
+            End If
+        Next
+        If Not isToday Then
+            tempPPMPD &= vbNewLine & Today & "|" & PPM
+        End If
+
+        isToday = False
+
+        For Each str As String In My.Settings.ChecksPD.Split(vbNewLine)
+            If Not str = "" Then
+                If Not DateAdd(DateInterval.Day, 15, CType(str.Split("|")(0), Date)) > Today Then
+                    If CType(str.Split("|")(0), Date) = Today Then
+                        isToday = True
+                        tempChecksPD &= vbNewLine & Today & "|" & str.Split("|")(1) + Sess
+                    Else
+                        tempChecksPD &= vbNewLine & str
+                    End If
+                End If
+            End If
+        Next
+        If Not isToday Then
+            tempChecksPD &= vbNewLine & Today & "|" & Sess
+        End If
+        My.Settings.PPMPD = tempPPMPD
+        My.Settings.ChecksPD = tempChecksPD
+        My.Settings.Save()
     End Sub
     Private Sub UpdateList()
         Try
             If Date.Today > My.Settings.LastUpdate.AddDays(7) Then
-                lbStatus.Text = "Status:    Updating..."
+                lbStatus.ForeColor = Color.Yellow
                 Dim duckString As String = ""
                 Dim endpoint As String = New StreamReader(WebRequest.Create("http://warframe.wikia.com/wiki/Ducats/Prices").GetResponse().GetResponseStream()).ReadToEnd()
                 Dim str1 As String = endpoint.Substring(endpoint.IndexOf("Blueprint/Crafted Value"))
@@ -299,13 +350,13 @@ Public Class Main
                             vBool = True
                             vStr = "*"
                         End If
-                        If Not (name.Contains("Wyrm") Or name.Contains("Carrier") Or name.Contains("Helios")) Then
-                            name = name.Replace("Chassis", "Chassis Blueprint")
-                            name = name.Replace("Systems", "Systems Blueprint")
-                            name = name.Replace("Neuroptics", "Neuroptics Blueprint")
-                        End If
-                        name = name.Replace("Band", "Kubrow Band Blueprint")
-                        name = name.Replace("Buckle", "Kubrow Buckle Blueprint")
+                        'If Not (name.Contains("Wyrm") Or name.Contains("Carrier") Or name.Contains("Helios")) Then
+                        'name = name.Replace("Chassis", "Chassis Blueprint")
+                        'name = name.Replace("Systems", "Systems Blueprint")
+                        'name = name.Replace("Neuroptics", "Neuroptics Blueprint")
+                        'End If
+                        name = name.Replace("Band", "Kubrow Band")
+                        name = name.Replace("Buckle", "Kubrow Buckle")
                         name = name.Replace("Collar", "Kubrow Collar")
                         name = name.Replace("Harness", "Harness Blueprint")
                         name = name.Replace("Wings", "Wings Blueprint")
@@ -329,7 +380,7 @@ Public Class Main
         Names.Add("Forma Blueprint")
         Ducks.Add("0")
 
-        lbStatus.Text = "Status:    Ready"
+        lbStatus.ForeColor = Color.Lime
     End Sub
 
     Private Sub Main_Shown(sender As Object, e As EventArgs) Handles Me.Shown
@@ -578,6 +629,20 @@ Public Class Main
         Dim endIndex As Integer = FullString.IndexOf(EndText, startIndex)
         Return FullString.Substring(startIndex, endIndex - startIndex)
     End Function
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        For Each str As String In My.Settings.PPMPD.Split(vbNewLine)
+            MsgBox(str)
+        Next
+    End Sub
+
+    Private Sub tOnline_Tick(sender As Object, e As EventArgs) Handles tOnline.Tick
+        OnlineStatus.Navigate("https://sites.google.com/site/wfinfoapp/online")
+    End Sub
+
+    Private Sub Panel1_Paint(sender As Object, e As PaintEventArgs) Handles Panel1.Paint
+
+    End Sub
 End Class
 
 Module Glob
@@ -725,42 +790,29 @@ Module Glob
         Return d(n, m)
     End Function
     Public Function GetPlat(str As String, Optional getUser As Boolean = False, Optional getMod As Boolean = False) As String
-        str = str.Replace("*", "")
-        If str.Contains("Lex Prime Receiver") Then
-            str = str.Replace("Receiver", "Reciever")
+        str = str.ToLower
+        If (str.Contains("chassis") Or str.Contains("neuroptics") Or str.Contains("systems")) Then
+            str = str.Replace(" blueprint", "")
         End If
-        If (str.Contains("Chassis") Or str.Contains("Neuroptics") Or str.Contains("Systems")) Then
-            str = str.Replace(" Blueprint", "")
+        If str.Contains("kubrow") Then
+            str = str.Replace(" kubrow ", " ")
         End If
-        If str.Contains("Kubrow") Then
-            str = str.Replace(" Kubrow ", " ")
-        End If
-        str = str.Replace(" ", "%20").Replace(vbLf, "")
+        str = str.Replace(" ", "%5F").Replace(vbLf, "").Replace("*", "")
         Dim webClient As New System.Net.WebClient
+        webClient.Headers.Add("platform", "pc")
+        webClient.Headers.Add("language", "en")
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11
         Dim result As JObject
-        If Not getMod Then
-            result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("http://warframe.market/api/get_orders/Blueprint/" + str))
-            If Not result("code").ToString = 200 Then
-                result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("http://warframe.market/api/get_orders/Set/" + str))
-                If Not result("code").ToString = 200 Then
-                    Return "Unknown"
-                End If
-            End If
-        Else
-            result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("http://warframe.market/api/get_orders/Mod/" + str))
-            If Not result("code").ToString = 200 Then
-                result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("http://warframe.market/api/get_orders/Void%20Trader/" + str))
-                If Not result("code").ToString = 200 Then
-                    Return "Unknown"
-                End If
-            End If
-        End If
+        str = str.ToLower
+        result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/orders"))
         Dim platCheck As New List(Of Integer)()
         Dim userCheck As New List(Of String)()
-        For i = 0 To result("response")("sell").Count - 1
-            If result("response")("sell")(i)("online_ingame").ToString = True Then
-                platCheck.Add(result("response")("sell")(i)("price"))
-                userCheck.Add(result("response")("sell")(i)("ingame_name"))
+        For i = 0 To result("payload")("orders").Count - 1
+            If result("payload")("orders")(i)("user")("status") = "ingame" Then
+                If result("payload")("orders")(i)("order_type") = "sell" Then
+                    platCheck.Add(result("payload")("orders")(i)("platinum"))
+                    userCheck.Add(result("payload")("orders")(i)("user")("ingame_name"))
+                End If
             End If
         Next
         If platCheck.Count = 0 Then
@@ -777,7 +829,6 @@ Module Glob
             End If
         Next
         If getUser Then
-            Clipboard.SetText(user)
             Return low & vbNewLine & "    User: " & user
         Else
             Return low

@@ -110,28 +110,33 @@ Public Class Overlay
                 If Not Me.Location.Y > screenHeight Then
                     Me.Location = New Point(Me.Location.X, Me.Location.Y + 20)
                 Else
+                    If Not Input.Visible = True Then
+                        Try
+                            AppActivate("WARFRAME")
+                        Catch ex As Exception
+                        End Try
+                        Me.Close()
+                    End If
+                End If
+            Else
+                If Not Input.Visible = True Then
+
                     Try
                         AppActivate("WARFRAME")
                     Catch ex As Exception
                     End Try
                     Me.Close()
                 End If
-            Else
-                Try
-                    AppActivate("WARFRAME")
-                Catch ex As Exception
-                End Try
-                Me.Close()
             End If
-        End If
+            End If
     End Sub
     Public Sub quack()
         qItems.Clear()
         lbDisplay.Text = ""
-        qItems.Add("  ______")
-        qItems.Add("/                \            _")
-        qItems.Add("| Quack      >    <(o )___")
-        qItems.Add("\_______/          ( ._> /")
+        qItems.Add("  _________")
+        qItems.Add("/             \            _")
+        qItems.Add("| Quack    >    <(o )___")
+        qItems.Add("\_________/         ( ._> /")
         Me.Display()
     End Sub
 End Class

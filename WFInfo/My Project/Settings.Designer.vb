@@ -245,6 +245,30 @@ Namespace My
                 Me("Resources") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("6/1/2017|0")>  _
+        Public Property PPMPD() As String
+            Get
+                Return CType(Me("PPMPD"),String)
+            End Get
+            Set
+                Me("PPMPD") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("6/1/2017|0")>  _
+        Public Property ChecksPD() As String
+            Get
+                Return CType(Me("ChecksPD"),String)
+            End Get
+            Set
+                Me("ChecksPD") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

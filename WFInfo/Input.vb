@@ -78,6 +78,8 @@ Public Class Input
     Private Sub btnAccept_Click(sender As Object, e As EventArgs) Handles btnAccept.Click
         busy = True
         Try
+            Me.Hide()
+            Overlay.Clear()
             Try
                 AppActivate("WARFRAME")
             Catch ex As Exception

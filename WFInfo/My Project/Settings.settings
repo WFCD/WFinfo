@@ -238,5 +238,11 @@ Rubedo,Void Survival / Defence
 Salvage,Cameria(Jupiter) / Wahiba(Mars)
 Tellurium,Ophelia or Caelus(Uranus)</Value>
     </Setting>
+    <Setting Name="PPMPD" Type="System.String" Scope="User">
+      <Value Profile="(Default)">6/1/2017|0</Value>
+    </Setting>
+    <Setting Name="ChecksPD" Type="System.String" Scope="User">
+      <Value Profile="(Default)">6/1/2017|0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
