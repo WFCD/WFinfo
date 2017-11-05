@@ -575,7 +575,7 @@ Public Class Main
     End Sub
 
     Private Sub pbDonate_Click(sender As Object, e As EventArgs) Handles pbDonate.Click
-        Process.Start("https://www.paypal.com/donate/?token=eKKVPQV-5HI8tIe8m85Wt35U94uf4Qdl1YK6dBWkue0G98ErTb9tgKe8e51DcgIy6ZRu60")
+        Process.Start("https://sites.google.com/site/wfinfoapp/donate")
     End Sub
 
     Private Sub pbDonate_MouseEnter(sender As Object, e As EventArgs) Handles pbDonate.MouseEnter
