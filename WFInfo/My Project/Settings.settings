@@ -244,5 +244,17 @@ Tellurium,Ophelia or Caelus(Uranus)</Value>
     <Setting Name="ChecksPD" Type="System.String" Scope="User">
       <Value Profile="(Default)">6/1/2017|0</Value>
     </Setting>
+    <Setting Name="Version" Type="System.String" Scope="User">
+      <Value Profile="(Default)">3.2.0</Value>
+    </Setting>
+    <Setting Name="CheckUpdates" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="StartX" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">500</Value>
+    </Setting>
+    <Setting Name="StartY" Type="System.String" Scope="User">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

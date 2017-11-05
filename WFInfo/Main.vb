@@ -22,6 +22,8 @@ Public Class Main
     Dim mouseX As Integer
     Dim mouseY As Integer
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        lbVersion.Text = "v" + My.Settings.Version
+        Me.Location = New Point(My.Settings.StartX, My.Settings.StartY)
         Me.MaximizeBox = False
         lbStatus.ForeColor = Color.Yellow
         Me.Refresh()
@@ -39,6 +41,10 @@ Public Class Main
         End If
 
         OnlineStatus.Navigate("https://sites.google.com/site/wfinfoapp/online")
+
+        If My.Settings.CheckUpdates = True Then
+            CheckUpdates()
+        End If
     End Sub
 
     Private Async Sub tPB_Tick(sender As Object, e As EventArgs) Handles tPB.Tick
@@ -108,22 +114,21 @@ Public Class Main
                                     If Not LevDist(tList(i), "Blueprint") < 4 Then
                                         Dim guess As String = Names(check(tList(i)))
                                         If Not unique.Contains(guess) Then
-                                            unique.Add(guess)
+                                            unique.Add(GClean(guess))
                                         End If
                                     Else
                                         Dim img As Image = Crop(CliptoImage, 1, i, players)
                                         If Not img Is Nothing Then
                                             pbDebug.Image = img
                                         End If
-                                        'Clipboard.SetText(LevDist("banshee prime systems))
                                         If Debug Then
                                             Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\") + 1
                                             img.Save(appData & "\WFInfo\tests\" & nextFile & ".jpg", Imaging.ImageFormat.Jpeg)
                                         End If
-                                        Dim guess As String = Names(check(GetText(img)))
+                                        Dim guess As String = Names(check(GetText(img) + " blueprint"))
                                         img.Dispose()
                                         If Not unique.Contains(guess) Then
-                                            unique.Add(guess)
+                                            unique.Add(GClean(guess))
                                         End If
                                     End If
                                 Next
@@ -211,17 +216,17 @@ Public Class Main
                 Select Case players
                     Case 4
                         startX = (img.Width * 0.055) + (img.Width * 0.225 * pos)
-                        startY = img.Height * 0.395
+                        startY = img.Height * 0.4
                         height = img.Height * 0.03
                         width = img.Width * 0.22
                     Case 3
                         startX = (img.Width * 0.055) + (img.Width * 0.225 * pos) + (img.Width * 0.11)
-                        startY = img.Height * 0.395
+                        startY = img.Height * 0.4
                         height = img.Height * 0.03
                         width = img.Width * 0.22
                     Case 2
                         startX = (img.Width * 0.055) + (img.Width * 0.225 * (pos + 1))
-                        startY = img.Height * 0.395
+                        startY = img.Height * 0.4
                         height = img.Height * 0.03
                         width = img.Width * 0.22
                 End Select
@@ -325,6 +330,8 @@ Public Class Main
         End If
         My.Settings.PPMPD = tempPPMPD
         My.Settings.ChecksPD = tempChecksPD
+        My.Settings.StartX = Me.Location.X
+        My.Settings.StartY = Me.Location.Y
         My.Settings.Save()
     End Sub
     Private Sub UpdateList()
@@ -343,18 +350,18 @@ Public Class Main
                     If current.Contains("</a>") Then
                         Dim name As String = current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).Substring(0, current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).IndexOf("<"))
                         Dim ducats As String = current.Substring(current.IndexOf("sortkey") + 9, current.IndexOf("</span>") - current.IndexOf("sortkey") - 9)
-                        Dim Relic = GetRelic(current, "<td>", "</td>").ToString().Replace("<br />", vbCrLf)
+                        Dim Relic = GetRelic(current, "<td>", ">").ToString().Replace("<br />", vbCrLf)
                         Dim vBool As Boolean = False
                         Dim vStr As String = ""
-                        If Relic.Split(vbCrLf).Length = Relic.Split("*").Length - 1 Or current.Contains("Prime Vault") Then
+                        If Relic.Contains("Prime Vault") Then
                             vBool = True
                             vStr = "*"
                         End If
-                        'If Not (name.Contains("Wyrm") Or name.Contains("Carrier") Or name.Contains("Helios")) Then
-                        'name = name.Replace("Chassis", "Chassis Blueprint")
-                        'name = name.Replace("Systems", "Systems Blueprint")
-                        'name = name.Replace("Neuroptics", "Neuroptics Blueprint")
-                        'End If
+                        If Not (name.Contains("Wyrm") Or name.Contains("Carrier") Or name.Contains("Helios")) Then
+                            name = name.Replace("Chassis", "Chassis Blueprint")
+                            name = name.Replace("Systems", "Systems Blueprint")
+                            name = name.Replace("Neuroptics", "Neuroptics Blueprint")
+                        End If
                         name = name.Replace("Band", "Kubrow Band")
                         name = name.Replace("Buckle", "Kubrow Buckle")
                         name = name.Replace("Collar", "Kubrow Collar")
@@ -505,6 +512,16 @@ Public Class Main
         End Using
     End Function
 
+    Public Function GClean(guess As String)
+        If Not (guess.Contains("Wyrm") Or guess.Contains("Carrier") Or guess.Contains("Helios")) Then
+            guess = guess.Replace("Chassis Blueprint", "Chassis")
+            guess = guess.Replace("Systems Blueprint", "Systems")
+            guess = guess.Replace("Neuroptics Blueprint", "Neuroptics")
+        End If
+        Return guess
+    End Function
+
+
     Private Sub tPPrice_Tick(sender As Object, e As EventArgs) Handles tPPrice.Tick
         If Not bgPPrice.IsBusy Then
             bgPPrice.RunWorkerAsync()
@@ -631,16 +648,26 @@ Public Class Main
     End Function
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        For Each str As String In My.Settings.PPMPD.Split(vbNewLine)
-            MsgBox(str)
-        Next
+        Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
+        curVersion = curVersion.Remove(0, curVersion.IndexOf("version ") + 8)
+        curVersion = curVersion.Remove(5, curVersion.Length - 5)
+
     End Sub
 
     Private Sub tOnline_Tick(sender As Object, e As EventArgs) Handles tOnline.Tick
         OnlineStatus.Navigate("https://sites.google.com/site/wfinfoapp/online")
     End Sub
 
-    Private Sub Panel1_Paint(sender As Object, e As PaintEventArgs) Handles Panel1.Paint
+    Public Sub CheckUpdates()
+        Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
+        curVersion = curVersion.Remove(0, curVersion.IndexOf("version ") + 8)
+        curVersion = curVersion.Remove(5, curVersion.Length - 5)
+
+
+        If Not My.Settings.Version = curVersion Then
+            UpdateWindow.Show()
+            UpdateWindow.BringToFront()
+        End If
 
     End Sub
 End Class
@@ -803,34 +830,64 @@ Module Glob
         webClient.Headers.Add("language", "en")
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11
         Dim result As JObject
-        str = str.ToLower
-        result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/orders"))
-        Dim platCheck As New List(Of Integer)()
-        Dim userCheck As New List(Of String)()
-        For i = 0 To result("payload")("orders").Count - 1
-            If result("payload")("orders")(i)("user")("status") = "ingame" Then
-                If result("payload")("orders")(i)("order_type") = "sell" Then
-                    platCheck.Add(result("payload")("orders")(i)("platinum"))
-                    userCheck.Add(result("payload")("orders")(i)("user")("ingame_name"))
-                End If
-            End If
-        Next
-        If platCheck.Count = 0 Then
-            Return 0
-        End If
-        Dim low As Integer = 999999
-        Dim user As String
-        For i = 0 To platCheck.Count - 1
-            If (Not userCheck(i).Contains("XB1")) And (Not userCheck(i).Contains("PS4")) Then
-                If platCheck(i) < low Then
-                    low = platCheck(i)
-                    user = userCheck(i)
-                End If
-            End If
-        Next
+
         If getUser Then
-            Return low & vbNewLine & "    User: " & user
-        Else
+            Clipboard.SetText(str)
+            result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/orders"))
+            Dim platCheck As New List(Of Integer)()
+            Dim userCheck As New List(Of String)()
+            For i = 0 To result("payload")("orders").Count - 1
+                If result("payload")("orders")(i)("user")("status") = "ingame" Then
+                    If result("payload")("orders")(i)("order_type") = "sell" Then
+                        platCheck.Add(result("payload")("orders")(i)("platinum"))
+                        userCheck.Add(result("payload")("orders")(i)("user")("ingame_name"))
+                    End If
+                End If
+            Next
+
+            If platCheck.Count = 0 Then
+                Return 0
+            End If
+            Dim low As Integer = 999999
+            Dim user As String
+            For i = 0 To platCheck.Count - 1
+                If (Not userCheck(i).Contains("XB1")) And (Not userCheck(i).Contains("PS4")) Then
+                    If platCheck(i) < low Then
+                        low = platCheck(i)
+                        user = userCheck(i)
+                    End If
+                End If
+            Next
+            If getUser Then
+                Return low & vbNewLine & "    User: " & user
+            Else
+                Return low
+            End If
+
+        Else 'Not Single Pull
+
+            result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/statistics"))
+            Dim minList As New List(Of Integer)()
+            Dim x As Integer = 9
+            For i = 0 To x
+                minList.Add(CInt(result("payload")("statistics")("48hours")(i)("min_price")))
+            Next
+
+            Dim total As Integer = 0
+            For i = 0 To minList.Count - 1
+                total += minList(i)
+            Next
+
+            Dim avg As Single = total / minList.Count
+
+            Dim difference As Single = 999999
+            Dim low As Integer = 0
+            For i = 0 To minList.Count - 1
+                If Math.Abs(avg - minList(i)) < difference Then
+                    low = minList(i)
+                    difference = Math.Abs(avg - minList(i))
+                End If
+            Next
             Return low
         End If
     End Function

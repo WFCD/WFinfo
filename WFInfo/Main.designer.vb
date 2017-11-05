@@ -38,22 +38,22 @@ Partial Class Main
         Me.lbVersion = New System.Windows.Forms.Label()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.btnClose = New System.Windows.Forms.Button()
+        Me.pTitle = New System.Windows.Forms.Panel()
+        Me.Label1 = New System.Windows.Forms.Label()
+        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
+        Me.tOnline = New System.Windows.Forms.Timer(Me.components)
         Me.pbHome = New System.Windows.Forms.PictureBox()
         Me.pbDonate = New System.Windows.Forms.PictureBox()
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
-        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
-        Me.pTitle = New System.Windows.Forms.Panel()
-        Me.Label1 = New System.Windows.Forms.Label()
-        Me.tOnline = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1.SuspendLayout()
         CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.pTitle.SuspendLayout()
+        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.pTitle.SuspendLayout()
         Me.SuspendLayout()
         '
         'tPB
@@ -186,6 +186,49 @@ Partial Class Main
         Me.btnClose.Text = "x"
         Me.btnClose.UseVisualStyleBackColor = False
         '
+        'pTitle
+        '
+        Me.pTitle.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
+        Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.pTitle.Controls.Add(Me.Label1)
+        Me.pTitle.Controls.Add(Me.lbVersion)
+        Me.pTitle.Controls.Add(Me.btnClose)
+        Me.pTitle.Controls.Add(Me.PictureBox3)
+        Me.pTitle.Controls.Add(Me.lbStatus)
+        Me.pTitle.Controls.Add(Me.lbTitle)
+        Me.pTitle.Location = New System.Drawing.Point(0, 0)
+        Me.pTitle.Name = "pTitle"
+        Me.pTitle.Size = New System.Drawing.Size(334, 27)
+        Me.pTitle.TabIndex = 6
+        '
+        'Label1
+        '
+        Me.Label1.AutoSize = True
+        Me.Label1.BackColor = System.Drawing.Color.Transparent
+        Me.Label1.Font = New System.Drawing.Font("Cambria", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.Label1.Location = New System.Drawing.Point(236, 7)
+        Me.Label1.Name = "Label1"
+        Me.Label1.Size = New System.Drawing.Size(42, 12)
+        Me.Label1.TabIndex = 24
+        Me.Label1.Text = "Status: "
+        '
+        'PictureBox3
+        '
+        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
+        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
+        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
+        Me.PictureBox3.Name = "PictureBox3"
+        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
+        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox3.TabIndex = 23
+        Me.PictureBox3.TabStop = False
+        '
+        'tOnline
+        '
+        Me.tOnline.Enabled = True
+        Me.tOnline.Interval = 300000
+        '
         'pbHome
         '
         Me.pbHome.BackColor = System.Drawing.Color.Transparent
@@ -229,49 +272,6 @@ Partial Class Main
         Me.PictureBox1.TabIndex = 18
         Me.PictureBox1.TabStop = False
         '
-        'PictureBox3
-        '
-        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
-        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
-        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
-        Me.PictureBox3.Name = "PictureBox3"
-        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
-        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox3.TabIndex = 23
-        Me.PictureBox3.TabStop = False
-        '
-        'pTitle
-        '
-        Me.pTitle.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
-        Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.pTitle.Controls.Add(Me.Label1)
-        Me.pTitle.Controls.Add(Me.lbVersion)
-        Me.pTitle.Controls.Add(Me.btnClose)
-        Me.pTitle.Controls.Add(Me.PictureBox3)
-        Me.pTitle.Controls.Add(Me.lbStatus)
-        Me.pTitle.Controls.Add(Me.lbTitle)
-        Me.pTitle.Location = New System.Drawing.Point(0, 0)
-        Me.pTitle.Name = "pTitle"
-        Me.pTitle.Size = New System.Drawing.Size(334, 27)
-        Me.pTitle.TabIndex = 6
-        '
-        'Label1
-        '
-        Me.Label1.AutoSize = True
-        Me.Label1.BackColor = System.Drawing.Color.Transparent
-        Me.Label1.Font = New System.Drawing.Font("Cambria", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label1.Location = New System.Drawing.Point(236, 7)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(42, 12)
-        Me.Label1.TabIndex = 24
-        Me.Label1.Text = "Status: "
-        '
-        'tOnline
-        '
-        Me.tOnline.Enabled = True
-        Me.tOnline.Interval = 300000
-        '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -292,13 +292,13 @@ Partial Class Main
         Me.Panel1.ResumeLayout(False)
         Me.Panel1.PerformLayout()
         CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.pTitle.ResumeLayout(False)
+        Me.pTitle.PerformLayout()
+        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.pTitle.ResumeLayout(False)
-        Me.pTitle.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
