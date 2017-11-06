@@ -13,7 +13,7 @@ Public Class Main
     Dim count As Integer = 0 ' Number of Pics in appData
     Dim Sess As Integer = 0  ' Number of Screenshots this session
     Dim PPM As Integer = 0   ' Potential Platinum Made this session
-    Dim pCount As Integer = 0 ' Current plat price to scan
+    Dim pCount As Integer = 80 ' Current plat price to scan
     Dim CliptoImage As Image         ' Stored image
     Dim HKeyTog As Integer = 0       ' Toggle Var for setting the activation key
     Dim pbWait As Integer = 0        ' Variable to set to make the timer wait
@@ -24,6 +24,7 @@ Public Class Main
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         lbVersion.Text = "v" + My.Settings.Version
         Me.Location = New Point(My.Settings.StartX, My.Settings.StartY)
+        Fullscreen = My.Settings.Fullscreen
         Me.MaximizeBox = False
         lbStatus.ForeColor = Color.Yellow
         Me.Refresh()
@@ -42,9 +43,17 @@ Public Class Main
 
         OnlineStatus.Navigate("https://sites.google.com/site/wfinfoapp/online")
 
-        If My.Settings.CheckUpdates = True Then
-            CheckUpdates()
+
+        'Mechanism to make sure I don't kill warframe.market
+        Dim enablePassives As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/enablepassivechecks")
+        enablePassives = enablePassives.Remove(0, enablePassives.IndexOf("enabled = ") + 10)
+        enablePassives = enablePassives.Remove(enablePassives.IndexOf(" "), enablePassives.Length - enablePassives.IndexOf(" "))
+
+        If Not enablePassives = "true" Then
+            tPPrice.Enabled = False
+            tPPrice.Stop()
         End If
+
     End Sub
 
     Private Async Sub tPB_Tick(sender As Object, e As EventArgs) Handles tPB.Tick
@@ -62,9 +71,9 @@ Public Class Main
                 Else
                     Dim keyState As Integer
                     If Fullscreen Then
-                        If Not Directory.GetFiles(LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
-                            If Not LastFile = Directory.GetFiles(LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
-                                LastFile = Directory.GetFiles(LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
+                        If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
+                            If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
+                                My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
                                 keyState = 1
                             End If
                         End If
@@ -84,7 +93,7 @@ Public Class Main
                             tPPrice.Stop()
                             scTog = 0
                             If Fullscreen Then
-                                CliptoImage = New System.Drawing.Bitmap(LastFile)
+                                CliptoImage = New System.Drawing.Bitmap(My.Settings.LastFile)
                             Else
                                 Dim bounds As Rectangle
                                 Dim screenshot As System.Drawing.Bitmap
@@ -114,7 +123,7 @@ Public Class Main
                                     If Not LevDist(tList(i), "Blueprint") < 4 Then
                                         Dim guess As String = Names(check(tList(i)))
                                         If Not unique.Contains(guess) Then
-                                            unique.Add(GClean(guess))
+                                            unique.Add(guess)
                                         End If
                                     Else
                                         Dim img As Image = Crop(CliptoImage, 1, i, players)
@@ -125,10 +134,10 @@ Public Class Main
                                             Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\") + 1
                                             img.Save(appData & "\WFInfo\tests\" & nextFile & ".jpg", Imaging.ImageFormat.Jpeg)
                                         End If
-                                        Dim guess As String = Names(check(GetText(img) + " blueprint"))
+                                        Dim guess As String = Names(check(GetText(img)))
                                         img.Dispose()
                                         If Not unique.Contains(guess) Then
-                                            unique.Add(GClean(guess))
+                                            unique.Add(guess)
                                         End If
                                     End If
                                 Next
@@ -145,7 +154,7 @@ Public Class Main
                                             End If
                                         Next
                                         If plat = "" Then
-                                            plat = GetPlat(guess)
+                                            plat = GetPlat(KClean(guess))
                                             PlatPrices.Add(guess & "," & plat)
                                         End If
                                         If Not plat = "Unknown" Then
@@ -153,10 +162,10 @@ Public Class Main
                                                 HighestPlat = CType(plat, Integer)
                                             End If
                                         End If
-                                        If guess.Length > 27 Then
-                                            qItems.Add(guess.Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
+                                        If KClean(guess).Length > 27 Then
+                                            qItems.Add(KClean(guess).Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
                                         Else
-                                            qItems.Add(guess & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
+                                            qItems.Add(KClean(guess) & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
                                         End If
                                     Else
                                         qItems.Add(vbNewLine & unique(i) & vbNewLine)
@@ -263,15 +272,6 @@ Public Class Main
         Return GetMax
     End Function
 
-    Private Function ConFab(ByVal str As String) As String
-        Dim con As String
-        For x = 0 To str.Length / 3 - 1
-            Dim k As String = str.Substring(x * 3, 3)
-            con &= System.Convert.ToChar(System.Convert.ToUInt32(k, 8)).ToString()
-        Next
-        Return con
-    End Function
-
     Private Sub Main_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress
         If HKeyTog = 1 Then
             lbTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper
@@ -287,11 +287,6 @@ Public Class Main
     End Sub
 
     Private Sub Main_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
-        If Fullscreen Then
-            If HideShots Then
-                My.Computer.FileSystem.WriteAllText(LocStorage & "\config\localconfig.vdf", SettingsStorage, False)
-            End If
-        End If
         Dim tempPPMPD As String = ""
         Dim tempChecksPD As String = ""
         Dim isToday As Boolean = False
@@ -357,16 +352,6 @@ Public Class Main
                             vBool = True
                             vStr = "*"
                         End If
-                        If Not (name.Contains("Wyrm") Or name.Contains("Carrier") Or name.Contains("Helios")) Then
-                            name = name.Replace("Chassis", "Chassis Blueprint")
-                            name = name.Replace("Systems", "Systems Blueprint")
-                            name = name.Replace("Neuroptics", "Neuroptics Blueprint")
-                        End If
-                        name = name.Replace("Band", "Kubrow Band")
-                        name = name.Replace("Buckle", "Kubrow Buckle")
-                        name = name.Replace("Collar", "Kubrow Collar")
-                        name = name.Replace("Harness", "Harness Blueprint")
-                        name = name.Replace("Wings", "Wings Blueprint")
                         duckString += vStr & name & "," & ducats & "," & vBool & vbNewLine
                     End If
                     index += 1
@@ -512,12 +497,8 @@ Public Class Main
         End Using
     End Function
 
-    Public Function GClean(guess As String)
-        If Not (guess.Contains("Wyrm") Or guess.Contains("Carrier") Or guess.Contains("Helios")) Then
-            guess = guess.Replace("Chassis Blueprint", "Chassis")
-            guess = guess.Replace("Systems Blueprint", "Systems")
-            guess = guess.Replace("Neuroptics Blueprint", "Neuroptics")
-        End If
+    Public Function KClean(guess As String)
+        guess = guess.Replace("Band", "Collar Band").Replace("Buckle", "Collar Buckle").Replace("&amp;", "and")
         Return guess
     End Function
 
@@ -533,12 +514,12 @@ Public Class Main
             Dim found As Boolean = False
             For i = 0 To PlatPrices.Count - 1
                 If PlatPrices(i).Contains(Names(pCount)) Then
-                    PlatPrices(i) = Names(pCount) & "," & GetPlat(Names(pCount))
+                    PlatPrices(i) = Names(pCount) & "," & GetPlat(KClean(Names(pCount)))
                     found = True
                 End If
             Next
             If found = False Then
-                PlatPrices.Add(Names(pCount) & "," & GetPlat(Names(pCount)))
+                PlatPrices.Add(Names(pCount) & "," & GetPlat(KClean(Names(pCount))))
             End If
             If pCount < Names.Count - 2 Then
                 pCount += 1
@@ -670,6 +651,14 @@ Public Class Main
         End If
 
     End Sub
+
+    Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick
+        If My.Settings.CheckUpdates = True Then
+            CheckUpdates()
+        End If
+        tUpdate.Enabled = False
+        tUpdate.Stop()
+    End Sub
 End Class
 
 Module Glob
@@ -681,9 +670,6 @@ Module Glob
     Public Vaulted As New List(Of String)()   ' Is the part vaulted? True / False
     Public PlatPrices As New List(Of String)()   ' Stored list of plat prices
     Public HideShots As Boolean = False     ' Bool to hide screenshot notifications in fullscreen mode
-    Public SettingsStorage As String ' Stores user settings until restart
-    Public LocStorage As String ' Stores user settings file location
-    Public LastFile As String   ' Stores last screenshot taken directory
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
     Public key2Tog As Boolean = False
@@ -818,12 +804,6 @@ Module Glob
     End Function
     Public Function GetPlat(str As String, Optional getUser As Boolean = False, Optional getMod As Boolean = False) As String
         str = str.ToLower
-        If (str.Contains("chassis") Or str.Contains("neuroptics") Or str.Contains("systems")) Then
-            str = str.Replace(" blueprint", "")
-        End If
-        If str.Contains("kubrow") Then
-            str = str.Replace(" kubrow ", " ")
-        End If
         str = str.Replace(" ", "%5F").Replace(vbLf, "").Replace("*", "")
         Dim webClient As New System.Net.WebClient
         webClient.Headers.Add("platform", "pc")
@@ -832,7 +812,6 @@ Module Glob
         Dim result As JObject
 
         If getUser Then
-            Clipboard.SetText(str)
             result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/orders"))
             Dim platCheck As New List(Of Integer)()
             Dim userCheck As New List(Of String)()
@@ -858,11 +837,9 @@ Module Glob
                     End If
                 End If
             Next
-            If getUser Then
-                Return low & vbNewLine & "    User: " & user
-            Else
-                Return low
-            End If
+
+            Clipboard.SetText(user)
+            Return low & vbNewLine & "    User: " & user
 
         Else 'Not Single Pull
 

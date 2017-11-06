@@ -46,6 +46,7 @@ Partial Class Main
         Me.pbDonate = New System.Windows.Forms.PictureBox()
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1.SuspendLayout()
         CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
@@ -87,7 +88,7 @@ Partial Class Main
         '
         'tPPrice
         '
-        Me.tPPrice.Interval = 30000
+        Me.tPPrice.Interval = 300
         '
         'bgPPrice
         '
@@ -272,6 +273,10 @@ Partial Class Main
         Me.PictureBox1.TabIndex = 18
         Me.PictureBox1.TabStop = False
         '
+        'tUpdate
+        '
+        Me.tUpdate.Enabled = True
+        '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -325,4 +330,5 @@ Partial Class Main
     Friend WithEvents Label1 As Label
     Friend WithEvents OnlineStatus As WebBrowser
     Friend WithEvents tOnline As Timer
+    Friend WithEvents tUpdate As Timer
 End Class

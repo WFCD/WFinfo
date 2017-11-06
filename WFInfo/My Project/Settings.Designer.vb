@@ -272,7 +272,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("3.2.0")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("3.2.1")>  _
         Public Property Version() As String
             Get
                 Return CType(Me("Version"),String)
@@ -315,6 +315,54 @@ Namespace My
             End Get
             Set
                 Me("StartY") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
+        Public Property Fullscreen() As Boolean
+            Get
+                Return CType(Me("Fullscreen"),Boolean)
+            End Get
+            Set
+                Me("Fullscreen") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property LocStorage() As String
+            Get
+                Return CType(Me("LocStorage"),String)
+            End Get
+            Set
+                Me("LocStorage") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property LastFile() As String
+            Get
+                Return CType(Me("LastFile"),String)
+            End Get
+            Set
+                Me("LastFile") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property SteamSettings() As String
+            Get
+                Return CType(Me("SteamSettings"),String)
+            End Get
+            Set
+                Me("SteamSettings") = value
             End Set
         End Property
     End Class

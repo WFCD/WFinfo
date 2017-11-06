@@ -100,7 +100,6 @@ Partial Class Settings
         '
         Me.cbFullscreen.AutoSize = True
         Me.cbFullscreen.BackColor = System.Drawing.Color.Transparent
-        Me.cbFullscreen.Enabled = False
         Me.cbFullscreen.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbFullscreen.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.cbFullscreen.Location = New System.Drawing.Point(187, 121)
