@@ -239,7 +239,16 @@ Public Class Settings
 
     Private Sub cbFullscreen_Click(sender As Object, e As EventArgs) Handles cbFullscreen.Click
         Dim msgChoice
+        Dim MainDir As String = "C:\Program Files (x86)\Steam\userdata"
         If Not Fullscreen Then
+            msgChoice = MsgBox("Is Steam installed to the default location?", MsgBoxStyle.YesNo, "Steam Location")
+            If msgChoice = MsgBoxResult.No Then
+                MsgBox("Please select your Steam folder.")
+                Using dialog As New FolderBrowserDialog
+                    If dialog.ShowDialog() <> DialogResult.OK Then Return
+                    MainDir = dialog.SelectedPath + "\userdata"
+                End Using
+            End If
             Dim found As Boolean = False
             msgChoice = MsgBox("Would you like to disable Steam Screenshot Notifications?", MsgBoxStyle.YesNo, "Fullscreen Mode")
             If msgChoice = MsgBoxResult.Yes Then
@@ -247,33 +256,33 @@ Public Class Settings
             Else
                 HideShots = False
             End If
-            For Each userDir As String In System.IO.Directory.GetDirectories("C:\Program Files (x86)\Steam\userdata")
-                Dim settingsFile As String = ""
-                If Directory.Exists(userDir + "\config") Then
-                    settingsFile = My.Computer.FileSystem.ReadAllText(userDir & "\config\localconfig.vdf")
-                    Dim user As String = settingsFile.Split("""")(53)
-                    msgChoice = MsgBox(user & vbNewLine & vbNewLine & "Is this you?", vbYesNo, "Fullscreen Mode")
-                    If Directory.GetFiles(userDir & "\760\remote\230410\screenshots").Count = 0 Then
-                        My.Settings.LastFile = ""
-                    Else
-                        My.Settings.LastFile = Directory.GetFiles(userDir & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
-                    End If
-                    If msgChoice = MsgBoxResult.Yes Then
-                        found = True
-                        My.Settings.LocStorage = userDir
-                        My.Settings.SteamSettings = settingsFile
-                        If HideShots Then
-                            settingsFile = settingsFile.Replace("""InGameOverlayScreenshotNotification""		""1""", """InGameOverlayScreenshotNotification""		""0""")
-                            settingsFile = settingsFile.Replace("""InGameOverlayScreenshotPlaySound""		""1""", """InGameOverlayScreenshotPlaySound""		""0""")
-                            My.Computer.FileSystem.WriteAllText(userDir & "\config\localconfig.vdf", settingsFile, False)
-                            MsgBox("Restart Steam to hide screenshot notification.")
-                        End If
-                    End If
-
-                    Exit For
+        For Each userDir As String In System.IO.Directory.GetDirectories(MainDir)
+            Dim settingsFile As String = ""
+            If Directory.Exists(userDir + "\config") Then
+                settingsFile = My.Computer.FileSystem.ReadAllText(userDir & "\config\localconfig.vdf")
+                Dim user As String = settingsFile.Split("""")(53)
+                msgChoice = MsgBox(user & vbNewLine & vbNewLine & "Is this you?", vbYesNo, "Fullscreen Mode")
+                If Directory.GetFiles(userDir & "\760\remote\230410\screenshots").Count = 0 Then
+                    My.Settings.LastFile = ""
+                Else
+                    My.Settings.LastFile = Directory.GetFiles(userDir & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
                 End If
-            Next
-            If Not found Then
+                If msgChoice = MsgBoxResult.Yes Then
+                    found = True
+                    My.Settings.LocStorage = userDir
+                    My.Settings.SteamSettings = settingsFile
+                    If HideShots Then
+                        settingsFile = settingsFile.Replace("""InGameOverlayScreenshotNotification""		""1""", """InGameOverlayScreenshotNotification""		""0""")
+                        settingsFile = settingsFile.Replace("""InGameOverlayScreenshotPlaySound""		""1""", """InGameOverlayScreenshotPlaySound""		""0""")
+                        My.Computer.FileSystem.WriteAllText(userDir & "\config\localconfig.vdf", settingsFile, False)
+                        MsgBox("Restart Steam to hide screenshot notification.")
+                    End If
+                End If
+
+                Exit For
+            End If
+        Next
+        If Not found Then
                 cbFullscreen.Checked = False
                 MsgBox("Unable to find user!")
             Else

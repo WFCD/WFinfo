@@ -35,7 +35,11 @@ Public Class Main
             System.IO.Directory.CreateDirectory(appData + "\WFInfo\tests")
         End If
         count = GetMax(appData + "\WFInfo\tests\") + 1
-
+        If Fullscreen Then
+            If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
+                My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
+            End If
+        End If
         If Clipboard.ContainsImage() Then
             Clipboard.GetImage()
             CliptoImage = Clipboard.GetImage()
@@ -134,7 +138,7 @@ Public Class Main
                                             Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\") + 1
                                             img.Save(appData & "\WFInfo\tests\" & nextFile & ".jpg", Imaging.ImageFormat.Jpeg)
                                         End If
-                                        Dim guess As String = Names(check(GetText(img)))
+                                        Dim guess As String = Names(check(GetText(img) + " Blueprint"))
                                         img.Dispose()
                                         If Not unique.Contains(guess) Then
                                             unique.Add(guess)
@@ -352,6 +356,11 @@ Public Class Main
                             vBool = True
                             vStr = "*"
                         End If
+                        If Not name.Contains("Carrier") And Not name.Contains("Wyrm") And Not name.Contains("Helios") Then
+                            If name.Contains("Systems") Or name.Contains("Chassis") Or name.Contains("Neuroptics") Then
+                                name += " Blueprint"
+                            End If
+                        End If
                         duckString += vStr & name & "," & ducats & "," & vBool & vbNewLine
                     End If
                     index += 1
@@ -498,6 +507,11 @@ Public Class Main
     End Function
 
     Public Function KClean(guess As String)
+        If Not guess.Contains("Carrier") And Not guess.Contains("Wyrm") And Not guess.Contains("Helios") Then
+            If guess.Contains("Systems") Or guess.Contains("Chassis") Or guess.Contains("Neuroptics") Then
+                guess = guess.Replace(" Blueprint", "")
+            End If
+        End If
         guess = guess.Replace("Band", "Collar Band").Replace("Buckle", "Collar Buckle").Replace("&amp;", "and")
         Return guess
     End Function

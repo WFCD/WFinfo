@@ -155,17 +155,17 @@ Public Class Input
                         End If
                     End If
                     If Not guess = "Forma Blueprint" Then
-                        Dim plat As String = GetPlat(guess, True)
+                        Dim plat As String = GetPlat(Main.KClean(guess), True)
                         Dim duck As String
                         If tbCommand.Text.ToLower.Contains("set") Then
                             duck = ""
                         Else
                             duck = "    Ducks: " & Ducks(check(guess)) & vbNewLine
                         End If
-                        If guess.Length > 27 Then
-                            qItems.Add(guess.Substring(0, 27) & "..." & vbNewLine & duck & "    Plat: " & plat & vbNewLine)
+                        If Main.KClean(guess).Length > 27 Then
+                            qItems.Add(Main.KClean(guess).Substring(0, 27) & "..." & vbNewLine & duck & "    Plat: " & plat & vbNewLine)
                         Else
-                            qItems.Add(guess & vbNewLine & duck & "    Plat: " & plat & vbNewLine)
+                            qItems.Add(Main.KClean(guess) & vbNewLine & duck & "    Plat: " & plat & vbNewLine)
                         End If
                     Else
                         qItems.Add(vbNewLine & guess & vbNewLine)

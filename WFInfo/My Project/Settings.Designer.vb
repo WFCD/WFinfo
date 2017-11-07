@@ -272,7 +272,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("3.2.1")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("3.2.2")>  _
         Public Property Version() As String
             Get
                 Return CType(Me("Version"),String)

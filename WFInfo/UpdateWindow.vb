@@ -5,7 +5,7 @@ Public Class UpdateWindow
     Dim mouseX As Integer
     Dim mouseY As Integer
     Private Sub btnYes_Click(sender As Object, e As EventArgs) Handles btnYes.Click
-        Process.Start("https://sites.google.com/site/wfinfoapp/")
+        Process.Start("https://sites.google.com/site/wfinfoapp/changes")
         If cbShowAgain.Checked = True Then
             My.Settings.CheckUpdates = False
         Else
