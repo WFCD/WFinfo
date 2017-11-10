@@ -21,6 +21,7 @@ Public Class Main
     Dim drag As Boolean = False
     Dim mouseX As Integer
     Dim mouseY As Integer
+    Dim enablePPC As Boolean = True
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         lbVersion.Text = "v" + My.Settings.Version
         Me.Location = New Point(My.Settings.StartX, My.Settings.StartY)
@@ -54,8 +55,7 @@ Public Class Main
         enablePassives = enablePassives.Remove(enablePassives.IndexOf(" "), enablePassives.Length - enablePassives.IndexOf(" "))
 
         If Not enablePassives = "true" Then
-            tPPrice.Enabled = False
-            tPPrice.Stop()
+            enablePPC = False
         End If
 
     End Sub
@@ -186,6 +186,10 @@ Public Class Main
                                 tPPrice.Start()
                             Catch ex As Exception
                                 lbStatus.ForeColor = Color.Orange
+                                qItems.Clear()
+                                qItems.Add(vbNewLine + "Something went wrong!")
+                                Overlay.Clear()
+                                Overlay.Display()
                                 addLog(ex.ToString)
                                 tPPrice.Start()
                             End Try
@@ -255,8 +259,9 @@ Public Class Main
 
     Private Sub addLog(txt As String)
         Dim dateTime As String = "[" + System.DateTime.Now + "]"
+        Dim logStore As String = My.Computer.FileSystem.ReadAllText(appData + "\WFInfo\WFInfo.log")
         My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\WFInfo.log",
-        dateTime + vbNewLine + txt + vbNewLine + vbNewLine, True)
+        dateTime + vbNewLine + txt + vbNewLine + vbNewLine + logStore, False)
     End Sub
 
     Private Function GetMax(ByVal sFolder As String) As Long
@@ -518,7 +523,7 @@ Public Class Main
 
 
     Private Sub tPPrice_Tick(sender As Object, e As EventArgs) Handles tPPrice.Tick
-        If Not bgPPrice.IsBusy Then
+        If Not bgPPrice.IsBusy And enablePPC Then
             bgPPrice.RunWorkerAsync()
         End If
     End Sub
@@ -860,6 +865,9 @@ Module Glob
             result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/statistics"))
             Dim minList As New List(Of Integer)()
             Dim x As Integer = 9
+            If x > result("payload")("statistics")("48hours").Count - 1 Then
+                x = result("payload")("statistics")("48hours").Count - 1
+            End If
             For i = 0 To x
                 minList.Add(CInt(result("payload")("statistics")("48hours")(i)("min_price")))
             Next
