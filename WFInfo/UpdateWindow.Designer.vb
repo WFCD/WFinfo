@@ -180,15 +180,18 @@ Partial Class UpdateWindow
         '
         'lbNewerVersion
         '
-        Me.lbNewerVersion.AutoSize = True
+        Me.lbNewerVersion.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lbNewerVersion.BackColor = System.Drawing.Color.Transparent
         Me.lbNewerVersion.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbNewerVersion.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbNewerVersion.Location = New System.Drawing.Point(22, 11)
+        Me.lbNewerVersion.Location = New System.Drawing.Point(0, 11)
         Me.lbNewerVersion.Name = "lbNewerVersion"
-        Me.lbNewerVersion.Size = New System.Drawing.Size(280, 20)
+        Me.lbNewerVersion.Size = New System.Drawing.Size(321, 20)
         Me.lbNewerVersion.TabIndex = 8
         Me.lbNewerVersion.Text = "A newer version of WFInfo is available."
+        Me.lbNewerVersion.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
         'tPPrice
         '

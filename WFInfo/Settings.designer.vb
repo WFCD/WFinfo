@@ -3,16 +3,7 @@ Partial Class Settings
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
-    Protected Overrides Sub Dispose(ByVal disposing As Boolean)
-        Try
-            If disposing AndAlso components IsNot Nothing Then
-                components.Dispose()
-            End If
-        Finally
-            MyBase.Dispose(disposing)
-        End Try
-    End Sub
+
 
     'Required by the Windows Form Designer
     Private components As System.ComponentModel.IContainer
@@ -36,11 +27,18 @@ Partial Class Settings
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.Panel2 = New System.Windows.Forms.Panel()
+        Me.cbMessages = New System.Windows.Forms.CheckBox()
+        Me.cbNewStyle = New System.Windows.Forms.CheckBox()
         Me.cbDebug = New System.Windows.Forms.CheckBox()
+        Me.Panel3 = New System.Windows.Forms.Panel()
+        Me.Panel4 = New System.Windows.Forms.Panel()
+        Me.btnCustomize = New System.Windows.Forms.Button()
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel2.SuspendLayout()
+        Me.Panel3.SuspendLayout()
+        Me.Panel4.SuspendLayout()
         Me.SuspendLayout()
         '
         'btnHkey1
@@ -89,7 +87,7 @@ Partial Class Settings
         Me.cbCommands.CheckState = System.Windows.Forms.CheckState.Checked
         Me.cbCommands.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbCommands.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbCommands.Location = New System.Drawing.Point(14, 121)
+        Me.cbCommands.Location = New System.Drawing.Point(11, 22)
         Me.cbCommands.Name = "cbCommands"
         Me.cbCommands.Size = New System.Drawing.Size(129, 17)
         Me.cbCommands.TabIndex = 17
@@ -102,7 +100,7 @@ Partial Class Settings
         Me.cbFullscreen.BackColor = System.Drawing.Color.Transparent
         Me.cbFullscreen.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbFullscreen.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbFullscreen.Location = New System.Drawing.Point(187, 121)
+        Me.cbFullscreen.Location = New System.Drawing.Point(11, 68)
         Me.cbFullscreen.Name = "cbFullscreen"
         Me.cbFullscreen.Size = New System.Drawing.Size(117, 17)
         Me.cbFullscreen.TabIndex = 18
@@ -117,7 +115,7 @@ Partial Class Settings
         Me.cbAnimations.CheckState = System.Windows.Forms.CheckState.Checked
         Me.cbAnimations.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbAnimations.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbAnimations.Location = New System.Drawing.Point(14, 144)
+        Me.cbAnimations.Location = New System.Drawing.Point(184, 45)
         Me.cbAnimations.Name = "cbAnimations"
         Me.cbAnimations.Size = New System.Drawing.Size(90, 17)
         Me.cbAnimations.TabIndex = 20
@@ -132,9 +130,9 @@ Partial Class Settings
         Me.Panel1.Controls.Add(Me.btnHkey2)
         Me.Panel1.Controls.Add(Me.btnHkey1)
         Me.Panel1.Controls.Add(Me.Label1)
-        Me.Panel1.Location = New System.Drawing.Point(1, 28)
+        Me.Panel1.Location = New System.Drawing.Point(2, 28)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(319, 71)
+        Me.Panel1.Size = New System.Drawing.Size(317, 71)
         Me.Panel1.TabIndex = 21
         '
         'btnHkey2
@@ -204,11 +202,46 @@ Partial Class Settings
         '
         Me.Panel2.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel2.Controls.Add(Me.cbCommands)
+        Me.Panel2.Controls.Add(Me.cbAnimations)
+        Me.Panel2.Controls.Add(Me.cbFullscreen)
+        Me.Panel2.Controls.Add(Me.cbMessages)
+        Me.Panel2.Controls.Add(Me.cbNewStyle)
         Me.Panel2.Controls.Add(Me.cbDebug)
-        Me.Panel2.Location = New System.Drawing.Point(1, 98)
+        Me.Panel2.Location = New System.Drawing.Point(2, 98)
         Me.Panel2.Name = "Panel2"
-        Me.Panel2.Size = New System.Drawing.Size(319, 74)
+        Me.Panel2.Size = New System.Drawing.Size(317, 94)
         Me.Panel2.TabIndex = 22
+        '
+        'cbMessages
+        '
+        Me.cbMessages.AutoSize = True
+        Me.cbMessages.BackColor = System.Drawing.Color.Transparent
+        Me.cbMessages.Checked = True
+        Me.cbMessages.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.cbMessages.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.cbMessages.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.cbMessages.Location = New System.Drawing.Point(184, 22)
+        Me.cbMessages.Name = "cbMessages"
+        Me.cbMessages.Size = New System.Drawing.Size(82, 17)
+        Me.cbMessages.TabIndex = 25
+        Me.cbMessages.Text = "Messages"
+        Me.cbMessages.UseVisualStyleBackColor = False
+        '
+        'cbNewStyle
+        '
+        Me.cbNewStyle.AutoSize = True
+        Me.cbNewStyle.BackColor = System.Drawing.Color.Transparent
+        Me.cbNewStyle.Checked = True
+        Me.cbNewStyle.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.cbNewStyle.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.cbNewStyle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.cbNewStyle.Location = New System.Drawing.Point(11, 45)
+        Me.cbNewStyle.Name = "cbNewStyle"
+        Me.cbNewStyle.Size = New System.Drawing.Size(126, 17)
+        Me.cbNewStyle.TabIndex = 24
+        Me.cbNewStyle.Text = "New Style Results"
+        Me.cbNewStyle.UseVisualStyleBackColor = False
         '
         'cbDebug
         '
@@ -216,25 +249,57 @@ Partial Class Settings
         Me.cbDebug.BackColor = System.Drawing.Color.Transparent
         Me.cbDebug.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbDebug.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbDebug.Location = New System.Drawing.Point(185, 45)
+        Me.cbDebug.Location = New System.Drawing.Point(184, 68)
         Me.cbDebug.Name = "cbDebug"
         Me.cbDebug.Size = New System.Drawing.Size(96, 17)
         Me.cbDebug.TabIndex = 23
         Me.cbDebug.Text = "Debug Mode"
         Me.cbDebug.UseVisualStyleBackColor = False
         '
+        'Panel3
+        '
+        Me.Panel3.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
+        Me.Panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel3.Controls.Add(Me.Panel4)
+        Me.Panel3.Location = New System.Drawing.Point(1, 26)
+        Me.Panel3.Name = "Panel3"
+        Me.Panel3.Size = New System.Drawing.Size(319, 207)
+        Me.Panel3.TabIndex = 23
+        '
+        'Panel4
+        '
+        Me.Panel4.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.Panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel4.Controls.Add(Me.btnCustomize)
+        Me.Panel4.Location = New System.Drawing.Point(0, 163)
+        Me.Panel4.Name = "Panel4"
+        Me.Panel4.Size = New System.Drawing.Size(317, 42)
+        Me.Panel4.TabIndex = 22
+        '
+        'btnCustomize
+        '
+        Me.btnCustomize.BackColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer))
+        Me.btnCustomize.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnCustomize.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold)
+        Me.btnCustomize.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.btnCustomize.Location = New System.Drawing.Point(13, 8)
+        Me.btnCustomize.Name = "btnCustomize"
+        Me.btnCustomize.Size = New System.Drawing.Size(290, 24)
+        Me.btnCustomize.TabIndex = 13
+        Me.btnCustomize.Text = "Customize UI"
+        Me.btnCustomize.TextAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.btnCustomize.UseVisualStyleBackColor = False
+        '
         'Settings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(320, 173)
-        Me.Controls.Add(Me.cbFullscreen)
-        Me.Controls.Add(Me.cbAnimations)
-        Me.Controls.Add(Me.cbCommands)
+        Me.ClientSize = New System.Drawing.Size(320, 233)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.Controls.Add(Me.Panel2)
+        Me.Controls.Add(Me.Panel3)
         Me.DoubleBuffered = True
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -247,8 +312,9 @@ Partial Class Settings
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel2.ResumeLayout(False)
         Me.Panel2.PerformLayout()
+        Me.Panel3.ResumeLayout(False)
+        Me.Panel4.ResumeLayout(False)
         Me.ResumeLayout(False)
-        Me.PerformLayout()
 
     End Sub
     Friend WithEvents btnHkey1 As Button
@@ -265,4 +331,9 @@ Partial Class Settings
     Friend WithEvents btnHkey2 As Button
     Friend WithEvents btnClose As Button
     Friend WithEvents PictureBox3 As PictureBox
+    Friend WithEvents cbMessages As CheckBox
+    Friend WithEvents cbNewStyle As CheckBox
+    Friend WithEvents Panel3 As Panel
+    Friend WithEvents Panel4 As Panel
+    Friend WithEvents btnCustomize As Button
 End Class

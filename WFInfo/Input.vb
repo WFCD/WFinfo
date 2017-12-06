@@ -1,4 +1,5 @@
 ﻿Imports System.Runtime.InteropServices
+Imports System.Text
 Public Class Input
     Declare Function SetForegroundWindow Lib "user32.dll" (ByVal hwnd As Integer) As Integer
     Private InitialStyle As Integer
@@ -7,7 +8,10 @@ Public Class Input
     Dim busy As Boolean = False
     Dim screenWidth As Integer = Screen.PrimaryScreen.Bounds.Width
     Dim screenHeight As Integer = Screen.PrimaryScreen.Bounds.Height
+    Dim GetWarframe As Boolean = False
+    Dim WFhWnd As String = ""
     Private Sub Input_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        UpdateColors(Me)
         Me.Location = New Point(screenWidth * 3, screenHeight * 3)
     End Sub
 
@@ -42,6 +46,18 @@ Public Class Input
 
     Private Declare Function GetForegroundWindow Lib "user32" () As Long
 
+    <DllImport("user32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+    Private Shared Function GetWindowText(hWnd As IntPtr, text As StringBuilder, count As Integer) As Integer
+    End Function
+
+    <DllImport("user32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+    Private Shared Function GetWindowTextLength(hWnd As IntPtr) As Integer
+    End Function
+
+    <DllImport("user32.dll", EntryPoint:="GetWindowRect")>
+    Private Shared Function GetWindowRect(ByVal hWnd As IntPtr, ByRef lpRect As Rectangle) As <MarshalAs(UnmanagedType.Bool)> Boolean
+    End Function
+
     <DllImport("user32.dll",
       EntryPoint:="SetLayeredWindowAttributes")>
     Public Shared Function SetLayeredWindowAttributes(
@@ -51,6 +67,10 @@ Public Class Input
         ByVal dwFlags As LWA
             ) As Boolean
     End Function
+
+    Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Integer,
+      ByVal dx As Integer, ByVal dy As Integer, ByVal cButtons As Integer,
+      ByVal dwExtraInfo As Integer)
 
     Private Sub Input_Shown(sender As Object, e As EventArgs) Handles Me.Shown
         Me.Refresh()
@@ -78,32 +98,46 @@ Public Class Input
     Private Sub btnAccept_Click(sender As Object, e As EventArgs) Handles btnAccept.Click
         busy = True
         Try
+            Dim command As String = tbCommand.Text.ToLower()
             Me.Hide()
-            Overlay.Clear()
+            Tray.Clear()
             Try
-                AppActivate("WARFRAME")
+                If GetWarframe Then
+                    While Not ActiveWindowName() = "WARFRAME"
+                        AppActivate("WARFRAME")
+                    End While
+
+                    'Get WAREFRAME screen position
+                    Dim wr As Rectangle
+                    GetWindowRect(WFhWnd, wr)
+
+                    'Give WARFRAME mouse control
+                    Dim prevPos As Point = Cursor.Position
+                    Cursor.Position = New Point(wr.Left, wr.Top)
+                    mouse_event(&H2, 0, 0, 0, 0)
+                    mouse_event(&H4, 0, 0, 0, 0)
+                    Cursor.Position = prevPos
+                End If
             Catch ex As Exception
             End Try
-            If tbCommand.Text.ToLower.Contains("duck") Or tbCommand.Text.ToLower.Contains("quack") Then
-                Overlay.quack()
+
+            If command.Contains("duck") Or command.Contains("quack") Then
+                Tray.quack()
                 Me.Close()
                 tbCommand.Text = ""
                 Exit Try
             End If
-            If tbCommand.Text.ToLower.Split(" ")(0) = "mod" Or tbCommand.Text.ToLower.Split(" ")(0) = "m" Then
-                If tbCommand.Text.ToLower.Split(" ")(0) = "m" Then
-                    tbCommand.Text = "mod" & tbCommand.Text.ToLower.Remove(0, 1)
-                End If
-                Dim modStr As String = StrConv(tbCommand.Text.ToLower.Replace("mod ", ""), VbStrConv.ProperCase)
+            If command.Split(" ")(0) = "mod" Or command.Split(" ")(0) = "m" Then
+                Dim modStr As String = StrConv(nth(command, 0), VbStrConv.ProperCase)
                 qItems.Add(vbNewLine & modStr & vbNewLine & "    Plat: " & GetPlat(modStr, True, True) & vbNewLine)
-                Overlay.Display()
+                Tray.Display()
                 Me.Close()
                 tbCommand.Text = ""
-            ElseIf tbCommand.Text.ToLower.Split(" ")(0) = "where" Or tbCommand.Text.ToLower.Split(" ")(0) = "w" Then
-                If tbCommand.Text.ToLower.Split(" ")(0) = "w" Then
-                    tbCommand.Text = "where" & tbCommand.Text.ToLower.Remove(0, 1)
+            ElseIf command.Split(" ")(0) = "where" Or command.Split(" ")(0) = "w" Then
+                If command.Split(" ")(0) = "w" Then
+                    tbCommand.Text = "where" & command.Remove(0, 1)
                 End If
-                Dim cmdRes As String = tbCommand.Text.ToLower.Replace("where ", "")
+                Dim cmdRes As String = command.Replace("where ", "")
                 Dim ResInd As Integer = -1
                 Dim Found As Boolean = False
                 For Each str As String In My.Settings.Resources.Split(vbNewLine)
@@ -130,22 +164,93 @@ Public Class Input
                     Next
                 End If
                 qItems.Add(My.Settings.Resources.Split(vbNewLine)(ResInd).Split(",")(0) & vbNewLine & My.Settings.Resources.Split(vbNewLine)(ResInd).Split(",")(1) & vbNewLine)
-                Overlay.Display()
+                Tray.Display()
                 Me.Close()
+
+            ElseIf command.Split(" ")(0) = "e" Then
+                Dim found As Boolean = False
+                Dim foundItem As String = ""
+                Dim checkItem As String = nth(command, 0)
+                If checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "p" Or checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "prime" Then
+                    checkItem = checkItem.Substring(0, checkItem.LastIndexOf(" ")) & " prime"
+                End If
+
+                For Each item As String In Equipment.Split(",")
+                    If item = checkItem Then
+                        found = True
+                        foundItem = StrConv(item, VbStrConv.ProperCase)
+                    End If
+                Next
+                If found Then
+                    qItems.Add(vbNewLine & foundItem & vbNewLine & "Already Leveled")
+                Else
+                    qItems.Add(vbNewLine & "Not Leveled")
+                End If
+                Tray.Display()
+                Me.Close()
+                tbCommand.Text = ""
+
+            ElseIf command.Split(" ")(0) = "ea" Then
+                Dim item As String = nth(command, 0)
+                If item.Substring(item.LastIndexOf(" ") + 1) = "p" Then
+                    item = item.Substring(0, item.LastIndexOf(" ")) & " prime"
+                End If
+                Equipment = Equipment & item & ","
+                Me.Close()
+                tbCommand.Text = ""
+
+            ElseIf command.Split(" ")(0) = "er" Then
+                Dim found As Boolean = False
+                Dim checkItem As String = nth(command, 0)
+                If checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "p" Or checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "prime" Then
+                    checkItem = checkItem.Substring(0, checkItem.LastIndexOf(" ")) & " prime"
+                End If
+                For Each item As String In Equipment.Split(",")
+                    If item = checkItem Then
+                        Equipment = Equipment.Replace(item & ",", "")
+                        found = True
+                    End If
+                Next
+                If Not found Then
+                    qItems.Add(vbNewLine & "Item Not Found")
+                    Tray.Display()
+                End If
+                Me.Close()
+                tbCommand.Text = ""
+
+            ElseIf command.Split(" ")(0) = "el" Then
+                Dim clipString As String = ""
+                For Each item As String In Equipment.Split(",")
+                    clipString &= item & vbNewLine
+                Next
+                Clipboard.SetText(clipString)
+                qItems.Add(vbNewLine & "Equipment Coppied" & vbNewLine & "To Clipboard")
+                Tray.Display()
+                Me.Close()
+                tbCommand.Text = ""
+
+            ElseIf command.Split(" ")(0) = "ec" Then
+                Equipment = ""
+                qItems.Add(vbNewLine & "Equipment Cleared")
+                Tray.Display()
+                Me.Close()
+                tbCommand.Text = ""
+
             Else
-                tbCommand.Text = tbCommand.Text.ToLower.Replace(" p ", " prime ")
-                tbCommand.Text = tbCommand.Text.ToLower.Replace("bp", "blueprint")
-                If tbCommand.Text.ToLower = "clear" Then
-                    Overlay.Clear()
+                command = command.Replace(" p ", " prime ")
+                command = command.Replace("bp", "blueprint")
+                tbCommand.Text = command
+                If command = "clear" Then
+                    Tray.Clear()
                     tbCommand.Text = ""
                 Else
                     Dim found As Boolean = False
                     Dim guess As String = ""
-                    If tbCommand.Text.ToLower.Contains("set") Then
+                    If command.Contains("set") Then
                         guess = checkSet(tbCommand.Text)
                     Else
                         For i = 0 To Names.Count - 1
-                            If Names(i).ToLower.Contains(tbCommand.Text.ToLower) Then
+                            If Names(i).ToLower.Contains(command) Then
                                 found = True
                                 guess = Names(i)
                             End If
@@ -157,7 +262,7 @@ Public Class Input
                     If Not guess = "Forma Blueprint" Then
                         Dim plat As String = GetPlat(Main.KClean(guess), True)
                         Dim duck As String
-                        If tbCommand.Text.ToLower.Contains("set") Then
+                        If command.Contains("set") Then
                             duck = ""
                         Else
                             duck = "    Ducks: " & Ducks(check(guess)) & vbNewLine
@@ -170,21 +275,37 @@ Public Class Input
                     Else
                         qItems.Add(vbNewLine & guess & vbNewLine)
                     End If
-                    Overlay.Display()
+                    Tray.Display()
                 End If
                 Me.Close()
                 tbCommand.Text = ""
             End If
         Catch ex As Exception
+            Me.Close()
+            tbCommand.Text = ""
         End Try
     End Sub
+    Public Function nth(s As String, n As Integer) As String
+        For i = 0 To n
+            s = s.Substring(s.IndexOf(" ") + 1)
+        Next
+        Return s
+    End Function
     Public Sub Display()
+
+        'Checks for WF as active, sets boolean and hWnd
+        If ActiveWindowName() = "WARFRAME" Then
+            GetWarframe = True
+            WFhWnd = GetForegroundWindow()
+        End If
+
         Me.Refresh()
         Me.TransparencyKey = Color.LightBlue
         Me.BackColor = Color.LightBlue
         Me.TopMost = True
         Me.WindowState = FormWindowState.Maximized
         Me.Show()
+        Me.Refresh()
         Me.Select()
     End Sub
 
@@ -199,6 +320,22 @@ Public Class Input
     Private Sub tbCommand_KeyDown(sender As Object, e As KeyEventArgs) Handles tbCommand.KeyDown
         If e.KeyCode = Keys.Escape Then
             e.Handled = True
+            If GetWarframe Then
+                While Not ActiveWindowName() = "WARFRAME"
+                    AppActivate("WARFRAME")
+                End While
+
+                'Get WAREFRAME screen position
+                Dim wr As Rectangle
+                GetWindowRect(WFhWnd, wr)
+
+                'Give WARFRAME mouse control
+                Dim prevPos As Point = Cursor.Position
+                Cursor.Position = New Point(wr.Left, wr.Top)
+                mouse_event(&H2, 0, 0, 0, 0)
+                mouse_event(&H4, 0, 0, 0, 0)
+                Cursor.Position = prevPos
+            End If
             Me.Close()
         End If
     End Sub
@@ -206,7 +343,6 @@ Public Class Input
     Private Sub tActivate_Tick(sender As Object, e As EventArgs) Handles tActivate.Tick
         If Me.Visible Then
             If Not GetForegroundWindow() = Me.Handle.ToString Then
-                SendKeys.Send(Keys.Alt)
                 Input.SetForegroundWindow(Me.Handle)
             End If
             If Not tbCommand.Focused Then
@@ -220,4 +356,15 @@ Public Class Input
         tbCommand.Select()
     End Sub
 
+    Private Function ActiveWindowName() As String
+        Dim strTitle As String = String.Empty
+        Dim handle As IntPtr = GetForegroundWindow()
+        ' Obtain the length of the text   
+        Dim intLength As Integer = GetWindowTextLength(handle) + 1
+        Dim stringBuilder As New StringBuilder(intLength)
+        If GetWindowText(handle, stringBuilder, intLength) > 0 Then
+            strTitle = stringBuilder.ToString()
+        End If
+        Return strTitle
+    End Function
 End Class

@@ -236,7 +236,9 @@ Plastids,Ophelia(Uranus) / Zabala(Eris)
 Polymer Bundle,Ophelia or Assur(Uranus)
 Rubedo,Void Survival / Defence
 Salvage,Cameria(Jupiter) / Wahiba(Mars)
-Tellurium,Ophelia or Caelus(Uranus)</Value>
+Tellurium,Ophelia or Caelus(Uranus)
+Nyth,Plains of Eidolon(Earth)
+Sentirum,Plains of Eidolon(Earth)</Value>
     </Setting>
     <Setting Name="PPMPD" Type="System.String" Scope="User">
       <Value Profile="(Default)">6/1/2017|0</Value>
@@ -245,7 +247,7 @@ Tellurium,Ophelia or Caelus(Uranus)</Value>
       <Value Profile="(Default)">6/1/2017|0</Value>
     </Setting>
     <Setting Name="Version" Type="System.String" Scope="User">
-      <Value Profile="(Default)">3.2.3</Value>
+      <Value Profile="(Default)">4.0.0</Value>
     </Setting>
     <Setting Name="CheckUpdates" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -267,6 +269,33 @@ Tellurium,Ophelia or Caelus(Uranus)</Value>
     </Setting>
     <Setting Name="SteamSettings" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Equipment" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="NewStyle" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Messages" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="LastMessage" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="cTitleBar" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">15, 15, 15</Value>
+    </Setting>
+    <Setting Name="cBackground" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">27, 27, 27</Value>
+    </Setting>
+    <Setting Name="cSideBar" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">23, 23, 23</Value>
+    </Setting>
+    <Setting Name="cText" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">177, 208, 217</Value>
+    </Setting>
+    <Setting Name="cTray" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">23, 23, 23</Value>
     </Setting>
   </Settings>
 </SettingsFile>

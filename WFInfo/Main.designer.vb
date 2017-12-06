@@ -31,8 +31,9 @@ Partial Class Main
         Me.tPPrice = New System.Windows.Forms.Timer(Me.components)
         Me.bgPPrice = New System.ComponentModel.BackgroundWorker()
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.btnDebug2 = New System.Windows.Forms.Button()
         Me.OnlineStatus = New System.Windows.Forms.WebBrowser()
-        Me.Button1 = New System.Windows.Forms.Button()
+        Me.btnDebug1 = New System.Windows.Forms.Button()
         Me.lbPPM = New System.Windows.Forms.Label()
         Me.pbDebug = New System.Windows.Forms.PictureBox()
         Me.lbVersion = New System.Windows.Forms.Label()
@@ -45,8 +46,9 @@ Partial Class Main
         Me.pbHome = New System.Windows.Forms.PictureBox()
         Me.pbDonate = New System.Windows.Forms.PictureBox()
         Me.pbSettings = New System.Windows.Forms.PictureBox()
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.pbSideBar = New System.Windows.Forms.PictureBox()
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
+        Me.tMessages = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1.SuspendLayout()
         CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
@@ -54,7 +56,7 @@ Partial Class Main
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'tPB
@@ -66,13 +68,13 @@ Partial Class Main
         '
         Me.lbChecks.AutoSize = True
         Me.lbChecks.BackColor = System.Drawing.Color.Transparent
-        Me.lbChecks.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbChecks.Font = New System.Drawing.Font("Calibri", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbChecks.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbChecks.Location = New System.Drawing.Point(16, 24)
+        Me.lbChecks.Location = New System.Drawing.Point(16, 21)
         Me.lbChecks.Name = "lbChecks"
-        Me.lbChecks.Size = New System.Drawing.Size(251, 20)
+        Me.lbChecks.Size = New System.Drawing.Size(238, 23)
         Me.lbChecks.TabIndex = 4
-        Me.lbChecks.Text = "Checks this Session:             0"
+        Me.lbChecks.Text = "Checks this Session:               0"
         '
         'lbStatus
         '
@@ -88,7 +90,7 @@ Partial Class Main
         '
         'tPPrice
         '
-        Me.tPPrice.Interval = 30000
+        Me.tPPrice.Interval = 300
         '
         'bgPPrice
         '
@@ -97,8 +99,9 @@ Partial Class Main
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel1.Controls.Add(Me.btnDebug2)
         Me.Panel1.Controls.Add(Me.OnlineStatus)
-        Me.Panel1.Controls.Add(Me.Button1)
+        Me.Panel1.Controls.Add(Me.btnDebug1)
         Me.Panel1.Controls.Add(Me.lbPPM)
         Me.Panel1.Controls.Add(Me.pbDebug)
         Me.Panel1.Controls.Add(Me.lbChecks)
@@ -107,6 +110,16 @@ Partial Class Main
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(334, 99)
         Me.Panel1.TabIndex = 19
+        '
+        'btnDebug2
+        '
+        Me.btnDebug2.Location = New System.Drawing.Point(270, 73)
+        Me.btnDebug2.Name = "btnDebug2"
+        Me.btnDebug2.Size = New System.Drawing.Size(28, 21)
+        Me.btnDebug2.TabIndex = 10
+        Me.btnDebug2.Text = "D2"
+        Me.btnDebug2.UseVisualStyleBackColor = True
+        Me.btnDebug2.Visible = False
         '
         'OnlineStatus
         '
@@ -118,25 +131,25 @@ Partial Class Main
         Me.OnlineStatus.Url = New System.Uri("https://sites.google.com/site/wfinfoapp/online", System.UriKind.Absolute)
         Me.OnlineStatus.Visible = False
         '
-        'Button1
+        'btnDebug1
         '
-        Me.Button1.Location = New System.Drawing.Point(27, 76)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(11, 10)
-        Me.Button1.TabIndex = 8
-        Me.Button1.Text = "Button1"
-        Me.Button1.UseVisualStyleBackColor = True
-        Me.Button1.Visible = False
+        Me.btnDebug1.Location = New System.Drawing.Point(232, 73)
+        Me.btnDebug1.Name = "btnDebug1"
+        Me.btnDebug1.Size = New System.Drawing.Size(32, 21)
+        Me.btnDebug1.TabIndex = 8
+        Me.btnDebug1.Text = "D1"
+        Me.btnDebug1.UseVisualStyleBackColor = True
+        Me.btnDebug1.Visible = False
         '
         'lbPPM
         '
         Me.lbPPM.AutoSize = True
         Me.lbPPM.BackColor = System.Drawing.Color.Transparent
-        Me.lbPPM.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbPPM.Font = New System.Drawing.Font("Calibri", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbPPM.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbPPM.Location = New System.Drawing.Point(16, 53)
+        Me.lbPPM.Location = New System.Drawing.Point(16, 50)
         Me.lbPPM.Name = "lbPPM"
-        Me.lbPPM.Size = New System.Drawing.Size(251, 20)
+        Me.lbPPM.Size = New System.Drawing.Size(237, 23)
         Me.lbPPM.TabIndex = 7
         Me.lbPPM.Text = "Platinum this Session:           0"
         '
@@ -263,19 +276,24 @@ Partial Class Main
         Me.pbSettings.TabIndex = 15
         Me.pbSettings.TabStop = False
         '
-        'PictureBox1
+        'pbSideBar
         '
-        Me.PictureBox1.BackColor = System.Drawing.Color.FromArgb(CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer))
-        Me.PictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.PictureBox1.Location = New System.Drawing.Point(306, 27)
-        Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(28, 99)
-        Me.PictureBox1.TabIndex = 18
-        Me.PictureBox1.TabStop = False
+        Me.pbSideBar.BackColor = System.Drawing.Color.FromArgb(CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer))
+        Me.pbSideBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.pbSideBar.Location = New System.Drawing.Point(306, 27)
+        Me.pbSideBar.Name = "pbSideBar"
+        Me.pbSideBar.Size = New System.Drawing.Size(28, 99)
+        Me.pbSideBar.TabIndex = 18
+        Me.pbSideBar.TabStop = False
         '
         'tUpdate
         '
         Me.tUpdate.Enabled = True
+        '
+        'tMessages
+        '
+        Me.tMessages.Enabled = True
+        Me.tMessages.Interval = 1800000
         '
         'Main
         '
@@ -286,7 +304,7 @@ Partial Class Main
         Me.Controls.Add(Me.pbHome)
         Me.Controls.Add(Me.pbDonate)
         Me.Controls.Add(Me.pbSettings)
-        Me.Controls.Add(Me.PictureBox1)
+        Me.Controls.Add(Me.pbSideBar)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.DoubleBuffered = True
@@ -303,7 +321,7 @@ Partial Class Main
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -317,7 +335,7 @@ Partial Class Main
     Friend WithEvents pbSettings As PictureBox
     Friend WithEvents pbDonate As PictureBox
     Friend WithEvents pbHome As PictureBox
-    Friend WithEvents PictureBox1 As PictureBox
+    Friend WithEvents pbSideBar As PictureBox
     Friend WithEvents Panel1 As Panel
     Friend WithEvents lbTitle As Label
     Friend WithEvents btnClose As Button
@@ -326,9 +344,11 @@ Partial Class Main
     Friend WithEvents pbDebug As PictureBox
     Friend WithEvents lbVersion As Label
     Friend WithEvents lbPPM As Label
-    Friend WithEvents Button1 As Button
+    Friend WithEvents btnDebug1 As Button
     Friend WithEvents Label1 As Label
     Friend WithEvents OnlineStatus As WebBrowser
     Friend WithEvents tOnline As Timer
     Friend WithEvents tUpdate As Timer
+    Friend WithEvents tMessages As Timer
+    Friend WithEvents btnDebug2 As Button
 End Class

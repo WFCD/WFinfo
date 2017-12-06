@@ -64,6 +64,9 @@
   <PropertyGroup>
     <ApplicationIcon>WFIcon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -98,6 +101,12 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Picker.Designer.vb">
+      <DependentUpon>Picker.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Picker.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Input.Designer.vb">
       <DependentUpon>Input.vb</DependentUpon>
     </Compile>
@@ -125,10 +134,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Overlay.designer.vb">
+    <Compile Include="Overlay.Designer.vb">
       <DependentUpon>Overlay.vb</DependentUpon>
     </Compile>
     <Compile Include="Overlay.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tray.designer.vb">
+      <DependentUpon>Tray.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Tray.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Settings.designer.vb">
@@ -145,6 +160,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Picker.resx">
+      <DependentUpon>Picker.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Input.resx">
       <DependentUpon>Input.vb</DependentUpon>
     </EmbeddedResource>
@@ -160,6 +178,9 @@
     <EmbeddedResource Include="Overlay.resx">
       <DependentUpon>Overlay.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Tray.resx">
+      <DependentUpon>Tray.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.vb</DependentUpon>
     </EmbeddedResource>
@@ -168,6 +189,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.manifest" />
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
@@ -210,7 +232,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Resources\home_h.png" />
   </ItemGroup>
   <ItemGroup>
@@ -247,6 +271,12 @@
     <Content Include="lib\x86\libtesseract304.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\panelBG.bmp" />
+    <None Include="Resources\DPPanel.png" />
+    <None Include="Resources\DuckPlatPanel.png" />
+    <None Include="Resources\Panel.png" />
+    <None Include="Resources\DnPPanel.png" />
+    <None Include="Resources\Tray.png" />
     <Content Include="WFIcon.ico" />
     <Content Include="x64\liblept172.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

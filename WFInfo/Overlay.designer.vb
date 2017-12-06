@@ -23,55 +23,104 @@ Partial Class Overlay
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Overlay))
-        Me.lbDisplay = New System.Windows.Forms.Label()
+        Me.lbPlat = New System.Windows.Forms.Label()
+        Me.lbPDropShadow = New System.Windows.Forms.Label()
+        Me.lbDucats = New System.Windows.Forms.Label()
+        Me.lbDDropShadow = New System.Windows.Forms.Label()
         Me.tHide = New System.Windows.Forms.Timer(Me.components)
-        Me.tAnimate = New System.Windows.Forms.Timer(Me.components)
+        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
-        'lbDisplay
+        'lbPlat
         '
-        Me.lbDisplay.AutoSize = True
-        Me.lbDisplay.BackColor = System.Drawing.Color.Transparent
-        Me.lbDisplay.Font = New System.Drawing.Font("Cambria", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbDisplay.ForeColor = System.Drawing.Color.FromArgb(CType(CType(147, Byte), Integer), CType(CType(178, Byte), Integer), CType(CType(187, Byte), Integer))
-        Me.lbDisplay.Location = New System.Drawing.Point(25, 20)
-        Me.lbDisplay.Name = "lbDisplay"
-        Me.lbDisplay.Size = New System.Drawing.Size(0, 19)
-        Me.lbDisplay.TabIndex = 0
+        Me.lbPlat.AutoSize = True
+        Me.lbPlat.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.lbPlat.Font = New System.Drawing.Font("Calibri", 21.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbPlat.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.lbPlat.Location = New System.Drawing.Point(70, 19)
+        Me.lbPlat.Name = "lbPlat"
+        Me.lbPlat.Size = New System.Drawing.Size(60, 36)
+        Me.lbPlat.TabIndex = 1
+        Me.lbPlat.Text = "120"
+        '
+        'lbPDropShadow
+        '
+        Me.lbPDropShadow.AutoSize = True
+        Me.lbPDropShadow.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.lbPDropShadow.Font = New System.Drawing.Font("Calibri", 21.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbPDropShadow.ForeColor = System.Drawing.Color.FromArgb(CType(CType(18, Byte), Integer), CType(CType(20, Byte), Integer), CType(CType(24, Byte), Integer))
+        Me.lbPDropShadow.Location = New System.Drawing.Point(163, 19)
+        Me.lbPDropShadow.Name = "lbPDropShadow"
+        Me.lbPDropShadow.Size = New System.Drawing.Size(60, 36)
+        Me.lbPDropShadow.TabIndex = 2
+        Me.lbPDropShadow.Text = "120"
+        '
+        'lbDucats
+        '
+        Me.lbDucats.AutoSize = True
+        Me.lbDucats.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.lbDucats.Font = New System.Drawing.Font("Calibri", 21.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbDucats.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.lbDucats.Location = New System.Drawing.Point(70, 84)
+        Me.lbDucats.Name = "lbDucats"
+        Me.lbDucats.Size = New System.Drawing.Size(60, 36)
+        Me.lbDucats.TabIndex = 3
+        Me.lbDucats.Text = "120"
+        '
+        'lbDDropShadow
+        '
+        Me.lbDDropShadow.AutoSize = True
+        Me.lbDDropShadow.BackColor = System.Drawing.SystemColors.ActiveCaptionText
+        Me.lbDDropShadow.Font = New System.Drawing.Font("Calibri", 21.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbDDropShadow.ForeColor = System.Drawing.Color.FromArgb(CType(CType(18, Byte), Integer), CType(CType(20, Byte), Integer), CType(CType(24, Byte), Integer))
+        Me.lbDDropShadow.Location = New System.Drawing.Point(163, 84)
+        Me.lbDDropShadow.Name = "lbDDropShadow"
+        Me.lbDDropShadow.Size = New System.Drawing.Size(60, 36)
+        Me.lbDDropShadow.TabIndex = 4
+        Me.lbDDropShadow.Text = "120"
         '
         'tHide
         '
-        Me.tHide.Interval = 10000
+        Me.tHide.Enabled = True
+        Me.tHide.Interval = 15000
         '
-        'tAnimate
+        'PictureBox1
         '
-        Me.tAnimate.Interval = 1
+        Me.PictureBox1.BackColor = System.Drawing.Color.Transparent
+        Me.PictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
+        Me.PictureBox1.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox1.Image = Global.WFInfo.My.Resources.Resources.DnPPanel
+        Me.PictureBox1.Location = New System.Drawing.Point(0, 0)
+        Me.PictureBox1.Name = "PictureBox1"
+        Me.PictureBox1.Size = New System.Drawing.Size(250, 140)
+        Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox1.TabIndex = 0
+        Me.PictureBox1.TabStop = False
         '
         'Overlay
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
-        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Black
-        Me.BackgroundImage = CType(resources.GetObject("$this.BackgroundImage"), System.Drawing.Image)
-        Me.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
-        Me.ClientSize = New System.Drawing.Size(297, 350)
-        Me.Controls.Add(Me.lbDisplay)
-        Me.DoubleBuffered = True
+        Me.ClientSize = New System.Drawing.Size(250, 140)
+        Me.Controls.Add(Me.lbDDropShadow)
+        Me.Controls.Add(Me.lbDucats)
+        Me.Controls.Add(Me.lbPDropShadow)
+        Me.Controls.Add(Me.lbPlat)
+        Me.Controls.Add(Me.PictureBox1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.Name = "Overlay"
-        Me.ShowIcon = False
         Me.ShowInTaskbar = False
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.Manual
-        Me.Text = "Overlay"
-        Me.TopMost = True
-        Me.TransparencyKey = System.Drawing.SystemColors.HotTrack
+        Me.TransparencyKey = System.Drawing.Color.Black
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
 
-    Friend WithEvents lbDisplay As Label
+    Friend WithEvents PictureBox1 As PictureBox
+    Friend WithEvents lbPlat As Label
+    Friend WithEvents lbPDropShadow As Label
+    Friend WithEvents lbDucats As Label
+    Friend WithEvents lbDDropShadow As Label
     Friend WithEvents tHide As Timer
-    Friend WithEvents tAnimate As Timer
 End Class

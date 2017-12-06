@@ -139,4 +139,10 @@
   <data name="WFLogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\WFLogo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="DnPPanel" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\DnPPanel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Tray" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Tray.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

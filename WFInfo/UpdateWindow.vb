@@ -80,6 +80,7 @@ Public Class UpdateWindow
     End Sub
 
     Private Sub UpdateWindow_Load(sender As Object, e As EventArgs) Handles Me.Load
+        UpdateColors(Me)
         lbVersion.Text = "v" + My.Settings.Version
         Me.BringToFront()
         Me.Refresh()
@@ -90,7 +91,13 @@ Public Class UpdateWindow
         Me.Refresh()
     End Sub
 
-    Private Sub pTitle_Paint(sender As Object, e As PaintEventArgs) Handles pTitle.Paint
+    Public Sub Display(v As String)
+        lbNewerVersion.Text = "WFInfo  v" & v & "  is available."
+        Me.Show()
+        Me.BringToFront()
+    End Sub
+
+    Private Sub Panel1_Paint(sender As Object, e As PaintEventArgs) Handles Panel1.Paint
 
     End Sub
 End Class

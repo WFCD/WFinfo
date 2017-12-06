@@ -4,6 +4,7 @@ Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
 Imports System.ComponentModel
 Imports System.Text.RegularExpressions
+Imports System.Drawing.Imaging
 Imports Tesseract
 Public Class Main
     Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Integer, ByVal dx As Integer, ByVal dy As Integer, ByVal cButtons As Integer, ByVal dwExtraInfo As Integer)
@@ -13,7 +14,7 @@ Public Class Main
     Dim count As Integer = 0 ' Number of Pics in appData
     Dim Sess As Integer = 0  ' Number of Screenshots this session
     Dim PPM As Integer = 0   ' Potential Platinum Made this session
-    Dim pCount As Integer = 80 ' Current plat price to scan
+    Dim pCount As Integer = 0 ' Current plat price to scan
     Dim CliptoImage As Image         ' Stored image
     Dim HKeyTog As Integer = 0       ' Toggle Var for setting the activation key
     Dim pbWait As Integer = 0        ' Variable to set to make the timer wait
@@ -23,6 +24,13 @@ Public Class Main
     Dim mouseY As Integer
     Dim enablePPC As Boolean = True
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        UpdateColors(Me)
+        pbHome.Parent = pbSideBar
+        pbHome.Location = New Point(0, 8)
+        pbDonate.Parent = pbSideBar
+        pbDonate.Location = New Point(0, 38)
+        pbSettings.Parent = pbSideBar
+        pbSettings.Location = New Point(0, 65)
         lbVersion.Text = "v" + My.Settings.Version
         Me.Location = New Point(My.Settings.StartX, My.Settings.StartY)
         Fullscreen = My.Settings.Fullscreen
@@ -110,6 +118,9 @@ Public Class Main
                             End If
                             Try
                                 Dim players As Integer = GetPlayers(Crop(CliptoImage))
+                                If players > 4 Or players < 1 Then
+                                    players = 4
+                                End If
                                 Dim tList As New List(Of String)()
                                 For i = 0 To players - 1
                                     Dim img As Image = Crop(CliptoImage, players, i)
@@ -126,10 +137,8 @@ Public Class Main
                                 For i = 0 To tList.Count - 1
                                     If Not LevDist(tList(i), "Blueprint") < 4 Then
                                         Dim guess As String = Names(check(tList(i)))
-                                        If Not unique.Contains(guess) Then
-                                            unique.Add(guess)
-                                        End If
-                                    Else
+                                        unique.Add(guess)
+                                        Else
                                         Dim img As Image = Crop(CliptoImage, 1, i, players)
                                         If Not img Is Nothing Then
                                             pbDebug.Image = img
@@ -140,13 +149,13 @@ Public Class Main
                                         End If
                                         Dim guess As String = Names(check(GetText(img) + " Blueprint"))
                                         img.Dispose()
-                                        If Not unique.Contains(guess) Then
-                                            unique.Add(guess)
+                                        unique.Add(guess)
                                         End If
-                                    End If
                                 Next
                                 qItems.Clear()
                                 Dim HighestPlat As Integer = 0
+                                Dim p As New List(Of String)()
+                                Dim d As New List(Of String)()
                                 For i = 0 To unique.Count - 1
                                     Dim guess As String = unique(i)
                                     If Not unique(i) = "Forma Blueprint" Then
@@ -166,6 +175,10 @@ Public Class Main
                                                 HighestPlat = CType(plat, Integer)
                                             End If
                                         End If
+
+                                        p.Add(plat)
+                                        d.Add(Ducks(check(guess)))
+
                                         If KClean(guess).Length > 27 Then
                                             qItems.Add(KClean(guess).Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
                                         Else
@@ -173,23 +186,79 @@ Public Class Main
                                         End If
                                     Else
                                         qItems.Add(vbNewLine & unique(i) & vbNewLine)
+                                        p.Add(0)
+                                        d.Add(0)
                                     End If
                                 Next
-                                Overlay.Clear()
-                                Overlay.Display()
+                                If Not Fullscreen And Not NewStyle Then
+                                    Tray.Clear()
+                                    Tray.Display()
+                                Else
+                                    Tray.Clear()
+                                    qItems.Clear()
+                                    Dim panel1 As New Overlay
+                                    Dim panel2 As New Overlay
+                                    Dim panel3 As New Overlay
+                                    Dim panel4 As New Overlay
+                                    For i = 0 To players - 1
+                                        Dim width As Integer = 0.4 * Screen.PrimaryScreen.Bounds.Height
+                                        Select Case players
+                                            Case 4
+                                                Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (width * 2) + (width * i) + (width * 0.62)
+                                                Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
+                                                Select Case i
+                                                    Case 0
+                                                        panel1.Display(x, y, p(i), d(i))
+                                                    Case 1
+                                                        panel2.Display(x, y, p(i), d(i))
+                                                    Case 2
+                                                        panel3.Display(x, y, p(i), d(i))
+                                                    Case 3
+                                                        panel4.Display(x, y, p(i), d(i))
+                                                End Select
+                                            Case 3
+                                                Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (1.5 * width) + (width * i) + (width * 0.62)
+                                                Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
+                                                Select Case i
+                                                    Case 0
+                                                        panel1.Display(x, y, p(i), d(i))
+                                                    Case 1
+                                                        panel2.Display(x, y, p(i), d(i))
+                                                    Case 2
+                                                        panel3.Display(x, y, p(i), d(i))
+                                                    Case 3
+                                                        panel4.Display(x, y, p(i), d(i))
+                                                End Select
+                                            Case 2
+                                                Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (width) + (width * i) + (width * 0.62)
+                                                Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
+                                                Select Case i
+                                                    Case 0
+                                                        panel1.Display(x, y, p(i), d(i))
+                                                    Case 1
+                                                        panel2.Display(x, y, p(i), d(i))
+                                                    Case 2
+                                                        panel3.Display(x, y, p(i), d(i))
+                                                    Case 3
+                                                        panel4.Display(x, y, p(i), d(i))
+                                                End Select
+                                        End Select
+                                    Next
+                                End If
+
                                 count += 1
                                 Sess += 1
                                 PPM += HighestPlat
                                 lbStatus.ForeColor = Color.Lime
-                                lbChecks.Text = "Checks this Session:            " & Sess
+                                lbChecks.Text = "Checks this Session:              " & Sess
                                 lbPPM.Text = "Platinum this Session:          " & PPM
                                 tPPrice.Start()
                             Catch ex As Exception
                                 lbStatus.ForeColor = Color.Orange
                                 qItems.Clear()
                                 qItems.Add(vbNewLine + "Something went wrong!")
-                                Overlay.Clear()
-                                Overlay.Display()
+                                Tray.Clear()
+                                Tray.Display()
                                 addLog(ex.ToString)
                                 tPPrice.Start()
                             End Try
@@ -207,45 +276,39 @@ Public Class Main
         Dim startX As Integer
         Dim startY As Integer
         Dim height As Integer
-        Dim width As Integer
+        Dim width As Integer = 0.4 * img.Height
         Select Case mode
             Case 0
-                startX = img.Width * 0.055
+                startX = (img.Width / 2) - (width * 2)
                 startY = img.Height * 0.457
                 height = img.Height * 0.03
-                width = img.Width - startX * 2
+                width = width * 4
             Case 4
-                startX = (img.Width * 0.055) + (img.Width * 0.225 * pos)
+                startX = (img.Width / 2) - (width * 2) + (width * pos)
                 startY = img.Height * 0.425
                 height = img.Height * 0.03
-                width = img.Width * 0.22
             Case 3
-                startX = (img.Width * 0.055) + (img.Width * 0.225 * pos) + (img.Width * 0.11)
+                startX = (img.Width / 2) - (1.5 * width) + (width * pos)
                 startY = img.Height * 0.425
                 height = img.Height * 0.03
-                width = img.Width * 0.22
             Case 2
-                startX = (img.Width * 0.055) + (img.Width * 0.225 * (pos + 1))
+                startX = (img.Width / 2) - (width) + (width * pos)
                 startY = img.Height * 0.425
                 height = img.Height * 0.03
-                width = img.Width * 0.22
             Case 1
                 Select Case players
                     Case 4
-                        startX = (img.Width * 0.055) + (img.Width * 0.225 * pos)
+                        startX = (img.Width / 2) - (width * 2) + (width * pos)
                         startY = img.Height * 0.4
                         height = img.Height * 0.03
-                        width = img.Width * 0.22
                     Case 3
-                        startX = (img.Width * 0.055) + (img.Width * 0.225 * pos) + (img.Width * 0.11)
+                        startX = (img.Width / 2) - (1.5 * width) + (width * pos)
                         startY = img.Height * 0.4
                         height = img.Height * 0.03
-                        width = img.Width * 0.22
                     Case 2
-                        startX = (img.Width * 0.055) + (img.Width * 0.225 * (pos + 1))
+                        startX = (img.Width / 2) - (width) + (width * pos)
                         startY = img.Height * 0.4
                         height = img.Height * 0.03
-                        width = img.Width * 0.22
                 End Select
         End Select
         Dim CropRect As New Rectangle(startX, startY, width, height)
@@ -259,7 +322,12 @@ Public Class Main
 
     Private Sub addLog(txt As String)
         Dim dateTime As String = "[" + System.DateTime.Now + "]"
-        Dim logStore As String = My.Computer.FileSystem.ReadAllText(appData + "\WFInfo\WFInfo.log")
+        Dim logStore As String = ""
+        If My.Computer.FileSystem.FileExists(appData + "\WFInfo\WFInfo.log") Then
+            logStore = My.Computer.FileSystem.ReadAllText(appData + "\WFInfo\WFInfo.log")
+        Else
+            File.Create(appData + "\WFInfo\WFInfo.log").Dispose()
+        End If
         My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\WFInfo.log",
         dateTime + vbNewLine + txt + vbNewLine + vbNewLine + logStore, False)
     End Sub
@@ -336,10 +404,13 @@ Public Class Main
         My.Settings.ChecksPD = tempChecksPD
         My.Settings.StartX = Me.Location.X
         My.Settings.StartY = Me.Location.Y
+        My.Settings.Equipment = Equipment
         My.Settings.Save()
     End Sub
     Private Sub UpdateList()
         Try
+            Equipment = My.Settings.Equipment ' Load equipment string
+
             If Date.Today > My.Settings.LastUpdate.AddDays(7) Then
                 lbStatus.ForeColor = Color.Yellow
                 Dim duckString As String = ""
@@ -375,6 +446,7 @@ Public Class Main
                 My.Settings.LastUpdate = Date.Today
                 My.Settings.Save()
             End If
+
         Catch ex As Exception
         End Try
         For Each str As String In My.Settings.DuckList.Split(vbNewLine)
@@ -531,15 +603,20 @@ Public Class Main
     Private Sub bgPPrice_DoWork(sender As Object, e As DoWorkEventArgs) Handles bgPPrice.DoWork
         Try
             Dim found As Boolean = False
+            Dim price As Integer = 0
             For i = 0 To PlatPrices.Count - 1
                 If PlatPrices(i).Contains(Names(pCount)) Then
-                    PlatPrices(i) = Names(pCount) & "," & GetPlat(KClean(Names(pCount)))
+                    price = GetPlat(KClean(Names(pCount)))
+                    PlatPrices(i) = Names(pCount) & "," & price
                     found = True
                 End If
             Next
             If found = False Then
-                PlatPrices.Add(Names(pCount) & "," & GetPlat(KClean(Names(pCount))))
+                price = GetPlat(KClean(Names(pCount)))
+                PlatPrices.Add(Names(pCount) & "," & price)
             End If
+
+
             If pCount < Names.Count - 2 Then
                 pCount += 1
             Else
@@ -647,11 +724,8 @@ Public Class Main
         Return FullString.Substring(startIndex, endIndex - startIndex)
     End Function
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
-        curVersion = curVersion.Remove(0, curVersion.IndexOf("version ") + 8)
-        curVersion = curVersion.Remove(5, curVersion.Length - 5)
-
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnDebug1.Click
+        Picker.Show()
     End Sub
 
     Private Sub tOnline_Tick(sender As Object, e As EventArgs) Handles tOnline.Tick
@@ -665,8 +739,7 @@ Public Class Main
 
 
         If Not My.Settings.Version = curVersion Then
-            UpdateWindow.Show()
-            UpdateWindow.BringToFront()
+            UpdateWindow.Display(curVersion)
         End If
 
     End Sub
@@ -677,6 +750,26 @@ Public Class Main
         End If
         tUpdate.Enabled = False
         tUpdate.Stop()
+    End Sub
+
+    Private Sub tMessages_Tick(sender As Object, e As EventArgs) Handles tMessages.Tick
+        If Messages Then
+            Dim curMessage As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/message")
+            curMessage = curMessage.Remove(0, curMessage.IndexOf("(message)") + 9)
+            curMessage = curMessage.Remove(curMessage.IndexOf("(/message)"), curMessage.Length - curMessage.IndexOf("(/message)"))
+
+
+            If Not My.Settings.LastMessage = curMessage Then
+                My.Settings.LastMessage = curMessage
+                curMessage = curMessage.Replace("vbNewLine", vbNewLine)
+                qItems.Add(vbNewLine & curMessage)
+                Tray.Display()
+            End If
+        End If
+    End Sub
+
+    Private Sub btnDebug2_Click(sender As Object, e As EventArgs) Handles btnDebug2.Click
+        UpdateColors(Me)
     End Sub
 End Class
 
@@ -689,11 +782,14 @@ Module Glob
     Public Vaulted As New List(Of String)()   ' Is the part vaulted? True / False
     Public PlatPrices As New List(Of String)()   ' Stored list of plat prices
     Public HideShots As Boolean = False     ' Bool to hide screenshot notifications in fullscreen mode
+    Public Equipment As String               ' List of leveled equipment
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
     Public key2Tog As Boolean = False
     Public Animate As Boolean = My.Settings.Animate
     Public Commands As Boolean = My.Settings.Commands
+    Public Messages As Boolean = My.Settings.Messages
+    Public NewStyle As Boolean = My.Settings.NewStyle
     Public Debug As Boolean = My.Settings.Debug
     Public Function check(string1 As String) As Integer
         string1 = string1.Replace("*", "")
@@ -856,7 +952,6 @@ Module Glob
                     End If
                 End If
             Next
-
             Clipboard.SetText(user)
             Return low & vbNewLine & "    User: " & user
 
@@ -889,5 +984,80 @@ Module Glob
             Next
             Return low
         End If
+    End Function
+    Public Sub UpdateColors(f As Form)
+        For Each c As Control In f.Controls
+            If c.Name = "pTitle" Then
+                c.BackColor = My.Settings.cTitleBar
+                For Each c2 As Control In c.Controls
+                    If TypeOf c2 Is Label Then c2.ForeColor = My.Settings.cText
+                    If TypeOf c2 Is Button Then c2.BackColor = My.Settings.cTitleBar
+                    If TypeOf c2 Is Button Then c2.ForeColor = My.Settings.cText
+                    If c2.Name = "lbStatus" Then c2.ForeColor = Color.Lime
+                Next
+            Else
+                If TypeOf c Is Label Then c.ForeColor = My.Settings.cText
+                If TypeOf c Is Panel Then c.BackColor = My.Settings.cBackground
+                If TypeOf c Is Label Then c.ForeColor = My.Settings.cText
+                If TypeOf c Is Button Then c.ForeColor = My.Settings.cText
+                If TypeOf c Is Button Then c.BackColor = My.Settings.cTitleBar
+                If c.Name = "pbSideBar" Then c.BackColor = My.Settings.cSideBar
+                If TypeOf c Is TextBox Then c.BackColor = My.Settings.cBackground
+                If TypeOf c Is TextBox Then c.ForeColor = My.Settings.cText
+                If c.Name.Contains("DropShadow") Then
+                    c.ForeColor = Color.FromArgb(10, 10, 10)
+                End If
+                For Each c2 As Control In c.Controls
+                    If TypeOf c2 Is Panel Then c2.BackColor = My.Settings.cBackground
+                    If TypeOf c2 Is Label Then c2.ForeColor = My.Settings.cText
+                    If TypeOf c2 Is Button Then c2.ForeColor = My.Settings.cText
+                    If TypeOf c2 Is Button Then c2.BackColor = My.Settings.cTitleBar
+                    If TypeOf c2 Is CheckBox Then c2.ForeColor = My.Settings.cText
+                    If c2.Name = "pbSideBar" Then c2.BackColor = My.Settings.cSideBar
+                    If c2.Name.Contains("DropShadow") Then
+                        c2.ForeColor = Color.FromArgb(10, 10, 10)
+                    End If
+                    For Each c3 As Control In c2.Controls
+                        If TypeOf c3 Is Panel Then c3.BackColor = My.Settings.cBackground
+                        If TypeOf c3 Is Label Then c3.ForeColor = My.Settings.cText
+                        If TypeOf c3 Is Button Then c3.ForeColor = My.Settings.cText
+                        If TypeOf c3 Is Button Then c3.BackColor = My.Settings.cTitleBar
+                        If TypeOf c3 Is CheckBox Then c3.ForeColor = My.Settings.cText
+                        For Each c4 As Control In c3.Controls
+                            If TypeOf c4 Is Panel Then c4.BackColor = My.Settings.cBackground
+                            If TypeOf c4 Is Label Then c4.ForeColor = My.Settings.cText
+                            If TypeOf c4 Is Button Then c4.ForeColor = My.Settings.cText
+                            If TypeOf c4 Is Button Then c4.BackColor = My.Settings.cTitleBar
+                            If TypeOf c4 Is CheckBox Then c4.ForeColor = My.Settings.cText
+                            If c4.Name = "pbSideBar" Then c4.BackColor = My.Settings.cSideBar
+                        Next
+                    Next
+                Next
+            End If
+        Next
+    End Sub
+    Public Function Tint(ByVal bmpSource As Bitmap, ByVal clrScaleColor As Color, ByVal sngScaleDepth As Single) As Bitmap
+
+        Dim bmpTemp As New Bitmap(bmpSource.Width, bmpSource.Height) 'Create Temporary Bitmap To Work With
+
+        Dim iaImageProps As New ImageAttributes 'Contains information about how bitmap and metafile colors are manipulated during rendering. 
+
+        Dim cmNewColors As ColorMatrix 'Defines a 5 x 5 matrix that contains the coordinates for the RGBAW space
+
+        cmNewColors = New ColorMatrix(New Single()() _
+            {New Single() {1, 0, 0, 0, 0},
+             New Single() {0, 1, 0, 0, 0},
+             New Single() {0, 0, 1, 0, 0},
+             New Single() {0, 0, 0, 1, 0},
+             New Single() {clrScaleColor.R / 255 * sngScaleDepth, clrScaleColor.G / 255 * sngScaleDepth, clrScaleColor.B / 255 * sngScaleDepth, 0, 1}})
+
+        iaImageProps.SetColorMatrix(cmNewColors) 'Apply Matrix
+
+        Dim grpGraphics As Graphics = Graphics.FromImage(bmpTemp) 'Create Graphics Object and Draw Bitmap Onto Graphics Object
+
+        grpGraphics.DrawImage(bmpSource, New Rectangle(0, 0, bmpSource.Width, bmpSource.Height), 0, 0, bmpSource.Width, bmpSource.Height, GraphicsUnit.Pixel, iaImageProps)
+
+        Return bmpTemp
+
     End Function
 End Module

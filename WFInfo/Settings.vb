@@ -59,6 +59,7 @@ Public Class Settings
     End Sub
 
     Private Sub Settings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        UpdateColors(Me)
         Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         btnHkey1.Text = My.Settings.HKey1Text
         btnHkey2.Text = My.Settings.HKey2Text
@@ -229,6 +230,8 @@ Public Class Settings
     Private Sub Settings_Closed(sender As Object, e As EventArgs) Handles Me.Closed
         My.Settings.Animate = cbAnimations.Checked
         My.Settings.Commands = cbCommands.Checked
+        My.Settings.Messages = cbMessages.Checked
+        My.Settings.NewStyle = cbNewStyle.Checked
         My.Settings.HKey1 = HKey1
         My.Settings.HKey2 = HKey2
         My.Settings.HKey1Text = btnHkey1.Text
@@ -351,5 +354,19 @@ Public Class Settings
 
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
         Me.Close()
+    End Sub
+
+    Private Sub cbMessages_Click(sender As Object, e As EventArgs) Handles cbMessages.Click
+        My.Settings.Messages = cbMessages.Checked
+        Messages = cbMessages.Checked
+    End Sub
+
+    Private Sub cbNewStyle_Click(sender As Object, e As EventArgs) Handles cbNewStyle.Click
+        My.Settings.NewStyle = cbNewStyle.Checked
+        NewStyle = cbNewStyle.Checked
+    End Sub
+
+    Private Sub btnCustomize_Click(sender As Object, e As EventArgs) Handles btnCustomize.Click
+        Picker.Show()
     End Sub
 End Class

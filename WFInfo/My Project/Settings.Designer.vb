@@ -236,7 +236,7 @@ Namespace My
             "l,ODS / Draco(Ceres)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Oxium,IO(Jupiter) / Baal(Europa)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Plastids,Ophelia(Uranus)"& _ 
             " / Zabala(Eris)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Polymer Bundle,Ophelia or Assur(Uranus)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Rubedo,Void Survival /"& _ 
             " Defence"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Salvage,Cameria(Jupiter) / Wahiba(Mars)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Tellurium,Ophelia or Caelus(U"& _ 
-            "ranus)")>  _
+            "ranus)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Nyth,Plains of Eidolon(Earth)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Sentirum,Plains of Eidolon(Earth)")>  _
         Public Property Resources() As String
             Get
                 Return CType(Me("Resources"),String)
@@ -272,7 +272,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("3.2.3")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("4.0.0")>  _
         Public Property Version() As String
             Get
                 Return CType(Me("Version"),String)
@@ -363,6 +363,114 @@ Namespace My
             End Get
             Set
                 Me("SteamSettings") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property Equipment() As String
+            Get
+                Return CType(Me("Equipment"),String)
+            End Get
+            Set
+                Me("Equipment") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
+        Public Property NewStyle() As Boolean
+            Get
+                Return CType(Me("NewStyle"),Boolean)
+            End Get
+            Set
+                Me("NewStyle") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
+        Public Property Messages() As Boolean
+            Get
+                Return CType(Me("Messages"),Boolean)
+            End Get
+            Set
+                Me("Messages") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property LastMessage() As String
+            Get
+                Return CType(Me("LastMessage"),String)
+            End Get
+            Set
+                Me("LastMessage") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("15, 15, 15")>  _
+        Public Property cTitleBar() As Global.System.Drawing.Color
+            Get
+                Return CType(Me("cTitleBar"),Global.System.Drawing.Color)
+            End Get
+            Set
+                Me("cTitleBar") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("27, 27, 27")>  _
+        Public Property cBackground() As Global.System.Drawing.Color
+            Get
+                Return CType(Me("cBackground"),Global.System.Drawing.Color)
+            End Get
+            Set
+                Me("cBackground") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("23, 23, 23")>  _
+        Public Property cSideBar() As Global.System.Drawing.Color
+            Get
+                Return CType(Me("cSideBar"),Global.System.Drawing.Color)
+            End Get
+            Set
+                Me("cSideBar") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("177, 208, 217")>  _
+        Public Property cText() As Global.System.Drawing.Color
+            Get
+                Return CType(Me("cText"),Global.System.Drawing.Color)
+            End Get
+            Set
+                Me("cText") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("23, 23, 23")>  _
+        Public Property cTray() As Global.System.Drawing.Color
+            Get
+                Return CType(Me("cTray"),Global.System.Drawing.Color)
+            End Get
+            Set
+                Me("cTray") = value
             End Set
         End Property
     End Class

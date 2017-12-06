@@ -1,17 +1,26 @@
 ﻿Imports System.Runtime.InteropServices
-Imports System.Math
+Imports System.Drawing.Text
+Imports System.Text
 
 Public Class Overlay
-
     Private InitialStyle As Integer
     Dim PercentVisible As Decimal
     Dim screenWidth As Integer = Screen.PrimaryScreen.Bounds.Width
     Dim screenHeight As Integer = Screen.PrimaryScreen.Bounds.Height
-    Dim closing As Boolean = False
-    Dim goalY As Integer = screenHeight * 0.63
-
+    Dim pSize As Point
+    Dim pLoc As Point
+    Protected Overrides ReadOnly Property CreateParams As System.Windows.Forms.CreateParams
+        Get
+            Dim cp As CreateParams = MyBase.CreateParams
+            cp.ExStyle = cp.ExStyle Or &H80
+            Return cp
+        End Get
+    End Property
     Private Sub Form_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
-        Me.Location = New Point(screenWidth * 3, screenHeight * 3)
+        UpdateColors(Me)
+        PictureBox1.Image = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
+        Me.Location = pLoc
+        Me.Size = pSize
     End Sub
 
     Public Enum GWL As Integer
@@ -43,6 +52,22 @@ Public Class Overlay
             ) As Integer
     End Function
 
+    Private Declare Function GetForegroundWindow Lib "user32" () As Long
+
+    <DllImport("user32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+    Private Shared Function GetWindowText(hWnd As IntPtr, text As StringBuilder, count As Integer) As Integer
+    End Function
+
+    <DllImport("user32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+    Private Shared Function GetWindowTextLength(hWnd As IntPtr) As Integer
+    End Function
+
+    <DllImport("user32.dll", EntryPoint:="GetWindowRect")>
+    Private Shared Function GetWindowRect(ByVal hWnd As IntPtr, ByRef lpRect As Rectangle) As <MarshalAs(UnmanagedType.Bool)> Boolean
+    End Function
+
+
+
     <DllImport("user32.dll",
       EntryPoint:="SetLayeredWindowAttributes")>
     Public Shared Function SetLayeredWindowAttributes(
@@ -52,91 +77,61 @@ Public Class Overlay
         ByVal dwFlags As LWA
             ) As Boolean
     End Function
-    Public Sub Display()
-        If Me.Visible Then
-            UpdateLb()
-        End If
-        Me.Show()
-        tHide.Stop()
-        tHide.Start()
-    End Sub
-    Public Sub Clear()
-        lbDisplay.Text = ""
-    End Sub
-    Private Sub UpdateLb()
-        For i = 0 To qItems.Count - 1
-            lbDisplay.Text += qItems(i) + vbNewLine
-        Next
-        qItems.Clear()
-    End Sub
-    Private Sub tHide_Tick(sender As Object, e As EventArgs) Handles tHide.Tick
-        closing = True
-        lbDisplay.Text = ""
-        tHide.Stop()
-    End Sub
+
+    Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Integer,
+      ByVal dx As Integer, ByVal dy As Integer, ByVal cButtons As Integer,
+      ByVal dwExtraInfo As Integer)
 
     Private Sub Overlay_Shown(sender As Object, e As EventArgs) Handles Me.Shown
-        Me.Refresh()
-        Me.Location = New Point(screenWidth * 0.82, screenHeight)
-        Dim size As Integer = (screenWidth + screenHeight) / 200
-        lbDisplay.Font = New Font(lbDisplay.Font.FontFamily, size, FontStyle.Bold)
-        Me.Width = screenWidth * 0.18
-        Me.Height = screenHeight * 0.37
+
         InitialStyle = GetWindowLong(Me.Handle, GWL.ExStyle)
-        PercentVisible = 0.95
+        PercentVisible = 0.5
 
         SetWindowLong(Me.Handle, GWL.ExStyle, InitialStyle Or WS_EX.Layered Or WS_EX.Transparent)
-        SetLayeredWindowAttributes(Me.Handle, 0, 255 * PercentVisible, LWA.Alpha)
+        'SetLayeredWindowAttributes(Me.Handle, 0, 255 * PercentVisible, LWA.Alpha)
         Me.BackColor = Color.Black
         Me.TopMost = True
-        tAnimate.Start()
+        Me.Refresh()
     End Sub
 
-    Private Sub tAnimate_Tick(sender As Object, e As EventArgs) Handles tAnimate.Tick
-        If Not closing Then
-            If Animate Then
-                If Not Me.Location.Y - 22 <= goalY Then
-                    Me.Location = New Point(Me.Location.X, Me.Location.Y - 22)
-                ElseIf Me.Location.Y <> goalY Then
-                    Me.Location = New Point(Me.Location.X, goalY)
-                    UpdateLb()
-                End If
-            ElseIf Me.Location.Y <> goalY Then
-                Me.Location = New Point(Me.Location.X, goalY)
-                UpdateLb()
-            End If
-        Else
-            If Animate Then
-                If Not Me.Location.Y > screenHeight Then
-                    Me.Location = New Point(Me.Location.X, Me.Location.Y + 20)
-                Else
-                    If Not Input.Visible = True Then
-                        Try
-                            AppActivate("WARFRAME")
-                        Catch ex As Exception
-                        End Try
-                        Me.Close()
-                    End If
-                End If
-            Else
-                If Not Input.Visible = True Then
+    Public Sub Display(x As Integer, y As Integer, p As Integer, d As Integer)
+        pLoc = New Point(x, y)
+        pSize = New Point(125, 70)
+        Dim fontSize As Integer = 0.26 * pSize.Y
 
-                    Try
-                        AppActivate("WARFRAME")
-                    Catch ex As Exception
-                    End Try
-                    Me.Close()
-                End If
-            End If
-            End If
+        'Platinum Label
+        lbPlat.Location = New Point(-2, 0)
+        lbPlat.Font = New Font(lbPlat.Font.FontFamily, fontSize, FontStyle.Bold)
+        lbPlat.BackColor = Color.Transparent
+        lbPlat.Parent = lbPDropShadow
+        lbPlat.Text = p
+
+        'Platinum Label Drop Shadow
+        lbPDropShadow.Location = New Point((pSize.X / 2.58) + 2, (pSize.Y / 27))
+        lbPDropShadow.Font = New Font(lbPDropShadow.Font.FontFamily, fontSize, FontStyle.Bold)
+        lbPDropShadow.BackColor = Color.Transparent
+        lbPDropShadow.Parent = PictureBox1
+        lbPDropShadow.Text = p
+
+        'Ducat Label
+        lbDucats.Location = New Point(-1, 0)
+        lbDucats.Font = New Font(lbDucats.Font.FontFamily, fontSize, FontStyle.Bold)
+        lbDucats.BackColor = Color.Transparent
+        lbDucats.Parent = lbDDropShadow
+        lbDucats.Text = d
+
+        'Ducat Label Drop Shadow
+        lbDDropShadow.Location = New Point((pSize.X / 2.58) + 2, (pSize.Y / 2.15) + (pSize.Y / 27))
+        lbDDropShadow.Font = New Font(lbDDropShadow.Font.FontFamily, fontSize, FontStyle.Bold)
+        lbDDropShadow.BackColor = Color.Transparent
+        lbDDropShadow.Parent = PictureBox1
+        lbDDropShadow.Text = d
+
+        Me.Show()
+        Me.Refresh()
     End Sub
-    Public Sub quack()
-        qItems.Clear()
-        lbDisplay.Text = ""
-        qItems.Add("  _________")
-        qItems.Add("/             \            _")
-        qItems.Add("| Quack    >    <(o )___")
-        qItems.Add("\_________/         ( ._> /")
-        Me.Display()
+
+    Private Sub tHide_Tick(sender As Object, e As EventArgs) Handles tHide.Tick
+        Me.Close()
     End Sub
 End Class

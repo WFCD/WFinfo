@@ -41,7 +41,7 @@ Partial Class Input
         '
         Me.tbCommand.BackColor = System.Drawing.Color.FromArgb(CType(CType(44, Byte), Integer), CType(CType(44, Byte), Integer), CType(CType(44, Byte), Integer))
         Me.tbCommand.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.tbCommand.ForeColor = System.Drawing.Color.FromArgb(CType(CType(147, Byte), Integer), CType(CType(178, Byte), Integer), CType(CType(187, Byte), Integer))
+        Me.tbCommand.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.tbCommand.Location = New System.Drawing.Point(12, 20)
         Me.tbCommand.Name = "tbCommand"
         Me.tbCommand.Size = New System.Drawing.Size(456, 20)
