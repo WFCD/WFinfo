@@ -343,6 +343,7 @@ Public Class Input
     Private Sub tActivate_Tick(sender As Object, e As EventArgs) Handles tActivate.Tick
         If Me.Visible Then
             If Not GetForegroundWindow() = Me.Handle.ToString Then
+                SendKeys.Send(Keys.LMenu)
                 Input.SetForegroundWindow(Me.Handle)
             End If
             If Not tbCommand.Focused Then

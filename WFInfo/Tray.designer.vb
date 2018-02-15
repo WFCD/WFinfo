@@ -45,7 +45,7 @@ Partial Class Tray
         '
         'tHide
         '
-        Me.tHide.Interval = 10000
+        Me.tHide.Interval = 15000
         '
         'tAnimate
         '

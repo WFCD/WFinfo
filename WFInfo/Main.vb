@@ -411,11 +411,10 @@ Public Class Main
         Try
             Equipment = My.Settings.Equipment ' Load equipment string
 
-            If Date.Today > My.Settings.LastUpdate.AddDays(7) Then
-                lbStatus.ForeColor = Color.Yellow
+            lbStatus.ForeColor = Color.Yellow
                 Dim duckString As String = ""
-                Dim endpoint As String = New StreamReader(WebRequest.Create("http://warframe.wikia.com/wiki/Ducats/Prices").GetResponse().GetResponseStream()).ReadToEnd()
-                Dim str1 As String = endpoint.Substring(endpoint.IndexOf("Blueprint/Crafted Value"))
+                Dim endpoint As String = New StreamReader(WebRequest.Create("http://warframe.wikia.com/wiki/Ducats/Prices/All").GetResponse().GetResponseStream()).ReadToEnd()
+                Dim str1 As String = endpoint.Substring(endpoint.IndexOf("> Ducat Value"))
                 Dim str2 As String = str1.Substring(0, str1.IndexOf("</div>"))
                 Dim str3 As String = str2.Substring(str2.IndexOf("Acquisition"))
                 Dim strArray As String() = str3.Split(New String(0) {"Acquisition"}, StringSplitOptions.None)
@@ -444,8 +443,7 @@ Public Class Main
                 duckString = duckString.Remove(duckString.Length - 2, 1)
                 My.Settings.DuckList = duckString
                 My.Settings.LastUpdate = Date.Today
-                My.Settings.Save()
-            End If
+            My.Settings.Save()
 
         Catch ex As Exception
         End Try
@@ -459,12 +457,12 @@ Public Class Main
         Ducks.Add("0")
 
         lbStatus.ForeColor = Color.Lime
+        tPPrice.Start()
     End Sub
 
     Private Sub Main_Shown(sender As Object, e As EventArgs) Handles Me.Shown
         Me.Refresh()
-        UpdateList()
-        tPPrice.Start()
+        BGWorker.RunWorkerAsync()
     End Sub
     Private Function GetPlayers(img As Image) As Integer
         Using img
@@ -498,278 +496,294 @@ Public Class Main
             Return count
         End Using
     End Function
+    Public Shared Function ResizeImage(ByVal img As Image, multi As Double) As Image
+        Return New Bitmap(img, New Size(img.Width * multi, img.Height * multi))
+    End Function
     Private Function GetText(img As Image) As String
-        Using img
+            Using img
             Dim engine As New TesseractEngine("", "eng")
-            Dim page = engine.Process(prepare(img))
+            engine.DefaultPageSegMode = Tesseract.PageSegMode.SingleLine
+            Dim page = engine.Process(ResizeImage(img, 1.25))
             Dim result As String = Regex.Replace(page.GetText(), "[^A-Za-z0-9\-_ /]", "")
-            If Debug Then
-                Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\")
-                My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\tests\" & nextFile & ".txt",
+                If Debug Then
+                    Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\")
+                    My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\tests\" & nextFile & ".txt",
                 result, False)
-            End If
-            Return result
-        End Using
-    End Function
-    Private Function GetHOCR(img As Image) As String
-        Using img
-            Dim engine As New TesseractEngine("", "eng")
-            Dim page = engine.Process(prepare(img)).GetHOCRText(1)
-            Return page
-        End Using
-    End Function
-    Private Function prepare(img As Image) As Image
-        Using img
-            Dim X As Integer
-            Dim Y As Integer
-            Dim clr As Integer
-            Dim bm As Bitmap = New Bitmap(img)
-            For X = 0 To bm.Width - 1
-                For Y = 0 To bm.Height - 1
-                    clr = (CInt(bm.GetPixel(X, Y).R) +
-                           bm.GetPixel(X, Y).G +
-                           bm.GetPixel(X, Y).B) \ 3
-                    bm.SetPixel(X, Y, Color.FromArgb(clr, clr, clr))
+                End If
+                Return result
+            End Using
+        End Function
+        Private Function GetHOCR(img As Image) As String
+            Using img
+                Dim engine As New TesseractEngine("", "eng")
+                Dim page = engine.Process(prepare(img)).GetHOCRText(1)
+                Return page
+            End Using
+        End Function
+        Private Function prepare(img As Image) As Image
+            Using img
+                Dim X As Integer
+                Dim Y As Integer
+                Dim clr As Integer
+            Dim bmp As Bitmap = New Bitmap(img)
+            For X = 0 To bmp.Width - 1
+                For Y = 0 To bmp.Height - 1
+                    clr = (CInt(bmp.GetPixel(X, Y).R) +
+                           bmp.GetPixel(X, Y).G +
+                           bmp.GetPixel(X, Y).B) \ 3
+                    bmp.SetPixel(X, Y, Color.FromArgb(clr, clr, clr))
                 Next Y
             Next X
-            Return bm
+            Return bmp
         End Using
-    End Function
+        End Function
 
-    Private Function Sharpen(image As Image, strength As Integer) As Image
-        Using image
-            Dim fpixel, secpixel As Color
-            Dim NewImg As Bitmap = New Bitmap(image)
-            Dim CR, CB, CG As Integer
-            Dim x, y As Integer
-            For x = 0 To NewImg.Width - 2
-                For y = 0 To NewImg.Height - 2
-                    fpixel = NewImg.GetPixel(x, y)
-                    secpixel = NewImg.GetPixel(x + 1, y)
-                    Dim newR, newB, newG As Integer
-                    newR = CInt(fpixel.R) - CInt(secpixel.R)
-                    newB = CInt(fpixel.B) - CInt(secpixel.B)
-                    newG = CInt(fpixel.G) - CInt(secpixel.G)
-                    CR = CInt(newR * strength) + fpixel.R
-                    CG = CInt(newG * strength) + fpixel.G
-                    CB = CInt(newB * strength) + fpixel.B
+        Private Function Sharpen(image As Image, strength As Integer) As Image
+            Using image
+                Dim fpixel, secpixel As Color
+                Dim NewImg As Bitmap = New Bitmap(image)
+                Dim CR, CB, CG As Integer
+                Dim x, y As Integer
+                For x = 0 To NewImg.Width - 2
+                    For y = 0 To NewImg.Height - 2
+                        fpixel = NewImg.GetPixel(x, y)
+                        secpixel = NewImg.GetPixel(x + 1, y)
+                        Dim newR, newB, newG As Integer
+                        newR = CInt(fpixel.R) - CInt(secpixel.R)
+                        newB = CInt(fpixel.B) - CInt(secpixel.B)
+                        newG = CInt(fpixel.G) - CInt(secpixel.G)
+                        CR = CInt(newR * strength) + fpixel.R
+                        CG = CInt(newG * strength) + fpixel.G
+                        CB = CInt(newB * strength) + fpixel.B
 
-                    If CR > 255 Then
-                        CR = 255
-                    End If
-                    If CR < 0 Then
-                        CR = 0
+                        If CR > 255 Then
+                            CR = 255
+                        End If
+                        If CR < 0 Then
+                            CR = 0
 
-                    End If
-                    If CB > 255 Then
-                        CB = 255
-                    End If
-                    If CB < 0 Then
-                        CB = 0
-                    End If
+                        End If
+                        If CB > 255 Then
+                            CB = 255
+                        End If
+                        If CB < 0 Then
+                            CB = 0
+                        End If
 
-                    If CG > 255 Then
-                        CG = 255
-                    End If
+                        If CG > 255 Then
+                            CG = 255
+                        End If
 
-                    If CG < 0 Then
-                        CG = 0
-                    End If
+                        If CG < 0 Then
+                            CG = 0
+                        End If
 
-                    NewImg.SetPixel(x, y, Color.FromArgb(CR, CG, CB))
+                        NewImg.SetPixel(x, y, Color.FromArgb(CR, CG, CB))
+                    Next
                 Next
-            Next
-            Return NewImg
-        End Using
-    End Function
+                Return NewImg
+            End Using
+        End Function
 
-    Public Function KClean(guess As String)
-        If Not guess.Contains("Carrier") And Not guess.Contains("Wyrm") And Not guess.Contains("Helios") Then
-            If guess.Contains("Systems") Or guess.Contains("Chassis") Or guess.Contains("Neuroptics") Then
-                guess = guess.Replace(" Blueprint", "")
-            End If
-        End If
-        guess = guess.Replace("Band", "Collar Band").Replace("Buckle", "Collar Buckle").Replace("&amp;", "and")
-        Return guess
-    End Function
-
-
-    Private Sub tPPrice_Tick(sender As Object, e As EventArgs) Handles tPPrice.Tick
-        If Not bgPPrice.IsBusy And enablePPC Then
-            bgPPrice.RunWorkerAsync()
-        End If
-    End Sub
-
-    Private Sub bgPPrice_DoWork(sender As Object, e As DoWorkEventArgs) Handles bgPPrice.DoWork
-        Try
-            Dim found As Boolean = False
-            Dim price As Integer = 0
-            For i = 0 To PlatPrices.Count - 1
-                If PlatPrices(i).Contains(Names(pCount)) Then
-                    price = GetPlat(KClean(Names(pCount)))
-                    PlatPrices(i) = Names(pCount) & "," & price
-                    found = True
+        Public Function KClean(guess As String)
+            If Not guess.Contains("Carrier") And Not guess.Contains("Wyrm") And Not guess.Contains("Helios") Then
+                If guess.Contains("Systems") Or guess.Contains("Chassis") Or guess.Contains("Neuroptics") Then
+                    guess = guess.Replace(" Blueprint", "")
                 End If
-            Next
-            If found = False Then
-                price = GetPlat(KClean(Names(pCount)))
-                PlatPrices.Add(Names(pCount) & "," & price)
             End If
+            guess = guess.Replace("Band", "Collar Band").Replace("Buckle", "Collar Buckle").Replace("&amp;", "and")
+            Return guess
+        End Function
 
 
-            If pCount < Names.Count - 2 Then
-                pCount += 1
-            Else
-                pCount = 0
+        Private Sub tPPrice_Tick(sender As Object, e As EventArgs) Handles tPPrice.Tick
+            If Not bgPPrice.IsBusy And enablePPC Then
+                bgPPrice.RunWorkerAsync()
             End If
-        Catch ex As Exception
-            addLog(ex.ToString)
-        End Try
-    End Sub
+        End Sub
 
-    Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
-        Settings.Show()
-    End Sub
-
-    Private Sub pbSettings_MouseEnter(sender As Object, e As EventArgs) Handles pbSettings.MouseEnter
-        pbSettings.Image = My.Resources.Settings_h
-    End Sub
-
-    Private Sub pbSettings_MouseLeave(sender As Object, e As EventArgs) Handles pbSettings.MouseLeave
-        pbSettings.Image = My.Resources.Settings
-    End Sub
-
-    Private Sub pbHome_Click(sender As Object, e As EventArgs) Handles pbHome.Click
-        Process.Start("https://sites.google.com/site/wfinfoapp/home")
-    End Sub
-
-    Private Sub pbHome_MouseEnter(sender As Object, e As EventArgs) Handles pbHome.MouseEnter
-        pbHome.Image = My.Resources.home_h
-    End Sub
-
-    Private Sub pbHome_MouseLeave(sender As Object, e As EventArgs) Handles pbHome.MouseLeave
-        pbHome.Image = My.Resources.home
-    End Sub
-
-    Private Sub pbDonate_Click(sender As Object, e As EventArgs) Handles pbDonate.Click
-        Process.Start("https://sites.google.com/site/wfinfoapp/donate")
-    End Sub
-
-    Private Sub pbDonate_MouseEnter(sender As Object, e As EventArgs) Handles pbDonate.MouseEnter
-        pbDonate.Image = My.Resources.Donate_h
-    End Sub
-
-    Private Sub pbDonate_MouseLeave(sender As Object, e As EventArgs) Handles pbDonate.MouseLeave
-        pbDonate.Image = My.Resources.Donate
-    End Sub
-
-    Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
-        Me.Close()
-    End Sub
-
-    Private Sub pTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown
-        drag = True
-        mouseX = Cursor.Position.X - Me.Left
-        mouseY = Cursor.Position.Y - Me.Top
-    End Sub
-
-    Private Sub pTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles pTitle.MouseMove
-        If drag Then
-            Me.Top = Cursor.Position.Y - mouseY
-            Me.Left = Cursor.Position.X - mouseX
-        End If
-    End Sub
-
-    Private Sub pTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp
-        drag = False
-    End Sub
-
-    Private Sub lbTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseDown
-        drag = True
-        mouseX = Cursor.Position.X - Me.Left
-        mouseY = Cursor.Position.Y - Me.Top
-    End Sub
-
-    Private Sub lbTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseMove
-        If drag Then
-            Me.Top = Cursor.Position.Y - mouseY
-            Me.Left = Cursor.Position.X - mouseX
-        End If
-    End Sub
-
-    Private Sub lbTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseUp
-        drag = False
-    End Sub
-
-    Private Sub lbVersion_MouseDown(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseDown
-        drag = True
-        mouseX = Cursor.Position.X - Me.Left
-        mouseY = Cursor.Position.Y - Me.Top
-    End Sub
-
-    Private Sub lbVersion_MouseMove(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseMove
-        If drag Then
-            Me.Top = Cursor.Position.Y - mouseY
-            Me.Left = Cursor.Position.X - mouseX
-        End If
-    End Sub
-
-    Private Sub lbVersion_MouseUp(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseUp
-        drag = False
-    End Sub
-
-    Public Function GetRelic(ByVal FullString As String, ByVal StartText As String, ByVal EndText As String)
-        Dim startIndex As Integer = FullString.IndexOf(StartText) + StartText.Length
-        Dim endIndex As Integer = FullString.IndexOf(EndText, startIndex)
-        Return FullString.Substring(startIndex, endIndex - startIndex)
-    End Function
-
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnDebug1.Click
-        Picker.Show()
-    End Sub
-
-    Private Sub tOnline_Tick(sender As Object, e As EventArgs) Handles tOnline.Tick
-        OnlineStatus.Navigate("https://sites.google.com/site/wfinfoapp/online")
-    End Sub
-
-    Public Sub CheckUpdates()
-        Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
-        curVersion = curVersion.Remove(0, curVersion.IndexOf("version ") + 8)
-        curVersion = curVersion.Remove(5, curVersion.Length - 5)
+        Private Sub bgPPrice_DoWork(sender As Object, e As DoWorkEventArgs) Handles bgPPrice.DoWork
+            Try
+                Dim found As Boolean = False
+                Dim price As Integer = 0
+                For i = 0 To PlatPrices.Count - 1
+                    If PlatPrices(i).Contains(Names(pCount)) Then
+                        price = GetPlat(KClean(Names(pCount)))
+                        PlatPrices(i) = Names(pCount) & "," & price
+                        found = True
+                    End If
+                Next
+                If found = False Then
+                    price = GetPlat(KClean(Names(pCount)))
+                    PlatPrices.Add(Names(pCount) & "," & price)
+                End If
 
 
-        If Not My.Settings.Version = curVersion Then
-            UpdateWindow.Display(curVersion)
-        End If
+                If pCount < Names.Count - 2 Then
+                    pCount += 1
+                Else
+                    pCount = 0
+                End If
+            Catch ex As Exception
+                addLog(ex.ToString)
+            End Try
+        End Sub
 
-    End Sub
+        Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
+            Settings.Show()
+        End Sub
 
-    Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick
-        If My.Settings.CheckUpdates = True Then
-            CheckUpdates()
-        End If
-        tUpdate.Enabled = False
-        tUpdate.Stop()
-    End Sub
+        Private Sub pbSettings_MouseEnter(sender As Object, e As EventArgs) Handles pbSettings.MouseEnter
+            pbSettings.Image = My.Resources.Settings_h
+        End Sub
 
-    Private Sub tMessages_Tick(sender As Object, e As EventArgs) Handles tMessages.Tick
-        If Messages Then
-            Dim curMessage As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/message")
-            curMessage = curMessage.Remove(0, curMessage.IndexOf("(message)") + 9)
+        Private Sub pbSettings_MouseLeave(sender As Object, e As EventArgs) Handles pbSettings.MouseLeave
+            pbSettings.Image = My.Resources.Settings
+        End Sub
+
+        Private Sub pbHome_Click(sender As Object, e As EventArgs) Handles pbHome.Click
+            Process.Start("https://sites.google.com/site/wfinfoapp/home")
+        End Sub
+
+        Private Sub pbHome_MouseEnter(sender As Object, e As EventArgs) Handles pbHome.MouseEnter
+            pbHome.Image = My.Resources.home_h
+        End Sub
+
+        Private Sub pbHome_MouseLeave(sender As Object, e As EventArgs) Handles pbHome.MouseLeave
+            pbHome.Image = My.Resources.home
+        End Sub
+
+        Private Sub pbDonate_Click(sender As Object, e As EventArgs) Handles pbDonate.Click
+            Process.Start("https://sites.google.com/site/wfinfoapp/donate")
+        End Sub
+
+        Private Sub pbDonate_MouseEnter(sender As Object, e As EventArgs) Handles pbDonate.MouseEnter
+            pbDonate.Image = My.Resources.Donate_h
+        End Sub
+
+        Private Sub pbDonate_MouseLeave(sender As Object, e As EventArgs) Handles pbDonate.MouseLeave
+            pbDonate.Image = My.Resources.Donate
+        End Sub
+
+        Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
+            Me.Close()
+        End Sub
+
+        Private Sub pTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown
+            drag = True
+            mouseX = Cursor.Position.X - Me.Left
+            mouseY = Cursor.Position.Y - Me.Top
+        End Sub
+
+        Private Sub pTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles pTitle.MouseMove
+            If drag Then
+                Me.Top = Cursor.Position.Y - mouseY
+                Me.Left = Cursor.Position.X - mouseX
+            End If
+        End Sub
+
+        Private Sub pTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp
+            drag = False
+        End Sub
+
+        Private Sub lbTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseDown
+            drag = True
+            mouseX = Cursor.Position.X - Me.Left
+            mouseY = Cursor.Position.Y - Me.Top
+        End Sub
+
+        Private Sub lbTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseMove
+            If drag Then
+                Me.Top = Cursor.Position.Y - mouseY
+                Me.Left = Cursor.Position.X - mouseX
+            End If
+        End Sub
+
+        Private Sub lbTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseUp
+            drag = False
+        End Sub
+
+        Private Sub lbVersion_MouseDown(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseDown
+            drag = True
+            mouseX = Cursor.Position.X - Me.Left
+            mouseY = Cursor.Position.Y - Me.Top
+        End Sub
+
+        Private Sub lbVersion_MouseMove(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseMove
+            If drag Then
+                Me.Top = Cursor.Position.Y - mouseY
+                Me.Left = Cursor.Position.X - mouseX
+            End If
+        End Sub
+
+        Private Sub lbVersion_MouseUp(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseUp
+            drag = False
+        End Sub
+
+        Public Function GetRelic(ByVal FullString As String, ByVal StartText As String, ByVal EndText As String)
+            Dim startIndex As Integer = FullString.IndexOf(StartText) + StartText.Length
+            Dim endIndex As Integer = FullString.IndexOf(EndText, startIndex)
+            Return FullString.Substring(startIndex, endIndex - startIndex)
+        End Function
+
+        Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnDebug1.Click
+        Dim curMessage As String = InputBox("Message String")
+        curMessage = curMessage.Remove(0, curMessage.IndexOf("(message)") + 9)
             curMessage = curMessage.Remove(curMessage.IndexOf("(/message)"), curMessage.Length - curMessage.IndexOf("(/message)"))
 
 
-            If Not My.Settings.LastMessage = curMessage Then
-                My.Settings.LastMessage = curMessage
-                curMessage = curMessage.Replace("vbNewLine", vbNewLine)
-                qItems.Add(vbNewLine & curMessage)
-                Tray.Display()
-            End If
-        End If
+        My.Settings.LastMessage = curMessage
+        curMessage = curMessage.Replace("vbNewLine", vbNewLine)
+        qItems.Add(vbNewLine & curMessage)
+        Tray.Display()
     End Sub
 
-    Private Sub btnDebug2_Click(sender As Object, e As EventArgs) Handles btnDebug2.Click
-        UpdateColors(Me)
+        Private Sub tOnline_Tick(sender As Object, e As EventArgs) Handles tOnline.Tick
+            OnlineStatus.Navigate("https://sites.google.com/site/wfinfoapp/online")
+        End Sub
+
+        Public Sub CheckUpdates()
+            Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
+            curVersion = curVersion.Remove(0, curVersion.IndexOf("version ") + 8)
+            curVersion = curVersion.Remove(5, curVersion.Length - 5)
+
+
+            If Not My.Settings.Version = curVersion Then
+                UpdateWindow.Display(curVersion)
+            End If
+
+        End Sub
+
+        Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick
+            If My.Settings.CheckUpdates = True Then
+                CheckUpdates()
+            End If
+            tUpdate.Enabled = False
+            tUpdate.Stop()
+        End Sub
+
+        Private Sub tMessages_Tick(sender As Object, e As EventArgs) Handles tMessages.Tick
+            If Messages Then
+                Dim curMessage As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/message")
+            curMessage = curMessage.Remove(0, curMessage.IndexOf("content=""(message)") + 18)
+            curMessage = curMessage.Remove(curMessage.IndexOf("(/message)"), curMessage.Length - curMessage.IndexOf("(/message)"))
+
+
+                If Not My.Settings.LastMessage = curMessage Then
+                    My.Settings.LastMessage = curMessage
+                    curMessage = curMessage.Replace("vbNewLine", vbNewLine)
+                    qItems.Add(vbNewLine & curMessage)
+                    Tray.Display()
+                End If
+            End If
+        End Sub
+
+        Private Sub btnDebug2_Click(sender As Object, e As EventArgs) Handles btnDebug2.Click
+            UpdateColors(Me)
+        End Sub
+
+    Private Sub BGWorker_DoWork(sender As Object, e As DoWorkEventArgs) Handles BGWorker.DoWork
+        UpdateList()
     End Sub
 End Class
 
@@ -964,7 +978,7 @@ Module Glob
                 x = result("payload")("statistics")("48hours").Count - 1
             End If
             For i = 0 To x
-                minList.Add(CInt(result("payload")("statistics")("48hours")(i)("min_price")))
+                minList.Add(CInt(result("payload")("statistics")("48hours")(i)("max_price")))
             Next
 
             Dim total As Integer = 0

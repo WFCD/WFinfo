@@ -66,6 +66,7 @@ Public Class Settings
         cbCommands.Checked = Commands
         cbAnimations.Checked = Animate
         cbFullscreen.Checked = Fullscreen
+        cbNewStyle.Checked = NewStyle
         cbDebug.Checked = Debug
     End Sub
 

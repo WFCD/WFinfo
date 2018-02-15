@@ -64,6 +64,9 @@ Partial Class Main
         Me.tPB.Enabled = True
         Me.tPB.Interval = 1
         '
+        'BGWorker
+        '
+        '
         'lbChecks
         '
         Me.lbChecks.AutoSize = True
@@ -293,7 +296,7 @@ Partial Class Main
         'tMessages
         '
         Me.tMessages.Enabled = True
-        Me.tMessages.Interval = 1800000
+        Me.tMessages.Interval = 300000
         '
         'Main
         '

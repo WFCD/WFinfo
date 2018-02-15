@@ -83,7 +83,7 @@ Partial Class Overlay
         'tHide
         '
         Me.tHide.Enabled = True
-        Me.tHide.Interval = 15000
+        Me.tHide.Interval = 10000
         '
         'PictureBox1
         '
