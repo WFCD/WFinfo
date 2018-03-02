@@ -48,6 +48,9 @@ Partial Class Input
         Me.tbCommand.TabIndex = 3
         Me.tbCommand.Visible = False
         '
+        'bgMain
+        '
+        '
         'tActivate
         '
         Me.tActivate.Enabled = True

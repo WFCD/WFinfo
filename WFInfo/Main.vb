@@ -5,6 +5,7 @@ Imports Newtonsoft.Json.Linq
 Imports System.ComponentModel
 Imports System.Text.RegularExpressions
 Imports System.Drawing.Imaging
+Imports System.Data.SQLite
 Imports Tesseract
 Public Class Main
     Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Integer, ByVal dx As Integer, ByVal dy As Integer, ByVal cButtons As Integer, ByVal dwExtraInfo As Integer)
@@ -24,6 +25,9 @@ Public Class Main
     Dim mouseY As Integer
     Dim enablePPC As Boolean = True
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        If getCookie() Then
+            getXcsrf()
+        End If
         UpdateColors(Me)
         pbHome.Parent = pbSideBar
         pbHome.Location = New Point(0, 8)
@@ -67,6 +71,95 @@ Public Class Main
         End If
 
     End Sub
+
+    Public Function getCookie()
+        Dim found As Boolean = False
+        Dim FFpath As String = Directory.GetDirectories(appData + "\Mozilla\Firefox\Profiles")(0) + "\cookies.sqlite"
+        Dim ChromePath As String = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\Google\Chrome\User Data\Default\Cookies"
+
+        ''Checks FF cookie then Chrome Cookie, if it exists in neither returns false, true if found, also sets cookie
+        If File.Exists(FFpath) Then
+            If Not checkCookie(FFpath, True) = True Then
+                If File.Exists(ChromePath) Then
+                    If checkCookie(ChromePath) = True Then
+                        found = True
+                    End If
+                End If
+            Else
+                found = True
+            End If
+        ElseIf File.Exists(ChromePath) Then
+            If checkCookie(ChromePath) = True Then
+                found = True
+            End If
+        End If
+        Return found
+    End Function
+
+    Private Function checkCookie(path As String, Optional FireFox As Boolean = False)
+        Dim SQLconnect As New SQLiteConnection
+        Dim SQLcommand As New SQLiteCommand
+
+        SQLconnect.ConnectionString = "Data Source=" & path & ";"
+        SQLconnect.Open()
+
+
+        SQLcommand = SQLconnect.CreateCommand
+        If FireFox Then
+            SQLcommand.CommandText = "SELECT * FROM moz_cookies"
+        Else
+            SQLcommand.CommandText = "SELECT name,encrypted_value FROM Cookies"
+        End If
+        Dim SQLreader As SQLiteDataReader = SQLcommand.ExecuteReader()
+        Dim cdmblk As String = " "
+        Dim found As Boolean = False
+        While SQLreader.Read
+            If FireFox Then
+                If SQLreader(3).contains("JWT") Then
+                    cookie = "JWT=" + SQLreader(4) + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
+                    found = True
+                End If
+            Else
+                Dim encryptedData = SQLreader(1)
+                If SQLreader(0).Contains("JWT") Then
+                    Dim decodedData = System.Security.Cryptography.ProtectedData.Unprotect(encryptedData, Nothing, System.Security.Cryptography.DataProtectionScope.LocalMachine)
+                    Dim plainText = System.Text.Encoding.ASCII.GetString(decodedData)
+                    cookie = "JWT=" + plainText + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
+                    found = True
+                End If
+            End If
+        End While
+
+
+
+        SQLcommand.Dispose()
+        SQLconnect.Close()
+        Return found
+    End Function
+
+    Private Function getXcsrf()
+        Dim uri As New Uri("https://warframe.market")
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11
+        Dim req As HttpWebRequest = HttpWebRequest.Create(uri)
+        req.ContentType = "application/json"
+        req.Method = "GET"
+        req.Connection = "warframe.market:443 HTTP/1.1"
+        req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
+        req.Host = "warframe.market:443"
+        req.Headers.Add("cookie", cookie)
+        req.Headers.Add("X-Requested-With", "XMLHttpRequest")
+        req.KeepAlive = True
+
+        Dim response = req.GetResponse()
+        Dim stream = response.GetResponseStream()
+        Dim reader As StreamReader = New StreamReader(stream)
+        xcsrf = reader.ReadLine()
+        Do Until xcsrf.Contains("csrf-token")
+            xcsrf = reader.ReadLine()
+        Loop
+        xcsrf = xcsrf.Substring(xcsrf.IndexOf("##"), 130)
+
+    End Function
 
     Private Async Sub tPB_Tick(sender As Object, e As EventArgs) Handles tPB.Tick
         Try
@@ -320,7 +413,7 @@ Public Class Main
         End Using
     End Function
 
-    Private Sub addLog(txt As String)
+    Public Sub addLog(txt As String)
         Dim dateTime As String = "[" + System.DateTime.Now + "]"
         Dim logStore As String = ""
         If My.Computer.FileSystem.FileExists(appData + "\WFInfo\WFInfo.log") Then
@@ -502,8 +595,9 @@ Public Class Main
     Private Function GetText(img As Image) As String
             Using img
             Dim engine As New TesseractEngine("", "eng")
+            engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
             engine.DefaultPageSegMode = Tesseract.PageSegMode.SingleLine
-            Dim page = engine.Process(ResizeImage(img, 1.25))
+            Dim page = engine.Process(ResizeImage(img, 1.1))
             Dim result As String = Regex.Replace(page.GetText(), "[^A-Za-z0-9\-_ /]", "")
                 If Debug Then
                     Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\")
@@ -515,9 +609,11 @@ Public Class Main
         End Function
         Private Function GetHOCR(img As Image) As String
             Using img
-                Dim engine As New TesseractEngine("", "eng")
-                Dim page = engine.Process(prepare(img)).GetHOCRText(1)
-                Return page
+            Dim engine As New TesseractEngine("", "eng")
+            engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-.")
+            engine.DefaultPageSegMode = Tesseract.PageSegMode.SingleLine
+            Dim page = engine.Process(ResizeImage(img, 1.1)).GetHOCRText(1)
+            Return page
             End Using
         End Function
         Private Function prepare(img As Image) As Image
@@ -779,12 +875,13 @@ Public Class Main
         End Sub
 
         Private Sub btnDebug2_Click(sender As Object, e As EventArgs) Handles btnDebug2.Click
-            UpdateColors(Me)
-        End Sub
+
+    End Sub
 
     Private Sub BGWorker_DoWork(sender As Object, e As DoWorkEventArgs) Handles BGWorker.DoWork
         UpdateList()
     End Sub
+
 End Class
 
 Module Glob
@@ -805,6 +902,8 @@ Module Glob
     Public Messages As Boolean = My.Settings.Messages
     Public NewStyle As Boolean = My.Settings.NewStyle
     Public Debug As Boolean = My.Settings.Debug
+    Public cookie As String = ""
+    Public xcsrf As String = ""
     Public Function check(string1 As String) As Integer
         string1 = string1.Replace("*", "")
         Dim Compare As New List(Of Integer)()
@@ -931,7 +1030,9 @@ Module Glob
 
         Return d(n, m)
     End Function
-    Public Function GetPlat(str As String, Optional getUser As Boolean = False, Optional getMod As Boolean = False) As String
+    Public Function GetPlat(str As String, Optional getUser As Boolean = False, Optional getMod As Boolean = False, Optional getID As Boolean = False) As String
+        Dim partName As String = str
+        partName = partName.Replace(vbLf, "").Replace("*", "")
         str = str.ToLower
         str = str.Replace(" ", "%5F").Replace(vbLf, "").Replace("*", "")
         Dim webClient As New System.Net.WebClient
@@ -966,9 +1067,12 @@ Module Glob
                     End If
                 End If
             Next
-            Clipboard.SetText(user)
+            Clipboard.SetText("/w " & user & " Hi, I would like to buy your " & partName & " for " & low & " Platinum.")
             Return low & vbNewLine & "    User: " & user
 
+        ElseIf getID Then
+            result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str))
+            Return result("payload")("item")("_id")
         Else 'Not Single Pull
 
             result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/statistics"))

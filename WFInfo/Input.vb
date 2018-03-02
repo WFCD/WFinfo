@@ -1,5 +1,7 @@
 ﻿Imports System.Runtime.InteropServices
 Imports System.Text
+Imports System.Net
+Imports System.IO
 Public Class Input
     Declare Function SetForegroundWindow Lib "user32.dll" (ByVal hwnd As Integer) As Integer
     Private InitialStyle As Integer
@@ -236,6 +238,82 @@ Public Class Input
                 Me.Close()
                 tbCommand.Text = ""
 
+            ElseIf command.Split(" ")(0) = "sell" Then
+                Try
+                    If cookie = "" Then
+                        Exit Try
+                    End If
+
+                    Dim getMod As Boolean = False
+                    If command.Split(" ")(1) = "m" Or command.Split(" ")(1) = "mod" Then
+                        getMod = True
+                    End If
+                    command = command.Replace(" p ", " prime ")
+                    command = command.Replace("bp", "blueprint")
+                    command = command.Replace(" m ", " ").Replace(" mod ", " ")
+                    command = command.Replace("sell ", "")
+                    Dim listPrice As String = command.Split(" ")(command.Split(" ").Count - 1)
+                    command = command.Replace(" " + listPrice, "")
+                    tbCommand.Text = command
+
+                    Dim found As Boolean = False
+                    Dim guess As String = ""
+                    For i = 0 To Names.Count - 1
+                        If Names(i).ToLower.Contains(command) Then
+                            found = True
+                            guess = Names(i)
+                        End If
+                    Next
+                    If Not found Then
+                        guess = Names(check(command))
+                    End If
+
+                    Dim ID As String = " "
+                    Dim DisplayName As String = " "
+                    If getMod Then
+                        ID = GetPlat(command, getID:=True)
+                        DisplayName = vbNewLine + StrConv(command, VbStrConv.ProperCase)
+                    Else
+                        ID = GetPlat(Main.KClean(guess), getID:=True)
+                        DisplayName = Main.KClean(guess)
+                    End If
+                    Dim JSON As String = "{""item_id"":""" & ID & """,""order_type"":""sell"",""platinum"":""" & listPrice & """,""quantity"":""1"",""mod_rank"":""0""}"
+
+                    Dim jsonDataBytes = Encoding.UTF8.GetBytes(JSON)
+                    Dim uri As New Uri("https://api.warframe.market/v1/profile/orders")
+                    Dim req As WebRequest = WebRequest.Create(uri)
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11
+                    req.ContentType = "application/json"
+                    req.Method = "POST"
+                    req.ContentLength = jsonDataBytes.Length
+                    req.Headers.Add("cookie", Glob.cookie)
+                    req.Headers.Add("x-csrftoken", Glob.xcsrf)
+                    req.Headers.Add("platform", "pc")
+                    req.Headers.Add("language", "en")
+
+                    Dim stream = req.GetRequestStream()
+                    stream.Write(jsonDataBytes, 0, jsonDataBytes.Length)
+                    stream.Close()
+
+                    Dim response = req.GetResponse().GetResponseStream()
+
+                    Dim reader As New StreamReader(response)
+                    Dim res = reader.ReadToEnd()
+                    reader.Close()
+                    response.Close()
+
+                    qItems.Add(DisplayName & vbNewLine & vbNewLine & "Listed For: " & vbNewLine & listPrice & " Platinum" & vbNewLine)
+
+                    Tray.Display()
+                Catch ex As Exception
+                    Main.addLog(ex.ToString)
+                    Main.lbStatus.ForeColor = Color.Yellow
+                    qItems.Add(vbNewLine & "ERROR" & vbNewLine & vbNewLine & "Check logs for details." & vbNewLine & vbNewLine & vbNewLine & "Format:" & vbNewLine & """sell rhino p chass 1234""")
+                    Tray.Display()
+                End Try
+                Me.Close()
+                tbCommand.Text = ""
+
             Else
                 command = command.Replace(" p ", " prime ")
                 command = command.Replace("bp", "blueprint")
@@ -260,7 +338,7 @@ Public Class Input
                         End If
                     End If
                     If Not guess = "Forma Blueprint" Then
-                        Dim plat As String = GetPlat(Main.KClean(guess), True)
+                        Dim plat As String = GetPlat(Main.KClean(guess), getUser:=True)
                         Dim duck As String
                         If command.Contains("set") Then
                             duck = ""
@@ -345,9 +423,10 @@ Public Class Input
             If Not GetForegroundWindow() = Me.Handle.ToString Then
                 SendKeys.Send(Keys.LMenu)
                 Input.SetForegroundWindow(Me.Handle)
+                Input.SetForegroundWindow(Me.tbCommand.Handle)
             End If
             If Not tbCommand.Focused Then
-                Show()
+                tbCommand.Show()
                 tbCommand.Focus()
             End If
         End If
@@ -368,4 +447,5 @@ Public Class Input
         End If
         Return strTitle
     End Function
+
 End Class
