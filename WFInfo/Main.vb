@@ -25,9 +25,13 @@ Public Class Main
     Dim mouseY As Integer
     Dim enablePPC As Boolean = True
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        If getCookie() Then
-            getXcsrf()
-        End If
+        Try
+            If getCookie() Then
+                getXcsrf()
+            End If
+        Catch ex As Exception
+            addLog(ex.ToString)
+        End Try
         UpdateColors(Me)
         pbHome.Parent = pbSideBar
         pbHome.Location = New Point(0, 8)
@@ -152,13 +156,16 @@ Public Class Main
 
         Dim response = req.GetResponse()
         Dim stream = response.GetResponseStream()
+        Dim found As Boolean = False
         Dim reader As StreamReader = New StreamReader(stream)
         xcsrf = reader.ReadLine()
         Do Until xcsrf.Contains("csrf-token")
             xcsrf = reader.ReadLine()
+            found = True
         Loop
         xcsrf = xcsrf.Substring(xcsrf.IndexOf("##"), 130)
 
+        Return found
     End Function
 
     Private Async Sub tPB_Tick(sender As Object, e As EventArgs) Handles tPB.Tick
@@ -167,7 +174,7 @@ Public Class Main
                 Dim Refresh As Integer = GetAsyncKeyState(HKey1)
                 Refresh = GetAsyncKeyState(HKey2)
                 If Not Input.Visible = True Then
-                    If GetAsyncKeyState(HKey2) Then
+                    If GetAsyncKeyState(HKey2) And &H8000 Then
                         Input.Display()
                     End If
                 End If
@@ -182,11 +189,9 @@ Public Class Main
                                 keyState = 1
                             End If
                         End If
-                    Else
-                        keyState = GetAsyncKeyState(HKey1)
                     End If
                     If scTog = 0 Then
-                        If Not keyState = 0 Then
+                        If GetAsyncKeyState(HKey1) And &H8000 Then
                             scTog = 1
                         End If
                     Else
@@ -231,7 +236,7 @@ Public Class Main
                                     If Not LevDist(tList(i), "Blueprint") < 4 Then
                                         Dim guess As String = Names(check(tList(i)))
                                         unique.Add(guess)
-                                        Else
+                                    Else
                                         Dim img As Image = Crop(CliptoImage, 1, i, players)
                                         If Not img Is Nothing Then
                                             pbDebug.Image = img
@@ -243,7 +248,7 @@ Public Class Main
                                         Dim guess As String = Names(check(GetText(img) + " Blueprint"))
                                         img.Dispose()
                                         unique.Add(guess)
-                                        End If
+                                    End If
                                 Next
                                 qItems.Clear()
                                 Dim HighestPlat As Integer = 0
@@ -882,6 +887,9 @@ Public Class Main
         UpdateList()
     End Sub
 
+    Private Sub tDebug_Tick(sender As Object, e As EventArgs) Handles tDebug.Tick
+
+    End Sub
 End Class
 
 Module Glob
@@ -1058,7 +1066,7 @@ Module Glob
                 Return 0
             End If
             Dim low As Integer = 999999
-            Dim user As String
+            Dim user As String = ""
             For i = 0 To platCheck.Count - 1
                 If (Not userCheck(i).Contains("XB1")) And (Not userCheck(i).Contains("PS4")) Then
                     If platCheck(i) < low Then

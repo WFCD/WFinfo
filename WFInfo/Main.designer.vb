@@ -49,6 +49,7 @@ Partial Class Main
         Me.pbDonate = New System.Windows.Forms.PictureBox()
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
+        Me.tDebug = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1.SuspendLayout()
         CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
@@ -298,6 +299,10 @@ Partial Class Main
         Me.pbSideBar.TabIndex = 18
         Me.pbSideBar.TabStop = False
         '
+        'tDebug
+        '
+        Me.tDebug.Enabled = True
+        '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -354,4 +359,5 @@ Partial Class Main
     Friend WithEvents tUpdate As Timer
     Friend WithEvents tMessages As Timer
     Friend WithEvents btnDebug2 As Button
+    Friend WithEvents tDebug As Timer
 End Class
