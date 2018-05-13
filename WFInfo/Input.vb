@@ -270,23 +270,25 @@ Public Class Input
 
                     Dim ID As String = " "
                     Dim DisplayName As String = " "
+                    Dim JSON As String = ""
                     If getMod Then
                         ID = GetPlat(command, getID:=True)
                         DisplayName = vbNewLine + StrConv(command, VbStrConv.ProperCase)
+                        JSON = "{""item_id"":""" & ID & """,""order_type"":""sell"",""platinum"":""" & listPrice & """,""quantity"":""1"",""mod_rank"":""0""}"
                     Else
                         ID = GetPlat(Main.KClean(guess), getID:=True)
                         DisplayName = Main.KClean(guess)
+                        JSON = "{""item_id"":""" & ID & """,""order_type"":""sell"",""platinum"":""" & listPrice & """,""quantity"":""1""}"
                     End If
-                    Dim JSON As String = "{""item_id"":""" & ID & """,""order_type"":""sell"",""platinum"":""" & listPrice & """,""quantity"":""1"",""mod_rank"":""0""}"
 
                     Dim jsonDataBytes = Encoding.UTF8.GetBytes(JSON)
                     Dim uri As New Uri("https://api.warframe.market/v1/profile/orders")
                     Dim req As WebRequest = WebRequest.Create(uri)
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
                     req.ContentType = "application/json"
                     req.Method = "POST"
                     req.ContentLength = jsonDataBytes.Length
-                    req.Headers.Add("cookie", Glob.cookie)
+                    req.Headers.Add("Cookie", Glob.cookie)
                     req.Headers.Add("x-csrftoken", Glob.xcsrf)
                     req.Headers.Add("platform", "pc")
                     req.Headers.Add("language", "en")

@@ -205,12 +205,12 @@ Namespace My
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
-        Public Property Commands() As Boolean
+        Public Property PassiveChecks() As Boolean
             Get
-                Return CType(Me("Commands"),Boolean)
+                Return CType(Me("PassiveChecks"),Boolean)
             End Get
             Set
-                Me("Commands") = value
+                Me("PassiveChecks") = value
             End Set
         End Property
         
@@ -272,7 +272,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("5.0.0")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("5.0.6")>  _
         Public Property Version() As String
             Get
                 Return CType(Me("Version"),String)

@@ -2,6 +2,8 @@
 Imports System.Net
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
+Imports System.Management
+Imports System.Security.Cryptography
 Imports System.ComponentModel
 Imports System.Text.RegularExpressions
 Imports System.Drawing.Imaging
@@ -25,13 +27,6 @@ Public Class Main
     Dim mouseY As Integer
     Dim enablePPC As Boolean = True
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Try
-            If getCookie() Then
-                getXcsrf()
-            End If
-        Catch ex As Exception
-            addLog(ex.ToString)
-        End Try
         UpdateColors(Me)
         pbHome.Parent = pbSideBar
         pbHome.Location = New Point(0, 8)
@@ -45,13 +40,19 @@ Public Class Main
         Me.MaximizeBox = False
         lbStatus.ForeColor = Color.Yellow
         Me.Refresh()
-        If (Not System.IO.Directory.Exists(appData + "\WFInfo")) Then
-            System.IO.Directory.CreateDirectory(appData + "\WFInfo")
-        End If
+        Me.Activate()
+        Me.Refresh()
         If (Not System.IO.Directory.Exists(appData + "\WFInfo\tests")) Then
             System.IO.Directory.CreateDirectory(appData + "\WFInfo\tests")
         End If
         count = GetMax(appData + "\WFInfo\tests\") + 1
+        Try
+            If getCookie() Then
+                getXcsrf()
+            End If
+        Catch ex As Exception
+            addLog(ex.ToString)
+        End Try
         If Fullscreen Then
             If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
                 My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
@@ -62,9 +63,6 @@ Public Class Main
             CliptoImage = Clipboard.GetImage()
         End If
 
-        OnlineStatus.Navigate("https://sites.google.com/site/wfinfoapp/online")
-
-
         'Mechanism to make sure I don't kill warframe.market
         Dim enablePassives As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/enablepassivechecks")
         enablePassives = enablePassives.Remove(0, enablePassives.IndexOf("enabled = ") + 10)
@@ -73,7 +71,7 @@ Public Class Main
         If Not enablePassives = "true" Then
             enablePPC = False
         End If
-
+        UpdateStatus()
     End Sub
 
     Public Function getCookie()
@@ -143,7 +141,7 @@ Public Class Main
 
     Private Function getXcsrf()
         Dim uri As New Uri("https://warframe.market")
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
         Dim req As HttpWebRequest = HttpWebRequest.Create(uri)
         req.ContentType = "application/json"
         req.Method = "GET"
@@ -419,8 +417,12 @@ Public Class Main
     End Function
 
     Public Sub addLog(txt As String)
+        appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
         Dim dateTime As String = "[" + System.DateTime.Now + "]"
         Dim logStore As String = ""
+        If Not My.Computer.FileSystem.DirectoryExists(appData + "\WFInfo") Then
+            Directory.CreateDirectory(appData + "\WFInfo")
+        End If
         If My.Computer.FileSystem.FileExists(appData + "\WFInfo\WFInfo.log") Then
             logStore = My.Computer.FileSystem.ReadAllText(appData + "\WFInfo\WFInfo.log")
         Else
@@ -697,13 +699,13 @@ Public Class Main
         End Function
 
 
-        Private Sub tPPrice_Tick(sender As Object, e As EventArgs) Handles tPPrice.Tick
-            If Not bgPPrice.IsBusy And enablePPC Then
-                bgPPrice.RunWorkerAsync()
-            End If
-        End Sub
+    Private Sub tPPrice_Tick(sender As Object, e As EventArgs) Handles tPPrice.Tick
+        If Not bgPPrice.IsBusy And enablePPC And PassiveChecks Then
+            bgPPrice.RunWorkerAsync()
+        End If
+    End Sub
 
-        Private Sub bgPPrice_DoWork(sender As Object, e As DoWorkEventArgs) Handles bgPPrice.DoWork
+    Private Sub bgPPrice_DoWork(sender As Object, e As DoWorkEventArgs) Handles bgPPrice.DoWork
             Try
                 Dim found As Boolean = False
                 Dim price As Integer = 0
@@ -839,11 +841,32 @@ Public Class Main
         Tray.Display()
     End Sub
 
-        Private Sub tOnline_Tick(sender As Object, e As EventArgs) Handles tOnline.Tick
-            OnlineStatus.Navigate("https://sites.google.com/site/wfinfoapp/online")
-        End Sub
+    Private Sub tOnline_Tick(sender As Object, e As EventArgs) Handles tOnline.Tick
+        UpdateStatus()
+    End Sub
 
-        Public Sub CheckUpdates()
+    Private Sub UpdateStatus()
+        Dim uri As New Uri("http://www.google-analytics.com/collect")
+        Dim req As WebRequest = WebRequest.Create(uri)
+        Dim pData As String = "v=1&tid=UA-97839771-1&cid=" & HID() & "&t=pageview&dp=Online"
+        Dim pDataBytes = System.Text.Encoding.UTF8.GetBytes(pData)
+        req.ContentType = "application/json"
+        req.Method = "POST"
+        req.ContentLength = pDataBytes.Length
+
+        Dim stream = req.GetRequestStream()
+        stream.Write(pDataBytes, 0, pDataBytes.Length)
+        stream.Close()
+
+        Dim response = req.GetResponse().GetResponseStream()
+
+        Dim reader As New StreamReader(response)
+        Dim res = reader.ReadToEnd()
+        reader.Close()
+        response.Close()
+    End Sub
+
+    Public Sub CheckUpdates()
             Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
             curVersion = curVersion.Remove(0, curVersion.IndexOf("version ") + 8)
             curVersion = curVersion.Remove(5, curVersion.Length - 5)
@@ -863,31 +886,81 @@ Public Class Main
             tUpdate.Stop()
         End Sub
 
-        Private Sub tMessages_Tick(sender As Object, e As EventArgs) Handles tMessages.Tick
-            If Messages Then
-                Dim curMessage As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/message")
+    Private Sub tMessages_Tick(sender As Object, e As EventArgs) Handles tMessages.Tick
+        If Messages Then
+            Dim curMessage As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/message")
             curMessage = curMessage.Remove(0, curMessage.IndexOf("content=""(message)") + 18)
             curMessage = curMessage.Remove(curMessage.IndexOf("(/message)"), curMessage.Length - curMessage.IndexOf("(/message)"))
 
 
-                If Not My.Settings.LastMessage = curMessage Then
-                    My.Settings.LastMessage = curMessage
-                    curMessage = curMessage.Replace("vbNewLine", vbNewLine)
-                    qItems.Add(vbNewLine & curMessage)
-                    Tray.Display()
-                End If
+            If Not My.Settings.LastMessage = curMessage Then
+                My.Settings.LastMessage = curMessage
+                curMessage = curMessage.Replace("vbNewLine", vbNewLine)
+                qItems.Add(vbNewLine & curMessage)
+                Tray.Display()
             End If
-        End Sub
-
-        Private Sub btnDebug2_Click(sender As Object, e As EventArgs) Handles btnDebug2.Click
-
+        End If
     End Sub
+
+    Private Sub btnDebug2_Click(sender As Object, e As EventArgs) Handles btnDebug2.Click
+        Dim uri As New Uri("http://www.google-analytics.com/collect")
+        Dim req As WebRequest = WebRequest.Create(uri)
+        Dim pData As String = "v=1&tid=UA-97839771-1&cid=" & HID() & "&t=pageview&dp=Online"
+        Dim pDataBytes = System.Text.Encoding.UTF8.GetBytes(pData)
+        req.ContentType = "application/json"
+        req.Method = "POST"
+        req.ContentLength = pDataBytes.Length
+
+        Dim stream = req.GetRequestStream()
+        stream.Write(pDataBytes, 0, pDataBytes.Length)
+        stream.Close()
+
+        Dim response = req.GetResponse().GetResponseStream()
+
+        Dim reader As New StreamReader(response)
+        Dim res = reader.ReadToEnd()
+        reader.Close()
+        response.Close()
+    End Sub
+
+    Private Function HID() As String
+        ' Get the Windows Management Instrumentation object.
+        Dim wmi As Object = GetObject("WinMgmts:")
+
+        ' Get the "base boards" (mother boards).
+        Dim serial_numbers As String = ""
+        Dim mother_boards As Object =
+        wmi.InstancesOf("Win32_BaseBoard")
+        For Each board As Object In mother_boards
+            serial_numbers &= ", " & board.SerialNumber
+        Next board
+        If serial_numbers.Length > 0 Then serial_numbers =
+        serial_numbers.Substring(2)
+        serial_numbers = GenSHA(serial_numbers)
+
+        Return serial_numbers
+    End Function
+
+    Public Shared Function GenSHA(ByVal inputString) As String
+        Dim Sha256 As SHA256 = SHA256Managed.Create()
+        Dim bytes As Byte() = System.Text.Encoding.UTF8.GetBytes(inputString)
+        Dim hash As Byte() = Sha256.ComputeHash(bytes)
+        Dim stringBuilder As New System.Text.StringBuilder()
+        For i As Integer = 0 To hash.Length - 1
+            stringBuilder.Append(hash(i).ToString("X2"))
+        Next
+        Return stringBuilder.ToString()
+    End Function
 
     Private Sub BGWorker_DoWork(sender As Object, e As DoWorkEventArgs) Handles BGWorker.DoWork
         UpdateList()
     End Sub
 
     Private Sub tDebug_Tick(sender As Object, e As EventArgs) Handles tDebug.Tick
+
+    End Sub
+
+    Private Sub Panel1_Paint(sender As Object, e As PaintEventArgs) Handles Panel1.Paint
 
     End Sub
 End Class
@@ -906,7 +979,7 @@ Module Glob
     Public key1Tog As Boolean = False
     Public key2Tog As Boolean = False
     Public Animate As Boolean = My.Settings.Animate
-    Public Commands As Boolean = My.Settings.Commands
+    Public PassiveChecks As Boolean = My.Settings.PassiveChecks
     Public Messages As Boolean = My.Settings.Messages
     Public NewStyle As Boolean = My.Settings.NewStyle
     Public Debug As Boolean = My.Settings.Debug
@@ -1046,7 +1119,7 @@ Module Glob
         Dim webClient As New System.Net.WebClient
         webClient.Headers.Add("platform", "pc")
         webClient.Headers.Add("language", "en")
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
         Dim result As JObject
 
         If getUser Then
@@ -1080,7 +1153,7 @@ Module Glob
 
         ElseIf getID Then
             result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str))
-            Return result("payload")("item")("_id")
+            Return result("payload")("item")("id")
         Else 'Not Single Pull
 
             result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/statistics"))

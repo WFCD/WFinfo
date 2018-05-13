@@ -17,7 +17,7 @@ Partial Class Settings
         Me.btnHkey1 = New System.Windows.Forms.Button()
         Me.lbKey = New System.Windows.Forms.Label()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.cbCommands = New System.Windows.Forms.CheckBox()
+        Me.cbPassiveChecks = New System.Windows.Forms.CheckBox()
         Me.cbFullscreen = New System.Windows.Forms.CheckBox()
         Me.cbAnimations = New System.Windows.Forms.CheckBox()
         Me.Panel1 = New System.Windows.Forms.Panel()
@@ -79,20 +79,20 @@ Partial Class Settings
         Me.Label1.TabIndex = 16
         Me.Label1.Text = "Command Key"
         '
-        'cbCommands
+        'cbPassiveChecks
         '
-        Me.cbCommands.AutoSize = True
-        Me.cbCommands.BackColor = System.Drawing.Color.Transparent
-        Me.cbCommands.Checked = True
-        Me.cbCommands.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.cbCommands.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.cbCommands.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbCommands.Location = New System.Drawing.Point(11, 22)
-        Me.cbCommands.Name = "cbCommands"
-        Me.cbCommands.Size = New System.Drawing.Size(129, 17)
-        Me.cbCommands.TabIndex = 17
-        Me.cbCommands.Text = "Enable Commands"
-        Me.cbCommands.UseVisualStyleBackColor = False
+        Me.cbPassiveChecks.AutoSize = True
+        Me.cbPassiveChecks.BackColor = System.Drawing.Color.Transparent
+        Me.cbPassiveChecks.Checked = True
+        Me.cbPassiveChecks.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.cbPassiveChecks.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.cbPassiveChecks.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.cbPassiveChecks.Location = New System.Drawing.Point(11, 22)
+        Me.cbPassiveChecks.Name = "cbPassiveChecks"
+        Me.cbPassiveChecks.Size = New System.Drawing.Size(112, 17)
+        Me.cbPassiveChecks.TabIndex = 17
+        Me.cbPassiveChecks.Text = "Passive Checks"
+        Me.cbPassiveChecks.UseVisualStyleBackColor = False
         '
         'cbFullscreen
         '
@@ -202,7 +202,7 @@ Partial Class Settings
         '
         Me.Panel2.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel2.Controls.Add(Me.cbCommands)
+        Me.Panel2.Controls.Add(Me.cbPassiveChecks)
         Me.Panel2.Controls.Add(Me.cbAnimations)
         Me.Panel2.Controls.Add(Me.cbFullscreen)
         Me.Panel2.Controls.Add(Me.cbMessages)
@@ -320,7 +320,7 @@ Partial Class Settings
     Friend WithEvents btnHkey1 As Button
     Friend WithEvents lbKey As Label
     Friend WithEvents Label1 As Label
-    Friend WithEvents cbCommands As CheckBox
+    Friend WithEvents cbPassiveChecks As CheckBox
     Friend WithEvents cbFullscreen As CheckBox
     Friend WithEvents cbAnimations As CheckBox
     Friend WithEvents Panel1 As Panel

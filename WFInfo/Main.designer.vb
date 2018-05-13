@@ -32,7 +32,6 @@ Partial Class Main
         Me.bgPPrice = New System.ComponentModel.BackgroundWorker()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.btnDebug2 = New System.Windows.Forms.Button()
-        Me.OnlineStatus = New System.Windows.Forms.WebBrowser()
         Me.btnDebug1 = New System.Windows.Forms.Button()
         Me.lbPPM = New System.Windows.Forms.Label()
         Me.pbDebug = New System.Windows.Forms.PictureBox()
@@ -104,7 +103,6 @@ Partial Class Main
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.Panel1.Controls.Add(Me.btnDebug2)
-        Me.Panel1.Controls.Add(Me.OnlineStatus)
         Me.Panel1.Controls.Add(Me.btnDebug1)
         Me.Panel1.Controls.Add(Me.lbPPM)
         Me.Panel1.Controls.Add(Me.pbDebug)
@@ -124,16 +122,6 @@ Partial Class Main
         Me.btnDebug2.Text = "D2"
         Me.btnDebug2.UseVisualStyleBackColor = True
         Me.btnDebug2.Visible = False
-        '
-        'OnlineStatus
-        '
-        Me.OnlineStatus.Location = New System.Drawing.Point(44, 78)
-        Me.OnlineStatus.MinimumSize = New System.Drawing.Size(20, 20)
-        Me.OnlineStatus.Name = "OnlineStatus"
-        Me.OnlineStatus.Size = New System.Drawing.Size(20, 20)
-        Me.OnlineStatus.TabIndex = 9
-        Me.OnlineStatus.Url = New System.Uri("https://sites.google.com/site/wfinfoapp/online", System.UriKind.Absolute)
-        Me.OnlineStatus.Visible = False
         '
         'btnDebug1
         '
@@ -245,7 +233,7 @@ Partial Class Main
         'tOnline
         '
         Me.tOnline.Enabled = True
-        Me.tOnline.Interval = 300000
+        Me.tOnline.Interval = 330000
         '
         'tUpdate
         '
@@ -308,7 +296,7 @@ Partial Class Main
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(334, 127)
+        Me.ClientSize = New System.Drawing.Size(334, 126)
         Me.Controls.Add(Me.pbHome)
         Me.Controls.Add(Me.pbDonate)
         Me.Controls.Add(Me.pbSettings)
@@ -354,7 +342,6 @@ Partial Class Main
     Friend WithEvents lbPPM As Label
     Friend WithEvents btnDebug1 As Button
     Friend WithEvents Label1 As Label
-    Friend WithEvents OnlineStatus As WebBrowser
     Friend WithEvents tOnline As Timer
     Friend WithEvents tUpdate As Timer
     Friend WithEvents tMessages As Timer
