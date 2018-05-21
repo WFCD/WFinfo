@@ -868,11 +868,11 @@ Public Class Main
 
     Public Sub CheckUpdates()
             Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
-            curVersion = curVersion.Remove(0, curVersion.IndexOf("version ") + 8)
-            curVersion = curVersion.Remove(5, curVersion.Length - 5)
+        curVersion = curVersion.Remove(0, curVersion.IndexOf("text-align: center") + 29)
+        curVersion = curVersion.Substring(0, curVersion.IndexOf("<"))
 
 
-            If Not My.Settings.Version = curVersion Then
+        If Not My.Settings.Version = curVersion Then
                 UpdateWindow.Display(curVersion)
             End If
 
