@@ -27,51 +27,56 @@ Public Class Main
     Dim mouseY As Integer
     Dim enablePPC As Boolean = True
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        UpdateColors(Me)
-        pbHome.Parent = pbSideBar
-        pbHome.Location = New Point(0, 8)
-        pbDonate.Parent = pbSideBar
-        pbDonate.Location = New Point(0, 38)
-        pbSettings.Parent = pbSideBar
-        pbSettings.Location = New Point(0, 65)
-        lbVersion.Text = "v" + My.Settings.Version
-        Me.Location = New Point(My.Settings.StartX, My.Settings.StartY)
-        Fullscreen = My.Settings.Fullscreen
-        Me.MaximizeBox = False
-        lbStatus.ForeColor = Color.Yellow
-        Me.Refresh()
-        Me.Activate()
-        Me.Refresh()
-        If (Not System.IO.Directory.Exists(appData + "\WFInfo\tests")) Then
-            System.IO.Directory.CreateDirectory(appData + "\WFInfo\tests")
-        End If
-        count = GetMax(appData + "\WFInfo\tests\") + 1
         Try
-            If getCookie() Then
-                getXcsrf()
+            UpdateColors(Me)
+            pbHome.Parent = pbSideBar
+            pbHome.Location = New Point(0, 8)
+            pbDonate.Parent = pbSideBar
+            pbDonate.Location = New Point(0, 38)
+            pbSettings.Parent = pbSideBar
+            pbSettings.Location = New Point(0, 65)
+            lbVersion.Text = "v" + My.Settings.Version
+            Me.Location = New Point(My.Settings.StartX, My.Settings.StartY)
+            Fullscreen = My.Settings.Fullscreen
+            Me.MaximizeBox = False
+            lbStatus.ForeColor = Color.Yellow
+            Me.Refresh()
+            Me.Activate()
+            Me.Refresh()
+            If (Not System.IO.Directory.Exists(appData + "\WFInfo\tests")) Then
+                System.IO.Directory.CreateDirectory(appData + "\WFInfo\tests")
             End If
+            count = GetMax(appData + "\WFInfo\tests\") + 1
+            Try
+                If getCookie() Then
+                    getXcsrf()
+                End If
+            Catch ex As Exception
+                addLog(ex.ToString)
+            End Try
+            If Fullscreen Then
+                If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
+                    My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
+                End If
+            End If
+            If Clipboard.ContainsImage() Then
+                Clipboard.GetImage()
+                CliptoImage = Clipboard.GetImage()
+            End If
+
+            'Mechanism to make sure I don't kill warframe.market
+            Dim enablePassives As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/enablepassivechecks")
+            enablePassives = enablePassives.Remove(0, enablePassives.IndexOf("enabled = ") + 10)
+            enablePassives = enablePassives.Remove(enablePassives.IndexOf(" "), enablePassives.Length - enablePassives.IndexOf(" "))
+
+            If Not enablePassives = "true" Then
+                enablePPC = False
+            End If
+            UpdateStatus()
         Catch ex As Exception
             addLog(ex.ToString)
+
         End Try
-        If Fullscreen Then
-            If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
-                My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
-            End If
-        End If
-        If Clipboard.ContainsImage() Then
-            Clipboard.GetImage()
-            CliptoImage = Clipboard.GetImage()
-        End If
-
-        'Mechanism to make sure I don't kill warframe.market
-        Dim enablePassives As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/enablepassivechecks")
-        enablePassives = enablePassives.Remove(0, enablePassives.IndexOf("enabled = ") + 10)
-        enablePassives = enablePassives.Remove(enablePassives.IndexOf(" "), enablePassives.Length - enablePassives.IndexOf(" "))
-
-        If Not enablePassives = "true" Then
-            enablePPC = False
-        End If
-        UpdateStatus()
     End Sub
 
     Public Function getCookie()
@@ -512,52 +517,53 @@ Public Class Main
             Equipment = My.Settings.Equipment ' Load equipment string
 
             lbStatus.ForeColor = Color.Yellow
-                Dim duckString As String = ""
-                Dim endpoint As String = New StreamReader(WebRequest.Create("http://warframe.wikia.com/wiki/Ducats/Prices/All").GetResponse().GetResponseStream()).ReadToEnd()
-                Dim str1 As String = endpoint.Substring(endpoint.IndexOf("> Ducat Value"))
-                Dim str2 As String = str1.Substring(0, str1.IndexOf("</div>"))
-                Dim str3 As String = str2.Substring(str2.IndexOf("Acquisition"))
-                Dim strArray As String() = str3.Split(New String(0) {"Acquisition"}, StringSplitOptions.None)
-                Dim index As Integer = 0
-                While index < strArray.Length
-                    Dim current As String = strArray(index)
-                    If current.Contains("</a>") Then
-                        Dim name As String = current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).Substring(0, current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).IndexOf("<"))
-                        Dim ducats As String = current.Substring(current.IndexOf("sortkey") + 9, current.IndexOf("</span>") - current.IndexOf("sortkey") - 9)
-                        Dim Relic = GetRelic(current, "<td>", ">").ToString().Replace("<br />", vbCrLf)
-                        Dim vBool As Boolean = False
-                        Dim vStr As String = ""
-                        If Relic.Contains("Prime Vault") Then
-                            vBool = True
-                            vStr = "*"
-                        End If
-                        If Not name.Contains("Carrier") And Not name.Contains("Wyrm") And Not name.Contains("Helios") Then
-                            If name.Contains("Systems") Or name.Contains("Chassis") Or name.Contains("Neuroptics") Then
-                                name += " Blueprint"
-                            End If
-                        End If
-                        duckString += vStr & name & "," & ducats & "," & vBool & vbNewLine
+            Dim duckString As String = ""
+            Dim endpoint As String = New StreamReader(WebRequest.Create("http://warframe.wikia.com/wiki/Ducats/Prices/All").GetResponse().GetResponseStream()).ReadToEnd()
+            Dim str1 As String = endpoint.Substring(endpoint.IndexOf("> Ducat Value"))
+            Dim str2 As String = str1.Substring(0, str1.IndexOf("</div>"))
+            Dim str3 As String = str2.Substring(str2.IndexOf("Acquisition"))
+            Dim strArray As String() = str3.Split(New String(0) {"Acquisition"}, StringSplitOptions.None)
+            Dim index As Integer = 0
+            While index < strArray.Length
+                Dim current As String = strArray(index)
+                If current.Contains("</a>") Then
+                    Dim name As String = current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).Substring(0, current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).IndexOf("<"))
+                    Dim ducats As String = current.Substring(current.IndexOf("sortkey") + 9)
+                    ducats = ducats.Substring(0, ducats.IndexOf("<"))
+                    Dim vStr As String = ""
+                    Dim vBool As Boolean = False
+                    If current.Contains("Prime Vault") Then
+                        vBool = True
+                        vStr = "*"
                     End If
-                    index += 1
-                End While
-                duckString = duckString.Remove(duckString.Length - 2, 1)
-                My.Settings.DuckList = duckString
-                My.Settings.LastUpdate = Date.Today
+                    If Not name.Contains("Carrier") And Not name.Contains("Wyrm") And Not name.Contains("Helios") Then
+                        If name.Contains("Systems") Or name.Contains("Chassis") Or name.Contains("Neuroptics") Then
+                            name += " Blueprint"
+                        End If
+                    End If
+                    duckString += vStr & name & "," & ducats & "," & vBool & vbNewLine
+                End If
+                index += 1
+            End While
+            duckString = duckString.Remove(duckString.Length - 2, 1)
+            My.Settings.DuckList = duckString
+            My.Settings.LastUpdate = Date.Today
             My.Settings.Save()
 
-        Catch ex As Exception
-        End Try
-        For Each str As String In My.Settings.DuckList.Split(vbNewLine)
-            str.Replace(vbNewLine, "")
-            Names.Add(str.Split(",")(0))
-            Ducks.Add(str.Split(",")(1))
-            Vaulted.Add(str.Split(",")(2))
-        Next
-        Names.Add("Forma Blueprint")
-        Ducks.Add("0")
+            For Each str As String In My.Settings.DuckList.Split(vbNewLine)
+                str.Replace(vbNewLine, "")
+                Names.Add(str.Split(",")(0))
+                Ducks.Add(str.Split(",")(1))
+                Vaulted.Add(str.Split(",")(2))
+            Next
+            Names.Add("Forma Blueprint")
+            Ducks.Add("0")
 
-        lbStatus.ForeColor = Color.Lime
-        tPPrice.Start()
+            lbStatus.ForeColor = Color.Lime
+            tPPrice.Start()
+        Catch ex As Exception
+            addLog(ex.ToString)
+        End Try
     End Sub
 
     Private Sub Main_Shown(sender As Object, e As EventArgs) Handles Me.Shown
@@ -819,17 +825,11 @@ Public Class Main
             End If
         End Sub
 
-        Private Sub lbVersion_MouseUp(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseUp
-            drag = False
-        End Sub
+    Private Sub lbVersion_MouseUp(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseUp
+        drag = False
+    End Sub
 
-        Public Function GetRelic(ByVal FullString As String, ByVal StartText As String, ByVal EndText As String)
-            Dim startIndex As Integer = FullString.IndexOf(StartText) + StartText.Length
-            Dim endIndex As Integer = FullString.IndexOf(EndText, startIndex)
-            Return FullString.Substring(startIndex, endIndex - startIndex)
-        End Function
-
-        Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnDebug1.Click
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnDebug1.Click
         Dim curMessage As String = InputBox("Message String")
         curMessage = curMessage.Remove(0, curMessage.IndexOf("(message)") + 9)
             curMessage = curMessage.Remove(curMessage.IndexOf("(/message)"), curMessage.Length - curMessage.IndexOf("(/message)"))
