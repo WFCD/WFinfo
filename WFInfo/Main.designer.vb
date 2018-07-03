@@ -93,7 +93,7 @@ Partial Class Main
         '
         'tPPrice
         '
-        Me.tPPrice.Interval = 300
+        Me.tPPrice.Interval = 3000
         '
         'bgPPrice
         '

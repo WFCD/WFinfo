@@ -129,6 +129,12 @@ Public Class Input
                 tbCommand.Text = ""
                 Exit Try
             End If
+            If command.Contains("enable alert") Then
+                Me.Close()
+                tbCommand.Text = ""
+                Main.devCheck = True
+                Exit Try
+            End If
             If command.Split(" ")(0) = "mod" Or command.Split(" ")(0) = "m" Then
                 Dim modStr As String = StrConv(nth(command, 0), VbStrConv.ProperCase)
                 qItems.Add(vbNewLine & modStr & vbNewLine & "    Plat: " & GetPlat(modStr, True, True) & vbNewLine)
@@ -423,19 +429,12 @@ Public Class Input
     Private Sub tActivate_Tick(sender As Object, e As EventArgs) Handles tActivate.Tick
         If Me.Visible Then
             If Not GetForegroundWindow() = Me.Handle.ToString Then
-                SendKeys.Send(Keys.LMenu)
-                Input.SetForegroundWindow(Me.Handle)
-                Input.SetForegroundWindow(Me.tbCommand.Handle)
+                'SendKeys.Send(Keys.LMenu)
+                Me.Activate()
             End If
-            If Not tbCommand.Focused Then
-                tbCommand.Show()
-                tbCommand.Focus()
-            End If
+            tActivate.Enabled = False
+            tActivate.Stop()
         End If
-    End Sub
-
-    Private Sub Input_Activated(sender As Object, e As EventArgs) Handles Me.Activated
-        tbCommand.Select()
     End Sub
 
     Private Function ActiveWindowName() As String

@@ -22,6 +22,7 @@ Public Class Main
     Dim HKeyTog As Integer = 0       ' Toggle Var for setting the activation key
     Dim pbWait As Integer = 0        ' Variable to set to make the timer wait
     Dim lbTemp As String             ' Stores the keychar
+    Public devCheck As Boolean = False  ' Price alert (dev only)
     Dim drag As Boolean = False
     Dim mouseX As Integer
     Dim mouseY As Integer
@@ -67,7 +68,7 @@ Public Class Main
             'Mechanism to make sure I don't kill warframe.market
             Dim enablePassives As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/enablepassivechecks")
             enablePassives = enablePassives.Remove(0, enablePassives.IndexOf("enabled = ") + 10)
-            enablePassives = enablePassives.Remove(enablePassives.IndexOf(" "), enablePassives.Length - enablePassives.IndexOf(" "))
+            enablePassives = enablePassives.Remove(enablePassives.IndexOf(""""), enablePassives.Length - enablePassives.IndexOf(""""))
 
             If Not enablePassives = "true" Then
                 enablePPC = False
@@ -528,7 +529,7 @@ Public Class Main
                 Dim current As String = strArray(index)
                 If current.Contains("</a>") Then
                     Dim name As String = current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).Substring(0, current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).IndexOf("<"))
-                    Dim ducats As String = current.Substring(current.IndexOf("sortkey") + 9)
+                    Dim ducats As String = current.Substring(current.IndexOf("<b>") + 3)
                     ducats = ducats.Substring(0, ducats.IndexOf("<"))
                     Dim vStr As String = ""
                     Dim vBool As Boolean = False
@@ -569,6 +570,8 @@ Public Class Main
     Private Sub Main_Shown(sender As Object, e As EventArgs) Handles Me.Shown
         Me.Refresh()
         BGWorker.RunWorkerAsync()
+        tPPrice.Enabled = True
+        tPPrice.Start()
     End Sub
     Private Function GetPlayers(img As Image) As Integer
         Using img
@@ -728,12 +731,23 @@ Public Class Main
                 End If
 
 
-                If pCount < Names.Count - 2 Then
-                    pCount += 1
-                Else
-                    pCount = 0
+            If pCount < Names.Count - 2 Then
+                pCount += 1
+            Else
+                pCount = 0
+            End If
+
+            'add to bgPPrice_DoWork, comment out username copy to clip
+            If devCheck Then
+                Dim difference = GetPlat(KClean(Names(pCount)), getDif:=True)
+                If difference >= 20 Then
+                    Tray.Clear()
+                    qItems.Add("-ALERT-" & vbNewLine & KClean(Names(pCount)) & vbNewLine & "Difference:  " & difference)
+                    Tray.ShowDialog()
+                    Tray.Dispose()
                 End If
-            Catch ex As Exception
+            End If
+        Catch ex As Exception
                 addLog(ex.ToString)
             End Try
         End Sub
@@ -1111,7 +1125,7 @@ Module Glob
 
         Return d(n, m)
     End Function
-    Public Function GetPlat(str As String, Optional getUser As Boolean = False, Optional getMod As Boolean = False, Optional getID As Boolean = False) As String
+    Public Function GetPlat(str As String, Optional getUser As Boolean = False, Optional getMod As Boolean = False, Optional getID As Boolean = False, Optional getDif As Boolean = False) As String
         Dim partName As String = str
         partName = partName.Replace(vbLf, "").Replace("*", "")
         str = str.ToLower
@@ -1121,14 +1135,56 @@ Module Glob
         webClient.Headers.Add("language", "en")
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
         Dim result As JObject
+        result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/orders"))
+        Dim platCheck As New List(Of Integer)()
+        Dim userCheck As New List(Of String)()
+        For i = 0 To result("payload")("orders").Count - 1
+            If result("payload")("orders")(i)("user")("status") = "ingame" Then
+                If result("payload")("orders")(i)("order_type") = "sell" Then
+                    platCheck.Add(result("payload")("orders")(i)("platinum"))
+                    userCheck.Add(result("payload")("orders")(i)("user")("ingame_name"))
+                End If
+            End If
+        Next
+
+        If platCheck.Count = 0 Then
+            Return 0
+        End If
+        Dim low As Integer = 999999
+        Dim user As String = ""
+        Dim minUsers(4) As String
+        Dim minPrices(4) As Integer
+        Dim total As Integer = 0
+        For x = 0 To 4
+            low = 999999
+            For i = 0 To platCheck.Count - 1
+                If (Not userCheck(i).Contains("XB1")) And (Not userCheck(i).Contains("PS4")) And (Not minUsers.Contains(userCheck(i))) Then
+                    If platCheck(i) < low Then
+                        low = platCheck(i)
+                        user = userCheck(i)
+                    End If
+                End If
+            Next
+            minUsers(x) = user
+            minPrices(x) = low
+            total += low
+        Next
+        user = minUsers(0)
+        low = total / 5
 
         If getUser Then
-            result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/orders"))
-            Dim platCheck As New List(Of Integer)()
-            Dim userCheck As New List(Of String)()
+            Clipboard.SetText("/w " & user & " Hi, I would like to buy your " & partName & " for " & low & " Platinum.")
+            Return low & vbNewLine & "    User: " & user
+
+        ElseIf getID Then
+            result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str))
+            Return result("payload")("item")("id")
+        ElseIf getDif Then
+            platCheck.Clear()
+            userCheck.Clear()
             For i = 0 To result("payload")("orders").Count - 1
                 If result("payload")("orders")(i)("user")("status") = "ingame" Then
-                    If result("payload")("orders")(i)("order_type") = "sell" Then
+                    If (result("payload")("orders")(i)("order_type") = "sell") And (result("payload")("orders")(i)("user")("region") = "en") Then
                         platCheck.Add(result("payload")("orders")(i)("platinum"))
                         userCheck.Add(result("payload")("orders")(i)("user")("ingame_name"))
                     End If
@@ -1138,49 +1194,23 @@ Module Glob
             If platCheck.Count = 0 Then
                 Return 0
             End If
-            Dim low As Integer = 999999
-            Dim user As String = ""
-            For i = 0 To platCheck.Count - 1
-                If (Not userCheck(i).Contains("XB1")) And (Not userCheck(i).Contains("PS4")) Then
-                    If platCheck(i) < low Then
-                        low = platCheck(i)
-                        user = userCheck(i)
+
+            Dim firstLow As String = ""
+            For x = 0 To 1
+                low = 999999
+                For i = 0 To platCheck.Count - 1
+                    If (Not userCheck(i).Contains("XB1")) And (Not userCheck(i).Contains("PS4")) And (Not userCheck(i) = firstLow) Then
+                        If platCheck(i) < low Then
+                            low = platCheck(i)
+                            user = userCheck(i)
+                        End If
                     End If
-                End If
+                Next
+                firstLow = user
             Next
-            Clipboard.SetText("/w " & user & " Hi, I would like to buy your " & partName & " for " & low & " Platinum.")
-            Return low & vbNewLine & "    User: " & user
-
-        ElseIf getID Then
-            result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str))
-            Return result("payload")("item")("id")
+            Dim difference As Integer = Math.Abs(minPrices(0) - low)
+            Return difference
         Else 'Not Single Pull
-
-            result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/statistics"))
-            Dim minList As New List(Of Integer)()
-            Dim x As Integer = 9
-            If x > result("payload")("statistics")("48hours").Count - 1 Then
-                x = result("payload")("statistics")("48hours").Count - 1
-            End If
-            For i = 0 To x
-                minList.Add(CInt(result("payload")("statistics")("48hours")(i)("max_price")))
-            Next
-
-            Dim total As Integer = 0
-            For i = 0 To minList.Count - 1
-                total += minList(i)
-            Next
-
-            Dim avg As Single = total / minList.Count
-
-            Dim difference As Single = 999999
-            Dim low As Integer = 0
-            For i = 0 To minList.Count - 1
-                If Math.Abs(avg - minList(i)) < difference Then
-                    low = minList(i)
-                    difference = Math.Abs(avg - minList(i))
-                End If
-            Next
             Return low
         End If
     End Function
