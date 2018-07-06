@@ -6,16 +6,19 @@ Public Class Input
     Declare Function SetForegroundWindow Lib "user32.dll" (ByVal hwnd As Integer) As Integer
     Private InitialStyle As Integer
     Dim PercentVisible As Decimal
-    Dim myWindowID As Long
     Dim busy As Boolean = False
     Dim screenWidth As Integer = Screen.PrimaryScreen.Bounds.Width
     Dim screenHeight As Integer = Screen.PrimaryScreen.Bounds.Height
-    Dim GetWarframe As Boolean = False
+    Dim GetWarframe As Boolean = False 'If true then warframe was open when input was opened and should be switch to after
     Dim WFhWnd As String = ""
     Private Sub Input_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         UpdateColors(Me)
         Me.Location = New Point(screenWidth * 3, screenHeight * 3)
     End Sub
+
+    '_________________________________________________________________________
+    'Style stuff
+    '_________________________________________________________________________
 
     Public Enum GWL As Integer
         ExStyle = -20
@@ -31,6 +34,10 @@ Public Class Input
         Alpha = &H2
     End Enum
 
+
+    '_________________________________________________________________________
+    'Used to target warframe and switch between input and warframe control
+    '_________________________________________________________________________
     <DllImport("user32.dll", EntryPoint:="GetWindowLong")>
     Public Shared Function GetWindowLong(
         ByVal hWnd As IntPtr,
@@ -75,6 +82,9 @@ Public Class Input
       ByVal dwExtraInfo As Integer)
 
     Private Sub Input_Shown(sender As Object, e As EventArgs) Handles Me.Shown
+        '_________________________________________________________________________
+        'Initial setup
+        '_________________________________________________________________________
         Me.Refresh()
         Me.Location = New Point(screenWidth * 0.7, screenHeight * 0.94)
         Me.Width = screenWidth * 0.3
@@ -94,6 +104,8 @@ Public Class Input
         Me.TransparencyKey = Color.LightBlue
         Me.BackColor = Color.LightBlue
         Me.TopMost = True
+        '_________________________________________________________________________
+        'Gives focus to tbCommand (input closes if the tb loses focus)
         tbCommand.Focus()
     End Sub
 
@@ -104,6 +116,9 @@ Public Class Input
             Me.Hide()
             Tray.Clear()
             Try
+                '_________________________________________________________________________
+                'Gives control back to warframe
+                '_________________________________________________________________________
                 If GetWarframe Then
                     While Not ActiveWindowName() = "WARFRAME"
                         AppActivate("WARFRAME")
@@ -123,24 +138,44 @@ Public Class Input
             Catch ex As Exception
             End Try
 
+
+            '_________________________________________________________________________
+            'just a little easter egg
+            '_________________________________________________________________________
             If command.Contains("duck") Or command.Contains("quack") Then
                 Tray.quack()
                 Me.Close()
                 tbCommand.Text = ""
                 Exit Try
             End If
+
+
+            '_________________________________________________________________________
+            'Enables the WIP dev only (kinda) cheap listing alert
             If command.Contains("enable alert") Then
                 Me.Close()
                 tbCommand.Text = ""
                 Main.devCheck = True
                 Exit Try
             End If
+
+
+            '_________________________________________________________________________
+            'Process the string and determine what the user wants to do
+            '_________________________________________________________________________
+            '
+            'Get pricing for a mod
+            '_________________________________________________________________________
             If command.Split(" ")(0) = "mod" Or command.Split(" ")(0) = "m" Then
                 Dim modStr As String = StrConv(nth(command, 0), VbStrConv.ProperCase)
                 qItems.Add(vbNewLine & modStr & vbNewLine & "    Plat: " & GetPlat(modStr, True, True) & vbNewLine)
                 Tray.Display()
                 Me.Close()
                 tbCommand.Text = ""
+
+                '_________________________________________________________________________
+                'Gets location of resources
+                '_________________________________________________________________________
             ElseIf command.Split(" ")(0) = "where" Or command.Split(" ")(0) = "w" Then
                 If command.Split(" ")(0) = "w" Then
                     tbCommand.Text = "where" & command.Remove(0, 1)
@@ -175,6 +210,9 @@ Public Class Input
                 Tray.Display()
                 Me.Close()
 
+                '_________________________________________________________________________
+                'Checks users mastery list (WFInfo only) to see if a weapon/prime is mastered
+                '_________________________________________________________________________
             ElseIf command.Split(" ")(0) = "e" Then
                 Dim found As Boolean = False
                 Dim foundItem As String = ""
@@ -198,6 +236,9 @@ Public Class Input
                 Me.Close()
                 tbCommand.Text = ""
 
+                '_________________________________________________________________________
+                'Adds a weapon/prime to the locally stored mastery list
+                '_________________________________________________________________________
             ElseIf command.Split(" ")(0) = "ea" Then
                 Dim item As String = nth(command, 0)
                 If item.Substring(item.LastIndexOf(" ") + 1) = "p" Then
@@ -207,6 +248,9 @@ Public Class Input
                 Me.Close()
                 tbCommand.Text = ""
 
+                '_________________________________________________________________________
+                'Removes weapon/prime from the locally stored mastery list
+                '_________________________________________________________________________
             ElseIf command.Split(" ")(0) = "er" Then
                 Dim found As Boolean = False
                 Dim checkItem As String = nth(command, 0)
@@ -226,6 +270,9 @@ Public Class Input
                 Me.Close()
                 tbCommand.Text = ""
 
+                '_________________________________________________________________________
+                'Copies the locally stored mastery list to clipboard
+                '_________________________________________________________________________
             ElseIf command.Split(" ")(0) = "el" Then
                 Dim clipString As String = ""
                 For Each item As String In Equipment.Split(",")
@@ -237,6 +284,9 @@ Public Class Input
                 Me.Close()
                 tbCommand.Text = ""
 
+                '_________________________________________________________________________
+                'Completely clears the mastery list
+                '_________________________________________________________________________
             ElseIf command.Split(" ")(0) = "ec" Then
                 Equipment = ""
                 qItems.Add(vbNewLine & "Equipment Cleared")
@@ -244,6 +294,10 @@ Public Class Input
                 Me.Close()
                 tbCommand.Text = ""
 
+
+                '_________________________________________________________________________
+                'Posts a part, set, or mod to Warframe.Market for sale
+                '_________________________________________________________________________
             ElseIf command.Split(" ")(0) = "sell" Then
                 Try
                     If cookie = "" Then
@@ -322,6 +376,10 @@ Public Class Input
                 Me.Close()
                 tbCommand.Text = ""
 
+
+                '_________________________________________________________________________
+                'Retrieves the platinum price and seller for a single part or set
+                '_________________________________________________________________________
             Else
                 command = command.Replace(" p ", " prime ")
                 command = command.Replace("bp", "blueprint")
@@ -396,6 +454,9 @@ Public Class Input
     End Sub
 
     Private Sub tbCommand_LostFocus(sender As Object, e As EventArgs) Handles tbCommand.LostFocus
+        '_________________________________________________________________________
+        'Closes input if tbCommand loses focus
+        '_________________________________________________________________________
         If busy Then
             Me.Hide()
         Else
@@ -404,6 +465,9 @@ Public Class Input
     End Sub
 
     Private Sub tbCommand_KeyDown(sender As Object, e As KeyEventArgs) Handles tbCommand.KeyDown
+        '_________________________________________________________________________
+        'Escape hotkey to close input
+        '_________________________________________________________________________
         If e.KeyCode = Keys.Escape Then
             e.Handled = True
             If GetWarframe Then
@@ -427,6 +491,9 @@ Public Class Input
     End Sub
 
     Private Sub tActivate_Tick(sender As Object, e As EventArgs) Handles tActivate.Tick
+        '_________________________________________________________________________
+        'Quickly activates input as to not close instantly after opening it
+        '_________________________________________________________________________
         If Me.Visible Then
             If Not GetForegroundWindow() = Me.Handle.ToString Then
                 'SendKeys.Send(Keys.LMenu)

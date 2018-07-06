@@ -5,6 +5,9 @@ Public Class Settings
     Dim mouseX As Integer
     Dim mouseY As Integer
     Private Sub btnHkey1_Click(sender As Object, e As EventArgs) Handles btnHkey1.Click
+        '_________________________________________________________________________
+        'Toggle for setting hotkey 1
+        '_________________________________________________________________________
         If Not key1Tog Then
             btnHkey1.Text = "..."
             key1Tog = True
@@ -14,6 +17,9 @@ Public Class Settings
     End Sub
 
     Private Sub btnHkey1_KeyUp(sender As Object, e As KeyEventArgs) Handles btnHkey1.KeyUp
+        '_________________________________________________________________________
+        'Sets the key for hotkey 1
+        '_________________________________________________________________________
         If key1Tog Then
             key1Tog = False
             HKey1 = e.KeyCode
@@ -59,6 +65,9 @@ Public Class Settings
     End Sub
 
     Private Sub Settings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        '_________________________________________________________________________
+        'Visual stuff and loading settings
+        '_________________________________________________________________________
         UpdateColors(Me)
         Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         btnHkey1.Text = My.Settings.HKey1Text
@@ -71,12 +80,18 @@ Public Class Settings
     End Sub
 
     Private Sub Settings_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress
+        '_________________________________________________________________________
+        'Stores the next keypress char code to chTemp when ready to set a hotkey
+        '_________________________________________________________________________
         If key1Tog Or key2Tog Then
             chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
         End If
     End Sub
 
     Private Sub btnHkey2_KeyUp(sender As Object, e As KeyEventArgs) Handles btnHkey2.KeyUp
+        '_________________________________________________________________________
+        'Sets the key for hotkey 2
+        '_________________________________________________________________________
         If key2Tog Then
             key2Tog = False
             HKey2 = e.KeyCode
@@ -122,6 +137,9 @@ Public Class Settings
     End Sub
 
     Private Sub Settings_KeyUp(sender As Object, e As KeyEventArgs) Handles Me.KeyUp
+        '_________________________________________________________________________
+        'Further retrieving the code for hotkeys
+        '_________________________________________________________________________
         If key1Tog Then
             key1Tog = False
             HKey1 = e.KeyCode
@@ -207,6 +225,10 @@ Public Class Settings
         End If
     End Sub
 
+    '_________________________________________________________________________
+    'You get the idea
+    '_________________________________________________________________________
+
     Private Sub btnHkey2_KeyPress(sender As Object, e As KeyPressEventArgs) Handles btnHkey2.KeyPress
         If key1Tog Or key2Tog Then
             chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
@@ -229,6 +251,9 @@ Public Class Settings
     End Sub
 
     Private Sub Settings_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+        '_________________________________________________________________________
+        'Stores the settings when closing
+        '_________________________________________________________________________
         My.Settings.Animate = cbAnimations.Checked
         My.Settings.PassiveChecks = cbPassiveChecks.Checked
         My.Settings.Messages = cbMessages.Checked
@@ -242,6 +267,10 @@ Public Class Settings
     End Sub
 
     Private Sub cbFullscreen_Click(sender As Object, e As EventArgs) Handles cbFullscreen.Click
+        '_________________________________________________________________________
+        'This is the bread and butter of the fullscreen mode (which again is not fully supported)
+        'If you don't really understand what's going on here you don't have to bother
+        '_________________________________________________________________________
         Dim msgChoice
         Dim MainDir As String = "C:\Program Files (x86)\Steam\userdata"
         If Not Fullscreen Then

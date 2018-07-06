@@ -18,6 +18,9 @@ Public Class Tray
         End Get
     End Property
 
+    '_________________________________________________________________________
+    'Visual and location stuff, also allows it to be clicked through
+    '_________________________________________________________________________
     Private Sub Form_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         UpdateColors(Me)
         pbBG.Image = Tint(pbBG.Image, My.Settings.cTray, 0.125)
@@ -147,6 +150,9 @@ Public Class Tray
             Cursor.Position = prevPos
         End If
 
+        '_________________________________________________________________________
+        'Special condition for certain widescreen monitors
+        '_________________________________________________________________________
         Me.Width = screenWidth * 0.18
         Me.Height = screenHeight * 0.37
         If screenWidth > 2000 Then
@@ -167,6 +173,9 @@ Public Class Tray
     End Sub
 
     Private Sub tAnimate_Tick(sender As Object, e As EventArgs) Handles tAnimate.Tick
+        '_________________________________________________________________________
+        'Slide up and slide down animation control
+        '_________________________________________________________________________
         If Not closing Then
             If Animate Then
                 If Not Me.Location.Y - 22 <= goalY Then
@@ -232,6 +241,9 @@ Public Class Tray
         End If
     End Sub
     Public Sub quack()
+        '_________________________________________________________________________
+        'Easter egg text to display
+        '_________________________________________________________________________
         qItems.Clear()
         lbDisplay.Text = ""
         lbDDropShadow.Text = ""

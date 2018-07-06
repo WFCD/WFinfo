@@ -13,22 +13,24 @@ Public Class Main
     Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Integer, ByVal dx As Integer, ByVal dy As Integer, ByVal cButtons As Integer, ByVal dwExtraInfo As Integer)
     Public Declare Function GetAsyncKeyState Lib "user32" (ByVal vKey As Integer) As Integer
     Dim appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-    Dim scTog As Integer = 0 ' Toggle that only allows a single screen capture
+    Dim scTog As Integer = 0 ' Toggle to force a single screenshot
     Dim count As Integer = 0 ' Number of Pics in appData
     Dim Sess As Integer = 0  ' Number of Screenshots this session
     Dim PPM As Integer = 0   ' Potential Platinum Made this session
-    Dim pCount As Integer = 0 ' Current plat price to scan
+    Dim pCount As Integer = 0 ' Current plat price to scan (Used for passive plat checks)
     Dim CliptoImage As Image         ' Stored image
     Dim HKeyTog As Integer = 0       ' Toggle Var for setting the activation key
-    Dim pbWait As Integer = 0        ' Variable to set to make the timer wait
     Dim lbTemp As String             ' Stores the keychar
-    Public devCheck As Boolean = False  ' Price alert (dev only)
-    Dim drag As Boolean = False
+    Public devCheck As Boolean = False  ' Price alert (dev only) test feature that searches for cheaply listed parts
+    Dim drag As Boolean = False      ' Toggle for the custom UI allowing it to drag
     Dim mouseX As Integer
     Dim mouseY As Integer
-    Dim enablePPC As Boolean = True
+    Dim enablePPC As Boolean = True  ' Toggle that enables/disables passive platinum checks
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Try
+            '_________________________________________________________________________
+            ' Refreshes the UI and moves it to the stored location
+            '_________________________________________________________________________
             UpdateColors(Me)
             pbHome.Parent = pbSideBar
             pbHome.Location = New Point(0, 8)
@@ -36,7 +38,7 @@ Public Class Main
             pbDonate.Location = New Point(0, 38)
             pbSettings.Parent = pbSideBar
             pbSettings.Location = New Point(0, 65)
-            lbVersion.Text = "v" + My.Settings.Version
+            lbVersion.Text = "v" + My.Settings.Version 'The current version is stored in project properties
             Me.Location = New Point(My.Settings.StartX, My.Settings.StartY)
             Fullscreen = My.Settings.Fullscreen
             Me.MaximizeBox = False
@@ -44,10 +46,20 @@ Public Class Main
             Me.Refresh()
             Me.Activate()
             Me.Refresh()
+
+
+            '_________________________________________________________________________
+            'Readies the test folder for debug mode (Saves screenshots for debugging)
+            '_________________________________________________________________________
             If (Not System.IO.Directory.Exists(appData + "\WFInfo\tests")) Then
                 System.IO.Directory.CreateDirectory(appData + "\WFInfo\tests")
             End If
             count = GetMax(appData + "\WFInfo\tests\") + 1
+
+
+            '_________________________________________________________________________
+            ' Gets the xcsrf token from browser cookies for listing parts while in game
+            '_________________________________________________________________________
             Try
                 If getCookie() Then
                     getXcsrf()
@@ -55,37 +67,58 @@ Public Class Main
             Catch ex As Exception
                 addLog(ex.ToString)
             End Try
+
+
+            '_________________________________________________________________________
+            ' Sets up screenshot settings for fullscreen mode (Steam only, not fully supported)
+            '_________________________________________________________________________
             If Fullscreen Then
                 If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
                     My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
                 End If
             End If
+
+
+            '_________________________________________________________________________
+            'Refreshes the clipboard, causes issues later if you don't
+            '_________________________________________________________________________
             If Clipboard.ContainsImage() Then
                 Clipboard.GetImage()
                 CliptoImage = Clipboard.GetImage()
             End If
 
-            'Mechanism to make sure I don't kill warframe.market
+            '_________________________________________________________________________
+            'Mechanism to make sure I don't kill warframe.market (You can disable all passive checks via the website)
+            '_________________________________________________________________________
             Dim enablePassives As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/enablepassivechecks")
             enablePassives = enablePassives.Remove(0, enablePassives.IndexOf("enabled = ") + 10)
             enablePassives = enablePassives.Remove(enablePassives.IndexOf(""""), enablePassives.Length - enablePassives.IndexOf(""""))
 
+
+            '_________________________________________________________________________
+            'Disables passive checks if user sets it in settings
+            '_________________________________________________________________________
             If Not enablePassives = "true" Then
                 enablePPC = False
             End If
+
+            '_________________________________________________________________________
+            'UpdateStatus is a keep-alive function for analytics
+            '_________________________________________________________________________
             UpdateStatus()
         Catch ex As Exception
             addLog(ex.ToString)
-
         End Try
     End Sub
 
     Public Function getCookie()
+        '_________________________________________________________________________
+        'Checks FF cookie then Chrome Cookie, if it exists in neither returns false, true if found, also sets cookie
+        '_________________________________________________________________________
         Dim found As Boolean = False
         Dim FFpath As String = Directory.GetDirectories(appData + "\Mozilla\Firefox\Profiles")(0) + "\cookies.sqlite"
         Dim ChromePath As String = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\Google\Chrome\User Data\Default\Cookies"
 
-        ''Checks FF cookie then Chrome Cookie, if it exists in neither returns false, true if found, also sets cookie
         If File.Exists(FFpath) Then
             If Not checkCookie(FFpath, True) = True Then
                 If File.Exists(ChromePath) Then
@@ -105,6 +138,9 @@ Public Class Main
     End Function
 
     Private Function checkCookie(path As String, Optional FireFox As Boolean = False)
+        '_________________________________________________________________________
+        'Decrypts cookie to get JWT and returns true if all goes well
+        '_________________________________________________________________________
         Dim SQLconnect As New SQLiteConnection
         Dim SQLcommand As New SQLiteCommand
 
@@ -146,6 +182,9 @@ Public Class Main
     End Function
 
     Private Function getXcsrf()
+        '_________________________________________________________________________
+        'Gets a fresh xcsrf token from warframe.market
+        '_________________________________________________________________________
         Dim uri As New Uri("https://warframe.market")
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
         Dim req As HttpWebRequest = HttpWebRequest.Create(uri)
@@ -173,8 +212,15 @@ Public Class Main
     End Function
 
     Private Async Sub tPB_Tick(sender As Object, e As EventArgs) Handles tPB.Tick
+        '_________________________________________________________________________
+        'This is the main timer that triggers on hotkey and controls most function
+        'The toggles make sure it runs only once per press
+        '_________________________________________________________________________
         Try
             If (Not key1Tog) And (Not key2Tog) Then
+                '_________________________________________________________________________
+                'Refreshes the async state and checks and opens command function if hotkey is pressed
+                '_________________________________________________________________________
                 Dim Refresh As Integer = GetAsyncKeyState(HKey1)
                 Refresh = GetAsyncKeyState(HKey2)
                 If Not Input.Visible = True Then
@@ -182,190 +228,237 @@ Public Class Main
                         Input.Display()
                     End If
                 End If
-                If Not pbWait = 0 Then
-                    pbWait -= 1
-                Else
-                    Dim keyState As Integer
-                    If Fullscreen Then
-                        If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
-                            If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
-                                My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
-                                keyState = 1
-                            End If
-                        End If
-                    End If
-                    If scTog = 0 Then
-                        If GetAsyncKeyState(HKey1) And &H8000 Then
+                '_________________________________________________________________________
+                'Checks for new screenshots (using fullscreen mode) and starts main function if found
+                '_________________________________________________________________________
+                If Fullscreen Then
+                    If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
+                        If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
+                            My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
                             scTog = 1
                         End If
-                    Else
-                        If Fullscreen = False Then
-                            keyState = 0
-                        End If
-                        If keyState = 0 Then
-                            lbStatus.ForeColor = Color.Yellow
-                            tPPrice.Stop()
-                            scTog = 0
-                            If Fullscreen Then
-                                CliptoImage = New System.Drawing.Bitmap(My.Settings.LastFile)
-                            Else
-                                Dim bounds As Rectangle
-                                Dim screenshot As System.Drawing.Bitmap
-                                Dim graph As Graphics
-                                bounds = Screen.PrimaryScreen.Bounds
-                                screenshot = New System.Drawing.Bitmap(bounds.Width, bounds.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb)
-                                graph = Graphics.FromImage(screenshot)
-                                graph.CopyFromScreen(0, 0, 0, 0, bounds.Size, CopyPixelOperation.SourceCopy)
-                                CliptoImage = screenshot
-                            End If
-                            Try
-                                Dim players As Integer = GetPlayers(Crop(CliptoImage))
-                                If players > 4 Or players < 1 Then
-                                    players = 4
-                                End If
-                                Dim tList As New List(Of String)()
-                                For i = 0 To players - 1
-                                    Dim img As Image = Crop(CliptoImage, players, i)
-                                    If Not img Is Nothing Then
-                                        pbDebug.Image = img
-                                    End If
-                                    If Debug Then
-                                        Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\") + 1
-                                        img.Save(appData & "\WFInfo\tests\" & nextFile & ".jpg", Imaging.ImageFormat.Jpeg)
-                                    End If
-                                    tList.Add(GetText(Crop(CliptoImage, players, i)))
-                                Next
-                                Dim unique As New List(Of String)()
-                                For i = 0 To tList.Count - 1
-                                    If Not LevDist(tList(i), "Blueprint") < 4 Then
-                                        Dim guess As String = Names(check(tList(i)))
-                                        unique.Add(guess)
-                                    Else
-                                        Dim img As Image = Crop(CliptoImage, 1, i, players)
-                                        If Not img Is Nothing Then
-                                            pbDebug.Image = img
-                                        End If
-                                        If Debug Then
-                                            Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\") + 1
-                                            img.Save(appData & "\WFInfo\tests\" & nextFile & ".jpg", Imaging.ImageFormat.Jpeg)
-                                        End If
-                                        Dim guess As String = Names(check(GetText(img) + " Blueprint"))
-                                        img.Dispose()
-                                        unique.Add(guess)
-                                    End If
-                                Next
-                                qItems.Clear()
-                                Dim HighestPlat As Integer = 0
-                                Dim p As New List(Of String)()
-                                Dim d As New List(Of String)()
-                                For i = 0 To unique.Count - 1
-                                    Dim guess As String = unique(i)
-                                    If Not unique(i) = "Forma Blueprint" Then
-                                        Dim plat As String = ""
-                                        For j = 0 To PlatPrices.Count - 1
-                                            If PlatPrices(j).Contains(guess) Then
-                                                plat = PlatPrices(j).Split(",")(1)
-                                                Exit For
-                                            End If
-                                        Next
-                                        If plat = "" Then
-                                            plat = GetPlat(KClean(guess))
-                                            PlatPrices.Add(guess & "," & plat)
-                                        End If
-                                        If Not plat = "Unknown" Then
-                                            If CType(plat, Integer) > HighestPlat Then
-                                                HighestPlat = CType(plat, Integer)
-                                            End If
-                                        End If
-
-                                        p.Add(plat)
-                                        d.Add(Ducks(check(guess)))
-
-                                        If KClean(guess).Length > 27 Then
-                                            qItems.Add(KClean(guess).Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
-                                        Else
-                                            qItems.Add(KClean(guess) & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
-                                        End If
-                                    Else
-                                        qItems.Add(vbNewLine & unique(i) & vbNewLine)
-                                        p.Add(0)
-                                        d.Add(0)
-                                    End If
-                                Next
-                                If Not Fullscreen And Not NewStyle Then
-                                    Tray.Clear()
-                                    Tray.Display()
-                                Else
-                                    Tray.Clear()
-                                    qItems.Clear()
-                                    Dim panel1 As New Overlay
-                                    Dim panel2 As New Overlay
-                                    Dim panel3 As New Overlay
-                                    Dim panel4 As New Overlay
-                                    For i = 0 To players - 1
-                                        Dim width As Integer = 0.4 * Screen.PrimaryScreen.Bounds.Height
-                                        Select Case players
-                                            Case 4
-                                                Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (width * 2) + (width * i) + (width * 0.62)
-                                                Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
-                                                Select Case i
-                                                    Case 0
-                                                        panel1.Display(x, y, p(i), d(i))
-                                                    Case 1
-                                                        panel2.Display(x, y, p(i), d(i))
-                                                    Case 2
-                                                        panel3.Display(x, y, p(i), d(i))
-                                                    Case 3
-                                                        panel4.Display(x, y, p(i), d(i))
-                                                End Select
-                                            Case 3
-                                                Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (1.5 * width) + (width * i) + (width * 0.62)
-                                                Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
-                                                Select Case i
-                                                    Case 0
-                                                        panel1.Display(x, y, p(i), d(i))
-                                                    Case 1
-                                                        panel2.Display(x, y, p(i), d(i))
-                                                    Case 2
-                                                        panel3.Display(x, y, p(i), d(i))
-                                                    Case 3
-                                                        panel4.Display(x, y, p(i), d(i))
-                                                End Select
-                                            Case 2
-                                                Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (width) + (width * i) + (width * 0.62)
-                                                Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
-                                                Select Case i
-                                                    Case 0
-                                                        panel1.Display(x, y, p(i), d(i))
-                                                    Case 1
-                                                        panel2.Display(x, y, p(i), d(i))
-                                                    Case 2
-                                                        panel3.Display(x, y, p(i), d(i))
-                                                    Case 3
-                                                        panel4.Display(x, y, p(i), d(i))
-                                                End Select
-                                        End Select
-                                    Next
-                                End If
-
-                                count += 1
-                                Sess += 1
-                                PPM += HighestPlat
-                                lbStatus.ForeColor = Color.Lime
-                                lbChecks.Text = "Checks this Session:              " & Sess
-                                lbPPM.Text = "Platinum this Session:          " & PPM
-                                tPPrice.Start()
-                            Catch ex As Exception
-                                lbStatus.ForeColor = Color.Orange
-                                qItems.Clear()
-                                qItems.Add(vbNewLine + "Something went wrong!")
-                                Tray.Clear()
-                                Tray.Display()
-                                addLog(ex.ToString)
-                                tPPrice.Start()
-                            End Try
-                        End If
                     End If
+                End If
+
+
+                '_________________________________________________________________________
+                'watches for main hotkey and sctog starts the min function if pressed
+                '_________________________________________________________________________
+                If scTog = 0 Then
+                    If GetAsyncKeyState(HKey1) And &H8000 Then
+                        scTog = 1
+                    End If
+                Else
+                    lbStatus.ForeColor = Color.Yellow ' lbStatus is for showing the status color yellow = processing and sometimes error
+                    tPPrice.Stop()
+                    scTog = 0
+
+
+                    '_________________________________________________________________________
+                    'Stores the screenshot from clipboard (or screenshot file if fullscreen)
+                    '_________________________________________________________________________
+                    If Fullscreen Then
+                        CliptoImage = New System.Drawing.Bitmap(My.Settings.LastFile)
+                    Else
+                        Dim bounds As Rectangle
+                        Dim screenshot As System.Drawing.Bitmap
+                        Dim graph As Graphics
+                        bounds = Screen.PrimaryScreen.Bounds
+                        screenshot = New System.Drawing.Bitmap(bounds.Width, bounds.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb)
+                        graph = Graphics.FromImage(screenshot)
+                        graph.CopyFromScreen(0, 0, 0, 0, bounds.Size, CopyPixelOperation.SourceCopy)
+                        CliptoImage = screenshot
+                    End If
+
+
+                    Try
+                        '_________________________________________________________________________
+                        'Gets the number of players using OCR and the names underneath fissure rewards
+                        '_________________________________________________________________________
+                        Dim players As Integer = GetPlayers(Crop(CliptoImage))
+                        If players > 4 Or players < 1 Then
+                            players = 4
+                        End If
+
+
+                        '_________________________________________________________________________
+                        'Gets text of the cropped images (part tet) using OCR and stores them in tList
+                        'Stores clipped images if debug is enbled
+                        '_________________________________________________________________________
+                        Dim tList As New List(Of String)()
+                        For i = 0 To players - 1
+                            Dim img As Image = Crop(CliptoImage, players, i)
+                            If Not img Is Nothing Then
+                                pbDebug.Image = img
+                            End If
+                            If Debug Then
+                                Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\") + 1
+                                img.Save(appData & "\WFInfo\tests\" & nextFile & ".jpg", Imaging.ImageFormat.Jpeg)
+                            End If
+                            tList.Add(GetText(Crop(CliptoImage, players, i)))
+                        Next
+
+
+                        '_________________________________________________________________________
+                        'Gets the final guess (using Levenshtein distance) using the OCR text
+                        'compared to a list that has been retrieved by the wiki
+                        '_________________________________________________________________________
+                        Dim finalList As New List(Of String)()
+                        For i = 0 To tList.Count - 1
+
+                            'Blueprint means that it is a multi-line part name
+                            If Not LevDist(tList(i), "Blueprint") < 4 Then
+                                Dim guess As String = Names(check(tList(i)))
+                                finalList.Add(guess)
+                            Else
+                                'Since it's multi-line you need to use mode 1 of the crop function 
+                                'This gets one line higher than the usual
+                                Dim img As Image = Crop(CliptoImage, 1, i, players)
+                                If Not img Is Nothing Then
+                                    pbDebug.Image = img
+                                End If
+                                If Debug Then
+                                    Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\") + 1
+                                    img.Save(appData & "\WFInfo\tests\" & nextFile & ".jpg", Imaging.ImageFormat.Jpeg)
+                                End If
+                                Dim guess As String = Names(check(GetText(img) + " Blueprint"))
+                                img.Dispose()
+                                finalList.Add(guess)
+                            End If
+                        Next
+
+                        qItems.Clear() 'qItems is for people using the tray instead of the overlay
+
+
+                        '_________________________________________________________________________
+                        'Retrieves the platinum and ducat prices using warframe.market 
+                        'And the ducat list we pulled from the wiki when the application launched
+                        '_________________________________________________________________________
+                        '
+                        'Stores them in p() and d()
+                        '
+                        'This also stores the text to display in the tray (if used) in qItems
+                        '_________________________________________________________________________
+                        Dim HighestPlat As Integer = 0
+                        Dim p As New List(Of String)()
+                        Dim d As New List(Of String)()
+                        For i = 0 To finalList.Count - 1
+                            Dim guess As String = finalList(i)
+                            If Not finalList(i) = "Forma Blueprint" Then
+                                Dim plat As String = ""
+                                For j = 0 To PlatPrices.Count - 1
+                                    If PlatPrices(j).Contains(guess) Then
+                                        plat = PlatPrices(j).Split(",")(1)
+                                        Exit For
+                                    End If
+                                Next
+                                If plat = "" Then
+                                    plat = GetPlat(KClean(guess))
+                                    PlatPrices.Add(guess & "," & plat)
+                                End If
+                                If Not plat = "Unknown" Then
+                                    If CType(plat, Integer) > HighestPlat Then
+                                        HighestPlat = CType(plat, Integer)
+                                    End If
+                                End If
+
+                                p.Add(plat)
+                                d.Add(Ducks(check(guess)))
+
+                                If KClean(guess).Length > 27 Then
+                                    qItems.Add(KClean(guess).Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
+                                Else
+                                    qItems.Add(KClean(guess) & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
+                                End If
+                            Else
+                                qItems.Add(vbNewLine & finalList(i) & vbNewLine)
+                                p.Add(0)
+                                d.Add(0)
+                            End If
+                        Next
+
+
+                        '_________________________________________________________________________
+                        'Displays the information using either newstyle(overlay) or old(tray)
+                        '_________________________________________________________________________
+                        If Not Fullscreen And Not NewStyle Then
+                            Tray.Clear()
+                            Tray.Display()
+                        Else
+                            Tray.Clear()
+                            qItems.Clear()
+
+                            'Each part has it's own panel/overlay
+                            Dim panel1 As New Overlay
+                            Dim panel2 As New Overlay
+                            Dim panel3 As New Overlay
+                            Dim panel4 As New Overlay
+                            For i = 0 To players - 1
+                                Dim width As Integer = 0.4 * Screen.PrimaryScreen.Bounds.Height
+                                Select Case players
+                                    Case 4
+                                        Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (width * 2) + (width * i) + (width * 0.62)
+                                        Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
+                                        Select Case i
+                                            Case 0
+                                                panel1.Display(x, y, p(i), d(i))
+                                            Case 1
+                                                panel2.Display(x, y, p(i), d(i))
+                                            Case 2
+                                                panel3.Display(x, y, p(i), d(i))
+                                            Case 3
+                                                panel4.Display(x, y, p(i), d(i))
+                                        End Select
+                                    Case 3
+                                        Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (1.5 * width) + (width * i) + (width * 0.62)
+                                        Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
+                                        Select Case i
+                                            Case 0
+                                                panel1.Display(x, y, p(i), d(i))
+                                            Case 1
+                                                panel2.Display(x, y, p(i), d(i))
+                                            Case 2
+                                                panel3.Display(x, y, p(i), d(i))
+                                            Case 3
+                                                panel4.Display(x, y, p(i), d(i))
+                                        End Select
+                                    Case 2
+                                        Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (width) + (width * i) + (width * 0.62)
+                                        Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
+                                        Select Case i
+                                            Case 0
+                                                panel1.Display(x, y, p(i), d(i))
+                                            Case 1
+                                                panel2.Display(x, y, p(i), d(i))
+                                            Case 2
+                                                panel3.Display(x, y, p(i), d(i))
+                                            Case 3
+                                                panel4.Display(x, y, p(i), d(i))
+                                        End Select
+                                End Select
+                            Next
+                        End If
+
+
+                        '_________________________________________________________________________
+                        'Readies the program for the next run and updates the session information
+                        '_________________________________________________________________________
+                        count += 1
+                        Sess += 1
+                        PPM += HighestPlat
+                        lbStatus.ForeColor = Color.Lime
+                        lbChecks.Text = "Checks this Session:              " & Sess
+                        lbPPM.Text = "Platinum this Session:          " & PPM
+                        tPPrice.Start()
+                    Catch ex As Exception
+                        lbStatus.ForeColor = Color.Orange
+                        qItems.Clear()
+                        qItems.Add(vbNewLine + "Something went wrong!")
+                        Tray.Clear()
+                        Tray.Display()
+                        addLog(ex.ToString)
+                        tPPrice.Start()
+                    End Try
                 End If
             End If
         Catch ex As Exception
@@ -375,29 +468,32 @@ Public Class Main
         End Try
     End Sub
     Public Function Crop(img As Image, Optional mode As Integer = 0, Optional pos As Integer = 1, Optional players As Integer = 0) As Image
+        '_________________________________________________________________________
+        'Function used to crop the part names and usernames for player count
+        '_________________________________________________________________________
         Dim startX As Integer
         Dim startY As Integer
         Dim height As Integer
         Dim width As Integer = 0.4 * img.Height
         Select Case mode
-            Case 0
+            Case 0 'This mode is used to get the number of players
                 startX = (img.Width / 2) - (width * 2)
                 startY = img.Height * 0.457
                 height = img.Height * 0.03
                 width = width * 4
-            Case 4
+            Case 4 '4 players for single lined parts
                 startX = (img.Width / 2) - (width * 2) + (width * pos)
                 startY = img.Height * 0.425
                 height = img.Height * 0.03
-            Case 3
+            Case 3 '3 players for single lined parts
                 startX = (img.Width / 2) - (1.5 * width) + (width * pos)
                 startY = img.Height * 0.425
                 height = img.Height * 0.03
-            Case 2
+            Case 2 '2 players for single lined parts
                 startX = (img.Width / 2) - (width) + (width * pos)
                 startY = img.Height * 0.425
                 height = img.Height * 0.03
-            Case 1
+            Case 1 'Case for multi-lined part names
                 Select Case players
                     Case 4
                         startX = (img.Width / 2) - (width * 2) + (width * pos)
@@ -413,6 +509,11 @@ Public Class Main
                         height = img.Height * 0.03
                 End Select
         End Select
+
+
+        '_________________________________________________________________________
+        'Crops and returns the cropped image using the paramaters selected above
+        '_________________________________________________________________________
         Dim CropRect As New Rectangle(startX, startY, width, height)
         Dim OriginalImage = img
         Dim CropImage = New Bitmap(CropRect.Width, CropRect.Height)
@@ -423,6 +524,9 @@ Public Class Main
     End Function
 
     Public Sub addLog(txt As String)
+        '_________________________________________________________________________
+        'Function for storing log data
+        '_________________________________________________________________________
         appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
         Dim dateTime As String = "[" + System.DateTime.Now + "]"
         Dim logStore As String = ""
@@ -439,6 +543,9 @@ Public Class Main
     End Sub
 
     Private Function GetMax(ByVal sFolder As String) As Long
+        '_________________________________________________________________________
+        'Function that returns the number of files in a folder
+        '_________________________________________________________________________
         Const sExt As String = ".jpg"
         Dim lVal As Long, sFile As String
 
@@ -470,6 +577,10 @@ Public Class Main
     End Sub
 
     Private Sub Main_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
+        '_________________________________________________________________________
+        'Stores settings and this was the start of me wanting to store information
+        'So that users could generate a chart/graph showing how much platinum ducats they make over time
+        '_________________________________________________________________________
         Dim tempPPMPD As String = ""
         Dim tempChecksPD As String = ""
         Dim isToday As Boolean = False
@@ -514,6 +625,9 @@ Public Class Main
         My.Settings.Save()
     End Sub
     Private Sub UpdateList()
+        '_________________________________________________________________________
+        'Function that retrieves parts and ducat prices from the wiki and stores the info in Names() and Ducks()
+        '_________________________________________________________________________
         Try
             Equipment = My.Settings.Equipment ' Load equipment string
 
@@ -568,12 +682,19 @@ Public Class Main
     End Sub
 
     Private Sub Main_Shown(sender As Object, e As EventArgs) Handles Me.Shown
+        '_________________________________________________________________________
+        'Refreshes the application to stop graphical glitches caused by lockup
+        'Starts the background timers
+        '_________________________________________________________________________
         Me.Refresh()
         BGWorker.RunWorkerAsync()
         tPPrice.Enabled = True
         tPPrice.Start()
     End Sub
     Private Function GetPlayers(img As Image) As Integer
+        '_________________________________________________________________________
+        'Gets the number of seperate strings(players) in an image
+        '_________________________________________________________________________
         Using img
             Dim wb As New WebBrowser
             wb.ScriptErrorsSuppressed = True
@@ -606,129 +727,84 @@ Public Class Main
         End Using
     End Function
     Public Shared Function ResizeImage(ByVal img As Image, multi As Double) As Image
+        '_________________________________________________________________________
+        'Used to improve OCR accuracy by blowing the image up
+        '_________________________________________________________________________
         Return New Bitmap(img, New Size(img.Width * multi, img.Height * multi))
     End Function
     Private Function GetText(img As Image) As String
-            Using img
+        '_________________________________________________________________________
+        'Retrives the text from a cropped image
+        '_________________________________________________________________________
+        Using img
             Dim engine As New TesseractEngine("", "eng")
             engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
             engine.DefaultPageSegMode = Tesseract.PageSegMode.SingleLine
             Dim page = engine.Process(ResizeImage(img, 1.1))
             Dim result As String = Regex.Replace(page.GetText(), "[^A-Za-z0-9\-_ /]", "")
-                If Debug Then
-                    Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\")
-                    My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\tests\" & nextFile & ".txt",
+            If Debug Then
+                Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\")
+                My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\tests\" & nextFile & ".txt",
                 result, False)
-                End If
-                Return result
-            End Using
-        End Function
-        Private Function GetHOCR(img As Image) As String
-            Using img
+            End If
+            Return result
+        End Using
+    End Function
+    Private Function GetHOCR(img As Image) As String
+        '_________________________________________________________________________
+        'Retrieves the text information (location, type, etc) with OCR of an image
+        '_________________________________________________________________________
+        Using img
             Dim engine As New TesseractEngine("", "eng")
             engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-.")
             engine.DefaultPageSegMode = Tesseract.PageSegMode.SingleLine
             Dim page = engine.Process(ResizeImage(img, 1.1)).GetHOCRText(1)
             Return page
-            End Using
-        End Function
-        Private Function prepare(img As Image) As Image
-            Using img
-                Dim X As Integer
-                Dim Y As Integer
-                Dim clr As Integer
-            Dim bmp As Bitmap = New Bitmap(img)
-            For X = 0 To bmp.Width - 1
-                For Y = 0 To bmp.Height - 1
-                    clr = (CInt(bmp.GetPixel(X, Y).R) +
-                           bmp.GetPixel(X, Y).G +
-                           bmp.GetPixel(X, Y).B) \ 3
-                    bmp.SetPixel(X, Y, Color.FromArgb(clr, clr, clr))
-                Next Y
-            Next X
-            Return bmp
         End Using
-        End Function
+    End Function
 
-        Private Function Sharpen(image As Image, strength As Integer) As Image
-            Using image
-                Dim fpixel, secpixel As Color
-                Dim NewImg As Bitmap = New Bitmap(image)
-                Dim CR, CB, CG As Integer
-                Dim x, y As Integer
-                For x = 0 To NewImg.Width - 2
-                    For y = 0 To NewImg.Height - 2
-                        fpixel = NewImg.GetPixel(x, y)
-                        secpixel = NewImg.GetPixel(x + 1, y)
-                        Dim newR, newB, newG As Integer
-                        newR = CInt(fpixel.R) - CInt(secpixel.R)
-                        newB = CInt(fpixel.B) - CInt(secpixel.B)
-                        newG = CInt(fpixel.G) - CInt(secpixel.G)
-                        CR = CInt(newR * strength) + fpixel.R
-                        CG = CInt(newG * strength) + fpixel.G
-                        CB = CInt(newB * strength) + fpixel.B
-
-                        If CR > 255 Then
-                            CR = 255
-                        End If
-                        If CR < 0 Then
-                            CR = 0
-
-                        End If
-                        If CB > 255 Then
-                            CB = 255
-                        End If
-                        If CB < 0 Then
-                            CB = 0
-                        End If
-
-                        If CG > 255 Then
-                            CG = 255
-                        End If
-
-                        If CG < 0 Then
-                            CG = 0
-                        End If
-
-                        NewImg.SetPixel(x, y, Color.FromArgb(CR, CG, CB))
-                    Next
-                Next
-                Return NewImg
-            End Using
-        End Function
-
-        Public Function KClean(guess As String)
-            If Not guess.Contains("Carrier") And Not guess.Contains("Wyrm") And Not guess.Contains("Helios") Then
-                If guess.Contains("Systems") Or guess.Contains("Chassis") Or guess.Contains("Neuroptics") Then
-                    guess = guess.Replace(" Blueprint", "")
-                End If
+    Public Function KClean(guess As String)
+        '_________________________________________________________________________
+        'Prepares the part names for use with the Warframe.Market API
+        '_________________________________________________________________________
+        If Not guess.Contains("Carrier") And Not guess.Contains("Wyrm") And Not guess.Contains("Helios") Then
+            If guess.Contains("Systems") Or guess.Contains("Chassis") Or guess.Contains("Neuroptics") Then
+                guess = guess.Replace(" Blueprint", "")
             End If
-            guess = guess.Replace("Band", "Collar Band").Replace("Buckle", "Collar Buckle").Replace("&amp;", "and")
-            Return guess
-        End Function
+        End If
+        guess = guess.Replace("Band", "Collar Band").Replace("Buckle", "Collar Buckle").Replace("&amp;", "and")
+        Return guess
+    End Function
 
 
     Private Sub tPPrice_Tick(sender As Object, e As EventArgs) Handles tPPrice.Tick
+        '_________________________________________________________________________
+        'Keeps the background passive price check running
+        '_________________________________________________________________________
         If Not bgPPrice.IsBusy And enablePPC And PassiveChecks Then
             bgPPrice.RunWorkerAsync()
         End If
     End Sub
 
     Private Sub bgPPrice_DoWork(sender As Object, e As DoWorkEventArgs) Handles bgPPrice.DoWork
-            Try
-                Dim found As Boolean = False
-                Dim price As Integer = 0
-                For i = 0 To PlatPrices.Count - 1
-                    If PlatPrices(i).Contains(Names(pCount)) Then
-                        price = GetPlat(KClean(Names(pCount)))
-                        PlatPrices(i) = Names(pCount) & "," & price
-                        found = True
-                    End If
-                Next
-                If found = False Then
+        '_________________________________________________________________________
+        'Process that passively checks parts for platinum prices
+        'This speeds up searches as you no longer have to search every part in a fissure
+        '_________________________________________________________________________
+        Try
+            Dim found As Boolean = False
+            Dim price As Integer = 0
+            For i = 0 To PlatPrices.Count - 1
+                If PlatPrices(i).Contains(Names(pCount)) Then
                     price = GetPlat(KClean(Names(pCount)))
-                    PlatPrices.Add(Names(pCount) & "," & price)
+                    PlatPrices(i) = Names(pCount) & "," & price
+                    found = True
                 End If
+            Next
+            If found = False Then
+                price = GetPlat(KClean(Names(pCount)))
+                PlatPrices.Add(Names(pCount) & "," & price)
+            End If
 
 
             If pCount < Names.Count - 2 Then
@@ -737,7 +813,7 @@ Public Class Main
                 pCount = 0
             End If
 
-            'add to bgPPrice_DoWork, comment out username copy to clip
+            'This is the developer version of a function that checks for cheaply listed parts
             If devCheck Then
                 Dim difference = GetPlat(KClean(Names(pCount)), getDif:=True)
                 If difference >= 20 Then
@@ -748,105 +824,108 @@ Public Class Main
                 End If
             End If
         Catch ex As Exception
-                addLog(ex.ToString)
-            End Try
-        End Sub
+            addLog(ex.ToString)
+        End Try
+    End Sub
 
-        Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
-            Settings.Show()
-        End Sub
+    Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
+        Settings.Show()
+    End Sub
 
-        Private Sub pbSettings_MouseEnter(sender As Object, e As EventArgs) Handles pbSettings.MouseEnter
-            pbSettings.Image = My.Resources.Settings_h
-        End Sub
+    Private Sub pbSettings_MouseEnter(sender As Object, e As EventArgs) Handles pbSettings.MouseEnter
+        pbSettings.Image = My.Resources.Settings_h
+    End Sub
 
-        Private Sub pbSettings_MouseLeave(sender As Object, e As EventArgs) Handles pbSettings.MouseLeave
-            pbSettings.Image = My.Resources.Settings
-        End Sub
+    Private Sub pbSettings_MouseLeave(sender As Object, e As EventArgs) Handles pbSettings.MouseLeave
+        pbSettings.Image = My.Resources.Settings
+    End Sub
 
-        Private Sub pbHome_Click(sender As Object, e As EventArgs) Handles pbHome.Click
-            Process.Start("https://sites.google.com/site/wfinfoapp/home")
-        End Sub
+    Private Sub pbHome_Click(sender As Object, e As EventArgs) Handles pbHome.Click
+        Process.Start("https://sites.google.com/site/wfinfoapp/home")
+    End Sub
 
-        Private Sub pbHome_MouseEnter(sender As Object, e As EventArgs) Handles pbHome.MouseEnter
-            pbHome.Image = My.Resources.home_h
-        End Sub
+    Private Sub pbHome_MouseEnter(sender As Object, e As EventArgs) Handles pbHome.MouseEnter
+        pbHome.Image = My.Resources.home_h
+    End Sub
 
-        Private Sub pbHome_MouseLeave(sender As Object, e As EventArgs) Handles pbHome.MouseLeave
-            pbHome.Image = My.Resources.home
-        End Sub
+    Private Sub pbHome_MouseLeave(sender As Object, e As EventArgs) Handles pbHome.MouseLeave
+        pbHome.Image = My.Resources.home
+    End Sub
 
-        Private Sub pbDonate_Click(sender As Object, e As EventArgs) Handles pbDonate.Click
-            Process.Start("https://sites.google.com/site/wfinfoapp/donate")
-        End Sub
+    Private Sub pbDonate_Click(sender As Object, e As EventArgs) Handles pbDonate.Click
+        Process.Start("https://sites.google.com/site/wfinfoapp/donate")
+    End Sub
 
-        Private Sub pbDonate_MouseEnter(sender As Object, e As EventArgs) Handles pbDonate.MouseEnter
-            pbDonate.Image = My.Resources.Donate_h
-        End Sub
+    Private Sub pbDonate_MouseEnter(sender As Object, e As EventArgs) Handles pbDonate.MouseEnter
+        pbDonate.Image = My.Resources.Donate_h
+    End Sub
 
-        Private Sub pbDonate_MouseLeave(sender As Object, e As EventArgs) Handles pbDonate.MouseLeave
-            pbDonate.Image = My.Resources.Donate
-        End Sub
+    Private Sub pbDonate_MouseLeave(sender As Object, e As EventArgs) Handles pbDonate.MouseLeave
+        pbDonate.Image = My.Resources.Donate
+    End Sub
 
-        Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
-            Me.Close()
-        End Sub
+    Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
+        Me.Close()
+    End Sub
 
-        Private Sub pTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown
-            drag = True
-            mouseX = Cursor.Position.X - Me.Left
-            mouseY = Cursor.Position.Y - Me.Top
-        End Sub
+    Private Sub pTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown
+        drag = True
+        mouseX = Cursor.Position.X - Me.Left
+        mouseY = Cursor.Position.Y - Me.Top
+    End Sub
 
-        Private Sub pTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles pTitle.MouseMove
-            If drag Then
-                Me.Top = Cursor.Position.Y - mouseY
-                Me.Left = Cursor.Position.X - mouseX
-            End If
-        End Sub
+    Private Sub pTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles pTitle.MouseMove
+        If drag Then
+            Me.Top = Cursor.Position.Y - mouseY
+            Me.Left = Cursor.Position.X - mouseX
+        End If
+    End Sub
 
-        Private Sub pTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp
-            drag = False
-        End Sub
+    Private Sub pTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp
+        drag = False
+    End Sub
 
-        Private Sub lbTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseDown
-            drag = True
-            mouseX = Cursor.Position.X - Me.Left
-            mouseY = Cursor.Position.Y - Me.Top
-        End Sub
+    Private Sub lbTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseDown
+        drag = True
+        mouseX = Cursor.Position.X - Me.Left
+        mouseY = Cursor.Position.Y - Me.Top
+    End Sub
 
-        Private Sub lbTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseMove
-            If drag Then
-                Me.Top = Cursor.Position.Y - mouseY
-                Me.Left = Cursor.Position.X - mouseX
-            End If
-        End Sub
+    Private Sub lbTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseMove
+        If drag Then
+            Me.Top = Cursor.Position.Y - mouseY
+            Me.Left = Cursor.Position.X - mouseX
+        End If
+    End Sub
 
-        Private Sub lbTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseUp
-            drag = False
-        End Sub
+    Private Sub lbTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseUp
+        drag = False
+    End Sub
 
-        Private Sub lbVersion_MouseDown(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseDown
-            drag = True
-            mouseX = Cursor.Position.X - Me.Left
-            mouseY = Cursor.Position.Y - Me.Top
-        End Sub
+    Private Sub lbVersion_MouseDown(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseDown
+        drag = True
+        mouseX = Cursor.Position.X - Me.Left
+        mouseY = Cursor.Position.Y - Me.Top
+    End Sub
 
-        Private Sub lbVersion_MouseMove(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseMove
-            If drag Then
-                Me.Top = Cursor.Position.Y - mouseY
-                Me.Left = Cursor.Position.X - mouseX
-            End If
-        End Sub
+    Private Sub lbVersion_MouseMove(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseMove
+        If drag Then
+            Me.Top = Cursor.Position.Y - mouseY
+            Me.Left = Cursor.Position.X - mouseX
+        End If
+    End Sub
 
     Private Sub lbVersion_MouseUp(sender As Object, e As MouseEventArgs) Handles lbVersion.MouseUp
         drag = False
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnDebug1.Click
+        '_________________________________________________________________________
+        'Used to test how a message posted on the website will display
+        '_________________________________________________________________________
         Dim curMessage As String = InputBox("Message String")
         curMessage = curMessage.Remove(0, curMessage.IndexOf("(message)") + 9)
-            curMessage = curMessage.Remove(curMessage.IndexOf("(/message)"), curMessage.Length - curMessage.IndexOf("(/message)"))
+        curMessage = curMessage.Remove(curMessage.IndexOf("(/message)"), curMessage.Length - curMessage.IndexOf("(/message)"))
 
 
         My.Settings.LastMessage = curMessage
@@ -860,6 +939,9 @@ Public Class Main
     End Sub
 
     Private Sub UpdateStatus()
+        '_________________________________________________________________________
+        'Keep-alive function for google analytics
+        '_________________________________________________________________________
         Dim uri As New Uri("http://www.google-analytics.com/collect")
         Dim req As WebRequest = WebRequest.Create(uri)
         Dim pData As String = "v=1&tid=UA-97839771-1&cid=" & HID() & "&t=pageview&dp=Online"
@@ -881,26 +963,32 @@ Public Class Main
     End Sub
 
     Public Sub CheckUpdates()
-            Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
+        '_________________________________________________________________________
+        'Checks for updates, did this really need an annotation? ;)
+        '_________________________________________________________________________
+        Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
         curVersion = curVersion.Remove(0, curVersion.IndexOf("text-align: center") + 29)
         curVersion = curVersion.Substring(0, curVersion.IndexOf("<"))
 
 
         If Not My.Settings.Version = curVersion Then
-                UpdateWindow.Display(curVersion)
-            End If
+            UpdateWindow.Display(curVersion)
+        End If
 
-        End Sub
+    End Sub
 
-        Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick
-            If My.Settings.CheckUpdates = True Then
-                CheckUpdates()
-            End If
-            tUpdate.Enabled = False
-            tUpdate.Stop()
-        End Sub
+    Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick
+        If My.Settings.CheckUpdates = True Then
+            CheckUpdates()
+        End If
+        tUpdate.Enabled = False
+        tUpdate.Stop()
+    End Sub
 
     Private Sub tMessages_Tick(sender As Object, e As EventArgs) Handles tMessages.Tick
+        '_________________________________________________________________________
+        'Checks for messages on the website and displays them in a tray if new
+        '_________________________________________________________________________
         If Messages Then
             Dim curMessage As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/message")
             curMessage = curMessage.Remove(0, curMessage.IndexOf("content=""(message)") + 18)
@@ -917,6 +1005,9 @@ Public Class Main
     End Sub
 
     Private Sub btnDebug2_Click(sender As Object, e As EventArgs) Handles btnDebug2.Click
+        '_________________________________________________________________________
+        'Another debug button, this one was used when changing analytics
+        '_________________________________________________________________________
         Dim uri As New Uri("http://www.google-analytics.com/collect")
         Dim req As WebRequest = WebRequest.Create(uri)
         Dim pData As String = "v=1&tid=UA-97839771-1&cid=" & HID() & "&t=pageview&dp=Online"
@@ -938,6 +1029,10 @@ Public Class Main
     End Sub
 
     Private Function HID() As String
+        '_________________________________________________________________________
+        'Function that gets hardware ID used for uniquely identifying computers for analytics
+        '_________________________________________________________________________
+
         ' Get the Windows Management Instrumentation object.
         Dim wmi As Object = GetObject("WinMgmts:")
 
@@ -950,12 +1045,15 @@ Public Class Main
         Next board
         If serial_numbers.Length > 0 Then serial_numbers =
         serial_numbers.Substring(2)
-        serial_numbers = GenSHA(serial_numbers)
+        serial_numbers = GenSHA(serial_numbers) 'Encrypts serial number for safe transfer
 
         Return serial_numbers
     End Function
 
     Public Shared Function GenSHA(ByVal inputString) As String
+        '_________________________________________________________________________
+        'Function to encrypt HID for safe transfer on the net
+        '_________________________________________________________________________
         Dim Sha256 As SHA256 = SHA256Managed.Create()
         Dim bytes As Byte() = System.Text.Encoding.UTF8.GetBytes(inputString)
         Dim hash As Byte() = Sha256.ComputeHash(bytes)
@@ -969,17 +1067,12 @@ Public Class Main
     Private Sub BGWorker_DoWork(sender As Object, e As DoWorkEventArgs) Handles BGWorker.DoWork
         UpdateList()
     End Sub
-
-    Private Sub tDebug_Tick(sender As Object, e As EventArgs) Handles tDebug.Tick
-
-    End Sub
-
-    Private Sub Panel1_Paint(sender As Object, e As PaintEventArgs) Handles Panel1.Paint
-
-    End Sub
 End Class
 
 Module Glob
+    '_________________________________________________________________________
+    'Global variables used for various things
+    '_________________________________________________________________________
     Public qItems As New List(Of String)()
     Public HKey1 As Integer = My.Settings.HKey1
     Public HKey2 As Integer = My.Settings.HKey2
@@ -1000,6 +1093,9 @@ Module Glob
     Public cookie As String = ""
     Public xcsrf As String = ""
     Public Function check(string1 As String) As Integer
+        '_________________________________________________________________________
+        'Checks the levDist of a string and returns the index in Names() of the closest part
+        '_________________________________________________________________________
         string1 = string1.Replace("*", "")
         Dim Compare As New List(Of Integer)()
         For Each str As String In Names
@@ -1016,6 +1112,9 @@ Module Glob
         Return ind
     End Function
     Public Function checkSet(string1 As String) As String
+        '_________________________________________________________________________
+        'Returns a string of a set given a part name
+        '_________________________________________________________________________
         string1 = string1.ToLower()
         string1 = string1.Replace("*", "")
         Dim Compare As New List(Of Integer)()
@@ -1081,6 +1180,10 @@ Module Glob
     End Function
     Public Function LevDist(ByVal s As String,
                                     ByVal t As String) As Integer
+        '_________________________________________________________________________
+        'LevDist determines how "close" a jumbled name is to an actual name
+        'For example: Nuvo Prime is closer to Nova Prime (2) then Ash Prime (4)
+        '_________________________________________________________________________
         s.Replace("*", "")
         t.Replace("*", "")
         s = s.ToLower
@@ -1126,16 +1229,33 @@ Module Glob
         Return d(n, m)
     End Function
     Public Function GetPlat(str As String, Optional getUser As Boolean = False, Optional getMod As Boolean = False, Optional getID As Boolean = False, Optional getDif As Boolean = False) As String
+        '_________________________________________________________________________
+        'Retrieves a plat price of a part or set via warframe.market
+        '_________________________________________________________________________
+
+        '_________________________________________________________________________
+        'Prepare the name for the API
+        '_________________________________________________________________________
         Dim partName As String = str
         partName = partName.Replace(vbLf, "").Replace("*", "")
         str = str.ToLower
         str = str.Replace(" ", "%5F").Replace(vbLf, "").Replace("*", "")
+
+
+        '_________________________________________________________________________
+        'Make the request
+        '_________________________________________________________________________
         Dim webClient As New System.Net.WebClient
         webClient.Headers.Add("platform", "pc")
         webClient.Headers.Add("language", "en")
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
         Dim result As JObject
         result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/orders"))
+
+
+        '_________________________________________________________________________
+        'If ingame and online, and selling, add the price and name to a list
+        '_________________________________________________________________________
         Dim platCheck As New List(Of Integer)()
         Dim userCheck As New List(Of String)()
         For i = 0 To result("payload")("orders").Count - 1
@@ -1147,6 +1267,10 @@ Module Glob
             End If
         Next
 
+
+        '_________________________________________________________________________
+        'Compare the prices to get the lowest price listed
+        '_________________________________________________________________________
         If platCheck.Count = 0 Then
             Return 0
         End If
@@ -1172,14 +1296,19 @@ Module Glob
         user = minUsers(0)
         low = total / 5
 
+
+        '_________________________________________________________________________
+        'If you toggle getUser:
+        'Returns the username of the lowest seller and copies a buy message to clipboard
+        '_________________________________________________________________________
         If getUser Then
             Clipboard.SetText("/w " & user & " Hi, I would like to buy your " & partName & " for " & low & " Platinum.")
             Return low & vbNewLine & "    User: " & user
 
-        ElseIf getID Then
+        ElseIf getID Then 'Used to list parts on warframe.market, returns the ID of the searched part
             result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str))
             Return result("payload")("item")("id")
-        ElseIf getDif Then
+        ElseIf getDif Then 'Gets the difference between the lowest price and the next cheapest (Dev tool for cheap listings)
             platCheck.Clear()
             userCheck.Clear()
             For i = 0 To result("payload")("orders").Count - 1
@@ -1215,6 +1344,9 @@ Module Glob
         End If
     End Function
     Public Sub UpdateColors(f As Form)
+        '_________________________________________________________________________
+        'Updates the application colors for people who use custom colors
+        '_________________________________________________________________________
         For Each c As Control In f.Controls
             If c.Name = "pTitle" Then
                 c.BackColor = My.Settings.cTitleBar
