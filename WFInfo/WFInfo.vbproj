@@ -291,6 +291,11 @@
     <Content Include="lib\x86\libtesseract304.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Read Me.txt" />
+    <None Include="Resources\Panel_V.png" />
+    <None Include="Resources\Panel_UV.png" />
+    <Content Include="x64\SQLite.Interop.dll" />
+    <Content Include="x86\SQLite.Interop.dll" />
     <None Include="Resources\panelBG.bmp" />
     <None Include="Resources\DPPanel.png" />
     <None Include="Resources\DuckPlatPanel.png" />

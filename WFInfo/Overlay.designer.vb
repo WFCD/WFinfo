@@ -90,7 +90,7 @@ Partial Class Overlay
         Me.PictureBox1.BackColor = System.Drawing.Color.Transparent
         Me.PictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
         Me.PictureBox1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.PictureBox1.Image = Global.WFInfo.My.Resources.Resources.DnPPanel
+        Me.PictureBox1.Image = Global.WFInfo.My.Resources.Resources.Panel_UV
         Me.PictureBox1.Location = New System.Drawing.Point(0, 0)
         Me.PictureBox1.Name = "PictureBox1"
         Me.PictureBox1.Size = New System.Drawing.Size(250, 140)

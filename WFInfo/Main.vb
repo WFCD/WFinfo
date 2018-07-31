@@ -342,6 +342,7 @@ Public Class Main
                         Dim HighestPlat As Integer = 0
                         Dim p As New List(Of String)()
                         Dim d As New List(Of String)()
+                        Dim v As New List(Of Boolean)()
                         For i = 0 To finalList.Count - 1
                             Dim guess As String = finalList(i)
                             If Not finalList(i) = "Forma Blueprint" Then
@@ -364,6 +365,11 @@ Public Class Main
 
                                 p.Add(plat)
                                 d.Add(Ducks(check(guess)))
+                                If guess.Contains("*") Then
+                                    v.Add(True)
+                                Else
+                                    v.Add(False)
+                                End If
 
                                 If KClean(guess).Length > 27 Then
                                     qItems.Add(KClean(guess).Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
@@ -374,6 +380,7 @@ Public Class Main
                                 qItems.Add(vbNewLine & finalList(i) & vbNewLine)
                                 p.Add(0)
                                 d.Add(0)
+                                v.Add(False)
                             End If
                         Next
 
@@ -401,39 +408,39 @@ Public Class Main
                                         Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
                                         Select Case i
                                             Case 0
-                                                panel1.Display(x, y, p(i), d(i))
+                                                panel1.Display(x, y, p(i), d(i), v(i))
                                             Case 1
-                                                panel2.Display(x, y, p(i), d(i))
+                                                panel2.Display(x, y, p(i), d(i), v(i))
                                             Case 2
-                                                panel3.Display(x, y, p(i), d(i))
+                                                panel3.Display(x, y, p(i), d(i), v(i))
                                             Case 3
-                                                panel4.Display(x, y, p(i), d(i))
+                                                panel4.Display(x, y, p(i), d(i), v(i))
                                         End Select
                                     Case 3
                                         Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (1.5 * width) + (width * i) + (width * 0.62)
                                         Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
                                         Select Case i
                                             Case 0
-                                                panel1.Display(x, y, p(i), d(i))
+                                                panel1.Display(x, y, p(i), d(i), v(i))
                                             Case 1
-                                                panel2.Display(x, y, p(i), d(i))
+                                                panel2.Display(x, y, p(i), d(i), v(i))
                                             Case 2
-                                                panel3.Display(x, y, p(i), d(i))
+                                                panel3.Display(x, y, p(i), d(i), v(i))
                                             Case 3
-                                                panel4.Display(x, y, p(i), d(i))
+                                                panel4.Display(x, y, p(i), d(i), v(i))
                                         End Select
                                     Case 2
                                         Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (width) + (width * i) + (width * 0.62)
                                         Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
                                         Select Case i
                                             Case 0
-                                                panel1.Display(x, y, p(i), d(i))
+                                                panel1.Display(x, y, p(i), d(i), v(i))
                                             Case 1
-                                                panel2.Display(x, y, p(i), d(i))
+                                                panel2.Display(x, y, p(i), d(i), v(i))
                                             Case 2
-                                                panel3.Display(x, y, p(i), d(i))
+                                                panel3.Display(x, y, p(i), d(i), v(i))
                                             Case 3
-                                                panel4.Display(x, y, p(i), d(i))
+                                                panel4.Display(x, y, p(i), d(i), v(i))
                                         End Select
                                 End Select
                             Next
@@ -645,12 +652,16 @@ Public Class Main
                     Dim name As String = current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).Substring(0, current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).IndexOf("<"))
                     Dim ducats As String = current.Substring(current.IndexOf("<b>") + 3)
                     ducats = ducats.Substring(0, ducats.IndexOf("<"))
-                    Dim vStr As String = ""
-                    Dim vBool As Boolean = False
-                    If current.Contains("Prime Vault") Then
-                        vBool = True
-                        vStr = "*"
-                    End If
+                    Dim vStr As String = "*"
+                    Dim vBool As Boolean = True
+                    Dim delim As String() = New String() {"relic"}
+                    Dim relics() = current.Split(delim, StringSplitOptions.None)
+                    For i = 1 To relics.Count - 1
+                        If Not relics(i).Contains("Prime Vault") Then
+                            vBool = False
+                            vStr = ""
+                        End If
+                    Next
                     If Not name.Contains("Carrier") And Not name.Contains("Wyrm") And Not name.Contains("Helios") Then
                         If name.Contains("Systems") Or name.Contains("Chassis") Or name.Contains("Neuroptics") Then
                             name += " Blueprint"
@@ -755,6 +766,7 @@ Public Class Main
         'Retrieves the text information (location, type, etc) with OCR of an image
         '_________________________________________________________________________
         Using img
+            img = RemoveNoise(Sharpen(prepare(ResizeImage(img, 1.1)), 6))
             Dim engine As New TesseractEngine("", "eng")
             engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-.")
             engine.DefaultPageSegMode = Tesseract.PageSegMode.SingleLine
@@ -1420,5 +1432,84 @@ Module Glob
 
         Return bmpTemp
 
+    End Function
+    Public Function prepare(img As Image) As Image
+        Using img
+            Dim X As Integer
+            Dim Y As Integer
+            Dim clr As Integer
+            Dim bmp As Bitmap = New Bitmap(img)
+            For X = 0 To bmp.Width - 1
+                For Y = 0 To bmp.Height - 1
+                    clr = (CInt(bmp.GetPixel(X, Y).R) +
+                           bmp.GetPixel(X, Y).G +
+                           bmp.GetPixel(X, Y).B) \ 3
+                    bmp.SetPixel(X, Y, Color.FromArgb(clr, clr, clr))
+                Next Y
+            Next X
+            Return bmp
+        End Using
+    End Function
+
+    Public Function Sharpen(image As Image, strength As Integer) As Image
+        Using image
+            Dim fpixel, secpixel As Color
+            Dim NewImg As Bitmap = New Bitmap(image)
+            Dim CR, CB, CG As Integer
+            Dim x, y As Integer
+            For x = 0 To NewImg.Width - 2
+                For y = 0 To NewImg.Height - 2
+                    fpixel = NewImg.GetPixel(x, y)
+                    secpixel = NewImg.GetPixel(x + 1, y)
+                    Dim newR, newB, newG As Integer
+                    newR = CInt(fpixel.R) - CInt(secpixel.R)
+                    newB = CInt(fpixel.B) - CInt(secpixel.B)
+                    newG = CInt(fpixel.G) - CInt(secpixel.G)
+                    CR = CInt(newR * strength) + fpixel.R
+                    CG = CInt(newG * strength) + fpixel.G
+                    CB = CInt(newB * strength) + fpixel.B
+
+                    If CR > 255 Then
+                        CR = 255
+                    End If
+                    If CR < 0 Then
+                        CR = 0
+
+                    End If
+                    If CB > 255 Then
+                        CB = 255
+                    End If
+                    If CB < 0 Then
+                        CB = 0
+                    End If
+
+                    If CG > 255 Then
+                        CG = 255
+                    End If
+
+                    If CG < 0 Then
+                        CG = 0
+                    End If
+                    NewImg.SetPixel(x, y, Color.FromArgb(CR, CG, CB))
+                Next
+            Next
+            Return NewImg
+        End Using
+    End Function
+    Public Function RemoveNoise(ByVal bmap As Bitmap) As Bitmap
+        For x = 0 To bmap.Width - 1
+
+            For y = 0 To bmap.Height - 1
+                Dim pixel = bmap.GetPixel(x, y)
+
+                If pixel.R < 162 AndAlso pixel.G < 162 AndAlso pixel.B < 162 Then
+                    bmap.SetPixel(x, y, Color.Black)
+                ElseIf pixel.R > 162 AndAlso pixel.G > 162 AndAlso pixel.B > 162 Then
+                    bmap.SetPixel(x, y, Color.White)
+                End If
+            Next
+        Next
+
+        Return bmap
     End Function
 End Module

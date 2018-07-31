@@ -94,7 +94,10 @@ Public Class Overlay
         Me.Refresh()
     End Sub
 
-    Public Sub Display(x As Integer, y As Integer, p As Integer, d As Integer)
+    Public Sub Display(x As Integer, y As Integer, p As Integer, d As Integer, Optional v As Boolean = False)
+        If v Then
+            PictureBox1.Image = My.Resources.Panel_V
+        End If
         pLoc = New Point(x, y)
         pSize = New Point(125, 70)
         Dim fontSize As Integer = 0.26 * pSize.Y
@@ -134,4 +137,5 @@ Public Class Overlay
     Private Sub tHide_Tick(sender As Object, e As EventArgs) Handles tHide.Tick
         Me.Close()
     End Sub
+
 End Class

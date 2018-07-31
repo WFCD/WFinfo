@@ -45,11 +45,8 @@ Partial Class Input
         Me.tbCommand.Location = New System.Drawing.Point(12, 20)
         Me.tbCommand.Name = "tbCommand"
         Me.tbCommand.Size = New System.Drawing.Size(456, 20)
-        Me.tbCommand.TabIndex = 3
+        Me.tbCommand.TabIndex = 0
         Me.tbCommand.Visible = False
-        '
-        'bgMain
-        '
         '
         'tActivate
         '
