@@ -1,8 +1,7 @@
 ﻿Imports System.Runtime.InteropServices
 Imports System.Drawing.Text
 Imports System.Text
-
-Public Class Overlay
+Public Class NamePlaque
     Private InitialStyle As Integer
     Dim PercentVisible As Decimal
     Dim screenWidth As Integer = Screen.PrimaryScreen.Bounds.Width
@@ -94,41 +93,24 @@ Public Class Overlay
         Me.Refresh()
     End Sub
 
-    Public Sub Display(x As Integer, y As Integer, p As String, d As Integer, Optional v As Boolean = False)
-        If v Then
-            PictureBox1.Image = My.Resources.Panel_V
-        End If
+    Public Sub Display(x As Integer, y As Integer, w As Integer, n As String)
         pLoc = New Point(x, y)
-        pSize = New Point(125, 70)
-        Dim fontSize As Integer = 0.26 * pSize.Y
+        pSize = New Point(w, 40)
+        Dim fontSize As Integer = 0.33 * pSize.Y
 
-        'Platinum Label
-        lbPlat.Location = New Point(-2, 0)
-        lbPlat.Font = New Font(lbPlat.Font.FontFamily, fontSize, FontStyle.Bold)
-        lbPlat.BackColor = Color.Transparent
-        lbPlat.Parent = lbPDropShadow
-        lbPlat.Text = p
+        'Name Label
+        lbName.Location = New Point((-2), 0)
+        lbName.Font = New Font(lbName.Font.FontFamily, fontSize, FontStyle.Bold)
+        lbName.BackColor = Color.Transparent
+        lbName.Parent = lbNDropShadow
+        lbName.Text = n
 
-        'Platinum Label Drop Shadow
-        lbPDropShadow.Location = New Point((pSize.X / 2.58) + 2, (pSize.Y / 27))
-        lbPDropShadow.Font = New Font(lbPDropShadow.Font.FontFamily, fontSize, FontStyle.Bold)
-        lbPDropShadow.BackColor = Color.Transparent
-        lbPDropShadow.Parent = PictureBox1
-        lbPDropShadow.Text = p
-
-        'Ducat Label
-        lbDucats.Location = New Point(-1, 0)
-        lbDucats.Font = New Font(lbDucats.Font.FontFamily, fontSize, FontStyle.Bold)
-        lbDucats.BackColor = Color.Transparent
-        lbDucats.Parent = lbDDropShadow
-        lbDucats.Text = d
-
-        'Ducat Label Drop Shadow
-        lbDDropShadow.Location = New Point((pSize.X / 2.58) + 2, (pSize.Y / 2.15) + (pSize.Y / 27))
-        lbDDropShadow.Font = New Font(lbDDropShadow.Font.FontFamily, fontSize, FontStyle.Bold)
-        lbDDropShadow.BackColor = Color.Transparent
-        lbDDropShadow.Parent = PictureBox1
-        lbDDropShadow.Text = d
+        'Name Label Drop Shadow
+        lbNDropShadow.Location = New Point((pSize.Y * 0.3) + 1, pSize.Y * -0.35)
+        lbNDropShadow.Font = New Font(lbNDropShadow.Font.FontFamily, fontSize, FontStyle.Bold)
+        lbNDropShadow.BackColor = Color.Transparent
+        lbNDropShadow.Parent = PictureBox1
+        lbNDropShadow.Text = n
 
         Me.Show()
         Me.Refresh()

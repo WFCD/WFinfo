@@ -163,7 +163,7 @@ Public Class Tray
         PercentVisible = 0.97
 
         SetWindowLong(Me.Handle, GWL.ExStyle, InitialStyle Or WS_EX.Layered Or WS_EX.Transparent)
-        'SetLayeredWindowAttributes(Me.Handle, 0, 255 * PercentVisible, LWA.Alpha)
+        SetLayeredWindowAttributes(Me.Handle, 0, 255 * PercentVisible, LWA.Alpha)
         Me.BackColor = Color.Black
         Me.TopMost = True
 

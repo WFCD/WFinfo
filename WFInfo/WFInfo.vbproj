@@ -121,6 +121,12 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NamePlaque.Designer.vb">
+      <DependentUpon>NamePlaque.vb</DependentUpon>
+    </Compile>
+    <Compile Include="NamePlaque.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Picker.Designer.vb">
       <DependentUpon>Picker.vb</DependentUpon>
     </Compile>
@@ -160,6 +166,12 @@
     <Compile Include="Overlay.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="TargetSelector.Designer.vb">
+      <DependentUpon>TargetSelector.vb</DependentUpon>
+    </Compile>
+    <Compile Include="TargetSelector.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Tray.designer.vb">
       <DependentUpon>Tray.vb</DependentUpon>
     </Compile>
@@ -180,6 +192,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="NamePlaque.resx">
+      <DependentUpon>NamePlaque.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Picker.resx">
       <DependentUpon>Picker.vb</DependentUpon>
     </EmbeddedResource>
@@ -197,6 +212,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Overlay.resx">
       <DependentUpon>Overlay.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TargetSelector.resx">
+      <DependentUpon>TargetSelector.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tray.resx">
       <DependentUpon>Tray.vb</DependentUpon>
@@ -294,6 +312,11 @@
     <Content Include="Read Me.txt" />
     <None Include="Resources\Panel_V.png" />
     <None Include="Resources\Panel_UV.png" />
+    <None Include="Resources\Target.bmp" />
+    <None Include="Resources\Target.png" />
+    <None Include="Resources\Target1.png" />
+    <None Include="Resources\TargetBox.png" />
+    <None Include="Resources\PlaqueTray.png" />
     <Content Include="x64\SQLite.Interop.dll" />
     <Content Include="x86\SQLite.Interop.dll" />
     <None Include="Resources\panelBG.bmp" />

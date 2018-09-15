@@ -72,18 +72,21 @@ Public Class Settings
         Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         btnHkey1.Text = My.Settings.HKey1Text
         btnHkey2.Text = My.Settings.HKey2Text
+        btnHkey3.Text = My.Settings.HKey3Text
         cbPassiveChecks.Checked = PassiveChecks
         cbAnimations.Checked = Animate
         cbFullscreen.Checked = Fullscreen
         cbNewStyle.Checked = NewStyle
         cbDebug.Checked = Debug
+        cbPlatinum.Checked = DisplayPlatinum
+        cbDisplayNames.Checked = DisplayNames
     End Sub
 
     Private Sub Settings_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress
         '_________________________________________________________________________
         'Stores the next keypress char code to chTemp when ready to set a hotkey
         '_________________________________________________________________________
-        If key1Tog Or key2Tog Then
+        If key1Tog Or key2Tog Or key3Tog Then
             chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
         End If
     End Sub
@@ -229,14 +232,19 @@ Public Class Settings
     'You get the idea
     '_________________________________________________________________________
 
+    Private Sub btnHkey3_KeyPress(sender As Object, e As KeyPressEventArgs) Handles btnHkey3.KeyPress
+        If key1Tog Or key2Tog Or key3Tog Then
+            chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
+        End If
+    End Sub
     Private Sub btnHkey2_KeyPress(sender As Object, e As KeyPressEventArgs) Handles btnHkey2.KeyPress
-        If key1Tog Or key2Tog Then
+        If key1Tog Or key2Tog Or key3Tog Then
             chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
         End If
     End Sub
 
     Private Sub btnHkey1_KeyPress(sender As Object, e As KeyPressEventArgs) Handles btnHkey1.KeyPress
-        If key1Tog Or key2Tog Then
+        If key1Tog Or key2Tog Or key3Tog Then
             chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
         End If
     End Sub
@@ -254,16 +262,7 @@ Public Class Settings
         '_________________________________________________________________________
         'Stores the settings when closing
         '_________________________________________________________________________
-        My.Settings.Animate = cbAnimations.Checked
-        My.Settings.PassiveChecks = cbPassiveChecks.Checked
-        My.Settings.Messages = cbMessages.Checked
-        My.Settings.NewStyle = cbNewStyle.Checked
-        My.Settings.HKey1 = HKey1
-        My.Settings.HKey2 = HKey2
-        My.Settings.HKey1Text = btnHkey1.Text
-        My.Settings.HKey2Text = btnHkey2.Text
-        My.Settings.Debug = cbDebug.Checked
-        My.Settings.Save()
+        saveSettings()
     End Sub
 
     Private Sub cbFullscreen_Click(sender As Object, e As EventArgs) Handles cbFullscreen.Click
@@ -336,6 +335,7 @@ Public Class Settings
     Private Sub cbAnimations_Click(sender As Object, e As EventArgs) Handles cbAnimations.Click
         My.Settings.Animate = cbAnimations.Checked
         Animate = cbAnimations.Checked
+        saveSettings()
     End Sub
 
     Private Sub cbPassiveChecks_Click(sender As Object, e As EventArgs) Handles cbPassiveChecks.Click
@@ -346,6 +346,7 @@ Public Class Settings
     Private Sub cbDebug_Click(sender As Object, e As EventArgs) Handles cbDebug.Click
         My.Settings.Debug = cbDebug.Checked
         Debug = cbDebug.Checked
+        saveSettings()
     End Sub
 
     Private Sub pTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown
@@ -389,15 +390,105 @@ Public Class Settings
     Private Sub cbMessages_Click(sender As Object, e As EventArgs) Handles cbMessages.Click
         My.Settings.Messages = cbMessages.Checked
         Messages = cbMessages.Checked
+        saveSettings()
     End Sub
 
     Private Sub cbNewStyle_Click(sender As Object, e As EventArgs) Handles cbNewStyle.Click
         My.Settings.NewStyle = cbNewStyle.Checked
         NewStyle = cbNewStyle.Checked
+        saveSettings()
     End Sub
 
     Private Sub btnCustomize_Click(sender As Object, e As EventArgs) Handles btnCustomize.Click
         Picker.Show()
     End Sub
 
+    Private Sub btnHkey3_Click(sender As Object, e As EventArgs) Handles btnHkey3.Click
+        '_________________________________________________________________________
+        'Toggle for setting hotkey 3
+        '_________________________________________________________________________
+        If Not key3Tog Then
+            btnHkey3.Text = "..."
+            key3Tog = True
+        Else
+            btnHkey3.Text = My.Settings.HKey3Text
+        End If
+    End Sub
+
+    Private Sub btnHkey3_KeyUp(sender As Object, e As KeyEventArgs) Handles btnHkey3.KeyUp
+        '_________________________________________________________________________
+        'Sets the key for hotkey 3
+        '_________________________________________________________________________
+        If key3Tog Then
+            key3Tog = False
+            HKey3 = e.KeyCode
+            e.SuppressKeyPress = True
+            If e.KeyCode = Keys.PrintScreen Then
+                btnHkey3.Text = "Print Screen"
+            Else
+                Select Case e.KeyCode
+
+                    Case 112 To 123
+                        btnHkey3.Text = "F" & e.KeyCode - 111
+                    Case 32
+                        btnHkey3.Text = "SPACE"
+                    Case 8
+                        btnHkey3.Text = "BACKSPACE"
+                    Case 16
+                        btnHkey3.Text = "SHIFT"
+                    Case 17
+                        btnHkey3.Text = "CTRL"
+                    Case 18
+                        btnHkey3.Text = "ALT"
+                    Case 9
+                        btnHkey3.Text = "TAB"
+                    Case 20
+                        btnHkey3.Text = "CAPSLOCK"
+                    Case 45
+                        btnHkey3.Text = "INS"
+                    Case 46
+                        btnHkey3.Text = "DELETE"
+                    Case 36
+                        btnHkey3.Text = "HOME"
+                    Case 35
+                        btnHkey3.Text = "END"
+                    Case 33
+                        btnHkey3.Text = "PG UP"
+                    Case 34
+                        btnHkey3.Text = "PG DOWN"
+                    Case Else
+                        btnHkey3.Text = chTemp
+                End Select
+            End If
+        End If
+    End Sub
+
+    Private Sub cbPlatinum_Click(sender As Object, e As EventArgs) Handles cbPlatinum.Click
+        My.Settings.DisplayPlatinum = cbPlatinum.Checked
+        DisplayPlatinum = cbPlatinum.Checked
+        saveSettings()
+    End Sub
+
+    Private Sub cbDisplayNames_Click(sender As Object, e As EventArgs) Handles cbDisplayNames.Click
+        My.Settings.DisplayNames = cbDisplayNames.Checked
+        DisplayNames = cbDisplayNames.Checked
+        saveSettings()
+    End Sub
+    Private Sub saveSettings()
+        ''Saves settings
+        My.Settings.Animate = cbAnimations.Checked
+        My.Settings.PassiveChecks = cbPassiveChecks.Checked
+        My.Settings.Messages = cbMessages.Checked
+        My.Settings.NewStyle = cbNewStyle.Checked
+        My.Settings.DisplayPlatinum = cbPlatinum.Checked
+        My.Settings.DisplayNames = cbDisplayNames.Checked
+        My.Settings.HKey1 = HKey1
+        My.Settings.HKey2 = HKey2
+        My.Settings.HKey3 = HKey3
+        My.Settings.HKey1Text = btnHkey1.Text
+        My.Settings.HKey2Text = btnHkey2.Text
+        My.Settings.HKey3Text = btnHkey3.Text
+        My.Settings.Debug = cbDebug.Checked
+        My.Settings.Save()
+    End Sub
 End Class

@@ -44,11 +44,11 @@ Partial Class Main
         Me.tOnline = New System.Windows.Forms.Timer(Me.components)
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.tMessages = New System.Windows.Forms.Timer(Me.components)
+        Me.tDebug = New System.Windows.Forms.Timer(Me.components)
         Me.pbHome = New System.Windows.Forms.PictureBox()
         Me.pbDonate = New System.Windows.Forms.PictureBox()
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
-        Me.tDebug = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1.SuspendLayout()
         CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
@@ -244,6 +244,10 @@ Partial Class Main
         Me.tMessages.Enabled = True
         Me.tMessages.Interval = 300000
         '
+        'tDebug
+        '
+        Me.tDebug.Enabled = True
+        '
         'pbHome
         '
         Me.pbHome.BackColor = System.Drawing.Color.Transparent
@@ -286,10 +290,6 @@ Partial Class Main
         Me.pbSideBar.Size = New System.Drawing.Size(28, 99)
         Me.pbSideBar.TabIndex = 18
         Me.pbSideBar.TabStop = False
-        '
-        'tDebug
-        '
-        Me.tDebug.Enabled = True
         '
         'Main
         '

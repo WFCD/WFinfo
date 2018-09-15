@@ -106,9 +106,13 @@ Public Class Main
             'UpdateStatus is a keep-alive function for analytics
             '_________________________________________________________________________
             UpdateStatus()
+
         Catch ex As Exception
             addLog(ex.ToString)
         End Try
+        If Not My.Settings.TargetAreaSet Then
+            MsgBox("This is a beta version of WFInfo." & vbNewLine & "You must first set the target area." & vbNewLine & vbNewLine & "1.) Get to the Fissure Reward Screen with 4 players." & vbNewLine & "2.) Press " & My.Settings.HKey3Text & " to show the selection cursor." & vbNewLine & "3.) Click the upper left corner of the first reward." & vbNewLine & "4.) Click the lower right corner of the last reward.", MsgBoxStyle.SystemModal)
+        End If
     End Sub
 
     Public Function getCookie()
@@ -217,11 +221,18 @@ Public Class Main
         'The toggles make sure it runs only once per press
         '_________________________________________________________________________
         Try
-            If (Not key1Tog) And (Not key2Tog) Then
+            Dim Refresh As Integer = GetAsyncKeyState(HKey3)
+            If GetAsyncKeyState(HKey3) And &H8000 Then
+                If Not TargetSelector.Visible = True Then
+                    TargetSelector.Show()
+                End If
+            End If
+
+            If (Not key1Tog) And (Not key2Tog) And My.Settings.TargetAreaSet Then
                 '_________________________________________________________________________
                 'Refreshes the async state and checks and opens command function if hotkey is pressed
                 '_________________________________________________________________________
-                Dim Refresh As Integer = GetAsyncKeyState(HKey1)
+                Refresh = GetAsyncKeyState(HKey1)
                 Refresh = GetAsyncKeyState(HKey2)
                 If Not Input.Visible = True Then
                     If GetAsyncKeyState(HKey2) And &H8000 Then
@@ -260,13 +271,11 @@ Public Class Main
                     If Fullscreen Then
                         CliptoImage = New System.Drawing.Bitmap(My.Settings.LastFile)
                     Else
-                        Dim bounds As Rectangle
                         Dim screenshot As System.Drawing.Bitmap
                         Dim graph As Graphics
-                        bounds = Screen.PrimaryScreen.Bounds
-                        screenshot = New System.Drawing.Bitmap(bounds.Width, bounds.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb)
+                        screenshot = New System.Drawing.Bitmap(My.Settings.RecSize.X, My.Settings.RecSize.Y, System.Drawing.Imaging.PixelFormat.Format32bppRgb)
                         graph = Graphics.FromImage(screenshot)
-                        graph.CopyFromScreen(0, 0, 0, 0, bounds.Size, CopyPixelOperation.SourceCopy)
+                        graph.CopyFromScreen(My.Settings.StartPoint.X, My.Settings.StartPoint.Y, 0, 0, My.Settings.RecSize, CopyPixelOperation.SourceCopy)
                         CliptoImage = screenshot
                     End If
 
@@ -321,7 +330,7 @@ Public Class Main
                                     Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\") + 1
                                     img.Save(appData & "\WFInfo\tests\" & nextFile & ".jpg", Imaging.ImageFormat.Jpeg)
                                 End If
-                                Dim guess As String = Names(check(GetText(img) + " Blueprint"))
+                                Dim guess As String = Names(check(GetText(img) + " Blueprint Blueprint"))
                                 img.Dispose()
                                 finalList.Add(guess)
                             End If
@@ -343,6 +352,7 @@ Public Class Main
                         Dim p As New List(Of String)()
                         Dim d As New List(Of String)()
                         Dim v As New List(Of Boolean)()
+                        Dim n As New List(Of String)()
                         For i = 0 To finalList.Count - 1
                             Dim guess As String = finalList(i)
                             If Not finalList(i) = "Forma Blueprint" Then
@@ -354,30 +364,59 @@ Public Class Main
                                     End If
                                 Next
                                 If plat = "" Then
-                                    plat = GetPlat(KClean(guess))
-                                    PlatPrices.Add(guess & "," & plat)
-                                End If
-                                If Not plat = "Unknown" Then
-                                    If CType(plat, Integer) > HighestPlat Then
-                                        HighestPlat = CType(plat, Integer)
+                                    If DisplayPlatinum Then
+                                        plat = GetPlat(KClean(guess))
+                                        PlatPrices.Add(guess & "," & plat)
+                                    Else
+                                        plat = "-1"
+                                    End If
+                                    If Not plat = "Unknown" Then
+                                        If CType(plat, Integer) > HighestPlat Then
+                                            HighestPlat = CType(plat, Integer)
+                                        End If
+                                    End If
+                                    If CType(plat, Integer) < 0 Then
+                                        plat = "X"
+                                    End If
+                                    p.Add(plat)
+                                    d.Add(Ducks(check(guess)))
+                                    If KClean(guess).Length > 27 Then
+                                        n.Add(KClean(guess).Substring(0, 27) & "...")
+                                    Else
+                                        n.Add(KClean(guess))
+                                    End If
+                                    If guess.Contains("*") Then
+                                        v.Add(True)
+                                    Else
+                                        v.Add(False)
+                                    End If
+
+                                    If KClean(guess).Length > 27 Then
+                                        qItems.Add(KClean(guess).Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
+                                    Else
+                                        qItems.Add(KClean(guess) & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
+                                    End If
+                                Else
+                                    p.Add(plat)
+                                    d.Add(Ducks(check(guess)))
+                                    If KClean(guess).Length > 27 Then
+                                        n.Add(KClean(guess).Substring(0, 27) & "...")
+                                    Else
+                                        n.Add(KClean(guess))
+                                    End If
+                                    If guess.Contains("*") Then
+                                        v.Add(True)
+                                    Else
+                                        v.Add(False)
+                                    End If
+                                    If KClean(guess).Length > 27 Then
+                                        qItems.Add(KClean(guess).Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
+                                    Else
+                                        qItems.Add(KClean(guess) & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
                                     End If
                                 End If
-
-                                p.Add(plat)
-                                d.Add(Ducks(check(guess)))
-                                If guess.Contains("*") Then
-                                    v.Add(True)
-                                Else
-                                    v.Add(False)
-                                End If
-
-                                If KClean(guess).Length > 27 Then
-                                    qItems.Add(KClean(guess).Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
-                                Else
-                                    qItems.Add(KClean(guess) & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
-                                End If
                             Else
-                                qItems.Add(vbNewLine & finalList(i) & vbNewLine)
+                                n.Add(vbNewLine & KClean(guess))
                                 p.Add(0)
                                 d.Add(0)
                                 v.Add(False)
@@ -401,11 +440,11 @@ Public Class Main
                             Dim panel3 As New Overlay
                             Dim panel4 As New Overlay
                             For i = 0 To players - 1
-                                Dim width As Integer = 0.4 * Screen.PrimaryScreen.Bounds.Height
+                                Dim width As Integer = (CliptoImage.Width / 4)
+                                Dim y As Integer = My.Settings.StartPoint.Y + (My.Settings.StartPoint.Y * 0.05)
                                 Select Case players
                                     Case 4
-                                        Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (width * 2) + (width * i) + (width * 0.62)
-                                        Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
+                                        Dim x As Integer = ((CliptoImage.Width / 4) * 0.8) + (width * i)
                                         Select Case i
                                             Case 0
                                                 panel1.Display(x, y, p(i), d(i), v(i))
@@ -417,8 +456,7 @@ Public Class Main
                                                 panel4.Display(x, y, p(i), d(i), v(i))
                                         End Select
                                     Case 3
-                                        Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (1.5 * width) + (width * i) + (width * 0.62)
-                                        Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
+                                        Dim x As Integer = (width * i) + ((CliptoImage.Width / 4) * 0.8) + (width * 0.5)
                                         Select Case i
                                             Case 0
                                                 panel1.Display(x, y, p(i), d(i), v(i))
@@ -430,8 +468,7 @@ Public Class Main
                                                 panel4.Display(x, y, p(i), d(i), v(i))
                                         End Select
                                     Case 2
-                                        Dim x As Integer = (Screen.PrimaryScreen.Bounds.Width / 2) - (width) + (width * i) + (width * 0.62)
-                                        Dim y As Integer = Screen.PrimaryScreen.Bounds.Height * 0.174
+                                        Dim x As Integer = ((CliptoImage.Width / 4) * 0.8) + (width * (i + 1))
                                         Select Case i
                                             Case 0
                                                 panel1.Display(x, y, p(i), d(i), v(i))
@@ -444,13 +481,45 @@ Public Class Main
                                         End Select
                                 End Select
                             Next
-                        End If
+
+                            If DisplayNames Then
+                                'Each plaque has it's own panel/overlay
+                                Dim plaque1 As New NamePlaque
+                                Dim plaque2 As New NamePlaque
+                                Dim plaque3 As New NamePlaque
+                                Dim plaque4 As New NamePlaque
+                                For i = 0 To players - 1
+                                    Dim width As Integer = (CliptoImage.Width / 4)
+                                    Dim y As Integer = My.Settings.StartPoint.Y + (My.Settings.RecSize.Y * 0.93)
+                                    Dim w As Integer = (((CliptoImage.Width / 4) * 0.8) - My.Settings.StartPoint.X) + 125
+                                    Dim x As Integer = 0
+                                    Select Case players
+                                        Case 4
+                                            x = (width * i) + (width * 0.25) + (i * width * 0.005)
+                                        Case 3
+                                            x = (width * i) + (width * 0.5) + (width * 0.25) + (i * width * 0.005)
+                                        Case 2
+                                            x = (width * (i + 1)) + (width * 0.25) + (i * width * 0.005)
+                                    End Select
+                                    Select Case i
+                                        Case 0
+                                            plaque1.Display(x, y, w, n(i))
+                                        Case 1
+                                            plaque2.Display(x, y, w, n(i))
+                                        Case 2
+                                            plaque3.Display(x, y, w, n(i))
+                                        Case 3
+                                            plaque4.Display(x, y, w, n(i))
+                                    End Select
+                                Next
+                                End if
+                            End If
 
 
-                        '_________________________________________________________________________
-                        'Readies the program for the next run and updates the session information
-                        '_________________________________________________________________________
-                        count += 1
+                            '_________________________________________________________________________
+                            'Readies the program for the next run and updates the session information
+                            '_________________________________________________________________________
+                            count += 1
                         Sess += 1
                         PPM += HighestPlat
                         lbStatus.ForeColor = Color.Lime
@@ -467,6 +536,15 @@ Public Class Main
                         tPPrice.Start()
                     End Try
                 End If
+            Else
+                Refresh = GetAsyncKeyState(HKey1)
+
+                If GetAsyncKeyState(HKey1) And &H8000 And scTog = 0 Then
+                    scTog = 1
+                    MsgBox("You must first set the target area!" & vbNewLine & vbNewLine & "1.) Get to the Fissure Reward Screen with 4 players." & vbNewLine & "2.) Press " & My.Settings.HKey3Text & " to show the selection cursor." & vbNewLine & "3.) Click the upper left corner of the first reward." & vbNewLine & "4.) Click the lower right corner of the last reward.", MsgBoxStyle.SystemModal)
+                ElseIf Not GetAsyncKeyState(HKey1) And &H8000 And scTog = 1 Then
+                    scTog = 0
+                End If
             End If
         Catch ex As Exception
             lbStatus.ForeColor = Color.Orange
@@ -480,40 +558,37 @@ Public Class Main
         '_________________________________________________________________________
         Dim startX As Integer
         Dim startY As Integer
-        Dim height As Integer
-        Dim width As Integer = 0.4 * img.Height
+        Dim height As Integer = img.Height * 0.1
+        Dim width As Integer = (img.Width / 4)
         Select Case mode
             Case 0 'This mode is used to get the number of players
-                startX = (img.Width / 2) - (width * 2)
-                startY = img.Height * 0.457
-                height = img.Height * 0.03
-                width = width * 4
+                startX = 0
+                startY = img.Height - height
+                height = img.Height - startY
+                width = img.Width
             Case 4 '4 players for single lined parts
-                startX = (img.Width / 2) - (width * 2) + (width * pos)
-                startY = img.Height * 0.425
-                height = img.Height * 0.03
+                startX = (img.Width / 4) * pos
+                startY = img.Height - (height * 2)
             Case 3 '3 players for single lined parts
-                startX = (img.Width / 2) - (1.5 * width) + (width * pos)
-                startY = img.Height * 0.425
-                height = img.Height * 0.03
+                startX = (img.Width / 4) * pos + ((img.Width / 4) * 0.5)
+                startY = img.Height - (height * 2)
             Case 2 '2 players for single lined parts
-                startX = (img.Width / 2) - (width) + (width * pos)
-                startY = img.Height * 0.425
-                height = img.Height * 0.03
+                startX = (img.Width / 4) * (pos + 1)
+                startY = img.Height - (height * 2)
             Case 1 'Case for multi-lined part names
                 Select Case players
                     Case 4
-                        startX = (img.Width / 2) - (width * 2) + (width * pos)
-                        startY = img.Height * 0.4
-                        height = img.Height * 0.03
+                        startX = (img.Width / 4) * pos
+                        startY = img.Height - (height * 2.65)
+                        height = img.Height * 0.08
                     Case 3
-                        startX = (img.Width / 2) - (1.5 * width) + (width * pos)
-                        startY = img.Height * 0.4
-                        height = img.Height * 0.03
+                        startX = (img.Width / 4) * pos + ((img.Width / 4) * 0.5)
+                        startY = img.Height - (height * 2.65)
+                        height = img.Height * 0.08
                     Case 2
-                        startX = (img.Width / 2) - (width) + (width * pos)
-                        startY = img.Height * 0.4
-                        height = img.Height * 0.03
+                        startX = (img.Width / 4) * (pos + 1)
+                        startY = img.Height - (height * 2.65)
+                        height = img.Height * 0.08
                 End Select
         End Select
 
@@ -523,6 +598,9 @@ Public Class Main
         '_________________________________________________________________________
         Dim CropRect As New Rectangle(startX, startY, width, height)
         Dim OriginalImage = img
+        If Debug Then
+            img.Save(appData & "\WFInfo\tests\" & "Original Test" & ".jpg", Imaging.ImageFormat.Jpeg)
+        End If
         Dim CropImage = New Bitmap(CropRect.Width, CropRect.Height)
         Using grp = Graphics.FromImage(CropImage)
             grp.DrawImage(OriginalImage, New Rectangle(0, 0, CropRect.Width, CropRect.Height), CropRect, GraphicsUnit.Pixel)
@@ -672,11 +750,8 @@ Public Class Main
                 index += 1
             End While
             duckString = duckString.Remove(duckString.Length - 2, 1)
-            My.Settings.DuckList = duckString
-            My.Settings.LastUpdate = Date.Today
-            My.Settings.Save()
 
-            For Each str As String In My.Settings.DuckList.Split(vbNewLine)
+            For Each str As String In duckString.Split(vbNewLine)
                 str.Replace(vbNewLine, "")
                 Names.Add(str.Split(",")(0))
                 Ducks.Add(str.Split(",")(1))
@@ -951,41 +1026,55 @@ Public Class Main
     End Sub
 
     Private Sub UpdateStatus()
-        '_________________________________________________________________________
-        'Keep-alive function for google analytics
-        '_________________________________________________________________________
-        Dim uri As New Uri("http://www.google-analytics.com/collect")
-        Dim req As WebRequest = WebRequest.Create(uri)
-        Dim pData As String = "v=1&tid=UA-97839771-1&cid=" & HID() & "&t=pageview&dp=Online"
-        Dim pDataBytes = System.Text.Encoding.UTF8.GetBytes(pData)
-        req.ContentType = "application/json"
-        req.Method = "POST"
-        req.ContentLength = pDataBytes.Length
+        Try
+            '_________________________________________________________________________
+            'Keep-alive function for google analytics
+            '_________________________________________________________________________
+            Dim uri As New Uri("http://www.google-analytics.com/collect")
+            Dim req As WebRequest = WebRequest.Create(uri)
+            Dim pData As String = "v=1&tid=UA-97839771-1&cid=" & HID() & "&t=pageview&dp=Online"
+            Dim pDataBytes = System.Text.Encoding.UTF8.GetBytes(pData)
+            req.ContentType = "application/json"
+            req.Method = "POST"
+            req.ContentLength = pDataBytes.Length
 
-        Dim stream = req.GetRequestStream()
-        stream.Write(pDataBytes, 0, pDataBytes.Length)
-        stream.Close()
+            Dim stream = req.GetRequestStream()
+            stream.Write(pDataBytes, 0, pDataBytes.Length)
+            stream.Close()
 
-        Dim response = req.GetResponse().GetResponseStream()
+            Dim response = req.GetResponse().GetResponseStream()
 
-        Dim reader As New StreamReader(response)
-        Dim res = reader.ReadToEnd()
-        reader.Close()
-        response.Close()
+            Dim reader As New StreamReader(response)
+            Dim res = reader.ReadToEnd()
+            reader.Close()
+            response.Close()
+        Catch ex As exception
+            tOnline.enabled = False
+            tOnline.stop
+        End Try
     End Sub
 
     Public Sub CheckUpdates()
         '_________________________________________________________________________
         'Checks for updates, did this really need an annotation? ;)
         '_________________________________________________________________________
-        Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
-        curVersion = curVersion.Remove(0, curVersion.IndexOf("text-align: center") + 29)
-        curVersion = curVersion.Substring(0, curVersion.IndexOf("<"))
+        Try
+            Dim curVersion As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/version")
+            curVersion = curVersion.Remove(0, curVersion.IndexOf("text-align: center") + 29)
+            curVersion = curVersion.Substring(0, curVersion.IndexOf("<"))
 
 
-        If Not My.Settings.Version = curVersion Then
-            UpdateWindow.Display(curVersion)
-        End If
+            If Not My.Settings.Version = curVersion Then
+                If My.Settings.Version.Contains("b") Then
+                    If My.Settings.Version.Replace("b", "") = curVersion Then
+                        UpdateWindow.Display(curVersion)
+                    End If
+                Else
+                    UpdateWindow.Display(curVersion)
+                End If
+            End If
+        Catch ex As exception
+        End Try
 
     End Sub
 
@@ -1017,27 +1106,7 @@ Public Class Main
     End Sub
 
     Private Sub btnDebug2_Click(sender As Object, e As EventArgs) Handles btnDebug2.Click
-        '_________________________________________________________________________
-        'Another debug button, this one was used when changing analytics
-        '_________________________________________________________________________
-        Dim uri As New Uri("http://www.google-analytics.com/collect")
-        Dim req As WebRequest = WebRequest.Create(uri)
-        Dim pData As String = "v=1&tid=UA-97839771-1&cid=" & HID() & "&t=pageview&dp=Online"
-        Dim pDataBytes = System.Text.Encoding.UTF8.GetBytes(pData)
-        req.ContentType = "application/json"
-        req.Method = "POST"
-        req.ContentLength = pDataBytes.Length
-
-        Dim stream = req.GetRequestStream()
-        stream.Write(pDataBytes, 0, pDataBytes.Length)
-        stream.Close()
-
-        Dim response = req.GetResponse().GetResponseStream()
-
-        Dim reader As New StreamReader(response)
-        Dim res = reader.ReadToEnd()
-        reader.Close()
-        response.Close()
+        TargetSelector.Show()
     End Sub
 
     Private Function HID() As String
@@ -1079,6 +1148,10 @@ Public Class Main
     Private Sub BGWorker_DoWork(sender As Object, e As DoWorkEventArgs) Handles BGWorker.DoWork
         UpdateList()
     End Sub
+
+    Private Sub Panel1_Paint(sender As Object, e As PaintEventArgs) Handles Panel1.Paint
+
+    End Sub
 End Class
 
 Module Glob
@@ -1088,20 +1161,25 @@ Module Glob
     Public qItems As New List(Of String)()
     Public HKey1 As Integer = My.Settings.HKey1
     Public HKey2 As Integer = My.Settings.HKey2
+    Public HKey3 As Integer = My.Settings.HKey3
     Public Names As New List(Of String)()   ' List of Part Names
     Public Ducks As New List(Of String)()   ' Duck price associated with part
     Public Vaulted As New List(Of String)()   ' Is the part vaulted? True / False
     Public PlatPrices As New List(Of String)()   ' Stored list of plat prices
+    Public DuckList As New List(Of String)()    ' List of Ducat Prices
     Public HideShots As Boolean = False     ' Bool to hide screenshot notifications in fullscreen mode
     Public Equipment As String               ' List of leveled equipment
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
     Public key2Tog As Boolean = False
+    Public key3Tog As Boolean = False
     Public Animate As Boolean = My.Settings.Animate
     Public PassiveChecks As Boolean = My.Settings.PassiveChecks
     Public Messages As Boolean = My.Settings.Messages
     Public NewStyle As Boolean = My.Settings.NewStyle
     Public Debug As Boolean = My.Settings.Debug
+    Public DisplayPlatinum As Boolean = My.Settings.DisplayPlatinum
+    Public DisplayNames As Boolean = My.Settings.DisplayNames
     Public cookie As String = ""
     Public xcsrf As String = ""
     Public Function check(string1 As String) As Integer
