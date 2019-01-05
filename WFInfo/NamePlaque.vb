@@ -99,7 +99,7 @@ Public Class NamePlaque
         Dim fontSize As Integer = 0.33 * pSize.Y
 
         'Name Label
-        lbName.Location = New Point((-2), 0)
+        lbName.Location = New Point((-2), 10)
         lbName.Font = New Font(lbName.Font.FontFamily, fontSize, FontStyle.Bold)
         lbName.BackColor = Color.Transparent
         lbName.Parent = lbNDropShadow

@@ -38,6 +38,8 @@ Public Class Main
             pbDonate.Location = New Point(0, 38)
             pbSettings.Parent = pbSideBar
             pbSettings.Location = New Point(0, 65)
+            pbRelic.Parent = pbSideBar
+            pbRelic.Location = New Point(0, 92)
             lbVersion.Text = "v" + My.Settings.Version 'The current version is stored in project properties
             Me.Location = New Point(My.Settings.StartX, My.Settings.StartY)
             Fullscreen = My.Settings.Fullscreen
@@ -120,18 +122,20 @@ Public Class Main
         'Checks FF cookie then Chrome Cookie, if it exists in neither returns false, true if found, also sets cookie
         '_________________________________________________________________________
         Dim found As Boolean = False
-        Dim FFpath As String = Directory.GetDirectories(appData + "\Mozilla\Firefox\Profiles")(0) + "\cookies.sqlite"
         Dim ChromePath As String = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\Google\Chrome\User Data\Default\Cookies"
 
-        If File.Exists(FFpath) Then
-            If Not checkCookie(FFpath, True) = True Then
-                If File.Exists(ChromePath) Then
-                    If checkCookie(ChromePath) = True Then
-                        found = True
+        If File.Exists(appData + "\Mozilla\Firefox\Profiles") Then
+            Dim FFpath As String = Directory.GetDirectories(appData + "\Mozilla\Firefox\Profiles")(0) + "\cookies.sqlite"
+            If File.Exists(FFpath) Then
+                If Not checkCookie(FFpath, True) = True Then
+                    If File.Exists(ChromePath) Then
+                        If checkCookie(ChromePath) = True Then
+                            found = True
+                        End If
                     End If
+                Else
+                    found = True
                 End If
-            Else
-                found = True
             End If
         ElseIf File.Exists(ChromePath) Then
             If checkCookie(ChromePath) = True Then
@@ -444,7 +448,7 @@ Public Class Main
                                 Dim y As Integer = My.Settings.StartPoint.Y + (My.Settings.StartPoint.Y * 0.05)
                                 Select Case players
                                     Case 4
-                                        Dim x As Integer = ((CliptoImage.Width / 4) * 0.8) + (width * i)
+                                        Dim x As Integer = ((CliptoImage.Width / 4) * 0.8) + (width * i) + (width * 0.25)
                                         Select Case i
                                             Case 0
                                                 panel1.Display(x, y, p(i), d(i), v(i))
@@ -495,7 +499,7 @@ Public Class Main
                                     Dim x As Integer = 0
                                     Select Case players
                                         Case 4
-                                            x = (width * i) + (width * 0.25) + (i * width * 0.005)
+                                            x = (width * i) + 2.5 * (width * 0.25) + (i * width * 0.005)
                                         Case 3
                                             x = (width * i) + (width * 0.5) + (width * 0.25) + (i * width * 0.005)
                                         Case 2
@@ -709,53 +713,114 @@ Public Class Main
         My.Settings.Equipment = Equipment
         My.Settings.Save()
     End Sub
+
+    Private Sub Load_Market_Items()
+        Dim webClient As New System.Net.WebClient
+        webClient.Headers.Add("platform", "pc")
+        webClient.Headers.Add("language", "en")
+        Dim m_i_temp As JObject = JsonConvert.DeserializeObject(Of JObject)(WebClient.DownloadString("https://api.warframe.market/v1/items"))
+        market_items = New Dictionary(Of String, String)()
+        For Each elem As JObject In m_i_temp("payload")("items")("en")
+            Dim name As String = elem("item_name")
+            If name.Contains("Prime ") Then
+                market_items(elem("id")) = name + "|" + elem("url_name").ToString()
+            End If
+        Next
+        File.WriteAllText(items_file_path, JsonConvert.SerializeObject(market_items, Newtonsoft.Json.Formatting.Indented))
+    End Sub
+
     Private Sub UpdateList()
         '_________________________________________________________________________
         'Function that retrieves parts and ducat prices from the wiki and stores the info in Names() and Ducks()
         '_________________________________________________________________________
         Try
             Equipment = My.Settings.Equipment ' Load equipment string
-
             lbStatus.ForeColor = Color.Yellow
-            Dim duckString As String = ""
-            Dim endpoint As String = New StreamReader(WebRequest.Create("http://warframe.wikia.com/wiki/Ducats/Prices/All").GetResponse().GetResponseStream()).ReadToEnd()
-            Dim str1 As String = endpoint.Substring(endpoint.IndexOf("> Ducat Value"))
-            Dim str2 As String = str1.Substring(0, str1.IndexOf("</div>"))
-            Dim str3 As String = str2.Substring(str2.IndexOf("Acquisition"))
-            Dim strArray As String() = str3.Split(New String(0) {"Acquisition"}, StringSplitOptions.None)
-            Dim index As Integer = 0
-            While index < strArray.Length
-                Dim current As String = strArray(index)
-                If current.Contains("</a>") Then
-                    Dim name As String = current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).Substring(0, current.Substring(current.IndexOf(">") + 1, current.IndexOf("<")).IndexOf("<"))
-                    Dim ducats As String = current.Substring(current.IndexOf("<b>") + 3)
-                    ducats = ducats.Substring(0, ducats.IndexOf("<"))
-                    Dim vStr As String = "*"
-                    Dim vBool As Boolean = True
-                    Dim delim As String() = New String() {"relic"}
-                    Dim relics() = current.Split(delim, StringSplitOptions.None)
-                    For i = 1 To relics.Count - 1
-                        If Not relics(i).Contains("Prime Vault") Then
-                            vBool = False
-                            vStr = ""
-                        End If
-                    Next
-                    If Not name.Contains("Carrier") And Not name.Contains("Wyrm") And Not name.Contains("Helios") Then
-                        If name.Contains("Systems") Or name.Contains("Chassis") Or name.Contains("Neuroptics") Then
-                            name += " Blueprint"
-                        End If
-                    End If
-                    duckString += vStr & name & "," & ducats & "," & vBool & vbNewLine
-                End If
-                index += 1
-            End While
-            duckString = duckString.Remove(duckString.Length - 2, 1)
+            Console.WriteLine("ECHO001")
+            Dim webClient As New System.Net.WebClient
+            webClient.Headers.Add("platform", "pc")
+            webClient.Headers.Add("language", "en")
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
-            For Each str As String In duckString.Split(vbNewLine)
-                str.Replace(vbNewLine, "")
-                Names.Add(str.Split(",")(0))
-                Ducks.Add(str.Split(",")(1))
-                Vaulted.Add(str.Split(",")(2))
+            Console.WriteLine("ECHO002")
+            Console.WriteLine(items_file_path)
+            Console.WriteLine("ECHO002")
+
+            If market_items Is Nothing AndAlso File.Exists(items_file_path) Then
+                market_items = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(items_file_path))
+            End If
+
+            If market_items Is Nothing Then
+                Load_Market_Items()
+            End If
+
+            If ducat_plat Is Nothing AndAlso File.Exists(ducat_file_path) Then
+                ducat_plat = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(ducat_file_path))
+            End If
+
+            Dim temp_bool = ducat_plat Is Nothing
+            If Not temp_bool Then
+                Dim timestamp As Date = DateTime.Parse(ducat_plat("timestamp"))
+                Dim dayAgo As Date = Date.Now.AddDays(-1)
+                temp_bool = timestamp < dayAgo
+            End If
+            Console.WriteLine("ECHO003")
+
+            If temp_bool Then
+                Dim d_p_temp As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/tools/ducats"))
+                ducat_plat = New JObject()
+                Console.WriteLine("ECHO013")
+                For Each elem As JObject In d_p_temp("payload")("previous_day")
+                    Dim item_name As String = ""
+                    If Not market_items.TryGetValue(elem("item"), item_name) Then
+                        Console.WriteLine("CAN'T FIND: " + item_name)
+                        Load_Market_Items()
+                        item_name = market_items(elem("item"))
+                    End If
+                    item_name = item_name.Split("|")(0)
+                    If Not item_name.Contains("Set") Then
+                        ducat_plat(item_name) = New JObject()
+                        ducat_plat(item_name)("ducats") = elem("ducats")
+                        ducat_plat(item_name)("plat") = elem("wa_price")
+                    End If
+                Next
+                Console.WriteLine("ECHO023")
+                ' Confirm that no items have been missed
+                ' Add Pre-load option
+
+                'Dim flicker As Boolean = True
+                'For Each elem As KeyValuePair(Of String, String) In market_items
+                'Dim strs As String() = elem.Value.Split("|")
+                'Dim url As String = strs(1)
+                'Dim name As String = strs(0)
+                'Dim ignore As JToken = Nothing
+                'If Not ducat_plat.TryGetValue(name, ignore) Then
+                'Find_Item(name, url)
+                'End If
+                'flicker = Not flicker
+                'If flicker Then
+                'lbStatus.ForeColor = Color.Teal
+                'Else
+                'lbStatus.ForeColor = Color.Yellow
+                'End If
+                'Next
+                Console.WriteLine("ECHO033")
+
+                ducat_plat("timestamp") = Date.Now.ToString("R")
+                File.WriteAllText(ducat_file_path, JsonConvert.SerializeObject(ducat_plat, Newtonsoft.Json.Formatting.Indented))
+            End If
+            Console.WriteLine("ECHO004")
+
+            For Each elem As KeyValuePair(Of String, String) In market_items
+                Dim name As String = elem.Value.Split("|")(0)
+                Dim ducat As String = "0"
+                Dim d_p As JObject = Nothing
+                If ducat_plat.TryGetValue(name, d_p) Then
+                    ducat = d_p("ducats")
+                    PlatPrices.Add(name & "," & d_p("plat").ToString())
+                End If
+                Names.Add(name)
+                Ducks.Add(ducat)
             Next
             Names.Add("Forma Blueprint")
             Ducks.Add("0")
@@ -859,7 +924,7 @@ Public Class Main
                 guess = guess.Replace(" Blueprint", "")
             End If
         End If
-        guess = guess.Replace("Band", "Collar Band").Replace("Buckle", "Collar Buckle").Replace("&amp;", "and")
+        guess = guess.Replace("&amp;", "and")
         Return guess
     End Function
 
@@ -878,6 +943,7 @@ Public Class Main
         'Process that passively checks parts for platinum prices
         'This speeds up searches as you no longer have to search every part in a fissure
         '_________________________________________________________________________
+
         Try
             Dim found As Boolean = False
             Dim price As Integer = 0
@@ -949,6 +1015,19 @@ Public Class Main
 
     Private Sub pbDonate_MouseLeave(sender As Object, e As EventArgs) Handles pbDonate.MouseLeave
         pbDonate.Image = My.Resources.Donate
+    End Sub
+
+    Private Sub pbRelic_Click(sender As Object, e As EventArgs) Handles pbRelic.Click
+        Relics.Load_Relic_Data()
+        Relics.Show()
+    End Sub
+
+    Private Sub pbRelic_MouseEnter(sender As Object, e As EventArgs) Handles pbRelic.MouseEnter
+        pbRelic.Image = My.Resources.Relic_h
+    End Sub
+
+    Private Sub pbRelic_MouseLeave(sender As Object, e As EventArgs) Handles pbRelic.MouseLeave
+        pbRelic.Image = My.Resources.Relic
     End Sub
 
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
@@ -1180,6 +1259,10 @@ Module Glob
     Public Debug As Boolean = My.Settings.Debug
     Public DisplayPlatinum As Boolean = My.Settings.DisplayPlatinum
     Public DisplayNames As Boolean = My.Settings.DisplayNames
+    Public market_items As Dictionary(Of String, String)      'MODIFICATION: contains warframe.market item listing (mainly for ducat_plat)
+    Public items_file_path As String = Path.Combine(Environment.CurrentDirectory, "market_items.json")
+    Public ducat_plat As JObject        'MODIFICATION: contains warframe.market ducatonator list (which includes a weighted price)
+    Public ducat_file_path As String = Path.Combine(Environment.CurrentDirectory, "ducat_plat.json")
     Public cookie As String = ""
     Public xcsrf As String = ""
     Public Function check(string1 As String) As Integer
@@ -1318,7 +1401,39 @@ Module Glob
 
         Return d(n, m)
     End Function
+
+    Public Sub Find_Item(item_name As String, url As String)
+        Dim webClient As New System.Net.WebClient
+        webClient.Headers.Add("platform", "pc")
+        webClient.Headers.Add("language", "en")
+        Console.WriteLine(item_name)
+        Console.WriteLine(url)
+        Dim stats As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"))
+        stats = stats("payload")("statistics_closed")("90days").Last
+
+        Dim ducats As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + url))
+        ducats = ducats("payload")("item")
+        Dim id As String = ducats("id")
+        For Each part As JObject In ducats("items_in_set")
+            If part("id").ToString() = id Then
+                ducats = part
+                Exit For
+            End If
+        Next
+        Dim ducat As String = Nothing
+        If Not ducats.TryGetValue("ducats", ducat) Then
+            ducat = "0"
+        End If
+        ducat_plat(item_name) = New JObject()
+        ducat_plat(item_name)("ducats") = ducat
+        ducat_plat(item_name)("plat") = stats("avg_price")
+        File.WriteAllText(ducat_file_path, JsonConvert.SerializeObject(ducat_plat, Newtonsoft.Json.Formatting.Indented))
+    End Sub
+
     Public Function GetPlat(str As String, Optional getUser As Boolean = False, Optional getMod As Boolean = False, Optional getID As Boolean = False, Optional getDif As Boolean = False) As String
+
+        Console.WriteLine("GetPlat - " + str)
+
         '_________________________________________________________________________
         'Retrieves a plat price of a part or set via warframe.market
         '_________________________________________________________________________
@@ -1331,15 +1446,38 @@ Module Glob
         str = str.ToLower
         str = str.Replace(" ", "%5F").Replace(vbLf, "").Replace("*", "")
 
+        Dim elem As JObject = Nothing
+        If Not ducat_plat.TryGetValue(partName, elem) Then
+            Dim partName2 As String = partName.Replace("and", "&")
+            If Not ducat_plat.TryGetValue(partName2, elem) Then
+                Find_Item(partName, str.Replace("&", "and"))
+                If Not ducat_plat.TryGetValue(partName, elem) Then
+                    Return 0
+                End If
+            End If
+        End If
+        Return elem("plat")
 
-        '_________________________________________________________________________
-        'Make the request
-        '_________________________________________________________________________
+
         Dim webClient As New System.Net.WebClient
         webClient.Headers.Add("platform", "pc")
         webClient.Headers.Add("language", "en")
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+
+
+
+
+
+
+        '_________________________________________________________________________
+        'Make the request
+        '_________________________________________________________________________
+        'Dim webClient As New System.Net.WebClient
+        'WebClient.Headers.Add("platform", "pc")
+        'WebClient.Headers.Add("language", "en")
+        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
         Dim result As JObject
+        Console.WriteLine(str)
         result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/orders"))
 
 
@@ -1430,6 +1568,7 @@ Module Glob
             Dim difference As Integer = Math.Abs(minPrices(0) - low)
             Return difference
         Else 'Not Single Pull
+            'MODIFICATION: Will be done in the code above
             Return low
         End If
     End Function

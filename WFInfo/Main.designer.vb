@@ -34,13 +34,11 @@ Partial Class Main
         Me.btnDebug2 = New System.Windows.Forms.Button()
         Me.btnDebug1 = New System.Windows.Forms.Button()
         Me.lbPPM = New System.Windows.Forms.Label()
-        Me.pbDebug = New System.Windows.Forms.PictureBox()
         Me.lbVersion = New System.Windows.Forms.Label()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.pTitle = New System.Windows.Forms.Panel()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.tOnline = New System.Windows.Forms.Timer(Me.components)
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.tMessages = New System.Windows.Forms.Timer(Me.components)
@@ -48,15 +46,19 @@ Partial Class Main
         Me.pbHome = New System.Windows.Forms.PictureBox()
         Me.pbDonate = New System.Windows.Forms.PictureBox()
         Me.pbSettings = New System.Windows.Forms.PictureBox()
+        Me.pbRelic = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
+        Me.pbDebug = New System.Windows.Forms.PictureBox()
+        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.Panel1.SuspendLayout()
-        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'tPB
@@ -110,7 +112,7 @@ Partial Class Main
         Me.Panel1.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Panel1.Location = New System.Drawing.Point(0, 27)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(334, 99)
+        Me.Panel1.Size = New System.Drawing.Size(334, 126)
         Me.Panel1.TabIndex = 19
         '
         'btnDebug2
@@ -144,16 +146,6 @@ Partial Class Main
         Me.lbPPM.Size = New System.Drawing.Size(237, 23)
         Me.lbPPM.TabIndex = 7
         Me.lbPPM.Text = "Platinum this Session:           0"
-        '
-        'pbDebug
-        '
-        Me.pbDebug.BackColor = System.Drawing.Color.Silver
-        Me.pbDebug.Location = New System.Drawing.Point(11, 73)
-        Me.pbDebug.Name = "pbDebug"
-        Me.pbDebug.Size = New System.Drawing.Size(10, 11)
-        Me.pbDebug.TabIndex = 6
-        Me.pbDebug.TabStop = False
-        Me.pbDebug.Visible = False
         '
         'lbVersion
         '
@@ -219,17 +211,6 @@ Partial Class Main
         Me.Label1.TabIndex = 24
         Me.Label1.Text = "Status: "
         '
-        'PictureBox3
-        '
-        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
-        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
-        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
-        Me.PictureBox3.Name = "PictureBox3"
-        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
-        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox3.TabIndex = 23
-        Me.PictureBox3.TabStop = False
-        '
         'tOnline
         '
         Me.tOnline.Enabled = True
@@ -281,25 +262,58 @@ Partial Class Main
         Me.pbSettings.TabIndex = 15
         Me.pbSettings.TabStop = False
         '
+        'pbRelic
+        '
+        Me.pbRelic.BackColor = System.Drawing.Color.Transparent
+        Me.pbRelic.Image = Global.WFInfo.My.Resources.Resources.Relic
+        Me.pbRelic.Location = New System.Drawing.Point(307, 118)
+        Me.pbRelic.Name = "pbRelic"
+        Me.pbRelic.Size = New System.Drawing.Size(25, 21)
+        Me.pbRelic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
+        Me.pbRelic.TabIndex = 14
+        Me.pbRelic.TabStop = False
+        '
         'pbSideBar
         '
         Me.pbSideBar.BackColor = System.Drawing.Color.FromArgb(CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer))
         Me.pbSideBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.pbSideBar.Location = New System.Drawing.Point(306, 27)
         Me.pbSideBar.Name = "pbSideBar"
-        Me.pbSideBar.Size = New System.Drawing.Size(28, 99)
+        Me.pbSideBar.Size = New System.Drawing.Size(28, 126)
         Me.pbSideBar.TabIndex = 18
         Me.pbSideBar.TabStop = False
+        '
+        'pbDebug
+        '
+        Me.pbDebug.BackColor = System.Drawing.Color.Silver
+        Me.pbDebug.Location = New System.Drawing.Point(11, 73)
+        Me.pbDebug.Name = "pbDebug"
+        Me.pbDebug.Size = New System.Drawing.Size(10, 11)
+        Me.pbDebug.TabIndex = 6
+        Me.pbDebug.TabStop = False
+        Me.pbDebug.Visible = False
+        '
+        'PictureBox3
+        '
+        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
+        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
+        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
+        Me.PictureBox3.Name = "PictureBox3"
+        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
+        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox3.TabIndex = 23
+        Me.PictureBox3.TabStop = False
         '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(334, 126)
+        Me.ClientSize = New System.Drawing.Size(334, 153)
         Me.Controls.Add(Me.pbHome)
         Me.Controls.Add(Me.pbDonate)
         Me.Controls.Add(Me.pbSettings)
+        Me.Controls.Add(Me.pbRelic)
         Me.Controls.Add(Me.pbSideBar)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
@@ -310,14 +324,15 @@ Partial Class Main
         Me.Text = "WFInfo"
         Me.Panel1.ResumeLayout(False)
         Me.Panel1.PerformLayout()
-        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).EndInit()
         Me.pTitle.ResumeLayout(False)
         Me.pTitle.PerformLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -347,4 +362,5 @@ Partial Class Main
     Friend WithEvents tMessages As Timer
     Friend WithEvents btnDebug2 As Button
     Friend WithEvents tDebug As Timer
+    Friend WithEvents pbRelic As PictureBox
 End Class

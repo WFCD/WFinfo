@@ -166,6 +166,12 @@
     <Compile Include="Overlay.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Relics.Designer.vb">
+      <DependentUpon>Relics.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Relics.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="TargetSelector.Designer.vb">
       <DependentUpon>TargetSelector.vb</DependentUpon>
     </Compile>
@@ -212,6 +218,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Overlay.resx">
       <DependentUpon>Overlay.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Relics.resx">
+      <DependentUpon>Relics.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TargetSelector.resx">
       <DependentUpon>TargetSelector.vb</DependentUpon>
@@ -317,6 +326,11 @@
     <None Include="Resources\Target1.png" />
     <None Include="Resources\TargetBox.png" />
     <None Include="Resources\PlaqueTray.png" />
+    <None Include="Resources\Relic.png" />
+    <None Include="Resources\Relic_h.png" />
+    <None Include="Resources\ducat.gif" />
+    <None Include="Resources\plat.gif" />
+    <None Include="Resources\ducat_w.gif" />
     <Content Include="x64\SQLite.Interop.dll" />
     <Content Include="x86\SQLite.Interop.dll" />
     <None Include="Resources\panelBG.bmp" />

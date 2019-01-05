@@ -52,6 +52,7 @@ Partial Class NamePlaque
         Me.lbNDropShadow.Size = New System.Drawing.Size(60, 36)
         Me.lbNDropShadow.TabIndex = 4
         Me.lbNDropShadow.Text = "120"
+        Me.lbNDropShadow.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'lbName
         '
@@ -64,6 +65,7 @@ Partial Class NamePlaque
         Me.lbName.Size = New System.Drawing.Size(60, 36)
         Me.lbName.TabIndex = 3
         Me.lbName.Text = "120"
+        Me.lbName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'tHide
         '
