@@ -73,12 +73,12 @@ Public Class Settings
         btnHkey1.Text = My.Settings.HKey1Text
         btnHkey2.Text = My.Settings.HKey2Text
         btnHkey3.Text = My.Settings.HKey3Text
-        cbPassiveChecks.Checked = PassiveChecks
+        'cbPassiveChecks.Checked = PassiveChecks
         cbAnimations.Checked = Animate
         cbFullscreen.Checked = Fullscreen
         cbNewStyle.Checked = NewStyle
         cbDebug.Checked = Debug
-        cbPlatinum.Checked = DisplayPlatinum
+        'cbPlatinum.Checked = DisplayPlatinum
         cbDisplayNames.Checked = DisplayNames
     End Sub
 
@@ -338,11 +338,6 @@ Public Class Settings
         saveSettings()
     End Sub
 
-    Private Sub cbPassiveChecks_Click(sender As Object, e As EventArgs) Handles cbPassiveChecks.Click
-        My.Settings.PassiveChecks = cbPassiveChecks.Checked
-        PassiveChecks = cbPassiveChecks.Checked
-    End Sub
-
     Private Sub cbDebug_Click(sender As Object, e As EventArgs) Handles cbDebug.Click
         My.Settings.Debug = cbDebug.Checked
         Debug = cbDebug.Checked
@@ -463,11 +458,6 @@ Public Class Settings
         End If
     End Sub
 
-    Private Sub cbPlatinum_Click(sender As Object, e As EventArgs) Handles cbPlatinum.Click
-        My.Settings.DisplayPlatinum = cbPlatinum.Checked
-        DisplayPlatinum = cbPlatinum.Checked
-        saveSettings()
-    End Sub
 
     Private Sub cbDisplayNames_Click(sender As Object, e As EventArgs) Handles cbDisplayNames.Click
         My.Settings.DisplayNames = cbDisplayNames.Checked
@@ -477,10 +467,10 @@ Public Class Settings
     Private Sub saveSettings()
         ''Saves settings
         My.Settings.Animate = cbAnimations.Checked
-        My.Settings.PassiveChecks = cbPassiveChecks.Checked
+        'My.Settings.PassiveChecks = cbPassiveChecks.Checked
         My.Settings.Messages = cbMessages.Checked
         My.Settings.NewStyle = cbNewStyle.Checked
-        My.Settings.DisplayPlatinum = cbPlatinum.Checked
+        'My.Settings.DisplayPlatinum = cbPlatinum.Checked
         My.Settings.DisplayNames = cbDisplayNames.Checked
         My.Settings.HKey1 = HKey1
         My.Settings.HKey2 = HKey2

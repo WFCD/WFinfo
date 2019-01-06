@@ -2,6 +2,8 @@
 Imports System.Text
 Imports System.Net
 Imports System.IO
+Imports Newtonsoft.Json.Linq
+
 Public Class Input
     Declare Function SetForegroundWindow Lib "user32.dll" (ByVal hwnd As Integer) As Integer
     Private InitialStyle As Integer
@@ -213,91 +215,91 @@ Public Class Input
                 '_________________________________________________________________________
                 'Checks users mastery list (WFInfo only) to see if a weapon/prime is mastered
                 '_________________________________________________________________________
-            ElseIf command.Split(" ")(0) = "e" Then
-                Dim found As Boolean = False
-                Dim foundItem As String = ""
-                Dim checkItem As String = nth(command, 0)
-                If checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "p" Or checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "prime" Then
-                    checkItem = checkItem.Substring(0, checkItem.LastIndexOf(" ")) & " prime"
-                End If
+                'ElseIf command.Split(" ")(0) = "e" Then
+                '    Dim found As Boolean = False
+                '    Dim foundItem As String = ""
+                '    Dim checkItem As String = nth(command, 0)
+                '    If checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "p" Or checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "prime" Then
+                '        checkItem = checkItem.Substring(0, checkItem.LastIndexOf(" ")) & " prime"
+                '    End If
 
-                For Each item As String In Equipment.Split(",")
-                    If item = checkItem Then
-                        found = True
-                        foundItem = StrConv(item, VbStrConv.ProperCase)
-                    End If
-                Next
-                If found Then
-                    qItems.Add(vbNewLine & foundItem & vbNewLine & "Already Leveled")
-                Else
-                    qItems.Add(vbNewLine & "Not Leveled")
-                End If
-                Tray.Display()
-                Me.Close()
-                tbCommand.Text = ""
+                '    For Each item As String In Equipment.Split(",")
+                '        If item = checkItem Then
+                '            found = True
+                '            foundItem = StrConv(item, VbStrConv.ProperCase)
+                '        End If
+                '    Next
+                '    If found Then
+                '        qItems.Add(vbNewLine & foundItem & vbNewLine & "Already Leveled")
+                '    Else
+                '        qItems.Add(vbNewLine & "Not Leveled")
+                '    End If
+                '    Tray.Display()
+                '    Me.Close()
+                '    tbCommand.Text = ""
 
-                '_________________________________________________________________________
-                'Adds a weapon/prime to the locally stored mastery list
-                '_________________________________________________________________________
-            ElseIf command.Split(" ")(0) = "ea" Then
-                Dim item As String = nth(command, 0)
-                If item.Substring(item.LastIndexOf(" ") + 1) = "p" Then
-                    item = item.Substring(0, item.LastIndexOf(" ")) & " prime"
-                End If
-                Equipment = Equipment & item & ","
-                Me.Close()
-                tbCommand.Text = ""
+                '    '_________________________________________________________________________
+                '    'Adds a weapon/prime to the locally stored mastery list
+                '    '_________________________________________________________________________
+                'ElseIf command.Split(" ")(0) = "ea" Then
+                '    Dim item As String = nth(command, 0)
+                '    If item.Substring(item.LastIndexOf(" ") + 1) = "p" Then
+                '        item = item.Substring(0, item.LastIndexOf(" ")) & " prime"
+                '    End If
+                '    Equipment = Equipment & item & ","
+                '    Me.Close()
+                '    tbCommand.Text = ""
 
-                '_________________________________________________________________________
-                'Removes weapon/prime from the locally stored mastery list
-                '_________________________________________________________________________
-            ElseIf command.Split(" ")(0) = "er" Then
-                Dim found As Boolean = False
-                Dim checkItem As String = nth(command, 0)
-                If checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "p" Or checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "prime" Then
-                    checkItem = checkItem.Substring(0, checkItem.LastIndexOf(" ")) & " prime"
-                End If
-                For Each item As String In Equipment.Split(",")
-                    If item = checkItem Then
-                        Equipment = Equipment.Replace(item & ",", "")
-                        found = True
-                    End If
-                Next
-                If Not found Then
-                    qItems.Add(vbNewLine & "Item Not Found")
-                    Tray.Display()
-                End If
-                Me.Close()
-                tbCommand.Text = ""
+                '    '_________________________________________________________________________
+                '    'Removes weapon/prime from the locally stored mastery list
+                '    '_________________________________________________________________________
+                'ElseIf command.Split(" ")(0) = "er" Then
+                '    Dim found As Boolean = False
+                '    Dim checkItem As String = nth(command, 0)
+                '    If checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "p" Or checkItem.Substring(checkItem.LastIndexOf(" ") + 1) = "prime" Then
+                '        checkItem = checkItem.Substring(0, checkItem.LastIndexOf(" ")) & " prime"
+                '    End If
+                '    For Each item As String In Equipment.Split(",")
+                '        If item = checkItem Then
+                '            Equipment = Equipment.Replace(item & ",", "")
+                '            found = True
+                '        End If
+                '    Next
+                '    If Not found Then
+                '        qItems.Add(vbNewLine & "Item Not Found")
+                '        Tray.Display()
+                '    End If
+                '    Me.Close()
+                '    tbCommand.Text = ""
 
-                '_________________________________________________________________________
-                'Copies the locally stored mastery list to clipboard
-                '_________________________________________________________________________
-            ElseIf command.Split(" ")(0) = "el" Then
-                Dim clipString As String = ""
-                For Each item As String In Equipment.Split(",")
-                    clipString &= item & vbNewLine
-                Next
-                Clipboard.SetText(clipString)
-                qItems.Add(vbNewLine & "Equipment Coppied" & vbNewLine & "To Clipboard")
-                Tray.Display()
-                Me.Close()
-                tbCommand.Text = ""
+                '    '_________________________________________________________________________
+                '    'Copies the locally stored mastery list to clipboard
+                '    '_________________________________________________________________________
+                'ElseIf command.Split(" ")(0) = "el" Then
+                '    Dim clipString As String = ""
+                '    For Each item As String In Equipment.Split(",")
+                '        clipString &= item & vbNewLine
+                '    Next
+                '    Clipboard.SetText(clipString)
+                '    qItems.Add(vbNewLine & "Equipment Coppied" & vbNewLine & "To Clipboard")
+                '    Tray.Display()
+                '    Me.Close()
+                '    tbCommand.Text = ""
 
-                '_________________________________________________________________________
-                'Completely clears the mastery list
-                '_________________________________________________________________________
-            ElseIf command.Split(" ")(0) = "ec" Then
-                Equipment = ""
-                qItems.Add(vbNewLine & "Equipment Cleared")
-                Tray.Display()
-                Me.Close()
-                tbCommand.Text = ""
+                '    '_________________________________________________________________________
+                '    'Completely clears the mastery list
+                '    '_________________________________________________________________________
+                'ElseIf command.Split(" ")(0) = "ec" Then
+                '    Equipment = ""
+                '    qItems.Add(vbNewLine & "Equipment Cleared")
+                '    Tray.Display()
+                '    Me.Close()
+                '    tbCommand.Text = ""
 
 
-                '_________________________________________________________________________
-                'Posts a part, set, or mod to Warframe.Market for sale
-                '_________________________________________________________________________
+                '    '_________________________________________________________________________
+                '    'Posts a part, set, or mod to Warframe.Market for sale
+                '    '_________________________________________________________________________
             ElseIf command.Split(" ")(0) = "sell" Then
                 Try
                     If cookie = "" Then
@@ -318,14 +320,15 @@ Public Class Input
 
                     Dim found As Boolean = False
                     Dim guess As String = ""
-                    For i = 0 To Names.Count - 1
-                        If Names(i).ToLower.Contains(command) Then
+                    ' Modified
+                    For Each prop As KeyValuePair(Of String, JToken) In ducat_plat
+                        If prop.Key.ToLower.Contains(command) Then
                             found = True
-                            guess = Names(i)
+                            guess = prop.Key
                         End If
                     Next
                     If Not found Then
-                        guess = Names(check(command))
+                        guess = check(command)
                     End If
 
                     Dim ID As String = " "
@@ -393,14 +396,16 @@ Public Class Input
                     If command.Contains("set") Then
                         guess = checkSet(tbCommand.Text)
                     Else
-                        For i = 0 To Names.Count - 1
-                            If Names(i).ToLower.Contains(command) Then
+                        ' Modified
+                        For Each prop As KeyValuePair(Of String, JToken) In ducat_plat
+                            If prop.Key.ToLower.Contains(command) Then
                                 found = True
-                                guess = Names(i)
+                                guess = prop.Key
                             End If
                         Next
                         If Not found Then
-                            guess = Names(check(tbCommand.Text))
+                            ' Modified
+                            guess = check(tbCommand.Text)
                         End If
                     End If
                     If Not guess = "Forma Blueprint" Then
@@ -409,7 +414,8 @@ Public Class Input
                         If command.Contains("set") Then
                             duck = ""
                         Else
-                            duck = "    Ducks: " & Ducks(check(guess)) & vbNewLine
+                            ' Modified
+                            duck = "    Ducks: " & ducat_plat(check(guess))("ducats").ToString() & vbNewLine
                         End If
                         If Main.KClean(guess).Length > 27 Then
                             qItems.Add(Main.KClean(guess).Substring(0, 27) & "..." & vbNewLine & duck & "    Plat: " & plat & vbNewLine)

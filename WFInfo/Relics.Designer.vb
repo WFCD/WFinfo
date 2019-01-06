@@ -29,7 +29,10 @@ Partial Class Relics
         Dim TreeNode4 As System.Windows.Forms.TreeNode = New System.Windows.Forms.TreeNode("Axi")
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Relics))
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.RelicTree2 = New System.Windows.Forms.TreeView()
         Me.Panel2 = New System.Windows.Forms.Panel()
+        Me.SortSelection = New System.Windows.Forms.ComboBox()
+        Me.Label1 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.RelicTree = New System.Windows.Forms.TreeView()
         Me.HideMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
@@ -38,7 +41,6 @@ Partial Class Relics
         Me.pTitle = New System.Windows.Forms.Panel()
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.lbTitle = New System.Windows.Forms.Label()
-        Me.Label1 = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
         Me.Panel2.SuspendLayout()
         Me.pTitle.SuspendLayout()
@@ -49,6 +51,7 @@ Partial Class Relics
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel1.Controls.Add(Me.RelicTree2)
         Me.Panel1.Controls.Add(Me.Panel2)
         Me.Panel1.Controls.Add(Me.RelicTree)
         Me.Panel1.Location = New System.Drawing.Point(2, 29)
@@ -56,9 +59,24 @@ Partial Class Relics
         Me.Panel1.Size = New System.Drawing.Size(456, 557)
         Me.Panel1.TabIndex = 24
         '
+        'RelicTree2
+        '
+        Me.RelicTree2.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.RelicTree2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.RelicTree2.CausesValidation = False
+        Me.RelicTree2.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll
+        Me.RelicTree2.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
+        Me.RelicTree2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.RelicTree2.FullRowSelect = True
+        Me.RelicTree2.Location = New System.Drawing.Point(2, 33)
+        Me.RelicTree2.Name = "RelicTree2"
+        Me.RelicTree2.Size = New System.Drawing.Size(450, 520)
+        Me.RelicTree2.TabIndex = 20
+        '
         'Panel2
         '
         Me.Panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel2.Controls.Add(Me.SortSelection)
         Me.Panel2.Controls.Add(Me.Label1)
         Me.Panel2.Controls.Add(Me.Label2)
         Me.Panel2.Location = New System.Drawing.Point(2, 2)
@@ -66,17 +84,43 @@ Partial Class Relics
         Me.Panel2.Size = New System.Drawing.Size(450, 32)
         Me.Panel2.TabIndex = 19
         '
+        'SortSelection
+        '
+        Me.SortSelection.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.SortSelection.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.SortSelection.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.SortSelection.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold)
+        Me.SortSelection.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.SortSelection.FormattingEnabled = True
+        Me.SortSelection.Items.AddRange(New Object() {"Name", "Intact Plat", "Rad Bonus"})
+        Me.SortSelection.Location = New System.Drawing.Point(280, 2)
+        Me.SortSelection.Name = "SortSelection"
+        Me.SortSelection.Size = New System.Drawing.Size(126, 26)
+        Me.SortSelection.TabIndex = 23
+        '
+        'Label1
+        '
+        Me.Label1.AutoSize = True
+        Me.Label1.BackColor = System.Drawing.Color.Transparent
+        Me.Label1.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.Label1.Location = New System.Drawing.Point(210, 6)
+        Me.Label1.Name = "Label1"
+        Me.Label1.Size = New System.Drawing.Size(68, 18)
+        Me.Label1.TabIndex = 22
+        Me.Label1.Text = "Sort By:"
+        '
         'Label2
         '
         Me.Label2.AutoSize = True
         Me.Label2.BackColor = System.Drawing.Color.Transparent
         Me.Label2.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label2.Location = New System.Drawing.Point(48, 8)
+        Me.Label2.Location = New System.Drawing.Point(48, 6)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(51, 18)
+        Me.Label2.Size = New System.Drawing.Size(78, 18)
         Me.Label2.TabIndex = 21
-        Me.Label2.Text = "Name"
+        Me.Label2.Text = "All Relics"
         '
         'RelicTree
         '
@@ -87,7 +131,7 @@ Partial Class Relics
         Me.RelicTree.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
         Me.RelicTree.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.RelicTree.FullRowSelect = True
-        Me.RelicTree.Location = New System.Drawing.Point(2, 32)
+        Me.RelicTree.Location = New System.Drawing.Point(2, 33)
         Me.RelicTree.Name = "RelicTree"
         TreeNode1.Name = "lith"
         TreeNode1.Text = "Lith"
@@ -98,7 +142,7 @@ Partial Class Relics
         TreeNode4.Name = "axi"
         TreeNode4.Text = "Axi"
         Me.RelicTree.Nodes.AddRange(New System.Windows.Forms.TreeNode() {TreeNode1, TreeNode2, TreeNode3, TreeNode4})
-        Me.RelicTree.Size = New System.Drawing.Size(450, 521)
+        Me.RelicTree.Size = New System.Drawing.Size(450, 520)
         Me.RelicTree.TabIndex = 18
         '
         'HideMenu
@@ -169,18 +213,6 @@ Partial Class Relics
         Me.lbTitle.TabIndex = 17
         Me.lbTitle.Text = "Relics"
         '
-        'Label1
-        '
-        Me.Label1.AutoSize = True
-        Me.Label1.BackColor = System.Drawing.Color.Transparent
-        Me.Label1.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label1.Location = New System.Drawing.Point(250, 8)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(125, 18)
-        Me.Label1.TabIndex = 22
-        Me.Label1.Text = "Plat/Ducat Info"
-        '
         'Relics
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -214,4 +246,6 @@ Partial Class Relics
     Friend WithEvents HideMenu As ContextMenuStrip
     Friend WithEvents HideOpt As ToolStripMenuItem
     Friend WithEvents Label1 As Label
+    Friend WithEvents RelicTree2 As TreeView
+    Friend WithEvents SortSelection As ComboBox
 End Class

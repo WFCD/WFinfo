@@ -91,12 +91,13 @@ Partial Class Settings
         Me.cbPassiveChecks.CheckState = System.Windows.Forms.CheckState.Checked
         Me.cbPassiveChecks.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbPassiveChecks.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbPassiveChecks.Location = New System.Drawing.Point(184, 45)
+        Me.cbPassiveChecks.Location = New System.Drawing.Point(184, 91)
         Me.cbPassiveChecks.Name = "cbPassiveChecks"
         Me.cbPassiveChecks.Size = New System.Drawing.Size(112, 17)
         Me.cbPassiveChecks.TabIndex = 17
         Me.cbPassiveChecks.Text = "Passive Checks"
         Me.cbPassiveChecks.UseVisualStyleBackColor = False
+        Me.cbPassiveChecks.Visible = False
         '
         'cbFullscreen
         '
@@ -104,7 +105,7 @@ Partial Class Settings
         Me.cbFullscreen.BackColor = System.Drawing.Color.Transparent
         Me.cbFullscreen.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbFullscreen.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbFullscreen.Location = New System.Drawing.Point(11, 91)
+        Me.cbFullscreen.Location = New System.Drawing.Point(11, 68)
         Me.cbFullscreen.Name = "cbFullscreen"
         Me.cbFullscreen.Size = New System.Drawing.Size(117, 17)
         Me.cbFullscreen.TabIndex = 18
@@ -119,7 +120,7 @@ Partial Class Settings
         Me.cbAnimations.CheckState = System.Windows.Forms.CheckState.Checked
         Me.cbAnimations.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbAnimations.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbAnimations.Location = New System.Drawing.Point(11, 68)
+        Me.cbAnimations.Location = New System.Drawing.Point(11, 45)
         Me.cbAnimations.Name = "cbAnimations"
         Me.cbAnimations.Size = New System.Drawing.Size(90, 17)
         Me.cbAnimations.TabIndex = 20
@@ -255,12 +256,13 @@ Partial Class Settings
         Me.cbPlatinum.CheckState = System.Windows.Forms.CheckState.Checked
         Me.cbPlatinum.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbPlatinum.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbPlatinum.Location = New System.Drawing.Point(11, 45)
+        Me.cbPlatinum.Location = New System.Drawing.Point(11, 91)
         Me.cbPlatinum.Name = "cbPlatinum"
         Me.cbPlatinum.Size = New System.Drawing.Size(145, 17)
         Me.cbPlatinum.TabIndex = 26
         Me.cbPlatinum.Text = "Live Platinum Checks"
         Me.cbPlatinum.UseVisualStyleBackColor = False
+        Me.cbPlatinum.Visible = False
         '
         'cbDisplayNames
         '
@@ -285,7 +287,7 @@ Partial Class Settings
         Me.cbMessages.CheckState = System.Windows.Forms.CheckState.Checked
         Me.cbMessages.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbMessages.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbMessages.Location = New System.Drawing.Point(184, 68)
+        Me.cbMessages.Location = New System.Drawing.Point(184, 45)
         Me.cbMessages.Name = "cbMessages"
         Me.cbMessages.Size = New System.Drawing.Size(82, 17)
         Me.cbMessages.TabIndex = 25
@@ -313,7 +315,7 @@ Partial Class Settings
         Me.cbDebug.BackColor = System.Drawing.Color.Transparent
         Me.cbDebug.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbDebug.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbDebug.Location = New System.Drawing.Point(184, 91)
+        Me.cbDebug.Location = New System.Drawing.Point(184, 68)
         Me.cbDebug.Name = "cbDebug"
         Me.cbDebug.Size = New System.Drawing.Size(96, 17)
         Me.cbDebug.TabIndex = 23

@@ -12,7 +12,6 @@ Imports Tesseract
 Public Class Main
     Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Integer, ByVal dx As Integer, ByVal dy As Integer, ByVal cButtons As Integer, ByVal dwExtraInfo As Integer)
     Public Declare Function GetAsyncKeyState Lib "user32" (ByVal vKey As Integer) As Integer
-    Dim appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Dim scTog As Integer = 0 ' Toggle to force a single screenshot
     Dim count As Integer = 0 ' Number of Pics in appData
     Dim Sess As Integer = 0  ' Number of Screenshots this session
@@ -321,7 +320,8 @@ Public Class Main
 
                             'Blueprint means that it is a multi-line part name
                             If Not LevDist(tList(i), "Blueprint") < 4 Then
-                                Dim guess As String = Names(check(tList(i)))
+                                ' Modified
+                                Dim guess As String = check(tList(i))
                                 finalList.Add(guess)
                             Else
                                 'Since it's multi-line you need to use mode 1 of the crop function 
@@ -334,7 +334,9 @@ Public Class Main
                                     Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\") + 1
                                     img.Save(appData & "\WFInfo\tests\" & nextFile & ".jpg", Imaging.ImageFormat.Jpeg)
                                 End If
-                                Dim guess As String = Names(check(GetText(img) + " Blueprint Blueprint"))
+                                ' Modified
+                                ' Dim guess As String = Names(check(GetText(img) + " Blueprint Blueprint"))
+                                Dim guess As String = check(GetText(img) + " Blueprint")
                                 img.Dispose()
                                 finalList.Add(guess)
                             End If
@@ -361,63 +363,49 @@ Public Class Main
                             Dim guess As String = finalList(i)
                             If Not finalList(i) = "Forma Blueprint" Then
                                 Dim plat As String = ""
-                                For j = 0 To PlatPrices.Count - 1
-                                    If PlatPrices(j).Contains(guess) Then
-                                        plat = PlatPrices(j).Split(",")(1)
-                                        Exit For
+                                Dim ducat As String = ""
+                                Dim job As JObject = Nothing
+                                If ducat_plat.TryGetValue(guess, job) Then
+                                    plat = job("plat").ToString()
+                                    p.Add(plat)
+                                    ducat = job("ducats").ToString()
+                                    d.Add(ducat)
+                                Else
+                                    Dim plat_int As Integer = GetPlat(KClean(guess))
+                                    plat = plat_int
+                                    If plat_int > HighestPlat Then
+                                        HighestPlat = plat_int
                                     End If
-                                Next
-                                If plat = "" Then
-                                    If DisplayPlatinum Then
-                                        plat = GetPlat(KClean(guess))
-                                        PlatPrices.Add(guess & "," & plat)
-                                    Else
-                                        plat = "-1"
-                                    End If
-                                    If Not plat = "Unknown" Then
-                                        If CType(plat, Integer) > HighestPlat Then
-                                            HighestPlat = CType(plat, Integer)
-                                        End If
-                                    End If
-                                    If CType(plat, Integer) < 0 Then
+                                    If plat_int < 0 Then
                                         plat = "X"
                                     End If
                                     p.Add(plat)
-                                    d.Add(Ducks(check(guess)))
-                                    If KClean(guess).Length > 27 Then
-                                        n.Add(KClean(guess).Substring(0, 27) & "...")
-                                    Else
-                                        n.Add(KClean(guess))
-                                    End If
-                                    If guess.Contains("*") Then
-                                        v.Add(True)
-                                    Else
-                                        v.Add(False)
-                                    End If
 
-                                    If KClean(guess).Length > 27 Then
-                                        qItems.Add(KClean(guess).Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
+                                    If plat = "X" OrElse plat = 0 Then
+                                        ducat = plat
                                     Else
-                                        qItems.Add(KClean(guess) & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
+                                        ducat = ducat_plat(check(guess))("ducats").ToString()
                                     End If
+                                    d.Add(ducat)
+                                End If
+                                guess = KClean(guess)
+
+                                If guess.Length > 27 Then
+                                    n.Add(guess.Substring(0, 27) & "...")
                                 Else
-                                    p.Add(plat)
-                                    d.Add(Ducks(check(guess)))
-                                    If KClean(guess).Length > 27 Then
-                                        n.Add(KClean(guess).Substring(0, 27) & "...")
-                                    Else
-                                        n.Add(KClean(guess))
-                                    End If
-                                    If guess.Contains("*") Then
-                                        v.Add(True)
-                                    Else
-                                        v.Add(False)
-                                    End If
-                                    If KClean(guess).Length > 27 Then
-                                        qItems.Add(KClean(guess).Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
-                                    Else
-                                        qItems.Add(KClean(guess) & vbNewLine & "    Ducks: " & Ducks(check(guess)) & "   Plat: " & plat & vbNewLine)
-                                    End If
+                                    n.Add(guess)
+                                End If
+
+                                ' TODO: Add in "vaulted" to ducat_plat database
+                                '       And probably should rename it to prime_parts or something
+                                '       Then have check like this:
+                                ' v.Add(job("vaulted").ToObject(Of Boolean))
+                                v.Add(True)
+
+                                If guess.Length > 27 Then
+                                    qItems.Add(guess.Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & ducat & "   Plat: " & plat & vbNewLine)
+                                Else
+                                    qItems.Add(guess & vbNewLine & "    Ducks: " & ducat & "   Plat: " & plat & vbNewLine)
                                 End If
                             Else
                                 n.Add(vbNewLine & KClean(guess))
@@ -448,7 +436,7 @@ Public Class Main
                                 Dim y As Integer = My.Settings.StartPoint.Y + (My.Settings.StartPoint.Y * 0.05)
                                 Select Case players
                                     Case 4
-                                        Dim x As Integer = ((CliptoImage.Width / 4) * 0.8) + (width * i) + (width * 0.25)
+                                        Dim x As Integer = ((CliptoImage.Width / 4) * 0.8) + (width * (i + 0.25))
                                         Select Case i
                                             Case 0
                                                 panel1.Display(x, y, p(i), d(i), v(i))
@@ -460,7 +448,7 @@ Public Class Main
                                                 panel4.Display(x, y, p(i), d(i), v(i))
                                         End Select
                                     Case 3
-                                        Dim x As Integer = (width * i) + ((CliptoImage.Width / 4) * 0.8) + (width * 0.5)
+                                        Dim x As Integer = ((CliptoImage.Width / 4) * 0.8) + (width * (i + 0.75))
                                         Select Case i
                                             Case 0
                                                 panel1.Display(x, y, p(i), d(i), v(i))
@@ -472,7 +460,7 @@ Public Class Main
                                                 panel4.Display(x, y, p(i), d(i), v(i))
                                         End Select
                                     Case 2
-                                        Dim x As Integer = ((CliptoImage.Width / 4) * 0.8) + (width * (i + 1))
+                                        Dim x As Integer = ((CliptoImage.Width / 4) * 0.8) + (width * (i + 1.25))
                                         Select Case i
                                             Case 0
                                                 panel1.Display(x, y, p(i), d(i), v(i))
@@ -499,11 +487,11 @@ Public Class Main
                                     Dim x As Integer = 0
                                     Select Case players
                                         Case 4
-                                            x = (width * i) + 2.5 * (width * 0.25) + (i * width * 0.005)
+                                            x = (width * i) + (width * 0.25) + (i * width * 0.005)
                                         Case 3
-                                            x = (width * i) + (width * 0.5) + (width * 0.25) + (i * width * 0.005)
+                                            x = (width * i) + (width * 0.75) + (i * width * 0.005)
                                         Case 2
-                                            x = (width * (i + 1)) + (width * 0.25) + (i * width * 0.005)
+                                            x = (width * i) + (width * 1.25) + (i * width * 0.005)
                                     End Select
                                     Select Case i
                                         Case 0
@@ -710,7 +698,7 @@ Public Class Main
         My.Settings.ChecksPD = tempChecksPD
         My.Settings.StartX = Me.Location.X
         My.Settings.StartY = Me.Location.Y
-        My.Settings.Equipment = Equipment
+        'My.Settings.Equipment = Equipment
         My.Settings.Save()
     End Sub
 
@@ -734,17 +722,13 @@ Public Class Main
         'Function that retrieves parts and ducat prices from the wiki and stores the info in Names() and Ducks()
         '_________________________________________________________________________
         Try
-            Equipment = My.Settings.Equipment ' Load equipment string
+            'Equipment = My.Settings.Equipment ' Load equipment string
             lbStatus.ForeColor = Color.Yellow
-            Console.WriteLine("ECHO001")
             Dim webClient As New System.Net.WebClient
             webClient.Headers.Add("platform", "pc")
             webClient.Headers.Add("language", "en")
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
-            Console.WriteLine("ECHO002")
-            Console.WriteLine(items_file_path)
-            Console.WriteLine("ECHO002")
 
             If market_items Is Nothing AndAlso File.Exists(items_file_path) Then
                 market_items = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(items_file_path))
@@ -764,16 +748,14 @@ Public Class Main
                 Dim dayAgo As Date = Date.Now.AddDays(-1)
                 temp_bool = timestamp < dayAgo
             End If
-            Console.WriteLine("ECHO003")
 
             If temp_bool Then
                 Dim d_p_temp As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/tools/ducats"))
                 ducat_plat = New JObject()
-                Console.WriteLine("ECHO013")
                 For Each elem As JObject In d_p_temp("payload")("previous_day")
                     Dim item_name As String = ""
                     If Not market_items.TryGetValue(elem("item"), item_name) Then
-                        Console.WriteLine("CAN'T FIND: " + item_name)
+                        Console.WriteLine("DURING DUCAT/PLAT LOAD: CAN'T FIND THIS ID -- " + elem("item").ToString())
                         Load_Market_Items()
                         item_name = market_items(elem("item"))
                     End If
@@ -784,32 +766,16 @@ Public Class Main
                         ducat_plat(item_name)("plat") = elem("wa_price")
                     End If
                 Next
-                Console.WriteLine("ECHO023")
-                ' Confirm that no items have been missed
-                ' Add Pre-load option
-
-                'Dim flicker As Boolean = True
-                'For Each elem As KeyValuePair(Of String, String) In market_items
-                'Dim strs As String() = elem.Value.Split("|")
-                'Dim url As String = strs(1)
-                'Dim name As String = strs(0)
-                'Dim ignore As JToken = Nothing
-                'If Not ducat_plat.TryGetValue(name, ignore) Then
-                'Find_Item(name, url)
-                'End If
-                'flicker = Not flicker
-                'If flicker Then
-                'lbStatus.ForeColor = Color.Teal
-                'Else
-                'lbStatus.ForeColor = Color.Yellow
-                'End If
-                'Next
-                Console.WriteLine("ECHO033")
 
                 ducat_plat("timestamp") = Date.Now.ToString("R")
+                If Not ducat_plat.TryGetValue("Forma Blueprint", Nothing) Then
+                    Dim job As New JObject()
+                    job("ducats") = 0
+                    job("plat") = 0
+                    ducat_plat("Forma Blueprint") = job
+                End If
                 File.WriteAllText(ducat_file_path, JsonConvert.SerializeObject(ducat_plat, Newtonsoft.Json.Formatting.Indented))
             End If
-            Console.WriteLine("ECHO004")
 
             For Each elem As KeyValuePair(Of String, String) In market_items
                 Dim name As String = elem.Value.Split("|")(0)
@@ -817,13 +783,16 @@ Public Class Main
                 Dim d_p As JObject = Nothing
                 If ducat_plat.TryGetValue(name, d_p) Then
                     ducat = d_p("ducats")
-                    PlatPrices.Add(name & "," & d_p("plat").ToString())
+                    'PlatPrices.Add(name & "," & d_p("plat").ToString())
                 End If
-                Names.Add(name)
-                Ducks.Add(ducat)
+                'Names.Add(name)
+                'Ducks.Add(ducat)
             Next
-            Names.Add("Forma Blueprint")
-            Ducks.Add("0")
+
+            'Names.Add("Forma Blueprint")
+            'Ducks.Add("0")
+
+            Load_Relic_Data()
 
             lbStatus.ForeColor = Color.Lime
             tPPrice.Start()
@@ -933,7 +902,7 @@ Public Class Main
         '_________________________________________________________________________
         'Keeps the background passive price check running
         '_________________________________________________________________________
-        If Not bgPPrice.IsBusy And enablePPC And PassiveChecks Then
+        If Not bgPPrice.IsBusy And enablePPC Then
             bgPPrice.RunWorkerAsync()
         End If
     End Sub
@@ -944,41 +913,46 @@ Public Class Main
         'This speeds up searches as you no longer have to search every part in a fissure
         '_________________________________________________________________________
 
-        Try
-            Dim found As Boolean = False
-            Dim price As Integer = 0
-            For i = 0 To PlatPrices.Count - 1
-                If PlatPrices(i).Contains(Names(pCount)) Then
-                    price = GetPlat(KClean(Names(pCount)))
-                    PlatPrices(i) = Names(pCount) & "," & price
-                    found = True
-                End If
-            Next
-            If found = False Then
-                price = GetPlat(KClean(Names(pCount)))
-                PlatPrices.Add(Names(pCount) & "," & price)
-            End If
+        ' TODO:
+        '   Change this to add missing plat vals, and to check if need to reload plat vals
+        '   Make sure that when reloading plat vals, also reload the "fix list"
 
 
-            If pCount < Names.Count - 2 Then
-                pCount += 1
-            Else
-                pCount = 0
-            End If
+        'Try
+        '    Dim found As Boolean = False
+        '    Dim price As Integer = 0
+        '    For i = 0 To PlatPrices.Count - 1
+        '        If PlatPrices(i).Contains(Names(pCount)) Then
+        '            price = GetPlat(KClean(Names(pCount)))
+        '            PlatPrices(i) = Names(pCount) & "," & price
+        '            found = True
+        '        End If
+        '    Next
+        '    If found = False Then
+        '        price = GetPlat(KClean(Names(pCount)))
+        '        PlatPrices.Add(Names(pCount) & "," & price)
+        '    End If
 
-            'This is the developer version of a function that checks for cheaply listed parts
-            If devCheck Then
-                Dim difference = GetPlat(KClean(Names(pCount)), getDif:=True)
-                If difference >= 20 Then
-                    Tray.Clear()
-                    qItems.Add("-ALERT-" & vbNewLine & KClean(Names(pCount)) & vbNewLine & "Difference:  " & difference)
-                    Tray.ShowDialog()
-                    Tray.Dispose()
-                End If
-            End If
-        Catch ex As Exception
-            addLog(ex.ToString)
-        End Try
+
+        '    If pCount < Names.Count - 2 Then
+        '        pCount += 1
+        '    Else
+        '        pCount = 0
+        '    End If
+
+        '    'This is the developer version of a function that checks for cheaply listed parts
+        '    If devCheck Then
+        '        Dim difference = GetPlat(KClean(Names(pCount)), getDif:=True)
+        '        If difference >= 20 Then
+        '            Tray.Clear()
+        '            qItems.Add("-ALERT-" & vbNewLine & KClean(Names(pCount)) & vbNewLine & "Difference:  " & difference)
+        '            Tray.ShowDialog()
+        '            Tray.Dispose()
+        '        End If
+        '    End If
+        'Catch ex As Exception
+        '    addLog(ex.ToString)
+        'End Try
     End Sub
 
     Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
@@ -1018,8 +992,10 @@ Public Class Main
     End Sub
 
     Private Sub pbRelic_Click(sender As Object, e As EventArgs) Handles pbRelic.Click
-        Relics.Load_Relic_Data()
-        Relics.Show()
+        If relic_data IsNot Nothing Then
+            Load_Relic_Tree()
+            Relics.Show()
+        End If
     End Sub
 
     Private Sub pbRelic_MouseEnter(sender As Object, e As EventArgs) Handles pbRelic.MouseEnter
@@ -1241,48 +1217,55 @@ Module Glob
     Public HKey1 As Integer = My.Settings.HKey1
     Public HKey2 As Integer = My.Settings.HKey2
     Public HKey3 As Integer = My.Settings.HKey3
-    Public Names As New List(Of String)()   ' List of Part Names
-    Public Ducks As New List(Of String)()   ' Duck price associated with part
-    Public Vaulted As New List(Of String)()   ' Is the part vaulted? True / False
-    Public PlatPrices As New List(Of String)()   ' Stored list of plat prices
-    Public DuckList As New List(Of String)()    ' List of Ducat Prices
     Public HideShots As Boolean = False     ' Bool to hide screenshot notifications in fullscreen mode
-    Public Equipment As String               ' List of leveled equipment
+    'Public Equipment As String               ' List of leveled equipment
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
     Public key2Tog As Boolean = False
     Public key3Tog As Boolean = False
     Public Animate As Boolean = My.Settings.Animate
-    Public PassiveChecks As Boolean = My.Settings.PassiveChecks
+    'Public PassiveChecks As Boolean = My.Settings.PassiveChecks
     Public Messages As Boolean = My.Settings.Messages
     Public NewStyle As Boolean = My.Settings.NewStyle
     Public Debug As Boolean = My.Settings.Debug
-    Public DisplayPlatinum As Boolean = My.Settings.DisplayPlatinum
+    'Public DisplayPlatinum As Boolean = My.Settings.DisplayPlatinum
     Public DisplayNames As Boolean = My.Settings.DisplayNames
-    Public market_items As Dictionary(Of String, String)      'MODIFICATION: contains warframe.market item listing (mainly for ducat_plat)
-    Public items_file_path As String = Path.Combine(Environment.CurrentDirectory, "market_items.json")
-    Public ducat_plat As JObject        'MODIFICATION: contains warframe.market ducatonator list (which includes a weighted price)
-    Public ducat_file_path As String = Path.Combine(Environment.CurrentDirectory, "ducat_plat.json")
+    Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+    Public market_items As Dictionary(Of String, String)                ' warframe.market item listing                  {<id>: "<name>|<url_name>", ...}
+    Public items_file_path As String = Path.Combine(appData, "WFInfo\market_items.json")
+    Public ducat_plat As JObject                                        ' contains warframe.market ducatonator listing  {<partName>: {"ducats": <ducat_val>,"plat": <plat_val>}, ...}
+    Public ducat_file_path As String = Path.Combine(appData, "WFInfo\ducat_plat.json")
+    Public relic_data As JObject                                        ' Contains relic_data from Warframe PC Drops    {<Era>: {"A1":{"vaulted": true,<rare1/uncommon[12]/common[123]>: <part>}, ...}, "Meso": ..., "Neo": ..., "Axi": ...}
+    Public relic_file_path As String = Path.Combine(appData, "WFInfo\relic_data.json")
+    Public hidden_nodes As JObject                                      ' Contains list of nodes to hide                {"Lith": ["A1","A2",...], "Meso": [...], "Neo": [...], "Axi": [...]}
+    Public hidden_file_path As String = Path.Combine(appData, "WFInfo\hidden.json")
+    Public textColor As Color = Color.FromArgb(177, 208, 217)
+    Public textBrush As Brush = New SolidBrush(textColor)
+    Public stealthColor As Color = Color.FromArgb(118, 139, 145)
+    Public stealthBrush As Brush = New SolidBrush(stealthColor)
+    Public commonColor As Color = Color.FromArgb(205, 127, 50)
+    Public commonBrush As Brush = New SolidBrush(commonColor)
+    Public uncommonColor As Color = Color.FromArgb(192, 192, 192)
+    Public uncommonBrush As Brush = New SolidBrush(uncommonColor)
+    Public rareColor As Color = Color.FromArgb(255, 215, 0)
+    Public rareBrush As Brush = New SolidBrush(rareColor)
     Public cookie As String = ""
     Public xcsrf As String = ""
-    Public Function check(string1 As String) As Integer
+    Public Function check(string1 As String) As String
         '_________________________________________________________________________
         'Checks the levDist of a string and returns the index in Names() of the closest part
         '_________________________________________________________________________
         string1 = string1.Replace("*", "")
-        Dim Compare As New List(Of Integer)()
-        For Each str As String In Names
-            Compare.Add(LevDist(str, string1))
-        Next
+        Dim lowest As String = Nothing
         Dim low As Integer = 9999
-        Dim ind As Integer = 0
-        For i = 0 To Compare.Count - 1
-            If Compare(i) < low Then
-                low = Compare(i)
-                ind = i
+        For Each prop As KeyValuePair(Of String, JToken) In ducat_plat
+            Dim val As Integer = LevDist(prop.Key, string1)
+            If val < low Then
+                low = val
+                lowest = prop.Key
             End If
         Next
-        Return ind
+        Return lowest
     End Function
     Public Function checkSet(string1 As String) As String
         '_________________________________________________________________________
@@ -1290,41 +1273,38 @@ Module Glob
         '_________________________________________________________________________
         string1 = string1.ToLower()
         string1 = string1.Replace("*", "")
-        Dim Compare As New List(Of Integer)()
-        For Each str As String In Names
-            str = str.ToLower
-            str = str.Replace("neuroptics", "")
-            str = str.Replace("chassis", "")
-            str = str.Replace("sytems", "")
-            str = str.Replace("carapace", "")
-            str = str.Replace("cerebrum", "")
-            str = str.Replace("blueprint", "")
-            str = str.Replace("harness", "")
-            str = str.Replace("blade", "")
-            str = str.Replace("pouch", "")
-            str = str.Replace("barrel", "")
-            str = str.Replace("receiver", "")
-            str = str.Replace("stock", "")
-            str = str.Replace("disc", "")
-            str = str.Replace("grip", "")
-            str = str.Replace("string", "")
-            str = str.Replace("handle", "")
-            str = str.Replace("ornament", "")
-            str = str.Replace("wings", "")
-            str = str.Replace("blades", "")
-            str = str.Replace("hilt", "")
-            str = RTrim(str)
-            Compare.Add(LevDist(str, string1))
-        Next
+        Dim rStr As String = Nothing
         Dim low As Integer = 9999
-        Dim ind As Integer = 0
-        For i = 0 To Compare.Count - 2
-            If Compare(i) < low Then
-                low = Compare(i)
-                ind = i
+        ' Modified
+        For Each prop As KeyValuePair(Of String, JToken) In ducat_plat
+            Dim str As String = prop.Key.ToLower
+            str = Str.Replace("neuroptics", "")
+            Str = Str.Replace("chassis", "")
+            Str = Str.Replace("sytems", "")
+            Str = Str.Replace("carapace", "")
+            Str = Str.Replace("cerebrum", "")
+            Str = Str.Replace("blueprint", "")
+            Str = Str.Replace("harness", "")
+            Str = Str.Replace("blade", "")
+            Str = Str.Replace("pouch", "")
+            Str = Str.Replace("barrel", "")
+            Str = Str.Replace("receiver", "")
+            Str = Str.Replace("stock", "")
+            Str = Str.Replace("disc", "")
+            Str = Str.Replace("grip", "")
+            Str = Str.Replace("string", "")
+            Str = Str.Replace("handle", "")
+            Str = Str.Replace("ornament", "")
+            Str = Str.Replace("wings", "")
+            Str = Str.Replace("blades", "")
+            Str = Str.Replace("hilt", "")
+            str = RTrim(str)
+            Dim val As Integer = LevDist(str, string1)
+            If val < low Then
+                low = val
+                rStr = prop.Key
             End If
         Next
-        Dim rStr As String = Names(ind)
         rStr = rStr.ToLower
         rStr = rStr.Replace("neuroptics", "")
         rStr = rStr.Replace("chassis", "")
@@ -1356,6 +1336,7 @@ Module Glob
         '_________________________________________________________________________
         'LevDist determines how "close" a jumbled name is to an actual name
         'For example: Nuvo Prime is closer to Nova Prime (2) then Ash Prime (4)
+        '     https://en.wikipedia.org/wiki/Levenshtein_distance
         '_________________________________________________________________________
         s.Replace("*", "")
         t.Replace("*", "")
@@ -1402,12 +1383,225 @@ Module Glob
         Return d(n, m)
     End Function
 
+    Public Sub Load_Relic_Data()
+        Dim request As WebRequest = Nothing
+        If File.Exists(relic_file_path) Then
+            request = WebRequest.Create("https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html")
+            request.Method = "HEAD"
+            ' Move last_mod back one hour, so that it doesn't equal timestamp
+            Dim last_mod As Date = DateTime.Parse(request.GetResponse().Headers.Get("Last-Modified")).AddHours(-1)
+            relic_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(relic_file_path))
+            Dim ignore As JToken = Nothing
+            If relic_data.TryGetValue("timestamp", ignore) Then
+                Dim timestamp As Date = DateTime.Parse(relic_data("timestamp"))
+                If last_mod < timestamp Then
+                    Return
+                End If
+            End If
+        End If
+        relic_data = New JObject()
+        request = WebRequest.Create("https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html")
+        Dim response As WebResponse = request.GetResponse()
+        relic_data("timestamp") = DateTime.Parse(response.Headers.Get("Last-Modified"))
+        Dim drop_data As String = Nothing
+        Using reader As New StreamReader(response.GetResponseStream(), System.Text.ASCIIEncoding.ASCII)
+            drop_data = reader.ReadToEnd()
+        End Using
+
+        Dim first As Integer = drop_data.IndexOf("id=""relicRewards""")
+        first = drop_data.IndexOf("<table>", first)
+        Dim last As Integer = drop_data.IndexOf("</table>", first)
+        Dim index As Integer = drop_data.IndexOf("<tr>", first)
+        Dim tr_stop As Integer = 0
+        While index < last AndAlso index <> -1
+            tr_stop = drop_data.IndexOf("</tr>", index)
+            Dim sub_str As String = drop_data.Substring(index, tr_stop - index)
+            If sub_str.Contains("Relic") AndAlso sub_str.Contains("Intact") Then
+                sub_str = Regex.Replace(sub_str, "<[^>]+>|\([^\)]+\)", "")
+                Dim split As String() = sub_str.Split(" ")
+                Dim era As String = split(0)
+                Dim relic As String = split(1)
+                Dim ignore As JObject = Nothing
+                If Not relic_data.TryGetValue(era, ignore) Then
+                    relic_data(era) = New JObject()
+                End If
+                relic_data(era)(relic) = New JObject()
+                relic_data(era)(relic)("vaulted") = True
+                Dim cmnNum As Integer = 1
+                Dim uncNum As Integer = 1
+                index = drop_data.IndexOf("<tr", tr_stop)
+                tr_stop = drop_data.IndexOf("</tr>", index)
+                sub_str = drop_data.Substring(index, tr_stop - index)
+                While Not sub_str.Contains("blank-row")
+                    sub_str = sub_str.Replace("<tr><td>", "").Replace("</td>", "").Replace("td>", "")
+                    split = sub_str.Split("<")
+                    If split(1).Contains("2.") Then
+                        relic_data(era)(relic)("rare1") = split(0)
+                    ElseIf split(1).Contains("11") Then
+                        relic_data(era)(relic)("uncommon" + uncNum.ToString()) = split(0)
+                        uncNum += 1
+                    Else
+                        relic_data(era)(relic)("common" + cmnNum.ToString()) = split(0)
+                        cmnNum += 1
+                    End If
+
+                    index = drop_data.IndexOf("<tr", tr_stop)
+                    tr_stop = drop_data.IndexOf("</tr>", index)
+                    sub_str = drop_data.Substring(index, tr_stop - index)
+                End While
+
+            End If
+            index = drop_data.IndexOf("<tr>", tr_stop)
+        End While
+
+        ' Find NOT Vauled Relics in Missions
+        last = drop_data.IndexOf("id=""relicRewards""")
+        index = drop_data.IndexOf("<tr>")
+        While index < last AndAlso index <> -1
+            tr_stop = drop_data.IndexOf("</tr>", index)
+            Dim sub_str As String = drop_data.Substring(index, tr_stop - index)
+            index = sub_str.IndexOf("Relic")
+            If index <> -1 Then
+                sub_str = sub_str.Substring(0, index - 1)
+                index = sub_str.LastIndexOf(">") + 1
+                sub_str = sub_str.Substring(index)
+                Dim split As String() = sub_str.Split(" ")
+                relic_data(split(0))(split(1))("vaulted") = False
+            End If
+            index = drop_data.IndexOf("<tr>", tr_stop)
+        End While
+
+        ' Find NOT Vauled Relics in Special Rewards
+        last = drop_data.IndexOf("id=""modByAvatar""")
+        index = drop_data.IndexOf("id=""keyRewards""")
+        index = drop_data.IndexOf("<tr>", index)
+        While index < last AndAlso index <> -1
+            tr_stop = drop_data.IndexOf("</tr>", index)
+            Dim sub_str As String = drop_data.Substring(index, tr_stop - index)
+            index = sub_str.IndexOf("Relic")
+            If index <> -1 Then
+                sub_str = sub_str.Substring(0, index - 1)
+                index = sub_str.LastIndexOf(">") + 1
+                sub_str = sub_str.Substring(index)
+                Dim split As String() = sub_str.Split(" ")
+                Dim ignore As JToken = Nothing
+                If relic_data.TryGetValue(split(0), ignore) Then
+                    relic_data(split(0))(split(1))("vaulted") = False
+                End If
+            End If
+            index = drop_data.IndexOf("<tr>", tr_stop)
+        End While
+
+        Save_Relic_Data()
+    End Sub
+
+    Public Sub Load_Relic_Tree()
+        If Relics.RelicTree.Nodes(0).Nodes.Count > 1 Then
+            Return
+        End If
+        For Each node As TreeNode In Relics.RelicTree.Nodes
+            For Each relic As JProperty In relic_data(node.Text)
+                Dim kid As New TreeNode(relic.Name)
+                kid.Name = relic.Name
+                node.Nodes.Add(kid)
+
+                kid.Nodes.Add(relic.Value("rare1").ToString()).ForeColor = rareColor
+                kid.Nodes.Add(relic.Value("uncommon1").ToString()).ForeColor = uncommonColor
+                kid.Nodes.Add(relic.Value("uncommon2").ToString()).ForeColor = uncommonColor
+                kid.Nodes.Add(relic.Value("common1").ToString()).ForeColor = commonColor
+                kid.Nodes.Add(relic.Value("common2").ToString()).ForeColor = commonColor
+                kid.Nodes.Add(relic.Value("common3").ToString()).ForeColor = commonColor
+                Dim rtot As Double = 0
+                Dim itot As Double = 0
+                Dim rperc As Double = 0.1
+                Dim iperc As Double = 0.02
+                Dim count As Integer = 0
+                For Each temp As TreeNode In kid.Nodes
+                    If temp.Parent.FullPath = kid.FullPath Then
+                        If Not ducat_plat.TryGetValue(temp.Text, Nothing) And temp.Text <> "Forma Blueprint" Then
+                            If temp.Text.Contains("Kavasa") Then
+                                If temp.Text.Contains("Kubrow") Then
+                                    temp.Text = temp.Text.Replace("Kubrow ", "")
+                                Else
+                                    temp.Text = temp.Text.Replace("Prime", "Prime Collar")
+                                End If
+                            ElseIf Not temp.Text.Contains("Prime Blueprint") Then
+                                temp.Text = temp.Text.Replace(" Blueprint", "")
+                            End If
+                            If Not ducat_plat.TryGetValue(temp.Text, Nothing) Then
+                                Console.WriteLine("LOADING: MISSING PLAT -- " + temp.FullPath + " -- " + temp.Text)
+                            End If
+                        End If
+                        If ducat_plat.TryGetValue(temp.Text, Nothing) Then
+                            If count > 2 Then
+                                rperc = 0.5 / 3.0
+                                iperc = 0.76 / 3.0
+                            ElseIf count > 0 Then
+                                rperc = 0.2
+                                iperc = 0.11
+                            End If
+                            Dim plat As Double = Double.Parse(ducat_plat(temp.Text)("plat"))
+                            rtot += plat * rperc
+                            itot += plat * iperc
+                            count += 1
+                        End If
+                    End If
+                Next
+                rtot -= itot
+                relic_data(node.Text)(relic.Name)("rad") = rtot
+                relic_data(node.Text)(relic.Name)("int") = itot
+                kid = kid.Clone()
+                kid.Text = node.Text + " " + relic.Name
+                Relics.RelicTree2.Nodes.Add(kid)
+            Next
+            node.Nodes.Add("Hidden").Name = "Hidden"
+        Next
+        Relics.RelicTree2.Nodes.Add("Hidden").Name = "Hidden"
+
+        Load_Hidden_Nodes()
+
+        Relics.RelicTree.TreeViewNodeSorter = Relics.Tree1Sorter
+        Relics.RelicTree2.TreeViewNodeSorter = Relics.Tree2Sorter
+        Relics.RelicTree.Sort()
+        Relics.RelicTree2.Sort()
+    End Sub
+
+    Private Sub Load_Hidden_Nodes()
+        If File.Exists(hidden_file_path) Then
+            hidden_nodes = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(hidden_file_path))
+
+            For Each node As TreeNode In Relics.RelicTree.Nodes
+                For Each hide As JValue In hidden_nodes(node.Text)
+                    Dim move As TreeNode = node.Nodes.Find(hide.Value, False)(0)
+                    node.Nodes.Remove(move)
+                    node.Nodes.Find("Hidden", False)(0).Nodes.Add(move)
+                    For Each found As TreeNode In Relics.RelicTree2.Nodes.Find(hide.Value, False)
+                        If found.Text.Equals(node.Text + " " + hide.Value) Then
+                            Relics.RelicTree2.Nodes.Remove(found)
+                            Relics.RelicTree2.Nodes.Find("Hidden", False)(0).Nodes.Add(found)
+                        End If
+                    Next
+
+                Next
+            Next
+        Else
+            hidden_nodes = New JObject()
+            hidden_nodes("Lith") = New JArray()
+            hidden_nodes("Meso") = New JArray()
+            hidden_nodes("Neo") = New JArray()
+            hidden_nodes("Axi") = New JArray()
+            File.WriteAllText(hidden_file_path, JsonConvert.SerializeObject(hidden_nodes, Newtonsoft.Json.Formatting.Indented))
+        End If
+    End Sub
+
+    Public Sub Save_Relic_Data()
+        File.WriteAllText(relic_file_path, JsonConvert.SerializeObject(relic_data, Newtonsoft.Json.Formatting.Indented))
+    End Sub
+
     Public Sub Find_Item(item_name As String, url As String)
         Dim webClient As New System.Net.WebClient
         webClient.Headers.Add("platform", "pc")
         webClient.Headers.Add("language", "en")
-        Console.WriteLine(item_name)
-        Console.WriteLine(url)
         Dim stats As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"))
         stats = stats("payload")("statistics_closed")("90days").Last
 
@@ -1430,17 +1624,31 @@ Module Glob
         File.WriteAllText(ducat_file_path, JsonConvert.SerializeObject(ducat_plat, Newtonsoft.Json.Formatting.Indented))
     End Sub
 
-    Public Function GetPlat(str As String, Optional getUser As Boolean = False, Optional getMod As Boolean = False, Optional getID As Boolean = False, Optional getDif As Boolean = False) As String
+    Public Function GetMarketData(name As String) As JObject
+        Dim ret As JObject = Nothing
+        If ducat_plat.TryGetValue(name, ret) Then
+            Return ret
+        End If
 
-        Console.WriteLine("GetPlat - " + str)
+        For Each kvp As KeyValuePair(Of String, String) In market_items
+            If kvp.Value.Contains(name) Then
+                Dim split As String() = kvp.Value.Split("|")
+                Find_Item(split(0), split(1))
+                If ducat_plat.TryGetValue(name, ret) Then
+                    Return ret
+                End If
+            End If
+        Next
 
-        '_________________________________________________________________________
-        'Retrieves a plat price of a part or set via warframe.market
-        '_________________________________________________________________________
+        Console.WriteLine("CANNOT FIND """ + name + """ IN MARKET ITEMS")
+        ret = New JObject()
+        ret("ducats") = 0
+        ret("plat") = 0
+        Return ret
+    End Function
 
-        '_________________________________________________________________________
-        'Prepare the name for the API
-        '_________________________________________________________________________
+    Public Function GetPlat(str As String, Optional getUser As Boolean = False, Optional getMod As Boolean = False, Optional getID As Boolean = False, Optional getDif As Boolean = False) As Integer
+
         Dim partName As String = str
         partName = partName.Replace(vbLf, "").Replace("*", "")
         str = str.ToLower
@@ -1457,120 +1665,6 @@ Module Glob
             End If
         End If
         Return elem("plat")
-
-
-        Dim webClient As New System.Net.WebClient
-        webClient.Headers.Add("platform", "pc")
-        webClient.Headers.Add("language", "en")
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-
-
-
-
-
-
-        '_________________________________________________________________________
-        'Make the request
-        '_________________________________________________________________________
-        'Dim webClient As New System.Net.WebClient
-        'WebClient.Headers.Add("platform", "pc")
-        'WebClient.Headers.Add("language", "en")
-        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-        Dim result As JObject
-        Console.WriteLine(str)
-        result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str + "/orders"))
-
-
-        '_________________________________________________________________________
-        'If ingame and online, and selling, add the price and name to a list
-        '_________________________________________________________________________
-        Dim platCheck As New List(Of Integer)()
-        Dim userCheck As New List(Of String)()
-        For i = 0 To result("payload")("orders").Count - 1
-            If result("payload")("orders")(i)("user")("status") = "ingame" Then
-                If result("payload")("orders")(i)("order_type") = "sell" Then
-                    platCheck.Add(result("payload")("orders")(i)("platinum"))
-                    userCheck.Add(result("payload")("orders")(i)("user")("ingame_name"))
-                End If
-            End If
-        Next
-
-
-        '_________________________________________________________________________
-        'Compare the prices to get the lowest price listed
-        '_________________________________________________________________________
-        If platCheck.Count = 0 Then
-            Return 0
-        End If
-        Dim low As Integer = 999999
-        Dim user As String = ""
-        Dim minUsers(4) As String
-        Dim minPrices(4) As Integer
-        Dim total As Integer = 0
-        For x = 0 To 4
-            low = 999999
-            For i = 0 To platCheck.Count - 1
-                If (Not userCheck(i).Contains("XB1")) And (Not userCheck(i).Contains("PS4")) And (Not minUsers.Contains(userCheck(i))) Then
-                    If platCheck(i) < low Then
-                        low = platCheck(i)
-                        user = userCheck(i)
-                    End If
-                End If
-            Next
-            minUsers(x) = user
-            minPrices(x) = low
-            total += low
-        Next
-        user = minUsers(0)
-        low = total / 5
-
-
-        '_________________________________________________________________________
-        'If you toggle getUser:
-        'Returns the username of the lowest seller and copies a buy message to clipboard
-        '_________________________________________________________________________
-        If getUser Then
-            Clipboard.SetText("/w " & user & " Hi, I would like to buy your " & partName & " for " & low & " Platinum.")
-            Return low & vbNewLine & "    User: " & user
-
-        ElseIf getID Then 'Used to list parts on warframe.market, returns the ID of the searched part
-            result = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + str))
-            Return result("payload")("item")("id")
-        ElseIf getDif Then 'Gets the difference between the lowest price and the next cheapest (Dev tool for cheap listings)
-            platCheck.Clear()
-            userCheck.Clear()
-            For i = 0 To result("payload")("orders").Count - 1
-                If result("payload")("orders")(i)("user")("status") = "ingame" Then
-                    If (result("payload")("orders")(i)("order_type") = "sell") And (result("payload")("orders")(i)("user")("region") = "en") Then
-                        platCheck.Add(result("payload")("orders")(i)("platinum"))
-                        userCheck.Add(result("payload")("orders")(i)("user")("ingame_name"))
-                    End If
-                End If
-            Next
-
-            If platCheck.Count = 0 Then
-                Return 0
-            End If
-
-            Dim firstLow As String = ""
-            For x = 0 To 1
-                low = 999999
-                For i = 0 To platCheck.Count - 1
-                    If (Not userCheck(i).Contains("XB1")) And (Not userCheck(i).Contains("PS4")) And (Not userCheck(i) = firstLow) Then
-                        If platCheck(i) < low Then
-                            low = platCheck(i)
-                            user = userCheck(i)
-                        End If
-                    End If
-                Next
-                firstLow = user
-            Next
-            Dim difference As Integer = Math.Abs(minPrices(0) - low)
-            Return difference
-        Else 'Not Single Pull
-            'MODIFICATION: Will be done in the code above
-            Return low
-        End If
     End Function
     Public Sub UpdateColors(f As Form)
         '_________________________________________________________________________
@@ -1728,5 +1822,13 @@ Module Glob
         Next
 
         Return bmap
+    End Function
+
+    Public Function ReplaceFirst(text As String, search As String, replace As String)
+        Dim pos As Integer = text.IndexOf(search)
+        If pos < 0 Then
+            Return text
+        End If
+        Return text.Substring(0, pos) + replace + text.Substring(pos + search.Length)
     End Function
 End Module
