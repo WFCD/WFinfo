@@ -16,6 +16,7 @@ Public Class Relics
     Dim mouseX As Integer
     Dim mouseY As Integer
     Dim RelicToHide As TreeNode = Nothing
+    Dim Relic2ToHide As TreeNode = Nothing
     Public Tree1Sorter As New NodeSorter(0)
     Public Tree2Sorter As New NodeSorter(1)
 
@@ -153,27 +154,58 @@ Public Class Relics
             Dim parent As TreeNode = RelicToHide.Parent
             parent.Nodes.Remove(RelicToHide)
             parent.Parent.Nodes.Add(RelicToHide)
+
+            Relic2ToHide.Parent.Nodes.Remove(Relic2ToHide)
+            RelicTree2.Nodes.Add(Relic2ToHide)
             Dim tok As JToken = arr.SelectToken("$[?(@ == '" + split(1) + "')]")
             arr.Remove(tok)
         Else
             Dim parent As TreeNode = RelicToHide.Parent
             parent.Nodes.Remove(RelicToHide)
             parent.Nodes.Find("Hidden", False)(0).Nodes.Add(RelicToHide)
+
+            RelicTree2.Nodes.Remove(Relic2ToHide)
+            RelicTree2.Nodes.Find("Hidden", False)(0).Nodes.Add(Relic2ToHide)
             arr.Add(split(1))
         End If
         File.WriteAllText(hidden_file_path, JsonConvert.SerializeObject(hidden_nodes, Newtonsoft.Json.Formatting.Indented))
     End Sub
 
-    Private Sub RelicTree_Click(sender As Object, e As TreeNodeMouseClickEventArgs) Handles RelicTree.NodeMouseClick
+    Private Sub RelicTree_Click(sender As Object, e As TreeNodeMouseClickEventArgs) Handles RelicTree.NodeMouseClick, RelicTree2.NodeMouseClick
         If e.Button <> MouseButtons.Right Then
             RelicToHide = Nothing
+            Relic2ToHide = Nothing
             Return
         End If
-        RelicToHide = e.Node
+        If sender.Equals(RelicTree) Then
+            RelicToHide = e.Node
+            Dim era As String = e.Node.FullPath.Split("\")(0)
+            Console.WriteLine("NODES FOUND")
+            For Each node As TreeNode In RelicTree2.Nodes.Find(e.Node.Name, True)
+                Console.WriteLine(node.FullPath)
+                If node.FullPath.Contains(era) Then
+                    Relic2ToHide = node
+                    Exit For
+                End If
+            Next
+        Else
+            Relic2ToHide = e.Node
+            Dim era As String = e.Node.Text.Split(" ")(0)
+            Console.WriteLine("NODES FOUND")
+            For Each node As TreeNode In RelicTree.Nodes.Find(e.Node.Name, True)
+                Console.WriteLine(node.FullPath)
+                If node.FullPath.Contains(era) Then
+                    RelicToHide = node
+                    Exit For
+                End If
+            Next
+        End If
 
         HideMenu.Items.Clear()
-        If RelicToHide IsNot Nothing AndAlso RelicToHide.Name.Length = 2 Then
-            If RelicToHide.FullPath.Contains("Hidden") Then
+        Console.WriteLine("NODE1 PATH: " + RelicToHide.FullPath)
+        Console.WriteLine("NODE2 PATH: " + Relic2ToHide.FullPath)
+        If e.Node IsNot Nothing AndAlso e.Node.Name.Length = 2 Then
+            If e.Node.FullPath.Contains("Hidden") Then
                 HideMenu.Items.Add("Show").ForeColor = textColor
                 HideMenu.Show(RelicTree, e.Location)
 
@@ -240,13 +272,27 @@ Public Class NodeSorter
             ElseIf strx.Length <> stry.Length Then
                 Return strx.Length - stry.Length
             End If
-            erax = tx.Parent.Text
-            If erax = "Hidden" Then
-                erax = tx.Parent.Parent.Text
-            End If
-            eray = ty.Parent.Text
-            If eray = "Hidden" Then
-                eray = ty.Parent.Parent.Text
+            If tx.Parent Is Nothing OrElse ty.Parent Is Nothing Then
+                If Me.type > 0 Then
+                    If tx.Parent IsNot Nothing Then
+                        erax = tx.Parent.Text
+                        eray = tx.Parent.Text
+                    ElseIf ty.Parent IsNot Nothing Then
+                        erax = ty.Parent.Text
+                        eray = ty.Parent.Text
+                    Else
+                        Return 0
+                    End If
+                End If
+            Else
+                erax = tx.Parent.Text
+                If erax = "Hidden" Then
+                    erax = tx.Parent.Parent.Text
+                End If
+                eray = ty.Parent.Text
+                If eray = "Hidden" Then
+                    eray = ty.Parent.Parent.Text
+                End If
             End If
         ElseIf Me.relic = 1 Then
             Dim splitx As String() = strx.Split(" ")
