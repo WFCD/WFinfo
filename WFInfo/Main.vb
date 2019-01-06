@@ -264,6 +264,9 @@ Public Class Main
                     End If
                 Else
                     lbStatus.ForeColor = Color.Yellow ' lbStatus is for showing the status color yellow = processing and sometimes error
+                    ' TODO: WATCH START
+                    prev_time = 0
+                    clock.Restart()
                     tPPrice.Stop()
                     scTog = 0
 
@@ -281,8 +284,8 @@ Public Class Main
                         graph.CopyFromScreen(My.Settings.StartPoint.X, My.Settings.StartPoint.Y, 0, 0, My.Settings.RecSize, CopyPixelOperation.SourceCopy)
                         CliptoImage = screenshot
                     End If
-
-
+                    Console.WriteLine("SCREENSHOT: " + (clock.Elapsed.Ticks - prev_time).ToString())
+                    prev_time = clock.Elapsed.Ticks
                     Try
                         '_________________________________________________________________________
                         'Gets the number of players using OCR and the names underneath fissure rewards
@@ -291,6 +294,8 @@ Public Class Main
                         If players > 4 Or players < 1 Then
                             players = 4
                         End If
+                        Console.WriteLine("PLAYER COUNT: " + (clock.Elapsed.Ticks - prev_time).ToString())
+                        prev_time = clock.Elapsed.Ticks
 
 
                         '_________________________________________________________________________
@@ -309,6 +314,8 @@ Public Class Main
                             End If
                             tList.Add(GetText(Crop(CliptoImage, players, i)))
                         Next
+                        Console.WriteLine("GET OCR TEXT: " + (clock.Elapsed.Ticks - prev_time).ToString())
+                        prev_time = clock.Elapsed.Ticks
 
 
                         '_________________________________________________________________________
@@ -336,7 +343,7 @@ Public Class Main
                                 End If
                                 ' Modified
                                 ' Dim guess As String = Names(check(GetText(img) + " Blueprint Blueprint"))
-                                Dim guess As String = check(GetText(img) + " Blueprint")
+                                Dim guess As String = check(GetText(img))
                                 img.Dispose()
                                 finalList.Add(guess)
                             End If
@@ -344,6 +351,8 @@ Public Class Main
 
                         qItems.Clear() 'qItems is for people using the tray instead of the overlay
 
+                        Console.WriteLine("GET PART NAMES: " + (clock.Elapsed.Ticks - prev_time).ToString())
+                        prev_time = clock.Elapsed.Ticks
 
                         '_________________________________________________________________________
                         'Retrieves the platinum and ducat prices using warframe.market 
@@ -361,6 +370,7 @@ Public Class Main
                         Dim n As New List(Of String)()
                         For i = 0 To finalList.Count - 1
                             Dim guess As String = finalList(i)
+                            Console.WriteLine(guess)
                             If Not finalList(i) = "Forma Blueprint" Then
                                 Dim plat As String = ""
                                 Dim ducat As String = ""
@@ -415,6 +425,8 @@ Public Class Main
                             End If
                         Next
 
+                        Console.WriteLine("GET PLAT/DUCAT: " + (clock.Elapsed.Ticks - prev_time).ToString())
+                        prev_time = clock.Elapsed.Ticks
 
                         '_________________________________________________________________________
                         'Displays the information using either newstyle(overlay) or old(tray)
@@ -504,19 +516,23 @@ Public Class Main
                                             plaque4.Display(x, y, w, n(i))
                                     End Select
                                 Next
-                                End if
                             End If
+                        End If
 
+                        Console.WriteLine("DISPLAY OVERLAYS: " + (clock.Elapsed.Ticks - prev_time).ToString())
+                        prev_time = clock.Elapsed.Ticks
 
-                            '_________________________________________________________________________
-                            'Readies the program for the next run and updates the session information
-                            '_________________________________________________________________________
-                            count += 1
+                        '_________________________________________________________________________
+                        'Readies the program for the next run and updates the session information
+                        '_________________________________________________________________________
+                        count += 1
                         Sess += 1
                         PPM += HighestPlat
                         lbStatus.ForeColor = Color.Lime
                         lbChecks.Text = "Checks this Session:              " & Sess
                         lbPPM.Text = "Platinum this Session:          " & PPM
+                        clock.Stop()
+                        Console.WriteLine("Total: " + clock.Elapsed.Ticks.ToString())
                         tPPrice.Start()
                     Catch ex As Exception
                         lbStatus.ForeColor = Color.Orange
@@ -544,6 +560,7 @@ Public Class Main
             tPPrice.Start()
         End Try
     End Sub
+
     Public Function Crop(img As Image, Optional mode As Integer = 0, Optional pos As Integer = 1, Optional players As Integer = 0) As Image
         '_________________________________________________________________________
         'Function used to crop the part names and usernames for player count
@@ -779,18 +796,12 @@ Public Class Main
 
             For Each elem As KeyValuePair(Of String, String) In market_items
                 Dim name As String = elem.Value.Split("|")(0)
-                Dim ducat As String = "0"
-                Dim d_p As JObject = Nothing
-                If ducat_plat.TryGetValue(name, d_p) Then
-                    ducat = d_p("ducats")
-                    'PlatPrices.Add(name & "," & d_p("plat").ToString())
+                If Not name.Contains("Prime Set") AndAlso Not ducat_plat.TryGetValue(name, Nothing) Then
+                    Console.WriteLine("MISSING PLAT VAL: " + name)
+                    Find_Item(name, elem.Value.Split("|")(1))
                 End If
-                'Names.Add(name)
-                'Ducks.Add(ducat)
             Next
 
-            'Names.Add("Forma Blueprint")
-            'Ducks.Add("0")
 
             Load_Relic_Data()
 
@@ -815,36 +826,32 @@ Public Class Main
         '_________________________________________________________________________
         'Gets the number of seperate strings(players) in an image
         '_________________________________________________________________________
+
+
+        Dim count As Integer = 1
         Using img
-            Dim wb As New WebBrowser
-            wb.ScriptErrorsSuppressed = True
-            wb.Navigate("about:blank")
-            Dim doc As HtmlDocument = wb.Document.OpenNew(True)
-            doc.Write(GetHOCR(img))
-            Dim first As Boolean = True
-            Dim prevDist As Integer
-            Dim count As Integer = 1
-            For Each element As HtmlElement In doc.All
-                If element.GetAttribute("className") = "ocrx_word" Then
-                    If first = False Then
-                        If Not element.InnerText = "" Then
-                            If prevDist + 100 < element.GetAttribute("title").Split(" ")(1) And element.InnerText.Length > 2 Then
-                                count += 1
-                                prevDist = element.GetAttribute("title").Split(" ")(1)
-                            End If
-                        End If
-                    Else
-                        If Not element.InnerText = "" Then
-                            If element.InnerText.Length > 2 Then
-                                prevDist = element.GetAttribute("title").Split(" ")(1)
-                                first = False
-                            End If
-                        End If
-                    End If
+
+            Dim temp As String = GetHOCR(img)
+
+
+            Dim span_start As Integer = temp.IndexOf("<span class='ocrx_word'")
+            Dim span_end As Integer = temp.IndexOf("</span>", span_start)
+            Dim prevDist As Integer = Integer.Parse(temp.Substring(temp.IndexOf("bbox", span_start) + 4, 4))
+            span_start = temp.IndexOf("<span class='ocrx_word'", span_end)
+            While span_start <> -1
+                span_end = temp.IndexOf("</span>", span_start)
+                Dim tempDist As Integer = Integer.Parse(temp.Substring(temp.IndexOf("bbox", span_start) + 4, 4))
+                Dim text_end As Integer = temp.IndexOf("</", span_start)
+                If Not temp.Chars(text_end - 1).Equals(">"c) AndAlso Not temp.Chars(text_end - 2).Equals(">"c) AndAlso Not temp.Chars(text_end - 3).Equals(">"c) Then
+                    count += 1
+                    prevDist = tempDist
                 End If
-            Next
-            Return count
+
+                span_start = temp.IndexOf("<span class='ocrx_word'", span_end)
+            End While
+
         End Using
+        Return count
     End Function
     Public Shared Function ResizeImage(ByVal img As Image, multi As Double) As Image
         '_________________________________________________________________________
@@ -856,32 +863,45 @@ Public Class Main
         '_________________________________________________________________________
         'Retrives the text from a cropped image
         '_________________________________________________________________________
-        Using img
-            Dim engine As New TesseractEngine("", "eng")
+        Dim bmp As Bitmap = img
+        Dim clr As Color = Nothing
+        For i As Integer = 0 To bmp.Width - 1
+            For j As Integer = 0 To bmp.Height - 1
+                clr = bmp.GetPixel(i, j)
+                If clr.R < 100 AndAlso clr.G < 100 AndAlso clr.B < 100 Then
+                    clr = Color.White
+                Else
+                    clr = Color.Black
+                End If
+                bmp.SetPixel(i, j, clr)
+            Next
+        Next
+        Dim result As String = ""
+        Using bmp
             engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-            engine.DefaultPageSegMode = Tesseract.PageSegMode.SingleLine
-            Dim page = engine.Process(ResizeImage(img, 1.1))
-            Dim result As String = Regex.Replace(page.GetText(), "[^A-Za-z0-9\-_ /]", "")
-            If Debug Then
-                Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\")
-                My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\tests\" & nextFile & ".txt",
-                result, False)
-            End If
-            Return result
+            Using page As Page = engine.Process(ResizeImage(bmp, 1.1))
+                result = Regex.Replace(page.GetText(), "[^A-Za-z0-9\-_ /]", "")
+                If Debug Then
+                    Dim nextFile As Integer = GetMax(appData & "\WFInfo\tests\")
+                    My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\tests\" & nextFile & ".txt", result, False)
+                End If
+            End Using
         End Using
+        Return result
     End Function
     Private Function GetHOCR(img As Image) As String
         '_________________________________________________________________________
         'Retrieves the text information (location, type, etc) with OCR of an image
         '_________________________________________________________________________
+        Dim result As String = ""
         Using img
-            img = RemoveNoise(Sharpen(prepare(ResizeImage(img, 1.1)), 6))
-            Dim engine As New TesseractEngine("", "eng")
+            img = prepare(img)
             engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-.")
-            engine.DefaultPageSegMode = Tesseract.PageSegMode.SingleLine
-            Dim page = engine.Process(ResizeImage(img, 1.1)).GetHOCRText(1)
-            Return page
+            Using page As Page = engine.Process(img)
+                result = page.GetHOCRText(1)
+            End Using
         End Using
+        Return result
     End Function
 
     Public Function KClean(guess As String)
@@ -1213,6 +1233,16 @@ Module Glob
     '_________________________________________________________________________
     'Global variables used for various things
     '_________________________________________________________________________
+
+    ' StopWatch for Code Profiling
+    Public clock As New Stopwatch()
+    Public prev_time As Long = clock.Elapsed.Ticks
+
+
+    Public engine As New TesseractEngine("", "eng") With {
+        .DefaultPageSegMode = Tesseract.PageSegMode.SingleLine
+    }
+
     Public qItems As New List(Of String)()
     Public HKey1 As Integer = My.Settings.HKey1
     Public HKey2 As Integer = My.Settings.HKey2
@@ -1541,8 +1571,11 @@ Module Glob
                                 iperc = 0.11
                             End If
                             Dim plat As Double = Double.Parse(ducat_plat(temp.Text)("plat"))
-                            rtot += plat * rperc
-                            itot += plat * iperc
+                            rtot += (plat * rperc)
+                            itot += (plat * iperc)
+                            If node.Text.Equals("Lith") And relic.Name.Equals("M3") Then
+                                Console.WriteLine("VALS: " + rtot.ToString("N2") + ", " + itot.ToString("N2"))
+                            End If
                             count += 1
                         End If
                     End If
@@ -1746,18 +1779,19 @@ Module Glob
     End Function
     Public Function prepare(img As Image) As Image
         Using img
-            Dim X As Integer
-            Dim Y As Integer
-            Dim clr As Integer
-            Dim bmp As Bitmap = New Bitmap(img)
-            For X = 0 To bmp.Width - 1
-                For Y = 0 To bmp.Height - 1
-                    clr = (CInt(bmp.GetPixel(X, Y).R) +
-                           bmp.GetPixel(X, Y).G +
-                           bmp.GetPixel(X, Y).B) \ 3
-                    bmp.SetPixel(X, Y, Color.FromArgb(clr, clr, clr))
-                Next Y
-            Next X
+            Dim bmp As New Bitmap(img)
+            Dim clr As Color = Nothing
+            For i As Integer = 0 To bmp.Width - 1
+                For j As Integer = 0 To bmp.Height - 1
+                    clr = bmp.GetPixel(i, j)
+                    If clr.R < 100 AndAlso clr.G < 100 AndAlso clr.B < 100 Then
+                        clr = Color.White
+                    Else
+                        clr = Color.Black
+                    End If
+                    bmp.SetPixel(i, j, clr)
+                Next
+            Next
             Return bmp
         End Using
     End Function
