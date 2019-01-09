@@ -34,11 +34,14 @@ Partial Class Main
         Me.btnDebug2 = New System.Windows.Forms.Button()
         Me.btnDebug1 = New System.Windows.Forms.Button()
         Me.lbPPM = New System.Windows.Forms.Label()
+        Me.pbDebug = New System.Windows.Forms.PictureBox()
         Me.lbVersion = New System.Windows.Forms.Label()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.pTitle = New System.Windows.Forms.Panel()
+        Me.btnHide = New System.Windows.Forms.Button()
         Me.Label1 = New System.Windows.Forms.Label()
+        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.tOnline = New System.Windows.Forms.Timer(Me.components)
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.tMessages = New System.Windows.Forms.Timer(Me.components)
@@ -48,17 +51,22 @@ Partial Class Main
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.pbRelic = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
-        Me.pbDebug = New System.Windows.Forms.PictureBox()
-        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
+        Me.trayIcon = New System.Windows.Forms.NotifyIcon(Me.components)
+        Me.trayMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.trayShow = New System.Windows.Forms.ToolStripMenuItem()
+        Me.trayRelics = New System.Windows.Forms.ToolStripMenuItem()
+        Me.trayExit = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.Panel1.SuspendLayout()
+        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
+        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.trayMenu.SuspendLayout()
         Me.SuspendLayout()
         '
         'tPB
@@ -87,7 +95,7 @@ Partial Class Main
         Me.lbStatus.BackColor = System.Drawing.Color.Transparent
         Me.lbStatus.Font = New System.Drawing.Font("Cambria", 18.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbStatus.ForeColor = System.Drawing.Color.Yellow
-        Me.lbStatus.Location = New System.Drawing.Point(275, -3)
+        Me.lbStatus.Location = New System.Drawing.Point(245, -3)
         Me.lbStatus.Name = "lbStatus"
         Me.lbStatus.Size = New System.Drawing.Size(23, 28)
         Me.lbStatus.TabIndex = 5
@@ -147,6 +155,16 @@ Partial Class Main
         Me.lbPPM.TabIndex = 7
         Me.lbPPM.Text = "Platinum this Session:           0"
         '
+        'pbDebug
+        '
+        Me.pbDebug.BackColor = System.Drawing.Color.Silver
+        Me.pbDebug.Location = New System.Drawing.Point(11, 73)
+        Me.pbDebug.Name = "pbDebug"
+        Me.pbDebug.Size = New System.Drawing.Size(10, 11)
+        Me.pbDebug.TabIndex = 6
+        Me.pbDebug.TabStop = False
+        Me.pbDebug.Visible = False
+        '
         'lbVersion
         '
         Me.lbVersion.AutoSize = True
@@ -188,6 +206,7 @@ Partial Class Main
         '
         Me.pTitle.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
         Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.pTitle.Controls.Add(Me.btnHide)
         Me.pTitle.Controls.Add(Me.Label1)
         Me.pTitle.Controls.Add(Me.lbVersion)
         Me.pTitle.Controls.Add(Me.btnClose)
@@ -199,17 +218,42 @@ Partial Class Main
         Me.pTitle.Size = New System.Drawing.Size(334, 27)
         Me.pTitle.TabIndex = 6
         '
+        'btnHide
+        '
+        Me.btnHide.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
+        Me.btnHide.FlatStyle = System.Windows.Forms.FlatStyle.Popup
+        Me.btnHide.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold)
+        Me.btnHide.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.btnHide.Location = New System.Drawing.Point(275, 0)
+        Me.btnHide.Name = "btnHide"
+        Me.btnHide.Size = New System.Drawing.Size(30, 26)
+        Me.btnHide.TabIndex = 25
+        Me.btnHide.Text = "_"
+        Me.btnHide.TextAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.btnHide.UseVisualStyleBackColor = False
+        '
         'Label1
         '
         Me.Label1.AutoSize = True
         Me.Label1.BackColor = System.Drawing.Color.Transparent
         Me.Label1.Font = New System.Drawing.Font("Cambria", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label1.Location = New System.Drawing.Point(236, 7)
+        Me.Label1.Location = New System.Drawing.Point(206, 7)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(42, 12)
         Me.Label1.TabIndex = 24
         Me.Label1.Text = "Status: "
+        '
+        'PictureBox3
+        '
+        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
+        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
+        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
+        Me.PictureBox3.Name = "PictureBox3"
+        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
+        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox3.TabIndex = 23
+        Me.PictureBox3.TabStop = False
         '
         'tOnline
         '
@@ -283,26 +327,43 @@ Partial Class Main
         Me.pbSideBar.TabIndex = 18
         Me.pbSideBar.TabStop = False
         '
-        'pbDebug
+        'trayIcon
         '
-        Me.pbDebug.BackColor = System.Drawing.Color.Silver
-        Me.pbDebug.Location = New System.Drawing.Point(11, 73)
-        Me.pbDebug.Name = "pbDebug"
-        Me.pbDebug.Size = New System.Drawing.Size(10, 11)
-        Me.pbDebug.TabIndex = 6
-        Me.pbDebug.TabStop = False
-        Me.pbDebug.Visible = False
+        Me.trayIcon.ContextMenuStrip = Me.trayMenu
+        Me.trayIcon.Icon = CType(resources.GetObject("trayIcon.Icon"), System.Drawing.Icon)
+        Me.trayIcon.Text = "WFInfo"
         '
-        'PictureBox3
+        'trayMenu
         '
-        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
-        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
-        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
-        Me.PictureBox3.Name = "PictureBox3"
-        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
-        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox3.TabIndex = 23
-        Me.PictureBox3.TabStop = False
+        Me.trayMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.trayShow, Me.trayRelics, Me.ToolStripSeparator1, Me.trayExit})
+        Me.trayMenu.Name = "trayMenu"
+        Me.trayMenu.ShowImageMargin = False
+        Me.trayMenu.Size = New System.Drawing.Size(156, 98)
+        '
+        'trayShow
+        '
+        Me.trayShow.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold)
+        Me.trayShow.Name = "trayShow"
+        Me.trayShow.Size = New System.Drawing.Size(155, 22)
+        Me.trayShow.Text = "Show"
+        Me.trayShow.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal
+        '
+        'trayRelics
+        '
+        Me.trayRelics.Name = "trayRelics"
+        Me.trayRelics.Size = New System.Drawing.Size(155, 22)
+        Me.trayRelics.Text = "Relics"
+        '
+        'trayExit
+        '
+        Me.trayExit.Name = "trayExit"
+        Me.trayExit.Size = New System.Drawing.Size(155, 22)
+        Me.trayExit.Text = "Exit"
+        '
+        'ToolStripSeparator1
+        '
+        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(152, 6)
         '
         'Main
         '
@@ -324,15 +385,16 @@ Partial Class Main
         Me.Text = "WFInfo"
         Me.Panel1.ResumeLayout(False)
         Me.Panel1.PerformLayout()
+        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).EndInit()
         Me.pTitle.ResumeLayout(False)
         Me.pTitle.PerformLayout()
+        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.trayMenu.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -363,4 +425,11 @@ Partial Class Main
     Friend WithEvents btnDebug2 As Button
     Friend WithEvents tDebug As Timer
     Friend WithEvents pbRelic As PictureBox
+    Friend WithEvents trayIcon As NotifyIcon
+    Friend WithEvents btnHide As Button
+    Friend WithEvents trayMenu As ContextMenuStrip
+    Friend WithEvents trayShow As ToolStripMenuItem
+    Friend WithEvents trayRelics As ToolStripMenuItem
+    Friend WithEvents ToolStripSeparator1 As ToolStripSeparator
+    Friend WithEvents trayExit As ToolStripMenuItem
 End Class

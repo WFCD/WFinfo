@@ -25,6 +25,7 @@ Public Class Main
     Dim mouseX As Integer
     Dim mouseY As Integer
     Dim enablePPC As Boolean = True  ' Toggle that enables/disables passive platinum checks
+
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Try
             '_________________________________________________________________________
@@ -47,6 +48,7 @@ Public Class Main
             Me.Refresh()
             Me.Activate()
             Me.Refresh()
+
 
 
             '_________________________________________________________________________
@@ -267,7 +269,7 @@ Public Class Main
                     ' WATCH START
                     prev_time = 0
                     clock.Restart()
-                    tPPrice.Stop()
+                    'tPPrice.Stop()
                     scTog = 0
 
 
@@ -536,7 +538,7 @@ Public Class Main
                         lbPPM.Text = "Platinum this Session:          " & PPM
                         clock.Stop()
                         Console.WriteLine("Total: " + clock.Elapsed.Ticks.ToString())
-                        tPPrice.Start()
+                        'tPPrice.Start()
                     Catch ex As Exception
                         lbStatus.ForeColor = Color.Orange
                         qItems.Clear()
@@ -544,7 +546,7 @@ Public Class Main
                         Tray.Clear()
                         Tray.Display()
                         addLog(ex.ToString)
-                        tPPrice.Start()
+                        'tPPrice.Start()
                     End Try
                 End If
             Else
@@ -560,7 +562,7 @@ Public Class Main
         Catch ex As Exception
             lbStatus.ForeColor = Color.Orange
             addLog(ex.ToString)
-            tPPrice.Start()
+            'tPPrice.Start()
         End Try
     End Sub
 
@@ -811,7 +813,7 @@ Public Class Main
             Load_Relic_Data()
 
             lbStatus.ForeColor = Color.Lime
-            tPPrice.Start()
+            'tPPrice.Start()
         Catch ex As Exception
             addLog(ex.ToString)
         End Try
@@ -824,8 +826,8 @@ Public Class Main
         '_________________________________________________________________________
         Me.Refresh()
         BGWorker.RunWorkerAsync()
-        tPPrice.Enabled = True
-        tPPrice.Start()
+        'tPPrice.Enabled = True
+        'tPPrice.Start()
     End Sub
     Private Function GetPlayers(img As Image) As Integer
         '_________________________________________________________________________
@@ -931,7 +933,7 @@ Public Class Main
         'Keeps the background passive price check running
         '_________________________________________________________________________
         If Not bgPPrice.IsBusy And enablePPC Then
-            bgPPrice.RunWorkerAsync()
+            'bgPPrice.RunWorkerAsync()
         End If
     End Sub
 
@@ -1234,6 +1236,27 @@ Public Class Main
 
     Private Sub Panel1_Paint(sender As Object, e As PaintEventArgs) Handles Panel1.Paint
 
+    End Sub
+
+    Private Sub ButtonHide_Click(sender As Object, e As EventArgs) Handles btnHide.Click
+        Me.Hide()
+        trayIcon.Visible = True
+    End Sub
+
+    Private Sub trayIcon_MouseDoubleClick(sender As Object, e As MouseEventArgs) Handles trayIcon.MouseDoubleClick
+        Me.Show()
+        trayIcon.Visible = False
+    End Sub
+
+    Private Sub trayMenu_Opening(sender As Object, e As ToolStripItemClickedEventArgs) Handles trayMenu.ItemClicked
+        If e.ClickedItem.Name = "trayExit" Then
+            Me.Close()
+        ElseIf e.ClickedItem.Name = "trayShow" Then
+            Me.Show()
+            trayIcon.Visible = False
+        ElseIf e.ClickedItem.Name = "trayRelics" Then
+            pbRelic_Click(pbRelic, Nothing)
+        End If
     End Sub
 End Class
 

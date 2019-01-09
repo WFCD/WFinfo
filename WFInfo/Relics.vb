@@ -72,7 +72,6 @@ Public Class Relics
         If My.Settings.ExpandedRelics.Contains(temp) Then
             My.Settings.ExpandedRelics = My.Settings.ExpandedRelics.Replace(temp, "")
         End If
-        Console.WriteLine(My.Settings.ExpandedRelics)
     End Sub
 
     Private Sub RelicTree_Expand(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterExpand, RelicTree2.AfterExpand
@@ -87,7 +86,6 @@ Public Class Relics
         If Not My.Settings.ExpandedRelics.Contains(temp) Then
             My.Settings.ExpandedRelics += temp
         End If
-        Console.WriteLine(My.Settings.ExpandedRelics)
     End Sub
 
     Private Sub Relics_Opening(sender As Object, e As EventArgs) Handles Me.Shown
