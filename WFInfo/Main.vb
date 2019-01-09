@@ -264,7 +264,7 @@ Public Class Main
                     End If
                 Else
                     lbStatus.ForeColor = Color.Yellow ' lbStatus is for showing the status color yellow = processing and sometimes error
-                    ' TODO: WATCH START
+                    ' WATCH START
                     prev_time = 0
                     clock.Restart()
                     tPPrice.Stop()
@@ -343,7 +343,7 @@ Public Class Main
                                 End If
                                 ' Modified
                                 ' Dim guess As String = Names(check(GetText(img) + " Blueprint Blueprint"))
-                                Dim guess As String = check(GetText(img))
+                                Dim guess As String = check(GetText(img) + " Blueprint")
                                 img.Dispose()
                                 finalList.Add(guess)
                             End If
@@ -370,7 +370,6 @@ Public Class Main
                         Dim n As New List(Of String)()
                         For i = 0 To finalList.Count - 1
                             Dim guess As String = finalList(i)
-                            Console.WriteLine(guess)
                             If Not finalList(i) = "Forma Blueprint" Then
                                 Dim plat As String = ""
                                 Dim ducat As String = ""
@@ -410,7 +409,11 @@ Public Class Main
                                 '       And probably should rename it to prime_parts or something
                                 '       Then have check like this:
                                 ' v.Add(job("vaulted").ToObject(Of Boolean))
-                                v.Add(True)
+                                If ducat_plat.TryGetValue(guess, Nothing) Then
+                                    v.Add(ducat_plat(guess)("vaulted").ToObject(Of Boolean))
+                                Else
+                                    v.Add(False)
+                                End If
 
                                 If guess.Length > 27 Then
                                     qItems.Add(guess.Substring(0, 27) & "..." & vbNewLine & "    Ducks: " & ducat & "   Plat: " & plat & vbNewLine)
@@ -772,7 +775,7 @@ Public Class Main
                 For Each elem As JObject In d_p_temp("payload")("previous_day")
                     Dim item_name As String = ""
                     If Not market_items.TryGetValue(elem("item"), item_name) Then
-                        Console.WriteLine("DURING DUCAT/PLAT LOAD: CAN'T FIND THIS ID -- " + elem("item").ToString())
+                        Console.WriteLine("CAN'T FIND ITEM ID IN warframe.market -- " + elem("item").ToString())
                         Load_Market_Items()
                         item_name = market_items(elem("item"))
                     End If
@@ -781,6 +784,7 @@ Public Class Main
                         ducat_plat(item_name) = New JObject()
                         ducat_plat(item_name)("ducats") = elem("ducats")
                         ducat_plat(item_name)("plat") = elem("wa_price")
+                        ducat_plat(item_name)("vaulted") = True
                     End If
                 Next
 
@@ -789,6 +793,7 @@ Public Class Main
                     Dim job As New JObject()
                     job("ducats") = 0
                     job("plat") = 0
+                    job("vaulted") = False
                     ducat_plat("Forma Blueprint") = job
                 End If
                 File.WriteAllText(ducat_file_path, JsonConvert.SerializeObject(ducat_plat, Newtonsoft.Json.Formatting.Indented))
@@ -797,7 +802,7 @@ Public Class Main
             For Each elem As KeyValuePair(Of String, String) In market_items
                 Dim name As String = elem.Value.Split("|")(0)
                 If Not name.Contains("Prime Set") AndAlso Not ducat_plat.TryGetValue(name, Nothing) Then
-                    Console.WriteLine("MISSING PLAT VAL: " + name)
+                    Console.WriteLine("Loading """ + name + """")
                     Find_Item(name, elem.Value.Split("|")(1))
                 End If
             Next
@@ -833,9 +838,12 @@ Public Class Main
 
             Dim temp As String = GetHOCR(img)
 
-
+            Console.WriteLine("GOT A CRASH!")
+            Console.WriteLine(temp.Length)
             Dim span_start As Integer = temp.IndexOf("<span class='ocrx_word'")
+            Console.WriteLine("GOT A CRASH!")
             Dim span_end As Integer = temp.IndexOf("</span>", span_start)
+            Console.WriteLine("GOT A CRASH!")
             Dim prevDist As Integer = Integer.Parse(temp.Substring(temp.IndexOf("bbox", span_start) + 4, 4))
             span_start = temp.IndexOf("<span class='ocrx_word'", span_end)
             While span_start <> -1
@@ -1288,11 +1296,18 @@ Module Glob
         string1 = string1.Replace("*", "")
         Dim lowest As String = Nothing
         Dim low As Integer = 9999
+        Dim str As String = Nothing
+        Dim job As JObject = Nothing
         For Each prop As KeyValuePair(Of String, JToken) In ducat_plat
-            Dim val As Integer = LevDist(prop.Key, string1)
-            If val < low Then
-                low = val
-                lowest = prop.Key
+            If prop.Key <> "timestamp" AndAlso prop.Key <> "ID" Then
+                str = ducat_plat(prop.Key)("relic_name")
+                If str IsNot Nothing AndAlso str.Count > 0 Then
+                    Dim val As Integer = LevDist(str, string1)
+                    If val < low Then
+                        low = val
+                        lowest = prop.Key
+                    End If
+                End If
             End If
         Next
         Return lowest
@@ -1425,6 +1440,42 @@ Module Glob
             If relic_data.TryGetValue("timestamp", ignore) Then
                 Dim timestamp As Date = DateTime.Parse(relic_data("timestamp"))
                 If last_mod < timestamp Then
+                    If relic_data.TryGetValue("ID", Nothing) AndAlso ducat_plat.TryGetValue("ID", Nothing) AndAlso ducat_plat("ID").ToString() = relic_data("ID").ToString() Then
+
+                    Else
+                        For Each era As KeyValuePair(Of String, JToken) In relic_data
+                            If era.Key <> "timestamp" AndAlso era.Key <> "ID" Then
+                                For Each relic As JProperty In era.Value.Children
+                                    For Each part As JProperty In relic.Value.Children
+                                        If part.Name <> "vaulted" Then
+                                            Dim temp As String = part.Value
+                                            If Not ducat_plat.TryGetValue(temp, Nothing) Then
+                                                If temp.Contains("Kavasa") Then
+                                                    If temp.Contains("Kubrow") Then
+                                                        temp = temp.Replace("Kubrow ", "")
+                                                    Else
+                                                        temp = temp.Replace("Prime", "Prime Collar")
+                                                    End If
+                                                ElseIf Not temp.Contains("Prime Blueprint") Then
+                                                    temp = temp.Replace(" Blueprint", "")
+                                                End If
+                                                If ducat_plat.TryGetValue(temp, Nothing) Then
+                                                    ducat_plat(temp)("relic_name") = part.Value
+                                                End If
+                                            Else
+                                                ducat_plat(temp)("relic_name") = part.Value
+                                            End If
+                                        End If
+                                    Next
+                                Next
+                            End If
+                        Next
+                        Dim now As Date = Date.Now
+                        ducat_plat("ID") = now
+                        relic_data("ID") = now
+                        Save_Eqmt_Data()
+                        Save_Relic_Data()
+                    End If
                     Return
                 End If
             End If
@@ -1474,6 +1525,24 @@ Module Glob
                         relic_data(era)(relic)("common" + cmnNum.ToString()) = split(0)
                         cmnNum += 1
                     End If
+                    Dim temp As String = split(0)
+                    If Not ducat_plat.TryGetValue(temp, Nothing) Then
+                        If temp.Contains("Kavasa") Then
+                            If temp.Contains("Kubrow") Then
+                                temp = temp.Replace("Kubrow ", "")
+                            Else
+                                temp = temp.Replace("Prime", "Prime Collar")
+                            End If
+                        ElseIf Not temp.Contains("Prime Blueprint") Then
+                            temp = temp.Replace(" Blueprint", "")
+                        End If
+                        If ducat_plat.TryGetValue(temp, Nothing) Then
+                            ducat_plat(temp)("relic_name") = split(0)
+                        End If
+                    Else
+                        ducat_plat(temp)("relic_name") = split(0)
+                    End If
+
 
                     index = drop_data.IndexOf("<tr", tr_stop)
                     tr_stop = drop_data.IndexOf("</tr>", index)
@@ -1497,6 +1566,7 @@ Module Glob
                 sub_str = sub_str.Substring(index)
                 Dim split As String() = sub_str.Split(" ")
                 relic_data(split(0))(split(1))("vaulted") = False
+                Mark_Part_Unvaulted(split(0), split(1))
             End If
             index = drop_data.IndexOf("<tr>", tr_stop)
         End While
@@ -1517,19 +1587,51 @@ Module Glob
                 Dim ignore As JToken = Nothing
                 If relic_data.TryGetValue(split(0), ignore) Then
                     relic_data(split(0))(split(1))("vaulted") = False
+                    Mark_Part_Unvaulted(split(0), split(1))
                 End If
             End If
             index = drop_data.IndexOf("<tr>", tr_stop)
         End While
-
+        Save_Eqmt_Data()
         Save_Relic_Data()
     End Sub
 
+    Private Sub Mark_Part_Unvaulted(era As String, name As String)
+        For Each prop As JProperty In relic_data(era)(name)
+            If prop.Name <> "vaulted" Then
+                Dim temp As String = prop.Value
+                If Not ducat_plat.TryGetValue(temp, Nothing) Then
+                    If temp.Contains("Kavasa") Then
+                        If temp.Contains("Kubrow") Then
+                            temp = temp.Replace("Kubrow ", "")
+                        Else
+                            temp = temp.Replace("Prime", "Prime Collar")
+                        End If
+                    ElseIf Not temp.Contains("Prime Blueprint") Then
+                        temp = temp.Replace(" Blueprint", "")
+                    End If
+                    If Not ducat_plat.TryGetValue(temp, Nothing) Then
+                        Console.WriteLine("CAN'T FIND PART: " + era + " " + name + " -- " + temp)
+                    Else
+                        ducat_plat(temp)("vaulted") = False
+                    End If
+                Else
+                    ducat_plat(temp)("vaulted") = False
+                End If
+            End If
+        Next
+    End Sub
+
     Public Sub Load_Relic_Tree()
+        Dim hide As TreeNode = Nothing
         If Relics.RelicTree.Nodes(0).Nodes.Count > 1 Then
             Return
         End If
         For Each node As TreeNode In Relics.RelicTree.Nodes
+            If My.Settings.ExpandedRelics.Contains("|" + node.Name) Then
+                node.Expand()
+            End If
+
             For Each relic As JProperty In relic_data(node.Text)
                 Dim kid As New TreeNode(relic.Name)
                 kid.Name = relic.Name
@@ -1559,7 +1661,7 @@ Module Glob
                                 temp.Text = temp.Text.Replace(" Blueprint", "")
                             End If
                             If Not ducat_plat.TryGetValue(temp.Text, Nothing) Then
-                                Console.WriteLine("LOADING: MISSING PLAT -- " + temp.FullPath + " -- " + temp.Text)
+                                Console.WriteLine("MISSING RELIC PLAT VALUES: " + temp.FullPath + " -- " + temp.Text)
                             End If
                         End If
                         If ducat_plat.TryGetValue(temp.Text, Nothing) Then
@@ -1573,9 +1675,6 @@ Module Glob
                             Dim plat As Double = Double.Parse(ducat_plat(temp.Text)("plat"))
                             rtot += (plat * rperc)
                             itot += (plat * iperc)
-                            If node.Text.Equals("Lith") And relic.Name.Equals("M3") Then
-                                Console.WriteLine("VALS: " + rtot.ToString("N2") + ", " + itot.ToString("N2"))
-                            End If
                             count += 1
                         End If
                     End If
@@ -1583,13 +1682,28 @@ Module Glob
                 rtot -= itot
                 relic_data(node.Text)(relic.Name)("rad") = rtot
                 relic_data(node.Text)(relic.Name)("int") = itot
+                If My.Settings.ExpandedRelics.Contains("|" + kid.Name) Then
+                    kid.Expand()
+                End If
+
                 kid = kid.Clone()
                 kid.Text = node.Text + " " + relic.Name
                 Relics.RelicTree2.Nodes.Add(kid)
+                If My.Settings.ExpandedRelics.Contains("|" + kid.Name) Then
+                    kid.Expand()
+                End If
             Next
-            node.Nodes.Add("Hidden").Name = "Hidden"
+            hide = node.Nodes.Add("Hidden")
+            hide.Name = "Hidden"
+            If My.Settings.ExpandedRelics.Contains("|Hidden" + node.Name) Then
+                hide.Expand()
+            End If
         Next
-        Relics.RelicTree2.Nodes.Add("Hidden").Name = "Hidden"
+        hide = Relics.RelicTree2.Nodes.Add("Hidden")
+        hide.Name = "Hidden"
+        If My.Settings.ExpandedRelics.Contains("|Hidden|") Then
+            hide.Expand()
+        End If
 
         Load_Hidden_Nodes()
 
@@ -1631,6 +1745,10 @@ Module Glob
         File.WriteAllText(relic_file_path, JsonConvert.SerializeObject(relic_data, Newtonsoft.Json.Formatting.Indented))
     End Sub
 
+    Public Sub Save_Eqmt_Data()
+        File.WriteAllText(ducat_file_path, JsonConvert.SerializeObject(ducat_plat, Newtonsoft.Json.Formatting.Indented))
+    End Sub
+
     Public Sub Find_Item(item_name As String, url As String)
         Dim webClient As New System.Net.WebClient
         webClient.Headers.Add("platform", "pc")
@@ -1654,6 +1772,7 @@ Module Glob
         ducat_plat(item_name) = New JObject()
         ducat_plat(item_name)("ducats") = ducat
         ducat_plat(item_name)("plat") = stats("avg_price")
+        ducat_plat(item_name)("vaulted") = True
         File.WriteAllText(ducat_file_path, JsonConvert.SerializeObject(ducat_plat, Newtonsoft.Json.Formatting.Indented))
     End Sub
 

@@ -35,6 +35,7 @@ Public Class Relics
 
     Private Sub pTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp
         drag = False
+        My.Settings.RelicWinLoc = Me.Location
     End Sub
 
     Private Sub lbTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseDown
@@ -52,16 +53,55 @@ Public Class Relics
 
     Private Sub lbTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseUp
         drag = False
+        My.Settings.RelicWinLoc = Me.Location
     End Sub
 
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
         Me.Hide()
     End Sub
 
+    Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterCollapse, RelicTree2.AfterCollapse
+        Dim temp As String = "|" + e.Node.Name
+        If e.Node.Name = "Hidden" Then
+            If e.Node.Parent IsNot Nothing Then
+                temp += e.Node.Parent.Name
+            Else
+                temp += "|"
+            End If
+        End If
+        If My.Settings.ExpandedRelics.Contains(temp) Then
+            My.Settings.ExpandedRelics = My.Settings.ExpandedRelics.Replace(temp, "")
+        End If
+        Console.WriteLine(My.Settings.ExpandedRelics)
+    End Sub
+
+    Private Sub RelicTree_Expand(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterExpand, RelicTree2.AfterExpand
+        Dim temp As String = "|" + e.Node.Name
+        If e.Node.Name = "Hidden" Then
+            If e.Node.Parent IsNot Nothing Then
+                temp += e.Node.Parent.Name
+            Else
+                temp += "|"
+            End If
+        End If
+        If Not My.Settings.ExpandedRelics.Contains(temp) Then
+            My.Settings.ExpandedRelics += temp
+        End If
+        Console.WriteLine(My.Settings.ExpandedRelics)
+    End Sub
+
     Private Sub Relics_Opening(sender As Object, e As EventArgs) Handles Me.Shown
-        RelicTree.Visible = False
-        SortSelection.SelectedIndex = 0
-        RelicTree2.Select()
+        Me.Location = My.Settings.RelicWinLoc
+        If My.Settings.TreeOne Then
+            RelicTree2.Visible = False
+            RelicTree.Select()
+            Label2.Text = "Relic Eras"
+        Else
+            RelicTree.Visible = False
+            RelicTree2.Select()
+            Label2.Text = "All Relics"
+        End If
+        SortSelection.SelectedIndex = My.Settings.SortType
     End Sub
 
     Private Sub RelicTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles RelicTree.DrawNode, RelicTree2.DrawNode
@@ -180,9 +220,7 @@ Public Class Relics
         If sender.Equals(RelicTree) Then
             RelicToHide = e.Node
             Dim era As String = e.Node.FullPath.Split("\")(0)
-            Console.WriteLine("NODES FOUND")
             For Each node As TreeNode In RelicTree2.Nodes.Find(e.Node.Name, True)
-                Console.WriteLine(node.FullPath)
                 If node.FullPath.Contains(era) Then
                     Relic2ToHide = node
                     Exit For
@@ -191,9 +229,7 @@ Public Class Relics
         Else
             Relic2ToHide = e.Node
             Dim era As String = e.Node.Text.Split(" ")(0)
-            Console.WriteLine("NODES FOUND")
             For Each node As TreeNode In RelicTree.Nodes.Find(e.Node.Name, True)
-                Console.WriteLine(node.FullPath)
                 If node.FullPath.Contains(era) Then
                     RelicToHide = node
                     Exit For
@@ -202,8 +238,6 @@ Public Class Relics
         End If
 
         HideMenu.Items.Clear()
-        Console.WriteLine("NODE1 PATH: " + RelicToHide.FullPath)
-        Console.WriteLine("NODE2 PATH: " + Relic2ToHide.FullPath)
         If e.Node IsNot Nothing AndAlso e.Node.Name.Length = 2 Then
             If e.Node.FullPath.Contains("Hidden") Then
                 HideMenu.Items.Add("Show").ForeColor = textColor
@@ -218,9 +252,10 @@ Public Class Relics
     End Sub
 
     Private Sub Label2_Click(sender As Object, e As EventArgs) Handles Label2.Click
-        RelicTree.Visible = RelicTree2.Visible
-        RelicTree2.Visible = Not RelicTree2.Visible
-        If RelicTree.Visible Then
+        RelicTree2.Visible = My.Settings.TreeOne
+        My.Settings.TreeOne = Not My.Settings.TreeOne
+        RelicTree.Visible = My.Settings.TreeOne
+        If My.Settings.TreeOne Then
             RelicTree.Select()
             Label2.Text = "Relic Eras"
         Else
@@ -230,8 +265,9 @@ Public Class Relics
     End Sub
 
     Private Sub SortSelection_SelectedIndexChanged(sender As Object, e As EventArgs) Handles SortSelection.SelectedIndexChanged
-        Tree1Sorter.type = SortSelection.SelectedIndex
-        Tree2Sorter.type = SortSelection.SelectedIndex
+        My.Settings.SortType = SortSelection.SelectedIndex
+        Tree1Sorter.type = My.Settings.SortType
+        Tree2Sorter.type = My.Settings.SortType
         RelicTree.Sort()
         RelicTree2.Sort()
         If RelicTree.Visible Then
@@ -276,10 +312,16 @@ Public Class NodeSorter
                 If Me.type > 0 Then
                     If tx.Parent IsNot Nothing Then
                         erax = tx.Parent.Text
-                        eray = tx.Parent.Text
+                        If erax = "Hidden" Then
+                            erax = tx.Parent.Parent.Text
+                        End If
+                        eray = erax
                     ElseIf ty.Parent IsNot Nothing Then
-                        erax = ty.Parent.Text
                         eray = ty.Parent.Text
+                        If eray = "Hidden" Then
+                            eray = ty.Parent.Parent.Text
+                        End If
+                        erax = eray
                     Else
                         Return 0
                     End If
@@ -313,11 +355,12 @@ Public Class NodeSorter
         If Me.type <= 0 Then
             Return String.Compare(strx, stry)
         End If
+
         Dim jobx As JObject = relic_data(erax)(strx)
         Dim joby As JObject = relic_data(eray)(stry)
         If Me.type = 1 Then
-            Return Double.Parse(joby("int")) - Double.Parse(jobx("int"))
+            Return (Double.Parse(joby("int")) - Double.Parse(jobx("int"))) * 100
         End If
-        Return Double.Parse(joby("rad")) - Double.Parse(jobx("rad"))
+        Return (Double.Parse(joby("rad")) - Double.Parse(jobx("rad"))) * 100
     End Function
 End Class
