@@ -61,13 +61,9 @@ Public Class Relics
     End Sub
 
     Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterCollapse, RelicTree2.AfterCollapse
-        Dim temp As String = "|" + e.Node.Name
-        If e.Node.Name = "Hidden" Then
-            If e.Node.Parent IsNot Nothing Then
-                temp += e.Node.Parent.Name
-            Else
-                temp += "|"
-            End If
+        Dim temp As String = "|" + e.Node.FullPath.Replace(" ", "").Replace("\", "") + "|"
+        If e.Node.Text <> "Hidden" Then
+            temp = temp.Replace("Hidden", "")
         End If
         If My.Settings.ExpandedRelics.Contains(temp) Then
             My.Settings.ExpandedRelics = My.Settings.ExpandedRelics.Replace(temp, "")
@@ -75,13 +71,9 @@ Public Class Relics
     End Sub
 
     Private Sub RelicTree_Expand(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterExpand, RelicTree2.AfterExpand
-        Dim temp As String = "|" + e.Node.Name
-        If e.Node.Name = "Hidden" Then
-            If e.Node.Parent IsNot Nothing Then
-                temp += e.Node.Parent.Name
-            Else
-                temp += "|"
-            End If
+        Dim temp As String = "|" + e.Node.FullPath.Replace(" ", "").Replace("\", "") + "|"
+        If e.Node.Text <> "Hidden" Then
+            temp = temp.Replace("Hidden", "")
         End If
         If Not My.Settings.ExpandedRelics.Contains(temp) Then
             My.Settings.ExpandedRelics += temp
@@ -103,7 +95,6 @@ Public Class Relics
     End Sub
 
     Private Sub RelicTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles RelicTree.DrawNode, RelicTree2.DrawNode
-
         e.DrawDefault = True
         If e.Bounds.Width = 0 Then
             Return
@@ -125,25 +116,27 @@ Public Class Relics
             If relic_data.TryGetValue(split(0), find) Then
                 If find.TryGetValue(split(1), find) Then
                     If find("vaulted") Then
-                        Dim left As Integer = 115
+                        Dim right As Integer = 115
                         If fullPath.Contains("|") Then
                             If e.Node.FullPath.Contains("Meso") Then
-                                left = 131
+                                right = 131
                             ElseIf e.Node.FullPath.Contains("Axi") Then
-                                left = 118
+                                right = 118
                             ElseIf e.Node.FullPath.Contains("Lith") Then
-                                left = 123
+                                right = 123
                             Else
-                                left = 122
+                                right = 122
                             End If
                             If e.Node.FullPath.Contains("Hidden") Then
-                                left += 20
+                                right += 20
                             End If
 
                         ElseIf e.Node.FullPath.Contains("Hidden") Then
-                            left = 135
+                            right = 135
                         End If
-                        e.Graphics.DrawString("Vaulted", RelicTree.Font, stealthBrush, left, e.Bounds.Top + 1, sf)
+                        Dim rect As SizeF = e.Graphics.MeasureString("Vaulted", Me.Font)
+                        e.Graphics.FillRectangle(bgBrush, right - rect.Width - 10, e.Bounds.Top + 1, rect.Width + 10, rect.Height)
+                        e.Graphics.DrawString("Vaulted", RelicTree.Font, stealthBrush, right, e.Bounds.Top + 1, sf)
                     End If
 
                     'Double.Parse(ducat_plat(name)("plat"))
@@ -154,6 +147,7 @@ Public Class Relics
                     If rtot > 0 Then
                         rtot_str = "+" + rtot_str
                     End If
+                    e.Graphics.FillRectangle(bgBrush, 220, e.Bounds.Top, 180, e.Bounds.Height)
                     e.Graphics.DrawString("RAD:", RelicTree.Font, stealthBrush, 255, e.Bounds.Top, sf)
                     e.Graphics.DrawString(rtot_str, RelicTree.Font, stealthBrush, 300, e.Bounds.Top, sf)
                     e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
@@ -176,6 +170,7 @@ Public Class Relics
             Dim name As String = split(2)
             If name <> "Forma Blueprint" Then
                 Dim vals As JObject = GetMarketData(name)
+                e.Graphics.FillRectangle(bgBrush, 260, e.Bounds.Top, 130, e.Bounds.Height)
                 e.Graphics.DrawString(Double.Parse(vals("plat")).ToString("N1"), RelicTree.Font, brush, 300, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
                 e.Graphics.DrawString(vals("ducats"), RelicTree.Font, brush, 370, e.Bounds.Top + 1, sf)

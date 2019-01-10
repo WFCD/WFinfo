@@ -1310,6 +1310,8 @@ Module Glob
     Public uncommonBrush As Brush = New SolidBrush(uncommonColor)
     Public rareColor As Color = Color.FromArgb(255, 215, 0)
     Public rareBrush As Brush = New SolidBrush(rareColor)
+    Public bgColor As Color = Color.FromArgb(27, 27, 27)
+    Public bgBrush As Brush = New SolidBrush(bgColor)
     Public cookie As String = ""
     Public xcsrf As String = ""
     Public Function check(string1 As String) As String
@@ -1651,9 +1653,7 @@ Module Glob
             Return
         End If
         For Each node As TreeNode In Relics.RelicTree.Nodes
-            If My.Settings.ExpandedRelics.Contains("|" + node.Name) Then
-                node.Expand()
-            End If
+            CheckIfExpand(node)
 
             For Each relic As JProperty In relic_data(node.Text)
                 Dim kid As New TreeNode(relic.Name)
@@ -1705,28 +1705,20 @@ Module Glob
                 rtot -= itot
                 relic_data(node.Text)(relic.Name)("rad") = rtot
                 relic_data(node.Text)(relic.Name)("int") = itot
-                If My.Settings.ExpandedRelics.Contains("|" + kid.Name) Then
-                    kid.Expand()
-                End If
+                CheckIfExpand(kid)
 
                 kid = kid.Clone()
                 kid.Text = node.Text + " " + relic.Name
                 Relics.RelicTree2.Nodes.Add(kid)
-                If My.Settings.ExpandedRelics.Contains("|" + kid.Name) Then
-                    kid.Expand()
-                End If
+                CheckIfExpand(kid)
             Next
             hide = node.Nodes.Add("Hidden")
             hide.Name = "Hidden"
-            If My.Settings.ExpandedRelics.Contains("|Hidden" + node.Name) Then
-                hide.Expand()
-            End If
+            CheckIfExpand(hide)
         Next
         hide = Relics.RelicTree2.Nodes.Add("Hidden")
         hide.Name = "Hidden"
-        If My.Settings.ExpandedRelics.Contains("|Hidden|") Then
-            hide.Expand()
-        End If
+        CheckIfExpand(hide)
 
         Load_Hidden_Nodes()
 
@@ -1734,6 +1726,16 @@ Module Glob
         Relics.RelicTree2.TreeViewNodeSorter = Relics.Tree2Sorter
         Relics.RelicTree.Sort()
         Relics.RelicTree2.Sort()
+    End Sub
+
+    Private Sub CheckIfExpand(node As TreeNode)
+        Dim temp As String = "|" + node.FullPath.Replace(" ", "").Replace("\", "") + "|"
+        If node.Text <> "Hidden" Then
+            temp = temp.Replace("Hidden", "")
+        End If
+        If My.Settings.ExpandedRelics.Contains(temp) Then
+            node.Expand()
+        End If
     End Sub
 
     Private Sub Load_Hidden_Nodes()
