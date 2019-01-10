@@ -33,13 +33,14 @@ Public Class Main
             '_________________________________________________________________________
             UpdateColors(Me)
             pbHome.Parent = pbSideBar
-            pbHome.Location = New Point(0, 8)
-            pbDonate.Parent = pbSideBar
-            pbDonate.Location = New Point(0, 38)
-            pbSettings.Parent = pbSideBar
-            pbSettings.Location = New Point(0, 65)
+            pbHome.Location = New Point(0, 4)
             pbRelic.Parent = pbSideBar
-            pbRelic.Location = New Point(0, 92)
+            pbRelic.Location = New Point(0, 30)
+            pbDonate.Parent = pbSideBar
+            pbDonate.Location = New Point(0, 55)
+            pbSettings.Parent = pbSideBar
+            pbSettings.Location = New Point(0, 80)
+
             lbVersion.Text = "v" + My.Settings.Version 'The current version is stored in project properties
             Me.Location = New Point(My.Settings.StartX, My.Settings.StartY)
             Fullscreen = My.Settings.Fullscreen

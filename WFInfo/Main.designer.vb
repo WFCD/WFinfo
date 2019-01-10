@@ -34,39 +34,39 @@ Partial Class Main
         Me.btnDebug2 = New System.Windows.Forms.Button()
         Me.btnDebug1 = New System.Windows.Forms.Button()
         Me.lbPPM = New System.Windows.Forms.Label()
-        Me.pbDebug = New System.Windows.Forms.PictureBox()
         Me.lbVersion = New System.Windows.Forms.Label()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.pTitle = New System.Windows.Forms.Panel()
         Me.btnHide = New System.Windows.Forms.Button()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.tOnline = New System.Windows.Forms.Timer(Me.components)
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.tMessages = New System.Windows.Forms.Timer(Me.components)
         Me.tDebug = New System.Windows.Forms.Timer(Me.components)
+        Me.trayIcon = New System.Windows.Forms.NotifyIcon(Me.components)
+        Me.trayMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.trayShow = New System.Windows.Forms.ToolStripMenuItem()
+        Me.trayRelics = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.trayExit = New System.Windows.Forms.ToolStripMenuItem()
         Me.pbHome = New System.Windows.Forms.PictureBox()
         Me.pbDonate = New System.Windows.Forms.PictureBox()
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.pbRelic = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
-        Me.trayIcon = New System.Windows.Forms.NotifyIcon(Me.components)
-        Me.trayMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
-        Me.trayShow = New System.Windows.Forms.ToolStripMenuItem()
-        Me.trayRelics = New System.Windows.Forms.ToolStripMenuItem()
-        Me.trayExit = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.pbDebug = New System.Windows.Forms.PictureBox()
+        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.Panel1.SuspendLayout()
-        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.trayMenu.SuspendLayout()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.trayMenu.SuspendLayout()
+        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'tPB
@@ -120,7 +120,7 @@ Partial Class Main
         Me.Panel1.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Panel1.Location = New System.Drawing.Point(0, 27)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(334, 126)
+        Me.Panel1.Size = New System.Drawing.Size(334, 107)
         Me.Panel1.TabIndex = 19
         '
         'btnDebug2
@@ -155,16 +155,6 @@ Partial Class Main
         Me.lbPPM.TabIndex = 7
         Me.lbPPM.Text = "Platinum this Session:           0"
         '
-        'pbDebug
-        '
-        Me.pbDebug.BackColor = System.Drawing.Color.Silver
-        Me.pbDebug.Location = New System.Drawing.Point(11, 73)
-        Me.pbDebug.Name = "pbDebug"
-        Me.pbDebug.Size = New System.Drawing.Size(10, 11)
-        Me.pbDebug.TabIndex = 6
-        Me.pbDebug.TabStop = False
-        Me.pbDebug.Visible = False
-        '
         'lbVersion
         '
         Me.lbVersion.AutoSize = True
@@ -192,14 +182,17 @@ Partial Class Main
         'btnClose
         '
         Me.btnClose.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
-        Me.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Popup
-        Me.btnClose.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold)
+        Me.btnClose.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(60, Byte), Integer), CType(CType(60, Byte), Integer), CType(CType(60, Byte), Integer))
+        Me.btnClose.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer))
+        Me.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnClose.Font = New System.Drawing.Font("Tahoma", 11.0!, System.Drawing.FontStyle.Bold)
         Me.btnClose.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.btnClose.Location = New System.Drawing.Point(304, -1)
+        Me.btnClose.Location = New System.Drawing.Point(303, -1)
         Me.btnClose.Name = "btnClose"
         Me.btnClose.Size = New System.Drawing.Size(30, 27)
         Me.btnClose.TabIndex = 22
-        Me.btnClose.Text = "x"
+        Me.btnClose.TabStop = False
+        Me.btnClose.Text = "×"
         Me.btnClose.UseVisualStyleBackColor = False
         '
         'pTitle
@@ -221,15 +214,18 @@ Partial Class Main
         'btnHide
         '
         Me.btnHide.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
-        Me.btnHide.FlatStyle = System.Windows.Forms.FlatStyle.Popup
-        Me.btnHide.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold)
+        Me.btnHide.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(60, Byte), Integer), CType(CType(60, Byte), Integer), CType(CType(60, Byte), Integer))
+        Me.btnHide.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer))
+        Me.btnHide.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnHide.Font = New System.Drawing.Font("Tahoma", 7.0!, System.Drawing.FontStyle.Bold)
         Me.btnHide.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.btnHide.Location = New System.Drawing.Point(275, 0)
+        Me.btnHide.Location = New System.Drawing.Point(274, -1)
         Me.btnHide.Name = "btnHide"
-        Me.btnHide.Size = New System.Drawing.Size(30, 26)
+        Me.btnHide.Size = New System.Drawing.Size(30, 27)
         Me.btnHide.TabIndex = 25
-        Me.btnHide.Text = "_"
-        Me.btnHide.TextAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.btnHide.TabStop = False
+        Me.btnHide.Text = "━"
+        Me.btnHide.TextAlign = System.Drawing.ContentAlignment.BottomCenter
         Me.btnHide.UseVisualStyleBackColor = False
         '
         'Label1
@@ -243,17 +239,6 @@ Partial Class Main
         Me.Label1.Size = New System.Drawing.Size(42, 12)
         Me.Label1.TabIndex = 24
         Me.Label1.Text = "Status: "
-        '
-        'PictureBox3
-        '
-        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
-        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
-        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
-        Me.PictureBox3.Name = "PictureBox3"
-        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
-        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox3.TabIndex = 23
-        Me.PictureBox3.TabStop = False
         '
         'tOnline
         '
@@ -273,60 +258,6 @@ Partial Class Main
         '
         Me.tDebug.Enabled = True
         '
-        'pbHome
-        '
-        Me.pbHome.BackColor = System.Drawing.Color.Transparent
-        Me.pbHome.Image = Global.WFInfo.My.Resources.Resources.home
-        Me.pbHome.Location = New System.Drawing.Point(307, 37)
-        Me.pbHome.Name = "pbHome"
-        Me.pbHome.Size = New System.Drawing.Size(25, 21)
-        Me.pbHome.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.pbHome.TabIndex = 17
-        Me.pbHome.TabStop = False
-        '
-        'pbDonate
-        '
-        Me.pbDonate.BackColor = System.Drawing.Color.Transparent
-        Me.pbDonate.Image = Global.WFInfo.My.Resources.Resources.Donate
-        Me.pbDonate.Location = New System.Drawing.Point(307, 64)
-        Me.pbDonate.Name = "pbDonate"
-        Me.pbDonate.Size = New System.Drawing.Size(25, 21)
-        Me.pbDonate.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
-        Me.pbDonate.TabIndex = 16
-        Me.pbDonate.TabStop = False
-        '
-        'pbSettings
-        '
-        Me.pbSettings.BackColor = System.Drawing.Color.Transparent
-        Me.pbSettings.Image = Global.WFInfo.My.Resources.Resources.Settings
-        Me.pbSettings.Location = New System.Drawing.Point(307, 91)
-        Me.pbSettings.Name = "pbSettings"
-        Me.pbSettings.Size = New System.Drawing.Size(25, 21)
-        Me.pbSettings.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
-        Me.pbSettings.TabIndex = 15
-        Me.pbSettings.TabStop = False
-        '
-        'pbRelic
-        '
-        Me.pbRelic.BackColor = System.Drawing.Color.Transparent
-        Me.pbRelic.Image = Global.WFInfo.My.Resources.Resources.Relic
-        Me.pbRelic.Location = New System.Drawing.Point(307, 118)
-        Me.pbRelic.Name = "pbRelic"
-        Me.pbRelic.Size = New System.Drawing.Size(25, 21)
-        Me.pbRelic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
-        Me.pbRelic.TabIndex = 14
-        Me.pbRelic.TabStop = False
-        '
-        'pbSideBar
-        '
-        Me.pbSideBar.BackColor = System.Drawing.Color.FromArgb(CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer))
-        Me.pbSideBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.pbSideBar.Location = New System.Drawing.Point(306, 27)
-        Me.pbSideBar.Name = "pbSideBar"
-        Me.pbSideBar.Size = New System.Drawing.Size(28, 126)
-        Me.pbSideBar.TabIndex = 18
-        Me.pbSideBar.TabStop = False
-        '
         'trayIcon
         '
         Me.trayIcon.ContextMenuStrip = Me.trayMenu
@@ -338,39 +269,118 @@ Partial Class Main
         Me.trayMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.trayShow, Me.trayRelics, Me.ToolStripSeparator1, Me.trayExit})
         Me.trayMenu.Name = "trayMenu"
         Me.trayMenu.ShowImageMargin = False
-        Me.trayMenu.Size = New System.Drawing.Size(156, 98)
+        Me.trayMenu.Size = New System.Drawing.Size(81, 76)
         '
         'trayShow
         '
         Me.trayShow.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold)
         Me.trayShow.Name = "trayShow"
-        Me.trayShow.Size = New System.Drawing.Size(155, 22)
+        Me.trayShow.Size = New System.Drawing.Size(80, 22)
         Me.trayShow.Text = "Show"
         Me.trayShow.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal
         '
         'trayRelics
         '
         Me.trayRelics.Name = "trayRelics"
-        Me.trayRelics.Size = New System.Drawing.Size(155, 22)
+        Me.trayRelics.Size = New System.Drawing.Size(80, 22)
         Me.trayRelics.Text = "Relics"
-        '
-        'trayExit
-        '
-        Me.trayExit.Name = "trayExit"
-        Me.trayExit.Size = New System.Drawing.Size(155, 22)
-        Me.trayExit.Text = "Exit"
         '
         'ToolStripSeparator1
         '
         Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
-        Me.ToolStripSeparator1.Size = New System.Drawing.Size(152, 6)
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(77, 6)
+        '
+        'trayExit
+        '
+        Me.trayExit.Name = "trayExit"
+        Me.trayExit.Size = New System.Drawing.Size(80, 22)
+        Me.trayExit.Text = "Exit"
+        '
+        'pbHome
+        '
+        Me.pbHome.BackColor = System.Drawing.Color.Transparent
+        Me.pbHome.Image = Global.WFInfo.My.Resources.Resources.home
+        Me.pbHome.Location = New System.Drawing.Point(305, 32)
+        Me.pbHome.Name = "pbHome"
+        Me.pbHome.Padding = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.pbHome.Size = New System.Drawing.Size(28, 21)
+        Me.pbHome.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.pbHome.TabIndex = 17
+        Me.pbHome.TabStop = False
+        '
+        'pbDonate
+        '
+        Me.pbDonate.BackColor = System.Drawing.Color.Transparent
+        Me.pbDonate.Image = Global.WFInfo.My.Resources.Resources.Donate
+        Me.pbDonate.Location = New System.Drawing.Point(305, 82)
+        Me.pbDonate.Name = "pbDonate"
+        Me.pbDonate.Padding = New System.Windows.Forms.Padding(4, 0, 3, 0)
+        Me.pbDonate.Size = New System.Drawing.Size(28, 21)
+        Me.pbDonate.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
+        Me.pbDonate.TabIndex = 16
+        Me.pbDonate.TabStop = False
+        '
+        'pbSettings
+        '
+        Me.pbSettings.BackColor = System.Drawing.Color.Transparent
+        Me.pbSettings.Image = Global.WFInfo.My.Resources.Resources.Settings
+        Me.pbSettings.Location = New System.Drawing.Point(305, 107)
+        Me.pbSettings.Name = "pbSettings"
+        Me.pbSettings.Padding = New System.Windows.Forms.Padding(3, 0, 3, 0)
+        Me.pbSettings.Size = New System.Drawing.Size(28, 21)
+        Me.pbSettings.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
+        Me.pbSettings.TabIndex = 15
+        Me.pbSettings.TabStop = False
+        '
+        'pbRelic
+        '
+        Me.pbRelic.BackColor = System.Drawing.Color.Transparent
+        Me.pbRelic.Image = Global.WFInfo.My.Resources.Resources.Relic
+        Me.pbRelic.Location = New System.Drawing.Point(305, 57)
+        Me.pbRelic.Name = "pbRelic"
+        Me.pbRelic.Padding = New System.Windows.Forms.Padding(9, 0, 8, 0)
+        Me.pbRelic.Size = New System.Drawing.Size(27, 21)
+        Me.pbRelic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
+        Me.pbRelic.TabIndex = 14
+        Me.pbRelic.TabStop = False
+        '
+        'pbSideBar
+        '
+        Me.pbSideBar.BackColor = System.Drawing.Color.FromArgb(CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer))
+        Me.pbSideBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.pbSideBar.Location = New System.Drawing.Point(304, 27)
+        Me.pbSideBar.Name = "pbSideBar"
+        Me.pbSideBar.Size = New System.Drawing.Size(30, 107)
+        Me.pbSideBar.TabIndex = 18
+        Me.pbSideBar.TabStop = False
+        '
+        'pbDebug
+        '
+        Me.pbDebug.BackColor = System.Drawing.Color.Silver
+        Me.pbDebug.Location = New System.Drawing.Point(11, 73)
+        Me.pbDebug.Name = "pbDebug"
+        Me.pbDebug.Size = New System.Drawing.Size(10, 11)
+        Me.pbDebug.TabIndex = 6
+        Me.pbDebug.TabStop = False
+        Me.pbDebug.Visible = False
+        '
+        'PictureBox3
+        '
+        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
+        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
+        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
+        Me.PictureBox3.Name = "PictureBox3"
+        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
+        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox3.TabIndex = 23
+        Me.PictureBox3.TabStop = False
         '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(334, 153)
+        Me.ClientSize = New System.Drawing.Size(334, 134)
         Me.Controls.Add(Me.pbHome)
         Me.Controls.Add(Me.pbDonate)
         Me.Controls.Add(Me.pbSettings)
@@ -385,16 +395,16 @@ Partial Class Main
         Me.Text = "WFInfo"
         Me.Panel1.ResumeLayout(False)
         Me.Panel1.PerformLayout()
-        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).EndInit()
         Me.pTitle.ResumeLayout(False)
         Me.pTitle.PerformLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.trayMenu.ResumeLayout(False)
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.trayMenu.ResumeLayout(False)
+        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
