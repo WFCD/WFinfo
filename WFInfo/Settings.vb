@@ -278,12 +278,6 @@ Public Class Settings
         Me.Close()
     End Sub
 
-    Private Sub cbMessages_Click(sender As Object, e As EventArgs) Handles cbMessages.Click
-        My.Settings.Messages = cbMessages.Checked
-        Messages = cbMessages.Checked
-        saveSettings()
-    End Sub
-
     Private Sub cbNewStyle_Click(sender As Object, e As EventArgs) Handles cbNewStyle.Click
         My.Settings.NewStyle = cbNewStyle.Checked
         NewStyle = cbNewStyle.Checked
@@ -363,10 +357,7 @@ Public Class Settings
     Private Sub saveSettings()
         ''Saves settings
         My.Settings.Animate = cbAnimations.Checked
-        'My.Settings.PassiveChecks = cbPassiveChecks.Checked
-        My.Settings.Messages = cbMessages.Checked
         My.Settings.NewStyle = cbNewStyle.Checked
-        'My.Settings.DisplayPlatinum = cbPlatinum.Checked
         My.Settings.DisplayNames = cbDisplayNames.Checked
         My.Settings.HKey1 = HKey1
         My.Settings.HKey3 = HKey3

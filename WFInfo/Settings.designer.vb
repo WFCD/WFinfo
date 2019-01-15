@@ -255,14 +255,16 @@ Partial Class Settings
         Me.cbMessages.BackColor = System.Drawing.Color.Transparent
         Me.cbMessages.Checked = True
         Me.cbMessages.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.cbMessages.Enabled = False
         Me.cbMessages.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbMessages.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbMessages.Location = New System.Drawing.Point(184, 45)
+        Me.cbMessages.Location = New System.Drawing.Point(184, 68)
         Me.cbMessages.Name = "cbMessages"
         Me.cbMessages.Size = New System.Drawing.Size(82, 17)
         Me.cbMessages.TabIndex = 25
         Me.cbMessages.Text = "Messages"
         Me.cbMessages.UseVisualStyleBackColor = False
+        Me.cbMessages.Visible = False
         '
         'cbNewStyle
         '
@@ -285,7 +287,7 @@ Partial Class Settings
         Me.cbDebug.BackColor = System.Drawing.Color.Transparent
         Me.cbDebug.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbDebug.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbDebug.Location = New System.Drawing.Point(184, 68)
+        Me.cbDebug.Location = New System.Drawing.Point(184, 45)
         Me.cbDebug.Name = "cbDebug"
         Me.cbDebug.Size = New System.Drawing.Size(96, 17)
         Me.cbDebug.TabIndex = 23

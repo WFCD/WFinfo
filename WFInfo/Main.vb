@@ -24,7 +24,6 @@ Public Class Main
     Dim drag As Boolean = False      ' Toggle for the custom UI allowing it to drag
     Dim mouseX As Integer
     Dim mouseY As Integer
-    Dim enablePPC As Boolean = True  ' Toggle that enables/disables passive platinum checks
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Try
@@ -64,13 +63,13 @@ Public Class Main
             '_________________________________________________________________________
             ' Gets the xcsrf token from browser cookies for listing parts while in game
             '_________________________________________________________________________
-            Try
-                If getCookie() Then
-                    getXcsrf()
-                End If
-            Catch ex As Exception
-                addLog(ex.ToString)
-            End Try
+            'Try
+            '    If getCookie() Then
+            '        getXcsrf()
+            '    End If
+            'Catch ex As Exception
+            '    addLog(ex.ToString)
+            'End Try
 
 
             '_________________________________________________________________________
@@ -89,21 +88,6 @@ Public Class Main
             If Clipboard.ContainsImage() Then
                 Clipboard.GetImage()
                 CliptoImage = Clipboard.GetImage()
-            End If
-
-            '_________________________________________________________________________
-            'Mechanism to make sure I don't kill warframe.market (You can disable all passive checks via the website)
-            '_________________________________________________________________________
-            Dim enablePassives As String = New System.Net.WebClient().DownloadString("https://sites.google.com/site/wfinfoapp/enablepassivechecks")
-            enablePassives = enablePassives.Remove(0, enablePassives.IndexOf("enabled = ") + 10)
-            enablePassives = enablePassives.Remove(enablePassives.IndexOf(""""), enablePassives.Length - enablePassives.IndexOf(""""))
-
-
-            '_________________________________________________________________________
-            'Disables passive checks if user sets it in settings
-            '_________________________________________________________________________
-            If Not enablePassives = "true" Then
-                enablePPC = False
             End If
 
         Catch ex As Exception
@@ -146,74 +130,76 @@ Public Class Main
         '_________________________________________________________________________
         'Decrypts cookie to get JWT and returns true if all goes well
         '_________________________________________________________________________
-        Dim SQLconnect As New SQLiteConnection
-        Dim SQLcommand As New SQLiteCommand
+        'Dim SQLconnect As New SQLiteConnection
+        'Dim SQLcommand As New SQLiteCommand
 
-        SQLconnect.ConnectionString = "Data Source=" & path & ";"
-        SQLconnect.Open()
-
-
-        SQLcommand = SQLconnect.CreateCommand
-        If FireFox Then
-            SQLcommand.CommandText = "SELECT * FROM moz_cookies"
-        Else
-            SQLcommand.CommandText = "SELECT name,encrypted_value FROM Cookies"
-        End If
-        Dim SQLreader As SQLiteDataReader = SQLcommand.ExecuteReader()
-        Dim cdmblk As String = " "
-        Dim found As Boolean = False
-        While SQLreader.Read
-            If FireFox Then
-                If SQLreader(3).contains("JWT") Then
-                    cookie = "JWT=" + SQLreader(4) + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
-                    found = True
-                End If
-            Else
-                Dim encryptedData = SQLreader(1)
-                If SQLreader(0).Contains("JWT") Then
-                    Dim decodedData = System.Security.Cryptography.ProtectedData.Unprotect(encryptedData, Nothing, System.Security.Cryptography.DataProtectionScope.LocalMachine)
-                    Dim plainText = System.Text.Encoding.ASCII.GetString(decodedData)
-                    cookie = "JWT=" + plainText + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
-                    found = True
-                End If
-            End If
-        End While
+        'SQLconnect.ConnectionString = "Data Source=" & path & ";"
+        'SQLconnect.Open()
 
 
+        'SQLcommand = SQLconnect.CreateCommand
+        'If FireFox Then
+        '    SQLcommand.CommandText = "SELECT * FROM moz_cookies"
+        'Else
+        '    SQLcommand.CommandText = "SELECT name,encrypted_value FROM Cookies"
+        'End If
+        'Dim SQLreader As SQLiteDataReader = SQLcommand.ExecuteReader()
+        'Dim cdmblk As String = " "
+        'Dim found As Boolean = False
+        'While SQLreader.Read
+        '    If FireFox Then
+        '        If SQLreader(3).contains("JWT") Then
+        '            cookie = "JWT=" + SQLreader(4) + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
+        '            found = True
+        '        End If
+        '    Else
+        '        Dim encryptedData = SQLreader(1)
+        '        If SQLreader(0).Contains("JWT") Then
+        '            Dim decodedData = System.Security.Cryptography.ProtectedData.Unprotect(encryptedData, Nothing, System.Security.Cryptography.DataProtectionScope.LocalMachine)
+        '            Dim plainText = System.Text.Encoding.ASCII.GetString(decodedData)
+        '            cookie = "JWT=" + plainText + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
+        '            found = True
+        '        End If
+        '    End If
+        'End While
 
-        SQLcommand.Dispose()
-        SQLconnect.Close()
-        Return found
+
+
+        'SQLcommand.Dispose()
+        'SQLconnect.Close()
+        'Return found
+        Return False
     End Function
 
     Private Function getXcsrf()
         '_________________________________________________________________________
         'Gets a fresh xcsrf token from warframe.market
         '_________________________________________________________________________
-        Dim uri As New Uri("https://warframe.market")
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-        Dim req As HttpWebRequest = HttpWebRequest.Create(uri)
-        req.ContentType = "application/json"
-        req.Method = "GET"
-        req.Connection = "warframe.market:443 HTTP/1.1"
-        req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
-        req.Host = "warframe.market:443"
-        req.Headers.Add("cookie", cookie)
-        req.Headers.Add("X-Requested-With", "XMLHttpRequest")
-        req.KeepAlive = True
+        'Dim uri As New Uri("https://warframe.market")
+        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+        'Dim req As HttpWebRequest = HttpWebRequest.Create(uri)
+        'req.ContentType = "application/json"
+        'req.Method = "GET"
+        'req.Connection = "warframe.market:443 HTTP/1.1"
+        'req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
+        'req.Host = "warframe.market:443"
+        'req.Headers.Add("cookie", cookie)
+        'req.Headers.Add("X-Requested-With", "XMLHttpRequest")
+        'req.KeepAlive = True
 
-        Dim response = req.GetResponse()
-        Dim stream = response.GetResponseStream()
-        Dim found As Boolean = False
-        Dim reader As StreamReader = New StreamReader(stream)
-        xcsrf = reader.ReadLine()
-        Do Until xcsrf.Contains("csrf-token")
-            xcsrf = reader.ReadLine()
-            found = True
-        Loop
-        xcsrf = xcsrf.Substring(xcsrf.IndexOf("##"), 130)
+        'Dim response = req.GetResponse()
+        'Dim stream = response.GetResponseStream()
+        'Dim found As Boolean = False
+        'Dim reader As StreamReader = New StreamReader(stream)
+        'xcsrf = reader.ReadLine()
+        'Do Until xcsrf.Contains("csrf-token")
+        '    xcsrf = reader.ReadLine()
+        '    found = True
+        'Loop
+        'xcsrf = xcsrf.Substring(xcsrf.IndexOf("##"), 130)
 
-        Return found
+        'Return found
+        Return False
     End Function
 
     Private Sub btnDebug1_Click(sender As Object, e As EventArgs) Handles btnDebug1.Click
@@ -462,11 +448,8 @@ Module Glob
     Public key2Tog As Boolean = False
     Public key3Tog As Boolean = False
     Public Animate As Boolean = My.Settings.Animate
-    'Public PassiveChecks As Boolean = My.Settings.PassiveChecks
-    Public Messages As Boolean = My.Settings.Messages
     Public NewStyle As Boolean = My.Settings.NewStyle
     Public Debug As Boolean = My.Settings.Debug
-    'Public DisplayPlatinum As Boolean = My.Settings.DisplayPlatinum
     Public DisplayNames As Boolean = My.Settings.DisplayNames
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Public textColor As Color = Color.FromArgb(177, 208, 217)
@@ -481,8 +464,8 @@ Module Glob
     Public rareBrush As Brush = New SolidBrush(rareColor)
     Public bgColor As Color = Color.FromArgb(27, 27, 27)
     Public bgBrush As Brush = New SolidBrush(bgColor)
-    Public cookie As String = ""
-    Public xcsrf As String = ""
+    'Public cookie As String = ""
+    'Public xcsrf As String = ""
 
     Public Sub UpdateColors(f As Form)
         '_________________________________________________________________________

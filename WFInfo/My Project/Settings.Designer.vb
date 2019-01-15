@@ -80,18 +80,6 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("\")>  _
-        Public Property HKey2Text() As String
-            Get
-                Return CType(Me("HKey2Text"),String)
-            End Get
-            Set
-                Me("HKey2Text") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
         Public Property Animate() As Boolean
             Get
@@ -99,18 +87,6 @@ Namespace My
             End Get
             Set
                 Me("Animate") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
-        Public Property PassiveChecks() As Boolean
-            Get
-                Return CType(Me("PassiveChecks"),Boolean)
-            End Get
-            Set
-                Me("PassiveChecks") = value
             End Set
         End Property
         
@@ -179,18 +155,6 @@ Namespace My
             End Get
             Set
                 Me("Version") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
-        Public Property CheckUpdates() As Boolean
-            Get
-                Return CType(Me("CheckUpdates"),Boolean)
-            End Get
-            Set
-                Me("CheckUpdates") = value
             End Set
         End Property
         
@@ -268,18 +232,6 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
-        Public Property Equipment() As String
-            Get
-                Return CType(Me("Equipment"),String)
-            End Get
-            Set
-                Me("Equipment") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
         Public Property NewStyle() As Boolean
             Get
@@ -287,30 +239,6 @@ Namespace My
             End Get
             Set
                 Me("NewStyle") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
-        Public Property Messages() As Boolean
-            Get
-                Return CType(Me("Messages"),Boolean)
-            End Get
-            Set
-                Me("Messages") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
-        Public Property LastMessage() As String
-            Get
-                Return CType(Me("LastMessage"),String)
-            End Get
-            Set
-                Me("LastMessage") = value
             End Set
         End Property
         

@@ -8,13 +8,7 @@
     <Setting Name="HKey1Text" Type="System.String" Scope="User">
       <Value Profile="(Default)">Print Screen</Value>
     </Setting>
-    <Setting Name="HKey2Text" Type="System.String" Scope="User">
-      <Value Profile="(Default)">\</Value>
-    </Setting>
     <Setting Name="Animate" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="PassiveChecks" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="Debug" Type="System.Boolean" Scope="User">
@@ -51,9 +45,6 @@ Sentirum,Plains of Eidolon(Earth)</Value>
     <Setting Name="Version" Type="System.String" Scope="User">
       <Value Profile="(Default)">6.0.0b</Value>
     </Setting>
-    <Setting Name="CheckUpdates" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
     <Setting Name="StartX" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">500</Value>
     </Setting>
@@ -72,17 +63,8 @@ Sentirum,Plains of Eidolon(Earth)</Value>
     <Setting Name="SteamSettings" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Equipment" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="NewStyle" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="Messages" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="LastMessage" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="cTitleBar" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">15, 15, 15</Value>
