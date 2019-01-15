@@ -96,7 +96,7 @@ Public Class Picker
         pbColorWheel.Region = New Region(gp)
     End Sub
 
-    Private Function UpdateSlider()
+    Private Sub UpdateSlider()
         Try
             Dim darkBrush As New Drawing.Drawing2D.LinearGradientBrush(
             New PointF(0, 0),
@@ -131,7 +131,7 @@ Public Class Picker
             pbPreview.Refresh()
         Catch ex As Exception
         End Try
-    End Function
+    End Sub
 
     Private Sub pbClick(sender As Object, e As EventArgs) Handles pbTitleBar.Click, pbBackground.Click, pbSideBar.Click, pbText.Click, pbTray.Click
         LastSelected.BorderStyle = BorderStyle.FixedSingle

@@ -16,14 +16,12 @@ Partial Class Settings
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Settings))
         Me.btnHkey1 = New System.Windows.Forms.Button()
         Me.lbKey = New System.Windows.Forms.Label()
-        Me.Label1 = New System.Windows.Forms.Label()
         Me.cbPassiveChecks = New System.Windows.Forms.CheckBox()
         Me.cbFullscreen = New System.Windows.Forms.CheckBox()
         Me.cbAnimations = New System.Windows.Forms.CheckBox()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.btnHkey3 = New System.Windows.Forms.Button()
         Me.Label2 = New System.Windows.Forms.Label()
-        Me.btnHkey2 = New System.Windows.Forms.Button()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.pTitle = New System.Windows.Forms.Panel()
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
@@ -70,18 +68,6 @@ Partial Class Settings
         Me.lbKey.Size = New System.Drawing.Size(116, 18)
         Me.lbKey.TabIndex = 15
         Me.lbKey.Text = "Activation Key"
-        '
-        'Label1
-        '
-        Me.Label1.AutoSize = True
-        Me.Label1.BackColor = System.Drawing.Color.Transparent
-        Me.Label1.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label1.Location = New System.Drawing.Point(185, 12)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(112, 18)
-        Me.Label1.TabIndex = 16
-        Me.Label1.Text = "Command Key"
         '
         'cbPassiveChecks
         '
@@ -134,12 +120,10 @@ Partial Class Settings
         Me.Panel1.Controls.Add(Me.btnHkey3)
         Me.Panel1.Controls.Add(Me.Label2)
         Me.Panel1.Controls.Add(Me.lbKey)
-        Me.Panel1.Controls.Add(Me.btnHkey2)
         Me.Panel1.Controls.Add(Me.btnHkey1)
-        Me.Panel1.Controls.Add(Me.Label1)
         Me.Panel1.Location = New System.Drawing.Point(2, 28)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(317, 124)
+        Me.Panel1.Size = New System.Drawing.Size(317, 71)
         Me.Panel1.TabIndex = 21
         '
         'btnHkey3
@@ -148,7 +132,7 @@ Partial Class Settings
         Me.btnHkey3.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnHkey3.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold)
         Me.btnHkey3.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.btnHkey3.Location = New System.Drawing.Point(98, 91)
+        Me.btnHkey3.Location = New System.Drawing.Point(172, 34)
         Me.btnHkey3.Name = "btnHkey3"
         Me.btnHkey3.Size = New System.Drawing.Size(129, 24)
         Me.btnHkey3.TabIndex = 17
@@ -162,25 +146,11 @@ Partial Class Settings
         Me.Label2.BackColor = System.Drawing.Color.Transparent
         Me.Label2.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label2.Location = New System.Drawing.Point(111, 70)
+        Me.Label2.Location = New System.Drawing.Point(185, 13)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(104, 18)
         Me.Label2.TabIndex = 18
         Me.Label2.Text = "Area Set Key"
-        '
-        'btnHkey2
-        '
-        Me.btnHkey2.BackColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer))
-        Me.btnHkey2.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.btnHkey2.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold)
-        Me.btnHkey2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.btnHkey2.Location = New System.Drawing.Point(174, 33)
-        Me.btnHkey2.Name = "btnHkey2"
-        Me.btnHkey2.Size = New System.Drawing.Size(129, 24)
-        Me.btnHkey2.TabIndex = 13
-        Me.btnHkey2.Text = "Insert"
-        Me.btnHkey2.TextAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.btnHkey2.UseVisualStyleBackColor = False
         '
         'lbTitle
         '
@@ -243,7 +213,7 @@ Partial Class Settings
         Me.Panel2.Controls.Add(Me.cbMessages)
         Me.Panel2.Controls.Add(Me.cbNewStyle)
         Me.Panel2.Controls.Add(Me.cbDebug)
-        Me.Panel2.Location = New System.Drawing.Point(2, 150)
+        Me.Panel2.Location = New System.Drawing.Point(2, 98)
         Me.Panel2.Name = "Panel2"
         Me.Panel2.Size = New System.Drawing.Size(317, 117)
         Me.Panel2.TabIndex = 22
@@ -329,7 +299,7 @@ Partial Class Settings
         Me.Panel3.Controls.Add(Me.Panel4)
         Me.Panel3.Location = New System.Drawing.Point(1, 26)
         Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(319, 281)
+        Me.Panel3.Size = New System.Drawing.Size(319, 231)
         Me.Panel3.TabIndex = 23
         '
         'Panel4
@@ -337,7 +307,7 @@ Partial Class Settings
         Me.Panel4.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.Panel4.Controls.Add(Me.btnCustomize)
-        Me.Panel4.Location = New System.Drawing.Point(0, 239)
+        Me.Panel4.Location = New System.Drawing.Point(0, 187)
         Me.Panel4.Name = "Panel4"
         Me.Panel4.Size = New System.Drawing.Size(317, 42)
         Me.Panel4.TabIndex = 22
@@ -361,7 +331,7 @@ Partial Class Settings
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(320, 309)
+        Me.ClientSize = New System.Drawing.Size(321, 258)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.Controls.Add(Me.Panel2)
@@ -385,7 +355,6 @@ Partial Class Settings
     End Sub
     Friend WithEvents btnHkey1 As Button
     Friend WithEvents lbKey As Label
-    Friend WithEvents Label1 As Label
     Friend WithEvents cbPassiveChecks As CheckBox
     Friend WithEvents cbFullscreen As CheckBox
     Friend WithEvents cbAnimations As CheckBox
@@ -394,7 +363,6 @@ Partial Class Settings
     Friend WithEvents pTitle As Panel
     Friend WithEvents Panel2 As Panel
     Friend WithEvents cbDebug As CheckBox
-    Friend WithEvents btnHkey2 As Button
     Friend WithEvents btnClose As Button
     Friend WithEvents PictureBox3 As PictureBox
     Friend WithEvents cbMessages As CheckBox

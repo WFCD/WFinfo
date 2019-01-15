@@ -80,18 +80,6 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("220")>  _
-        Public Property HKey2() As Integer
-            Get
-                Return CType(Me("HKey2"),Integer)
-            End Get
-            Set
-                Me("HKey2") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("\")>  _
         Public Property HKey2Text() As String
             Get
@@ -505,13 +493,13 @@ Namespace My
                 Me("RelicWinLoc") = value
             End Set
         End Property
-
-        <Global.System.Configuration.UserScopedSettingAttribute(),
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),
-         Global.System.Configuration.DefaultSettingValueAttribute("")>
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
         Public Property ExpandedRelics() As String
             Get
-                Return CType(Me("ExpandedRelics"), String)
+                Return CType(Me("ExpandedRelics"),String)
             End Get
             Set
                 Me("ExpandedRelics") = value

@@ -71,7 +71,6 @@ Public Class Settings
         UpdateColors(Me)
         Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         btnHkey1.Text = My.Settings.HKey1Text
-        btnHkey2.Text = My.Settings.HKey2Text
         btnHkey3.Text = My.Settings.HKey3Text
         'cbPassiveChecks.Checked = PassiveChecks
         cbAnimations.Checked = Animate
@@ -88,54 +87,6 @@ Public Class Settings
         '_________________________________________________________________________
         If key1Tog Or key2Tog Or key3Tog Then
             chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
-        End If
-    End Sub
-
-    Private Sub btnHkey2_KeyUp(sender As Object, e As KeyEventArgs) Handles btnHkey2.KeyUp
-        '_________________________________________________________________________
-        'Sets the key for hotkey 2
-        '_________________________________________________________________________
-        If key2Tog Then
-            key2Tog = False
-            HKey2 = e.KeyCode
-            e.SuppressKeyPress = True
-            If e.KeyCode = Keys.PrintScreen Then
-                btnHkey2.Text = "Print Screen"
-            Else
-                Select Case e.KeyCode
-
-                    Case 112 To 123
-                        btnHkey2.Text = "F" & e.KeyCode - 111
-                    Case 32
-                        btnHkey2.Text = "SPACE"
-                    Case 8
-                        btnHkey2.Text = "BACKSPACE"
-                    Case 16
-                        btnHkey2.Text = "SHIFT"
-                    Case 17
-                        btnHkey2.Text = "CTRL"
-                    Case 18
-                        btnHkey2.Text = "ALT"
-                    Case 9
-                        btnHkey2.Text = "TAB"
-                    Case 20
-                        btnHkey2.Text = "CAPSLOCK"
-                    Case 45
-                        btnHkey2.Text = "INS"
-                    Case 46
-                        btnHkey2.Text = "DELETE"
-                    Case 36
-                        btnHkey2.Text = "HOME"
-                    Case 35
-                        btnHkey2.Text = "END"
-                    Case 33
-                        btnHkey2.Text = "PG UP"
-                    Case 34
-                        btnHkey2.Text = "PG DOWN"
-                    Case Else
-                        btnHkey2.Text = chTemp
-                End Select
-            End If
         End If
     End Sub
 
@@ -184,47 +135,6 @@ Public Class Settings
                         btnHkey1.Text = chTemp
                 End Select
             End If
-        ElseIf key2Tog Then
-            key2Tog = False
-            HKey2 = e.KeyCode
-            e.SuppressKeyPress = True
-            If e.KeyCode = Keys.PrintScreen Then
-                btnHkey2.Text = "Print Screen"
-            Else
-                Select Case e.KeyCode
-
-                    Case 112 To 123
-                        btnHkey2.Text = "F" & e.KeyCode - 111
-                    Case 32
-                        btnHkey2.Text = "SPACE"
-                    Case 8
-                        btnHkey2.Text = "BACKSPACE"
-                    Case 16
-                        btnHkey2.Text = "SHIFT"
-                    Case 17
-                        btnHkey2.Text = "CTRL"
-                    Case 18
-                        btnHkey2.Text = "ALT"
-                    Case 9
-                        btnHkey2.Text = "TAB"
-                    Case 20
-                        btnHkey2.Text = "CAPSLOCK"
-                    Case 45
-                        btnHkey2.Text = "INS"
-                    Case 46
-                        btnHkey2.Text = "DELETE"
-                    Case 36
-                        btnHkey2.Text = "HOME"
-                    Case 35
-                        btnHkey2.Text = "END"
-                    Case 33
-                        btnHkey2.Text = "PG UP"
-                    Case 34
-                        btnHkey2.Text = "PG DOWN"
-                    Case Else
-                        btnHkey2.Text = chTemp
-                End Select
-            End If
         End If
     End Sub
 
@@ -237,24 +147,10 @@ Public Class Settings
             chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
         End If
     End Sub
-    Private Sub btnHkey2_KeyPress(sender As Object, e As KeyPressEventArgs) Handles btnHkey2.KeyPress
-        If key1Tog Or key2Tog Or key3Tog Then
-            chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
-        End If
-    End Sub
 
     Private Sub btnHkey1_KeyPress(sender As Object, e As KeyPressEventArgs) Handles btnHkey1.KeyPress
         If key1Tog Or key2Tog Or key3Tog Then
             chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
-        End If
-    End Sub
-
-    Private Sub btnHkey2_Click(sender As Object, e As EventArgs) Handles btnHkey2.Click
-        If Not key2Tog Then
-            btnHkey2.Text = "..."
-            key2Tog = True
-        Else
-            btnHkey2.Text = My.Settings.HKey2Text
         End If
     End Sub
 
@@ -473,10 +369,8 @@ Public Class Settings
         'My.Settings.DisplayPlatinum = cbPlatinum.Checked
         My.Settings.DisplayNames = cbDisplayNames.Checked
         My.Settings.HKey1 = HKey1
-        My.Settings.HKey2 = HKey2
         My.Settings.HKey3 = HKey3
         My.Settings.HKey1Text = btnHkey1.Text
-        My.Settings.HKey2Text = btnHkey2.Text
         My.Settings.HKey3Text = btnHkey3.Text
         My.Settings.Debug = cbDebug.Checked
         My.Settings.Save()

@@ -1,0 +1,4 @@
+TODO:
+	Create equipment window
+	Do a full code review
+	

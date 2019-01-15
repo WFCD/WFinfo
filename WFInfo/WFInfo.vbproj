@@ -121,22 +121,18 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data.vb" />
     <Compile Include="NamePlaque.Designer.vb">
       <DependentUpon>NamePlaque.vb</DependentUpon>
     </Compile>
     <Compile Include="NamePlaque.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="OCR.vb" />
     <Compile Include="Picker.Designer.vb">
       <DependentUpon>Picker.vb</DependentUpon>
     </Compile>
     <Compile Include="Picker.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Input.Designer.vb">
-      <DependentUpon>Input.vb</DependentUpon>
-    </Compile>
-    <Compile Include="Input.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Main.designer.vb">
@@ -204,9 +200,6 @@
     <EmbeddedResource Include="Picker.resx">
       <DependentUpon>Picker.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Input.resx">
-      <DependentUpon>Input.vb</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.vb</DependentUpon>
     </EmbeddedResource>
@@ -245,6 +238,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+      <SubType>Designer</SubType>
     </None>
     <None Include="App.config">
       <SubType>Designer</SubType>

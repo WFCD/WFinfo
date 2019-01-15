@@ -8,9 +8,6 @@
     <Setting Name="HKey1Text" Type="System.String" Scope="User">
       <Value Profile="(Default)">Print Screen</Value>
     </Setting>
-    <Setting Name="HKey2" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">220</Value>
-    </Setting>
     <Setting Name="HKey2Text" Type="System.String" Scope="User">
       <Value Profile="(Default)">\</Value>
     </Setting>

@@ -193,30 +193,6 @@ Public Class Tray
                 If Not Me.Location.Y > screenHeight Then
                     Me.Location = New Point(Me.Location.X, Me.Location.Y + 20)
                 Else
-                    If Not Input.Visible = True Then
-                        Try
-                            If GetWarframe Then
-                                AppActivate("WARFRAME")
-
-                                'Get WAREFRAME screen position
-                                Dim wr As Rectangle
-                                GetWindowRect(WFhWnd, wr)
-
-                                'Give WARFRAME mouse control
-                                Dim prevPos As Point = Cursor.Position
-                                Cursor.Position = New Point(wr.Left, wr.Top)
-                                mouse_event(&H2, 0, 0, 0, 0)
-                                mouse_event(&H4, 0, 0, 0, 0)
-                                Cursor.Position = prevPos
-                            End If
-                        Catch ex As Exception
-                        End Try
-                        Me.Close()
-                    End If
-                End If
-            Else
-                If Not Input.Visible = True Then
-
                     Try
                         If GetWarframe Then
                             AppActivate("WARFRAME")
@@ -237,6 +213,26 @@ Public Class Tray
                     Me.Close()
                     Me.Dispose()
                 End If
+            Else
+                Try
+                    If GetWarframe Then
+                        AppActivate("WARFRAME")
+
+                        'Get WAREFRAME screen position
+                        Dim wr As Rectangle
+                        GetWindowRect(WFhWnd, wr)
+
+                        'Give WARFRAME mouse control
+                        Dim prevPos As Point = Cursor.Position
+                        Cursor.Position = New Point(wr.Left, wr.Top)
+                        mouse_event(&H2, 0, 0, 0, 0)
+                        mouse_event(&H4, 0, 0, 0, 0)
+                        Cursor.Position = prevPos
+                    End If
+                Catch ex As Exception
+                End Try
+                Me.Close()
+                Me.Dispose()
             End If
         End If
     End Sub

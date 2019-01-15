@@ -12,13 +12,15 @@ Imports Tesseract
 
 
 Public Class Relics
-    Dim drag As Boolean = False
-    Dim mouseX As Integer
-    Dim mouseY As Integer
-    Dim RelicToHide As TreeNode = Nothing
-    Dim Relic2ToHide As TreeNode = Nothing
+    Private drag As Boolean = False
+    Private mouseX As Integer
+    Private mouseY As Integer
+    Private RelicToHide As TreeNode = Nothing
+    Private Relic2ToHide As TreeNode = Nothing
     Public Tree1Sorter As New NodeSorter(0)
     Public Tree2Sorter As New NodeSorter(1)
+    Private hidden_nodes As JObject                                      ' Contains list of nodes to hide                {"Lith": ["A1","A2",...], "Meso": [...], "Neo": [...], "Axi": [...]}
+    Private hidden_file_path As String = Path.Combine(appData, "WFInfo\hidden.json")
 
     Private Sub pTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown
         drag = True
@@ -61,22 +63,54 @@ Public Class Relics
     End Sub
 
     Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterCollapse, RelicTree2.AfterCollapse
-        Dim temp As String = "|" + e.Node.FullPath.Replace(" ", "").Replace("\", "") + "|"
+        Dim temp As String = "|" + e.Node.FullPath.Replace("\", " ") + "|"
         If e.Node.Text <> "Hidden" Then
-            temp = temp.Replace("Hidden", "")
+            temp = temp.Replace("Hidden ", "")
         End If
         If My.Settings.ExpandedRelics.Contains(temp) Then
             My.Settings.ExpandedRelics = My.Settings.ExpandedRelics.Replace(temp, "")
         End If
+        Console.WriteLine(My.Settings.ExpandedRelics)
+        temp = temp.Replace("|", "")
+        Dim era_name As String() = temp.Split(" ")
+        If era_name.Count = 2 AndAlso era_name(1).Length = 2 Then
+            Console.WriteLine("LOOKING FOR: " + era_name(0) + "---" + era_name(1))
+            Dim other As TreeView = RelicTree
+            If sender.Equals(RelicTree) Then
+                other = RelicTree2
+            End If
+            For Each node As TreeNode In other.Nodes.Find(era_name(1), True)
+                Console.WriteLine(node.FullPath + "---" + node.Text)
+                If node.IsExpanded AndAlso node.FullPath.Contains(era_name(0)) Then
+                    node.Collapse()
+                End If
+            Next
+        End If
     End Sub
 
     Private Sub RelicTree_Expand(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterExpand, RelicTree2.AfterExpand
-        Dim temp As String = "|" + e.Node.FullPath.Replace(" ", "").Replace("\", "") + "|"
+        Dim temp As String = "|" + e.Node.FullPath.Replace("\", " ") + "|"
         If e.Node.Text <> "Hidden" Then
-            temp = temp.Replace("Hidden", "")
+            temp = temp.Replace("Hidden ", "")
         End If
         If Not My.Settings.ExpandedRelics.Contains(temp) Then
             My.Settings.ExpandedRelics += temp
+        End If
+        Console.WriteLine(My.Settings.ExpandedRelics)
+        temp = temp.Replace("|", "")
+        Dim era_name As String() = temp.Split(" ")
+        If era_name.Count = 2 AndAlso era_name(1).Length = 2 Then
+            Console.WriteLine("LOOKING FOR: " + era_name(0) + "---" + era_name(1))
+            Dim other As TreeView = RelicTree
+            If sender.Equals(RelicTree) Then
+                other = RelicTree2
+            End If
+            For Each node As TreeNode In other.Nodes.Find(era_name(1), True)
+                Console.WriteLine(node.FullPath + "---" + node.Text)
+                If Not node.IsExpanded AndAlso node.FullPath.Contains(era_name(0)) Then
+                    node.Expand()
+                End If
+            Next
         End If
     End Sub
 
@@ -113,7 +147,7 @@ Public Class Relics
         }
         If split.Count = 2 Then
             Dim find As JObject = Nothing
-            If relic_data.TryGetValue(split(0), find) Then
+            If db.relic_data.TryGetValue(split(0), find) Then
                 If find.TryGetValue(split(1), find) Then
                     If find("vaulted") Then
                         Dim right As Integer = 115
@@ -169,7 +203,7 @@ Public Class Relics
             End If
             Dim name As String = split(2)
             If name <> "Forma Blueprint" Then
-                Dim vals As JObject = GetMarketData(name)
+                Dim vals As JObject = db.market_data(name)
                 e.Graphics.FillRectangle(bgBrush, 260, e.Bounds.Top, 130, e.Bounds.Height)
                 e.Graphics.DrawString(Double.Parse(vals("plat")).ToString("N1"), RelicTree.Font, brush, 300, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
@@ -270,6 +304,113 @@ Public Class Relics
         End If
 
     End Sub
+
+    Public Sub Load_Relic_Tree()
+        Dim hide As TreeNode = Nothing
+        If RelicTree.Nodes(0).Nodes.Count > 1 Then
+            Return
+        End If
+        For Each node As TreeNode In RelicTree.Nodes
+            CheckIfExpand(node)
+
+            For Each relic As JProperty In db.relic_data(node.Text)
+                Dim kid As New TreeNode(relic.Name)
+                kid.Name = relic.Name
+                node.Nodes.Add(kid)
+
+                kid.Nodes.Add(relic.Value("rare1").ToString()).ForeColor = rareColor
+                kid.Nodes.Add(relic.Value("uncommon1").ToString()).ForeColor = uncommonColor
+                kid.Nodes.Add(relic.Value("uncommon2").ToString()).ForeColor = uncommonColor
+                kid.Nodes.Add(relic.Value("common1").ToString()).ForeColor = commonColor
+                kid.Nodes.Add(relic.Value("common2").ToString()).ForeColor = commonColor
+                kid.Nodes.Add(relic.Value("common3").ToString()).ForeColor = commonColor
+                Dim rtot As Double = 0
+                Dim itot As Double = 0
+                Dim rperc As Double = 0.1
+                Dim iperc As Double = 0.02
+                Dim count As Integer = 0
+                For Each temp As TreeNode In kid.Nodes
+                    If temp.Parent.FullPath = kid.FullPath Then
+                        If db.market_data.TryGetValue(temp.Text, Nothing) Then
+                            If count > 2 Then
+                                rperc = 0.5 / 3.0
+                                iperc = 0.76 / 3.0
+                            ElseIf count > 0 Then
+                                rperc = 0.2
+                                iperc = 0.11
+                            End If
+                            Dim plat As Double = Double.Parse(db.market_data(temp.Text)("plat"))
+                            rtot += (plat * rperc)
+                            itot += (plat * iperc)
+                            count += 1
+                        Else
+                            Console.WriteLine("MISSING RELIC PLAT VALUES: " + temp.FullPath + " -- " + temp.Text)
+                        End If
+                    End If
+                Next
+                rtot -= itot
+                db.relic_data(node.Text)(relic.Name)("rad") = rtot
+                db.relic_data(node.Text)(relic.Name)("int") = itot
+                CheckIfExpand(kid)
+
+                kid = kid.Clone()
+                kid.Text = node.Text + " " + relic.Name
+                RelicTree2.Nodes.Add(kid)
+                CheckIfExpand(kid)
+            Next
+            hide = node.Nodes.Add("Hidden")
+            hide.Name = "Hidden"
+            CheckIfExpand(hide)
+        Next
+        hide = RelicTree2.Nodes.Add("Hidden")
+        hide.Name = "Hidden"
+        CheckIfExpand(hide)
+
+        Load_Hidden_Nodes()
+
+        RelicTree.TreeViewNodeSorter = Tree1Sorter
+        RelicTree2.TreeViewNodeSorter = Tree2Sorter
+        RelicTree.Sort()
+        RelicTree2.Sort()
+    End Sub
+
+    Private Sub CheckIfExpand(node As TreeNode)
+        Dim temp As String = "|" + node.FullPath.Replace("\", " ") + "|"
+        If node.Text <> "Hidden" Then
+            temp = temp.Replace("Hidden ", "")
+        End If
+        If My.Settings.ExpandedRelics.Contains(temp) Then
+            node.Expand()
+        End If
+    End Sub
+
+    Private Sub Load_Hidden_Nodes()
+        If File.Exists(hidden_file_path) Then
+            hidden_nodes = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(hidden_file_path))
+
+            For Each node As TreeNode In RelicTree.Nodes
+                For Each hide As JValue In hidden_nodes(node.Text)
+                    Dim move As TreeNode = node.Nodes.Find(hide.Value, False)(0)
+                    node.Nodes.Remove(move)
+                    node.Nodes.Find("Hidden", False)(0).Nodes.Add(move)
+                    For Each found As TreeNode In RelicTree2.Nodes.Find(hide.Value, False)
+                        If found.Text.Equals(node.Text + " " + hide.Value) Then
+                            RelicTree2.Nodes.Remove(found)
+                            RelicTree2.Nodes.Find("Hidden", False)(0).Nodes.Add(found)
+                        End If
+                    Next
+
+                Next
+            Next
+        Else
+            hidden_nodes = New JObject()
+            hidden_nodes("Lith") = New JArray()
+            hidden_nodes("Meso") = New JArray()
+            hidden_nodes("Neo") = New JArray()
+            hidden_nodes("Axi") = New JArray()
+            File.WriteAllText(hidden_file_path, JsonConvert.SerializeObject(hidden_nodes, Newtonsoft.Json.Formatting.Indented))
+        End If
+    End Sub
 End Class
 
 Public Class NodeSorter
@@ -349,8 +490,8 @@ Public Class NodeSorter
             Return String.Compare(strx, stry)
         End If
 
-        Dim jobx As JObject = relic_data(erax)(strx)
-        Dim joby As JObject = relic_data(eray)(stry)
+        Dim jobx As JObject = db.relic_data(erax)(strx)
+        Dim joby As JObject = db.relic_data(eray)(stry)
         If Me.type = 1 Then
             Return (Double.Parse(joby("int")) - Double.Parse(jobx("int"))) * 100
         End If
