@@ -8,4 +8,5 @@ TODO:
 			Allows center of window to be used
 	Get Name Plaques working again
 	Move all colors into the Picker/Settings
+	Add Owned indicator to Overlays
 	
