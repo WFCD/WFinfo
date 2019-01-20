@@ -104,81 +104,13 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("Alloy Plate,Draco(Ceres) / Malva(Venus)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Argon Crystal,Void Survival / Defence"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"C"& _ 
-            "ircuits,Draco(Ceres) / Malva(Venus)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Control Module,Void Survival / Defence"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Cry"& _ 
-            "otic,Hieracon(Pluto)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Ferrite,Tikal(Earth)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Gallium,Assur(Uranus) / War(Mars)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"M"& _ 
-            "orphics,Wahiba(Mars) / Tolstoj(Mercury)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Nano Spores,ODD / Akkad(Eris)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Neural S"& _ 
-            "ensors,Themisto or IO(Jupiter)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Neurodes,Tikal(Earth) / Zabala(Eris)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Orokin Cel"& _ 
-            "l,ODS / Draco(Ceres)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Oxium,IO(Jupiter) / Baal(Europa)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Plastids,Ophelia(Uranus)"& _ 
-            " / Zabala(Eris)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Polymer Bundle,Ophelia or Assur(Uranus)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Rubedo,Void Survival /"& _ 
-            " Defence"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Salvage,Cameria(Jupiter) / Wahiba(Mars)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Tellurium,Ophelia or Caelus(U"& _ 
-            "ranus)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Nyth,Plains of Eidolon(Earth)"&Global.Microsoft.VisualBasic.ChrW(13)&Global.Microsoft.VisualBasic.ChrW(10)&"Sentirum,Plains of Eidolon(Earth)")>  _
-        Public Property Resources() As String
-            Get
-                Return CType(Me("Resources"),String)
-            End Get
-            Set
-                Me("Resources") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("6/1/2017|0")>  _
-        Public Property PPMPD() As String
-            Get
-                Return CType(Me("PPMPD"),String)
-            End Get
-            Set
-                Me("PPMPD") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("6/1/2017|0")>  _
-        Public Property ChecksPD() As String
-            Get
-                Return CType(Me("ChecksPD"),String)
-            End Get
-            Set
-                Me("ChecksPD") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("6.0.0b")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("7.0.0")>  _
         Public Property Version() As String
             Get
                 Return CType(Me("Version"),String)
             End Get
             Set
                 Me("Version") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("500")>  _
-        Public Property StartX() As Integer
-            Get
-                Return CType(Me("StartX"),Integer)
-            End Get
-            Set
-                Me("StartX") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("300")>  _
-        Public Property StartY() As String
-            Get
-                Return CType(Me("StartY"),String)
-            End Get
-            Set
-                Me("StartY") = value
             End Set
         End Property
         
@@ -304,90 +236,6 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("120")>  _
-        Public Property HKey3() As Integer
-            Get
-                Return CType(Me("HKey3"),Integer)
-            End Get
-            Set
-                Me("HKey3") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("F9")>  _
-        Public Property HKey3Text() As String
-            Get
-                Return CType(Me("HKey3Text"),String)
-            End Get
-            Set
-                Me("HKey3Text") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("0, 0")>  _
-        Public Property StartPoint() As Global.System.Drawing.Point
-            Get
-                Return CType(Me("StartPoint"),Global.System.Drawing.Point)
-            End Get
-            Set
-                Me("StartPoint") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("1, 1")>  _
-        Public Property RecSize() As Global.System.Drawing.Point
-            Get
-                Return CType(Me("RecSize"),Global.System.Drawing.Point)
-            End Get
-            Set
-                Me("RecSize") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
-        Public Property TargetAreaSet() As Boolean
-            Get
-                Return CType(Me("TargetAreaSet"),Boolean)
-            End Get
-            Set
-                Me("TargetAreaSet") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
-        Public Property DisplayPlatinum() As Boolean
-            Get
-                Return CType(Me("DisplayPlatinum"),Boolean)
-            End Get
-            Set
-                Me("DisplayPlatinum") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
-        Public Property DisplayNames() As Boolean
-            Get
-                Return CType(Me("DisplayNames"),Boolean)
-            End Get
-            Set
-                Me("DisplayNames") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
         Public Property TreeOne() As Boolean
             Get
@@ -395,6 +243,18 @@ Namespace My
             End Get
             Set
                 Me("TreeOne") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
+        Public Property EqmtOne() As Boolean
+            Get
+                Return CType(Me("EqmtOne"),Boolean)
+            End Get
+            Set
+                Me("EqmtOne") = value
             End Set
         End Property
         
@@ -412,6 +272,42 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0")>  _
+        Public Property EqmtSort() As Integer
+            Get
+                Return CType(Me("EqmtSort"),Integer)
+            End Get
+            Set
+                Me("EqmtSort") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0")>  _
+        Public Property ScaleType() As Integer
+            Get
+                Return CType(Me("ScaleType"),Integer)
+            End Get
+            Set
+                Me("ScaleType") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("100")>  _
+        Public Property Scaling() As Integer
+            Get
+                Return CType(Me("Scaling"),Integer)
+            End Get
+            Set
+                Me("Scaling") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("0, 0")>  _
         Public Property RelicWinLoc() As Global.System.Drawing.Point
             Get
@@ -424,6 +320,30 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0, 0")>  _
+        Public Property EqmtWinLoc() As Global.System.Drawing.Point
+            Get
+                Return CType(Me("EqmtWinLoc"),Global.System.Drawing.Point)
+            End Get
+            Set
+                Me("EqmtWinLoc") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0, 0")>  _
+        Public Property MainLoc() As Global.System.Drawing.Point
+            Get
+                Return CType(Me("MainLoc"),Global.System.Drawing.Point)
+            End Get
+            Set
+                Me("MainLoc") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("")>  _
         Public Property ExpandedRelics() As String
             Get
@@ -431,6 +351,30 @@ Namespace My
             End Get
             Set
                 Me("ExpandedRelics") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0")>  _
+        Public Property SSCount() As Integer
+            Get
+                Return CType(Me("SSCount"),Integer)
+            End Get
+            Set
+                Me("SSCount") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0")>  _
+        Public Property EtcCount() As Integer
+            Get
+                Return CType(Me("EtcCount"),Integer)
+            End Get
+            Set
+                Me("EtcCount") = value
             End Set
         End Property
     End Class

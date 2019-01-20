@@ -14,42 +14,8 @@
     <Setting Name="Debug" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Resources" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Alloy Plate,Draco(Ceres) / Malva(Venus)
-Argon Crystal,Void Survival / Defence
-Circuits,Draco(Ceres) / Malva(Venus)
-Control Module,Void Survival / Defence
-Cryotic,Hieracon(Pluto)
-Ferrite,Tikal(Earth)
-Gallium,Assur(Uranus) / War(Mars)
-Morphics,Wahiba(Mars) / Tolstoj(Mercury)
-Nano Spores,ODD / Akkad(Eris)
-Neural Sensors,Themisto or IO(Jupiter)
-Neurodes,Tikal(Earth) / Zabala(Eris)
-Orokin Cell,ODS / Draco(Ceres)
-Oxium,IO(Jupiter) / Baal(Europa)
-Plastids,Ophelia(Uranus) / Zabala(Eris)
-Polymer Bundle,Ophelia or Assur(Uranus)
-Rubedo,Void Survival / Defence
-Salvage,Cameria(Jupiter) / Wahiba(Mars)
-Tellurium,Ophelia or Caelus(Uranus)
-Nyth,Plains of Eidolon(Earth)
-Sentirum,Plains of Eidolon(Earth)</Value>
-    </Setting>
-    <Setting Name="PPMPD" Type="System.String" Scope="User">
-      <Value Profile="(Default)">6/1/2017|0</Value>
-    </Setting>
-    <Setting Name="ChecksPD" Type="System.String" Scope="User">
-      <Value Profile="(Default)">6/1/2017|0</Value>
-    </Setting>
     <Setting Name="Version" Type="System.String" Scope="User">
-      <Value Profile="(Default)">6.0.0b</Value>
-    </Setting>
-    <Setting Name="StartX" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">500</Value>
-    </Setting>
-    <Setting Name="StartY" Type="System.String" Scope="User">
-      <Value Profile="(Default)">300</Value>
+      <Value Profile="(Default)">7.0.0</Value>
     </Setting>
     <Setting Name="Fullscreen" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -81,38 +47,41 @@ Sentirum,Plains of Eidolon(Earth)</Value>
     <Setting Name="cTray" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">23, 23, 23</Value>
     </Setting>
-    <Setting Name="HKey3" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">120</Value>
-    </Setting>
-    <Setting Name="HKey3Text" Type="System.String" Scope="User">
-      <Value Profile="(Default)">F9</Value>
-    </Setting>
-    <Setting Name="StartPoint" Type="System.Drawing.Point" Scope="User">
-      <Value Profile="(Default)">0, 0</Value>
-    </Setting>
-    <Setting Name="RecSize" Type="System.Drawing.Point" Scope="User">
-      <Value Profile="(Default)">1, 1</Value>
-    </Setting>
-    <Setting Name="TargetAreaSet" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="DisplayPlatinum" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="DisplayNames" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
     <Setting Name="TreeOne" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="EqmtOne" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="SortType" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="EqmtSort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="ScaleType" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="Scaling" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
     <Setting Name="RelicWinLoc" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="EqmtWinLoc" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="MainLoc" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
     <Setting Name="ExpandedRelics" Type="System.String" Scope="User">
       <Value Profile="(Default)"></Value>
+    </Setting>
+    <Setting Name="SSCount" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="EtcCount" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

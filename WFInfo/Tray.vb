@@ -6,7 +6,7 @@ Public Class Tray
     Dim PercentVisible As Decimal
     Dim screenWidth As Integer = Screen.PrimaryScreen.Bounds.Width
     Dim screenHeight As Integer = Screen.PrimaryScreen.Bounds.Height
-    Dim closing As Boolean = False
+    Dim trayClosing As Boolean = False
     Dim goalY As Integer = screenHeight * 0.63
     Dim GetWarframe As Boolean = False
     Dim WFhWnd As String = ""
@@ -100,7 +100,7 @@ Public Class Tray
       ByVal dwExtraInfo As Integer)
 
     Public Sub Display()
-        closing = False
+        trayClosing = False
         'Checks for WF as active, sets boolean and hWnd
         If ActiveWindowName() = "WARFRAME" Then
             GetWarframe = True
@@ -126,7 +126,7 @@ Public Class Tray
         qItems.Clear()
     End Sub
     Private Sub tHide_Tick(sender As Object, e As EventArgs) Handles tHide.Tick
-        closing = True
+        trayClosing = True
         lbDisplay.Text = ""
         lbDDropShadow.Text = ""
         tHide.Stop()
@@ -176,7 +176,7 @@ Public Class Tray
         '_________________________________________________________________________
         'Slide up and slide down animation control
         '_________________________________________________________________________
-        If Not closing Then
+        If Not trayClosing Then
             If Animate Then
                 If Not Me.Location.Y - 22 <= goalY Then
                     Me.Location = New Point(Me.Location.X, Me.Location.Y - 22)

@@ -25,7 +25,6 @@ Partial Class Main
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Main))
         Me.tPB = New System.Windows.Forms.Timer(Me.components)
-        Me.BGWorker = New System.ComponentModel.BackgroundWorker()
         Me.lbChecks = New System.Windows.Forms.Label()
         Me.lbStatus = New System.Windows.Forms.Label()
         Me.Panel1 = New System.Windows.Forms.Panel()
@@ -50,7 +49,7 @@ Partial Class Main
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.trayExit = New System.Windows.Forms.ToolStripMenuItem()
         Me.pbHome = New System.Windows.Forms.PictureBox()
-        Me.pbDonate = New System.Windows.Forms.PictureBox()
+        Me.pbEqmt = New System.Windows.Forms.PictureBox()
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.pbRelic = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
@@ -60,7 +59,7 @@ Partial Class Main
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.trayMenu.SuspendLayout()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbEqmt, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -70,9 +69,6 @@ Partial Class Main
         '
         Me.tPB.Enabled = True
         Me.tPB.Interval = 1
-        '
-        'BGWorker
-        '
         '
         'lbChecks
         '
@@ -314,17 +310,17 @@ Partial Class Main
         Me.pbHome.TabIndex = 17
         Me.pbHome.TabStop = False
         '
-        'pbDonate
+        'pbEqmt
         '
-        Me.pbDonate.BackColor = System.Drawing.Color.Transparent
-        Me.pbDonate.Image = Global.WFInfo.My.Resources.Resources.Donate
-        Me.pbDonate.Location = New System.Drawing.Point(305, 82)
-        Me.pbDonate.Name = "pbDonate"
-        Me.pbDonate.Padding = New System.Windows.Forms.Padding(4, 0, 3, 0)
-        Me.pbDonate.Size = New System.Drawing.Size(28, 21)
-        Me.pbDonate.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
-        Me.pbDonate.TabIndex = 16
-        Me.pbDonate.TabStop = False
+        Me.pbEqmt.BackColor = System.Drawing.Color.Transparent
+        Me.pbEqmt.Image = Global.WFInfo.My.Resources.Resources.foundry
+        Me.pbEqmt.Location = New System.Drawing.Point(305, 82)
+        Me.pbEqmt.Name = "pbEqmt"
+        Me.pbEqmt.Padding = New System.Windows.Forms.Padding(6, 0, 6, 0)
+        Me.pbEqmt.Size = New System.Drawing.Size(28, 21)
+        Me.pbEqmt.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
+        Me.pbEqmt.TabIndex = 16
+        Me.pbEqmt.TabStop = False
         '
         'pbSettings
         '
@@ -367,7 +363,7 @@ Partial Class Main
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.ClientSize = New System.Drawing.Size(334, 134)
         Me.Controls.Add(Me.pbHome)
-        Me.Controls.Add(Me.pbDonate)
+        Me.Controls.Add(Me.pbEqmt)
         Me.Controls.Add(Me.pbSettings)
         Me.Controls.Add(Me.pbRelic)
         Me.Controls.Add(Me.pbSideBar)
@@ -386,7 +382,7 @@ Partial Class Main
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
         Me.trayMenu.ResumeLayout(False)
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.pbDonate, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbEqmt, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).EndInit()
@@ -395,11 +391,10 @@ Partial Class Main
 
     End Sub
     Friend WithEvents tPB As Timer
-    Friend WithEvents BGWorker As System.ComponentModel.BackgroundWorker
     Friend WithEvents lbChecks As Label
     Friend WithEvents lbStatus As Label
     Friend WithEvents pbSettings As PictureBox
-    Friend WithEvents pbDonate As PictureBox
+    Friend WithEvents pbEqmt As PictureBox
     Friend WithEvents pbHome As PictureBox
     Friend WithEvents pbSideBar As PictureBox
     Friend WithEvents Panel1 As Panel

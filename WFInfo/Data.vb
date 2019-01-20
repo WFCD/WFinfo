@@ -17,9 +17,9 @@ Class Data
     Public name_data As Dictionary(Of String, String)                   ' Contains relic to market name translation      {<relic_name>: <market_name>}
     Private name_data_path As String = Path.Combine(appData, "WFInfo\name_data.json")
 
-
     Private debug_path As String = Path.Combine(appData, "WFInfo\debug.json")
 
+    Public panels(3) As Overlay
 
     Private webClient As System.Net.WebClient
 
@@ -28,7 +28,6 @@ Class Data
         webClient.Headers.Add("platform", "pc")
         webClient.Headers.Add("language", "en")
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-
 
         Dim market_save As Boolean = Load_Market_Items() Or Load_Market_Data()
 
@@ -52,20 +51,20 @@ Class Data
         End If
     End Sub
 
-    Private Sub Save_Market()
+    Public Sub Save_Market()
         File.WriteAllText(market_items_path, JsonConvert.SerializeObject(market_items, Newtonsoft.Json.Formatting.Indented))
         File.WriteAllText(market_data_path, JsonConvert.SerializeObject(market_data, Newtonsoft.Json.Formatting.Indented))
     End Sub
 
-    Private Sub Save_Relics()
+    Public Sub Save_Relics()
         File.WriteAllText(relic_data_path, JsonConvert.SerializeObject(relic_data, Newtonsoft.Json.Formatting.Indented))
     End Sub
 
-    Private Sub Save_Names()
+    Public Sub Save_Names()
         File.WriteAllText(name_data_path, JsonConvert.SerializeObject(name_data, Newtonsoft.Json.Formatting.Indented))
     End Sub
 
-    Private Sub Save_Eqmt()
+    Public Sub Save_Eqmt()
         File.WriteAllText(eqmt_data_path, JsonConvert.SerializeObject(eqmt_data, Newtonsoft.Json.Formatting.Indented))
     End Sub
 
@@ -123,6 +122,34 @@ Class Data
         Return True
     End Function
 
+    Friend Function GetSetPlat(job As JObject, Optional unowned As Boolean = False) As Double
+        Dim temp As JObject = Nothing
+        Dim ret As Double = 0
+        For Each kvp As KeyValuePair(Of String, JToken) In job("parts").ToObject(Of JObject)
+            Dim count As Integer = kvp.Value.Item("count")
+            Dim owned As Integer = kvp.Value.Item("owned")
+            If unowned Then
+                count -= owned
+            End If
+            If db.market_data.TryGetValue(kvp.Key, temp) Then
+                ' THAR BE PLAT/DUCAT VALUES!
+                ret += count * temp("plat").ToObject(Of Double)
+
+            ElseIf db.eqmt_data.TryGetValue(kvp.Key, temp) Then
+                ' So... it ain't got no values, but it can?
+                db.market_data(kvp.Key) = New JObject()
+                db.market_data(kvp.Key)("ducats") = 0
+                db.market_data(kvp.Key)("plat") = 0
+                Dim plat As Double = GetSetPlat(temp)
+                db.market_data(kvp.Key)("plat") = plat
+                Save_Market()
+
+                ret += count * plat
+            End If
+        Next
+        Return ret
+    End Function
+
     Private Sub Load_Market_Item(item_name As String, url As String)
 
         Dim stats As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"))
@@ -149,6 +176,12 @@ Class Data
 
     Private Function Load_Drop_Data() As Boolean
         Dim request As WebRequest = Nothing
+        If File.Exists(eqmt_data_path) Then
+            eqmt_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(eqmt_data_path))
+        Else
+            eqmt_data = New JObject()
+        End If
+
         If File.Exists(relic_data_path) And File.Exists(eqmt_data_path) Then
             request = WebRequest.Create("https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html")
             request.Method = "HEAD"
@@ -156,7 +189,6 @@ Class Data
             Dim last_mod As Date = DateTime.Parse(request.GetResponse().Headers.Get("Last-Modified")).AddHours(-1)
 
             relic_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(relic_data_path))
-            eqmt_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(eqmt_data_path))
             name_data = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(name_data_path))
             If relic_data.TryGetValue("timestamp", Nothing) AndAlso
                 eqmt_data.TryGetValue("timestamp", Nothing) AndAlso
@@ -167,7 +199,6 @@ Class Data
         End If
 
         relic_data = New JObject()
-        eqmt_data = New JObject()
         name_data = New Dictionary(Of String, String)()
 
         request = WebRequest.Create("https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html")
@@ -240,12 +271,27 @@ Class Data
                         If Not eqmt_data.TryGetValue(prime, Nothing) Then
                             eqmt_data(prime) = New JObject()
                             eqmt_data(prime)("parts") = New JObject()
+                            eqmt_data(prime)("type") = ""
                         End If
 
-                        Dim job As New JObject()
-                        job("count") = 1
-                        job("vaulted") = True
-                        eqmt_data(prime)("parts")(name) = job
+                        Dim job As JObject = eqmt_data(prime)("parts")
+
+                        If Not job.TryGetValue(name, Nothing) Then
+                            job = New JObject()
+                            job("count") = 1
+                            job("owned") = 0
+                            job("vaulted") = True
+                            eqmt_data(prime)("parts")(name) = job
+                        End If
+
+                        If name.Contains("Harness") Then
+                            eqmt_data(prime)("type") = "Archwing"
+                        ElseIf name.Contains("Chassis") Then
+                            eqmt_data(prime)("type") = "Warframe"
+                        ElseIf name.Contains("Carapace") OrElse name.Contains("Collar Blueprint") Then
+                            eqmt_data(prime)("type") = "Companion"
+                        End If
+
                     End If
                     If Not name_data.ContainsKey(split(0)) Then
                         name_data(split(0)) = name
@@ -343,9 +389,12 @@ Class Data
 
 
         Dim data_job As JObject = JsonConvert.DeserializeObject(Of JObject)(data)("Weapons")
+        File.WriteAllText(debug_path, JsonConvert.SerializeObject(data_job, Newtonsoft.Json.Formatting.Indented))
         For Each kvp As KeyValuePair(Of String, JToken) In eqmt_data
             If kvp.Key <> "timestamp" Then
                 If data_job.TryGetValue(kvp.Key, Nothing) Then
+                    eqmt_data(kvp.Key)("type") = data_job(kvp.Key)("Type")
+                    Dim temp As New Dictionary(Of String, Integer)()
                     For Each part As JObject In data_job(kvp.Key)("Cost")("Parts")
                         If part("Type").ToString() = "PrimePart" Then
                             For Each relic_part As KeyValuePair(Of String, JToken) In kvp.Value.Item("parts").ToObject(Of JObject)
@@ -355,15 +404,25 @@ Class Data
                                 End If
                             Next
                         ElseIf part("Type").ToString() = "Weapon" AndAlso part("Name").ToString().Contains("Prime") Then
-                            Dim job As JObject = eqmt_data(kvp.Key)("parts")
-                            If Not job.TryGetValue(part("Name").ToString(), Nothing) Then
-                                job(part("Name").ToString()) = New JObject()
-                                job(part("Name").ToString())("count") = 0
+                            If Not temp.ContainsKey(part("Name")) Then
+                                temp(part("Name")) = 0
                             End If
-                            job = job(part("Name").ToString())
-                            job("count") = 1 + job("count").ToObject(Of Integer)
+                            temp(part("Name")) += part("Count").ToObject(Of Integer)
                         End If
                     Next
+
+                    If temp.Count > 0 Then
+                        For Each entry As KeyValuePair(Of String, Integer) In temp
+                            Dim job As JObject = eqmt_data(kvp.Key)("parts")
+                            If Not job.TryGetValue(entry.Key, Nothing) Then
+                                job = New JObject()
+                                job("owned") = 0
+                                job("vaulted") = False
+                                eqmt_data(kvp.Key)("parts")(entry.Key) = job
+                            End If
+                            eqmt_data(kvp.Key)("parts")(entry.Key)("count") = entry.Value
+                        Next
+                    End If
                 End If
             End If
         Next

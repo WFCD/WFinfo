@@ -1,4 +1,4 @@
 TODO:
-	Create equipment window
 	Do a full code review
-	
+	Allow Relic/Equipment to be resized
+	Default hidden.json to be all vaulted relics

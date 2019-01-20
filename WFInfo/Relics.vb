@@ -62,6 +62,14 @@ Public Class Relics
         Me.Hide()
     End Sub
 
+    Private Sub Label2_MouseEnter(sender As Object, e As EventArgs) Handles Label2.MouseEnter
+        Label2.BackColor = System.Drawing.Color.FromArgb(50, 50, 50)
+    End Sub
+
+    Private Sub Label2_MouseLeave(sender As Object, e As EventArgs) Handles Label2.MouseLeave
+        Label2.BackColor = Color.Transparent
+    End Sub
+
     Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterCollapse, RelicTree2.AfterCollapse
         Dim temp As String = "|" + e.Node.FullPath.Replace("\", " ") + "|"
         If e.Node.Text <> "Hidden" Then
@@ -70,17 +78,14 @@ Public Class Relics
         If My.Settings.ExpandedRelics.Contains(temp) Then
             My.Settings.ExpandedRelics = My.Settings.ExpandedRelics.Replace(temp, "")
         End If
-        Console.WriteLine(My.Settings.ExpandedRelics)
         temp = temp.Replace("|", "")
         Dim era_name As String() = temp.Split(" ")
         If era_name.Count = 2 AndAlso era_name(1).Length = 2 Then
-            Console.WriteLine("LOOKING FOR: " + era_name(0) + "---" + era_name(1))
             Dim other As TreeView = RelicTree
             If sender.Equals(RelicTree) Then
                 other = RelicTree2
             End If
             For Each node As TreeNode In other.Nodes.Find(era_name(1), True)
-                Console.WriteLine(node.FullPath + "---" + node.Text)
                 If node.IsExpanded AndAlso node.FullPath.Contains(era_name(0)) Then
                     node.Collapse()
                 End If
@@ -96,17 +101,14 @@ Public Class Relics
         If Not My.Settings.ExpandedRelics.Contains(temp) Then
             My.Settings.ExpandedRelics += temp
         End If
-        Console.WriteLine(My.Settings.ExpandedRelics)
         temp = temp.Replace("|", "")
         Dim era_name As String() = temp.Split(" ")
         If era_name.Count = 2 AndAlso era_name(1).Length = 2 Then
-            Console.WriteLine("LOOKING FOR: " + era_name(0) + "---" + era_name(1))
             Dim other As TreeView = RelicTree
             If sender.Equals(RelicTree) Then
                 other = RelicTree2
             End If
             For Each node As TreeNode In other.Nodes.Find(era_name(1), True)
-                Console.WriteLine(node.FullPath + "---" + node.Text)
                 If Not node.IsExpanded AndAlso node.FullPath.Contains(era_name(0)) Then
                     node.Expand()
                 End If
@@ -115,6 +117,7 @@ Public Class Relics
     End Sub
 
     Private Sub Relics_Opening(sender As Object, e As EventArgs) Handles Me.Shown
+
         Me.Location = My.Settings.RelicWinLoc
         If My.Settings.TreeOne Then
             RelicTree2.Visible = False
@@ -182,11 +185,11 @@ Public Class Relics
                         rtot_str = "+" + rtot_str
                     End If
                     e.Graphics.FillRectangle(bgBrush, 220, e.Bounds.Top, 180, e.Bounds.Height)
-                    e.Graphics.DrawString("RAD:", RelicTree.Font, stealthBrush, 255, e.Bounds.Top, sf)
-                    e.Graphics.DrawString(rtot_str, RelicTree.Font, stealthBrush, 300, e.Bounds.Top, sf)
+                    e.Graphics.DrawString("RAD:", RelicTree.Font, subdueBrush, 255, e.Bounds.Top, sf)
+                    e.Graphics.DrawString(rtot_str, RelicTree.Font, subdueBrush, 300, e.Bounds.Top, sf)
                     e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
-                    e.Graphics.DrawString("INT:", RelicTree.Font, stealthBrush, 350, e.Bounds.Top, sf)
-                    e.Graphics.DrawString(itot.ToString("N1"), RelicTree.Font, stealthBrush, 385, e.Bounds.Top, sf)
+                    e.Graphics.DrawString("INT:", RelicTree.Font, subdueBrush, 350, e.Bounds.Top, sf)
+                    e.Graphics.DrawString(itot.ToString("N1"), RelicTree.Font, subdueBrush, 385, e.Bounds.Top, sf)
                     e.Graphics.DrawImage(My.Resources.plat, 385, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
                 End If
             End If
@@ -211,6 +214,16 @@ Public Class Relics
                 e.Graphics.DrawImage(My.Resources.ducat_w, 370, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
             End If
         End If
+        Dim left As Integer = 20
+        If e.Node.Parent Is Nothing Then
+            left = 40
+        ElseIf e.Node.Parent.Parent Is Nothing Then
+            left = 60
+        Else
+            left = 80
+        End If
+        e.Graphics.DrawLine(New Pen(Color.FromArgb(40, 40, 40)), left, e.Bounds.Top, 450, e.Bounds.Top)
+        e.Graphics.DrawLine(New Pen(Color.FromArgb(40, 40, 40)), left, e.Bounds.Bottom, 450, e.Bounds.Bottom)
     End Sub
 
     Private Sub HideMenu_Click(sender As Object, e As ToolStripItemClickedEventArgs) Handles HideMenu.ItemClicked

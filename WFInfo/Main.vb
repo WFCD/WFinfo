@@ -36,13 +36,13 @@ Public Class Main
             pbHome.Location = New Point(0, 4)
             pbRelic.Parent = pbSideBar
             pbRelic.Location = New Point(0, 30)
-            pbDonate.Parent = pbSideBar
-            pbDonate.Location = New Point(0, 55)
+            pbEqmt.Parent = pbSideBar
+            pbEqmt.Location = New Point(0, 55)
             pbSettings.Parent = pbSideBar
             pbSettings.Location = New Point(0, 80)
 
             lbVersion.Text = "v" + My.Settings.Version 'The current version is stored in project properties
-            Me.Location = New Point(My.Settings.StartX, My.Settings.StartY)
+            Me.Location = My.Settings.MainLoc
             Fullscreen = My.Settings.Fullscreen
             Me.MaximizeBox = False
             lbStatus.ForeColor = Color.Yellow
@@ -93,9 +93,6 @@ Public Class Main
         Catch ex As Exception
             addLog(ex.ToString)
         End Try
-        If Not My.Settings.TargetAreaSet Then
-            MsgBox("This is a beta version of WFInfo." & vbNewLine & "You must first set the target area." & vbNewLine & vbNewLine & "1.) Get to the Fissure Reward Screen with 4 players." & vbNewLine & "2.) Press " & My.Settings.HKey3Text & " to show the selection cursor." & vbNewLine & "3.) Click the upper left corner of the first reward." & vbNewLine & "4.) Click the lower right corner of the last reward.", MsgBoxStyle.SystemModal)
-        End If
     End Sub
 
     Public Function getCookie()
@@ -208,11 +205,15 @@ Public Class Main
     Private Sub btnDebug2_Click(sender As Object, e As EventArgs) Handles btnDebug2.Click
     End Sub
 
-    Private Sub BGWorker_DoWork(sender As Object, e As DoWorkEventArgs) Handles BGWorker.DoWork
+    Private Sub DoWork()
         Try
             lbStatus.ForeColor = Color.Yellow
             If db Is Nothing Then
                 db = New Data()
+                OCR.GetCoors()
+                For i As Integer = 0 To 3
+                    db.panels(i) = New Overlay()
+                Next
             Else
                 OCR.ParseScreen()
             End If
@@ -225,14 +226,8 @@ Public Class Main
 
     Private Sub KeyWatch_Tick(sender As Object, e As EventArgs) Handles tPB.Tick
         Try
-            Dim Refresh As Integer = GetAsyncKeyState(HKey3)
-            If GetAsyncKeyState(HKey3) And &H8000 Then
-                If Not TargetSelector.Visible = True Then
-                    TargetSelector.Show()
-                End If
-            End If
-
             If Not key1Tog Then
+
                 '_________________________________________________________________________
                 'Checks for new steam screenshots (using fullscreen mode) and starts main function if found
                 '_________________________________________________________________________
@@ -240,9 +235,7 @@ Public Class Main
                     If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
                         If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
                             My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
-                            If Not BGWorker.IsBusy Then
-                                BGWorker.RunWorkerAsync()
-                            End If
+                            DoWork()
                         End If
                     End If
                 End If
@@ -252,9 +245,7 @@ Public Class Main
                 'watches for main hotkey and sctog starts the min function if pressed
                 '_________________________________________________________________________
                 If GetAsyncKeyState(HKey1) And &H8000 Then
-                    If Not BGWorker.IsBusy Then
-                        BGWorker.RunWorkerAsync()
-                    End If
+                    DoWork()
                 End If
             End If
         Catch ex As Exception
@@ -296,8 +287,7 @@ Public Class Main
 
     Private Sub Main_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
 
-        My.Settings.StartX = Me.Location.X
-        My.Settings.StartY = Me.Location.Y
+        My.Settings.MainLoc = Me.Location
         My.Settings.Save()
     End Sub
 
@@ -307,7 +297,7 @@ Public Class Main
         'Starts the background timers
         '_________________________________________________________________________
         Me.Refresh()
-        BGWorker.RunWorkerAsync()
+        Task.Factory.StartNew(Sub() DoWork())
     End Sub
 
     Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
@@ -335,7 +325,7 @@ Public Class Main
     End Sub
 
     Private Sub pbRelic_Click(sender As Object, e As EventArgs) Handles pbRelic.Click
-        If db.relic_data IsNot Nothing Then
+        If db IsNot Nothing AndAlso db.relic_data IsNot Nothing Then
             Relics.Load_Relic_Tree()
             Relics.Show()
         End If
@@ -351,6 +341,21 @@ Public Class Main
 
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
         Me.Close()
+    End Sub
+
+    Private Sub pbEqmt_MouseEnter(sender As Object, e As EventArgs) Handles pbEqmt.MouseEnter
+        pbEqmt.Image = My.Resources.foundry_h
+    End Sub
+
+    Private Sub pbEqmt_MouseLeave(sender As Object, e As EventArgs) Handles pbEqmt.MouseLeave
+        pbEqmt.Image = My.Resources.foundry
+    End Sub
+
+    Private Sub pbEqmt_Click(sender As Object, e As EventArgs) Handles pbEqmt.Click
+        If db IsNot Nothing AndAlso db.eqmt_data IsNot Nothing Then
+            Equipment.Load_Eqmt_Tree()
+            Equipment.Show()
+        End If
     End Sub
 
     Private Sub pTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown
@@ -440,22 +445,20 @@ Module Glob
     Public db As Data
     Public qItems As New List(Of String)()
     Public HKey1 As Integer = My.Settings.HKey1
-    Public HKey3 As Integer = My.Settings.HKey3
     Public HideShots As Boolean = False     ' Bool to hide screenshot notifications in fullscreen mode
     'Public Equipment As String               ' List of leveled equipment
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
-    Public key2Tog As Boolean = False
-    Public key3Tog As Boolean = False
     Public Animate As Boolean = My.Settings.Animate
     Public NewStyle As Boolean = My.Settings.NewStyle
     Public Debug As Boolean = My.Settings.Debug
-    Public DisplayNames As Boolean = My.Settings.DisplayNames
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Public textColor As Color = Color.FromArgb(177, 208, 217)
     Public textBrush As Brush = New SolidBrush(textColor)
-    Public stealthColor As Color = Color.FromArgb(118, 139, 145)
+    Public stealthColor As Color = Color.FromArgb(80, 100, 100)
     Public stealthBrush As Brush = New SolidBrush(stealthColor)
+    Public subdueColor As Color = Color.FromArgb(120, 140, 140)
+    Public subdueBrush As Brush = New SolidBrush(subdueColor)
     Public commonColor As Color = Color.FromArgb(205, 127, 50)
     Public commonBrush As Brush = New SolidBrush(commonColor)
     Public uncommonColor As Color = Color.FromArgb(192, 192, 192)

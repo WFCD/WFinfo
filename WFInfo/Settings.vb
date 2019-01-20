@@ -71,21 +71,20 @@ Public Class Settings
         UpdateColors(Me)
         Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         btnHkey1.Text = My.Settings.HKey1Text
-        btnHkey3.Text = My.Settings.HKey3Text
-        'cbPassiveChecks.Checked = PassiveChecks
         cbAnimations.Checked = Animate
         cbFullscreen.Checked = Fullscreen
         cbNewStyle.Checked = NewStyle
         cbDebug.Checked = Debug
-        'cbPlatinum.Checked = DisplayPlatinum
-        cbDisplayNames.Checked = DisplayNames
+        ScaleBar.Value = My.Settings.Scaling
+        Label9.Text = My.Settings.Scaling.ToString() + "%"
+        ScaleOption.SelectedIndex = My.Settings.ScaleType
     End Sub
 
-    Private Sub Settings_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress
+    Private Sub Settings_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress, btnHkey1.KeyPress
         '_________________________________________________________________________
         'Stores the next keypress char code to chTemp when ready to set a hotkey
         '_________________________________________________________________________
-        If key1Tog Or key2Tog Or key3Tog Then
+        If key1Tog Then
             chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
         End If
     End Sub
@@ -135,22 +134,6 @@ Public Class Settings
                         btnHkey1.Text = chTemp
                 End Select
             End If
-        End If
-    End Sub
-
-    '_________________________________________________________________________
-    'You get the idea
-    '_________________________________________________________________________
-
-    Private Sub btnHkey3_KeyPress(sender As Object, e As KeyPressEventArgs) Handles btnHkey3.KeyPress
-        If key1Tog Or key2Tog Or key3Tog Then
-            chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
-        End If
-    End Sub
-
-    Private Sub btnHkey1_KeyPress(sender As Object, e As KeyPressEventArgs) Handles btnHkey1.KeyPress
-        If key1Tog Or key2Tog Or key3Tog Then
-            chTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper()
         End If
     End Sub
 
@@ -229,7 +212,6 @@ Public Class Settings
     End Sub
 
     Private Sub cbAnimations_Click(sender As Object, e As EventArgs) Handles cbAnimations.Click
-        My.Settings.Animate = cbAnimations.Checked
         Animate = cbAnimations.Checked
         saveSettings()
     End Sub
@@ -288,82 +270,37 @@ Public Class Settings
         Picker.Show()
     End Sub
 
-    Private Sub btnHkey3_Click(sender As Object, e As EventArgs) Handles btnHkey3.Click
-        '_________________________________________________________________________
-        'Toggle for setting hotkey 3
-        '_________________________________________________________________________
-        If Not key3Tog Then
-            btnHkey3.Text = "..."
-            key3Tog = True
-        Else
-            btnHkey3.Text = My.Settings.HKey3Text
-        End If
-    End Sub
-
-    Private Sub btnHkey3_KeyUp(sender As Object, e As KeyEventArgs) Handles btnHkey3.KeyUp
-        '_________________________________________________________________________
-        'Sets the key for hotkey 3
-        '_________________________________________________________________________
-        If key3Tog Then
-            key3Tog = False
-            HKey3 = e.KeyCode
-            e.SuppressKeyPress = True
-            If e.KeyCode = Keys.PrintScreen Then
-                btnHkey3.Text = "Print Screen"
-            Else
-                Select Case e.KeyCode
-
-                    Case 112 To 123
-                        btnHkey3.Text = "F" & e.KeyCode - 111
-                    Case 32
-                        btnHkey3.Text = "SPACE"
-                    Case 8
-                        btnHkey3.Text = "BACKSPACE"
-                    Case 16
-                        btnHkey3.Text = "SHIFT"
-                    Case 17
-                        btnHkey3.Text = "CTRL"
-                    Case 18
-                        btnHkey3.Text = "ALT"
-                    Case 9
-                        btnHkey3.Text = "TAB"
-                    Case 20
-                        btnHkey3.Text = "CAPSLOCK"
-                    Case 45
-                        btnHkey3.Text = "INS"
-                    Case 46
-                        btnHkey3.Text = "DELETE"
-                    Case 36
-                        btnHkey3.Text = "HOME"
-                    Case 35
-                        btnHkey3.Text = "END"
-                    Case 33
-                        btnHkey3.Text = "PG UP"
-                    Case 34
-                        btnHkey3.Text = "PG DOWN"
-                    Case Else
-                        btnHkey3.Text = chTemp
-                End Select
-            End If
-        End If
-    End Sub
-
-
-    Private Sub cbDisplayNames_Click(sender As Object, e As EventArgs) Handles cbDisplayNames.Click
-        My.Settings.DisplayNames = cbDisplayNames.Checked
-        DisplayNames = cbDisplayNames.Checked
-        saveSettings()
-    End Sub
     Private Sub saveSettings()
         ''Saves settings
         My.Settings.Animate = cbAnimations.Checked
         My.Settings.NewStyle = cbNewStyle.Checked
-        My.Settings.DisplayNames = cbDisplayNames.Checked
         My.Settings.HKey1 = HKey1
-        My.Settings.HKey3 = HKey3
         My.Settings.HKey1Text = btnHkey1.Text
-        My.Settings.HKey3Text = btnHkey3.Text
         My.Settings.Debug = cbDebug.Checked
+        My.Settings.Scaling = ScaleBar.Value
+        My.Settings.ScaleType = ScaleOption.SelectedIndex
         My.Settings.Save()
+    End Sub
+
+    Private Sub ScaleBar_Scroll(sender As Object, e As EventArgs) Handles ScaleBar.Scroll
+        Label9.Text = ScaleBar.Value.ToString() + "%"
+        saveSettings()
+    End Sub
+
+    Private Sub ScaleBar_MouseUp(sender As Object, e As EventArgs) Handles ScaleBar.MouseUp
+        UpdateCoors()
+    End Sub
+
+    Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ScaleOption.SelectedIndexChanged
+        ScaleBar.Enabled = ScaleOption.SelectedIndex = 2
+        If ScaleOption.SelectedIndex = 0 Then
+            ScaleBar.Value = 100
+        ElseIf ScaleOption.SelectedIndex = 1 Then
+            ScaleBar.Value = 95
+        End If
+        ScaleBar_Scroll(sender, e)
+        UpdateCoors()
+        'To remove the blue highlight... because I don't like the look of it
+        ScaleBar.Select()
     End Sub
 End Class

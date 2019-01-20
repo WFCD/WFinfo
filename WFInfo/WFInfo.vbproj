@@ -76,6 +76,48 @@
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DocumentationFile>WFInfo.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DocumentationFile>WFInfo.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DocumentationFile>WFInfo.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DocumentationFile>WFInfo.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.dll</HintPath>
@@ -162,16 +204,16 @@
     <Compile Include="Overlay.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Equipment.Designer.vb">
+      <DependentUpon>Equipment.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Equipment.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Relics.Designer.vb">
       <DependentUpon>Relics.vb</DependentUpon>
     </Compile>
     <Compile Include="Relics.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="TargetSelector.Designer.vb">
-      <DependentUpon>TargetSelector.vb</DependentUpon>
-    </Compile>
-    <Compile Include="TargetSelector.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Tray.designer.vb">
@@ -206,11 +248,11 @@
     <EmbeddedResource Include="Overlay.resx">
       <DependentUpon>Overlay.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Equipment.resx">
+      <DependentUpon>Equipment.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Relics.resx">
       <DependentUpon>Relics.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TargetSelector.resx">
-      <DependentUpon>TargetSelector.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tray.resx">
       <DependentUpon>Tray.vb</DependentUpon>
@@ -316,6 +358,10 @@
     <None Include="Resources\ducat.gif" />
     <None Include="Resources\plat.gif" />
     <None Include="Resources\ducat_w.gif" />
+    <None Include="Resources\gear.png" />
+    <None Include="Resources\gear_h.png" />
+    <None Include="Resources\foundry.png" />
+    <None Include="Resources\foundry_h.png" />
     <Content Include="x64\SQLite.Interop.dll" />
     <Content Include="x86\SQLite.Interop.dll" />
     <None Include="Resources\panelBG.bmp" />
