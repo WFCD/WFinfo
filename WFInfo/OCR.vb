@@ -1,10 +1,9 @@
-﻿Imports System.Runtime.InteropServices
-Imports System.Text.RegularExpressions
+﻿Imports System.Text.RegularExpressions
 Imports Tesseract
 
 Module OCR
     Private engine As New TesseractEngine("", "eng") With {
-        .DefaultPageSegMode = Tesseract.PageSegMode.SingleLine
+        .DefaultPageSegMode = PageSegMode.SingleLine
     }
 
     Private window As Rect = Nothing
@@ -27,7 +26,7 @@ Module OCR
             Return UpdateCoors()
         End If
         Dim wf As Process = Nothing
-        For Each p As Process In System.Diagnostics.Process.GetProcesses
+        For Each p As Process In Process.GetProcesses
             If p.ProcessName.Contains("Warframe") Then
                 wf = p
                 Exit For
@@ -165,7 +164,7 @@ Module OCR
             End Using
             ret = CropImage
         Else
-            ret = New System.Drawing.Bitmap(relic_area.Width, relic_area.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb)
+            ret = New System.Drawing.Bitmap(relic_area.Width, relic_area.Height, Imaging.PixelFormat.Format32bppRgb)
             Dim graph As Graphics = Graphics.FromImage(ret)
             graph.CopyFromScreen(relic_area.X1, relic_area.Y1, 0, 0, New Size(relic_area.Width, relic_area.Height), CopyPixelOperation.SourceCopy)
         End If

@@ -1,4 +1,11 @@
 TODO:
 	Do a full code review
 	Allow Relic/Equipment to be resized
-	Default hidden.json to be all vaulted relics
+	Refactor or Confirm Functionality of Fullscreen mode
+	Remove or find use for Tray Popup
+		Potentially push functions into tray icon
+		And Main window if not minimized
+			Allows center of window to be used
+	Get Name Plaques working again
+	Move all colors into the Picker/Settings
+	

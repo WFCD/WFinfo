@@ -1,5 +1,5 @@
-﻿Imports System.Runtime.InteropServices
-Imports System.Text
+﻿Imports System.Text
+
 Public Class Tray
 
     Private InitialStyle As Integer
@@ -10,7 +10,7 @@ Public Class Tray
     Dim goalY As Integer = screenHeight * 0.63
     Dim GetWarframe As Boolean = False
     Dim WFhWnd As String = ""
-    Protected Overrides ReadOnly Property CreateParams As System.Windows.Forms.CreateParams
+    Protected Overrides ReadOnly Property CreateParams As CreateParams
         Get
             Dim cp As CreateParams = MyBase.CreateParams
             cp.ExStyle = cp.ExStyle Or &H80
@@ -21,7 +21,7 @@ Public Class Tray
     '_________________________________________________________________________
     'Visual and location stuff, also allows it to be clicked through
     '_________________________________________________________________________
-    Private Sub Form_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub Form_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
         UpdateColors(Me)
         pbBG.Image = Tint(pbBG.Image, My.Settings.cTray, 0.125)
         Me.Location = New Point(screenWidth * 3, screenHeight * 3)

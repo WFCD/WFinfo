@@ -1,15 +1,6 @@
 ﻿Imports System.IO
-Imports System.Net
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
-Imports System.Management
-Imports System.Security.Cryptography
-Imports System.ComponentModel
-Imports System.Text.RegularExpressions
-Imports System.Drawing.Imaging
-Imports System.Data.SQLite
-Imports Tesseract
-
 
 Public Class Relics
     Private drag As Boolean = False
@@ -21,6 +12,7 @@ Public Class Relics
     Public Tree2Sorter As New NodeSorter(1)
     Private hidden_nodes As JObject                                      ' Contains list of nodes to hide                {"Lith": ["A1","A2",...], "Meso": [...], "Neo": [...], "Axi": [...]}
     Private hidden_file_path As String = Path.Combine(appData, "WFInfo\hidden.json")
+    Public eras As New List(Of String) From {"Lith", "Meso", "Neo", "Axi"}
 
     Private Sub pTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown
         drag = True
@@ -63,7 +55,7 @@ Public Class Relics
     End Sub
 
     Private Sub Label2_MouseEnter(sender As Object, e As EventArgs) Handles Label2.MouseEnter
-        Label2.BackColor = System.Drawing.Color.FromArgb(50, 50, 50)
+        Label2.BackColor = Color.FromArgb(50, 50, 50)
     End Sub
 
     Private Sub Label2_MouseLeave(sender As Object, e As EventArgs) Handles Label2.MouseLeave
@@ -114,6 +106,10 @@ Public Class Relics
                 End If
             Next
         End If
+    End Sub
+
+    Private Sub Relics_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        UpdateColors(Me)
     End Sub
 
     Private Sub Relics_Opening(sender As Object, e As EventArgs) Handles Me.Shown
@@ -248,7 +244,7 @@ Public Class Relics
             RelicTree2.Nodes.Find("Hidden", False)(0).Nodes.Add(Relic2ToHide)
             arr.Add(split(1))
         End If
-        File.WriteAllText(hidden_file_path, JsonConvert.SerializeObject(hidden_nodes, Newtonsoft.Json.Formatting.Indented))
+        File.WriteAllText(hidden_file_path, JsonConvert.SerializeObject(hidden_nodes, Formatting.Indented))
     End Sub
 
     Private Sub RelicTree_Click(sender As Object, e As TreeNodeMouseClickEventArgs) Handles RelicTree.NodeMouseClick, RelicTree2.NodeMouseClick
@@ -398,31 +394,37 @@ Public Class Relics
     End Sub
 
     Private Sub Load_Hidden_Nodes()
-        If File.Exists(hidden_file_path) Then
+        If Not File.Exists(hidden_file_path) Then
+            hidden_nodes = New JObject()
+            For Each era As String In eras
+                Dim jar As New JArray()
+                For Each kvp As KeyValuePair(Of String, JToken) In db.relic_data(era).ToObject(Of JObject)
+                    If kvp.Value.Item("vaulted").ToObject(Of Boolean) Then
+                        jar.Add(kvp.Key)
+                    End If
+                Next
+                hidden_nodes(era) = jar
+            Next
+            File.WriteAllText(hidden_file_path, JsonConvert.SerializeObject(hidden_nodes, Formatting.Indented))
+        Else
             hidden_nodes = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(hidden_file_path))
+        End If
 
-            For Each node As TreeNode In RelicTree.Nodes
-                For Each hide As JValue In hidden_nodes(node.Text)
-                    Dim move As TreeNode = node.Nodes.Find(hide.Value, False)(0)
-                    node.Nodes.Remove(move)
-                    node.Nodes.Find("Hidden", False)(0).Nodes.Add(move)
-                    For Each found As TreeNode In RelicTree2.Nodes.Find(hide.Value, False)
-                        If found.Text.Equals(node.Text + " " + hide.Value) Then
-                            RelicTree2.Nodes.Remove(found)
-                            RelicTree2.Nodes.Find("Hidden", False)(0).Nodes.Add(found)
-                        End If
-                    Next
 
+
+        For Each node As TreeNode In RelicTree.Nodes
+            For Each hide As JValue In hidden_nodes(node.Text)
+                Dim move As TreeNode = node.Nodes.Find(hide.Value, False)(0)
+                node.Nodes.Remove(move)
+                node.Nodes.Find("Hidden", False)(0).Nodes.Add(move)
+                For Each found As TreeNode In RelicTree2.Nodes.Find(hide.Value, False)
+                    If found.Text.Equals(node.Text + " " + hide.Value) Then
+                        RelicTree2.Nodes.Remove(found)
+                        RelicTree2.Nodes.Find("Hidden", False)(0).Nodes.Add(found)
+                    End If
                 Next
             Next
-        Else
-            hidden_nodes = New JObject()
-            hidden_nodes("Lith") = New JArray()
-            hidden_nodes("Meso") = New JArray()
-            hidden_nodes("Neo") = New JArray()
-            hidden_nodes("Axi") = New JArray()
-            File.WriteAllText(hidden_file_path, JsonConvert.SerializeObject(hidden_nodes, Newtonsoft.Json.Formatting.Indented))
-        End If
+        Next
     End Sub
 End Class
 
@@ -430,7 +432,6 @@ Public Class NodeSorter
     Implements IComparer
     Dim relic As Integer = 0
     Public type As Integer = 0 ' 0: Name, 1: Intact Plat, 2: Rad Bonus
-    Dim eras As String() = {"Lith", "Meso", "Neo", "Axi"}
 
     Public Sub New(x As Integer)
         Me.relic = x
@@ -492,7 +493,7 @@ Public Class NodeSorter
             ElseIf Me.type = 0 AndAlso splitx(0) <> splity(0) Then
                 ' If the Eras are different 
                 '    AND the sort type is name
-                Return Array.IndexOf(eras, splitx(0)) - Array.IndexOf(eras, splity(0))
+                Return Relics.eras.IndexOf(splitx(0)) - Relics.eras.IndexOf(splity(0))
             End If
             strx = splitx(1)
             stry = splity(1)

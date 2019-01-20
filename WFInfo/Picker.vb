@@ -1,4 +1,5 @@
 ﻿Imports System.Drawing.Drawing2D
+
 Public Class Picker
     Dim PrevColor As Color
     Dim SliderPos As Integer

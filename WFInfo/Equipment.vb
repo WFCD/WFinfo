@@ -1,15 +1,4 @@
-﻿Imports System.IO
-Imports System.Net
-Imports Newtonsoft.Json
-Imports Newtonsoft.Json.Linq
-Imports System.Management
-Imports System.Security.Cryptography
-Imports System.ComponentModel
-Imports System.Text.RegularExpressions
-Imports System.Drawing.Imaging
-Imports System.Data.SQLite
-Imports Tesseract
-Imports System.Runtime.InteropServices
+﻿Imports Newtonsoft.Json.Linq
 
 Public Class Equipment
     Private drag As Boolean = False
@@ -20,7 +9,7 @@ Public Class Equipment
     Public Tree2Sorter As New EqmtSorter(1)
     Public types As String() = {"Warframe", "Primary", "Secondary", "Melee", "Archwing", "Companion"}
 
-    <DllImport("user32.dll", CharSet:=System.Runtime.InteropServices.CharSet.Auto)>
+    <DllImport("user32.dll", CharSet:=CharSet.Auto)>
     Public Shared Function GetScrollPos(hWnd As IntPtr, nBar As Integer) As Integer
     End Function
 
@@ -69,7 +58,7 @@ Public Class Equipment
     End Sub
 
     Private Sub Label2_MouseEnter(sender As Object, e As EventArgs) Handles Label2.MouseEnter
-        Label2.BackColor = System.Drawing.Color.FromArgb(50, 50, 50)
+        Label2.BackColor = Color.FromArgb(50, 50, 50)
     End Sub
 
     Private Sub Label2_MouseLeave(sender As Object, e As EventArgs) Handles Label2.MouseLeave
@@ -200,6 +189,10 @@ Public Class Equipment
                 node.Expand()
             End If
         Next
+    End Sub
+
+    Private Sub Eqmt_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        UpdateColors(Me)
     End Sub
 
     Private Sub Eqmt_Opening(sender As Object, e As EventArgs) Handles Me.Shown
@@ -334,7 +327,7 @@ Public Class Equipment
         Dim cast As JObject = Nothing
         Dim eqmt As TreeNode = Nothing
         For Each kvp As KeyValuePair(Of String, JToken) In db.eqmt_data
-            If kvp.Key <> "timestamp" Then
+            If Not kvp.Key.Contains("timestamp") Then
                 cast = kvp.Value
                 eqmt = EqmtTree1.Nodes.Find(cast("type"), False)(0).Nodes.Add(kvp.Key)
                 eqmt.Name = kvp.Key

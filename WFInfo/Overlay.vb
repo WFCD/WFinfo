@@ -1,7 +1,4 @@
-﻿Imports System.Runtime.InteropServices
-Imports System.Drawing.Text
-Imports System.Text
-
+﻿
 Public Class Overlay
     Dim loc As Point
 

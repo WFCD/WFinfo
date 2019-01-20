@@ -14,9 +14,6 @@
     <Setting Name="Debug" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Version" Type="System.String" Scope="User">
-      <Value Profile="(Default)">7.0.0</Value>
-    </Setting>
     <Setting Name="Fullscreen" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
@@ -28,9 +25,6 @@
     </Setting>
     <Setting Name="SteamSettings" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="NewStyle" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="cTitleBar" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">15, 15, 15</Value>
@@ -75,7 +69,7 @@
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
     <Setting Name="ExpandedRelics" Type="System.String" Scope="User">
-      <Value Profile="(Default)"></Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="SSCount" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>

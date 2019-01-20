@@ -1,4 +1,6 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿Imports System.Windows.Forms
+
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class Equipment
     Inherits System.Windows.Forms.Form
 
@@ -67,9 +69,9 @@ Partial Class Equipment
         Me.Panel1.Controls.Add(Me.Line2)
         Me.Panel1.Controls.Add(Me.Panel3)
         Me.Panel1.Controls.Add(Me.Panel2)
-        Me.Panel1.Location = New System.Drawing.Point(2, 29)
+        Me.Panel1.Location = New System.Drawing.Point(1, 28)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(456, 375)
+        Me.Panel1.Size = New System.Drawing.Size(456, 371)
         Me.Panel1.TabIndex = 24
         '
         'Line1
@@ -107,7 +109,7 @@ Partial Class Equipment
         Me.Panel3.Controls.Add(Me.Label3)
         Me.Panel3.Location = New System.Drawing.Point(-1, 31)
         Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(456, 344)
+        Me.Panel3.Size = New System.Drawing.Size(456, 340)
         Me.Panel3.TabIndex = 25
         '
         'EqmtTree1
@@ -134,7 +136,7 @@ Partial Class Equipment
         TreeNode6.Name = "companion"
         TreeNode6.Text = "Companion"
         Me.EqmtTree1.Nodes.AddRange(New System.Windows.Forms.TreeNode() {TreeNode1, TreeNode2, TreeNode3, TreeNode4, TreeNode5, TreeNode6})
-        Me.EqmtTree1.Size = New System.Drawing.Size(473, 314)
+        Me.EqmtTree1.Size = New System.Drawing.Size(473, 310)
         Me.EqmtTree1.TabIndex = 27
         '
         'EqmtTree2
@@ -148,7 +150,7 @@ Partial Class Equipment
         Me.EqmtTree2.FullRowSelect = True
         Me.EqmtTree2.Location = New System.Drawing.Point(-1, 29)
         Me.EqmtTree2.Name = "EqmtTree2"
-        Me.EqmtTree2.Size = New System.Drawing.Size(473, 314)
+        Me.EqmtTree2.Size = New System.Drawing.Size(473, 310)
         Me.EqmtTree2.TabIndex = 26
         '
         'Label6
@@ -281,7 +283,7 @@ Partial Class Equipment
         Me.pTitle.Controls.Add(Me.PictureBox3)
         Me.pTitle.Controls.Add(Me.lbTitle)
         Me.pTitle.Controls.Add(Me.btnClose)
-        Me.pTitle.Location = New System.Drawing.Point(2, 2)
+        Me.pTitle.Location = New System.Drawing.Point(1, 1)
         Me.pTitle.Name = "pTitle"
         Me.pTitle.Size = New System.Drawing.Size(456, 27)
         Me.pTitle.TabIndex = 25
@@ -324,7 +326,7 @@ Partial Class Equipment
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(460, 407)
+        Me.ClientSize = New System.Drawing.Size(458, 400)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.DoubleBuffered = True

@@ -5,71 +5,57 @@ Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
 
 Class Data
+
     Public market_items As Dictionary(Of String, String)                 ' warframe.market item listing                  {<id>: "<name>|<url_name>", ...}
-    Private market_items_path As String = Path.Combine(appData, "WFInfo\market_items.json")
+    Private ReadOnly market_items_path As String = Path.Combine(appData, "WFInfo\market_items.json")
     Public market_data As JObject                                        ' contains warframe.market ducatonator listing  {<partName>: {"ducats": <ducat_val>,"plat": <plat_val>}, ...}
-    Private market_data_path As String = Path.Combine(appData, "WFInfo\market_data.json")
+    Private ReadOnly market_data_path As String = Path.Combine(appData, "WFInfo\market_data.json")
 
     Public relic_data As JObject                                        ' Contains relic_data from Warframe PC Drops     {<Era>: {"A1":{"vaulted": true,<rare1/uncommon[12]/common[123]>: <part>}, ...}, "Meso": ..., "Neo": ..., "Axi": ...}
-    Private relic_data_path As String = Path.Combine(appData, "WFInfo\relic_data.json")
+    Private ReadOnly relic_data_path As String = Path.Combine(appData, "WFInfo\relic_data.json")
     Public eqmt_data As JObject                                         ' Contains eqmt_data from Warframe PC Drops      {<EQMT>: {"vaulted": true, "PARTS": {<NAME>:{"relic_name":<name>|"","count":<num>}, ...}},  ...}
-    Private eqmt_data_path As String = Path.Combine(appData, "WFInfo\eqmt_data.json")
+    Private ReadOnly eqmt_data_path As String = Path.Combine(appData, "WFInfo\eqmt_data.json")
     Public name_data As Dictionary(Of String, String)                   ' Contains relic to market name translation      {<relic_name>: <market_name>}
-    Private name_data_path As String = Path.Combine(appData, "WFInfo\name_data.json")
+    Private ReadOnly name_data_path As String = Path.Combine(appData, "WFInfo\name_data.json")
 
-    Private debug_path As String = Path.Combine(appData, "WFInfo\debug.json")
+    Private ReadOnly debug_path As String = Path.Combine(appData, "WFInfo\debug.json")
 
     Public panels(3) As Overlay
 
-    Private webClient As System.Net.WebClient
+    Private webClient As WebClient
 
     Public Sub New()
-        webClient = New System.Net.WebClient
+        If Not My.Computer.FileSystem.DirectoryExists(appData + "\WFInfo") Then
+            Directory.CreateDirectory(appData + "\WFInfo")
+        End If
+
+        webClient = New WebClient
         webClient.Headers.Add("platform", "pc")
         webClient.Headers.Add("language", "en")
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
-        Dim market_save As Boolean = Load_Market_Items() Or Load_Market_Data()
-
-        For Each elem As KeyValuePair(Of String, String) In market_items
-            Dim name As String = elem.Value.Split("|")(0)
-            If Not name.Contains(" Set") AndAlso Not market_data.TryGetValue(name, Nothing) Then
-                Dim split As String() = elem.Value.Split("|")
-                Load_Market_Item(split(0), split(1))
-                market_save = True
-            End If
-        Next
-        If market_save Then
-            Save_Market()
-        End If
-
-        If Load_Drop_Data() Then
-            Load_Eqmt_Rqmts()
-            Save_Eqmt()
-            Save_Relics()
-            Save_Names()
-        End If
+        Update()
     End Sub
 
     Public Sub Save_Market()
-        File.WriteAllText(market_items_path, JsonConvert.SerializeObject(market_items, Newtonsoft.Json.Formatting.Indented))
-        File.WriteAllText(market_data_path, JsonConvert.SerializeObject(market_data, Newtonsoft.Json.Formatting.Indented))
+        File.WriteAllText(market_items_path, JsonConvert.SerializeObject(market_items, Formatting.Indented))
+        File.WriteAllText(market_data_path, JsonConvert.SerializeObject(market_data, Formatting.Indented))
     End Sub
 
     Public Sub Save_Relics()
-        File.WriteAllText(relic_data_path, JsonConvert.SerializeObject(relic_data, Newtonsoft.Json.Formatting.Indented))
+        File.WriteAllText(relic_data_path, JsonConvert.SerializeObject(relic_data, Formatting.Indented))
     End Sub
 
     Public Sub Save_Names()
-        File.WriteAllText(name_data_path, JsonConvert.SerializeObject(name_data, Newtonsoft.Json.Formatting.Indented))
+        File.WriteAllText(name_data_path, JsonConvert.SerializeObject(name_data, Formatting.Indented))
     End Sub
 
     Public Sub Save_Eqmt()
-        File.WriteAllText(eqmt_data_path, JsonConvert.SerializeObject(eqmt_data, Newtonsoft.Json.Formatting.Indented))
+        File.WriteAllText(eqmt_data_path, JsonConvert.SerializeObject(eqmt_data, Formatting.Indented))
     End Sub
 
-    Private Function Load_Market_Items() As Boolean
-        If market_items Is Nothing AndAlso File.Exists(market_items_path) Then
+    Private Function Load_Market_Items(Optional force As Boolean = False) As Boolean
+        If Not force AndAlso market_items Is Nothing AndAlso File.Exists(market_items_path) Then
             market_items = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(market_items_path))
             Return False
         End If
@@ -85,8 +71,8 @@ Class Data
         Return True
     End Function
 
-    Private Function Load_Market_Data() As Boolean
-        If market_data Is Nothing AndAlso File.Exists(market_data_path) Then
+    Private Function Load_Market_Data(Optional force As Boolean = False) As Boolean
+        If Not force AndAlso market_data Is Nothing AndAlso File.Exists(market_data_path) Then
             market_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(market_data_path))
             Dim timestamp As Date = DateTime.Parse(market_data("timestamp"))
             Dim dayAgo As Date = Date.Now.AddDays(-1)
@@ -174,7 +160,7 @@ Class Data
         market_data(item_name)("plat") = stats("avg_price")
     End Sub
 
-    Private Function Load_Drop_Data() As Boolean
+    Private Function Load_Drop_Data(Optional force As Boolean = False) As Boolean
         Dim request As WebRequest = Nothing
         If File.Exists(eqmt_data_path) Then
             eqmt_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(eqmt_data_path))
@@ -182,7 +168,7 @@ Class Data
             eqmt_data = New JObject()
         End If
 
-        If File.Exists(relic_data_path) And File.Exists(eqmt_data_path) Then
+        If Not force AndAlso File.Exists(relic_data_path) AndAlso File.Exists(eqmt_data_path) Then
             request = WebRequest.Create("https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html")
             request.Method = "HEAD"
             ' Move last_mod back one hour, so that it doesn't equal timestamp
@@ -190,6 +176,7 @@ Class Data
 
             relic_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(relic_data_path))
             name_data = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(name_data_path))
+
             If relic_data.TryGetValue("timestamp", Nothing) AndAlso
                 eqmt_data.TryGetValue("timestamp", Nothing) AndAlso
                 eqmt_data("timestamp").ToString() = relic_data("timestamp").ToString() AndAlso
@@ -203,11 +190,11 @@ Class Data
 
         request = WebRequest.Create("https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html")
         Dim response As WebResponse = request.GetResponse()
-        relic_data("timestamp") = DateTime.Parse(response.Headers.Get("Last-Modified"))
-        eqmt_data("timestamp") = DateTime.Parse(response.Headers.Get("Last-Modified"))
+        relic_data("timestamp") = response.Headers.Get("Last-Modified")
+        eqmt_data("timestamp") = response.Headers.Get("Last-Modified")
 
         Dim drop_data As String = Nothing
-        Using reader As New StreamReader(response.GetResponseStream(), System.Text.ASCIIEncoding.ASCII)
+        Using reader As New StreamReader(response.GetResponseStream(), Text.Encoding.ASCII)
             drop_data = reader.ReadToEnd()
         End Using
 
@@ -371,6 +358,10 @@ Class Data
         ' https://warframe.fandom.com/wiki/Special:Export/Module:Weapons/data
 
         Dim data As String = webClient.DownloadString("https://warframe.fandom.com/wiki/Special:Export/Module:Weapons/data")
+
+        Dim start As Integer = data.IndexOf("<timestamp>") + 11
+        Dim last As Integer = data.IndexOf("<", start)
+        eqmt_data("rqmts_timestamp") = DateTime.Parse(data.Substring(start, last - start)).ToString("R")
         data = data.Substring(data.IndexOf("{", data.IndexOf("<text")))
         data = data.Substring(0, data.LastIndexOf("}") + 1)
         data = Regex.Replace(data, "&quot;", """")
@@ -389,9 +380,9 @@ Class Data
 
 
         Dim data_job As JObject = JsonConvert.DeserializeObject(Of JObject)(data)("Weapons")
-        File.WriteAllText(debug_path, JsonConvert.SerializeObject(data_job, Newtonsoft.Json.Formatting.Indented))
+        'File.WriteAllText(debug_path, JsonConvert.SerializeObject(data_job, Formatting.Indented))
         For Each kvp As KeyValuePair(Of String, JToken) In eqmt_data
-            If kvp.Key <> "timestamp" Then
+            If Not kvp.Key.Contains("timestamp") Then
                 If data_job.TryGetValue(kvp.Key, Nothing) Then
                     eqmt_data(kvp.Key)("type") = data_job(kvp.Key)("Type")
                     Dim temp As New Dictionary(Of String, Integer)()
@@ -428,6 +419,57 @@ Class Data
         Next
         Return True
     End Function
+
+    Public Sub Update()
+        Dim market_save As Boolean = Load_Market_Items() Or Load_Market_Data()
+
+        For Each elem As KeyValuePair(Of String, String) In market_items
+            Dim name As String = elem.Value.Split("|")(0)
+            If Not name.Contains(" Set") AndAlso Not market_data.TryGetValue(name, Nothing) Then
+                Dim split As String() = elem.Value.Split("|")
+                Load_Market_Item(split(0), split(1))
+                market_save = True
+            End If
+        Next
+        If market_save Then
+            Save_Market()
+        End If
+
+        If Load_Drop_Data() Then
+            Load_Eqmt_Rqmts()
+            Save_Eqmt()
+            Save_Relics()
+            Save_Names()
+        End If
+    End Sub
+
+    Public Sub ForceMarketUpdate()
+        Load_Market_Items(True)
+        Load_Market_Data(True)
+
+        For Each elem As KeyValuePair(Of String, String) In market_items
+            Dim name As String = elem.Value.Split("|")(0)
+            If Not name.Contains(" Set") AndAlso Not market_data.TryGetValue(name, Nothing) Then
+                Dim split As String() = elem.Value.Split("|")
+                Load_Market_Item(split(0), split(1))
+            End If
+        Next
+        Save_Market()
+    End Sub
+
+    Public Sub ForceEqmtUpdate()
+        Load_Drop_Data(True)
+        Load_Eqmt_Rqmts()
+        Save_Eqmt()
+        Save_Relics()
+        Save_Names()
+
+    End Sub
+
+    Public Sub ForceWikiUpdate()
+        Load_Eqmt_Rqmts()
+        Save_Eqmt()
+    End Sub
 
     Public Function GetPlat(guess As Object) As Integer
         Dim partUrl = guess.replace("*", "")

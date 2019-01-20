@@ -1,6 +1,5 @@
-﻿Imports System.Runtime.InteropServices
-Imports System.Drawing.Text
-Imports System.Text
+﻿Imports System.Text
+
 Public Class NamePlaque
     Private InitialStyle As Integer
     Dim PercentVisible As Decimal
@@ -53,7 +52,7 @@ Public Class NamePlaque
 
     Private Declare Function GetForegroundWindow Lib "user32" () As Long
 
-    <DllImport("user32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+    <DllImport("user32.dll", CharSet:=CharSet.Unicode, SetLastError:=True)>
     Private Shared Function GetWindowText(hWnd As IntPtr, text As StringBuilder, count As Integer) As Integer
     End Function
 
@@ -72,7 +71,7 @@ Public Class NamePlaque
     Public Shared Function SetLayeredWindowAttributes(
         ByVal hWnd As IntPtr,
         ByVal crKey As Integer,
-        ByVal alpha As Byte,
+        ByVal alpha As Integer,
         ByVal dwFlags As LWA
             ) As Boolean
     End Function

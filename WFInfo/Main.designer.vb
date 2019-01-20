@@ -1,4 +1,6 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿Imports System.Windows.Forms
+
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class Main
     Inherits System.Windows.Forms.Form
 
@@ -25,13 +27,8 @@ Partial Class Main
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Main))
         Me.tPB = New System.Windows.Forms.Timer(Me.components)
-        Me.lbChecks = New System.Windows.Forms.Label()
         Me.lbStatus = New System.Windows.Forms.Label()
         Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.btnDebug2 = New System.Windows.Forms.Button()
-        Me.btnDebug1 = New System.Windows.Forms.Button()
-        Me.lbPPM = New System.Windows.Forms.Label()
-        Me.pbDebug = New System.Windows.Forms.PictureBox()
         Me.lbVersion = New System.Windows.Forms.Label()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.btnClose = New System.Windows.Forms.Button()
@@ -40,12 +37,11 @@ Partial Class Main
         Me.Label1 = New System.Windows.Forms.Label()
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
-        Me.tMessages = New System.Windows.Forms.Timer(Me.components)
-        Me.tDebug = New System.Windows.Forms.Timer(Me.components)
         Me.trayIcon = New System.Windows.Forms.NotifyIcon(Me.components)
         Me.trayMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.trayShow = New System.Windows.Forms.ToolStripMenuItem()
         Me.trayRelics = New System.Windows.Forms.ToolStripMenuItem()
+        Me.trayEquipment = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.trayExit = New System.Windows.Forms.ToolStripMenuItem()
         Me.pbHome = New System.Windows.Forms.PictureBox()
@@ -53,8 +49,13 @@ Partial Class Main
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.pbRelic = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
+        Me.lbMarket = New System.Windows.Forms.Label()
+        Me.lbMarketDate = New System.Windows.Forms.Label()
+        Me.lbEqmtDate = New System.Windows.Forms.Label()
+        Me.lbEqmt = New System.Windows.Forms.Label()
+        Me.lbWiki = New System.Windows.Forms.Label()
+        Me.lbWikiDate = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
-        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.trayMenu.SuspendLayout()
@@ -69,18 +70,6 @@ Partial Class Main
         '
         Me.tPB.Enabled = True
         Me.tPB.Interval = 1
-        '
-        'lbChecks
-        '
-        Me.lbChecks.AutoSize = True
-        Me.lbChecks.BackColor = System.Drawing.Color.Transparent
-        Me.lbChecks.Font = New System.Drawing.Font("Calibri", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbChecks.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbChecks.Location = New System.Drawing.Point(16, 21)
-        Me.lbChecks.Name = "lbChecks"
-        Me.lbChecks.Size = New System.Drawing.Size(238, 23)
-        Me.lbChecks.TabIndex = 4
-        Me.lbChecks.Text = "Checks this Session:               0"
         '
         'lbStatus
         '
@@ -98,58 +87,17 @@ Partial Class Main
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel1.Controls.Add(Me.btnDebug2)
-        Me.Panel1.Controls.Add(Me.btnDebug1)
-        Me.Panel1.Controls.Add(Me.lbPPM)
-        Me.Panel1.Controls.Add(Me.pbDebug)
-        Me.Panel1.Controls.Add(Me.lbChecks)
+        Me.Panel1.Controls.Add(Me.lbWiki)
+        Me.Panel1.Controls.Add(Me.lbWikiDate)
+        Me.Panel1.Controls.Add(Me.lbEqmt)
+        Me.Panel1.Controls.Add(Me.lbEqmtDate)
+        Me.Panel1.Controls.Add(Me.lbMarketDate)
+        Me.Panel1.Controls.Add(Me.lbMarket)
         Me.Panel1.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Panel1.Location = New System.Drawing.Point(0, 27)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(334, 107)
         Me.Panel1.TabIndex = 19
-        '
-        'btnDebug2
-        '
-        Me.btnDebug2.Location = New System.Drawing.Point(270, 73)
-        Me.btnDebug2.Name = "btnDebug2"
-        Me.btnDebug2.Size = New System.Drawing.Size(28, 21)
-        Me.btnDebug2.TabIndex = 10
-        Me.btnDebug2.Text = "D2"
-        Me.btnDebug2.UseVisualStyleBackColor = True
-        Me.btnDebug2.Visible = False
-        '
-        'btnDebug1
-        '
-        Me.btnDebug1.Location = New System.Drawing.Point(232, 73)
-        Me.btnDebug1.Name = "btnDebug1"
-        Me.btnDebug1.Size = New System.Drawing.Size(32, 21)
-        Me.btnDebug1.TabIndex = 8
-        Me.btnDebug1.Text = "D1"
-        Me.btnDebug1.UseVisualStyleBackColor = True
-        Me.btnDebug1.Visible = False
-        '
-        'lbPPM
-        '
-        Me.lbPPM.AutoSize = True
-        Me.lbPPM.BackColor = System.Drawing.Color.Transparent
-        Me.lbPPM.Font = New System.Drawing.Font("Calibri", 14.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbPPM.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbPPM.Location = New System.Drawing.Point(16, 50)
-        Me.lbPPM.Name = "lbPPM"
-        Me.lbPPM.Size = New System.Drawing.Size(237, 23)
-        Me.lbPPM.TabIndex = 7
-        Me.lbPPM.Text = "Platinum this Session:           0"
-        '
-        'pbDebug
-        '
-        Me.pbDebug.BackColor = System.Drawing.Color.Silver
-        Me.pbDebug.Location = New System.Drawing.Point(11, 73)
-        Me.pbDebug.Name = "pbDebug"
-        Me.pbDebug.Size = New System.Drawing.Size(10, 11)
-        Me.pbDebug.TabIndex = 6
-        Me.pbDebug.TabStop = False
-        Me.pbDebug.Visible = False
         '
         'lbVersion
         '
@@ -161,7 +109,7 @@ Partial Class Main
         Me.lbVersion.Name = "lbVersion"
         Me.lbVersion.Size = New System.Drawing.Size(38, 12)
         Me.lbVersion.TabIndex = 7
-        Me.lbVersion.Text = "v3.1.0"
+        Me.lbVersion.Text = "vX.X.X"
         '
         'lbTitle
         '
@@ -250,15 +198,7 @@ Partial Class Main
         'tUpdate
         '
         Me.tUpdate.Enabled = True
-        '
-        'tMessages
-        '
-        Me.tMessages.Enabled = True
-        Me.tMessages.Interval = 300000
-        '
-        'tDebug
-        '
-        Me.tDebug.Enabled = True
+        Me.tUpdate.Interval = 360000
         '
         'trayIcon
         '
@@ -268,34 +208,41 @@ Partial Class Main
         '
         'trayMenu
         '
-        Me.trayMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.trayShow, Me.trayRelics, Me.ToolStripSeparator1, Me.trayExit})
+        Me.trayMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.trayShow, Me.trayRelics, Me.trayEquipment, Me.ToolStripSeparator1, Me.trayExit})
         Me.trayMenu.Name = "trayMenu"
         Me.trayMenu.ShowImageMargin = False
-        Me.trayMenu.Size = New System.Drawing.Size(81, 76)
+        Me.trayMenu.Size = New System.Drawing.Size(108, 98)
         '
         'trayShow
         '
         Me.trayShow.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold)
         Me.trayShow.Name = "trayShow"
-        Me.trayShow.Size = New System.Drawing.Size(80, 22)
+        Me.trayShow.Size = New System.Drawing.Size(107, 22)
         Me.trayShow.Text = "Show"
         Me.trayShow.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal
         '
         'trayRelics
         '
         Me.trayRelics.Name = "trayRelics"
-        Me.trayRelics.Size = New System.Drawing.Size(80, 22)
+        Me.trayRelics.Size = New System.Drawing.Size(107, 22)
         Me.trayRelics.Text = "Relics"
+        '
+        'trayEquipment
+        '
+        Me.trayEquipment.Name = "trayEquipment"
+        Me.trayEquipment.Size = New System.Drawing.Size(107, 22)
+        Me.trayEquipment.Text = "Equipment"
+        Me.trayEquipment.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal
         '
         'ToolStripSeparator1
         '
         Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
-        Me.ToolStripSeparator1.Size = New System.Drawing.Size(77, 6)
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(104, 6)
         '
         'trayExit
         '
         Me.trayExit.Name = "trayExit"
-        Me.trayExit.Size = New System.Drawing.Size(80, 22)
+        Me.trayExit.Size = New System.Drawing.Size(107, 22)
         Me.trayExit.Text = "Exit"
         '
         'pbHome
@@ -356,6 +303,75 @@ Partial Class Main
         Me.pbSideBar.TabIndex = 18
         Me.pbSideBar.TabStop = False
         '
+        'lbMarket
+        '
+        Me.lbMarket.BackColor = System.Drawing.Color.Transparent
+        Me.lbMarket.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbMarket.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.lbMarket.Location = New System.Drawing.Point(30, 18)
+        Me.lbMarket.Name = "lbMarket"
+        Me.lbMarket.Size = New System.Drawing.Size(120, 18)
+        Me.lbMarket.TabIndex = 21
+        Me.lbMarket.Text = "Market Data:"
+        Me.lbMarket.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'lbMarketDate
+        '
+        Me.lbMarketDate.BackColor = System.Drawing.Color.Transparent
+        Me.lbMarketDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbMarketDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
+        Me.lbMarketDate.Location = New System.Drawing.Point(156, 18)
+        Me.lbMarketDate.Name = "lbMarketDate"
+        Me.lbMarketDate.Size = New System.Drawing.Size(120, 18)
+        Me.lbMarketDate.TabIndex = 22
+        Me.lbMarketDate.Text = "Loading..."
+        '
+        'lbEqmtDate
+        '
+        Me.lbEqmtDate.BackColor = System.Drawing.Color.Transparent
+        Me.lbEqmtDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbEqmtDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
+        Me.lbEqmtDate.Location = New System.Drawing.Point(156, 43)
+        Me.lbEqmtDate.Name = "lbEqmtDate"
+        Me.lbEqmtDate.Size = New System.Drawing.Size(120, 18)
+        Me.lbEqmtDate.TabIndex = 24
+        Me.lbEqmtDate.Text = "Loading..."
+        '
+        'lbEqmt
+        '
+        Me.lbEqmt.BackColor = System.Drawing.Color.Transparent
+        Me.lbEqmt.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbEqmt.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.lbEqmt.Location = New System.Drawing.Point(30, 43)
+        Me.lbEqmt.Name = "lbEqmt"
+        Me.lbEqmt.Size = New System.Drawing.Size(120, 18)
+        Me.lbEqmt.TabIndex = 25
+        Me.lbEqmt.Text = "Drop Data:"
+        Me.lbEqmt.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'lbWiki
+        '
+        Me.lbWiki.BackColor = System.Drawing.Color.Transparent
+        Me.lbWiki.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbWiki.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.lbWiki.Location = New System.Drawing.Point(30, 68)
+        Me.lbWiki.Name = "lbWiki"
+        Me.lbWiki.Size = New System.Drawing.Size(120, 18)
+        Me.lbWiki.TabIndex = 27
+        Me.lbWiki.Text = "Wiki Data:"
+        Me.lbWiki.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'lbWikiDate
+        '
+        Me.lbWikiDate.BackColor = System.Drawing.Color.Transparent
+        Me.lbWikiDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbWikiDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
+        Me.lbWikiDate.Location = New System.Drawing.Point(156, 68)
+        Me.lbWikiDate.Name = "lbWikiDate"
+        Me.lbWikiDate.Size = New System.Drawing.Size(120, 18)
+        Me.lbWikiDate.TabIndex = 26
+        Me.lbWikiDate.Text = "Loading..."
+        '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -375,8 +391,6 @@ Partial Class Main
         Me.Name = "Main"
         Me.Text = "WFInfo"
         Me.Panel1.ResumeLayout(False)
-        Me.Panel1.PerformLayout()
-        CType(Me.pbDebug, System.ComponentModel.ISupportInitialize).EndInit()
         Me.pTitle.ResumeLayout(False)
         Me.pTitle.PerformLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
@@ -391,7 +405,6 @@ Partial Class Main
 
     End Sub
     Friend WithEvents tPB As Timer
-    Friend WithEvents lbChecks As Label
     Friend WithEvents lbStatus As Label
     Friend WithEvents pbSettings As PictureBox
     Friend WithEvents pbEqmt As PictureBox
@@ -402,15 +415,9 @@ Partial Class Main
     Friend WithEvents btnClose As Button
     Friend WithEvents PictureBox3 As PictureBox
     Friend WithEvents pTitle As Panel
-    Friend WithEvents pbDebug As PictureBox
     Friend WithEvents lbVersion As Label
-    Friend WithEvents lbPPM As Label
-    Friend WithEvents btnDebug1 As Button
     Friend WithEvents Label1 As Label
     Friend WithEvents tUpdate As Timer
-    Friend WithEvents tMessages As Timer
-    Friend WithEvents btnDebug2 As Button
-    Friend WithEvents tDebug As Timer
     Friend WithEvents pbRelic As PictureBox
     Friend WithEvents trayIcon As NotifyIcon
     Friend WithEvents btnHide As Button
@@ -419,4 +426,11 @@ Partial Class Main
     Friend WithEvents trayRelics As ToolStripMenuItem
     Friend WithEvents ToolStripSeparator1 As ToolStripSeparator
     Friend WithEvents trayExit As ToolStripMenuItem
+    Friend WithEvents trayEquipment As ToolStripMenuItem
+    Friend WithEvents lbMarketDate As Label
+    Friend WithEvents lbMarket As Label
+    Friend WithEvents lbEqmt As Label
+    Friend WithEvents lbEqmtDate As Label
+    Friend WithEvents lbWiki As Label
+    Friend WithEvents lbWikiDate As Label
 End Class

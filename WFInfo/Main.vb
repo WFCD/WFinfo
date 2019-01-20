@@ -1,14 +1,7 @@
-﻿Imports System.IO
-Imports System.Net
-Imports Newtonsoft.Json
-Imports Newtonsoft.Json.Linq
-Imports System.Management
-Imports System.Security.Cryptography
-Imports System.ComponentModel
-Imports System.Text.RegularExpressions
+﻿Imports System.ComponentModel
 Imports System.Drawing.Imaging
-Imports System.Data.SQLite
-Imports Tesseract
+Imports System.IO
+
 Public Class Main
     Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Integer, ByVal dx As Integer, ByVal dy As Integer, ByVal cButtons As Integer, ByVal dwExtraInfo As Integer)
     Public Declare Function GetAsyncKeyState Lib "user32" (ByVal vKey As Integer) As Integer
@@ -24,6 +17,7 @@ Public Class Main
     Dim drag As Boolean = False      ' Toggle for the custom UI allowing it to drag
     Dim mouseX As Integer
     Dim mouseY As Integer
+    Public version As String = "1.0.0"
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Try
@@ -41,7 +35,9 @@ Public Class Main
             pbSettings.Parent = pbSideBar
             pbSettings.Location = New Point(0, 80)
 
-            lbVersion.Text = "v" + My.Settings.Version 'The current version is stored in project properties
+            version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
+            version = version.Substring(0, version.LastIndexOf("."))
+            lbVersion.Text = "v" + version
             Me.Location = My.Settings.MainLoc
             Fullscreen = My.Settings.Fullscreen
             Me.MaximizeBox = False
@@ -54,8 +50,8 @@ Public Class Main
             '_________________________________________________________________________
             'Readies the test folder for debug mode (Saves screenshots for debugging)
             '_________________________________________________________________________
-            If (Not System.IO.Directory.Exists(appData + "\WFInfo\tests")) Then
-                System.IO.Directory.CreateDirectory(appData + "\WFInfo\tests")
+            If (Not Directory.Exists(appData + "\WFInfo\tests")) Then
+                Directory.CreateDirectory(appData + "\WFInfo\tests")
             End If
             count = GetMax(appData + "\WFInfo\tests\") + 1
 
@@ -199,10 +195,10 @@ Public Class Main
         Return False
     End Function
 
-    Private Sub btnDebug1_Click(sender As Object, e As EventArgs) Handles btnDebug1.Click
+    Private Sub btnDebug1_Click(sender As Object, e As EventArgs)
     End Sub
 
-    Private Sub btnDebug2_Click(sender As Object, e As EventArgs) Handles btnDebug2.Click
+    Private Sub btnDebug2_Click(sender As Object, e As EventArgs)
     End Sub
 
     Private Sub DoWork()
@@ -210,12 +206,15 @@ Public Class Main
             lbStatus.ForeColor = Color.Yellow
             If db Is Nothing Then
                 db = New Data()
-                OCR.GetCoors()
+                GetCoors()
                 For i As Integer = 0 To 3
                     db.panels(i) = New Overlay()
                 Next
+                Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
+                Invoke(Sub() lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11))
+                Invoke(Sub() lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
             Else
-                OCR.ParseScreen()
+                ParseScreen()
             End If
             lbStatus.ForeColor = Color.Lime
         Catch ex As Exception
@@ -256,7 +255,7 @@ Public Class Main
 
     Public Sub addLog(txt As String)
         '_________________________________________________________________________
-        'Function for storing log market_data
+        'Function for storing log data
         '_________________________________________________________________________
         appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
         Dim dateTime As String = "[" + System.DateTime.Now + "]"
@@ -297,6 +296,7 @@ Public Class Main
         'Starts the background timers
         '_________________________________________________________________________
         Me.Refresh()
+        Me.CreateControl()
         Task.Factory.StartNew(Sub() DoWork())
     End Sub
 
@@ -427,7 +427,38 @@ Public Class Main
             trayIcon.Visible = False
         ElseIf e.ClickedItem.Name = "trayRelics" Then
             pbRelic_Click(pbRelic, Nothing)
+        ElseIf e.ClickedItem.Name = "trayEquipment" Then
+            pbEqmt_Click(pbEqmt, Nothing)
         End If
+    End Sub
+
+    Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick
+        db.Update()
+    End Sub
+
+    Private Async Sub lbMarket_Click(sender As Object, e As EventArgs) Handles lbMarket.Click
+        lbMarketDate.Text = "Loading..."
+        Await Task.Run(Sub() db.ForceMarketUpdate())
+        lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11)
+        Equipment.Refresh()
+        Relics.Refresh()
+    End Sub
+
+    Private Async Sub lbEqmt_Click(sender As Object, e As EventArgs) Handles lbEqmt.Click
+        lbEqmtDate.Text = "Loading..."
+        lbWikiDate.Text = "Loading..."
+        Await Task.Run(Sub() db.ForceEqmtUpdate())
+        lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11)
+        lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11)
+        Equipment.Refresh()
+        Relics.Refresh()
+    End Sub
+
+    Private Async Sub lbWiki_Click(sender As Object, e As EventArgs) Handles lbWiki.Click
+        lbWikiDate.Text = "Loading..."
+        Await Task.Run(Sub() db.ForceWikiUpdate())
+        lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11)
+        Equipment.Refresh()
     End Sub
 End Class
 
@@ -450,7 +481,6 @@ Module Glob
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
     Public Animate As Boolean = My.Settings.Animate
-    Public NewStyle As Boolean = My.Settings.NewStyle
     Public Debug As Boolean = My.Settings.Debug
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Public textColor As Color = Color.FromArgb(177, 208, 217)

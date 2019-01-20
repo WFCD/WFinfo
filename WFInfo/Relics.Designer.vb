@@ -1,4 +1,6 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿Imports System.Windows.Forms
+
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class Relics
     Inherits System.Windows.Forms.Form
 
@@ -54,9 +56,9 @@ Partial Class Relics
         Me.Panel1.Controls.Add(Me.RelicTree2)
         Me.Panel1.Controls.Add(Me.Panel2)
         Me.Panel1.Controls.Add(Me.RelicTree)
-        Me.Panel1.Location = New System.Drawing.Point(2, 29)
+        Me.Panel1.Location = New System.Drawing.Point(1, 28)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(456, 375)
+        Me.Panel1.Size = New System.Drawing.Size(456, 371)
         Me.Panel1.TabIndex = 24
         '
         'RelicTree2
@@ -70,7 +72,7 @@ Partial Class Relics
         Me.RelicTree2.FullRowSelect = True
         Me.RelicTree2.Location = New System.Drawing.Point(-1, 30)
         Me.RelicTree2.Name = "RelicTree2"
-        Me.RelicTree2.Size = New System.Drawing.Size(473, 344)
+        Me.RelicTree2.Size = New System.Drawing.Size(473, 340)
         Me.RelicTree2.TabIndex = 20
         '
         'Panel2
@@ -144,7 +146,7 @@ Partial Class Relics
         TreeNode4.Name = "axi"
         TreeNode4.Text = "Axi"
         Me.RelicTree.Nodes.AddRange(New System.Windows.Forms.TreeNode() {TreeNode1, TreeNode2, TreeNode3, TreeNode4})
-        Me.RelicTree.Size = New System.Drawing.Size(473, 344)
+        Me.RelicTree.Size = New System.Drawing.Size(473, 340)
         Me.RelicTree.TabIndex = 18
         '
         'HideMenu
@@ -189,7 +191,7 @@ Partial Class Relics
         Me.pTitle.Controls.Add(Me.PictureBox3)
         Me.pTitle.Controls.Add(Me.lbTitle)
         Me.pTitle.Controls.Add(Me.btnClose)
-        Me.pTitle.Location = New System.Drawing.Point(2, 2)
+        Me.pTitle.Location = New System.Drawing.Point(1, 1)
         Me.pTitle.Name = "pTitle"
         Me.pTitle.Size = New System.Drawing.Size(456, 27)
         Me.pTitle.TabIndex = 25
@@ -222,7 +224,7 @@ Partial Class Relics
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(460, 406)
+        Me.ClientSize = New System.Drawing.Size(458, 400)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.DoubleBuffered = True

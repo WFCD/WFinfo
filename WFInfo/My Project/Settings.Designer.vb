@@ -104,18 +104,6 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("7.0.0")>  _
-        Public Property Version() As String
-            Get
-                Return CType(Me("Version"),String)
-            End Get
-            Set
-                Me("Version") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
         Public Property Fullscreen() As Boolean
             Get
@@ -159,18 +147,6 @@ Namespace My
             End Get
             Set
                 Me("SteamSettings") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
-        Public Property NewStyle() As Boolean
-            Get
-                Return CType(Me("NewStyle"),Boolean)
-            End Get
-            Set
-                Me("NewStyle") = value
             End Set
         End Property
         

@@ -1,4 +1,5 @@
 ﻿Imports System.IO
+
 Public Class Settings
     Dim chTemp As String
     Dim drag As Boolean = False
@@ -73,7 +74,6 @@ Public Class Settings
         btnHkey1.Text = My.Settings.HKey1Text
         cbAnimations.Checked = Animate
         cbFullscreen.Checked = Fullscreen
-        cbNewStyle.Checked = NewStyle
         cbDebug.Checked = Debug
         ScaleBar.Value = My.Settings.Scaling
         Label9.Text = My.Settings.Scaling.ToString() + "%"
@@ -167,7 +167,7 @@ Public Class Settings
             Else
                 HideShots = False
             End If
-            For Each userDir As String In System.IO.Directory.GetDirectories(MainDir)
+            For Each userDir As String In Directory.GetDirectories(MainDir)
                 Dim settingsFile As String = ""
                 If Directory.Exists(userDir + "\config") Then
                     settingsFile = My.Computer.FileSystem.ReadAllText(userDir & "\config\localconfig.vdf")
@@ -260,12 +260,6 @@ Public Class Settings
         Me.Close()
     End Sub
 
-    Private Sub cbNewStyle_Click(sender As Object, e As EventArgs) Handles cbNewStyle.Click
-        My.Settings.NewStyle = cbNewStyle.Checked
-        NewStyle = cbNewStyle.Checked
-        saveSettings()
-    End Sub
-
     Private Sub btnCustomize_Click(sender As Object, e As EventArgs) Handles btnCustomize.Click
         Picker.Show()
     End Sub
@@ -273,7 +267,6 @@ Public Class Settings
     Private Sub saveSettings()
         ''Saves settings
         My.Settings.Animate = cbAnimations.Checked
-        My.Settings.NewStyle = cbNewStyle.Checked
         My.Settings.HKey1 = HKey1
         My.Settings.HKey1Text = btnHkey1.Text
         My.Settings.Debug = cbDebug.Checked
@@ -300,7 +293,7 @@ Public Class Settings
         End If
         ScaleBar_Scroll(sender, e)
         UpdateCoors()
-        'To remove the blue highlight... because I don't like the look of it
+        'Kek: To remove the blue highlight... because I don't like the look of it
         ScaleBar.Select()
     End Sub
 End Class
