@@ -55,6 +55,7 @@ Partial Class Main
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.pbRelic = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
+        Me.DebugButton = New System.Windows.Forms.Button()
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -87,6 +88,7 @@ Partial Class Main
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel1.Controls.Add(Me.DebugButton)
         Me.Panel1.Controls.Add(Me.lbWiki)
         Me.Panel1.Controls.Add(Me.lbWikiDate)
         Me.Panel1.Controls.Add(Me.lbEqmt)
@@ -372,6 +374,17 @@ Partial Class Main
         Me.pbSideBar.TabIndex = 18
         Me.pbSideBar.TabStop = False
         '
+        'DebugButton
+        '
+        Me.DebugButton.Enabled = False
+        Me.DebugButton.Location = New System.Drawing.Point(259, 79)
+        Me.DebugButton.Name = "DebugButton"
+        Me.DebugButton.Size = New System.Drawing.Size(39, 23)
+        Me.DebugButton.TabIndex = 28
+        Me.DebugButton.Text = "Button1"
+        Me.DebugButton.UseVisualStyleBackColor = True
+        Me.DebugButton.Visible = False
+        '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -433,4 +446,5 @@ Partial Class Main
     Friend WithEvents lbEqmtDate As Label
     Friend WithEvents lbWiki As Label
     Friend WithEvents lbWikiDate As Label
+    Friend WithEvents DebugButton As Button
 End Class

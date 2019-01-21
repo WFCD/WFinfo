@@ -70,6 +70,9 @@ Module OCR
         End If
 
         relic_area = New Rect(left - 1, top - 1, 1500 * scale + 2, 300 * scale + 2)
+        If Debug Then
+            Main.addLog("UPDATED WIN COORS:" & vbCrLf & window.ToString() & vbCrLf & win_area.ToString() & vbCrLf & relic_area.ToString() & vbCrLf & relic_pt.ToString())
+        End If
         Return True
     End Function
 
@@ -80,7 +83,6 @@ Module OCR
         Dim screen As Bitmap
         Dim players As Integer = 0
         Dim foundText As New List(Of String)()
-
         ' Start timer
         prev_time = 0
         clock.Restart()
@@ -154,6 +156,9 @@ Module OCR
     End Function
 
     Private Function GetScreenShot() As Bitmap
+        If Debug Then
+            Main.addLog("TAKING SCREENSHOT:" & vbCrLf & relic_area.ToString() & vbCrLf & relic_pt.ToString())
+        End If
         Dim ret As Bitmap
         If Fullscreen Then
             ret = New System.Drawing.Bitmap(My.Settings.LastFile)

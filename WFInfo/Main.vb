@@ -462,6 +462,10 @@ Public Class Main
         lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11)
         Equipment.Refresh()
     End Sub
+
+    Private Sub DebugButton_Click(sender As Object, e As EventArgs) Handles DebugButton.Click
+
+    End Sub
 End Class
 
 Module Glob
