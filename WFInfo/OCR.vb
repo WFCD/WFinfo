@@ -169,7 +169,7 @@ Module OCR
             graph.CopyFromScreen(relic_area.X1, relic_area.Y1, 0, 0, New Size(relic_area.Width, relic_area.Height), CopyPixelOperation.SourceCopy)
         End If
         If Debug Then
-            ret.Save(appData & "\WFInfo\tests\SS-" + My.Settings.SSCount + ".jpg")
+            ret.Save(appData & "\WFInfo\tests\SS-" & My.Settings.SSCount.ToString() & ".jpg")
             My.Settings.SSCount += 1
         End If
         Return ret
@@ -220,7 +220,7 @@ Module OCR
         Dim result As String = ""
         Using bmp
             If Debug Then
-                bmp.Save(appData & "\WFInfo\tests\Text-" + My.Settings.EtcCount + ".jpg")
+                bmp.Save(appData & "\WFInfo\tests\Text-" & My.Settings.EtcCount.ToString() & ".jpg")
                 My.Settings.EtcCount += 1
             End If
             Using page As Page = engine.Process(bmp)
