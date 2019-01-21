@@ -58,7 +58,7 @@ Module OCR
         'FROM (0,0)
         Dim top As Integer = (win_area.Height / 2) - (314 * scale)
         Dim left As Integer = (win_area.Width / 2) - (749 * scale)
-        relic_pt = New Point(left, top)
+        relic_pt = New Point(dpiScaling * left, dpiScaling * top)
 
         'Adjust to actual "top-left"
         left += window.X1
@@ -69,9 +69,9 @@ Module OCR
             top += window.Height - win_area.Height - padding
         End If
 
-        relic_area = New Rect(left - 1, top - 1, 1500 * scale + 2, 300 * scale + 2)
+        relic_area = New Rect(dpiScaling * (left - 1), dpiScaling * (top - 1), dpiScaling * (1500 * scale + 2), dpiScaling * (300 * scale + 2))
         If Debug Then
-            Main.addLog("UPDATED WIN COORS:" & vbCrLf & window.ToString() & vbCrLf & win_area.ToString() & vbCrLf & relic_area.ToString() & vbCrLf & relic_pt.ToString())
+            Main.addLog("UPDATED WIN COORS:" & vbCrLf & dpiScaling & vbCrLf & window.ToString() & vbCrLf & win_area.ToString() & vbCrLf & relic_area.ToString() & vbCrLf & relic_pt.ToString())
         End If
         Return True
     End Function
@@ -116,19 +116,18 @@ Module OCR
         Console.WriteLine("GET PART NAMES: " + (clock.Elapsed.Ticks - prev_time).ToString())
         prev_time = clock.Elapsed.Ticks
 
-        Dim plat As String = ""
+        Dim plat As Double = 0
         Dim ducat As String = ""
         Dim vaulted As Boolean
         Dim y As Integer = relic_area.Y1 * 1.05
         Dim x As Integer
         For i = 0 To foundText.Count - 1
             x = relic_area.X1 + (screen.Width * (i / 4 + (5 - players) / 8))
-            plat = db.market_data(foundText(i))("plat").ToString()
+            plat = db.market_data(foundText(i))("plat")
             ducat = db.market_data(foundText(i))("ducats").ToString()
             vaulted = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
-            db.panels(i).Position(x, y)
-            db.panels(i).LoadText(plat, ducat, vaulted)
-            db.panels(i).ShowOverlay()
+            db.panels(i).LoadText(plat.ToString("N1"), ducat, vaulted)
+            db.panels(i).ShowOverlay(x, y)
         Next
         Console.WriteLine("DISPLAY OVERLAYS: " + (clock.Elapsed.Ticks - prev_time).ToString())
         clock.Stop()
@@ -157,7 +156,7 @@ Module OCR
 
     Private Function GetScreenShot() As Bitmap
         If Debug Then
-            Main.addLog("TAKING SCREENSHOT:" & vbCrLf & relic_area.ToString() & vbCrLf & relic_pt.ToString())
+            Main.addLog("TAKING SCREENSHOT:" & vbCrLf & dpiScaling & vbCrLf & relic_area.ToString() & vbCrLf & relic_pt.ToString())
         End If
         Dim ret As Bitmap
         If Fullscreen Then

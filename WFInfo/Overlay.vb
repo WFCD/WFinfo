@@ -1,19 +1,17 @@
 ﻿
 Public Class Overlay
-    Dim loc As Point
 
-    Public Sub Position(x As Integer, y As Integer)
+    Public Sub New()
+        InitializeComponent()
         UpdateColors(Me)
-        loc = New Point(x, y)
-        Me.Size = New Point(125, 70)
         PictureBox1.Image = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
         Me.BackColor = Color.Black
         Me.TopMost = True
 
-        Dim fontSize As Integer = 0.26 * Me.Size.Height
+        Dim fontSize As Integer = 18 / dpiScaling
         Dim allFont As New Font(lbPDropShadow.Font.FontFamily, fontSize, FontStyle.Bold)
 
-        lbPDropShadow.Location = New Point((Me.Size.Width / 2.58) + 2, (Me.Size.Height / 27))
+        lbPDropShadow.Location = New Point(35, 3)
         lbPDropShadow.Font = allFont
         lbPDropShadow.Parent = PictureBox1
 
@@ -21,13 +19,14 @@ Public Class Overlay
         lbPlat.Font = allFont
         lbPlat.Parent = lbPDropShadow
 
-        lbDDropShadow.Location = New Point((Me.Size.Width / 2.58) + 2, (Me.Size.Height / 2.15) + (Me.Size.Height / 27))
+        lbDDropShadow.Location = New Point(35, 36)
         lbDDropShadow.Font = allFont
         lbDDropShadow.Parent = PictureBox1
 
         lbDucats.Location = New Point(-1, 0)
         lbDucats.Font = allFont
         lbDucats.Parent = lbDDropShadow
+
     End Sub
 
     Public Sub LoadText(plat As String, ducat As Integer, Optional vaulted As Boolean = False)
@@ -45,9 +44,10 @@ Public Class Overlay
         lbDDropShadow.Text = lbDucats.Text
     End Sub
 
-    Public Sub ShowOverlay()
+    Public Sub ShowOverlay(x As Integer, y As Integer)
         Me.Show()
-        Me.Location = loc
+        Me.Size = New Drawing.Size(125, 70)
+        Me.Location = New Point(x, y)
         tHide.Start()
     End Sub
 

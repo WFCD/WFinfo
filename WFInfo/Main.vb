@@ -26,14 +26,6 @@ Public Class Main
             '_________________________________________________________________________
 
             UpdateColors(Me)
-            pbHome.Parent = pbSideBar
-            pbHome.Location = New Point(0, 4)
-            pbRelic.Parent = pbSideBar
-            pbRelic.Location = New Point(0, 30)
-            pbEqmt.Parent = pbSideBar
-            pbEqmt.Location = New Point(0, 55)
-            pbSettings.Parent = pbSideBar
-            pbSettings.Location = New Point(0, 80)
 
             version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
             version = version.Substring(0, version.LastIndexOf("."))
@@ -45,7 +37,7 @@ Public Class Main
             Me.Refresh()
             Me.Activate()
             Me.Refresh()
-
+            dpiScaling = GetScalingFactor()
 
             '_________________________________________________________________________
             'Readies the test folder for debug mode (Saves screenshots for debugging)
@@ -477,7 +469,7 @@ Module Glob
     Public clock As New Stopwatch()
     Public prev_time As Long = clock.Elapsed.Ticks
 
-
+    Public dpiScaling As Double = 1.0
 
     Public db As Data
     Public qItems As New List(Of String)()
@@ -505,6 +497,24 @@ Module Glob
     Public bgBrush As Brush = New SolidBrush(bgColor)
     'Public cookie As String = ""
     'Public xcsrf As String = ""
+
+    <DllImport("gdi32.dll")>
+    Public Function GetDeviceCaps(hdc As IntPtr, nIndex As Integer) As Integer
+    End Function
+    Public Enum DeviceCap
+        VERTRES = 10
+        LOGPIXELSX = 88
+        LOGPIXELSY = 90
+        DESKTOPVERTRES = 117
+    End Enum
+
+
+    Public Function GetScalingFactor() As Double
+        Dim g As Graphics = Graphics.FromHwnd(IntPtr.Zero)
+        Dim desktop As IntPtr = g.GetHdc()
+        Dim temp As Double = GetDeviceCaps(desktop, DeviceCap.LOGPIXELSX)
+        Return temp / 96
+    End Function
 
     Public Sub UpdateColors(f As Form)
         '_________________________________________________________________________
