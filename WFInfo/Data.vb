@@ -522,6 +522,9 @@ Class Data
                 lowest = prop.Value
             End If
         Next
+        If Debug Then
+            Main.addLog("FOUND PART: " & lowest & vbCrLf & "FROM: " & string1)
+        End If
         Return lowest
     End Function
 

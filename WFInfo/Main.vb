@@ -510,10 +510,34 @@ Module Glob
 
 
     Public Function GetScalingFactor() As Double
-        Dim g As Graphics = Graphics.FromHwnd(IntPtr.Zero)
-        Dim desktop As IntPtr = g.GetHdc()
-        Dim temp As Double = GetDeviceCaps(desktop, DeviceCap.LOGPIXELSX)
-        Return temp / 96
+        Using form As New Form()
+            Using g As Graphics = form.CreateGraphics()
+                If g.DpiX <> 96 Then
+                    Main.addLog("FOUND DPI: g.DpiX")
+                    Return g.DpiX / 96
+                ElseIf g.DpiY <> 96 Then
+                    Main.addLog("FOUND DPI: g.DpiY")
+                    Return g.DpiY / 96
+                End If
+            End Using
+        End Using
+
+        Using g As Graphics = Graphics.FromHwnd(IntPtr.Zero)
+            Dim desktop As IntPtr = g.GetHdc()
+            Dim temp As Double = GetDeviceCaps(desktop, DeviceCap.LOGPIXELSX) / 96
+            If temp <> 1 Then
+                Main.addLog("FOUND DPI: LOGPIXELSX")
+                Return temp
+            End If
+            temp = GetDeviceCaps(desktop, DeviceCap.LOGPIXELSY) / 96
+            If temp <> 1 Then
+                Main.addLog("FOUND DPI: LOGPIXELSY")
+                Return temp
+            End If
+            temp = GetDeviceCaps(desktop, DeviceCap.DESKTOPVERTRES)
+            temp /= GetDeviceCaps(desktop, DeviceCap.VERTRES)
+            Return temp
+        End Using
     End Function
 
     Public Sub UpdateColors(f As Form)
