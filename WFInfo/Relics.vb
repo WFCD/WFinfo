@@ -140,10 +140,7 @@ Public Class Relics
         Dim split As String() = fullPath.Split(New Char() {CChar("\"), CChar("|")})
 
         ' Write Plat + Ducat values
-
-        Dim sf As New StringFormat With {
-            .Alignment = StringAlignment.Far
-        }
+        Dim sf As New StringFormat With {.Alignment = StringAlignment.Far}
         If split.Count = 2 Then
             Dim find As JObject = Nothing
             If db.relic_data.TryGetValue(split(0), find) Then
@@ -423,6 +420,42 @@ Public Class Relics
                         RelicTree2.Nodes.Find("Hidden", False)(0).Nodes.Add(found)
                     End If
                 Next
+            Next
+        Next
+    End Sub
+
+    Public Sub Reload_Data()
+        For Each node As TreeNode In RelicTree.Nodes
+            For Each kid As TreeNode In node.Nodes
+                If Not kid.Name.Contains("Hidden") Then
+                    Dim rtot As Double = 0
+                    Dim itot As Double = 0
+                    Dim rperc As Double = 0.1
+                    Dim iperc As Double = 0.02
+                    Dim count As Integer = 0
+                    For Each temp As TreeNode In kid.Nodes
+                        If temp.Parent.FullPath = kid.FullPath Then
+                            If db.market_data.TryGetValue(temp.Text, Nothing) Then
+                                If count > 2 Then
+                                    rperc = 0.5 / 3.0
+                                    iperc = 0.76 / 3.0
+                                ElseIf count > 0 Then
+                                    rperc = 0.2
+                                    iperc = 0.11
+                                End If
+                                Dim plat As Double = Double.Parse(db.market_data(temp.Text)("plat"))
+                                rtot += (plat * rperc)
+                                itot += (plat * iperc)
+                                count += 1
+                            Else
+                                Console.WriteLine("MISSING RELIC PLAT VALUES: " + temp.FullPath + " -- " + temp.Text)
+                            End If
+                        End If
+                    Next
+                    rtot -= itot
+                    db.relic_data(node.Text)(kid.Name)("rad") = rtot
+                    db.relic_data(node.Text)(kid.Name)("int") = itot
+                End If
             Next
         Next
     End Sub

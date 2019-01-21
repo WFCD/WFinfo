@@ -29,6 +29,12 @@ Partial Class Main
         Me.tPB = New System.Windows.Forms.Timer(Me.components)
         Me.lbStatus = New System.Windows.Forms.Label()
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.lbWiki = New System.Windows.Forms.Label()
+        Me.lbWikiDate = New System.Windows.Forms.Label()
+        Me.lbEqmt = New System.Windows.Forms.Label()
+        Me.lbEqmtDate = New System.Windows.Forms.Label()
+        Me.lbMarketDate = New System.Windows.Forms.Label()
+        Me.lbMarket = New System.Windows.Forms.Label()
         Me.lbVersion = New System.Windows.Forms.Label()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.btnClose = New System.Windows.Forms.Button()
@@ -49,12 +55,6 @@ Partial Class Main
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.pbRelic = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
-        Me.lbMarket = New System.Windows.Forms.Label()
-        Me.lbMarketDate = New System.Windows.Forms.Label()
-        Me.lbEqmtDate = New System.Windows.Forms.Label()
-        Me.lbEqmt = New System.Windows.Forms.Label()
-        Me.lbWiki = New System.Windows.Forms.Label()
-        Me.lbWikiDate = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -98,6 +98,75 @@ Partial Class Main
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(334, 107)
         Me.Panel1.TabIndex = 19
+        '
+        'lbWiki
+        '
+        Me.lbWiki.BackColor = System.Drawing.Color.Transparent
+        Me.lbWiki.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbWiki.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.lbWiki.Location = New System.Drawing.Point(30, 68)
+        Me.lbWiki.Name = "lbWiki"
+        Me.lbWiki.Size = New System.Drawing.Size(120, 18)
+        Me.lbWiki.TabIndex = 27
+        Me.lbWiki.Text = "Wiki Data:"
+        Me.lbWiki.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'lbWikiDate
+        '
+        Me.lbWikiDate.BackColor = System.Drawing.Color.Transparent
+        Me.lbWikiDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbWikiDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
+        Me.lbWikiDate.Location = New System.Drawing.Point(156, 68)
+        Me.lbWikiDate.Name = "lbWikiDate"
+        Me.lbWikiDate.Size = New System.Drawing.Size(120, 18)
+        Me.lbWikiDate.TabIndex = 26
+        Me.lbWikiDate.Text = "Loading..."
+        '
+        'lbEqmt
+        '
+        Me.lbEqmt.BackColor = System.Drawing.Color.Transparent
+        Me.lbEqmt.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbEqmt.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.lbEqmt.Location = New System.Drawing.Point(30, 43)
+        Me.lbEqmt.Name = "lbEqmt"
+        Me.lbEqmt.Size = New System.Drawing.Size(120, 18)
+        Me.lbEqmt.TabIndex = 25
+        Me.lbEqmt.Text = "Drop Data:"
+        Me.lbEqmt.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'lbEqmtDate
+        '
+        Me.lbEqmtDate.BackColor = System.Drawing.Color.Transparent
+        Me.lbEqmtDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbEqmtDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
+        Me.lbEqmtDate.Location = New System.Drawing.Point(156, 43)
+        Me.lbEqmtDate.Name = "lbEqmtDate"
+        Me.lbEqmtDate.Size = New System.Drawing.Size(120, 18)
+        Me.lbEqmtDate.TabIndex = 24
+        Me.lbEqmtDate.Text = "Loading..."
+        '
+        'lbMarketDate
+        '
+        Me.lbMarketDate.BackColor = System.Drawing.Color.Transparent
+        Me.lbMarketDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbMarketDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
+        Me.lbMarketDate.Location = New System.Drawing.Point(156, 18)
+        Me.lbMarketDate.Name = "lbMarketDate"
+        Me.lbMarketDate.Size = New System.Drawing.Size(120, 18)
+        Me.lbMarketDate.TabIndex = 22
+        Me.lbMarketDate.Text = "Loading..."
+        '
+        'lbMarket
+        '
+        Me.lbMarket.BackColor = System.Drawing.Color.Transparent
+        Me.lbMarket.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbMarket.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.lbMarket.Location = New System.Drawing.Point(30, 18)
+        Me.lbMarket.Name = "lbMarket"
+        Me.lbMarket.Size = New System.Drawing.Size(120, 18)
+        Me.lbMarket.TabIndex = 21
+        Me.lbMarket.Text = "Market Data:"
+        Me.lbMarket.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
         'lbVersion
         '
@@ -198,7 +267,7 @@ Partial Class Main
         'tUpdate
         '
         Me.tUpdate.Enabled = True
-        Me.tUpdate.Interval = 360000
+        Me.tUpdate.Interval = 3600000
         '
         'trayIcon
         '
@@ -302,75 +371,6 @@ Partial Class Main
         Me.pbSideBar.Size = New System.Drawing.Size(30, 107)
         Me.pbSideBar.TabIndex = 18
         Me.pbSideBar.TabStop = False
-        '
-        'lbMarket
-        '
-        Me.lbMarket.BackColor = System.Drawing.Color.Transparent
-        Me.lbMarket.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbMarket.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbMarket.Location = New System.Drawing.Point(30, 18)
-        Me.lbMarket.Name = "lbMarket"
-        Me.lbMarket.Size = New System.Drawing.Size(120, 18)
-        Me.lbMarket.TabIndex = 21
-        Me.lbMarket.Text = "Market Data:"
-        Me.lbMarket.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'lbMarketDate
-        '
-        Me.lbMarketDate.BackColor = System.Drawing.Color.Transparent
-        Me.lbMarketDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbMarketDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
-        Me.lbMarketDate.Location = New System.Drawing.Point(156, 18)
-        Me.lbMarketDate.Name = "lbMarketDate"
-        Me.lbMarketDate.Size = New System.Drawing.Size(120, 18)
-        Me.lbMarketDate.TabIndex = 22
-        Me.lbMarketDate.Text = "Loading..."
-        '
-        'lbEqmtDate
-        '
-        Me.lbEqmtDate.BackColor = System.Drawing.Color.Transparent
-        Me.lbEqmtDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbEqmtDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
-        Me.lbEqmtDate.Location = New System.Drawing.Point(156, 43)
-        Me.lbEqmtDate.Name = "lbEqmtDate"
-        Me.lbEqmtDate.Size = New System.Drawing.Size(120, 18)
-        Me.lbEqmtDate.TabIndex = 24
-        Me.lbEqmtDate.Text = "Loading..."
-        '
-        'lbEqmt
-        '
-        Me.lbEqmt.BackColor = System.Drawing.Color.Transparent
-        Me.lbEqmt.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbEqmt.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbEqmt.Location = New System.Drawing.Point(30, 43)
-        Me.lbEqmt.Name = "lbEqmt"
-        Me.lbEqmt.Size = New System.Drawing.Size(120, 18)
-        Me.lbEqmt.TabIndex = 25
-        Me.lbEqmt.Text = "Drop Data:"
-        Me.lbEqmt.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'lbWiki
-        '
-        Me.lbWiki.BackColor = System.Drawing.Color.Transparent
-        Me.lbWiki.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbWiki.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbWiki.Location = New System.Drawing.Point(30, 68)
-        Me.lbWiki.Name = "lbWiki"
-        Me.lbWiki.Size = New System.Drawing.Size(120, 18)
-        Me.lbWiki.TabIndex = 27
-        Me.lbWiki.Text = "Wiki Data:"
-        Me.lbWiki.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'lbWikiDate
-        '
-        Me.lbWikiDate.BackColor = System.Drawing.Color.Transparent
-        Me.lbWikiDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbWikiDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
-        Me.lbWikiDate.Location = New System.Drawing.Point(156, 68)
-        Me.lbWikiDate.Name = "lbWikiDate"
-        Me.lbWikiDate.Size = New System.Drawing.Size(120, 18)
-        Me.lbWikiDate.TabIndex = 26
-        Me.lbWikiDate.Text = "Loading..."
         '
         'Main
         '

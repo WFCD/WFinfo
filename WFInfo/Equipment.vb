@@ -225,9 +225,7 @@ Public Class Equipment
 
         Dim brush As Brush = textBrush
 
-        Dim sf As New StringFormat With {
-            .Alignment = StringAlignment.Near
-        }
+        Dim sf As New StringFormat With {.Alignment = StringAlignment.Near}
         ' COLUMNS: Count(210-290), Ducat(290-370), Plat(370-450)
         If e.Node.Parent IsNot Nothing AndAlso e.Node.Parent.Text.Contains("Prime") Then
             ' PART with a PARENT PRIME      i.e. Warframe/Ash Prime/Systems  OR  Ash Prime/Systems

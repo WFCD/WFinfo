@@ -433,7 +433,9 @@ Public Class Main
     End Sub
 
     Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick
-        db.Update()
+        If db IsNot Nothing AndAlso db.Update() Then
+            Relics.Reload_Data()
+        End If
     End Sub
 
     Private Async Sub lbMarket_Click(sender As Object, e As EventArgs) Handles lbMarket.Click

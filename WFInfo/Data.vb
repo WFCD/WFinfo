@@ -55,8 +55,10 @@ Class Data
     End Sub
 
     Private Function Load_Market_Items(Optional force As Boolean = False) As Boolean
-        If Not force AndAlso market_items Is Nothing AndAlso File.Exists(market_items_path) Then
-            market_items = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(market_items_path))
+        If Not force AndAlso File.Exists(market_items_path) Then
+            If market_items Is Nothing Then
+                market_items = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(market_items_path))
+            End If
             Return False
         End If
 
@@ -72,8 +74,10 @@ Class Data
     End Function
 
     Private Function Load_Market_Data(Optional force As Boolean = False) As Boolean
-        If Not force AndAlso market_data Is Nothing AndAlso File.Exists(market_data_path) Then
-            market_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(market_data_path))
+        If Not force AndAlso File.Exists(market_data_path) Then
+            If market_data Is Nothing Then
+                market_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(market_data_path))
+            End If
             Dim timestamp As Date = DateTime.Parse(market_data("timestamp"))
             Dim dayAgo As Date = Date.Now.AddDays(-1)
             If timestamp > dayAgo Then
@@ -162,27 +166,35 @@ Class Data
 
     Private Function Load_Drop_Data(Optional force As Boolean = False) As Boolean
         Dim request As WebRequest = Nothing
-        If File.Exists(eqmt_data_path) Then
-            eqmt_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(eqmt_data_path))
-        Else
-            eqmt_data = New JObject()
+        If eqmt_data Is Nothing Then
+            If File.Exists(eqmt_data_path) Then
+                eqmt_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(eqmt_data_path))
+            Else
+                eqmt_data = New JObject()
+            End If
         End If
 
         If Not force AndAlso File.Exists(relic_data_path) AndAlso File.Exists(eqmt_data_path) Then
             request = WebRequest.Create("https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html")
             request.Method = "HEAD"
             ' Move last_mod back one hour, so that it doesn't equal timestamp
-            Dim last_mod As Date = DateTime.Parse(request.GetResponse().Headers.Get("Last-Modified")).AddHours(-1)
+            Using resp As WebResponse = request.GetResponse()
+                Dim last_mod As Date = DateTime.Parse(resp.Headers.Get("Last-Modified")).AddHours(-1)
 
-            relic_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(relic_data_path))
-            name_data = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(name_data_path))
+                If relic_data Is Nothing Then
+                    relic_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(relic_data_path))
+                End If
+                If name_data Is Nothing Then
+                    name_data = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(name_data_path))
+                End If
 
-            If relic_data.TryGetValue("timestamp", Nothing) AndAlso
-                eqmt_data.TryGetValue("timestamp", Nothing) AndAlso
-                eqmt_data("timestamp").ToString() = relic_data("timestamp").ToString() AndAlso
-                last_mod < DateTime.Parse(relic_data("timestamp")) Then
-                Return False
-            End If
+                If relic_data.TryGetValue("timestamp", Nothing) AndAlso
+                    eqmt_data.TryGetValue("timestamp", Nothing) AndAlso
+                    eqmt_data("timestamp").ToString() = relic_data("timestamp").ToString() AndAlso
+                    last_mod < DateTime.Parse(relic_data("timestamp")) Then
+                    Return False
+                End If
+            End Using
         End If
 
         relic_data = New JObject()
@@ -420,28 +432,29 @@ Class Data
         Return True
     End Function
 
-    Public Sub Update()
-        Dim market_save As Boolean = Load_Market_Items() Or Load_Market_Data()
+    Public Function Update() As Boolean
+        Dim save_market As Boolean = Load_Market_Items() Or Load_Market_Data()
 
         For Each elem As KeyValuePair(Of String, String) In market_items
             Dim name As String = elem.Value.Split("|")(0)
             If Not name.Contains(" Set") AndAlso Not market_data.TryGetValue(name, Nothing) Then
                 Dim split As String() = elem.Value.Split("|")
                 Load_Market_Item(split(0), split(1))
-                market_save = True
+                save_market = True
             End If
         Next
-        If market_save Then
-            Save_Market()
+        If save_market Then
+            Me.Save_Market()
         End If
-
-        If Load_Drop_Data() Then
+        Dim save_drop As Boolean = Load_Drop_Data()
+        If save_drop Then
             Load_Eqmt_Rqmts()
             Save_Eqmt()
             Save_Relics()
             Save_Names()
         End If
-    End Sub
+        Return save_market Or save_drop
+    End Function
 
     Public Sub ForceMarketUpdate()
         Load_Market_Items(True)

@@ -198,7 +198,6 @@
     <Compile Include="Relics.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Settings1.vb" />
     <Compile Include="Tray.designer.vb">
       <DependentUpon>Tray.vb</DependentUpon>
     </Compile>
