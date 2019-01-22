@@ -9,4 +9,4 @@ TODO:
 	Get Name Plaques working again
 	Move all colors into the Picker/Settings
 	Add Owned indicator to Overlays
-	
+	Store settings in appdata as json
