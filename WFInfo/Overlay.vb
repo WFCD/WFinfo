@@ -44,10 +44,10 @@ Public Class Overlay
         lbDDropShadow.Text = lbDucats.Text
     End Sub
 
-    Public Sub ShowOverlay(x As Integer, y As Integer)
+    Public Sub ShowOverlay(right As Integer, top As Integer)
         Me.Show()
         Me.Size = New Drawing.Size(125, 70)
-        Me.Location = New Point(x, y)
+        Me.Location = New Point(right - Me.Size.Width, top)
         tHide.Start()
     End Sub
 

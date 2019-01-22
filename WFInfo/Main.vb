@@ -524,17 +524,7 @@ Module Glob
 
         Using g As Graphics = Graphics.FromHwnd(IntPtr.Zero)
             Dim desktop As IntPtr = g.GetHdc()
-            Dim temp As Double = GetDeviceCaps(desktop, DeviceCap.LOGPIXELSX) / 96
-            If temp <> 1 Then
-                Main.addLog("FOUND DPI: LOGPIXELSX")
-                Return temp
-            End If
-            temp = GetDeviceCaps(desktop, DeviceCap.LOGPIXELSY) / 96
-            If temp <> 1 Then
-                Main.addLog("FOUND DPI: LOGPIXELSY")
-                Return temp
-            End If
-            temp = GetDeviceCaps(desktop, DeviceCap.DESKTOPVERTRES)
+            Dim temp As Double = GetDeviceCaps(desktop, DeviceCap.DESKTOPVERTRES)
             temp /= GetDeviceCaps(desktop, DeviceCap.VERTRES)
             Return temp
         End Using

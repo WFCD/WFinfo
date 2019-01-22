@@ -8,8 +8,10 @@ Module OCR
 
     Private window As Rect = Nothing
     Private win_area As Rect = Nothing
-    Private relic_area As Rect = Nothing
-    Private relic_pt As Point = Nothing
+    Private ss_area As Rectangle = Nothing ' Screenshot coordinates and width/height
+
+    Private relic_area As RectangleF = Nothing ' Percentage coordinates, i.e. OF THE LEFT MOST REWARD
+
     Dim img_count As Integer = 1
     Dim rarity As New List(Of Color) From {Color.FromArgb(171, 159, 117), Color.FromArgb(175, 175, 175), Color.FromArgb(134, 98, 50)}
 
@@ -56,9 +58,10 @@ Module OCR
 
 
         'FROM (0,0)
-        Dim top As Integer = (win_area.Height / 2) - (314 * scale)
-        Dim left As Integer = (win_area.Width / 2) - (749 * scale)
-        relic_pt = New Point(dpiScaling * left, dpiScaling * top)
+        Dim top As Integer = (win_area.Height / 2) - (318 * scale) - 1
+        Dim left As Integer = (win_area.Width / 2) - (758 * scale) - 1
+        Dim wid As Integer = 1516 * scale + 2
+        Dim hei As Integer = 304 * scale + 2
 
         'Adjust to actual "top-left"
         left += window.X1
@@ -69,9 +72,10 @@ Module OCR
             top += window.Height - win_area.Height - padding
         End If
 
-        relic_area = New Rect(dpiScaling * (left - 1), dpiScaling * (top - 1), dpiScaling * (1500 * scale + 2), dpiScaling * (300 * scale + 2))
+        ss_area = New Rectangle(dpiScaling * left, dpiScaling * top, dpiScaling * wid, dpiScaling * hei)
+        relic_area = New RectangleF(left, top, 378 * scale, hei)
         If Debug Then
-            Main.addLog("UPDATED WIN COORS:" & vbCrLf & dpiScaling & vbCrLf & window.ToString() & vbCrLf & win_area.ToString() & vbCrLf & relic_area.ToString() & vbCrLf & relic_pt.ToString())
+            Main.addLog("UPDATED WIN COORS:" & vbCrLf & dpiScaling & vbCrLf & window.ToString() & vbCrLf & win_area.ToString() & vbCrLf & ss_area.ToString() & vbCrLf & relic_area.ToString())
         End If
         Return True
     End Function
@@ -106,7 +110,6 @@ Module OCR
             ' Finds text in those images, then adds to list
             Dim text As String = GetPartText(Crop(screen, players, i))
             foundText.Add(text)
-            Console.WriteLine("FOUND PART: " + text)
         Next
         Console.WriteLine("GET OCR TEXT: " + (clock.Elapsed.Ticks - prev_time).ToString())
         prev_time = clock.Elapsed.Ticks
@@ -116,18 +119,26 @@ Module OCR
         Console.WriteLine("GET PART NAMES: " + (clock.Elapsed.Ticks - prev_time).ToString())
         prev_time = clock.Elapsed.Ticks
 
+        If Debug Then
+            Main.addLog("DISPLAYING OVERLAYS:" & vbCrLf & players & vbCrLf & relic_area.ToString())
+        End If
         Dim plat As Double = 0
         Dim ducat As String = ""
         Dim vaulted As Boolean
-        Dim y As Integer = relic_area.Y1 * 1.05
-        Dim x As Integer
+        Dim pad As Integer = relic_area.Height * 0.05
+        Dim top As Integer = relic_area.Y + pad
+        Dim right As Integer = relic_area.X - pad
         For i = 0 To foundText.Count - 1
-            x = relic_area.X1 + (screen.Width * (i / 4 + (5 - players) / 8))
+            right += relic_area.Width
+
+            If Debug Then
+                Main.addLog("DISPLAY OVERLAY " & (i + 1) & ":" & vbCrLf & "Right, Top: " & right & ", " & top & vbCrLf & relic_area.ToString())
+            End If
             plat = db.market_data(foundText(i))("plat")
             ducat = db.market_data(foundText(i))("ducats").ToString()
             vaulted = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
             db.panels(i).LoadText(plat.ToString("N1"), ducat, vaulted)
-            db.panels(i).ShowOverlay(x, y)
+            db.panels(i).ShowOverlay(right, top)
         Next
         Console.WriteLine("DISPLAY OVERLAYS: " + (clock.Elapsed.Ticks - prev_time).ToString())
         clock.Stop()
@@ -156,21 +167,20 @@ Module OCR
 
     Private Function GetScreenShot() As Bitmap
         If Debug Then
-            Main.addLog("TAKING SCREENSHOT:" & vbCrLf & dpiScaling & vbCrLf & relic_area.ToString() & vbCrLf & relic_pt.ToString())
+            Main.addLog("TAKING SCREENSHOT:" & vbCrLf & dpiScaling & vbCrLf & ss_area.ToString())
         End If
         Dim ret As Bitmap
         If Fullscreen Then
             ret = New System.Drawing.Bitmap(My.Settings.LastFile)
-            Dim CropRect As New Rectangle(relic_pt.X, relic_pt.Y, relic_area.Width, relic_area.Height)
-            Dim CropImage = New Bitmap(CropRect.Width, CropRect.Height)
+            Dim CropImage = New Bitmap(ss_area.Width, ss_area.Height)
             Using grp = Graphics.FromImage(CropImage)
-                grp.DrawImage(ret, New Rectangle(0, 0, CropRect.Width, CropRect.Height), CropRect, GraphicsUnit.Pixel)
+                grp.DrawImage(ret, New Rectangle(0, 0, ss_area.Width, ss_area.Height), ss_area, GraphicsUnit.Pixel)
             End Using
             ret = CropImage
         Else
-            ret = New System.Drawing.Bitmap(relic_area.Width, relic_area.Height, Imaging.PixelFormat.Format32bppRgb)
+            ret = New System.Drawing.Bitmap(ss_area.Width, ss_area.Height, Imaging.PixelFormat.Format32bppRgb)
             Dim graph As Graphics = Graphics.FromImage(ret)
-            graph.CopyFromScreen(relic_area.X1, relic_area.Y1, 0, 0, New Size(relic_area.Width, relic_area.Height), CopyPixelOperation.SourceCopy)
+            graph.CopyFromScreen(ss_area.X, ss_area.Y, 0, 0, New Size(ss_area.Width, ss_area.Height), CopyPixelOperation.SourceCopy)
         End If
         If Debug Then
             ret.Save(appData & "\WFInfo\tests\SS-" & My.Settings.SSCount.ToString() & ".jpg")
@@ -244,7 +254,7 @@ Module OCR
             Dim clr As Color = Nothing
             Dim last As Integer = -200
             For i As Integer = 0 To bmp.Width - 1
-                For j As Integer = bmp.Height / 2 To (bmp.Height / 2 + 4)
+                For j As Integer = 0 To bmp.Height - 1
                     clr = bmp.GetPixel(i, j)
                     If clr.R > 80 OrElse clr.G > 80 OrElse clr.B > 80 Then
                         If last + 160 < i Then
@@ -253,9 +263,15 @@ Module OCR
                         last = i
                         Exit For
                     End If
-                    bmp.SetPixel(i, j, Color.White)
+                    If Debug Then
+                        bmp.SetPixel(i, j, Color.White)
+                    End If
                 Next
             Next
+            If Debug Then
+                bmp.Save(appData & "\WFInfo\tests\Plyr-" & My.Settings.PlyrCount.ToString() & ".jpg")
+                My.Settings.PlyrCount += 1
+            End If
         End Using
         Return count
     End Function
@@ -271,8 +287,8 @@ Module OCR
         Select Case mode
             Case 0 'This mode is used to get the number of players
                 startX = 0
-                startY = img.Height - height
-                height = img.Height - startY
+                startY = img.Height * 0.95
+                height = 4
                 width = img.Width
             Case 4 '4 players for single lined parts
                 startX = (img.Width / 4) * pos
