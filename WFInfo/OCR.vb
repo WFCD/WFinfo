@@ -128,6 +128,8 @@ Module OCR
         Dim pad As Integer = relic_area.Height * 0.05
         Dim top As Integer = relic_area.Y + pad
         Dim right As Integer = relic_area.X - pad
+		' Move over if you don't have all 4
+		right += relic_area.Width * (4 - players) * 0.5
         For i = 0 To foundText.Count - 1
             right += relic_area.Width
 
