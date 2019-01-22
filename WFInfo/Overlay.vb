@@ -8,7 +8,7 @@ Public Class Overlay
         Me.BackColor = Color.Black
         Me.TopMost = True
 
-        Dim fontSize As Integer = 18 / dpiScaling
+        Dim fontSize As Integer = 18
         Dim allFont As New Font(lbPDropShadow.Font.FontFamily, fontSize, FontStyle.Bold)
 
         lbPDropShadow.Location = New Point(35, 3)
