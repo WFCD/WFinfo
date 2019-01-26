@@ -27,9 +27,7 @@ Partial Class Main
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Main))
         Me.tPB = New System.Windows.Forms.Timer(Me.components)
-        Me.lbStatus = New System.Windows.Forms.Label()
         Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.DebugButton = New System.Windows.Forms.Button()
         Me.lbWiki = New System.Windows.Forms.Label()
         Me.lbWikiDate = New System.Windows.Forms.Label()
         Me.lbEqmt = New System.Windows.Forms.Label()
@@ -41,7 +39,6 @@ Partial Class Main
         Me.btnClose = New System.Windows.Forms.Button()
         Me.pTitle = New System.Windows.Forms.Panel()
         Me.btnHide = New System.Windows.Forms.Button()
-        Me.Label1 = New System.Windows.Forms.Label()
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.trayIcon = New System.Windows.Forms.NotifyIcon(Me.components)
@@ -56,6 +53,8 @@ Partial Class Main
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.pbEqmt = New System.Windows.Forms.PictureBox()
         Me.pbHome = New System.Windows.Forms.PictureBox()
+        Me.Label2 = New System.Windows.Forms.Label()
+        Me.lbStatus = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -72,24 +71,10 @@ Partial Class Main
         Me.tPB.Enabled = True
         Me.tPB.Interval = 1
         '
-        'lbStatus
-        '
-        Me.lbStatus.AutoSize = True
-        Me.lbStatus.BackColor = System.Drawing.Color.Transparent
-        Me.lbStatus.Font = New System.Drawing.Font("Cambria", 18.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbStatus.ForeColor = System.Drawing.Color.Yellow
-        Me.lbStatus.Location = New System.Drawing.Point(368, -5)
-        Me.lbStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lbStatus.Name = "lbStatus"
-        Me.lbStatus.Size = New System.Drawing.Size(34, 42)
-        Me.lbStatus.TabIndex = 5
-        Me.lbStatus.Text = "•"
-        '
         'Panel1
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel1.Controls.Add(Me.DebugButton)
         Me.Panel1.Controls.Add(Me.lbWiki)
         Me.Panel1.Controls.Add(Me.lbWikiDate)
         Me.Panel1.Controls.Add(Me.lbEqmt)
@@ -97,33 +82,19 @@ Partial Class Main
         Me.Panel1.Controls.Add(Me.lbMarketDate)
         Me.Panel1.Controls.Add(Me.lbMarket)
         Me.Panel1.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Panel1.Location = New System.Drawing.Point(0, 39)
-        Me.Panel1.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.Panel1.Location = New System.Drawing.Point(0, 25)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(500, 164)
+        Me.Panel1.Size = New System.Drawing.Size(334, 87)
         Me.Panel1.TabIndex = 19
-        '
-        'DebugButton
-        '
-        Me.DebugButton.Enabled = False
-        Me.DebugButton.Location = New System.Drawing.Point(388, 122)
-        Me.DebugButton.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
-        Me.DebugButton.Name = "DebugButton"
-        Me.DebugButton.Size = New System.Drawing.Size(58, 35)
-        Me.DebugButton.TabIndex = 28
-        Me.DebugButton.Text = "Button1"
-        Me.DebugButton.UseVisualStyleBackColor = True
-        Me.DebugButton.Visible = False
         '
         'lbWiki
         '
         Me.lbWiki.BackColor = System.Drawing.Color.Transparent
         Me.lbWiki.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbWiki.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbWiki.Location = New System.Drawing.Point(45, 105)
-        Me.lbWiki.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lbWiki.Location = New System.Drawing.Point(30, 59)
         Me.lbWiki.Name = "lbWiki"
-        Me.lbWiki.Size = New System.Drawing.Size(180, 28)
+        Me.lbWiki.Size = New System.Drawing.Size(120, 18)
         Me.lbWiki.TabIndex = 27
         Me.lbWiki.Text = "Wiki Data:"
         Me.lbWiki.TextAlign = System.Drawing.ContentAlignment.MiddleRight
@@ -133,10 +104,9 @@ Partial Class Main
         Me.lbWikiDate.BackColor = System.Drawing.Color.Transparent
         Me.lbWikiDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbWikiDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
-        Me.lbWikiDate.Location = New System.Drawing.Point(234, 105)
-        Me.lbWikiDate.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lbWikiDate.Location = New System.Drawing.Point(156, 59)
         Me.lbWikiDate.Name = "lbWikiDate"
-        Me.lbWikiDate.Size = New System.Drawing.Size(180, 28)
+        Me.lbWikiDate.Size = New System.Drawing.Size(120, 18)
         Me.lbWikiDate.TabIndex = 26
         Me.lbWikiDate.Text = "Loading..."
         '
@@ -145,10 +115,9 @@ Partial Class Main
         Me.lbEqmt.BackColor = System.Drawing.Color.Transparent
         Me.lbEqmt.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbEqmt.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbEqmt.Location = New System.Drawing.Point(45, 66)
-        Me.lbEqmt.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lbEqmt.Location = New System.Drawing.Point(30, 34)
         Me.lbEqmt.Name = "lbEqmt"
-        Me.lbEqmt.Size = New System.Drawing.Size(180, 28)
+        Me.lbEqmt.Size = New System.Drawing.Size(120, 18)
         Me.lbEqmt.TabIndex = 25
         Me.lbEqmt.Text = "Drop Data:"
         Me.lbEqmt.TextAlign = System.Drawing.ContentAlignment.MiddleRight
@@ -158,10 +127,9 @@ Partial Class Main
         Me.lbEqmtDate.BackColor = System.Drawing.Color.Transparent
         Me.lbEqmtDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbEqmtDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
-        Me.lbEqmtDate.Location = New System.Drawing.Point(234, 66)
-        Me.lbEqmtDate.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lbEqmtDate.Location = New System.Drawing.Point(156, 34)
         Me.lbEqmtDate.Name = "lbEqmtDate"
-        Me.lbEqmtDate.Size = New System.Drawing.Size(180, 28)
+        Me.lbEqmtDate.Size = New System.Drawing.Size(120, 18)
         Me.lbEqmtDate.TabIndex = 24
         Me.lbEqmtDate.Text = "Loading..."
         '
@@ -170,10 +138,9 @@ Partial Class Main
         Me.lbMarketDate.BackColor = System.Drawing.Color.Transparent
         Me.lbMarketDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbMarketDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
-        Me.lbMarketDate.Location = New System.Drawing.Point(234, 28)
-        Me.lbMarketDate.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lbMarketDate.Location = New System.Drawing.Point(156, 9)
         Me.lbMarketDate.Name = "lbMarketDate"
-        Me.lbMarketDate.Size = New System.Drawing.Size(180, 28)
+        Me.lbMarketDate.Size = New System.Drawing.Size(120, 18)
         Me.lbMarketDate.TabIndex = 22
         Me.lbMarketDate.Text = "Loading..."
         '
@@ -182,10 +149,9 @@ Partial Class Main
         Me.lbMarket.BackColor = System.Drawing.Color.Transparent
         Me.lbMarket.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbMarket.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbMarket.Location = New System.Drawing.Point(45, 28)
-        Me.lbMarket.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lbMarket.Location = New System.Drawing.Point(30, 9)
         Me.lbMarket.Name = "lbMarket"
-        Me.lbMarket.Size = New System.Drawing.Size(180, 28)
+        Me.lbMarket.Size = New System.Drawing.Size(120, 18)
         Me.lbMarket.TabIndex = 21
         Me.lbMarket.Text = "Market Data:"
         Me.lbMarket.TextAlign = System.Drawing.ContentAlignment.MiddleRight
@@ -196,10 +162,9 @@ Partial Class Main
         Me.lbVersion.BackColor = System.Drawing.Color.Transparent
         Me.lbVersion.Font = New System.Drawing.Font("Cambria", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbVersion.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbVersion.Location = New System.Drawing.Point(132, 11)
-        Me.lbVersion.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lbVersion.Location = New System.Drawing.Point(88, 7)
         Me.lbVersion.Name = "lbVersion"
-        Me.lbVersion.Size = New System.Drawing.Size(59, 20)
+        Me.lbVersion.Size = New System.Drawing.Size(38, 12)
         Me.lbVersion.TabIndex = 7
         Me.lbVersion.Text = "vX.X.X"
         '
@@ -209,10 +174,9 @@ Partial Class Main
         Me.lbTitle.BackColor = System.Drawing.Color.Transparent
         Me.lbTitle.Font = New System.Drawing.Font("Cambria", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbTitle.Location = New System.Drawing.Point(46, 5)
-        Me.lbTitle.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lbTitle.Location = New System.Drawing.Point(31, 3)
         Me.lbTitle.Name = "lbTitle"
-        Me.lbTitle.Size = New System.Drawing.Size(90, 27)
+        Me.lbTitle.Size = New System.Drawing.Size(58, 17)
         Me.lbTitle.TabIndex = 6
         Me.lbTitle.Text = "WFInfo"
         '
@@ -224,10 +188,9 @@ Partial Class Main
         Me.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnClose.Font = New System.Drawing.Font("Tahoma", 11.0!, System.Drawing.FontStyle.Bold)
         Me.btnClose.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.btnClose.Location = New System.Drawing.Point(454, -2)
-        Me.btnClose.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.btnClose.Location = New System.Drawing.Point(303, -1)
         Me.btnClose.Name = "btnClose"
-        Me.btnClose.Size = New System.Drawing.Size(45, 42)
+        Me.btnClose.Size = New System.Drawing.Size(30, 27)
         Me.btnClose.TabIndex = 22
         Me.btnClose.TabStop = False
         Me.btnClose.Text = "×"
@@ -238,16 +201,13 @@ Partial Class Main
         Me.pTitle.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
         Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.pTitle.Controls.Add(Me.btnHide)
-        Me.pTitle.Controls.Add(Me.Label1)
         Me.pTitle.Controls.Add(Me.lbVersion)
         Me.pTitle.Controls.Add(Me.btnClose)
         Me.pTitle.Controls.Add(Me.PictureBox3)
-        Me.pTitle.Controls.Add(Me.lbStatus)
         Me.pTitle.Controls.Add(Me.lbTitle)
         Me.pTitle.Location = New System.Drawing.Point(0, 0)
-        Me.pTitle.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.pTitle.Name = "pTitle"
-        Me.pTitle.Size = New System.Drawing.Size(500, 40)
+        Me.pTitle.Size = New System.Drawing.Size(334, 27)
         Me.pTitle.TabIndex = 6
         '
         'btnHide
@@ -258,37 +218,22 @@ Partial Class Main
         Me.btnHide.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnHide.Font = New System.Drawing.Font("Tahoma", 7.0!, System.Drawing.FontStyle.Bold)
         Me.btnHide.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.btnHide.Location = New System.Drawing.Point(411, -2)
-        Me.btnHide.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.btnHide.Location = New System.Drawing.Point(274, -1)
         Me.btnHide.Name = "btnHide"
-        Me.btnHide.Size = New System.Drawing.Size(45, 42)
+        Me.btnHide.Size = New System.Drawing.Size(30, 27)
         Me.btnHide.TabIndex = 25
         Me.btnHide.TabStop = False
         Me.btnHide.Text = "━"
         Me.btnHide.TextAlign = System.Drawing.ContentAlignment.BottomCenter
         Me.btnHide.UseVisualStyleBackColor = False
         '
-        'Label1
-        '
-        Me.Label1.AutoSize = True
-        Me.Label1.BackColor = System.Drawing.Color.Transparent
-        Me.Label1.Font = New System.Drawing.Font("Cambria", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label1.Location = New System.Drawing.Point(309, 11)
-        Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(66, 20)
-        Me.Label1.TabIndex = 24
-        Me.Label1.Text = "Status: "
-        '
         'PictureBox3
         '
         Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
         Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
-        Me.PictureBox3.Location = New System.Drawing.Point(0, -2)
-        Me.PictureBox3.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
         Me.PictureBox3.Name = "PictureBox3"
-        Me.PictureBox3.Size = New System.Drawing.Size(38, 38)
+        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
         Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.PictureBox3.TabIndex = 23
         Me.PictureBox3.TabStop = False
@@ -296,7 +241,7 @@ Partial Class Main
         'tUpdate
         '
         Me.tUpdate.Enabled = True
-        Me.tUpdate.Interval = 3600000
+        Me.tUpdate.Interval = 300000
         '
         'trayIcon
         '
@@ -310,48 +255,47 @@ Partial Class Main
         Me.trayMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.trayShow, Me.trayRelics, Me.trayEquipment, Me.ToolStripSeparator1, Me.trayExit})
         Me.trayMenu.Name = "trayMenu"
         Me.trayMenu.ShowImageMargin = False
-        Me.trayMenu.Size = New System.Drawing.Size(146, 130)
+        Me.trayMenu.Size = New System.Drawing.Size(108, 98)
         '
         'trayShow
         '
         Me.trayShow.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold)
         Me.trayShow.Name = "trayShow"
-        Me.trayShow.Size = New System.Drawing.Size(145, 30)
+        Me.trayShow.Size = New System.Drawing.Size(107, 22)
         Me.trayShow.Text = "Show"
         Me.trayShow.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal
         '
         'trayRelics
         '
         Me.trayRelics.Name = "trayRelics"
-        Me.trayRelics.Size = New System.Drawing.Size(145, 30)
+        Me.trayRelics.Size = New System.Drawing.Size(107, 22)
         Me.trayRelics.Text = "Relics"
         '
         'trayEquipment
         '
         Me.trayEquipment.Name = "trayEquipment"
-        Me.trayEquipment.Size = New System.Drawing.Size(145, 30)
+        Me.trayEquipment.Size = New System.Drawing.Size(107, 22)
         Me.trayEquipment.Text = "Equipment"
         Me.trayEquipment.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal
         '
         'ToolStripSeparator1
         '
         Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
-        Me.ToolStripSeparator1.Size = New System.Drawing.Size(142, 6)
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(104, 6)
         '
         'trayExit
         '
         Me.trayExit.Name = "trayExit"
-        Me.trayExit.Size = New System.Drawing.Size(145, 30)
+        Me.trayExit.Size = New System.Drawing.Size(107, 22)
         Me.trayExit.Text = "Exit"
         '
         'pbSideBar
         '
         Me.pbSideBar.BackColor = System.Drawing.Color.FromArgb(CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer))
         Me.pbSideBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.pbSideBar.Location = New System.Drawing.Point(456, 39)
-        Me.pbSideBar.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.pbSideBar.Location = New System.Drawing.Point(304, 25)
         Me.pbSideBar.Name = "pbSideBar"
-        Me.pbSideBar.Size = New System.Drawing.Size(44, 164)
+        Me.pbSideBar.Size = New System.Drawing.Size(30, 107)
         Me.pbSideBar.TabIndex = 18
         Me.pbSideBar.TabStop = False
         '
@@ -359,11 +303,10 @@ Partial Class Main
         '
         Me.pbRelic.BackColor = System.Drawing.Color.Transparent
         Me.pbRelic.Image = Global.WFInfo.My.Resources.Resources.Relic
-        Me.pbRelic.Location = New System.Drawing.Point(457, 85)
-        Me.pbRelic.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.pbRelic.Location = New System.Drawing.Point(305, 55)
         Me.pbRelic.Name = "pbRelic"
-        Me.pbRelic.Padding = New System.Windows.Forms.Padding(14, 0, 12, 0)
-        Me.pbRelic.Size = New System.Drawing.Size(42, 32)
+        Me.pbRelic.Padding = New System.Windows.Forms.Padding(9, 0, 8, 0)
+        Me.pbRelic.Size = New System.Drawing.Size(28, 21)
         Me.pbRelic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.pbRelic.TabIndex = 14
         Me.pbRelic.TabStop = False
@@ -372,11 +315,10 @@ Partial Class Main
         '
         Me.pbSettings.BackColor = System.Drawing.Color.Transparent
         Me.pbSettings.Image = Global.WFInfo.My.Resources.Resources.Settings
-        Me.pbSettings.Location = New System.Drawing.Point(457, 162)
-        Me.pbSettings.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.pbSettings.Location = New System.Drawing.Point(305, 105)
         Me.pbSettings.Name = "pbSettings"
-        Me.pbSettings.Padding = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.pbSettings.Size = New System.Drawing.Size(42, 32)
+        Me.pbSettings.Padding = New System.Windows.Forms.Padding(3, 0, 3, 0)
+        Me.pbSettings.Size = New System.Drawing.Size(28, 21)
         Me.pbSettings.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.pbSettings.TabIndex = 15
         Me.pbSettings.TabStop = False
@@ -385,11 +327,10 @@ Partial Class Main
         '
         Me.pbEqmt.BackColor = System.Drawing.Color.Transparent
         Me.pbEqmt.Image = Global.WFInfo.My.Resources.Resources.foundry
-        Me.pbEqmt.Location = New System.Drawing.Point(457, 123)
-        Me.pbEqmt.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.pbEqmt.Location = New System.Drawing.Point(305, 80)
         Me.pbEqmt.Name = "pbEqmt"
-        Me.pbEqmt.Padding = New System.Windows.Forms.Padding(9, 0, 9, 0)
-        Me.pbEqmt.Size = New System.Drawing.Size(42, 32)
+        Me.pbEqmt.Padding = New System.Windows.Forms.Padding(6, 0, 6, 0)
+        Me.pbEqmt.Size = New System.Drawing.Size(28, 21)
         Me.pbEqmt.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.pbEqmt.TabIndex = 16
         Me.pbEqmt.TabStop = False
@@ -398,21 +339,48 @@ Partial Class Main
         '
         Me.pbHome.BackColor = System.Drawing.Color.Transparent
         Me.pbHome.Image = Global.WFInfo.My.Resources.Resources.home
-        Me.pbHome.Location = New System.Drawing.Point(457, 46)
-        Me.pbHome.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
+        Me.pbHome.Location = New System.Drawing.Point(305, 30)
         Me.pbHome.Name = "pbHome"
-        Me.pbHome.Padding = New System.Windows.Forms.Padding(3, 0, 3, 0)
-        Me.pbHome.Size = New System.Drawing.Size(42, 32)
+        Me.pbHome.Padding = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.pbHome.Size = New System.Drawing.Size(28, 21)
         Me.pbHome.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.pbHome.TabIndex = 17
         Me.pbHome.TabStop = False
         '
+        'Label2
+        '
+        Me.Label2.BackColor = System.Drawing.Color.FromArgb(CType(CType(39, Byte), Integer), CType(CType(39, Byte), Integer), CType(CType(39, Byte), Integer))
+        Me.Label2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Label2.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.Label2.Location = New System.Drawing.Point(0, 111)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Padding = New System.Windows.Forms.Padding(2)
+        Me.Label2.Size = New System.Drawing.Size(305, 21)
+        Me.Label2.TabIndex = 29
+        Me.Label2.Text = "Status: "
+        Me.Label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'lbStatus
+        '
+        Me.lbStatus.BackColor = System.Drawing.Color.FromArgb(CType(CType(39, Byte), Integer), CType(CType(39, Byte), Integer), CType(CType(39, Byte), Integer))
+        Me.lbStatus.Font = New System.Drawing.Font("Tahoma", 8.0!)
+        Me.lbStatus.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.lbStatus.Location = New System.Drawing.Point(48, 112)
+        Me.lbStatus.Name = "lbStatus"
+        Me.lbStatus.Size = New System.Drawing.Size(256, 19)
+        Me.lbStatus.TabIndex = 30
+        Me.lbStatus.Text = "Loading..."
+        Me.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
         'Main
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(9.0!, 20.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(501, 206)
+        Me.ClientSize = New System.Drawing.Size(334, 132)
+        Me.Controls.Add(Me.lbStatus)
+        Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.pbHome)
         Me.Controls.Add(Me.pbEqmt)
         Me.Controls.Add(Me.pbSettings)
@@ -423,7 +391,6 @@ Partial Class Main
         Me.DoubleBuffered = True
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.Name = "Main"
         Me.Text = "WFInfo"
         Me.Panel1.ResumeLayout(False)
@@ -440,7 +407,6 @@ Partial Class Main
 
     End Sub
     Friend WithEvents tPB As Timer
-    Friend WithEvents lbStatus As Label
     Friend WithEvents pbSideBar As PictureBox
     Friend WithEvents Panel1 As Panel
     Friend WithEvents lbTitle As Label
@@ -448,7 +414,6 @@ Partial Class Main
     Friend WithEvents PictureBox3 As PictureBox
     Friend WithEvents pTitle As Panel
     Friend WithEvents lbVersion As Label
-    Friend WithEvents Label1 As Label
     Friend WithEvents tUpdate As Timer
     Friend WithEvents trayIcon As NotifyIcon
     Friend WithEvents btnHide As Button
@@ -464,9 +429,10 @@ Partial Class Main
     Friend WithEvents lbEqmtDate As Label
     Friend WithEvents lbWiki As Label
     Friend WithEvents lbWikiDate As Label
-    Friend WithEvents DebugButton As Button
     Friend WithEvents pbRelic As PictureBox
     Friend WithEvents pbSettings As PictureBox
     Friend WithEvents pbEqmt As PictureBox
     Friend WithEvents pbHome As PictureBox
+    Friend WithEvents Label2 As Label
+    Friend WithEvents lbStatus As Label
 End Class

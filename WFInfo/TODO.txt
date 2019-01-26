@@ -10,3 +10,16 @@ TODO:
 	Move all colors into the Picker/Settings
 	Add Owned indicator to Overlays
 	Store settings in appdata as json
+	Fix Overlay white flash
+	Confirm Eqmt window is being updated
+	Move status into a bottom bar with text
+		Makes it clearer and will work for colorblind people
+	Look into potential of merging all windows into one?
+		Possible, but unlikely?
+		Need to consider usefulness
+	Add tabs to main window
+		Have status tab showing databases AND a "reload" button for each
+		Have another tab for information, like the tray info
+		Need to consider if tabs are worthwhile
+			Or just to expand main window
+	Get window hiding before tray icon shows

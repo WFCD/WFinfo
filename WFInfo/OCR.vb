@@ -9,8 +9,9 @@ Module OCR
     Private window As Rect = Nothing
     Private win_area As Rect = Nothing
     Private ss_area As Rectangle = Nothing ' Screenshot coordinates and width/height
-
     Private relic_area As RectangleF = Nothing ' Percentage coordinates, i.e. OF THE LEFT MOST REWARD
+
+    Private dpiScaling As Double = -1.0
 
     Dim img_count As Integer = 1
     Dim rarity As New List(Of Color) From {Color.FromArgb(171, 159, 117), Color.FromArgb(175, 175, 175), Color.FromArgb(134, 98, 50)}
@@ -23,10 +24,53 @@ Module OCR
     Private Function GetClientRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
     End Function
 
+    <DllImport("gdi32.dll")>
+    Public Function GetDeviceCaps(hdc As IntPtr, nIndex As Integer) As Integer
+    End Function
+
+    Public Enum DeviceCap
+        VERTRES = 10
+        DESKTOPVERTRES = 117
+    End Enum
+
+    Public Function GetScalingFactor() As Double
+        Using form As New Form()
+            Using g As Graphics = form.CreateGraphics()
+                If g.DpiX <> 96 Then
+                    Main.addLog("FOUND DPI: g.DpiX")
+                    Return g.DpiX / 96
+                ElseIf g.DpiY <> 96 Then
+                    Main.addLog("FOUND DPI: g.DpiY")
+                    Return g.DpiY / 96
+                End If
+            End Using
+        End Using
+
+        Using g As Graphics = Graphics.FromHwnd(IntPtr.Zero)
+            Dim desktop As IntPtr = g.GetHdc()
+            Dim temp As Double = GetDeviceCaps(desktop, DeviceCap.DESKTOPVERTRES)
+            temp /= GetDeviceCaps(desktop, DeviceCap.VERTRES)
+            If temp <> 1 Then
+                Main.addLog("FOUND DPI: VERTRES")
+                Return temp
+            End If
+        End Using
+
+        Return 1
+    End Function
+
+    Friend Sub ForceUpdateCoors()
+        dpiScaling = GetScalingFactor()
+        window = Nothing
+        win_area = Nothing
+        ss_area = Nothing
+        relic_area = Nothing
+        GetCoors()
+    End Sub
+
+    Private GetCoors_timer As Long = 0
     Public Function GetCoors() As Boolean
-        If window <> Nothing Then
-            Return UpdateCoors()
-        End If
+        GetCoors_timer = clock.Elapsed.TotalMilliseconds
         Dim wf As Process = Nothing
         For Each p As Process In Process.GetProcesses
             If p.ProcessName.Contains("Warframe") Then
@@ -35,6 +79,8 @@ Module OCR
             End If
         Next
         If wf Is Nothing Then
+            GetCoors_timer -= clock.Elapsed.TotalMilliseconds
+            Console.WriteLine("No WF window" & GetCoors_timer & "ms")
             Return False
         End If
 
@@ -42,44 +88,50 @@ Module OCR
         GetWindowRect(hr, window)
         GetClientRect(hr, win_area)
 
-
-        Return UpdateCoors()
-    End Function
-
-    Public Function UpdateCoors() As Boolean
-        If window = Nothing Then
-            Return GetCoors()
-        End If
-        ' Works for ONLY 1680/1050
-        Dim scale As Double = My.Settings.Scaling
-        scale /= 100
-        scale *= win_area.Width
-        scale /= 1680
-
-
-        'FROM (0,0)
-        Dim top As Integer = (win_area.Height / 2) - (318 * scale) - 1
-        Dim left As Integer = (win_area.Width / 2) - (758 * scale) - 1
-        Dim wid As Integer = 1516 * scale + 2
-        Dim hei As Integer = 304 * scale + 2
-
-        'Adjust to actual "top-left"
-        left += window.X1
-        top += window.Y1
-        If (win_area.Width <> window.Width Or win_area.Height <> window.Height) Then
-            Dim padding As Integer = (window.Width - win_area.Width) / 2
-            left += padding
-            top += window.Height - win_area.Height - padding
-        End If
-
-        ss_area = New Rectangle(dpiScaling * left, dpiScaling * top, dpiScaling * wid, dpiScaling * hei)
-        relic_area = New RectangleF(left, top, 378 * scale, hei)
-        If Debug Then
-            Main.addLog("UPDATED WIN COORS:" & vbCrLf & dpiScaling & vbCrLf & window.ToString() & vbCrLf & win_area.ToString() & vbCrLf & ss_area.ToString() & vbCrLf & relic_area.ToString())
-        End If
+        UpdateCoors()
+        GetCoors_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("GetCoors Update" & GetCoors_timer & "ms")
         Return True
     End Function
 
+    Public Sub UpdateCoors()
+        If dpiScaling = -1.0 Then
+            dpiScaling = GetScalingFactor()
+        End If
+
+        If window = Nothing Then
+            GetCoors()
+        Else
+            Dim scale As Double = My.Settings.Scaling
+            scale /= 100
+            scale *= win_area.Width
+            scale /= 1680
+
+
+            'FROM (0,0)
+            Dim top As Integer = (win_area.Height / 2) - (318 * scale) - 1
+            Dim left As Integer = (win_area.Width / 2) - (758 * scale) - 1
+            Dim wid As Integer = 1516 * scale + 2
+            Dim hei As Integer = 304 * scale + 2
+
+            'Adjust to actual "top-left"
+            left += window.X1
+            top += window.Y1
+            If (win_area.Width <> window.Width Or win_area.Height <> window.Height) Then
+                Dim padding As Integer = (window.Width - win_area.Width) / 2
+                left += padding
+                top += window.Height - win_area.Height - padding
+            End If
+
+            ss_area = New Rectangle(dpiScaling * left, dpiScaling * top, dpiScaling * wid, dpiScaling * hei)
+            relic_area = New RectangleF(left, top, 378 * scale, hei)
+            If Debug Then
+                Main.addLog("UPDATED WIN COORS:" & vbCrLf & dpiScaling & vbCrLf & window.ToString() & vbCrLf & win_area.ToString() & vbCrLf & ss_area.ToString() & vbCrLf & relic_area.ToString())
+            End If
+        End If
+    End Sub
+
+    Private ParseScreen_timer As Long = 0
     Public Sub ParseScreen()
         If Not Fullscreen AndAlso window = Nothing AndAlso Not GetCoors() Then
             Return
@@ -88,19 +140,20 @@ Module OCR
         Dim players As Integer = 0
         Dim foundText As New List(Of String)()
         ' Start timer
-        prev_time = 0
-        clock.Restart()
+        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         ' Get Relic Image
         screen = GetScreenShot()
         'screen = GetDebugShot()
-        Console.WriteLine("SCREENSHOT: " + (clock.Elapsed.Ticks - prev_time).ToString())
-        prev_time = clock.Elapsed.Ticks
+        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("SCREENSHOT-" & ParseScreen_timer & "ms")
+        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         ' Get Player Count from Image
         players = GetPlayers(screen)
-        Console.WriteLine("PLAYER COUNT(" + players.ToString() + "): " + (clock.Elapsed.Ticks - prev_time).ToString())
-        prev_time = clock.Elapsed.Ticks
+        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("PLAYER COUNT(" + players.ToString() + ")-" & ParseScreen_timer & "ms")
+        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         ' Get Part Text from Image
         ' Only retrieve capitals
@@ -111,13 +164,15 @@ Module OCR
             Dim text As String = GetPartText(Crop(screen, players, i))
             foundText.Add(text)
         Next
-        Console.WriteLine("GET OCR TEXT: " + (clock.Elapsed.Ticks - prev_time).ToString())
-        prev_time = clock.Elapsed.Ticks
+        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("GET OCR TEXT-" & ParseScreen_timer & "ms")
+        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         foundText = GetPartNames(foundText, screen, players)
 
-        Console.WriteLine("GET PART NAMES: " + (clock.Elapsed.Ticks - prev_time).ToString())
-        prev_time = clock.Elapsed.Ticks
+        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("GET PART NAMES-" & ParseScreen_timer & "ms")
+        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         If Debug Then
             Main.addLog("DISPLAYING OVERLAYS:" & vbCrLf & players & vbCrLf & relic_area.ToString())
@@ -128,8 +183,8 @@ Module OCR
         Dim pad As Integer = relic_area.Height * 0.05
         Dim top As Integer = relic_area.Y + pad
         Dim right As Integer = relic_area.X - pad
-		' Move over if you don't have all 4
-		right += relic_area.Width * (4 - players) * 0.5
+        ' Move over if you don't have all 4
+        right += relic_area.Width * (4 - players) * 0.5
         For i = 0 To foundText.Count - 1
             right += relic_area.Width
 
@@ -142,9 +197,8 @@ Module OCR
             db.panels(i).LoadText(plat.ToString("N1"), ducat, vaulted)
             db.panels(i).ShowOverlay(right, top)
         Next
-        Console.WriteLine("DISPLAY OVERLAYS: " + (clock.Elapsed.Ticks - prev_time).ToString())
-        clock.Stop()
-        Console.WriteLine("Total: " + clock.Elapsed.Ticks.ToString())
+        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")
     End Sub
 
     Private Function GetPartNames(foundText As List(Of String), screen As Bitmap, plyr_count As Integer) As List(Of String)

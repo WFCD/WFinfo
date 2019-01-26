@@ -1,10 +1,15 @@
 ﻿
 Public Class Overlay
+    Private vault_img As Image
+    Private unvault_img As Image
 
     Public Sub New()
         InitializeComponent()
         UpdateColors(Me)
         PictureBox1.Image = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
+        vault_img = Tint(My.Resources.Panel_V, My.Settings.cTray, 0.25)
+        unvault_img = Tint(My.Resources.Panel_UV, My.Settings.cTray, 0.25)
+
         Me.BackColor = Color.Black
         Me.TopMost = True
 
@@ -31,11 +36,10 @@ Public Class Overlay
 
     Public Sub LoadText(plat As String, ducat As Integer, Optional vaulted As Boolean = False)
         If vaulted Then
-            PictureBox1.Image = My.Resources.Panel_V
+            PictureBox1.Image = vault_img
         Else
-            PictureBox1.Image = My.Resources.Panel_UV
+            PictureBox1.Image = unvault_img
         End If
-        PictureBox1.Image = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
 
         lbPlat.Text = plat
         lbPDropShadow.Text = lbPlat.Text
@@ -54,5 +58,6 @@ Public Class Overlay
     Private Sub tHide_Tick(sender As Object, e As EventArgs) Handles tHide.Tick
         Me.Hide()
         tHide.Stop()
+        Main.Invoke(Sub() Main.lbStatus.Text = "Ready for next reward")
     End Sub
 End Class
