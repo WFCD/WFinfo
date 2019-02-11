@@ -26,7 +26,6 @@ Partial Class Main
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Main))
-        Me.tPB = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.lbWiki = New System.Windows.Forms.Label()
         Me.lbWikiDate = New System.Windows.Forms.Label()
@@ -55,6 +54,10 @@ Partial Class Main
         Me.pbHome = New System.Windows.Forms.PictureBox()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.lbStatus = New System.Windows.Forms.Label()
+        Me.tAutomate = New System.Windows.Forms.Timer(Me.components)
+        Me.tRefine = New System.Windows.Forms.Timer(Me.components)
+        Me.tMouse = New System.Windows.Forms.Timer(Me.components)
+        Me.tScroll = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -65,11 +68,6 @@ Partial Class Main
         CType(Me.pbEqmt, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
-        '
-        'tPB
-        '
-        Me.tPB.Enabled = True
-        Me.tPB.Interval = 1
         '
         'Panel1
         '
@@ -373,6 +371,23 @@ Partial Class Main
         Me.lbStatus.Text = "Loading..."
         Me.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
+        'tAutomate
+        '
+        Me.tAutomate.Interval = 1000
+        '
+        'tRefine
+        '
+        Me.tRefine.Enabled = True
+        Me.tRefine.Interval = 5000
+        '
+        'tMouse
+        '
+        Me.tMouse.Interval = 300
+        '
+        'tScroll
+        '
+        Me.tScroll.Interval = 400
+        '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -406,7 +421,6 @@ Partial Class Main
         Me.ResumeLayout(False)
 
     End Sub
-    Friend WithEvents tPB As Timer
     Friend WithEvents pbSideBar As PictureBox
     Friend WithEvents Panel1 As Panel
     Friend WithEvents lbTitle As Label
@@ -435,4 +449,8 @@ Partial Class Main
     Friend WithEvents pbHome As PictureBox
     Friend WithEvents Label2 As Label
     Friend WithEvents lbStatus As Label
+    Friend WithEvents tAutomate As Timer
+    Friend WithEvents tRefine As Timer
+    Friend WithEvents tMouse As Timer
+    Friend WithEvents tScroll As Timer
 End Class

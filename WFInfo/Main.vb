@@ -18,6 +18,7 @@ Public Class Main
             '_________________________________________________________________________
 
             UpdateColors(Me)
+            Me.CreateControl()
 
             version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
             version = version.Substring(0, version.LastIndexOf("."))
@@ -29,6 +30,19 @@ Public Class Main
             Me.Activate()
             Me.Refresh()
             clock.Restart()
+
+            If (My.Settings.Automate) Then
+                Me.tAutomate.Enabled = True
+            End If
+
+
+            Glob.ReplacementList = {{"5"c, "s"c},
+                                    {"1"c, "i"c},
+                                    {"3"c, "b"c},
+                                    {"6"c, "o"c},
+                                    {"2"c, "z"c},
+                                    {"]"c, "i"c},
+                                    {"["c, "i"c}}
 
             '_________________________________________________________________________
             'Readies the test folder for debug mode (Saves screenshots for debugging)
@@ -77,57 +91,34 @@ Public Class Main
     Private Sub DoWork()
         DoWork_timer = clock.Elapsed.TotalMilliseconds
         Try
-            If db Is Nothing Then
-                db = New Data()
-                OCR.UpdateCoors()
-                For i As Integer = 0 To 3
-                    db.panels(i) = New Overlay()
-                Next
-                Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
-                Invoke(Sub() lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11))
-                Invoke(Sub() lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
-                Invoke(Sub() lbStatus.Text = "Data Loaded")
-            Else
-                Invoke(Sub() lbStatus.Text = "Getting Reward Info...")
+            If (Glob.db IsNot Nothing) Then
+                Dim elapsed As TimeSpan = Glob.clock.Elapsed
+                Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds))
+                Me.lbStatus.Text = "Getting Reward Info..."
                 OCR.ParseScreen()
-                DoWork_timer = clock.Elapsed.TotalMilliseconds - DoWork_timer
-                Invoke(Sub() lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
+                elapsed = Glob.clock.Elapsed
+                Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds - CDbl(Me.DoWork_timer)))
+                Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)"
+            Else
+                Glob.db = New Data()
+                OCR.ForceUpdateCenter()
+                Invoke(Sub() lbMarketDate.Text = Glob.db.market_data("timestamp").ToString().Substring(5, 11))
+                Invoke(Sub() lbEqmtDate.Text = Glob.db.eqmt_data("timestamp").ToString().Substring(5, 11))
+                Invoke(Sub() lbWikiDate.Text = Glob.db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
+                Relics.Load_Relic_Tree()
+                Equipment.Load_Eqmt_Tree()
+                For i As Integer = 0 To 3
+                    rwrdPanels(i) = New Overlay()
+                Next
+                For i As Integer = 0 To 8
+                    relicPanels(i) = New Overlay()
+                Next
+                Invoke(Sub() lbStatus.Text = "Data Loaded")
             End If
         Catch ex As Exception
-            Invoke(Sub() lbStatus.Text = "ERROR (ParseScreen)")
-            Invoke(Sub() lbStatus.ForeColor = Color.Red)
-            addLog(ex.ToString)
-        End Try
-    End Sub
-
-    Private Sub KeyWatch_Tick(sender As Object, e As EventArgs) Handles tPB.Tick
-        Try
-            If Not key1Tog Then
-
-                '_________________________________________________________________________
-                'Checks for new steam screenshots (using fullscreen mode) and starts main function if found
-                '_________________________________________________________________________
-                If Fullscreen Then
-                    If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
-                        If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
-                            My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
-                            DoWork()
-                        End If
-                    End If
-                End If
-
-
-                '_________________________________________________________________________
-                'watches for main hotkey and sctog starts the min function if pressed
-                '_________________________________________________________________________
-                If GetAsyncKeyState(HKey1) And &H8000 Then
-                    DoWork()
-                End If
-            End If
-        Catch ex As Exception
-            Invoke(Sub() lbStatus.Text = "ERROR (KeyWatch)")
-            Invoke(Sub() lbStatus.ForeColor = Color.Red)
-            addLog(ex.ToString)
+            Me.lbStatus.Text = "ERROR (ParseScreen)"
+            Me.lbStatus.ForeColor = Color.Red
+            Me.addLog(ex.ToString())
         End Try
     End Sub
 
@@ -299,24 +290,91 @@ Public Class Main
     End Sub
 
     Private tUpdate_Count As Integer = 1
-    Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick ' Happens every 5min
+    Private Sub tUpdate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tUpdate.Tick
         Try
-
-            ' Every hour, check db Data
-            If tUpdate_Count = 0 Then
-                If db IsNot Nothing AndAlso db.Update() Then
-                    Relics.Reload_Data()
-                    Equipment.RefreshData()
-                End If
+            If Me.tUpdate_Count = 0 AndAlso Glob.db IsNot Nothing AndAlso Glob.db.Update() Then
+                Relics.Reload_Data()
+                Equipment.RefreshData()
             End If
-            ' Every 5min update the relic_area
-            OCR.ForceUpdateCoors()
-        Catch ex As Exception
-            Invoke(Sub() lbStatus.Text = "ERROR (Updating DB)")
-            Invoke(Sub() lbStatus.ForeColor = Color.Red)
-            addLog(ex.ToString)
+            OCR.ForceUpdateCenter()
+        Catch ex As System.Exception
+            MyBase.Invoke(Sub() Me.lbStatus.Text = "ERROR (Updating DB)")
+            MyBase.Invoke(Sub() Me.lbStatus.ForeColor = Color.Red)
+            Me.addLog(ex.ToString())
         End Try
-        tUpdate_Count = (tUpdate_Count + 1) Mod 12
+        Me.tUpdate_Count = (Me.tUpdate_Count + 1) Mod 12
+    End Sub
+
+    Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
+        If (Glob.db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso OCR.isWFActive()) Then
+            If (OCR.IsRelicWindow()) Then
+                If (Not rwrdPanels(0).Visible) Then
+                    Me.tAutomate.Interval = 3000
+                    MyBase.Invoke(Sub() Me.DoWork())
+                End If
+            ElseIf (rwrdPanels(0).Visible) Then
+                For i As Integer = 0 To 3
+                    rwrdPanels(i).Hide()
+                Next
+            Else
+                Me.tAutomate.Interval = 1000
+            End If
+        Else
+            Me.tRefine.Interval = 5000
+        End If
+    End Sub
+
+    Private Sub tRefine_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tRefine.Tick
+        Console.WriteLine("tRefine_Tick")
+        If (Glob.db IsNot Nothing AndAlso relicPanels(0) IsNot Nothing AndAlso OCR.isWFActive()) Then
+            If OCR.FoundRefineWin Then
+                If ForceRefineDisplay Then
+                    ForceRefineDisplay = False
+                    OCR.ShowRelicOverlay()
+                ElseIf Not IsRefinementWindow() Then
+                    For i As Integer = 0 To 8
+                        relicPanels(i).Hide()
+                    Next
+                End If
+            ElseIf IsRefinementWindow() Then
+                OCR.ShowRelicOverlay()
+            Else
+                tRefine.Interval = 1000
+            End If
+        Else
+            tRefine.Interval = 5000
+        End If
+    End Sub
+
+    Private ForceRefineDisplay As Boolean = False
+    Private Sub tMouse_Tick(sender As Object, e As EventArgs) Handles tMouse.Tick
+        ' Change this to be the region where the relics are
+        '   ... need to check scroll bar too....
+        ' Whelp, modify this to check if mouse is on scrollbar or era selection
+        Console.WriteLine("tMouse_Tick")
+        If OCR.FoundRefineWin AndAlso OCR.CheckEraSelection() Then
+            tRefine.Stop()
+            For i As Integer = 0 To 8
+                relicPanels(i).Hide()
+            Next
+            tRefine.Start()
+            ForceRefineDisplay = True
+        End If
+        tMouse.Enabled = False
+    End Sub
+
+    ' Have a "HIDE" tick, then have a "RELOAD" tick
+    Private Sub tScroll_Tick(sender As Object, e As EventArgs) Handles tScroll.Tick
+        Console.WriteLine("tScroll_Tick")
+        If OCR.FoundRefineWin AndAlso OCR.CheckScrollBar() Then
+            tRefine.Stop()
+            For i As Integer = 0 To 8
+                relicPanels(i).Hide()
+            Next
+            tRefine.Start()
+            ForceRefineDisplay = True
+        End If
+        tScroll.Enabled = False
     End Sub
 
     Private Async Sub lbMarket_Click(sender As Object, e As EventArgs) Handles lbMarket.Click
@@ -361,6 +419,7 @@ Module Glob
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
     Public Animate As Boolean = My.Settings.Animate
+    Public Automate As Boolean = My.Settings.Automate
     Public Debug As Boolean = My.Settings.Debug
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Public textColor As Color = Color.FromArgb(177, 208, 217)
@@ -377,6 +436,37 @@ Module Glob
     Public rareBrush As Brush = New SolidBrush(rareColor)
     Public bgColor As Color = Color.FromArgb(27, 27, 27)
     Public bgBrush As Brush = New SolidBrush(bgColor)
+
+    Public rwrdPanels(4) As Overlay
+    Public relicPanels(9) As Overlay
+
+    Public ReplacementList As Char(,)
+    Public WithEvents globHook As New GlobalHook()
+
+    Public Sub KeyUp(key As Keys) Handles globHook.KeyUp
+        If (key = Keys.LButton) Then
+            Main.Invoke(Sub() Main.tMouse.Enabled = True)
+        End If
+    End Sub
+
+    Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
+        If key = Glob.HKey1 Then
+            Task.Factory.StartNew(Sub() Glob.DoOtherWork())
+        End If
+    End Sub
+
+    Public Sub MouseScroll(ByVal scrolled As Integer) Handles globHook.MouseScroll
+        Main.Invoke(Sub() Main.tScroll.Enabled = True)
+    End Sub
+
+    Private DoOtherWork_timer As Long
+    Private Sub DoOtherWork()
+        DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
+        Main.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
+        OCR.ParseScreen()
+        DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
+        Main.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
+    End Sub
 
     Public Function getCookie()
         '_________________________________________________________________________
@@ -640,5 +730,95 @@ Module Glob
         Next
 
         Return d(n, m)
+    End Function
+
+    Public Function LevDist2(ByVal str1 As String, ByVal str2 As String, Optional ByVal limit As Integer = -1) As Integer
+        Dim num As Integer
+        Dim maxY As Boolean
+        Dim temp As Integer
+        Dim maxX As Boolean
+        Dim s As String = str1.ToLower()
+        Dim t As String = str2.ToLower()
+        Dim n As Integer = s.Length
+        Dim m As Integer = t.Length
+        If (Not (n = 0 Or m = 0)) Then
+            Dim d(n + 1 + 1 - 1, m + 1 + 1 - 1) As Integer
+            Dim activeX As List(Of Integer) = New List(Of Integer)()
+            Dim activeY As List(Of Integer) = New List(Of Integer)()
+            d(0, 0) = 1
+            activeX.Add(0)
+            activeY.Add(0)
+            Dim currX As Integer = 0
+            Dim currY As Integer = 0
+            Do
+                currX = activeX(0)
+                activeX.RemoveAt(0)
+                currY = activeY(0)
+                activeY.RemoveAt(0)
+
+                temp = d(currX, currY)
+                If limit <> -1 AndAlso temp > limit Then
+                    Return temp
+                End If
+
+                maxX = currX = n
+                maxY = currY = m
+                If (Not maxX) Then
+                    temp = d(currX, currY) + 1
+                    If (temp < d(currX + 1, currY) OrElse d(currX + 1, currY) = 0) Then
+                        d(currX + 1, currY) = temp
+                        Glob.AddElement(d, activeX, activeY, currX + 1, currY)
+                    End If
+                End If
+                If (Not maxY) Then
+                    temp = d(currX, currY) + 1
+                    If (temp < d(currX, currY + 1) OrElse d(currX, currY + 1) = 0) Then
+                        d(currX, currY + 1) = temp
+                        Glob.AddElement(d, activeX, activeY, currX, currY + 1)
+                    End If
+                End If
+                If Not maxX And Not maxY Then
+                    temp = d(currX, currY) + Glob.GetDifference(s(currX), t(currY))
+                    If (temp < d(currX + 1, currY + 1) OrElse d(currX + 1, currY + 1) = 0) Then
+                        d(currX + 1, currY + 1) = temp
+                        Glob.AddElement(d, activeX, activeY, currX + 1, currY + 1)
+                    End If
+                End If
+            Loop While Not (maxX And maxY)
+            num = d(n, m) - 1
+        Else
+            num = n + m
+        End If
+        Return num
+    End Function
+
+    Private Sub AddElement(ByRef d As Integer(,), ByRef xList As List(Of Integer), ByRef yList As List(Of Integer), x As Integer, y As Integer)
+        Dim loc As Integer = 0
+        Dim temp As Integer = d(x, y)
+        While loc < xList.Count AndAlso temp > d(xList(loc), yList(loc))
+            loc = loc + 1
+        End While
+        If (loc = xList.Count) Then
+            xList.Add(x)
+            yList.Add(y)
+            Return
+        End If
+        xList.Insert(loc, x)
+        yList.Insert(loc, y)
+    End Sub
+
+    Private Function GetDifference(c1 As Char, c2 As Char) As Integer
+        If c1 = c2 Or c1 = "?"c Or c2 = "?"c Then
+            Return 0
+        End If
+
+        For i As Integer = 0 To ReplacementList.GetLength(0) - 1
+            If (c1 = Glob.ReplacementList(i, 0) Or c2 = Glob.ReplacementList(i, 0)) AndAlso
+               (c1 = Glob.ReplacementList(i, 1) Or c2 = Glob.ReplacementList(i, 1)) Then
+                Return 0
+            End If
+        Next
+
+        Return 1
     End Function
 End Module

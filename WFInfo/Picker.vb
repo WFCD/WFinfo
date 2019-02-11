@@ -51,12 +51,12 @@ Public Class Picker
 
     Private Sub tGetShade_Tick(sender As Object, e As EventArgs) Handles tGetShade.Tick
         Try
-            Dim darkBrush As New Drawing.Drawing2D.LinearGradientBrush(
+            Dim darkBrush As New LinearGradientBrush(
             New PointF(0, 0),
             New PointF(pbSliderBG.Width / 2, 0),
             Color.Black, PrevColor)
 
-            Dim lightBrush As New Drawing.Drawing2D.LinearGradientBrush(
+            Dim lightBrush As New LinearGradientBrush(
             New PointF(0, 0),
             New PointF(pbSliderBG.Width / 2, 0),
             PrevColor, Color.White)
@@ -99,12 +99,12 @@ Public Class Picker
 
     Private Sub UpdateSlider()
         Try
-            Dim darkBrush As New Drawing.Drawing2D.LinearGradientBrush(
+            Dim darkBrush As New LinearGradientBrush(
             New PointF(0, 0),
             New PointF(pbSliderBG.Width / 2, 0),
             Color.Black, PrevColor)
 
-            Dim lightBrush As New Drawing.Drawing2D.LinearGradientBrush(
+            Dim lightBrush As New LinearGradientBrush(
             New PointF(0, 0),
             New PointF(pbSliderBG.Width / 2, 0),
             PrevColor, Color.White)

@@ -209,7 +209,7 @@ Public Class Equipment
         SortSelection.SelectedIndex = My.Settings.EqmtSort
     End Sub
 
-    Private Sub EqmtTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles EqmtTree1.DrawNode, EqmtTree2.DrawNode
+    Private Sub EqmtTree_DrawItem(ByVal sender As System.Object, ByVal e As DrawTreeNodeEventArgs) Handles EqmtTree1.DrawNode, EqmtTree2.DrawNode
         e.DrawDefault = True
         If e.Bounds.Width = 0 Then
             ' BOUNDS ARE INCORRECT
@@ -362,21 +362,23 @@ Public Class Equipment
         Dim cast As JObject = Nothing
         Dim eqmt As TreeNode = Nothing
         For Each kvp As KeyValuePair(Of String, JToken) In db.eqmt_data
-            If EqmtTree1.Nodes.Find(kvp.Key, True).Length = 0 Then
-                cast = kvp.Value
-                eqmt = EqmtTree1.Nodes.Find(cast("type"), False)(0).Nodes.Add(kvp.Key)
-                eqmt.Name = kvp.Key
-                cast = cast("parts")
-                For Each part As KeyValuePair(Of String, JToken) In cast
-                    Dim node As TreeNode = eqmt.Nodes.Add(part.Key)
-                    node.Name = part.Key
-                    If node.Text.Contains("Prime ") Then
-                        node.Text = node.Text.Substring(node.Text.IndexOf("Prime ") + 6)
-                    End If
-                Next
+            If Not kvp.Key.Contains("timestamp") Then
+                If EqmtTree1.Nodes.Find(kvp.Key, True).Length = 0 Then
+                    cast = kvp.Value
+                    eqmt = EqmtTree1.Nodes.Find(cast("type"), False)(0).Nodes.Add(kvp.Key)
+                    eqmt.Name = kvp.Key
+                    cast = cast("parts")
+                    For Each part As KeyValuePair(Of String, JToken) In cast
+                        Dim node As TreeNode = eqmt.Nodes.Add(part.Key)
+                        node.Name = part.Key
+                        If node.Text.Contains("Prime ") Then
+                            node.Text = node.Text.Substring(node.Text.IndexOf("Prime ") + 6)
+                        End If
+                    Next
 
-                eqmt = eqmt.Clone()
-                EqmtTree2.Nodes.Add(eqmt)
+                    eqmt = eqmt.Clone()
+                    EqmtTree2.Nodes.Add(eqmt)
+                End If
             End If
         Next
     End Sub

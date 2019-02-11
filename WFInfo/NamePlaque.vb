@@ -7,14 +7,14 @@ Public Class NamePlaque
     Dim screenHeight As Integer = Screen.PrimaryScreen.Bounds.Height
     Dim pSize As Point
     Dim pLoc As Point
-    Protected Overrides ReadOnly Property CreateParams As System.Windows.Forms.CreateParams
+    Protected Overrides ReadOnly Property CreateParams As CreateParams
         Get
             Dim cp As CreateParams = MyBase.CreateParams
             cp.ExStyle = cp.ExStyle Or &H80
             Return cp
         End Get
     End Property
-    Private Sub Form_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub Form_Load(ByVal sender As System.Object, ByVal e As EventArgs) Handles MyBase.Load
         UpdateColors(Me)
         PictureBox1.Image = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
         Me.Location = pLoc

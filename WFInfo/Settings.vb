@@ -72,6 +72,7 @@ Public Class Settings
         UpdateColors(Me)
         Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         btnHkey1.Text = My.Settings.HKey1Text
+        cbAutomation.Checked = Automate
         cbAnimations.Checked = Animate
         cbFullscreen.Checked = Fullscreen
         cbDebug.Checked = Debug
@@ -211,6 +212,12 @@ Public Class Settings
         End If
     End Sub
 
+    Private Sub cbAutomation_Click(sender As Object, e As EventArgs) Handles cbAutomation.Click
+        Automate = cbAutomation.Checked
+        Main.tAutomate.Enabled = Automate
+        saveSettings()
+    End Sub
+
     Private Sub cbAnimations_Click(sender As Object, e As EventArgs) Handles cbAnimations.Click
         Animate = cbAnimations.Checked
         saveSettings()
@@ -266,6 +273,7 @@ Public Class Settings
 
     Private Sub saveSettings()
         ''Saves settings
+        My.Settings.Automate = cbAutomation.Checked
         My.Settings.Animate = cbAnimations.Checked
         My.Settings.HKey1 = HKey1
         My.Settings.HKey1Text = btnHkey1.Text
@@ -280,10 +288,6 @@ Public Class Settings
         saveSettings()
     End Sub
 
-    Private Sub ScaleBar_MouseUp(sender As Object, e As EventArgs) Handles ScaleBar.MouseUp
-        UpdateCoors()
-    End Sub
-
     Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ScaleOption.SelectedIndexChanged
         ScaleBar.Enabled = ScaleOption.SelectedIndex = 2
         If ScaleOption.SelectedIndex = 0 Then
@@ -292,7 +296,6 @@ Public Class Settings
             ScaleBar.Value = 95
         End If
         ScaleBar_Scroll(sender, e)
-        UpdateCoors()
         'Kek: To remove the blue highlight... because I don't like the look of it
         ScaleBar.Select()
     End Sub

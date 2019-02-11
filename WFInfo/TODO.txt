@@ -23,3 +23,5 @@ TODO:
 		Need to consider if tabs are worthwhile
 			Or just to expand main window
 	Get window hiding before tray icon shows
+	Enabled clicking through the overlays
+	Add in other languages

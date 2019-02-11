@@ -365,6 +365,30 @@ Namespace My
                 Me("PlyrCount") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0")>  _
+        Public Property DebugCount() As Integer
+            Get
+                Return CType(Me("DebugCount"),Integer)
+            End Get
+            Set
+                Me("DebugCount") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
+        Public Property Automate() As Boolean
+            Get
+                Return CType(Me("Automate"),Boolean)
+            End Get
+            Set
+                Me("Automate") = value
+            End Set
+        End Property
     End Class
 End Namespace
 
