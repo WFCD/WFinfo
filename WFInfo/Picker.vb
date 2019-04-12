@@ -51,12 +51,12 @@ Public Class Picker
 
     Private Sub tGetShade_Tick(sender As Object, e As EventArgs) Handles tGetShade.Tick
         Try
-            Dim darkBrush As New LinearGradientBrush(
+            Dim darkBrush As New Drawing.Drawing2D.LinearGradientBrush(
             New PointF(0, 0),
             New PointF(pbSliderBG.Width / 2, 0),
             Color.Black, PrevColor)
 
-            Dim lightBrush As New LinearGradientBrush(
+            Dim lightBrush As New Drawing.Drawing2D.LinearGradientBrush(
             New PointF(0, 0),
             New PointF(pbSliderBG.Width / 2, 0),
             PrevColor, Color.White)
@@ -99,12 +99,12 @@ Public Class Picker
 
     Private Sub UpdateSlider()
         Try
-            Dim darkBrush As New LinearGradientBrush(
+            Dim darkBrush As New Drawing.Drawing2D.LinearGradientBrush(
             New PointF(0, 0),
             New PointF(pbSliderBG.Width / 2, 0),
             Color.Black, PrevColor)
 
-            Dim lightBrush As New LinearGradientBrush(
+            Dim lightBrush As New Drawing.Drawing2D.LinearGradientBrush(
             New PointF(0, 0),
             New PointF(pbSliderBG.Width / 2, 0),
             PrevColor, Color.White)
@@ -248,7 +248,6 @@ Public Class Picker
                     If TypeOf c2 Is Label Then c2.ForeColor = pbText.BackColor
                     If TypeOf c2 Is Button Then c2.BackColor = pbTitleBar.BackColor
                     If TypeOf c2 Is Button Then c2.ForeColor = pbText.BackColor
-                    If c2.Name = "lbStatus" Then c2.ForeColor = Color.Lime
                 Next
             Else
                 If TypeOf c Is Label Then c.ForeColor = pbText.BackColor

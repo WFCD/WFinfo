@@ -20,6 +20,7 @@ Class Data
 
     Private ReadOnly debug_path As String = Path.Combine(appData, "WFInfo\debug.json")
 
+    Public panels(3) As Overlay
 
     Private webClient As WebClient
 
@@ -512,6 +513,8 @@ Class Data
         '_________________________________________________________________________
         Dim lowest As String = Nothing
         Dim low As Integer = 9999
+        Dim str As String = Nothing
+        Dim job As JObject = Nothing
         For Each prop As KeyValuePair(Of String, String) In name_data
             Dim val As Integer = LevDist(prop.Key, string1)
             If val < low Then
@@ -588,32 +591,5 @@ Class Data
         rStr = RTrim(rStr) & " set"
         rStr = StrConv(rStr, VbStrConv.ProperCase)
         Return rStr
-    End Function
-
-    Public Function GetRelicName(string1 As String) As String
-        Dim lowest As String = Nothing
-        Dim low As Integer = 999
-        Dim temp As Integer = 0
-        Dim str As String = Nothing
-        Dim job As JObject = Nothing
-        For Each era As KeyValuePair(Of String, JToken) In relic_data
-            If Not era.Key.Contains("timestamp") Then
-                temp = LevDist2(string1, era.Key & "??RELIC", low)
-                If temp < low Then
-                    job = era.Value
-                    str = era.Key
-                    low = temp
-                End If
-            End If
-        Next
-        low = 999
-        For Each relic As KeyValuePair(Of String, JToken) In job
-            temp = LevDist2(string1, str & relic.Key & "RELIC", low)
-            If temp < low Then
-                lowest = str & " " & relic.Key
-                low = temp
-            End If
-        Next
-        Return lowest
     End Function
 End Class

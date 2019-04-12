@@ -37,7 +37,6 @@ Partial Class Settings
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.Panel2 = New System.Windows.Forms.Panel()
-        Me.cbAutomation = New System.Windows.Forms.CheckBox()
         Me.cbDebug = New System.Windows.Forms.CheckBox()
         Me.Panel3 = New System.Windows.Forms.Panel()
         Me.Panel4 = New System.Windows.Forms.Panel()
@@ -318,7 +317,6 @@ Partial Class Settings
         '
         Me.Panel2.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel2.Controls.Add(Me.cbAutomation)
         Me.Panel2.Controls.Add(Me.cbAnimations)
         Me.Panel2.Controls.Add(Me.cbFullscreen)
         Me.Panel2.Controls.Add(Me.cbDebug)
@@ -326,19 +324,6 @@ Partial Class Settings
         Me.Panel2.Name = "Panel2"
         Me.Panel2.Size = New System.Drawing.Size(319, 84)
         Me.Panel2.TabIndex = 22
-        '
-        'cbAutomation
-        '
-        Me.cbAutomation.AutoSize = True
-        Me.cbAutomation.BackColor = System.Drawing.Color.Transparent
-        Me.cbAutomation.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.cbAutomation.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbAutomation.Location = New System.Drawing.Point(185, 45)
-        Me.cbAutomation.Name = "cbAutomation"
-        Me.cbAutomation.Size = New System.Drawing.Size(93, 17)
-        Me.cbAutomation.TabIndex = 24
-        Me.cbAutomation.Text = "Enable Auto"
-        Me.cbAutomation.UseVisualStyleBackColor = False
         '
         'cbDebug
         '
@@ -440,5 +425,4 @@ Partial Class Settings
     Friend WithEvents Label1 As Label
     Friend WithEvents Label9 As Label
     Friend WithEvents ScaleOption As ComboBox
-    Friend WithEvents cbAutomation As CheckBox
 End Class

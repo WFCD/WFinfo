@@ -1,26 +1,15 @@
 ﻿
 Public Class Overlay
-<<<<<<< HEAD
-
     Private vault_img As Image
     Private unvault_img As Image
-    Private loading_img As Image
-=======
->>>>>>> parent of bd0e09b... 7.0.4 - Background Update
 
     Public Sub New()
         InitializeComponent()
-        'Me.CreateControl()
         UpdateColors(Me)
-<<<<<<< HEAD
-        loading_img = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
+        PictureBox1.Image = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
         vault_img = Tint(My.Resources.Panel_V, My.Settings.cTray, 0.25)
         unvault_img = Tint(My.Resources.Panel_UV, My.Settings.cTray, 0.25)
-        PictureBox1.Image = loading_img
 
-=======
-        PictureBox1.Image = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
->>>>>>> parent of bd0e09b... 7.0.4 - Background Update
         Me.BackColor = Color.Black
         Me.TopMost = True
 
@@ -42,41 +31,33 @@ Public Class Overlay
         lbDucats.Location = New Point(-1, 0)
         lbDucats.Font = allFont
         lbDucats.Parent = lbDDropShadow
+
     End Sub
 
-    Public Sub LoadText(plat As String, ducat As String, Optional vaulted As Boolean = False)
+    Public Sub LoadText(plat As String, ducat As Integer, Optional vaulted As Boolean = False)
         If vaulted Then
-            PictureBox1.Image = My.Resources.Panel_V
+            PictureBox1.Image = vault_img
         Else
-            PictureBox1.Image = My.Resources.Panel_UV
+            PictureBox1.Image = unvault_img
         End If
-        PictureBox1.Image = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
 
         lbPlat.Text = plat
         lbPDropShadow.Text = lbPlat.Text
 
-        lbDucats.Text = ducat
+        lbDucats.Text = ducat.ToString()
         lbDDropShadow.Text = lbDucats.Text
+    End Sub
 
-        If Not My.Settings.Automate Then
-            tHide.Start()
-        End If
+    Public Sub ShowOverlay(right As Integer, top As Integer)
+        Me.Show()
+        Me.Size = New Drawing.Size(125, 70)
+        Me.Location = New Point(right - Me.Size.Width, top)
+        tHide.Start()
     End Sub
 
     Private Sub tHide_Tick(sender As Object, e As EventArgs) Handles tHide.Tick
         Me.Hide()
         tHide.Stop()
-    End Sub
-
-    Public Sub ShowLoading(right As Integer, top As Integer)
-        lbPlat.Text = ""
-        lbPDropShadow.Text = ""
-        lbDucats.Text = ""
-        lbDDropShadow.Text = ""
-        PictureBox1.Image = loading_img
-        Me.Show()
-        Me.Size = New Size(125, 70)
-        Me.Location = New Point(right - Me.Size.Width, top)
-        Me.Refresh()
+        Main.Invoke(Sub() Main.lbStatus.Text = "Ready for next reward")
     End Sub
 End Class

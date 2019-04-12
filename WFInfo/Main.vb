@@ -5,15 +5,7 @@ Imports System.IO
 Public Class Main
     Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Integer, ByVal dx As Integer, ByVal dy As Integer, ByVal cButtons As Integer, ByVal dwExtraInfo As Integer)
     Public Declare Function GetAsyncKeyState Lib "user32" (ByVal vKey As Integer) As Integer
-    Dim scTog As Integer = 0 ' Toggle to force a single screenshot
-    Dim count As Integer = 0 ' Number of Pics in appData
-    Dim Sess As Integer = 0  ' Number of Screenshots this session
-    Dim PPM As Integer = 0   ' Potential Platinum Made this session
-    Dim pCount As Integer = 0 ' Current plat price to scan (Used for passive plat checks)
     Dim CliptoImage As Image         ' Stored image
-    Dim HKeyTog As Integer = 0       ' Toggle Var for setting the activation key
-    Dim lbTemp As String             ' Stores the keychar
-    Public devCheck As Boolean = False  ' Price alert (dev only) test feature that searches for cheaply listed parts
     Dim drag As Boolean = False      ' Toggle for the custom UI allowing it to drag
     Dim mouseX As Integer
     Dim mouseY As Integer
@@ -26,7 +18,6 @@ Public Class Main
             '_________________________________________________________________________
 
             UpdateColors(Me)
-            Me.CreateControl()
 
             version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
             version = version.Substring(0, version.LastIndexOf("."))
@@ -34,24 +25,10 @@ Public Class Main
             Me.Location = My.Settings.MainLoc
             Fullscreen = My.Settings.Fullscreen
             Me.MaximizeBox = False
-            lbStatus.ForeColor = Color.Yellow
             Me.Refresh()
             Me.Activate()
             Me.Refresh()
-            dpiScaling = GetScalingFactor()
-
-            If (My.Settings.Automate) Then
-                Me.tAutomate.Enabled = True
-            End If
-
-
-            Glob.ReplacementList = {{"5"c, "s"c},
-                                    {"1"c, "i"c},
-                                    {"3"c, "b"c},
-                                    {"6"c, "o"c},
-                                    {"2"c, "z"c},
-                                    {"]"c, "i"c},
-                                    {"["c, "i"c}}
+            clock.Restart()
 
             '_________________________________________________________________________
             'Readies the test folder for debug mode (Saves screenshots for debugging)
@@ -59,7 +36,6 @@ Public Class Main
             If (Not Directory.Exists(appData + "\WFInfo\tests")) Then
                 Directory.CreateDirectory(appData + "\WFInfo\tests")
             End If
-            count = GetMax(appData + "\WFInfo\tests\") + 1
 
 
             '_________________________________________________________________________
@@ -97,164 +73,29 @@ Public Class Main
         End Try
     End Sub
 
-    Public Function getCookie()
-        '_________________________________________________________________________
-        'Checks FF cookie then Chrome Cookie, if it exists in neither returns false, true if found, also sets cookie
-        '_________________________________________________________________________
-        Dim found As Boolean = False
-        Dim ChromePath As String = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\Google\Chrome\User Data\Default\Cookies"
-
-        If File.Exists(appData + "\Mozilla\Firefox\Profiles") Then
-            Dim FFpath As String = Directory.GetDirectories(appData + "\Mozilla\Firefox\Profiles")(0) + "\cookies.sqlite"
-            If File.Exists(FFpath) Then
-                If Not checkCookie(FFpath, True) = True Then
-                    If File.Exists(ChromePath) Then
-                        If checkCookie(ChromePath) = True Then
-                            found = True
-                        End If
-                    End If
-                Else
-                    found = True
-                End If
-            End If
-        ElseIf File.Exists(ChromePath) Then
-            If checkCookie(ChromePath) = True Then
-                found = True
-            End If
-        End If
-        Return found
-    End Function
-
-    Private Function checkCookie(path As String, Optional FireFox As Boolean = False)
-        '_________________________________________________________________________
-        'Decrypts cookie to get JWT and returns true if all goes well
-        '_________________________________________________________________________
-        'Dim SQLconnect As New SQLiteConnection
-        'Dim SQLcommand As New SQLiteCommand
-
-        'SQLconnect.ConnectionString = "Data Source=" & path & ";"
-        'SQLconnect.Open()
-
-
-        'SQLcommand = SQLconnect.CreateCommand
-        'If FireFox Then
-        '    SQLcommand.CommandText = "SELECT * FROM moz_cookies"
-        'Else
-        '    SQLcommand.CommandText = "SELECT name,encrypted_value FROM Cookies"
-        'End If
-        'Dim SQLreader As SQLiteDataReader = SQLcommand.ExecuteReader()
-        'Dim cdmblk As String = " "
-        'Dim found As Boolean = False
-        'While SQLreader.Read
-        '    If FireFox Then
-        '        If SQLreader(3).contains("JWT") Then
-        '            cookie = "JWT=" + SQLreader(4) + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
-        '            found = True
-        '        End If
-        '    Else
-        '        Dim encryptedData = SQLreader(1)
-        '        If SQLreader(0).Contains("JWT") Then
-        '            Dim decodedData = System.Security.Cryptography.ProtectedData.Unprotect(encryptedData, Nothing, System.Security.Cryptography.DataProtectionScope.LocalMachine)
-        '            Dim plainText = System.Text.Encoding.ASCII.GetString(decodedData)
-        '            cookie = "JWT=" + plainText + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
-        '            found = True
-        '        End If
-        '    End If
-        'End While
-
-
-
-        'SQLcommand.Dispose()
-        'SQLconnect.Close()
-        'Return found
-        Return False
-    End Function
-
-    Private Function getXcsrf()
-        '_________________________________________________________________________
-        'Gets a fresh xcsrf token from warframe.market
-        '_________________________________________________________________________
-        'Dim uri As New Uri("https://warframe.market")
-        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-        'Dim req As HttpWebRequest = HttpWebRequest.Create(uri)
-        'req.ContentType = "application/json"
-        'req.Method = "GET"
-        'req.Connection = "warframe.market:443 HTTP/1.1"
-        'req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
-        'req.Host = "warframe.market:443"
-        'req.Headers.Add("cookie", cookie)
-        'req.Headers.Add("X-Requested-With", "XMLHttpRequest")
-        'req.KeepAlive = True
-
-        'Dim response = req.GetResponse()
-        'Dim stream = response.GetResponseStream()
-        'Dim found As Boolean = False
-        'Dim reader As StreamReader = New StreamReader(stream)
-        'xcsrf = reader.ReadLine()
-        'Do Until xcsrf.Contains("csrf-token")
-        '    xcsrf = reader.ReadLine()
-        '    found = True
-        'Loop
-        'xcsrf = xcsrf.Substring(xcsrf.IndexOf("##"), 130)
-
-        'Return found
-        Return False
-    End Function
-
-    Private Sub btnDebug1_Click(sender As Object, e As EventArgs)
-    End Sub
-
-    Private Sub btnDebug2_Click(sender As Object, e As EventArgs)
-    End Sub
-
+    Private DoWork_timer As Long = 0
     Private Sub DoWork()
+        DoWork_timer = clock.Elapsed.TotalMilliseconds
         Try
-<<<<<<< HEAD
-            If (Glob.db IsNot Nothing) Then
-                Dim elapsed As TimeSpan = Glob.clock.Elapsed
-                Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds))
-                Me.lbStatus.Text = "Getting Reward Info..."
-                OCR.ParseScreen()
-                elapsed = Glob.clock.Elapsed
-                Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds - CDbl(Me.DoWork_timer)))
-                Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)"
-            Else
-                Glob.db = New Data()
-                OCR.ForceUpdateCenter()
-                Invoke(Sub() lbMarketDate.Text = Glob.db.market_data("timestamp").ToString().Substring(5, 11))
-                Invoke(Sub() lbEqmtDate.Text = Glob.db.eqmt_data("timestamp").ToString().Substring(5, 11))
-                Invoke(Sub() lbWikiDate.Text = Glob.db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
-                Relics.Load_Relic_Tree()
-                Equipment.Load_Eqmt_Tree()
-=======
-            lbStatus.ForeColor = Color.Yellow
             If db Is Nothing Then
                 db = New Data()
-                GetCoors()
->>>>>>> parent of bd0e09b... 7.0.4 - Background Update
+                OCR.UpdateCoors()
                 For i As Integer = 0 To 3
-                    rwrdPanels(i) = New Overlay()
+                    db.panels(i) = New Overlay()
                 Next
-                For i As Integer = 0 To 8
-                    relicPanels(i) = New Overlay()
-                Next
-<<<<<<< HEAD
-                Invoke(Sub() lbStatus.Text = "Data Loaded")
-            End If
-        Catch ex As Exception
-            Me.lbStatus.Text = "ERROR (ParseScreen)"
-            Me.lbStatus.ForeColor = Color.Red
-            Me.addLog(ex.ToString())
-=======
                 Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
                 Invoke(Sub() lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11))
                 Invoke(Sub() lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
+                Invoke(Sub() lbStatus.Text = "Data Loaded")
             Else
-                ParseScreen()
+                Invoke(Sub() lbStatus.Text = "Getting Reward Info...")
+                OCR.ParseScreen()
+                DoWork_timer = clock.Elapsed.TotalMilliseconds - DoWork_timer
+                Invoke(Sub() lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
             End If
-            lbStatus.ForeColor = Color.Lime
         Catch ex As Exception
-            lbStatus.ForeColor = Color.Red
+            Invoke(Sub() lbStatus.Text = "ERROR (ParseScreen)")
+            Invoke(Sub() lbStatus.ForeColor = Color.Red)
             addLog(ex.ToString)
         End Try
     End Sub
@@ -284,9 +125,9 @@ Public Class Main
                 End If
             End If
         Catch ex As Exception
-            lbStatus.ForeColor = Color.Red
+            Invoke(Sub() lbStatus.Text = "ERROR (KeyWatch)")
+            Invoke(Sub() lbStatus.ForeColor = Color.Red)
             addLog(ex.ToString)
->>>>>>> parent of bd0e09b... 7.0.4 - Background Update
         End Try
     End Sub
 
@@ -307,18 +148,6 @@ Public Class Main
         End If
         My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\WFInfo.log",
         dateTime + vbNewLine + txt + vbNewLine + vbNewLine + logStore, False)
-    End Sub
-
-    Private Sub Main_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress
-        If HKeyTog = 1 Then
-            lbTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper
-        End If
-    End Sub
-
-    Private Sub btnSetKey_KeyPress(sender As Object, e As KeyPressEventArgs)
-        If HKeyTog = 1 Then
-            lbTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper
-        End If
     End Sub
 
     Private Sub Main_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
@@ -469,99 +298,25 @@ Public Class Main
         End If
     End Sub
 
-<<<<<<< HEAD
     Private tUpdate_Count As Integer = 1
-    Private Sub tUpdate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tUpdate.Tick
+    Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick ' Happens every 5min
         Try
-            If Me.tUpdate_Count = 0 AndAlso Glob.db IsNot Nothing AndAlso Glob.db.Update() Then
-                Relics.Reload_Data()
-                Equipment.RefreshData()
+
+            ' Every hour, check db Data
+            If tUpdate_Count = 0 Then
+                If db IsNot Nothing AndAlso db.Update() Then
+                    Relics.Reload_Data()
+                    Equipment.RefreshData()
+                End If
             End If
-            OCR.ForceUpdateCenter()
-        Catch ex As System.Exception
-            MyBase.Invoke(Sub() Me.lbStatus.Text = "ERROR (Updating DB)")
-            MyBase.Invoke(Sub() Me.lbStatus.ForeColor = Color.Red)
-            Me.addLog(ex.ToString())
+            ' Every 5min update the relic_area
+            OCR.ForceUpdateCoors()
+        Catch ex As Exception
+            Invoke(Sub() lbStatus.Text = "ERROR (Updating DB)")
+            Invoke(Sub() lbStatus.ForeColor = Color.Red)
+            addLog(ex.ToString)
         End Try
-        Me.tUpdate_Count = (Me.tUpdate_Count + 1) Mod 12
-    End Sub
-
-    Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
-        If (Glob.db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso OCR.isWFActive()) Then
-            If (OCR.IsRelicWindow()) Then
-                If (Not rwrdPanels(0).Visible) Then
-                    Me.tAutomate.Interval = 3000
-                    MyBase.Invoke(Sub() Me.DoWork())
-                End If
-            ElseIf (rwrdPanels(0).Visible) Then
-                For i As Integer = 0 To 3
-                    rwrdPanels(i).Hide()
-                Next
-            Else
-                Me.tAutomate.Interval = 1000
-            End If
-        Else
-            Me.tRefine.Interval = 5000
-        End If
-    End Sub
-
-    Private Sub tRefine_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tRefine.Tick
-        Console.WriteLine("tRefine_Tick")
-        If (Glob.db IsNot Nothing AndAlso relicPanels(0) IsNot Nothing AndAlso OCR.isWFActive()) Then
-            If OCR.FoundRefineWin Then
-                If ForceRefineDisplay Then
-                    ForceRefineDisplay = False
-                    OCR.ShowRelicOverlay()
-                ElseIf Not IsRefinementWindow() Then
-                    For i As Integer = 0 To 8
-                        relicPanels(i).Hide()
-                    Next
-                End If
-            ElseIf IsRefinementWindow() Then
-                OCR.ShowRelicOverlay()
-            Else
-                tRefine.Interval = 1000
-            End If
-        Else
-            tRefine.Interval = 5000
-        End If
-    End Sub
-
-    Private ForceRefineDisplay As Boolean = False
-    Private Sub tMouse_Tick(sender As Object, e As EventArgs) Handles tMouse.Tick
-        ' Change this to be the region where the relics are
-        '   ... need to check scroll bar too....
-        ' Whelp, modify this to check if mouse is on scrollbar or era selection
-        Console.WriteLine("tMouse_Tick")
-        If OCR.FoundRefineWin AndAlso OCR.CheckEraSelection() Then
-            tRefine.Stop()
-            For i As Integer = 0 To 8
-                relicPanels(i).Hide()
-            Next
-            tRefine.Start()
-            ForceRefineDisplay = True
-        End If
-        tMouse.Enabled = False
-    End Sub
-
-    ' Have a "HIDE" tick, then have a "RELOAD" tick
-    Private Sub tScroll_Tick(sender As Object, e As EventArgs) Handles tScroll.Tick
-        Console.WriteLine("tScroll_Tick")
-        If OCR.FoundRefineWin AndAlso OCR.CheckScrollBar() Then
-            tRefine.Stop()
-            For i As Integer = 0 To 8
-                relicPanels(i).Hide()
-            Next
-            tRefine.Start()
-            ForceRefineDisplay = True
-        End If
-        tScroll.Enabled = False
-=======
-    Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick
-        If db IsNot Nothing AndAlso db.Update() Then
-            Relics.Reload_Data()
-        End If
->>>>>>> parent of bd0e09b... 7.0.4 - Background Update
+        tUpdate_Count = (tUpdate_Count + 1) Mod 12
     End Sub
 
     Private Async Sub lbMarket_Click(sender As Object, e As EventArgs) Handles lbMarket.Click
@@ -588,10 +343,6 @@ Public Class Main
         lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11)
         Equipment.Refresh()
     End Sub
-
-    Private Sub DebugButton_Click(sender As Object, e As EventArgs) Handles DebugButton.Click
-
-    End Sub
 End Class
 
 Module Glob
@@ -601,9 +352,6 @@ Module Glob
 
     ' StopWatch for Code Profiling
     Public clock As New Stopwatch()
-    Public prev_time As Long = clock.Elapsed.Ticks
-
-    Public dpiScaling As Double = 1.0
 
     Public db As Data
     Public qItems As New List(Of String)()
@@ -613,7 +361,6 @@ Module Glob
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
     Public Animate As Boolean = My.Settings.Animate
-    Public Automate As Boolean = My.Settings.Automate
     Public Debug As Boolean = My.Settings.Debug
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Public textColor As Color = Color.FromArgb(177, 208, 217)
@@ -630,40 +377,6 @@ Module Glob
     Public rareBrush As Brush = New SolidBrush(rareColor)
     Public bgColor As Color = Color.FromArgb(27, 27, 27)
     Public bgBrush As Brush = New SolidBrush(bgColor)
-    'Public cookie As String = ""
-    'Public xcsrf As String = ""
-
-<<<<<<< HEAD
-    Public rwrdPanels(4) As Overlay
-    Public relicPanels(9) As Overlay
-
-    Public ReplacementList As Char(,)
-    Public WithEvents globHook As New GlobalHook()
-
-    Public Sub KeyUp(key As Keys) Handles globHook.KeyUp
-        If (key = Keys.LButton) Then
-            Main.Invoke(Sub() Main.tMouse.Enabled = True)
-        End If
-    End Sub
-
-    Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
-        If key = Glob.HKey1 Then
-            Task.Factory.StartNew(Sub() Glob.DoOtherWork())
-        End If
-    End Sub
-
-    Public Sub MouseScroll(ByVal scrolled As Integer) Handles globHook.MouseScroll
-        Main.Invoke(Sub() Main.tScroll.Enabled = True)
-    End Sub
-
-    Private DoOtherWork_timer As Long
-    Private Sub DoOtherWork()
-        DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
-        Main.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
-        OCR.ParseScreen()
-        DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
-        Main.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
-    End Sub
 
     Public Function getCookie()
         '_________________________________________________________________________
@@ -736,38 +449,37 @@ Module Glob
         'SQLconnect.Close()
         'Return found
         Return False
-=======
-    <DllImport("gdi32.dll")>
-    Public Function GetDeviceCaps(hdc As IntPtr, nIndex As Integer) As Integer
->>>>>>> parent of bd0e09b... 7.0.4 - Background Update
     End Function
-    Public Enum DeviceCap
-        VERTRES = 10
-        LOGPIXELSX = 88
-        LOGPIXELSY = 90
-        DESKTOPVERTRES = 117
-    End Enum
 
+    Private Function getXcsrf()
+        '_________________________________________________________________________
+        'Gets a fresh xcsrf token from warframe.market
+        '_________________________________________________________________________
+        'Dim uri As New Uri("https://warframe.market")
+        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+        'Dim req As HttpWebRequest = HttpWebRequest.Create(uri)
+        'req.ContentType = "application/json"
+        'req.Method = "GET"
+        'req.Connection = "warframe.market:443 HTTP/1.1"
+        'req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
+        'req.Host = "warframe.market:443"
+        'req.Headers.Add("cookie", cookie)
+        'req.Headers.Add("X-Requested-With", "XMLHttpRequest")
+        'req.KeepAlive = True
 
-    Public Function GetScalingFactor() As Double
-        Using form As New Form()
-            Using g As Graphics = form.CreateGraphics()
-                If g.DpiX <> 96 Then
-                    Main.addLog("FOUND DPI: g.DpiX")
-                    Return g.DpiX / 96
-                ElseIf g.DpiY <> 96 Then
-                    Main.addLog("FOUND DPI: g.DpiY")
-                    Return g.DpiY / 96
-                End If
-            End Using
-        End Using
+        'Dim response = req.GetResponse()
+        'Dim stream = response.GetResponseStream()
+        'Dim found As Boolean = False
+        'Dim reader As StreamReader = New StreamReader(stream)
+        'xcsrf = reader.ReadLine()
+        'Do Until xcsrf.Contains("csrf-token")
+        '    xcsrf = reader.ReadLine()
+        '    found = True
+        'Loop
+        'xcsrf = xcsrf.Substring(xcsrf.IndexOf("##"), 130)
 
-        Using g As Graphics = Graphics.FromHwnd(IntPtr.Zero)
-            Dim desktop As IntPtr = g.GetHdc()
-            Dim temp As Double = GetDeviceCaps(desktop, DeviceCap.DESKTOPVERTRES)
-            temp /= GetDeviceCaps(desktop, DeviceCap.VERTRES)
-            Return temp
-        End Using
+        'Return found
+        Return False
     End Function
 
     Public Sub UpdateColors(f As Form)
@@ -928,95 +640,5 @@ Module Glob
         Next
 
         Return d(n, m)
-    End Function
-
-    Public Function LevDist2(ByVal str1 As String, ByVal str2 As String, Optional ByVal limit As Integer = -1) As Integer
-        Dim num As Integer
-        Dim maxY As Boolean
-        Dim temp As Integer
-        Dim maxX As Boolean
-        Dim s As String = str1.ToLower()
-        Dim t As String = str2.ToLower()
-        Dim n As Integer = s.Length
-        Dim m As Integer = t.Length
-        If (Not (n = 0 Or m = 0)) Then
-            Dim d(n + 1 + 1 - 1, m + 1 + 1 - 1) As Integer
-            Dim activeX As List(Of Integer) = New List(Of Integer)()
-            Dim activeY As List(Of Integer) = New List(Of Integer)()
-            d(0, 0) = 1
-            activeX.Add(0)
-            activeY.Add(0)
-            Dim currX As Integer = 0
-            Dim currY As Integer = 0
-            Do
-                currX = activeX(0)
-                activeX.RemoveAt(0)
-                currY = activeY(0)
-                activeY.RemoveAt(0)
-
-                temp = d(currX, currY)
-                If limit <> -1 AndAlso temp > limit Then
-                    Return temp
-                End If
-
-                maxX = currX = n
-                maxY = currY = m
-                If (Not maxX) Then
-                    temp = d(currX, currY) + 1
-                    If (temp < d(currX + 1, currY) OrElse d(currX + 1, currY) = 0) Then
-                        d(currX + 1, currY) = temp
-                        Glob.AddElement(d, activeX, activeY, currX + 1, currY)
-                    End If
-                End If
-                If (Not maxY) Then
-                    temp = d(currX, currY) + 1
-                    If (temp < d(currX, currY + 1) OrElse d(currX, currY + 1) = 0) Then
-                        d(currX, currY + 1) = temp
-                        Glob.AddElement(d, activeX, activeY, currX, currY + 1)
-                    End If
-                End If
-                If Not maxX And Not maxY Then
-                    temp = d(currX, currY) + Glob.GetDifference(s(currX), t(currY))
-                    If (temp < d(currX + 1, currY + 1) OrElse d(currX + 1, currY + 1) = 0) Then
-                        d(currX + 1, currY + 1) = temp
-                        Glob.AddElement(d, activeX, activeY, currX + 1, currY + 1)
-                    End If
-                End If
-            Loop While Not (maxX And maxY)
-            num = d(n, m) - 1
-        Else
-            num = n + m
-        End If
-        Return num
-    End Function
-
-    Private Sub AddElement(ByRef d As Integer(,), ByRef xList As List(Of Integer), ByRef yList As List(Of Integer), x As Integer, y As Integer)
-        Dim loc As Integer = 0
-        Dim temp As Integer = d(x, y)
-        While loc < xList.Count AndAlso temp > d(xList(loc), yList(loc))
-            loc = loc + 1
-        End While
-        If (loc = xList.Count) Then
-            xList.Add(x)
-            yList.Add(y)
-            Return
-        End If
-        xList.Insert(loc, x)
-        yList.Insert(loc, y)
-    End Sub
-
-    Private Function GetDifference(c1 As Char, c2 As Char) As Integer
-        If c1 = c2 Or c1 = "?"c Or c2 = "?"c Then
-            Return 0
-        End If
-
-        For i As Integer = 0 To ReplacementList.GetLength(0) - 1
-            If (c1 = Glob.ReplacementList(i, 0) Or c2 = Glob.ReplacementList(i, 0)) AndAlso
-               (c1 = Glob.ReplacementList(i, 1) Or c2 = Glob.ReplacementList(i, 1)) Then
-                Return 0
-            End If
-        Next
-
-        Return 1
     End Function
 End Module
