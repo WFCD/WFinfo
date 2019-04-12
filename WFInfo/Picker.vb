@@ -248,6 +248,7 @@ Public Class Picker
                     If TypeOf c2 Is Label Then c2.ForeColor = pbText.BackColor
                     If TypeOf c2 Is Button Then c2.BackColor = pbTitleBar.BackColor
                     If TypeOf c2 Is Button Then c2.ForeColor = pbText.BackColor
+                    If c2.Name = "lbStatus" Then c2.ForeColor = Color.Lime
                 Next
             Else
                 If TypeOf c Is Label Then c.ForeColor = pbText.BackColor

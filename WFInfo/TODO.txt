@@ -9,6 +9,7 @@ TODO:
 	Get Name Plaques working again
 	Move all colors into the Picker/Settings
 	Add Owned indicator to Overlays
+<<<<<<< HEAD
 	Store settings in appdata as json
 	Fix Overlay white flash
 	Confirm Eqmt window is being updated
@@ -25,3 +26,6 @@ TODO:
 	Get window hiding before tray icon shows
 	Enabled clicking through the overlays
 	Add in other languages
+=======
+	Store settings in appdata as json
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update

@@ -1,19 +1,26 @@
 ﻿
 Public Class Overlay
+<<<<<<< HEAD
 
     Private vault_img As Image
     Private unvault_img As Image
     Private loading_img As Image
+=======
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
 
     Public Sub New()
         InitializeComponent()
         'Me.CreateControl()
         UpdateColors(Me)
+<<<<<<< HEAD
         loading_img = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
         vault_img = Tint(My.Resources.Panel_V, My.Settings.cTray, 0.25)
         unvault_img = Tint(My.Resources.Panel_UV, My.Settings.cTray, 0.25)
         PictureBox1.Image = loading_img
 
+=======
+        PictureBox1.Image = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
         Me.BackColor = Color.Black
         Me.TopMost = True
 
@@ -39,10 +46,11 @@ Public Class Overlay
 
     Public Sub LoadText(plat As String, ducat As String, Optional vaulted As Boolean = False)
         If vaulted Then
-            PictureBox1.Image = vault_img
+            PictureBox1.Image = My.Resources.Panel_V
         Else
-            PictureBox1.Image = unvault_img
+            PictureBox1.Image = My.Resources.Panel_UV
         End If
+        PictureBox1.Image = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
 
         lbPlat.Text = plat
         lbPDropShadow.Text = lbPlat.Text
@@ -58,7 +66,6 @@ Public Class Overlay
     Private Sub tHide_Tick(sender As Object, e As EventArgs) Handles tHide.Tick
         Me.Hide()
         tHide.Stop()
-        Main.Invoke(Sub() Main.lbStatus.Text = "Ready for next reward")
     End Sub
 
     Public Sub ShowLoading(right As Integer, top As Integer)

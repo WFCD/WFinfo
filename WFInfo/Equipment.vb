@@ -357,6 +357,7 @@ Public Class Equipment
             node.Expand()
         End If
     End Sub
+<<<<<<< HEAD
 
     Friend Sub RefreshData()
         Dim cast As JObject = Nothing
@@ -382,6 +383,8 @@ Public Class Equipment
             End If
         Next
     End Sub
+=======
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
 End Class
 
 Public Class EqmtSorter

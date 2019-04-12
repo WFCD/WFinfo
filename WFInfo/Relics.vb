@@ -413,7 +413,12 @@ Public Class Relics
             hidden_nodes = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(hidden_file_path))
         End If
 
+<<<<<<< HEAD
         Dim remove As New List(Of JValue)
+=======
+
+
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
         For Each node As TreeNode In RelicTree.Nodes
             For Each hide As JValue In hidden_nodes(node.Text)
                 If db.relic_data(node.Text)(hide.Value)("vaulted").ToObject(Of Boolean) Then
@@ -441,39 +446,6 @@ Public Class Relics
     End Sub
 
     Public Sub Reload_Data()
-        ' Find any missing Relics
-        For Each node As TreeNode In RelicTree.Nodes
-            For Each relic As JProperty In db.relic_data(node.Text)
-                If node.Nodes.Find(relic.Name, True).Length = 0 Then
-                    Dim kid As New TreeNode(relic.Name)
-                    kid.Name = relic.Name
-
-                    kid.Nodes.Add(relic.Value("rare1").ToString()).ForeColor = rareColor
-                    kid.Nodes.Add(relic.Value("uncommon1").ToString()).ForeColor = uncommonColor
-                    kid.Nodes.Add(relic.Value("uncommon2").ToString()).ForeColor = uncommonColor
-                    kid.Nodes.Add(relic.Value("common1").ToString()).ForeColor = commonColor
-                    kid.Nodes.Add(relic.Value("common2").ToString()).ForeColor = commonColor
-                    kid.Nodes.Add(relic.Value("common3").ToString()).ForeColor = commonColor
-
-                    If relic.Value("vaulted").ToObject(Of Boolean) Then
-                        node.Nodes.Find("Hidden", False)(0).Nodes.Add(kid)
-                    Else
-                        node.Nodes.Add(kid)
-                    End If
-
-                    kid = kid.Clone()
-                    kid.Text = node.Text + " " + relic.Name
-
-                    If relic.Value("vaulted").ToObject(Of Boolean) Then
-                        RelicTree2.Nodes.Find("Hidden", False)(0).Nodes.Add(kid)
-                    Else
-                        RelicTree2.Nodes.Add(kid)
-                    End If
-                End If
-            Next
-        Next
-
-        ' Update all rad/int values
         For Each node As TreeNode In RelicTree.Nodes
             For Each kid As TreeNode In node.Nodes
                 If Not kid.Name.Contains("Hidden") Then

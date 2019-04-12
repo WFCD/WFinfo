@@ -5,7 +5,15 @@ Imports System.IO
 Public Class Main
     Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Integer, ByVal dx As Integer, ByVal dy As Integer, ByVal cButtons As Integer, ByVal dwExtraInfo As Integer)
     Public Declare Function GetAsyncKeyState Lib "user32" (ByVal vKey As Integer) As Integer
+    Dim scTog As Integer = 0 ' Toggle to force a single screenshot
+    Dim count As Integer = 0 ' Number of Pics in appData
+    Dim Sess As Integer = 0  ' Number of Screenshots this session
+    Dim PPM As Integer = 0   ' Potential Platinum Made this session
+    Dim pCount As Integer = 0 ' Current plat price to scan (Used for passive plat checks)
     Dim CliptoImage As Image         ' Stored image
+    Dim HKeyTog As Integer = 0       ' Toggle Var for setting the activation key
+    Dim lbTemp As String             ' Stores the keychar
+    Public devCheck As Boolean = False  ' Price alert (dev only) test feature that searches for cheaply listed parts
     Dim drag As Boolean = False      ' Toggle for the custom UI allowing it to drag
     Dim mouseX As Integer
     Dim mouseY As Integer
@@ -26,10 +34,11 @@ Public Class Main
             Me.Location = My.Settings.MainLoc
             Fullscreen = My.Settings.Fullscreen
             Me.MaximizeBox = False
+            lbStatus.ForeColor = Color.Yellow
             Me.Refresh()
             Me.Activate()
             Me.Refresh()
-            clock.Restart()
+            dpiScaling = GetScalingFactor()
 
             If (My.Settings.Automate) Then
                 Me.tAutomate.Enabled = True
@@ -50,6 +59,7 @@ Public Class Main
             If (Not Directory.Exists(appData + "\WFInfo\tests")) Then
                 Directory.CreateDirectory(appData + "\WFInfo\tests")
             End If
+            count = GetMax(appData + "\WFInfo\tests\") + 1
 
 
             '_________________________________________________________________________
@@ -87,10 +97,119 @@ Public Class Main
         End Try
     End Sub
 
-    Private DoWork_timer As Long = 0
+    Public Function getCookie()
+        '_________________________________________________________________________
+        'Checks FF cookie then Chrome Cookie, if it exists in neither returns false, true if found, also sets cookie
+        '_________________________________________________________________________
+        Dim found As Boolean = False
+        Dim ChromePath As String = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\Google\Chrome\User Data\Default\Cookies"
+
+        If File.Exists(appData + "\Mozilla\Firefox\Profiles") Then
+            Dim FFpath As String = Directory.GetDirectories(appData + "\Mozilla\Firefox\Profiles")(0) + "\cookies.sqlite"
+            If File.Exists(FFpath) Then
+                If Not checkCookie(FFpath, True) = True Then
+                    If File.Exists(ChromePath) Then
+                        If checkCookie(ChromePath) = True Then
+                            found = True
+                        End If
+                    End If
+                Else
+                    found = True
+                End If
+            End If
+        ElseIf File.Exists(ChromePath) Then
+            If checkCookie(ChromePath) = True Then
+                found = True
+            End If
+        End If
+        Return found
+    End Function
+
+    Private Function checkCookie(path As String, Optional FireFox As Boolean = False)
+        '_________________________________________________________________________
+        'Decrypts cookie to get JWT and returns true if all goes well
+        '_________________________________________________________________________
+        'Dim SQLconnect As New SQLiteConnection
+        'Dim SQLcommand As New SQLiteCommand
+
+        'SQLconnect.ConnectionString = "Data Source=" & path & ";"
+        'SQLconnect.Open()
+
+
+        'SQLcommand = SQLconnect.CreateCommand
+        'If FireFox Then
+        '    SQLcommand.CommandText = "SELECT * FROM moz_cookies"
+        'Else
+        '    SQLcommand.CommandText = "SELECT name,encrypted_value FROM Cookies"
+        'End If
+        'Dim SQLreader As SQLiteDataReader = SQLcommand.ExecuteReader()
+        'Dim cdmblk As String = " "
+        'Dim found As Boolean = False
+        'While SQLreader.Read
+        '    If FireFox Then
+        '        If SQLreader(3).contains("JWT") Then
+        '            cookie = "JWT=" + SQLreader(4) + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
+        '            found = True
+        '        End If
+        '    Else
+        '        Dim encryptedData = SQLreader(1)
+        '        If SQLreader(0).Contains("JWT") Then
+        '            Dim decodedData = System.Security.Cryptography.ProtectedData.Unprotect(encryptedData, Nothing, System.Security.Cryptography.DataProtectionScope.LocalMachine)
+        '            Dim plainText = System.Text.Encoding.ASCII.GetString(decodedData)
+        '            cookie = "JWT=" + plainText + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
+        '            found = True
+        '        End If
+        '    End If
+        'End While
+
+
+
+        'SQLcommand.Dispose()
+        'SQLconnect.Close()
+        'Return found
+        Return False
+    End Function
+
+    Private Function getXcsrf()
+        '_________________________________________________________________________
+        'Gets a fresh xcsrf token from warframe.market
+        '_________________________________________________________________________
+        'Dim uri As New Uri("https://warframe.market")
+        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+        'Dim req As HttpWebRequest = HttpWebRequest.Create(uri)
+        'req.ContentType = "application/json"
+        'req.Method = "GET"
+        'req.Connection = "warframe.market:443 HTTP/1.1"
+        'req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
+        'req.Host = "warframe.market:443"
+        'req.Headers.Add("cookie", cookie)
+        'req.Headers.Add("X-Requested-With", "XMLHttpRequest")
+        'req.KeepAlive = True
+
+        'Dim response = req.GetResponse()
+        'Dim stream = response.GetResponseStream()
+        'Dim found As Boolean = False
+        'Dim reader As StreamReader = New StreamReader(stream)
+        'xcsrf = reader.ReadLine()
+        'Do Until xcsrf.Contains("csrf-token")
+        '    xcsrf = reader.ReadLine()
+        '    found = True
+        'Loop
+        'xcsrf = xcsrf.Substring(xcsrf.IndexOf("##"), 130)
+
+        'Return found
+        Return False
+    End Function
+
+    Private Sub btnDebug1_Click(sender As Object, e As EventArgs)
+    End Sub
+
+    Private Sub btnDebug2_Click(sender As Object, e As EventArgs)
+    End Sub
+
     Private Sub DoWork()
-        DoWork_timer = clock.Elapsed.TotalMilliseconds
         Try
+<<<<<<< HEAD
             If (Glob.db IsNot Nothing) Then
                 Dim elapsed As TimeSpan = Glob.clock.Elapsed
                 Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds))
@@ -107,18 +226,67 @@ Public Class Main
                 Invoke(Sub() lbWikiDate.Text = Glob.db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
                 Relics.Load_Relic_Tree()
                 Equipment.Load_Eqmt_Tree()
+=======
+            lbStatus.ForeColor = Color.Yellow
+            If db Is Nothing Then
+                db = New Data()
+                GetCoors()
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
                 For i As Integer = 0 To 3
                     rwrdPanels(i) = New Overlay()
                 Next
                 For i As Integer = 0 To 8
                     relicPanels(i) = New Overlay()
                 Next
+<<<<<<< HEAD
                 Invoke(Sub() lbStatus.Text = "Data Loaded")
             End If
         Catch ex As Exception
             Me.lbStatus.Text = "ERROR (ParseScreen)"
             Me.lbStatus.ForeColor = Color.Red
             Me.addLog(ex.ToString())
+=======
+                Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
+                Invoke(Sub() lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11))
+                Invoke(Sub() lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
+            Else
+                ParseScreen()
+            End If
+            lbStatus.ForeColor = Color.Lime
+        Catch ex As Exception
+            lbStatus.ForeColor = Color.Red
+            addLog(ex.ToString)
+        End Try
+    End Sub
+
+    Private Sub KeyWatch_Tick(sender As Object, e As EventArgs) Handles tPB.Tick
+        Try
+            If Not key1Tog Then
+
+                '_________________________________________________________________________
+                'Checks for new steam screenshots (using fullscreen mode) and starts main function if found
+                '_________________________________________________________________________
+                If Fullscreen Then
+                    If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
+                        If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
+                            My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
+                            DoWork()
+                        End If
+                    End If
+                End If
+
+
+                '_________________________________________________________________________
+                'watches for main hotkey and sctog starts the min function if pressed
+                '_________________________________________________________________________
+                If GetAsyncKeyState(HKey1) And &H8000 Then
+                    DoWork()
+                End If
+            End If
+        Catch ex As Exception
+            lbStatus.ForeColor = Color.Red
+            addLog(ex.ToString)
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
         End Try
     End Sub
 
@@ -139,6 +307,18 @@ Public Class Main
         End If
         My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\WFInfo.log",
         dateTime + vbNewLine + txt + vbNewLine + vbNewLine + logStore, False)
+    End Sub
+
+    Private Sub Main_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress
+        If HKeyTog = 1 Then
+            lbTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper
+        End If
+    End Sub
+
+    Private Sub btnSetKey_KeyPress(sender As Object, e As KeyPressEventArgs)
+        If HKeyTog = 1 Then
+            lbTemp = Chr(AscW(e.KeyChar)).ToString.ToUpper
+        End If
     End Sub
 
     Private Sub Main_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
@@ -289,6 +469,7 @@ Public Class Main
         End If
     End Sub
 
+<<<<<<< HEAD
     Private tUpdate_Count As Integer = 1
     Private Sub tUpdate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tUpdate.Tick
         Try
@@ -375,6 +556,12 @@ Public Class Main
             ForceRefineDisplay = True
         End If
         tScroll.Enabled = False
+=======
+    Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick
+        If db IsNot Nothing AndAlso db.Update() Then
+            Relics.Reload_Data()
+        End If
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
     End Sub
 
     Private Async Sub lbMarket_Click(sender As Object, e As EventArgs) Handles lbMarket.Click
@@ -401,6 +588,10 @@ Public Class Main
         lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11)
         Equipment.Refresh()
     End Sub
+
+    Private Sub DebugButton_Click(sender As Object, e As EventArgs) Handles DebugButton.Click
+
+    End Sub
 End Class
 
 Module Glob
@@ -410,6 +601,9 @@ Module Glob
 
     ' StopWatch for Code Profiling
     Public clock As New Stopwatch()
+    Public prev_time As Long = clock.Elapsed.Ticks
+
+    Public dpiScaling As Double = 1.0
 
     Public db As Data
     Public qItems As New List(Of String)()
@@ -436,7 +630,10 @@ Module Glob
     Public rareBrush As Brush = New SolidBrush(rareColor)
     Public bgColor As Color = Color.FromArgb(27, 27, 27)
     Public bgBrush As Brush = New SolidBrush(bgColor)
+    'Public cookie As String = ""
+    'Public xcsrf As String = ""
 
+<<<<<<< HEAD
     Public rwrdPanels(4) As Overlay
     Public relicPanels(9) As Overlay
 
@@ -539,37 +736,38 @@ Module Glob
         'SQLconnect.Close()
         'Return found
         Return False
+=======
+    <DllImport("gdi32.dll")>
+    Public Function GetDeviceCaps(hdc As IntPtr, nIndex As Integer) As Integer
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
     End Function
+    Public Enum DeviceCap
+        VERTRES = 10
+        LOGPIXELSX = 88
+        LOGPIXELSY = 90
+        DESKTOPVERTRES = 117
+    End Enum
 
-    Private Function getXcsrf()
-        '_________________________________________________________________________
-        'Gets a fresh xcsrf token from warframe.market
-        '_________________________________________________________________________
-        'Dim uri As New Uri("https://warframe.market")
-        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-        'Dim req As HttpWebRequest = HttpWebRequest.Create(uri)
-        'req.ContentType = "application/json"
-        'req.Method = "GET"
-        'req.Connection = "warframe.market:443 HTTP/1.1"
-        'req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
-        'req.Host = "warframe.market:443"
-        'req.Headers.Add("cookie", cookie)
-        'req.Headers.Add("X-Requested-With", "XMLHttpRequest")
-        'req.KeepAlive = True
 
-        'Dim response = req.GetResponse()
-        'Dim stream = response.GetResponseStream()
-        'Dim found As Boolean = False
-        'Dim reader As StreamReader = New StreamReader(stream)
-        'xcsrf = reader.ReadLine()
-        'Do Until xcsrf.Contains("csrf-token")
-        '    xcsrf = reader.ReadLine()
-        '    found = True
-        'Loop
-        'xcsrf = xcsrf.Substring(xcsrf.IndexOf("##"), 130)
+    Public Function GetScalingFactor() As Double
+        Using form As New Form()
+            Using g As Graphics = form.CreateGraphics()
+                If g.DpiX <> 96 Then
+                    Main.addLog("FOUND DPI: g.DpiX")
+                    Return g.DpiX / 96
+                ElseIf g.DpiY <> 96 Then
+                    Main.addLog("FOUND DPI: g.DpiY")
+                    Return g.DpiY / 96
+                End If
+            End Using
+        End Using
 
-        'Return found
-        Return False
+        Using g As Graphics = Graphics.FromHwnd(IntPtr.Zero)
+            Dim desktop As IntPtr = g.GetHdc()
+            Dim temp As Double = GetDeviceCaps(desktop, DeviceCap.DESKTOPVERTRES)
+            temp /= GetDeviceCaps(desktop, DeviceCap.VERTRES)
+            Return temp
+        End Using
     End Function
 
     Public Sub UpdateColors(f As Form)

@@ -9,10 +9,16 @@ Module OCR
 
     Private window As Rect = Nothing
     Private win_area As Rect = Nothing
+<<<<<<< HEAD
 
     Private dpiScaling As Double = -1.0
     Private uiScaling As Double = -1.0
     Private center As Point = Nothing
+=======
+    Private ss_area As Rectangle = Nothing ' Screenshot coordinates and width/height
+
+    Private relic_area As RectangleF = Nothing ' Percentage coordinates, i.e. OF THE LEFT MOST REWARD
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
 
     Dim rarity As New List(Of Color) From {Color.FromArgb(171, 159, 117), Color.FromArgb(175, 175, 175), Color.FromArgb(134, 98, 50)}
 
@@ -24,6 +30,7 @@ Module OCR
     Private Function GetClientRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
     End Function
 
+<<<<<<< HEAD
     <DllImport("gdi32.dll")>
     Public Function GetDeviceCaps(hdc As IntPtr, nIndex As Integer) As Integer
     End Function
@@ -97,6 +104,21 @@ Module OCR
         '     So extra computation will not negatively affect user
         If isWFActive() Then
             UpdateCenter()
+=======
+    Public Function GetCoors() As Boolean
+        If window <> Nothing Then
+            Return UpdateCoors()
+        End If
+        Dim wf As Process = Nothing
+        For Each p As Process In Process.GetProcesses
+            If p.ProcessName.Contains("Warframe") Then
+                wf = p
+                Exit For
+            End If
+        Next
+        If wf Is Nothing Then
+            Return False
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
         End If
     End Sub
 
@@ -112,6 +134,7 @@ Module OCR
             ' Get DPI Scaling
             dpiScaling = GetScalingFactor()
 
+<<<<<<< HEAD
             Dim padding As Integer = (window.Width - win_area.Width) / 2
 
             ' Start at left of window
@@ -353,6 +376,46 @@ Module OCR
 
     ' THIS WILL BE IGNORING FULLSCREEN FOR NOW
     Private ParseScreen_timer As Long = 0
+=======
+
+        Return UpdateCoors()
+    End Function
+
+    Public Function UpdateCoors() As Boolean
+        If window = Nothing Then
+            Return GetCoors()
+        End If
+        ' Works for ONLY 1680/1050
+        Dim scale As Double = My.Settings.Scaling
+        scale /= 100
+        scale *= win_area.Width
+        scale /= 1680
+
+
+        'FROM (0,0)
+        Dim top As Integer = (win_area.Height / 2) - (318 * scale) - 1
+        Dim left As Integer = (win_area.Width / 2) - (758 * scale) - 1
+        Dim wid As Integer = 1516 * scale + 2
+        Dim hei As Integer = 304 * scale + 2
+
+        'Adjust to actual "top-left"
+        left += window.X1
+        top += window.Y1
+        If (win_area.Width <> window.Width Or win_area.Height <> window.Height) Then
+            Dim padding As Integer = (window.Width - win_area.Width) / 2
+            left += padding
+            top += window.Height - win_area.Height - padding
+        End If
+
+        ss_area = New Rectangle(dpiScaling * left, dpiScaling * top, dpiScaling * wid, dpiScaling * hei)
+        relic_area = New RectangleF(left, top, 378 * scale, hei)
+        If Debug Then
+            Main.addLog("UPDATED WIN COORS:" & vbCrLf & dpiScaling & vbCrLf & window.ToString() & vbCrLf & win_area.ToString() & vbCrLf & ss_area.ToString() & vbCrLf & relic_area.ToString())
+        End If
+        Return True
+    End Function
+
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
     Public Sub ParseScreen()
         If Not isWFActive() Then
             Return
@@ -362,8 +425,10 @@ Module OCR
         Dim players As Integer = 0
         Dim foundText As New List(Of String)()
         ' Start timer
-        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
+        prev_time = 0
+        clock.Restart()
 
+<<<<<<< HEAD
         screen = GetRelicWindow()
 
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
@@ -386,6 +451,18 @@ Module OCR
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
         Console.WriteLine("PLAYER COUNT(" + players.ToString() + ")-" & ParseScreen_timer & "ms")
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
+=======
+        ' Get Relic Image
+        screen = GetScreenShot()
+        'screen = GetDebugShot()
+        Console.WriteLine("SCREENSHOT: " + (clock.Elapsed.Ticks - prev_time).ToString())
+        prev_time = clock.Elapsed.Ticks
+
+        ' Get Player Count from Image
+        players = GetPlayers(screen)
+        Console.WriteLine("PLAYER COUNT(" + players.ToString() + "): " + (clock.Elapsed.Ticks - prev_time).ToString())
+        prev_time = clock.Elapsed.Ticks
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
 
         ' Get Part Text from Image
         ' Only retrieve capitals
@@ -397,6 +474,7 @@ Module OCR
             text = db.GetPartName(text)
             foundText.Add(text)
         Next
+<<<<<<< HEAD
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
         Console.WriteLine("GET PART TEXT-" & ParseScreen_timer & "ms")
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
@@ -404,6 +482,27 @@ Module OCR
         Dim ducat As String = ""
         Dim vaulted As Boolean
         ' Move over if you don't have all 4
+=======
+        Console.WriteLine("GET OCR TEXT: " + (clock.Elapsed.Ticks - prev_time).ToString())
+        prev_time = clock.Elapsed.Ticks
+
+        foundText = GetPartNames(foundText, screen, players)
+
+        Console.WriteLine("GET PART NAMES: " + (clock.Elapsed.Ticks - prev_time).ToString())
+        prev_time = clock.Elapsed.Ticks
+
+        If Debug Then
+            Main.addLog("DISPLAYING OVERLAYS:" & vbCrLf & players & vbCrLf & relic_area.ToString())
+        End If
+        Dim plat As Double = 0
+        Dim ducat As String = ""
+        Dim vaulted As Boolean
+        Dim pad As Integer = relic_area.Height * 0.05
+        Dim top As Integer = relic_area.Y + pad
+        Dim right As Integer = relic_area.X - pad
+		' Move over if you don't have all 4
+		right += relic_area.Width * (4 - players) * 0.5
+>>>>>>> parent of bd0e09b... 7.0.4 - Background Update
         For i = 0 To foundText.Count - 1
 
             If Debug Then
@@ -414,8 +513,9 @@ Module OCR
             vaulted = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
             rwrdPanels(i).LoadText(plat.ToString("N1"), ducat, vaulted)
         Next
-        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")
+        Console.WriteLine("DISPLAY OVERLAYS: " + (clock.Elapsed.Ticks - prev_time).ToString())
+        clock.Stop()
+        Console.WriteLine("Total: " + clock.Elapsed.Ticks.ToString())
     End Sub
 
     '_____________________________________________________
