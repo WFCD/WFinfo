@@ -22,6 +22,7 @@ Class Data
 
     Public panels(3) As Overlay
 
+    Private save_count As Integer = 0
     Private webClient As WebClient
 
     Public Sub New()
@@ -35,6 +36,11 @@ Class Data
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
         Update()
+    End Sub
+
+    Public Sub Save_JObject(data As JObject)
+        File.WriteAllText(Path.Combine(appData, "WFInfo\debug" & save_count.ToString() & ".json"), JsonConvert.SerializeObject(data, Formatting.Indented))
+        save_count += 1
     End Sub
 
     Public Sub Save_Market()
@@ -92,7 +98,7 @@ Class Data
         For Each elem As JObject In market_temp("payload")("previous_day")
             Dim item_name As String = ""
             If Not market_items.TryGetValue(elem("item"), item_name) Then
-                Load_Market_Items()
+                Load_Market_Items(True)
                 item_name = market_items(elem("item"))
             End If
             item_name = item_name.Split("|")(0)
