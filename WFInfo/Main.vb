@@ -136,7 +136,7 @@ Public Class Main
         'Function for storing log data
         '_________________________________________________________________________
         appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-        Dim dateTime As String = "[" + System.DateTime.Now + "]"
+        Dim dateTime As String = "[" + System.DateTime.Now + " " + version + "]"
         Dim logStore As String = ""
         If Not My.Computer.FileSystem.DirectoryExists(appData + "\WFInfo") Then
             Directory.CreateDirectory(appData + "\WFInfo")

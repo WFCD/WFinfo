@@ -67,8 +67,14 @@ Class Data
             End If
             Return False
         End If
-
-        Dim m_i_temp As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items"))
+        Dim m_i_temp As JObject
+        Try
+            m_i_temp = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items"))
+        Catch ex As System.Net.WebException
+            Main.addLog(ex.Status.ToString())
+            Main.addLog(ex.InnerException.ToString())
+            Return False
+        End Try
         market_items = New Dictionary(Of String, String)()
         For Each elem As JObject In m_i_temp("payload")("items")("en")
             Dim name As String = elem("item_name")
@@ -99,14 +105,18 @@ Class Data
             Dim item_name As String = ""
             If Not market_items.TryGetValue(elem("item"), item_name) Then
                 Load_Market_Items(True)
-                item_name = market_items(elem("item"))
             End If
-            item_name = item_name.Split("|")(0)
 
-            If Not item_name.Contains("Set") Then
-                market_data(item_name) = New JObject()
-                market_data(item_name)("ducats") = elem("ducats")
-                market_data(item_name)("plat") = elem("wa_price")
+            If market_items.TryGetValue(elem("item"), item_name) Then
+                item_name = item_name.Split("|")(0)
+
+                If Not item_name.Contains("Set") Then
+                    market_data(item_name) = New JObject()
+                    market_data(item_name)("ducats") = elem("ducats")
+                    market_data(item_name)("plat") = elem("wa_price")
+                End If
+            Else
+                Main.addLog("CANNOT FIND:" & elem("item").ToString())
             End If
         Next
 
