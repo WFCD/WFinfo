@@ -387,6 +387,7 @@ Module Glob
     'Public Equipment As String               ' List of leveled equipment
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
+    Public Automate As Boolean = My.Settings.Automate
     Public Animate As Boolean = My.Settings.Animate
     Public Debug As Boolean = My.Settings.Debug
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
