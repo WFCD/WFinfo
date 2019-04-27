@@ -9,7 +9,7 @@ Public Class Main
     Dim drag As Boolean = False      ' Toggle for the custom UI allowing it to drag
     Dim mouseX As Integer
     Dim mouseY As Integer
-    Public version As String = "1.0.0"
+    Public version As String = Nothing
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Try
@@ -19,8 +19,11 @@ Public Class Main
 
             UpdateColors(Me)
 
-            version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
-            version = version.Substring(0, version.LastIndexOf("."))
+            If version Is Nothing Then
+                version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
+                version = version.Substring(0, version.LastIndexOf("."))
+            End If
+
             lbVersion.Text = "v" + version
             Me.Location = My.Settings.MainLoc
             Fullscreen = My.Settings.Fullscreen
@@ -143,6 +146,12 @@ Public Class Main
         '_________________________________________________________________________
         'Function for storing log data
         '_________________________________________________________________________
+
+        If version Is Nothing Then
+            version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
+            version = version.Substring(0, version.LastIndexOf("."))
+        End If
+
         appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
         Dim dateTime As String = "[" + System.DateTime.Now + " " + version + "]"
         Dim logStore As String = ""
@@ -405,6 +414,8 @@ Module Glob
     Public rareBrush As Brush = New SolidBrush(rareColor)
     Public bgColor As Color = Color.FromArgb(27, 27, 27)
     Public bgBrush As Brush = New SolidBrush(bgColor)
+
+    Public culture As System.Globalization.CultureInfo = New System.Globalization.CultureInfo("en")
 
     Public rwrdPanels(4) As Overlay
     Public relicPanels(9) As Overlay

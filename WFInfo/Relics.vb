@@ -201,7 +201,7 @@ Public Class Relics
             If name <> "Forma Blueprint" Then
                 Dim vals As JObject = db.market_data(name)
                 e.Graphics.FillRectangle(bgBrush, 260, e.Bounds.Top, 130, e.Bounds.Height)
-                e.Graphics.DrawString(Double.Parse(vals("plat")).ToString("N1"), RelicTree.Font, brush, 300, e.Bounds.Top + 1, sf)
+                e.Graphics.DrawString(Double.Parse(vals("plat"), culture).ToString("N1"), RelicTree.Font, brush, 300, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
                 e.Graphics.DrawString(vals("ducats"), RelicTree.Font, brush, 370, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.ducat_w, 370, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
@@ -345,16 +345,16 @@ Public Class Relics
                                 rperc = 0.2
                                 iperc = 0.11
                             End If
-                            Dim plat As Double = Double.Parse(db.market_data(temp.Text)("plat"))
+                            Dim plat As Double = Double.Parse(db.market_data(temp.Text)("plat"), culture)
                             rtot += (plat * rperc)
                             itot += (plat * iperc)
                             count += 1
                         Catch ex As Exception
                             If db.market_data.TryGetValue(temp.Text, Nothing) Then
-                                Main.addLog("MISSING RELIC PLAT VALUES: " + temp.FullPath + " -- " + temp.Text)
-                            Else
                                 Main.addLog("UNKNOWN ERROR: " + temp.Text + " -- " + db.market_data(temp.Text)("plat").ToString() + "\n")
                                 Main.addLog(ex.ToString())
+                            Else
+                                Main.addLog("MISSING RELIC PLAT VALUES: " + temp.FullPath + " -- " + temp.Text)
                             End If
                         End Try
                     End If
@@ -479,7 +479,7 @@ Public Class Relics
                                     rperc = 0.2
                                     iperc = 0.11
                                 End If
-                                Dim plat As Double = Double.Parse(db.market_data(temp.Text)("plat"))
+                                Dim plat As Double = Double.Parse(db.market_data(temp.Text)("plat"), culture)
                                 rtot += (plat * rperc)
                                 itot += (plat * iperc)
                                 count += 1
@@ -576,8 +576,8 @@ Public Class NodeSorter
         Dim jobx As JObject = db.relic_data(erax)(strx)
         Dim joby As JObject = db.relic_data(eray)(stry)
         If Me.type = 1 Then
-            Return (Double.Parse(joby("int")) - Double.Parse(jobx("int"))) * 100
+            Return (Double.Parse(joby("int"), culture) - Double.Parse(jobx("int"), culture)) * 100
         End If
-        Return (Double.Parse(joby("rad")) - Double.Parse(jobx("rad"))) * 100
+        Return (Double.Parse(joby("rad"), culture) - Double.Parse(jobx("rad"), culture)) * 100
     End Function
 End Class
