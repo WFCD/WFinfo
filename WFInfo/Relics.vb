@@ -337,7 +337,7 @@ Public Class Relics
                 Dim count As Integer = 0
                 For Each temp As TreeNode In kid.Nodes
                     If temp.Parent.FullPath = kid.FullPath Then
-                        If db.market_data.TryGetValue(temp.Text, Nothing) Then
+                        Try
                             If count > 2 Then
                                 rperc = 0.5 / 3.0
                                 iperc = 0.76 / 3.0
@@ -349,9 +349,14 @@ Public Class Relics
                             rtot += (plat * rperc)
                             itot += (plat * iperc)
                             count += 1
-                        Else
-                            Console.WriteLine("MISSING RELIC PLAT VALUES: " + temp.FullPath + " -- " + temp.Text)
-                        End If
+                        Catch ex As Exception
+                            If db.market_data.TryGetValue(temp.Text, Nothing) Then
+                                Main.addLog("MISSING RELIC PLAT VALUES: " + temp.FullPath + " -- " + temp.Text)
+                            Else
+                                Main.addLog("UNKNOWN ERROR: " + temp.Text + " -- " + db.market_data(temp.Text)("plat").ToString() + "\n")
+                                Main.addLog(ex.ToString())
+                            End If
+                        End Try
                     End If
                 Next
                 rtot -= itot
