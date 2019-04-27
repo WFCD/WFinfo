@@ -26,7 +26,7 @@ Public Class Main
 
             lbVersion.Text = "v" + version
             Me.Location = My.Settings.MainLoc
-            Fullscreen = My.Settings.Fullscreen
+            'Fullscreen = My.Settings.Fullscreen
             Me.MaximizeBox = False
             Me.Refresh()
             Me.Activate()
