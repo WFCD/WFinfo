@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data.vb" />
+    <Compile Include="GlobalHook.vb" />
     <Compile Include="NamePlaque.Designer.vb">
       <DependentUpon>NamePlaque.vb</DependentUpon>
     </Compile>

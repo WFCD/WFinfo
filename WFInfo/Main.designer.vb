@@ -55,6 +55,7 @@ Partial Class Main
         Me.pbHome = New System.Windows.Forms.PictureBox()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.lbStatus = New System.Windows.Forms.Label()
+        Me.tAutomate = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -373,6 +374,11 @@ Partial Class Main
         Me.lbStatus.Text = "Loading..."
         Me.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
+        'tAutomate
+        '
+        Me.tAutomate.Enabled = True
+        Me.tAutomate.Interval = 1000
+        '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -435,4 +441,5 @@ Partial Class Main
     Friend WithEvents pbHome As PictureBox
     Friend WithEvents Label2 As Label
     Friend WithEvents lbStatus As Label
+    Friend WithEvents tAutomate As Timer
 End Class

@@ -281,7 +281,7 @@ Public Class Settings
     End Sub
 
     Private Sub ScaleBar_MouseUp(sender As Object, e As EventArgs) Handles ScaleBar.MouseUp
-        UpdateCoors()
+        ForceUpdateCenter()
     End Sub
 
     Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ScaleOption.SelectedIndexChanged
@@ -292,7 +292,7 @@ Public Class Settings
             ScaleBar.Value = 95
         End If
         ScaleBar_Scroll(sender, e)
-        UpdateCoors()
+        ForceUpdateCenter()
         'Kek: To remove the blue highlight... because I don't like the look of it
         ScaleBar.Select()
     End Sub
