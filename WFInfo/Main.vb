@@ -49,7 +49,7 @@ Public Class Main
             '        getXcsrf()
             '    End If
             'Catch ex As Exception
-            '    addLog(ex.ToString)
+            '    addLog(ex.ToString())
             'End Try
 
 
@@ -72,7 +72,7 @@ Public Class Main
             End If
 
         Catch ex As Exception
-            addLog(ex.ToString)
+            addLog(ex.ToString())
         End Try
     End Sub
 
@@ -138,7 +138,7 @@ Public Class Main
         Catch ex As Exception
             Invoke(Sub() lbStatus.Text = "ERROR (KeyWatch)")
             Invoke(Sub() lbStatus.ForeColor = Color.Red)
-            addLog(ex.ToString)
+            addLog(ex.ToString())
         End Try
     End Sub
 
@@ -146,6 +146,8 @@ Public Class Main
         '_________________________________________________________________________
         'Function for storing log data
         '_________________________________________________________________________
+
+        Console.WriteLine(txt)
 
         If version Is Nothing Then
             version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
@@ -181,6 +183,7 @@ Public Class Main
         Me.Refresh()
         Me.CreateControl()
         Task.Factory.StartNew(Sub() DoWork())
+        Console.WriteLine(Me.Location.ToString())
     End Sub
 
     Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
@@ -331,7 +334,7 @@ Public Class Main
         Catch ex As Exception
             Invoke(Sub() lbStatus.Text = "ERROR (Updating DB)")
             Invoke(Sub() lbStatus.ForeColor = Color.Red)
-            addLog(ex.ToString)
+            addLog(ex.ToString())
         End Try
         tUpdate_Count = (tUpdate_Count + 1) Mod 12
     End Sub

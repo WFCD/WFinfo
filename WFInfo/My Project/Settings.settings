@@ -66,7 +66,7 @@
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
     <Setting Name="MainLoc" Type="System.Drawing.Point" Scope="User">
-      <Value Profile="(Default)">0, 0</Value>
+      <Value Profile="(Default)">200, 200</Value>
     </Setting>
     <Setting Name="ExpandedRelics" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
