@@ -27,6 +27,8 @@ Public Class Main
             lbVersion.Text = "v" + version
             Me.Location = My.Settings.MainLoc
             Fullscreen = My.Settings.Fullscreen
+            Automate = My.Settings.Automate
+            tAutomate.Enabled = Automate
             Me.MaximizeBox = False
             Me.Refresh()
             Me.Activate()
@@ -365,6 +367,7 @@ Public Class Main
     End Sub
 
     Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
+        Console.WriteLine("tAutomate Tick")
         If (Glob.db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso OCR.isWFActive()) Then
             If (OCR.IsRelicWindow()) Then
                 If (Not rwrdPanels(0).Visible) Then
@@ -399,7 +402,7 @@ Module Glob
     'Public Equipment As String               ' List of leveled equipment
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
-    Public Automate As Boolean = My.Settings.Automate
+    Public Automate As Boolean = False
     Public Animate As Boolean = My.Settings.Animate
     Public Debug As Boolean = My.Settings.Debug
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
