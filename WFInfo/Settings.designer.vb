@@ -39,16 +39,18 @@ Partial Class Settings
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.cbAutomation = New System.Windows.Forms.CheckBox()
         Me.cbDebug = New System.Windows.Forms.CheckBox()
-        Me.Panel3 = New System.Windows.Forms.Panel()
         Me.Panel4 = New System.Windows.Forms.Panel()
         Me.btnCustomize = New System.Windows.Forms.Button()
+        Me.Panel5 = New System.Windows.Forms.Panel()
+        Me.SSdirSelection = New System.Windows.Forms.Button()
+        Me.Label10 = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
         CType(Me.ScaleBar, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel2.SuspendLayout()
-        Me.Panel3.SuspendLayout()
         Me.Panel4.SuspendLayout()
+        Me.Panel5.SuspendLayout()
         Me.SuspendLayout()
         '
         'btnHkey1
@@ -81,7 +83,6 @@ Partial Class Settings
         '
         Me.cbFullscreen.AutoSize = True
         Me.cbFullscreen.BackColor = System.Drawing.Color.Transparent
-        Me.cbFullscreen.Enabled = True
         Me.cbFullscreen.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbFullscreen.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.cbFullscreen.Location = New System.Drawing.Point(185, 22)
@@ -354,22 +355,12 @@ Partial Class Settings
         Me.cbDebug.Text = "Debug Mode"
         Me.cbDebug.UseVisualStyleBackColor = False
         '
-        'Panel3
-        '
-        Me.Panel3.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
-        Me.Panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel3.Controls.Add(Me.Panel4)
-        Me.Panel3.Location = New System.Drawing.Point(1, 26)
-        Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(319, 270)
-        Me.Panel3.TabIndex = 23
-        '
         'Panel4
         '
         Me.Panel4.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.Panel4.Controls.Add(Me.btnCustomize)
-        Me.Panel4.Location = New System.Drawing.Point(-1, 227)
+        Me.Panel4.Location = New System.Drawing.Point(1, 322)
         Me.Panel4.Name = "Panel4"
         Me.Panel4.Size = New System.Drawing.Size(319, 42)
         Me.Panel4.TabIndex = 22
@@ -388,16 +379,54 @@ Partial Class Settings
         Me.btnCustomize.TextAlign = System.Drawing.ContentAlignment.TopCenter
         Me.btnCustomize.UseVisualStyleBackColor = False
         '
+        'Panel5
+        '
+        Me.Panel5.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.Panel5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel5.Controls.Add(Me.SSdirSelection)
+        Me.Panel5.Controls.Add(Me.Label10)
+        Me.Panel5.Location = New System.Drawing.Point(1, 254)
+        Me.Panel5.Name = "Panel5"
+        Me.Panel5.Size = New System.Drawing.Size(319, 69)
+        Me.Panel5.TabIndex = 23
+        '
+        'SSdirSelection
+        '
+        Me.SSdirSelection.BackColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer))
+        Me.SSdirSelection.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.SSdirSelection.Font = New System.Drawing.Font("Tahoma", 8.25!)
+        Me.SSdirSelection.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.SSdirSelection.Location = New System.Drawing.Point(14, 30)
+        Me.SSdirSelection.Name = "SSdirSelection"
+        Me.SSdirSelection.Size = New System.Drawing.Size(290, 24)
+        Me.SSdirSelection.TabIndex = 14
+        Me.SSdirSelection.Text = "C:\Users\<user>\Pictures\Warframe"
+        Me.SSdirSelection.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.SSdirSelection.UseVisualStyleBackColor = False
+        '
+        'Label10
+        '
+        Me.Label10.BackColor = System.Drawing.Color.Transparent
+        Me.Label10.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label10.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.Label10.Location = New System.Drawing.Point(-1, 6)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(319, 18)
+        Me.Label10.TabIndex = 29
+        Me.Label10.Text = "Screenshot Location:"
+        Me.Label10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
         'Settings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(321, 297)
+        Me.ClientSize = New System.Drawing.Size(321, 416)
+        Me.Controls.Add(Me.Panel4)
+        Me.Controls.Add(Me.Panel5)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.Controls.Add(Me.Panel2)
-        Me.Controls.Add(Me.Panel3)
         Me.DoubleBuffered = True
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -411,8 +440,8 @@ Partial Class Settings
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel2.ResumeLayout(False)
         Me.Panel2.PerformLayout()
-        Me.Panel3.ResumeLayout(False)
         Me.Panel4.ResumeLayout(False)
+        Me.Panel5.ResumeLayout(False)
         Me.ResumeLayout(False)
 
     End Sub
@@ -427,9 +456,7 @@ Partial Class Settings
     Friend WithEvents cbDebug As CheckBox
     Friend WithEvents btnClose As Button
     Friend WithEvents PictureBox3 As PictureBox
-    Friend WithEvents Panel3 As Panel
     Friend WithEvents Panel4 As Panel
-    Friend WithEvents btnCustomize As Button
     Friend WithEvents Label2 As Label
     Friend WithEvents ScaleBar As TrackBar
     Friend WithEvents Label8 As Label
@@ -442,4 +469,8 @@ Partial Class Settings
     Friend WithEvents Label9 As Label
     Friend WithEvents ScaleOption As ComboBox
     Friend WithEvents cbAutomation As CheckBox
+    Friend WithEvents btnCustomize As Button
+    Friend WithEvents Panel5 As Panel
+    Friend WithEvents Label10 As Label
+    Friend WithEvents SSdirSelection As Button
 End Class

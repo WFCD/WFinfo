@@ -79,6 +79,10 @@ Public Class Settings
         ScaleBar.Value = My.Settings.Scaling
         Label9.Text = My.Settings.Scaling.ToString() + "%"
         ScaleOption.SelectedIndex = My.Settings.ScaleType
+        If My.Settings.LocStorage.Length <= 1 Then
+            My.Settings.LocStorage = Environment.ExpandEnvironmentVariables("%Userprofile%\Pictures\Warframe")
+        End If
+        SSdirSelection.Text = My.Settings.LocStorage
     End Sub
 
     Private Sub Settings_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress, btnHkey1.KeyPress
@@ -150,24 +154,7 @@ Public Class Settings
         'This is a new implementation of fullscreens support that does not rely on steam screenshots. 
         'Instead it allows the user to select any directory they wish.
         '_________________________________________________________________________
-        Dim msgChoice
-        Dim mainDir As String = "%Userprofile%\Pictures\Warframe"
-        If Not Fullscreen Then
-            msgChoice = MsgBox("Is Warframe saving screenshots to %Userprofile%\Pictures\Warframe?", MsgBoxStyle.YesNo, "Steam Location")
-            If msgChoice = MsgBoxResult.No Then
-                MsgBox("Please select the folder where Warframe screenshots are saved to.")
-                Using dialog As New FolderBrowserDialog
-                    If dialog.ShowDialog() <> DialogResult.OK Then Return
-                    mainDir = dialog.SelectedPath
-                End Using
-            End If
-            Fullscreen = True
-            My.Settings.Fullscreen = True
-            My.Settings.LocStorage = mainDir
-        Else
-            Fullscreen = False
-            My.Settings.Fullscreen = False
-        End If
+        Fullscreen = cbFullscreen.Checked
     End Sub
 
     Private Sub cbAutomation_Click(sender As Object, e As EventArgs) Handles cbAutomation.Click
@@ -256,5 +243,15 @@ Public Class Settings
         ScaleBar_Scroll(sender, e)
         'Kek: To remove the blue highlight... because I don't like the look of it
         ScaleBar.Select()
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles SSdirSelection.Click
+        Dim folderBrowserDialog1 As New FolderBrowserDialog()
+        folderBrowserDialog1.ShowNewFolderButton = False
+        Dim result As DialogResult = folderBrowserDialog1.ShowDialog()
+        If result = DialogResult.OK Then
+            My.Settings.LocStorage = folderBrowserDialog1.SelectedPath
+            SSdirSelection.Text = My.Settings.LocStorage
+        End If
     End Sub
 End Class
