@@ -73,7 +73,6 @@ Public Class Settings
         Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         btnHkey1.Text = My.Settings.HKey1Text
         cbAutomation.Checked = Automate
-        cbAnimations.Checked = Animate
         cbFullscreen.Checked = Fullscreen
         cbDebug.Checked = Debug
         ScaleBar.Value = My.Settings.Scaling
@@ -82,7 +81,6 @@ Public Class Settings
         If My.Settings.LocStorage.Length <= 1 Then
             My.Settings.LocStorage = Environment.ExpandEnvironmentVariables("%Userprofile%\Pictures\Warframe")
         End If
-        SSdirSelection.Text = My.Settings.LocStorage
     End Sub
 
     Private Sub Settings_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress, btnHkey1.KeyPress
@@ -163,11 +161,6 @@ Public Class Settings
         saveSettings()
     End Sub
 
-    Private Sub cbAnimations_Click(sender As Object, e As EventArgs) Handles cbAnimations.Click
-        Animate = cbAnimations.Checked
-        saveSettings()
-    End Sub
-
     Private Sub cbDebug_Click(sender As Object, e As EventArgs) Handles cbDebug.Click
         My.Settings.Debug = cbDebug.Checked
         Debug = cbDebug.Checked
@@ -219,7 +212,6 @@ Public Class Settings
     Private Sub saveSettings()
         ''Saves settings
         My.Settings.Automate = cbAutomation.Checked
-        My.Settings.Animate = cbAnimations.Checked
         My.Settings.HKey1 = HKey1
         My.Settings.HKey1Text = btnHkey1.Text
         My.Settings.Debug = cbDebug.Checked
@@ -245,13 +237,52 @@ Public Class Settings
         ScaleBar.Select()
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles SSdirSelection.Click
+    Private Sub Button1_Click(sender As Object, e As EventArgs)
         Dim folderBrowserDialog1 As New FolderBrowserDialog()
         folderBrowserDialog1.ShowNewFolderButton = False
         Dim result As DialogResult = folderBrowserDialog1.ShowDialog()
         If result = DialogResult.OK Then
             My.Settings.LocStorage = folderBrowserDialog1.SelectedPath
-            SSdirSelection.Text = My.Settings.LocStorage
+            'SSdirSelection.Text = My.Settings.LocStorage
         End If
+    End Sub
+
+    Private Sub lbKey_Click(sender As Object, e As EventArgs) Handles lbKey.Click
+
+    End Sub
+
+    Private Sub Label2_Click(sender As Object, e As EventArgs) Handles Label2.Click
+
+    End Sub
+
+    Private Sub Label9_Click(sender As Object, e As EventArgs) Handles Label9.Click
+
+    End Sub
+
+    Private Sub Label8_Click(sender As Object, e As EventArgs) Handles Label8.Click
+
+    End Sub
+
+    Private Sub Label1_Click(sender As Object, e As EventArgs) Handles Label1.Click
+
+    End Sub
+
+    Private Sub Label3_Click(sender As Object, e As EventArgs) Handles Label3.Click
+
+    End Sub
+
+    Private Sub Label12_Click(sender As Object, e As EventArgs)
+
+    End Sub
+
+    Private Sub TrackBar1_Scroll(sender As Object, e As EventArgs)
+    End Sub
+
+    Private Sub Label10_Click(sender As Object, e As EventArgs)
+
+    End Sub
+
+    Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs)
+
     End Sub
 End Class

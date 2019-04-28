@@ -26,7 +26,7 @@ Public Class Main
 
             lbVersion.Text = "v" + version
             Me.Location = My.Settings.MainLoc
-            Fullscreen = My.Settings.Fullscreen
+            Fullscreen = My.Settings.ResultWindow
             Automate = My.Settings.Automate
             tAutomate.Enabled = Automate
             Me.MaximizeBox = False
@@ -403,7 +403,7 @@ Module Glob
     Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
     Public Automate As Boolean = False
-    Public Animate As Boolean = My.Settings.Animate
+    Public Animate As Boolean = My.Settings.ResultWindow
     Public Debug As Boolean = My.Settings.Debug
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Public textColor As Color = Color.FromArgb(177, 208, 217)

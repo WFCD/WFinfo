@@ -8,7 +8,7 @@
     <Setting Name="HKey1Text" Type="System.String" Scope="User">
       <Value Profile="(Default)">Print Screen</Value>
     </Setting>
-    <Setting Name="Animate" Type="System.Boolean" Scope="User">
+    <Setting Name="ResultWindow" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="Debug" Type="System.Boolean" Scope="User">

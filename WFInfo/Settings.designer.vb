@@ -19,7 +19,6 @@ Partial Class Settings
         Me.btnHkey1 = New System.Windows.Forms.Button()
         Me.lbKey = New System.Windows.Forms.Label()
         Me.cbFullscreen = New System.Windows.Forms.CheckBox()
-        Me.cbAnimations = New System.Windows.Forms.CheckBox()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.ScaleOption = New System.Windows.Forms.ComboBox()
         Me.Label9 = New System.Windows.Forms.Label()
@@ -41,16 +40,19 @@ Partial Class Settings
         Me.cbDebug = New System.Windows.Forms.CheckBox()
         Me.Panel4 = New System.Windows.Forms.Panel()
         Me.btnCustomize = New System.Windows.Forms.Button()
-        Me.Panel5 = New System.Windows.Forms.Panel()
-        Me.SSdirSelection = New System.Windows.Forms.Button()
+        Me.Panel3 = New System.Windows.Forms.Panel()
+        Me.Label12 = New System.Windows.Forms.Label()
+        Me.Label11 = New System.Windows.Forms.Label()
         Me.Label10 = New System.Windows.Forms.Label()
+        Me.TrackBar1 = New System.Windows.Forms.TrackBar()
         Me.Panel1.SuspendLayout()
         CType(Me.ScaleBar, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel2.SuspendLayout()
         Me.Panel4.SuspendLayout()
-        Me.Panel5.SuspendLayout()
+        Me.Panel3.SuspendLayout()
+        CType(Me.TrackBar1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'btnHkey1
@@ -59,7 +61,7 @@ Partial Class Settings
         Me.btnHkey1.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnHkey1.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold)
         Me.btnHkey1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.btnHkey1.Location = New System.Drawing.Point(14, 34)
+        Me.btnHkey1.Location = New System.Drawing.Point(14, 100)
         Me.btnHkey1.Name = "btnHkey1"
         Me.btnHkey1.Size = New System.Drawing.Size(139, 24)
         Me.btnHkey1.TabIndex = 14
@@ -73,7 +75,7 @@ Partial Class Settings
         Me.lbKey.BackColor = System.Drawing.Color.Transparent
         Me.lbKey.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbKey.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbKey.Location = New System.Drawing.Point(27, 12)
+        Me.lbKey.Location = New System.Drawing.Point(27, 78)
         Me.lbKey.Name = "lbKey"
         Me.lbKey.Size = New System.Drawing.Size(116, 18)
         Me.lbKey.TabIndex = 15
@@ -92,21 +94,6 @@ Partial Class Settings
         Me.cbFullscreen.Text = "Fullscreen Mode"
         Me.cbFullscreen.UseVisualStyleBackColor = False
         '
-        'cbAnimations
-        '
-        Me.cbAnimations.AutoSize = True
-        Me.cbAnimations.BackColor = System.Drawing.Color.Transparent
-        Me.cbAnimations.Checked = True
-        Me.cbAnimations.CheckState = System.Windows.Forms.CheckState.Checked
-        Me.cbAnimations.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.cbAnimations.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbAnimations.Location = New System.Drawing.Point(12, 22)
-        Me.cbAnimations.Name = "cbAnimations"
-        Me.cbAnimations.Size = New System.Drawing.Size(90, 17)
-        Me.cbAnimations.TabIndex = 20
-        Me.cbAnimations.Text = "Animations"
-        Me.cbAnimations.UseVisualStyleBackColor = False
-        '
         'Panel1
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
@@ -124,9 +111,9 @@ Partial Class Settings
         Me.Panel1.Controls.Add(Me.Label2)
         Me.Panel1.Controls.Add(Me.lbKey)
         Me.Panel1.Controls.Add(Me.btnHkey1)
-        Me.Panel1.Location = New System.Drawing.Point(1, 27)
+        Me.Panel1.Location = New System.Drawing.Point(1, 23)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(319, 145)
+        Me.Panel1.Size = New System.Drawing.Size(319, 210)
         Me.Panel1.TabIndex = 21
         '
         'ScaleOption
@@ -138,7 +125,7 @@ Partial Class Settings
         Me.ScaleOption.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.ScaleOption.FormattingEnabled = True
         Me.ScaleOption.Items.AddRange(New Object() {"Full", "Legacy", "Custom"})
-        Me.ScaleOption.Location = New System.Drawing.Point(173, 33)
+        Me.ScaleOption.Location = New System.Drawing.Point(173, 99)
         Me.ScaleOption.Name = "ScaleOption"
         Me.ScaleOption.Size = New System.Drawing.Size(129, 26)
         Me.ScaleOption.TabIndex = 28
@@ -149,7 +136,7 @@ Partial Class Settings
         Me.Label9.BackColor = System.Drawing.Color.Transparent
         Me.Label9.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label9.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label9.Location = New System.Drawing.Point(186, 72)
+        Me.Label9.Location = New System.Drawing.Point(186, 138)
         Me.Label9.Name = "Label9"
         Me.Label9.Size = New System.Drawing.Size(46, 18)
         Me.Label9.TabIndex = 27
@@ -161,7 +148,7 @@ Partial Class Settings
         Me.Label8.BackColor = System.Drawing.Color.Transparent
         Me.Label8.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label8.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label8.Location = New System.Drawing.Point(71, 72)
+        Me.Label8.Location = New System.Drawing.Point(71, 138)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(113, 18)
         Me.Label8.TabIndex = 26
@@ -173,7 +160,7 @@ Partial Class Settings
         Me.Label7.BackColor = System.Drawing.Color.Transparent
         Me.Label7.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
         Me.Label7.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label7.Location = New System.Drawing.Point(271, 120)
+        Me.Label7.Location = New System.Drawing.Point(271, 186)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(41, 13)
         Me.Label7.TabIndex = 25
@@ -186,7 +173,7 @@ Partial Class Settings
         Me.Label6.BackColor = System.Drawing.Color.Transparent
         Me.Label6.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
         Me.Label6.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label6.Location = New System.Drawing.Point(222, 120)
+        Me.Label6.Location = New System.Drawing.Point(222, 186)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(34, 13)
         Me.Label6.TabIndex = 24
@@ -198,7 +185,7 @@ Partial Class Settings
         Me.Label5.BackColor = System.Drawing.Color.Transparent
         Me.Label5.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
         Me.Label5.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label5.Location = New System.Drawing.Point(170, 120)
+        Me.Label5.Location = New System.Drawing.Point(170, 186)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(34, 13)
         Me.Label5.TabIndex = 23
@@ -210,7 +197,7 @@ Partial Class Settings
         Me.Label4.BackColor = System.Drawing.Color.Transparent
         Me.Label4.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
         Me.Label4.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label4.Location = New System.Drawing.Point(117, 120)
+        Me.Label4.Location = New System.Drawing.Point(117, 186)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(34, 13)
         Me.Label4.TabIndex = 22
@@ -222,7 +209,7 @@ Partial Class Settings
         Me.Label3.BackColor = System.Drawing.Color.Transparent
         Me.Label3.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
         Me.Label3.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label3.Location = New System.Drawing.Point(65, 120)
+        Me.Label3.Location = New System.Drawing.Point(65, 186)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(34, 13)
         Me.Label3.TabIndex = 21
@@ -234,7 +221,7 @@ Partial Class Settings
         Me.Label1.BackColor = System.Drawing.Color.Transparent
         Me.Label1.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
         Me.Label1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label1.Location = New System.Drawing.Point(13, 120)
+        Me.Label1.Location = New System.Drawing.Point(13, 186)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(34, 13)
         Me.Label1.TabIndex = 20
@@ -244,7 +231,7 @@ Partial Class Settings
         '
         Me.ScaleBar.Enabled = False
         Me.ScaleBar.LargeChange = 10
-        Me.ScaleBar.Location = New System.Drawing.Point(14, 92)
+        Me.ScaleBar.Location = New System.Drawing.Point(14, 158)
         Me.ScaleBar.Maximum = 100
         Me.ScaleBar.Minimum = 50
         Me.ScaleBar.Name = "ScaleBar"
@@ -259,7 +246,7 @@ Partial Class Settings
         Me.Label2.BackColor = System.Drawing.Color.Transparent
         Me.Label2.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label2.Location = New System.Drawing.Point(185, 13)
+        Me.Label2.Location = New System.Drawing.Point(185, 79)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(103, 18)
         Me.Label2.TabIndex = 18
@@ -321,10 +308,9 @@ Partial Class Settings
         Me.Panel2.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.Panel2.Controls.Add(Me.cbAutomation)
-        Me.Panel2.Controls.Add(Me.cbAnimations)
         Me.Panel2.Controls.Add(Me.cbFullscreen)
         Me.Panel2.Controls.Add(Me.cbDebug)
-        Me.Panel2.Location = New System.Drawing.Point(1, 171)
+        Me.Panel2.Location = New System.Drawing.Point(1, 232)
         Me.Panel2.Name = "Panel2"
         Me.Panel2.Size = New System.Drawing.Size(319, 84)
         Me.Panel2.TabIndex = 22
@@ -335,7 +321,7 @@ Partial Class Settings
         Me.cbAutomation.BackColor = System.Drawing.Color.Transparent
         Me.cbAutomation.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbAutomation.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbAutomation.Location = New System.Drawing.Point(185, 45)
+        Me.cbAutomation.Location = New System.Drawing.Point(12, 47)
         Me.cbAutomation.Name = "cbAutomation"
         Me.cbAutomation.Size = New System.Drawing.Size(93, 17)
         Me.cbAutomation.TabIndex = 24
@@ -348,7 +334,7 @@ Partial Class Settings
         Me.cbDebug.BackColor = System.Drawing.Color.Transparent
         Me.cbDebug.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbDebug.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbDebug.Location = New System.Drawing.Point(12, 45)
+        Me.cbDebug.Location = New System.Drawing.Point(12, 24)
         Me.cbDebug.Name = "cbDebug"
         Me.cbDebug.Size = New System.Drawing.Size(96, 17)
         Me.cbDebug.TabIndex = 23
@@ -360,7 +346,7 @@ Partial Class Settings
         Me.Panel4.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.Panel4.Controls.Add(Me.btnCustomize)
-        Me.Panel4.Location = New System.Drawing.Point(1, 322)
+        Me.Panel4.Location = New System.Drawing.Point(1, 315)
         Me.Panel4.Name = "Panel4"
         Me.Panel4.Size = New System.Drawing.Size(319, 42)
         Me.Panel4.TabIndex = 22
@@ -379,51 +365,76 @@ Partial Class Settings
         Me.btnCustomize.TextAlign = System.Drawing.ContentAlignment.TopCenter
         Me.btnCustomize.UseVisualStyleBackColor = False
         '
-        'Panel5
+        'Panel3
         '
-        Me.Panel5.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.Panel5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel5.Controls.Add(Me.SSdirSelection)
-        Me.Panel5.Controls.Add(Me.Label10)
-        Me.Panel5.Location = New System.Drawing.Point(1, 254)
-        Me.Panel5.Name = "Panel5"
-        Me.Panel5.Size = New System.Drawing.Size(319, 69)
-        Me.Panel5.TabIndex = 23
+        Me.Panel3.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.Panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel3.Controls.Add(Me.Label12)
+        Me.Panel3.Controls.Add(Me.Label11)
+        Me.Panel3.Controls.Add(Me.Label10)
+        Me.Panel3.Controls.Add(Me.TrackBar1)
+        Me.Panel3.Location = New System.Drawing.Point(1, 27)
+        Me.Panel3.Name = "Panel3"
+        Me.Panel3.Size = New System.Drawing.Size(319, 70)
+        Me.Panel3.TabIndex = 25
         '
-        'SSdirSelection
+        'Label12
         '
-        Me.SSdirSelection.BackColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer))
-        Me.SSdirSelection.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.SSdirSelection.Font = New System.Drawing.Font("Tahoma", 8.25!)
-        Me.SSdirSelection.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.SSdirSelection.Location = New System.Drawing.Point(14, 30)
-        Me.SSdirSelection.Name = "SSdirSelection"
-        Me.SSdirSelection.Size = New System.Drawing.Size(290, 24)
-        Me.SSdirSelection.TabIndex = 14
-        Me.SSdirSelection.Text = "C:\Users\<user>\Pictures\Warframe"
-        Me.SSdirSelection.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.SSdirSelection.UseVisualStyleBackColor = False
+        Me.Label12.BackColor = System.Drawing.Color.Transparent
+        Me.Label12.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label12.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.Label12.Location = New System.Drawing.Point(-1, 6)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(319, 18)
+        Me.Label12.TabIndex = 35
+        Me.Label12.Text = "Reward Display"
+        Me.Label12.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.BackColor = System.Drawing.Color.Transparent
+        Me.Label11.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
+        Me.Label11.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.Label11.Location = New System.Drawing.Point(225, 47)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(51, 13)
+        Me.Label11.TabIndex = 38
+        Me.Label11.Text = "Window"
         '
         'Label10
         '
+        Me.Label10.AutoSize = True
         Me.Label10.BackColor = System.Drawing.Color.Transparent
-        Me.Label10.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label10.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
         Me.Label10.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label10.Location = New System.Drawing.Point(-1, 6)
+        Me.Label10.Location = New System.Drawing.Point(38, 47)
         Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(319, 18)
-        Me.Label10.TabIndex = 29
-        Me.Label10.Text = "Screenshot Location:"
-        Me.Label10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.Label10.Size = New System.Drawing.Size(51, 13)
+        Me.Label10.TabIndex = 36
+        Me.Label10.Text = "Overlay"
+        '
+        'TrackBar1
+        '
+        Me.TrackBar1.Enabled = False
+        Me.TrackBar1.LargeChange = 1
+        Me.TrackBar1.Location = New System.Drawing.Point(53, 25)
+        Me.TrackBar1.Maximum = 2
+        Me.TrackBar1.Minimum = 1
+        Me.TrackBar1.Name = "TrackBar1"
+        Me.TrackBar1.Size = New System.Drawing.Size(212, 45)
+        Me.TrackBar1.TabIndex = 37
+        Me.TrackBar1.TickStyle = System.Windows.Forms.TickStyle.None
+        Me.TrackBar1.Value = 1
         '
         'Settings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(321, 365)
+        Me.ClientSize = New System.Drawing.Size(321, 358)
+        Me.Controls.Add(Me.Panel3)
         Me.Controls.Add(Me.Panel4)
-        Me.Controls.Add(Me.Panel5)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.Controls.Add(Me.Panel2)
@@ -441,14 +452,15 @@ Partial Class Settings
         Me.Panel2.ResumeLayout(False)
         Me.Panel2.PerformLayout()
         Me.Panel4.ResumeLayout(False)
-        Me.Panel5.ResumeLayout(False)
+        Me.Panel3.ResumeLayout(False)
+        Me.Panel3.PerformLayout()
+        CType(Me.TrackBar1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub
     Friend WithEvents btnHkey1 As Button
     Friend WithEvents lbKey As Label
     Friend WithEvents cbFullscreen As CheckBox
-    Friend WithEvents cbAnimations As CheckBox
     Friend WithEvents Panel1 As Panel
     Friend WithEvents lbTitle As Label
     Friend WithEvents pTitle As Panel
@@ -470,7 +482,9 @@ Partial Class Settings
     Friend WithEvents ScaleOption As ComboBox
     Friend WithEvents cbAutomation As CheckBox
     Friend WithEvents btnCustomize As Button
-    Friend WithEvents Panel5 As Panel
+    Friend WithEvents Panel3 As Panel
+    Friend WithEvents Label12 As Label
+    Friend WithEvents Label11 As Label
     Friend WithEvents Label10 As Label
-    Friend WithEvents SSdirSelection As Button
+    Friend WithEvents TrackBar1 As TrackBar
 End Class

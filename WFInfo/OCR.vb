@@ -240,7 +240,7 @@ Module OCR
             graph.CopyFromScreen(ss_area.X, ss_area.Y, 0, 0, New Size(ss_area.Width, ss_area.Height), CopyPixelOperation.SourceCopy)
         End Using
         If Debug Then
-            ret.Save(appData & "\WFInfo\tests\SS-" & My.Settings.SSCount.ToString() & ".jpg")
+            ret.Save(appData & "\WFInfo\tests\SS-" & My.Settings.SSCount.ToString() & ".png")
             My.Settings.SSCount += 1
         End If
         Return ret
@@ -277,7 +277,7 @@ Module OCR
                 Next
             Next
             If Debug Then
-                CropImage.Save(appData & "\WFInfo\tests\Plyr-" & My.Settings.PlyrCount.ToString() & ".jpg")
+                CropImage.Save(appData & "\WFInfo\tests\Plyr-" & My.Settings.PlyrCount.ToString() & ".png")
                 My.Settings.PlyrCount += 1
             End If
         End Using
@@ -332,7 +332,7 @@ Module OCR
             Next
 
             If Debug Then
-                bmp.Save(appData & "\WFInfo\tests\Text-" & My.Settings.EtcCount.ToString() & ".jpg")
+                bmp.Save(appData & "\WFInfo\tests\Text-" & My.Settings.EtcCount.ToString() & ".png")
                 My.Settings.EtcCount += 1
             End If
             ' ONLY one page can be used at a time
@@ -537,7 +537,7 @@ Module OCR
                         graph.CopyFromScreen(left, top + bmpSize.Height, 0, 0, bmpSize, CopyPixelOperation.SourceCopy)
 
                         If Debug Then
-                            bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".jpg")
+                            bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
                         End If
 
                         For l As Integer = 0 To bmpSize.Width - 1
@@ -554,7 +554,7 @@ Module OCR
                             Next
                         Next
                         If Debug Then
-                            bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".jpg")
+                            bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
                         End If
                         If Not more Then
                             Exit For
@@ -569,7 +569,7 @@ Module OCR
                     Using graph As Graphics = Graphics.FromImage(bmp)
                         graph.CopyFromScreen(left, top, 0, 0, bmpSize, CopyPixelOperation.SourceCopy)
                         If Debug Then
-                            bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "2-" & My.Settings.DebugCount & ".jpg")
+                            bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "2-" & My.Settings.DebugCount & ".png")
                         End If
                         Dim multi As Boolean = True
                         For k As Integer = 0 To bmpSize.Height - 1

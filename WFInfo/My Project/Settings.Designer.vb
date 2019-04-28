@@ -81,12 +81,12 @@ Namespace My
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("True")>  _
-        Public Property Animate() As Boolean
+        Public Property ResultWindow() As Boolean
             Get
-                Return CType(Me("Animate"),Boolean)
+                Return CType(Me("ResultWindow"),Boolean)
             End Get
             Set
-                Me("Animate") = value
+                Me("ResultWindow") = value
             End Set
         End Property
         
