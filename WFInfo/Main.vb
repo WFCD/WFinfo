@@ -26,7 +26,7 @@ Public Class Main
 
             lbVersion.Text = "v" + version
             Me.Location = My.Settings.MainLoc
-            'Fullscreen = My.Settings.Fullscreen
+            Fullscreen = My.Settings.Fullscreen
             Me.MaximizeBox = False
             Me.Refresh()
             Me.Activate()
@@ -57,8 +57,8 @@ Public Class Main
             ' Sets up screenshot settings for fullscreen mode (Steam only, not fully supported)
             '_________________________________________________________________________
             If Fullscreen Then
-                If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
-                    My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
+                If Not Directory.GetFiles(My.Settings.LocStorage).Count = 0 Then
+                    My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
                 End If
             End If
 
@@ -116,12 +116,12 @@ Public Class Main
             If Not key1Tog Then
 
                 '_________________________________________________________________________
-                'Checks for new steam screenshots (using fullscreen mode) and starts main function if found
+                'Checks for new screenshots (using fullscreen mode) and starts main function if found
                 '_________________________________________________________________________
                 If Fullscreen Then
-                    If Not Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").Count = 0 Then
-                        If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
-                            My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage & "\760\remote\230410\screenshots").OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
+                    If Not Directory.GetFiles(My.Settings.LocStorage).Count = 0 Then
+                        If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
+                            My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
                             DoWork()
                         End If
                     End If
@@ -417,7 +417,6 @@ Module Glob
     Public rareBrush As Brush = New SolidBrush(rareColor)
     Public bgColor As Color = Color.FromArgb(27, 27, 27)
     Public bgBrush As Brush = New SolidBrush(bgColor)
-
     Public culture As System.Globalization.CultureInfo = New System.Globalization.CultureInfo("en")
 
     Public rwrdPanels(4) As Overlay
