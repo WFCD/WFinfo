@@ -26,7 +26,6 @@ Public Class Main
 
             lbVersion.Text = "v" + version
             Me.Location = My.Settings.MainLoc
-            Fullscreen = My.Settings.ResultWindow
             Automate = My.Settings.Automate
             tAutomate.Enabled = Automate
             Me.MaximizeBox = False
@@ -58,11 +57,17 @@ Public Class Main
             '_________________________________________________________________________
             ' Sets up screenshot settings for fullscreen mode (Steam only, not fully supported)
             '_________________________________________________________________________
-            If Fullscreen Then
-                If Not Directory.GetFiles(My.Settings.LocStorage).Count = 0 Then
-                    My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
-                End If
+
+            If My.Settings.LocStorage.Length <= 1 Then
+                My.Settings.LocStorage = Environment.ExpandEnvironmentVariables("%Userprofile%\Pictures\Warframe")
+                My.Settings.LastFile = Nothing
             End If
+
+            'If Fullscreen Then
+            '    If Not Directory.GetFiles(My.Settings.LocStorage).Count = 0 Then
+            '        My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
+            '    End If
+            'End If
 
 
             '_________________________________________________________________________
@@ -120,14 +125,14 @@ Public Class Main
                 '_________________________________________________________________________
                 'Checks for new screenshots (using fullscreen mode) and starts main function if found
                 '_________________________________________________________________________
-                If Fullscreen Then
-                    If Not Directory.GetFiles(My.Settings.LocStorage).Count = 0 Then
-                        If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
-                            My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
-                            DoWork()
-                        End If
-                    End If
-                End If
+                'If Fullscreen Then
+                '    If Not Directory.GetFiles(My.Settings.LocStorage).Count = 0 Then
+                '        If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
+                '            My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
+                '            DoWork()
+                '        End If
+                '    End If
+                'End If
 
 
                 '_________________________________________________________________________
@@ -400,7 +405,7 @@ Module Glob
     Public HKey1 As Integer = My.Settings.HKey1
     Public HideShots As Boolean = False     ' Bool to hide screenshot notifications in fullscreen mode
     'Public Equipment As String               ' List of leveled equipment
-    Public Fullscreen As Boolean = False
+    'Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
     Public Automate As Boolean = False
     Public DisplayWindow As Boolean = My.Settings.ResultWindow

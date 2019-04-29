@@ -18,7 +18,6 @@ Partial Class Settings
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Settings))
         Me.btnHkey1 = New System.Windows.Forms.Button()
         Me.lbKey = New System.Windows.Forms.Label()
-        Me.cbFullscreen = New System.Windows.Forms.CheckBox()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.ScaleOption = New System.Windows.Forms.ComboBox()
         Me.Label9 = New System.Windows.Forms.Label()
@@ -80,19 +79,6 @@ Partial Class Settings
         Me.lbKey.Size = New System.Drawing.Size(116, 18)
         Me.lbKey.TabIndex = 15
         Me.lbKey.Text = "Activation Key"
-        '
-        'cbFullscreen
-        '
-        Me.cbFullscreen.AutoSize = True
-        Me.cbFullscreen.BackColor = System.Drawing.Color.Transparent
-        Me.cbFullscreen.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.cbFullscreen.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbFullscreen.Location = New System.Drawing.Point(185, 11)
-        Me.cbFullscreen.Name = "cbFullscreen"
-        Me.cbFullscreen.Size = New System.Drawing.Size(117, 17)
-        Me.cbFullscreen.TabIndex = 18
-        Me.cbFullscreen.Text = "Fullscreen Mode"
-        Me.cbFullscreen.UseVisualStyleBackColor = False
         '
         'Panel1
         '
@@ -308,11 +294,10 @@ Partial Class Settings
         Me.Panel2.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.Panel2.Controls.Add(Me.cbAutomation)
-        Me.Panel2.Controls.Add(Me.cbFullscreen)
         Me.Panel2.Controls.Add(Me.cbDebug)
         Me.Panel2.Location = New System.Drawing.Point(1, 237)
         Me.Panel2.Name = "Panel2"
-        Me.Panel2.Size = New System.Drawing.Size(319, 64)
+        Me.Panel2.Size = New System.Drawing.Size(319, 40)
         Me.Panel2.TabIndex = 22
         '
         'cbAutomation
@@ -321,7 +306,7 @@ Partial Class Settings
         Me.cbAutomation.BackColor = System.Drawing.Color.Transparent
         Me.cbAutomation.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbAutomation.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbAutomation.Location = New System.Drawing.Point(12, 36)
+        Me.cbAutomation.Location = New System.Drawing.Point(185, 11)
         Me.cbAutomation.Name = "cbAutomation"
         Me.cbAutomation.Size = New System.Drawing.Size(93, 17)
         Me.cbAutomation.TabIndex = 24
@@ -346,7 +331,7 @@ Partial Class Settings
         Me.Panel4.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.Panel4.Controls.Add(Me.btnCustomize)
-        Me.Panel4.Location = New System.Drawing.Point(1, 300)
+        Me.Panel4.Location = New System.Drawing.Point(1, 276)
         Me.Panel4.Name = "Panel4"
         Me.Panel4.Size = New System.Drawing.Size(319, 42)
         Me.Panel4.TabIndex = 22
@@ -431,7 +416,7 @@ Partial Class Settings
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(321, 343)
+        Me.ClientSize = New System.Drawing.Size(321, 319)
         Me.Controls.Add(Me.Panel3)
         Me.Controls.Add(Me.Panel4)
         Me.Controls.Add(Me.Panel1)
@@ -459,7 +444,6 @@ Partial Class Settings
     End Sub
     Friend WithEvents btnHkey1 As Button
     Friend WithEvents lbKey As Label
-    Friend WithEvents cbFullscreen As CheckBox
     Friend WithEvents Panel1 As Panel
     Friend WithEvents lbTitle As Label
     Friend WithEvents pTitle As Panel

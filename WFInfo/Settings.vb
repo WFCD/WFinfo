@@ -76,14 +76,10 @@ Public Class Settings
         End If
         btnHkey1.Text = My.Settings.HKey1Text
         cbAutomation.Checked = Automate
-        cbFullscreen.Checked = Fullscreen
         cbDebug.Checked = Debug
         ScaleBar.Value = My.Settings.Scaling
         Label9.Text = My.Settings.Scaling.ToString() + "%"
         ScaleOption.SelectedIndex = My.Settings.ScaleType
-        If My.Settings.LocStorage.Length <= 1 Then
-            My.Settings.LocStorage = Environment.ExpandEnvironmentVariables("%Userprofile%\Pictures\Warframe")
-        End If
     End Sub
 
     Private Sub Settings_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress, btnHkey1.KeyPress
@@ -148,14 +144,6 @@ Public Class Settings
         'Stores the settings when closing
         '_________________________________________________________________________
         saveSettings()
-    End Sub
-
-    Private Sub cbFullscreen_Click(sender As Object, e As EventArgs) Handles cbFullscreen.Click
-        '_________________________________________________________________________
-        'This is a new implementation of fullscreens support that does not rely on steam screenshots. 
-        'Instead it allows the user to select any directory they wish.
-        '_________________________________________________________________________
-        Fullscreen = cbFullscreen.Checked
     End Sub
 
     Private Sub cbAutomation_Click(sender As Object, e As EventArgs) Handles cbAutomation.Click

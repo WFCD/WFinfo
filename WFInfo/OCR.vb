@@ -130,6 +130,10 @@ Module OCR
             ' Get Center points
             center = New Point(dpiScaling * horz_center, dpiScaling * vert_center)
 
+            If Debug Then
+                Main.addLog("UPDATED CENTER COORS: " & center.ToString())
+            End If
+
             engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         End If
     End Sub
@@ -145,6 +149,10 @@ Module OCR
     Public Function IsRelicWindow() As Boolean
         If Not isWFActive() Then
             Return False
+        End If
+
+        If DisplayWindow Then
+            ForceUpdateCenter()
         End If
 
         ' UI Scaling is not in UpdateCenter because it will change more frequently than the rest
