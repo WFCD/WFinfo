@@ -69,7 +69,7 @@ Partial Class Equipment
         Me.Panel1.Controls.Add(Me.Line2)
         Me.Panel1.Controls.Add(Me.Panel3)
         Me.Panel1.Controls.Add(Me.Panel2)
-        Me.Panel1.Location = New System.Drawing.Point(1, 28)
+        Me.Panel1.Location = New System.Drawing.Point(1, 27)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(456, 371)
         Me.Panel1.TabIndex = 24
@@ -107,9 +107,9 @@ Partial Class Equipment
         Me.Panel3.Controls.Add(Me.Label5)
         Me.Panel3.Controls.Add(Me.Label4)
         Me.Panel3.Controls.Add(Me.Label3)
-        Me.Panel3.Location = New System.Drawing.Point(-1, 31)
+        Me.Panel3.Location = New System.Drawing.Point(-1, 30)
         Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(456, 340)
+        Me.Panel3.Size = New System.Drawing.Size(456, 341)
         Me.Panel3.TabIndex = 25
         '
         'EqmtTree1
@@ -136,7 +136,7 @@ Partial Class Equipment
         TreeNode6.Name = "companion"
         TreeNode6.Text = "Companion"
         Me.EqmtTree1.Nodes.AddRange(New System.Windows.Forms.TreeNode() {TreeNode1, TreeNode2, TreeNode3, TreeNode4, TreeNode5, TreeNode6})
-        Me.EqmtTree1.Size = New System.Drawing.Size(473, 310)
+        Me.EqmtTree1.Size = New System.Drawing.Size(456, 310)
         Me.EqmtTree1.TabIndex = 27
         '
         'EqmtTree2
@@ -150,7 +150,7 @@ Partial Class Equipment
         Me.EqmtTree2.FullRowSelect = True
         Me.EqmtTree2.Location = New System.Drawing.Point(-1, 29)
         Me.EqmtTree2.Name = "EqmtTree2"
-        Me.EqmtTree2.Size = New System.Drawing.Size(473, 310)
+        Me.EqmtTree2.Size = New System.Drawing.Size(456, 310)
         Me.EqmtTree2.TabIndex = 26
         '
         'Label6

@@ -1,4 +1,5 @@
 ﻿Imports System.IO
+Imports System.Text.RegularExpressions
 
 Public Class Settings
     Dim chTemp As String
@@ -78,7 +79,7 @@ Public Class Settings
         cbAutomation.Checked = Automate
         cbDebug.Checked = Debug
         ScaleBar.Value = My.Settings.Scaling
-        Label9.Text = My.Settings.Scaling.ToString() + "%"
+        TextBox1.Text = My.Settings.Scaling
         ScaleOption.SelectedIndex = My.Settings.ScaleType
     End Sub
 
@@ -212,7 +213,7 @@ Public Class Settings
     End Sub
 
     Private Sub ScaleBar_Scroll(sender As Object, e As EventArgs) Handles ScaleBar.Scroll
-        Label9.Text = ScaleBar.Value.ToString() + "%"
+        TextBox1.Text = ScaleBar.Value.ToString()
         saveSettings()
     End Sub
 
@@ -241,5 +242,30 @@ Public Class Settings
     Private Sub TrackBar1_Scroll_1(sender As Object, e As EventArgs) Handles TrackBar1.Scroll
         DisplayWindow = (TrackBar1.Value = 2)
         My.Settings.ResultWindow = DisplayWindow
+    End Sub
+
+    Private Sub TextBox1_TextPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles TextBox1.KeyPress
+        If e.KeyChar = ChrW(Keys.Enter) Then
+            saveScalling(TextBox1.Text)
+            e.Handled = True
+        End If
+        If Not Char.IsNumber(e.KeyChar) AndAlso Not Char.IsControl(e.KeyChar) Then e.KeyChar = ""
+    End Sub
+
+    Private Sub TextBox1_TextChanged(sender As Object, e As EventArgs) Handles TextBox1.TextChanged
+        saveScalling(TextBox1.Text)
+    End Sub
+
+    Private Sub saveScalling(text As String)
+        If text Is "" Then text = "50"
+        Dim value = Convert.ToInt32(text)
+        If value < 50 Then
+            value = 50
+        ElseIf value > 100 Then
+            value = 100
+        End If
+        ScaleBar.Value = value
+        My.Settings.Scaling = value
+        Console.WriteLine("Submit current: " & value)
     End Sub
 End Class

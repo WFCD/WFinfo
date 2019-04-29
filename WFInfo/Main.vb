@@ -118,7 +118,7 @@ Public Class Main
         End Try
     End Sub
 
-    Private Sub KeyWatch_Tick(sender As Object, e As EventArgs) Handles tPB.Tick
+    Private Sub KeyWatch_Tick(sender As Object, e As EventArgs)
         Try
             If Not key1Tog Then
 
@@ -206,7 +206,7 @@ Public Class Main
     End Sub
 
     Private Sub pbHome_Click(sender As Object, e As EventArgs) Handles pbHome.Click
-        Process.Start("https://sites.google.com/site/wfinfoapp/home")
+        Process.Start("https://github.com/random-facades/WFInfo")
     End Sub
 
     Private Sub pbHome_MouseEnter(sender As Object, e As EventArgs) Handles pbHome.MouseEnter
@@ -302,31 +302,31 @@ Public Class Main
         drag = False
     End Sub
 
-    Private Sub ButtonHide_Click(sender As Object, e As EventArgs) Handles btnHide.Click
-        Me.Hide()
-        trayIcon.Visible = True
-    End Sub
+    'Private Sub ButtonHide_Click(sender As Object, e As EventArgs) Handles btnHide.Click
+    '    Me.Hide()
+    '    trayIcon.Visible = True
+    'End Sub
 
-    Private Sub trayIcon_MouseDoubleClick(sender As Object, e As MouseEventArgs) Handles trayIcon.MouseDoubleClick
-        Me.Show()
-        trayIcon.Visible = False
-    End Sub
+    'Private Sub trayIcon_MouseDoubleClick(sender As Object, e As MouseEventArgs) Handles trayIcon.MouseDoubleClick
+    '    Me.Show()
+    '    trayIcon.Visible = False
+    'End Sub
 
-    Private Sub trayMenu_Opening(sender As Object, e As ToolStripItemClickedEventArgs) Handles trayMenu.ItemClicked
-        If e.ClickedItem.Name = "trayExit" Then
-            Me.Close()
-        ElseIf e.ClickedItem.Name = "trayShow" Then
-            Me.Show()
-            trayIcon.Visible = False
-        ElseIf e.ClickedItem.Name = "trayRelics" Then
-            pbRelic_Click(pbRelic, Nothing)
-        ElseIf e.ClickedItem.Name = "trayEquipment" Then
-            pbEqmt_Click(pbEqmt, Nothing)
-        End If
-    End Sub
+    'Private Sub trayMenu_Opening(sender As Object, e As ToolStripItemClickedEventArgs) Handles trayMenu.ItemClicked
+    '    If e.ClickedItem.Name = "trayExit" Then
+    '        Me.Close()
+    '    ElseIf e.ClickedItem.Name = "trayShow" Then
+    '        Me.Show()
+    '        trayIcon.Visible = False
+    '    ElseIf e.ClickedItem.Name = "trayRelics" Then
+    '        pbRelic_Click(pbRelic, Nothing)
+    '    ElseIf e.ClickedItem.Name = "trayEquipment" Then
+    '        pbEqmt_Click(pbEqmt, Nothing)
+    '    End If
+    'End Sub
 
     Private tUpdate_Count As Integer = 1
-    Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick ' Happens every 5min
+    Private Sub tUpdate_Tick(sender As Object, e As EventArgs)  ' Happens every 5min
         Try
 
             ' Every hour, check db Data
@@ -371,25 +371,25 @@ Public Class Main
         Equipment.Refresh()
     End Sub
 
-    Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
-        Console.WriteLine("tAutomate Tick")
-        If (Glob.db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso OCR.isWFActive()) Then
-            If (OCR.IsRelicWindow()) Then
-                If (Not rwrdPanels(0).Visible) Then
-                    Me.tAutomate.Interval = 3000
-                    MyBase.Invoke(Sub() Me.DoWork())
-                End If
-            ElseIf (rwrdPanels(0).Visible) Then
-                For i As Integer = 0 To 3
-                    rwrdPanels(i).Hide()
-                Next
-            Else
-                Me.tAutomate.Interval = 1000
-            End If
-        Else
-            Me.tAutomate.Interval = 5000
-        End If
-    End Sub
+    'Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
+    '    Console.WriteLine("tAutomate Tick")
+    '    If (Glob.db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso OCR.isWFActive()) Then
+    '        If (OCR.IsRelicWindow()) Then
+    '            If (Not rwrdPanels(0).Visible) Then
+    '                Me.tAutomate.Interval = 3000
+    '                MyBase.Invoke(Sub() Me.DoWork())
+    '            End If
+    '        ElseIf (rwrdPanels(0).Visible) Then
+    '            For i As Integer = 0 To 3
+    '                rwrdPanels(i).Hide()
+    '            Next
+    '        Else
+    '            Me.tAutomate.Interval = 1000
+    '        End If
+    '    Else
+    '        Me.tAutomate.Interval = 5000
+    '    End If
+    'End Sub
 End Class
 
 Module Glob
@@ -411,7 +411,7 @@ Module Glob
     Public DisplayWindow As Boolean = My.Settings.ResultWindow
     Public Debug As Boolean = My.Settings.Debug
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-    Public textColor As Color = Color.FromArgb(177, 208, 217)
+    Public textColor As Color = My.Settings.cText
     Public textBrush As Brush = New SolidBrush(textColor)
     Public stealthColor As Color = Color.FromArgb(80, 100, 100)
     Public stealthBrush As Brush = New SolidBrush(stealthColor)
@@ -423,7 +423,7 @@ Module Glob
     Public uncommonBrush As Brush = New SolidBrush(uncommonColor)
     Public rareColor As Color = Color.FromArgb(255, 215, 0)
     Public rareBrush As Brush = New SolidBrush(rareColor)
-    Public bgColor As Color = Color.FromArgb(27, 27, 27)
+    Public bgColor As Color = My.Settings.cBackground
     Public bgBrush As Brush = New SolidBrush(bgColor)
     Public culture As System.Globalization.CultureInfo = New System.Globalization.CultureInfo("en")
 
@@ -546,11 +546,13 @@ Module Glob
                 c.BackColor = My.Settings.cTitleBar
                 For Each c2 As Control In c.Controls
                     If TypeOf c2 Is Label Then c2.ForeColor = My.Settings.cText
+                    If TypeOf c2 Is PictureBox Then c2.BackColor = My.Settings.cTitleBar
                     If TypeOf c2 Is Button Then c2.BackColor = My.Settings.cTitleBar
                     If TypeOf c2 Is Button Then c2.ForeColor = My.Settings.cText
                     If c2.Name = "lbStatus" Then c2.ForeColor = Color.Lime
                 Next
             Else
+                If TypeOf c Is PictureBox Then c.BackColor = My.Settings.cSideBar
                 If TypeOf c Is Label Then c.ForeColor = My.Settings.cText
                 If TypeOf c Is Panel Then c.BackColor = My.Settings.cBackground
                 If TypeOf c Is Label Then c.ForeColor = My.Settings.cText
@@ -563,6 +565,11 @@ Module Glob
                     c.ForeColor = Color.FromArgb(10, 10, 10)
                 End If
                 For Each c2 As Control In c.Controls
+                    If TypeOf c2 Is TextBox Then c2.BackColor = My.Settings.cTitleBar
+                    If TypeOf c2 Is ComboBox Then c2.BackColor = My.Settings.cTitleBar
+                    If TypeOf c2 Is ComboBox Then c2.ForeColor = My.Settings.cText
+                    If TypeOf c2 Is TreeView Then c2.BackColor = My.Settings.cBackground
+                    If TypeOf c2 Is TreeView Then c2.ForeColor = My.Settings.cText
                     If TypeOf c2 Is Panel Then c2.BackColor = My.Settings.cBackground
                     If TypeOf c2 Is Label Then c2.ForeColor = My.Settings.cText
                     If TypeOf c2 Is Button Then c2.ForeColor = My.Settings.cText
@@ -573,12 +580,18 @@ Module Glob
                         c2.ForeColor = Color.FromArgb(10, 10, 10)
                     End If
                     For Each c3 As Control In c2.Controls
+                        If TypeOf c3 Is ComboBox Then c3.BackColor = My.Settings.cTitleBar
+                        If TypeOf c3 Is ComboBox Then c3.ForeColor = My.Settings.cText
+                        If TypeOf c3 Is TreeView Then c3.BackColor = My.Settings.cBackground
+                        If TypeOf c3 Is TreeView Then c3.ForeColor = My.Settings.cText
                         If TypeOf c3 Is Panel Then c3.BackColor = My.Settings.cBackground
                         If TypeOf c3 Is Label Then c3.ForeColor = My.Settings.cText
                         If TypeOf c3 Is Button Then c3.ForeColor = My.Settings.cText
                         If TypeOf c3 Is Button Then c3.BackColor = My.Settings.cTitleBar
                         If TypeOf c3 Is CheckBox Then c3.ForeColor = My.Settings.cText
                         For Each c4 As Control In c3.Controls
+                            If TypeOf c4 Is TreeView Then c4.BackColor = My.Settings.cBackground
+                            If TypeOf c4 Is TreeView Then c4.ForeColor = My.Settings.cText
                             If TypeOf c4 Is Panel Then c4.BackColor = My.Settings.cBackground
                             If TypeOf c4 Is Label Then c4.ForeColor = My.Settings.cText
                             If TypeOf c4 Is Button Then c4.ForeColor = My.Settings.cText

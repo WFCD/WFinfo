@@ -19,8 +19,8 @@ Partial Class Settings
         Me.btnHkey1 = New System.Windows.Forms.Button()
         Me.lbKey = New System.Windows.Forms.Label()
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.TextBox1 = New System.Windows.Forms.TextBox()
         Me.ScaleOption = New System.Windows.Forms.ComboBox()
-        Me.Label9 = New System.Windows.Forms.Label()
         Me.Label8 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.Label6 = New System.Windows.Forms.Label()
@@ -84,8 +84,8 @@ Partial Class Settings
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel1.Controls.Add(Me.TextBox1)
         Me.Panel1.Controls.Add(Me.ScaleOption)
-        Me.Panel1.Controls.Add(Me.Label9)
         Me.Panel1.Controls.Add(Me.Label8)
         Me.Panel1.Controls.Add(Me.Label7)
         Me.Panel1.Controls.Add(Me.Label6)
@@ -102,9 +102,21 @@ Partial Class Settings
         Me.Panel1.Size = New System.Drawing.Size(319, 142)
         Me.Panel1.TabIndex = 21
         '
+        'TextBox1
+        '
+        Me.TextBox1.BackColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer))
+        Me.TextBox1.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold)
+        Me.TextBox1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.TextBox1.Location = New System.Drawing.Point(219, 63)
+        Me.TextBox1.MaxLength = 3
+        Me.TextBox1.Name = "TextBox1"
+        Me.TextBox1.Size = New System.Drawing.Size(80, 26)
+        Me.TextBox1.TabIndex = 29
+        Me.TextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        '
         'ScaleOption
         '
-        Me.ScaleOption.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
+        Me.ScaleOption.BackColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer))
         Me.ScaleOption.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ScaleOption.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.ScaleOption.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold)
@@ -116,29 +128,17 @@ Partial Class Settings
         Me.ScaleOption.Size = New System.Drawing.Size(129, 26)
         Me.ScaleOption.TabIndex = 28
         '
-        'Label9
-        '
-        Me.Label9.AutoSize = True
-        Me.Label9.BackColor = System.Drawing.Color.Transparent
-        Me.Label9.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label9.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label9.Location = New System.Drawing.Point(183, 69)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(46, 18)
-        Me.Label9.TabIndex = 27
-        Me.Label9.Text = "90%"
-        '
         'Label8
         '
         Me.Label8.AutoSize = True
         Me.Label8.BackColor = System.Drawing.Color.Transparent
         Me.Label8.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label8.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label8.Location = New System.Drawing.Point(68, 69)
+        Me.Label8.Location = New System.Drawing.Point(11, 66)
         Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(113, 18)
+        Me.Label8.Size = New System.Drawing.Size(202, 18)
         Me.Label8.TabIndex = 26
-        Me.Label8.Text = "Custom Scale:"
+        Me.Label8.Text = "Custom Scale Percentage:"
         '
         'Label7
         '
@@ -461,7 +461,6 @@ Partial Class Settings
     Friend WithEvents Label4 As Label
     Friend WithEvents Label3 As Label
     Friend WithEvents Label1 As Label
-    Friend WithEvents Label9 As Label
     Friend WithEvents ScaleOption As ComboBox
     Friend WithEvents cbAutomation As CheckBox
     Friend WithEvents btnCustomize As Button
@@ -470,4 +469,5 @@ Partial Class Settings
     Friend WithEvents Label11 As Label
     Friend WithEvents Label10 As Label
     Friend WithEvents TrackBar1 As TrackBar
+    Friend WithEvents TextBox1 As TextBox
 End Class

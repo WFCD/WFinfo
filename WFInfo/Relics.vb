@@ -55,11 +55,11 @@ Public Class Relics
     End Sub
 
     Private Sub Label2_MouseEnter(sender As Object, e As EventArgs) Handles Label2.MouseEnter
-        Label2.BackColor = Color.FromArgb(50, 50, 50)
+        Label2.BackColor = My.Settings.cTray
     End Sub
 
     Private Sub Label2_MouseLeave(sender As Object, e As EventArgs) Handles Label2.MouseLeave
-        Label2.BackColor = Color.Transparent
+        Label2.BackColor = My.Settings.cBackground
     End Sub
 
     Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterCollapse, RelicTree2.AfterCollapse
@@ -113,7 +113,6 @@ Public Class Relics
     End Sub
 
     Private Sub Relics_Opening(sender As Object, e As EventArgs) Handles Me.Shown
-
         Me.Location = My.Settings.RelicWinLoc
         If Me.Location.X = 0 And Me.Location.Y = 0 Then
             Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
@@ -168,7 +167,9 @@ Public Class Relics
                             right = 135
                         End If
                         Dim rect As SizeF = e.Graphics.MeasureString("Vaulted", Me.Font)
-                        e.Graphics.FillRectangle(bgBrush, right - rect.Width - 10, e.Bounds.Top + 1, rect.Width + 10, rect.Height)
+                        Using br = New SolidBrush(My.Settings.cBackground)
+                            e.Graphics.FillRectangle(br, right - rect.Width - 10, e.Bounds.Top + 1, rect.Width + 10, rect.Height)
+                        End Using
                         e.Graphics.DrawString("Vaulted", RelicTree.Font, stealthBrush, right, e.Bounds.Top + 1, sf)
                     End If
 
@@ -180,13 +181,15 @@ Public Class Relics
                     If rtot > 0 Then
                         rtot_str = "+" + rtot_str
                     End If
-                    e.Graphics.FillRectangle(bgBrush, 220, e.Bounds.Top, 180, e.Bounds.Height)
-                    e.Graphics.DrawString("RAD:", RelicTree.Font, subdueBrush, 255, e.Bounds.Top, sf)
-                    e.Graphics.DrawString(rtot_str, RelicTree.Font, subdueBrush, 300, e.Bounds.Top, sf)
-                    e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
-                    e.Graphics.DrawString("INT:", RelicTree.Font, subdueBrush, 350, e.Bounds.Top, sf)
-                    e.Graphics.DrawString(itot.ToString("N1"), RelicTree.Font, subdueBrush, 385, e.Bounds.Top, sf)
-                    e.Graphics.DrawImage(My.Resources.plat, 385, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
+                    Using br = New SolidBrush(My.Settings.cText)
+                        e.Graphics.FillRectangle(bgBrush, 220, e.Bounds.Top, 180, e.Bounds.Height)
+                        e.Graphics.DrawString("RAD:", RelicTree.Font, br, 255, e.Bounds.Top, sf)
+                        e.Graphics.DrawString(rtot_str, RelicTree.Font, br, 300, e.Bounds.Top, sf)
+                        e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
+                        e.Graphics.DrawString("INT:", RelicTree.Font, br, 350, e.Bounds.Top, sf)
+                        e.Graphics.DrawString(itot.ToString("N1"), RelicTree.Font, br, 385, e.Bounds.Top, sf)
+                        e.Graphics.DrawImage(My.Resources.plat, 385, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
+                    End Using
                 End If
             End If
 
@@ -203,7 +206,9 @@ Public Class Relics
             Dim name As String = split(2)
             If name <> "Forma Blueprint" Then
                 Dim vals As JObject = db.market_data(name)
-                e.Graphics.FillRectangle(bgBrush, 260, e.Bounds.Top, 130, e.Bounds.Height)
+                Using br = New SolidBrush(My.Settings.cBackground)
+                    e.Graphics.FillRectangle(br, 260, e.Bounds.Top, 130, e.Bounds.Height)
+                End Using
                 e.Graphics.DrawString(Double.Parse(vals("plat"), culture).ToString("N1"), RelicTree.Font, brush, 300, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
                 e.Graphics.DrawString(vals("ducats"), RelicTree.Font, brush, 370, e.Bounds.Top + 1, sf)
@@ -218,11 +223,11 @@ Public Class Relics
         Else
             left = 80
         End If
-        e.Graphics.DrawLine(New Pen(Color.FromArgb(40, 40, 40)), left, e.Bounds.Top, 450, e.Bounds.Top)
-        e.Graphics.DrawLine(New Pen(Color.FromArgb(40, 40, 40)), left, e.Bounds.Bottom, 450, e.Bounds.Bottom)
+        e.Graphics.DrawLine(New Pen(My.Settings.cBackground), left, e.Bounds.Top, 450, e.Bounds.Top)
+        e.Graphics.DrawLine(New Pen(My.Settings.cBackground), left, e.Bounds.Bottom, 450, e.Bounds.Bottom)
     End Sub
 
-    Private Sub HideMenu_Click(sender As Object, e As ToolStripItemClickedEventArgs) Handles HideMenu.ItemClicked
+    Private Sub HideMenu_Click(sender As Object, e As ToolStripItemClickedEventArgs)
         Dim split As String() = RelicToHide.FullPath.Replace("Hidden\", "").Split("\")
         Dim arr As JArray = hidden_nodes(split(0))
 
@@ -272,19 +277,6 @@ Public Class Relics
                 End If
             Next
         End If
-
-        HideMenu.Items.Clear()
-        If e.Node IsNot Nothing AndAlso e.Node.Name.Length = 2 Then
-            If e.Node.FullPath.Contains("Hidden") Then
-                HideMenu.Items.Add("Show").ForeColor = textColor
-                HideMenu.Show(RelicTree, e.Location)
-
-            Else
-                HideMenu.Items.Add("Hide").ForeColor = textColor
-                HideMenu.Show(RelicTree, e.Location)
-
-            End If
-        End If
     End Sub
 
     Private Sub Label2_Click(sender As Object, e As EventArgs) Handles Label2.Click
@@ -315,6 +307,7 @@ Public Class Relics
     End Sub
 
     Public Sub Load_Relic_Tree()
+        Label2.BackColor = My.Settings.cBackground
         Dim hide As TreeNode = Nothing
         If RelicTree.Nodes(0).Nodes.Count > 1 Then
             Return

@@ -58,11 +58,11 @@ Public Class Equipment
     End Sub
 
     Private Sub Label2_MouseEnter(sender As Object, e As EventArgs) Handles Label2.MouseEnter
-        Label2.BackColor = Color.FromArgb(50, 50, 50)
+        Label2.BackColor = My.Settings.cTray
     End Sub
 
     Private Sub Label2_MouseLeave(sender As Object, e As EventArgs) Handles Label2.MouseLeave
-        Label2.BackColor = Color.Transparent
+        Label2.BackColor = My.Settings.cBackground
     End Sub
 
     Private Sub AddMenu_Click(sender As Object, e As ToolStripItemClickedEventArgs) Handles AddMenu.ItemClicked
@@ -123,11 +123,13 @@ Public Class Equipment
                 If owned < count Then
                     Dim tsi As ToolStripItem = AddMenu.Items.Add("Add a Part")
                     tsi.ForeColor = textColor
+                    tsi.BackColor = BackColor
                     tsi.Name = "2"
                 End If
                 If owned > 0 Then
                     Dim tsi As ToolStripItem = AddMenu.Items.Add("Remove a Part")
                     tsi.ForeColor = textColor
+                    tsi.BackColor = BackColor
                     tsi.Name = "3"
                 End If
                 AddMenu.Show(EqmtTree1, e.Location)
@@ -143,11 +145,13 @@ Public Class Equipment
                 If owned <> count Then
                     Dim tsi As ToolStripItem = AddMenu.Items.Add("Mark Owned")
                     tsi.ForeColor = textColor
+                    tsi.BackColor = BackColor
                     tsi.Name = "0"
                 End If
                 If owned <> 0 Then
                     Dim tsi As ToolStripItem = AddMenu.Items.Add("Mark Not Owned")
                     tsi.ForeColor = textColor
+                    tsi.BackColor = BackColor
                     tsi.Name = "1"
                 End If
                 AddMenu.Show(EqmtTree1, e.Location)
@@ -219,12 +223,12 @@ Public Class Equipment
             Return
         End If
         If types.Contains(e.Node.Text) Then
-            e.Graphics.DrawLine(New Pen(Color.FromArgb(40, 40, 40)), 50, e.Bounds.Top, 450, e.Bounds.Top)
-            e.Graphics.DrawLine(New Pen(Color.FromArgb(40, 40, 40)), 50, e.Bounds.Bottom, 450, e.Bounds.Bottom)
+            e.Graphics.DrawLine(New Pen(My.Settings.cBackground), 50, e.Bounds.Top, 450, e.Bounds.Top)
+            e.Graphics.DrawLine(New Pen(My.Settings.cBackground), 50, e.Bounds.Bottom, 450, e.Bounds.Bottom)
             Return
         End If
-        e.Graphics.DrawLine(New Pen(Color.FromArgb(40, 40, 40)), 60, e.Bounds.Top, 450, e.Bounds.Top)
-        e.Graphics.DrawLine(New Pen(Color.FromArgb(40, 40, 40)), 60, e.Bounds.Bottom, 450, e.Bounds.Bottom)
+        e.Graphics.DrawLine(New Pen(My.Settings.cBackground), 60, e.Bounds.Top, 450, e.Bounds.Top)
+        e.Graphics.DrawLine(New Pen(My.Settings.cBackground), 60, e.Bounds.Bottom, 450, e.Bounds.Bottom)
 
         Dim brush As Brush = textBrush
 
@@ -318,6 +322,7 @@ Public Class Equipment
     End Sub
 
     Public Sub Load_Eqmt_Tree()
+        Label2.BackColor = My.Settings.cBackground
         If EqmtTree1.Nodes(0).Nodes.Count > 1 Then
             Return
         End If
