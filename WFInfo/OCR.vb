@@ -400,22 +400,30 @@ Module OCR
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
         Console.WriteLine("GET PART TEXT-" & ParseScreen_timer & "ms")
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
-        Dim plat As Double = 0
-        Dim ducat As String = ""
-        Dim vaulted As Boolean
-        ' Move over if you don't have all 4
-        For i = 0 To foundText.Count - 1
 
-            If Debug Then
-                Main.addLog("DISPLAY OVERLAY " & (i + 1) & ":" & vbCrLf & "Right, Top: " & right & ", " & top)
-            End If
-            plat = db.market_data(foundText(i))("plat")
-            ducat = db.market_data(foundText(i))("ducats").ToString()
-            vaulted = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
-            rwrdPanels(i).LoadText(plat.ToString("N1"), ducat, vaulted)
-        Next
-        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")
+        If DisplayWindow Then
+            RewardWindow.Display(foundText)
+            ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+            Console.WriteLine("DISPLAY WINDOW-" & ParseScreen_timer & "ms")
+        Else
+            Dim plat As Double = 0
+            Dim ducat As String = ""
+            Dim vaulted As Boolean
+            ' Move over if you don't have all 4
+            For i = 0 To foundText.Count - 1
+
+                If Debug Then
+                    Main.addLog("DISPLAY OVERLAY " & (i + 1) & ":" & vbCrLf & "Right, Top: " & right & ", " & top)
+                End If
+                plat = db.market_data(foundText(i))("plat")
+                ducat = db.market_data(foundText(i))("ducats").ToString()
+                vaulted = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
+                rwrdPanels(i).LoadText(plat.ToString("N1"), ducat, vaulted)
+            Next
+            ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+            Console.WriteLine("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")
+        End If
+
     End Sub
 
     '_____________________________________________________

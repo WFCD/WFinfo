@@ -199,10 +199,10 @@
     <Compile Include="Relics.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Tray.designer.vb">
-      <DependentUpon>Tray.vb</DependentUpon>
+    <Compile Include="RewardWindow.Designer.vb">
+      <DependentUpon>RewardWindow.vb</DependentUpon>
     </Compile>
-    <Compile Include="Tray.vb">
+    <Compile Include="RewardWindow.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Settings.designer.vb">
@@ -237,8 +237,8 @@
     <EmbeddedResource Include="Relics.resx">
       <DependentUpon>Relics.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Tray.resx">
-      <DependentUpon>Tray.vb</DependentUpon>
+    <EmbeddedResource Include="RewardWindow.resx">
+      <DependentUpon>RewardWindow.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.vb</DependentUpon>

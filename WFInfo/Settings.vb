@@ -247,42 +247,8 @@ Public Class Settings
         End If
     End Sub
 
-    Private Sub lbKey_Click(sender As Object, e As EventArgs) Handles lbKey.Click
-
-    End Sub
-
-    Private Sub Label2_Click(sender As Object, e As EventArgs) Handles Label2.Click
-
-    End Sub
-
-    Private Sub Label9_Click(sender As Object, e As EventArgs) Handles Label9.Click
-
-    End Sub
-
-    Private Sub Label8_Click(sender As Object, e As EventArgs) Handles Label8.Click
-
-    End Sub
-
-    Private Sub Label1_Click(sender As Object, e As EventArgs) Handles Label1.Click
-
-    End Sub
-
-    Private Sub Label3_Click(sender As Object, e As EventArgs) Handles Label3.Click
-
-    End Sub
-
-    Private Sub Label12_Click(sender As Object, e As EventArgs)
-
-    End Sub
-
-    Private Sub TrackBar1_Scroll(sender As Object, e As EventArgs)
-    End Sub
-
-    Private Sub Label10_Click(sender As Object, e As EventArgs)
-
-    End Sub
-
-    Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs)
-
+    Private Sub TrackBar1_Scroll_1(sender As Object, e As EventArgs) Handles TrackBar1.Scroll
+        DisplayWindow = (TrackBar1.Value = 2)
+        My.Settings.ResultWindow = DisplayWindow
     End Sub
 End Class
