@@ -373,15 +373,20 @@ Module OCR
         ' Get Player Count from Image
         players = GetPlayers(screen)
 
-        Dim pad As Integer = screen.Height * 0.05
-        Dim top As Integer = center.Y - 318 * uiScaling + pad
-        Dim right As Integer = center.X - screen.Width / 2 - pad
-        ' Adjust for <4 players
-        right -= (players - 4) * screen.Width / 8
-        For i = 0 To players - 1
-            right += screen.Width / 4
-            rwrdPanels(i).ShowLoading(right, top)
-        Next
+        Dim top As Integer = 0
+        Dim right As Integer = 0
+
+        If Not DisplayWindow Then
+            Dim pad As Integer = screen.Height * 0.05
+            top = center.Y - 318 * uiScaling + pad
+            right = center.X - screen.Width / 2 - pad
+            ' Adjust for <4 players
+            right -= (players - 4) * screen.Width / 8
+            For i = 0 To players - 1
+                right += screen.Width / 4
+                rwrdPanels(i).ShowLoading(right, top)
+            Next
+        End If
 
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
         Console.WriteLine("PLAYER COUNT(" + players.ToString() + ")-" & ParseScreen_timer & "ms")

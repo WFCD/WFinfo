@@ -71,6 +71,9 @@ Public Class Settings
         '_________________________________________________________________________
         UpdateColors(Me)
         Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
+        If DisplayWindow Then
+            TrackBar1.Value = 2
+        End If
         btnHkey1.Text = My.Settings.HKey1Text
         cbAutomation.Checked = Automate
         cbFullscreen.Checked = Fullscreen

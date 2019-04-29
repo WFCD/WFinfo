@@ -28,7 +28,6 @@
             rwrdNames(i) = New Label() With {
                 .Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Bold),
                 .ForeColor = System.Drawing.Color.FromArgb(177, 208, 217),
-                .BackColor = System.Drawing.Color.FromArgb(87, 108, 117),
                 .TextAlign = System.Drawing.ContentAlignment.TopCenter,
                 .Size = New Drawing.Size(spacing - 5, 35),
                 .Location = New Point(3, 30)
