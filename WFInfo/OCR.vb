@@ -20,6 +20,10 @@ Module OCR
     Private Function GetWindowRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
     End Function
 
+    <System.Runtime.InteropServices.DllImport("dwmapi.dll", PreserveSig:=False)>
+    Private Sub DwmEnableComposition(bEnable As Boolean)
+    End Sub
+
     <DllImport("user32.dll")>
     Private Function GetClientRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
     End Function
@@ -151,10 +155,6 @@ Module OCR
             Return False
         End If
 
-        If DisplayWindow Then
-            ForceUpdateCenter()
-        End If
-
         ' UI Scaling is not in UpdateCenter because it will change more frequently than the rest
         '     Also UI Scaling is 3 computations (5 if you include writing) (who knows how many with reads)
         GetUIScaling()
@@ -172,6 +172,10 @@ Module OCR
 
         Using bmp As New Bitmap(wid, hei)
             Using graph As Graphics = Graphics.FromImage(bmp)
+                If DisplayWindow Then
+                    DwmEnableComposition(False)
+                End If
+
                 graph.CopyFromScreen(left, top, 0, 0, New Size(wid, hei), CopyPixelOperation.SourceCopy)
             End Using
 
