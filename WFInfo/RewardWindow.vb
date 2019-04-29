@@ -128,8 +128,7 @@
     Friend Sub Display(foundText As List(Of String))
         Me.Show()
         Me.Size = New Size(foundText.Count * 127 + 1, 105)
-        Me.Location = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
-
+        Dim firstPoint = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
         Using g As Graphics = CreateGraphics()
             For i = 0 To foundText.Count - 1
                 rwrdPanels(i).Visible = True
@@ -151,5 +150,17 @@
                 End If
             Next
         End Using
+        Dim lastUsedLocation = Me.Location
     End Sub
+
+    Private Sub cbtopToggle_Click(sender As Object, e As EventArgs) Handles topToggle.Click
+        If topToggle.Checked Then
+            Me.TopMost = True
+            Console.WriteLine("Sending to foreground")
+        Else
+            Me.TopMost = False
+            Console.WriteLine("Sending to background")
+        End If
+    End Sub
+
 End Class

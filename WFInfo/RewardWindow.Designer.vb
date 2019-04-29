@@ -18,6 +18,7 @@ Partial Class RewardWindow
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(RewardWindow))
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.pTitle = New System.Windows.Forms.Panel()
+        Me.topToggle = New System.Windows.Forms.CheckBox()
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.MainPanel = New System.Windows.Forms.Panel()
@@ -27,15 +28,15 @@ Partial Class RewardWindow
         '
         'lbTitle
         '
-        Me.lbTitle.AutoSize = True
         Me.lbTitle.BackColor = System.Drawing.Color.Transparent
         Me.lbTitle.Font = New System.Drawing.Font("Cambria", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbTitle.Location = New System.Drawing.Point(32, 4)
+        Me.lbTitle.Location = New System.Drawing.Point(27, 1)
         Me.lbTitle.Name = "lbTitle"
-        Me.lbTitle.Size = New System.Drawing.Size(107, 17)
+        Me.lbTitle.Size = New System.Drawing.Size(107, 23)
         Me.lbTitle.TabIndex = 17
         Me.lbTitle.Text = "Relic Rewards"
+        Me.lbTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'pTitle
         '
@@ -43,13 +44,28 @@ Partial Class RewardWindow
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.pTitle.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
         Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.pTitle.Controls.Add(Me.PictureBox3)
         Me.pTitle.Controls.Add(Me.lbTitle)
+        Me.pTitle.Controls.Add(Me.topToggle)
+        Me.pTitle.Controls.Add(Me.PictureBox3)
         Me.pTitle.Controls.Add(Me.btnClose)
         Me.pTitle.Location = New System.Drawing.Point(0, 0)
         Me.pTitle.Name = "pTitle"
         Me.pTitle.Size = New System.Drawing.Size(477, 27)
         Me.pTitle.TabIndex = 22
+        '
+        'topToggle
+        '
+        Me.topToggle.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.topToggle.BackColor = System.Drawing.Color.Transparent
+        Me.topToggle.Font = New System.Drawing.Font("Cambria", 11.25!, System.Drawing.FontStyle.Bold)
+        Me.topToggle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.topToggle.Location = New System.Drawing.Point(391, 1)
+        Me.topToggle.Name = "topToggle"
+        Me.topToggle.Size = New System.Drawing.Size(54, 23)
+        Me.topToggle.TabIndex = 25
+        Me.topToggle.Text = "Top"
+        Me.topToggle.UseVisualStyleBackColor = False
         '
         'PictureBox3
         '
@@ -106,7 +122,6 @@ Partial Class RewardWindow
         Me.Name = "RewardWindow"
         Me.Text = "Reward Window"
         Me.pTitle.ResumeLayout(False)
-        Me.pTitle.PerformLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
@@ -116,4 +131,5 @@ Partial Class RewardWindow
     Friend WithEvents btnClose As Button
     Friend WithEvents PictureBox3 As PictureBox
     Friend WithEvents MainPanel As Panel
+    Friend WithEvents topToggle As CheckBox
 End Class
