@@ -245,7 +245,7 @@ Module OCR
 
         Dim ss_area As New Rectangle(center.X - wid / 2, center.Y - top, wid, hei)
         If Debug Then
-            Main.addLog("TAKING SCREENSHOT:" & vbCrLf & dpiScaling & vbCrLf & ss_area.ToString())
+            Main.addLog("TAKING SCREENSHOT:" & vbCrLf & "DPI SCALE: " & dpiScaling & vbCrLf & "SS REGION: " & ss_area.ToString())
         End If
         Dim ret As New Bitmap(wid, hei)
         Using graph As Graphics = Graphics.FromImage(ret)
@@ -318,7 +318,9 @@ Module OCR
         Return ret
     End Function
 
+    Private GetPartText_timer As Long = 0
     Private Function GetPartText(screen As Bitmap, plyr_count As Integer, plyr As Integer, Optional multi As Boolean = False) As String
+        GetPartText_timer = clock.Elapsed.TotalMilliseconds
         ' This will not only check the bottom line of text
         '   But also will check one line up if the bottom line is ONLY "BLUEPRINT"
         Dim height As Integer = screen.Height * 0.1    ' Line Height
@@ -342,10 +344,16 @@ Module OCR
                     End Select
                 Next
             Next
+            GetPartText_timer -= clock.Elapsed.TotalMilliseconds
+            Console.WriteLine("IMAGE FILTER-" & GetPartText_timer & "ms")
+            GetPartText_timer = clock.Elapsed.TotalMilliseconds
 
             If Debug Then
                 bmp.Save(appData & "\WFInfo\tests\Text-" & My.Settings.EtcCount.ToString() & ".png")
                 My.Settings.EtcCount += 1
+                GetPartText_timer -= clock.Elapsed.TotalMilliseconds
+                Console.WriteLine("SAVE IMAGE-" & GetPartText_timer & "ms")
+                GetPartText_timer = clock.Elapsed.TotalMilliseconds
             End If
             ' ONLY one page can be used at a time
             '   So we have to get the text and dispose of the page quickly
@@ -353,6 +361,9 @@ Module OCR
             Using page As Page = engine.Process(bmp)
                 ret = Regex.Replace(page.GetText(), "[^A-Z& ]", "").Trim
             End Using
+
+            GetPartText_timer -= clock.Elapsed.TotalMilliseconds
+            Console.WriteLine("LINE-" & GetPartText_timer & "ms")
 
             ' IF A LONGER NAME IS ADDED
             '   THIS WILL NEED TO BE IMPROVED ON
@@ -414,7 +425,7 @@ Module OCR
             foundText.Add(text)
         Next
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("GET PART TEXT-" & ParseScreen_timer & "ms")
+        Console.WriteLine("GET ALL PARTS-" & ParseScreen_timer & "ms")
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         If DisplayWindow Then

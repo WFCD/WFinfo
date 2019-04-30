@@ -125,10 +125,16 @@
     End Sub
 
     Friend Sub Display(foundText As List(Of String))
+        Dim visible As Boolean = Me.Visible
         Me.Show()
         Me.TopMost = True
+
         Me.Size = New Size(foundText.Count * 127 + 1, 105)
-        Me.Location = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
+        If Not visible Then
+            Me.Location = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
+        End If
+
+
         Using g As Graphics = CreateGraphics()
             For i = 0 To foundText.Count - 1
                 rwrdPanels(i).Visible = True
