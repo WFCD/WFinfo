@@ -134,11 +134,11 @@ Partial Class Settings
         Me.Label8.BackColor = System.Drawing.Color.Transparent
         Me.Label8.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label8.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label8.Location = New System.Drawing.Point(11, 66)
+        Me.Label8.Location = New System.Drawing.Point(70, 66)
         Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(202, 18)
+        Me.Label8.Size = New System.Drawing.Size(143, 18)
         Me.Label8.TabIndex = 26
-        Me.Label8.Text = "Custom Scale Percentage:"
+        Me.Label8.Text = "Scale Percentage:"
         '
         'Label7
         '

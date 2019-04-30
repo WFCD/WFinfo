@@ -27,7 +27,9 @@ Partial Class Main
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Main))
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.lbStatus = New System.Windows.Forms.Label()
         Me.lbWiki = New System.Windows.Forms.Label()
+        Me.Label2 = New System.Windows.Forms.Label()
         Me.lbWikiDate = New System.Windows.Forms.Label()
         Me.lbEqmt = New System.Windows.Forms.Label()
         Me.lbEqmtDate = New System.Windows.Forms.Label()
@@ -39,17 +41,24 @@ Partial Class Main
         Me.pTitle = New System.Windows.Forms.Panel()
         Me.btnHide = New System.Windows.Forms.Button()
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
+        Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
+        Me.trayIcon = New System.Windows.Forms.NotifyIcon(Me.components)
+        Me.trayMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.trayShow = New System.Windows.Forms.ToolStripMenuItem()
+        Me.trayRelics = New System.Windows.Forms.ToolStripMenuItem()
+        Me.trayEquipment = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.trayExit = New System.Windows.Forms.ToolStripMenuItem()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
         Me.pbRelic = New System.Windows.Forms.PictureBox()
         Me.pbSettings = New System.Windows.Forms.PictureBox()
         Me.pbEqmt = New System.Windows.Forms.PictureBox()
         Me.pbHome = New System.Windows.Forms.PictureBox()
-        Me.Label2 = New System.Windows.Forms.Label()
-        Me.lbStatus = New System.Windows.Forms.Label()
         Me.tAutomate = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.trayMenu.SuspendLayout()
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -72,8 +81,20 @@ Partial Class Main
         Me.Panel1.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Panel1.Location = New System.Drawing.Point(0, 25)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(334, 107)
+        Me.Panel1.Size = New System.Drawing.Size(334, 106)
         Me.Panel1.TabIndex = 19
+        '
+        'lbStatus
+        '
+        Me.lbStatus.BackColor = System.Drawing.Color.Transparent
+        Me.lbStatus.Font = New System.Drawing.Font("Tahoma", 8.0!)
+        Me.lbStatus.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.lbStatus.Location = New System.Drawing.Point(48, 85)
+        Me.lbStatus.Name = "lbStatus"
+        Me.lbStatus.Size = New System.Drawing.Size(256, 19)
+        Me.lbStatus.TabIndex = 30
+        Me.lbStatus.Text = "Loading..."
+        Me.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'lbWiki
         '
@@ -86,6 +107,20 @@ Partial Class Main
         Me.lbWiki.TabIndex = 27
         Me.lbWiki.Text = "Wiki Data:"
         Me.lbWiki.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        '
+        'Label2
+        '
+        Me.Label2.BackColor = System.Drawing.Color.Transparent
+        Me.Label2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Label2.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.Label2.Location = New System.Drawing.Point(-1, 84)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Padding = New System.Windows.Forms.Padding(2)
+        Me.Label2.Size = New System.Drawing.Size(305, 21)
+        Me.Label2.TabIndex = 29
+        Me.Label2.Text = "Status: "
+        Me.Label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'lbWikiDate
         '
@@ -226,13 +261,64 @@ Partial Class Main
         Me.PictureBox3.TabIndex = 23
         Me.PictureBox3.TabStop = False
         '
+        'tUpdate
+        '
+        Me.tUpdate.Enabled = True
+        Me.tUpdate.Interval = 300000
+        '
+        'trayIcon
+        '
+        Me.trayIcon.ContextMenuStrip = Me.trayMenu
+        Me.trayIcon.Icon = CType(resources.GetObject("trayIcon.Icon"), System.Drawing.Icon)
+        Me.trayIcon.Text = "WFInfo"
+        '
+        'trayMenu
+        '
+        Me.trayMenu.ImageScalingSize = New System.Drawing.Size(24, 24)
+        Me.trayMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.trayShow, Me.trayRelics, Me.trayEquipment, Me.ToolStripSeparator1, Me.trayExit})
+        Me.trayMenu.Name = "trayMenu"
+        Me.trayMenu.ShowImageMargin = False
+        Me.trayMenu.Size = New System.Drawing.Size(108, 98)
+        '
+        'trayShow
+        '
+        Me.trayShow.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Bold)
+        Me.trayShow.Name = "trayShow"
+        Me.trayShow.Size = New System.Drawing.Size(107, 22)
+        Me.trayShow.Text = "Show"
+        Me.trayShow.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal
+        '
+        'trayRelics
+        '
+        Me.trayRelics.Name = "trayRelics"
+        Me.trayRelics.Size = New System.Drawing.Size(107, 22)
+        Me.trayRelics.Text = "Relics"
+        '
+        'trayEquipment
+        '
+        Me.trayEquipment.Name = "trayEquipment"
+        Me.trayEquipment.Size = New System.Drawing.Size(107, 22)
+        Me.trayEquipment.Text = "Equipment"
+        Me.trayEquipment.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal
+        '
+        'ToolStripSeparator1
+        '
+        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(104, 6)
+        '
+        'trayExit
+        '
+        Me.trayExit.Name = "trayExit"
+        Me.trayExit.Size = New System.Drawing.Size(107, 22)
+        Me.trayExit.Text = "Exit"
+        '
         'pbSideBar
         '
         Me.pbSideBar.BackColor = System.Drawing.Color.FromArgb(CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer))
         Me.pbSideBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.pbSideBar.Location = New System.Drawing.Point(304, 25)
         Me.pbSideBar.Name = "pbSideBar"
-        Me.pbSideBar.Size = New System.Drawing.Size(30, 107)
+        Me.pbSideBar.Size = New System.Drawing.Size(30, 106)
         Me.pbSideBar.TabIndex = 18
         Me.pbSideBar.TabStop = False
         '
@@ -284,32 +370,6 @@ Partial Class Main
         Me.pbHome.TabIndex = 17
         Me.pbHome.TabStop = False
         '
-        'Label2
-        '
-        Me.Label2.BackColor = System.Drawing.Color.Transparent
-        Me.Label2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Label2.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label2.Location = New System.Drawing.Point(-1, 84)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Padding = New System.Windows.Forms.Padding(2)
-        Me.Label2.Size = New System.Drawing.Size(305, 21)
-        Me.Label2.TabIndex = 29
-        Me.Label2.Text = "Status: "
-        Me.Label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        '
-        'lbStatus
-        '
-        Me.lbStatus.BackColor = System.Drawing.Color.Transparent
-        Me.lbStatus.Font = New System.Drawing.Font("Tahoma", 8.0!)
-        Me.lbStatus.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.lbStatus.Location = New System.Drawing.Point(48, 85)
-        Me.lbStatus.Name = "lbStatus"
-        Me.lbStatus.Size = New System.Drawing.Size(256, 19)
-        Me.lbStatus.TabIndex = 30
-        Me.lbStatus.Text = "Loading..."
-        Me.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        '
         'tAutomate
         '
         Me.tAutomate.Enabled = True
@@ -320,7 +380,7 @@ Partial Class Main
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(334, 132)
+        Me.ClientSize = New System.Drawing.Size(334, 131)
         Me.Controls.Add(Me.pbHome)
         Me.Controls.Add(Me.pbEqmt)
         Me.Controls.Add(Me.pbSettings)
@@ -337,6 +397,7 @@ Partial Class Main
         Me.pTitle.ResumeLayout(False)
         Me.pTitle.PerformLayout()
         CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.trayMenu.ResumeLayout(False)
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).EndInit()
@@ -352,7 +413,15 @@ Partial Class Main
     Friend WithEvents PictureBox3 As PictureBox
     Friend WithEvents pTitle As Panel
     Friend WithEvents lbVersion As Label
+    Friend WithEvents tUpdate As Timer
+    Friend WithEvents trayIcon As NotifyIcon
     Friend WithEvents btnHide As Button
+    Friend WithEvents trayMenu As ContextMenuStrip
+    Friend WithEvents trayShow As ToolStripMenuItem
+    Friend WithEvents trayRelics As ToolStripMenuItem
+    Friend WithEvents ToolStripSeparator1 As ToolStripSeparator
+    Friend WithEvents trayExit As ToolStripMenuItem
+    Friend WithEvents trayEquipment As ToolStripMenuItem
     Friend WithEvents lbMarketDate As Label
     Friend WithEvents lbMarket As Label
     Friend WithEvents lbEqmt As Label

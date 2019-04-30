@@ -118,37 +118,6 @@ Public Class Main
         End Try
     End Sub
 
-    Private Sub KeyWatch_Tick(sender As Object, e As EventArgs)
-        Try
-            If Not key1Tog Then
-
-                '_________________________________________________________________________
-                'Checks for new screenshots (using fullscreen mode) and starts main function if found
-                '_________________________________________________________________________
-                'If Fullscreen Then
-                '    If Not Directory.GetFiles(My.Settings.LocStorage).Count = 0 Then
-                '        If Not My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First() Then
-                '            My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
-                '            DoWork()
-                '        End If
-                '    End If
-                'End If
-
-
-                '_________________________________________________________________________
-                'watches for main hotkey and sctog starts the min function if pressed
-                '_________________________________________________________________________
-                If GetAsyncKeyState(HKey1) And &H8000 Then
-                    DoWork()
-                End If
-            End If
-        Catch ex As Exception
-            Invoke(Sub() lbStatus.Text = "ERROR (KeyWatch)")
-            Invoke(Sub() lbStatus.ForeColor = Color.Red)
-            addLog(ex.ToString())
-        End Try
-    End Sub
-
     Public Sub addLog(txt As String)
         '_________________________________________________________________________
         'Function for storing log data
@@ -302,33 +271,33 @@ Public Class Main
         drag = False
     End Sub
 
-    'Private Sub ButtonHide_Click(sender As Object, e As EventArgs) Handles btnHide.Click
-    '    Me.Hide()
-    '    trayIcon.Visible = True
-    'End Sub
+    Private Sub ButtonHide_Click(sender As Object, e As EventArgs) Handles btnHide.Click
+        Me.Hide()
+        trayIcon.Visible = True
+    End Sub
 
-    'Private Sub trayIcon_MouseDoubleClick(sender As Object, e As MouseEventArgs) Handles trayIcon.MouseDoubleClick
-    '    Me.Show()
-    '    trayIcon.Visible = False
-    'End Sub
+    Private Sub trayIcon_MouseDoubleClick(sender As Object, e As MouseEventArgs) Handles trayIcon.MouseDoubleClick
+        Me.Show()
+        trayIcon.Visible = False
+    End Sub
 
-    'Private Sub trayMenu_Opening(sender As Object, e As ToolStripItemClickedEventArgs) Handles trayMenu.ItemClicked
-    '    If e.ClickedItem.Name = "trayExit" Then
-    '        Me.Close()
-    '    ElseIf e.ClickedItem.Name = "trayShow" Then
-    '        Me.Show()
-    '        trayIcon.Visible = False
-    '    ElseIf e.ClickedItem.Name = "trayRelics" Then
-    '        pbRelic_Click(pbRelic, Nothing)
-    '    ElseIf e.ClickedItem.Name = "trayEquipment" Then
-    '        pbEqmt_Click(pbEqmt, Nothing)
-    '    End If
-    'End Sub
+    Private Sub trayMenu_Opening(sender As Object, e As ToolStripItemClickedEventArgs) Handles trayMenu.ItemClicked
+        If e.ClickedItem.Name = "trayExit" Then
+            Me.Close()
+        ElseIf e.ClickedItem.Name = "trayShow" Then
+            Me.Show()
+            trayIcon.Visible = False
+        ElseIf e.ClickedItem.Name = "trayRelics" Then
+            pbRelic_Click(pbRelic, Nothing)
+        ElseIf e.ClickedItem.Name = "trayEquipment" Then
+            pbEqmt_Click(pbEqmt, Nothing)
+        End If
+    End Sub
 
     Private tUpdate_Count As Integer = 1
-    Private Sub tUpdate_Tick(sender As Object, e As EventArgs)  ' Happens every 5min
+    Private Sub tUpdate_Tick(sender As Object, e As EventArgs) Handles tUpdate.Tick ' Happens every 5min
         Try
-
+            Console.WriteLine("tUpdate Tick")
             ' Every hour, check db Data
             If tUpdate_Count = 0 Then
                 If db IsNot Nothing AndAlso db.Update() Then
@@ -371,25 +340,25 @@ Public Class Main
         Equipment.Refresh()
     End Sub
 
-    'Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
-    '    Console.WriteLine("tAutomate Tick")
-    '    If (Glob.db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso OCR.isWFActive()) Then
-    '        If (OCR.IsRelicWindow()) Then
-    '            If (Not rwrdPanels(0).Visible) Then
-    '                Me.tAutomate.Interval = 3000
-    '                MyBase.Invoke(Sub() Me.DoWork())
-    '            End If
-    '        ElseIf (rwrdPanels(0).Visible) Then
-    '            For i As Integer = 0 To 3
-    '                rwrdPanels(i).Hide()
-    '            Next
-    '        Else
-    '            Me.tAutomate.Interval = 1000
-    '        End If
-    '    Else
-    '        Me.tAutomate.Interval = 5000
-    '    End If
-    'End Sub
+    Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
+        Console.WriteLine("tAutomate Tick")
+        If (Glob.db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso OCR.isWFActive()) Then
+            If (OCR.IsRelicWindow()) Then
+                If (Not rwrdPanels(0).Visible) Then
+                    Me.tAutomate.Interval = 3000
+                    MyBase.Invoke(Sub() Me.DoWork())
+                End If
+            ElseIf (rwrdPanels(0).Visible) Then
+                For i As Integer = 0 To 3
+                    rwrdPanels(i).Hide()
+                Next
+            Else
+                Me.tAutomate.Interval = 1000
+            End If
+        Else
+            Me.tAutomate.Interval = 5000
+        End If
+    End Sub
 End Class
 
 Module Glob
@@ -432,6 +401,21 @@ Module Glob
 
     Public ReplacementList As Char(,)
     Public WithEvents globHook As New GlobalHook()
+
+    Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
+        If key = Glob.HKey1 Then
+            Task.Factory.StartNew(Sub() Glob.DoOtherWork())
+        End If
+    End Sub
+
+    Private DoOtherWork_timer As Long
+    Private Sub DoOtherWork()
+        DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
+        Main.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
+        OCR.ParseScreen()
+        DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
+        Main.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
+    End Sub
 
     Public Function getCookie()
         '_________________________________________________________________________

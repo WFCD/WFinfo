@@ -6,6 +6,10 @@ Public Class Settings
     Dim drag As Boolean = False
     Dim mouseX As Integer
     Dim mouseY As Integer
+
+    'mouse hacks
+    Private storedCursor As Cursor
+
     Private Sub btnHkey1_Click(sender As Object, e As EventArgs) Handles btnHkey1.Click
         '_________________________________________________________________________
         'Toggle for setting hotkey 1
@@ -71,7 +75,7 @@ Public Class Settings
         'Visual stuff and loading settings
         '_________________________________________________________________________
         UpdateColors(Me)
-        Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
+        Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         If DisplayWindow Then
             TrackBar1.Value = 2
         End If
@@ -79,7 +83,7 @@ Public Class Settings
         cbAutomation.Checked = Automate
         cbDebug.Checked = Debug
         ScaleBar.Value = My.Settings.Scaling
-        TextBox1.Text = My.Settings.Scaling
+        TextBox1.Text = My.Settings.Scaling & "%"
         ScaleOption.SelectedIndex = My.Settings.ScaleType
     End Sub
 
@@ -213,12 +217,13 @@ Public Class Settings
     End Sub
 
     Private Sub ScaleBar_Scroll(sender As Object, e As EventArgs) Handles ScaleBar.Scroll
-        TextBox1.Text = ScaleBar.Value.ToString()
+        TextBox1.Text = ScaleBar.Value & "%"
         saveSettings()
     End Sub
 
     Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ScaleOption.SelectedIndexChanged
         ScaleBar.Enabled = ScaleOption.SelectedIndex = 2
+        TextBox1.Enabled = ScaleBar.Enabled
         If ScaleOption.SelectedIndex = 0 Then
             ScaleBar.Value = 100
         ElseIf ScaleOption.SelectedIndex = 1 Then
@@ -226,7 +231,7 @@ Public Class Settings
         End If
         ScaleBar_Scroll(sender, e)
         'Kek: To remove the blue highlight... because I don't like the look of it
-        ScaleBar.Select()
+        ActiveControl = Panel1
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs)
@@ -244,19 +249,32 @@ Public Class Settings
         My.Settings.ResultWindow = DisplayWindow
     End Sub
 
+    Private Sub TextBox1_Enter(sender As Object, e As EventArgs) Handles TextBox1.Enter
+        TextBox1.Text = TextBox1.Text.Replace("%", "")
+    End Sub
+
     Private Sub TextBox1_TextPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles TextBox1.KeyPress
+        If Cursor.Current IsNot Nothing Then
+            storedCursor = Cursor.Current
+            Cursor.Current = Nothing
+        End If
         If e.KeyChar = ChrW(Keys.Enter) Then
-            saveScalling(TextBox1.Text)
+            ' Kek: Cause I like the perc sign disappearing on edits
+            ActiveControl = Panel1
+            If Cursor.Current Is Nothing Then
+                Cursor.Current = storedCursor
+            End If
             e.Handled = True
         End If
         If Not Char.IsNumber(e.KeyChar) AndAlso Not Char.IsControl(e.KeyChar) Then e.KeyChar = ""
     End Sub
 
-    Private Sub TextBox1_TextChanged(sender As Object, e As EventArgs) Handles TextBox1.TextChanged
-        saveScalling(TextBox1.Text)
+    Private Sub TextBox1_Leave(sender As Object, e As EventArgs) Handles TextBox1.Leave
+        saveScaling(TextBox1.Text)
     End Sub
 
-    Private Sub saveScalling(text As String)
+    Private Sub saveScaling(text As String)
+        text = text.Replace("%", "")
         If text Is "" Then text = "50"
         Dim value = Convert.ToInt32(text)
         If value < 50 Then
@@ -267,5 +285,6 @@ Public Class Settings
         ScaleBar.Value = value
         My.Settings.Scaling = value
         Console.WriteLine("Submit current: " & value)
+        TextBox1.Text = value & "%"
     End Sub
 End Class

@@ -62,7 +62,7 @@ Public Class Relics
         Label2.BackColor = My.Settings.cBackground
     End Sub
 
-    Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterCollapse, RelicTree2.AfterCollapse
+    Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree1.AfterCollapse, RelicTree2.AfterCollapse
         Dim temp As String = "|" + e.Node.FullPath.Replace("\", " ") + "|"
         If e.Node.Text <> "Hidden" Then
             temp = temp.Replace("Hidden ", "")
@@ -73,8 +73,8 @@ Public Class Relics
         temp = temp.Replace("|", "")
         Dim era_name As String() = temp.Split(" ")
         If era_name.Count = 2 AndAlso era_name(1).Length = 2 Then
-            Dim other As TreeView = RelicTree
-            If sender.Equals(RelicTree) Then
+            Dim other As TreeView = RelicTree1
+            If sender.Equals(RelicTree1) Then
                 other = RelicTree2
             End If
             For Each node As TreeNode In other.Nodes.Find(era_name(1), True)
@@ -85,7 +85,7 @@ Public Class Relics
         End If
     End Sub
 
-    Private Sub RelicTree_Expand(sender As Object, e As TreeViewEventArgs) Handles RelicTree.AfterExpand, RelicTree2.AfterExpand
+    Private Sub RelicTree_Expand(sender As Object, e As TreeViewEventArgs) Handles RelicTree1.AfterExpand, RelicTree2.AfterExpand
         Dim temp As String = "|" + e.Node.FullPath.Replace("\", " ") + "|"
         If e.Node.Text <> "Hidden" Then
             temp = temp.Replace("Hidden ", "")
@@ -96,8 +96,8 @@ Public Class Relics
         temp = temp.Replace("|", "")
         Dim era_name As String() = temp.Split(" ")
         If era_name.Count = 2 AndAlso era_name(1).Length = 2 Then
-            Dim other As TreeView = RelicTree
-            If sender.Equals(RelicTree) Then
+            Dim other As TreeView = RelicTree1
+            If sender.Equals(RelicTree1) Then
                 other = RelicTree2
             End If
             For Each node As TreeNode In other.Nodes.Find(era_name(1), True)
@@ -119,17 +119,17 @@ Public Class Relics
         End If
         If My.Settings.TreeOne Then
             RelicTree2.Visible = False
-            RelicTree.Select()
+            RelicTree1.Select()
             Label2.Text = "Relic Eras"
         Else
-            RelicTree.Visible = False
+            RelicTree1.Visible = False
             RelicTree2.Select()
             Label2.Text = "All Relics"
         End If
         SortSelection.SelectedIndex = My.Settings.SortType
     End Sub
 
-    Private Sub RelicTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles RelicTree.DrawNode, RelicTree2.DrawNode
+    Private Sub RelicTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles RelicTree1.DrawNode, RelicTree2.DrawNode
         e.DrawDefault = True
         If e.Bounds.Width = 0 Then
             Return
@@ -140,6 +140,7 @@ Public Class Relics
 
         End If
         Dim split As String() = fullPath.Split(New Char() {CChar("\"), CChar("|")})
+
 
         ' Write Plat + Ducat values
         Dim sf As New StringFormat With {.Alignment = StringAlignment.Far}
@@ -166,11 +167,14 @@ Public Class Relics
                         ElseIf e.Node.FullPath.Contains("Hidden") Then
                             right = 135
                         End If
+
+                        right += 10 * (split(1).Length - 2)
+
                         Dim rect As SizeF = e.Graphics.MeasureString("Vaulted", Me.Font)
                         Using br = New SolidBrush(My.Settings.cBackground)
                             e.Graphics.FillRectangle(br, right - rect.Width - 10, e.Bounds.Top + 1, rect.Width + 10, rect.Height)
                         End Using
-                        e.Graphics.DrawString("Vaulted", RelicTree.Font, stealthBrush, right, e.Bounds.Top + 1, sf)
+                        e.Graphics.DrawString("Vaulted", RelicTree1.Font, stealthBrush, right, e.Bounds.Top + 1, sf)
                     End If
 
                     'Double.Parse(ducat_plat(name)("plat"))
@@ -183,11 +187,11 @@ Public Class Relics
                     End If
                     Using br = New SolidBrush(My.Settings.cText)
                         e.Graphics.FillRectangle(bgBrush, 220, e.Bounds.Top, 180, e.Bounds.Height)
-                        e.Graphics.DrawString("RAD:", RelicTree.Font, br, 255, e.Bounds.Top, sf)
-                        e.Graphics.DrawString(rtot_str, RelicTree.Font, br, 300, e.Bounds.Top, sf)
+                        e.Graphics.DrawString("RAD:", RelicTree1.Font, br, 255, e.Bounds.Top, sf)
+                        e.Graphics.DrawString(rtot_str, RelicTree1.Font, br, 300, e.Bounds.Top, sf)
                         e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
-                        e.Graphics.DrawString("INT:", RelicTree.Font, br, 350, e.Bounds.Top, sf)
-                        e.Graphics.DrawString(itot.ToString("N1"), RelicTree.Font, br, 385, e.Bounds.Top, sf)
+                        e.Graphics.DrawString("INT:", RelicTree1.Font, br, 350, e.Bounds.Top, sf)
+                        e.Graphics.DrawString(itot.ToString("N1"), RelicTree1.Font, br, 385, e.Bounds.Top, sf)
                         e.Graphics.DrawImage(My.Resources.plat, 385, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
                     End Using
                 End If
@@ -209,9 +213,9 @@ Public Class Relics
                 Using br = New SolidBrush(My.Settings.cBackground)
                     e.Graphics.FillRectangle(br, 260, e.Bounds.Top, 130, e.Bounds.Height)
                 End Using
-                e.Graphics.DrawString(Double.Parse(vals("plat"), culture).ToString("N1"), RelicTree.Font, brush, 300, e.Bounds.Top + 1, sf)
+                e.Graphics.DrawString(Double.Parse(vals("plat"), culture).ToString("N1"), RelicTree1.Font, brush, 300, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
-                e.Graphics.DrawString(vals("ducats"), RelicTree.Font, brush, 370, e.Bounds.Top + 1, sf)
+                e.Graphics.DrawString(vals("ducats"), RelicTree1.Font, brush, 370, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.ducat_w, 370, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
             End If
         End If
@@ -227,7 +231,7 @@ Public Class Relics
         e.Graphics.DrawLine(New Pen(My.Settings.cBackground), left, e.Bounds.Bottom, 450, e.Bounds.Bottom)
     End Sub
 
-    Private Sub HideMenu_Click(sender As Object, e As ToolStripItemClickedEventArgs)
+    Private Sub HideMenu_Click(sender As Object, e As ToolStripItemClickedEventArgs) Handles HideMenu.ItemClicked
         Dim split As String() = RelicToHide.FullPath.Replace("Hidden\", "").Split("\")
         Dim arr As JArray = hidden_nodes(split(0))
 
@@ -252,13 +256,35 @@ Public Class Relics
         File.WriteAllText(hidden_file_path, JsonConvert.SerializeObject(hidden_nodes, Formatting.Indented))
     End Sub
 
-    Private Sub RelicTree_Click(sender As Object, e As TreeNodeMouseClickEventArgs) Handles RelicTree.NodeMouseClick, RelicTree2.NodeMouseClick
+    Private Sub RelicTree_Click(sender As Object, e As TreeNodeMouseClickEventArgs) Handles RelicTree1.NodeMouseClick, RelicTree2.NodeMouseClick
         If e.Button <> MouseButtons.Right Then
             RelicToHide = Nothing
             Relic2ToHide = Nothing
             Return
         End If
-        If sender.Equals(RelicTree) Then
+        e.Node.TreeView.SelectedNode = e.Node
+
+        Dim fullPath As String = e.Node.FullPath.Replace("Hidden\", "")
+        If sender.Equals(RelicTree2) Then
+            fullPath = ReplaceFirst(fullPath, " ", "|")
+
+        End If
+        Dim split As String() = fullPath.Split(New Char() {CChar("\"), CChar("|")})
+
+        ' Write Plat + Ducat values
+        Dim sf As New StringFormat With {.Alignment = StringAlignment.Far}
+        If split.Count = 2 Then
+            Dim find As JObject = Nothing
+            If db.relic_data.TryGetValue(split(0), find) Then
+                If find.TryGetValue(split(1), find) Then
+                    If Not find("vaulted").ToObject(Of Boolean) Then
+                        Return
+                    End If
+                End If
+            End If
+        End If
+
+        If sender.Equals(RelicTree1) Then
             RelicToHide = e.Node
             Dim era As String = e.Node.FullPath.Split("\")(0)
             For Each node As TreeNode In RelicTree2.Nodes.Find(e.Node.Name, True)
@@ -270,21 +296,33 @@ Public Class Relics
         Else
             Relic2ToHide = e.Node
             Dim era As String = e.Node.Text.Split(" ")(0)
-            For Each node As TreeNode In RelicTree.Nodes.Find(e.Node.Name, True)
+            For Each node As TreeNode In RelicTree1.Nodes.Find(e.Node.Name, True)
                 If node.FullPath.Contains(era) Then
                     RelicToHide = node
                     Exit For
                 End If
             Next
         End If
+
+
+        HideMenu.Items.Clear()
+        If e.Node IsNot Nothing AndAlso e.Node.Name.Length = 2 Then
+            If e.Node.FullPath.Contains("Hidden") Then
+                HideMenu.Items.Add("Show").ForeColor = textColor
+                HideMenu.Show(RelicTree1, e.Location)
+            Else
+                HideMenu.Items.Add("Hide").ForeColor = textColor
+                HideMenu.Show(RelicTree1, e.Location)
+            End If
+        End If
     End Sub
 
     Private Sub Label2_Click(sender As Object, e As EventArgs) Handles Label2.Click
         RelicTree2.Visible = My.Settings.TreeOne
         My.Settings.TreeOne = Not My.Settings.TreeOne
-        RelicTree.Visible = My.Settings.TreeOne
+        RelicTree1.Visible = My.Settings.TreeOne
         If My.Settings.TreeOne Then
-            RelicTree.Select()
+            RelicTree1.Select()
             Label2.Text = "Relic Eras"
         Else
             RelicTree2.Select()
@@ -296,10 +334,10 @@ Public Class Relics
         My.Settings.SortType = SortSelection.SelectedIndex
         Tree1Sorter.type = My.Settings.SortType
         Tree2Sorter.type = My.Settings.SortType
-        RelicTree.Sort()
+        RelicTree1.Sort()
         RelicTree2.Sort()
-        If RelicTree.Visible Then
-            RelicTree.Select()
+        If RelicTree1.Visible Then
+            RelicTree1.Select()
         Else
             RelicTree2.Select()
         End If
@@ -309,10 +347,10 @@ Public Class Relics
     Public Sub Load_Relic_Tree()
         Label2.BackColor = My.Settings.cBackground
         Dim hide As TreeNode = Nothing
-        If RelicTree.Nodes(0).Nodes.Count > 1 Then
+        If RelicTree1.Nodes(0).Nodes.Count > 1 Then
             Return
         End If
-        For Each node As TreeNode In RelicTree.Nodes
+        For Each node As TreeNode In RelicTree1.Nodes
             CheckIfExpand(node)
 
             For Each relic As JProperty In db.relic_data(node.Text)
@@ -375,9 +413,9 @@ Public Class Relics
 
         Load_Hidden_Nodes()
 
-        RelicTree.TreeViewNodeSorter = Tree1Sorter
+        RelicTree1.TreeViewNodeSorter = Tree1Sorter
         RelicTree2.TreeViewNodeSorter = Tree2Sorter
-        RelicTree.Sort()
+        RelicTree1.Sort()
         RelicTree2.Sort()
     End Sub
 
@@ -408,7 +446,7 @@ Public Class Relics
             hidden_nodes = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(hidden_file_path))
         End If
 
-        For Each node As TreeNode In RelicTree.Nodes
+        For Each node As TreeNode In RelicTree1.Nodes
             For Each hide As JValue In hidden_nodes(node.Text)
                 Dim move As TreeNode = node.Nodes.Find(hide.Value, False)(0)
                 node.Nodes.Remove(move)
@@ -425,7 +463,7 @@ Public Class Relics
 
     Public Sub Reload_Data()
         ' Find any missing Relics
-        For Each node As TreeNode In RelicTree.Nodes
+        For Each node As TreeNode In RelicTree1.Nodes
             For Each relic As JProperty In db.relic_data(node.Text)
                 If node.Nodes.Find(relic.Name, True).Length = 0 Then
                     Dim kid As New TreeNode(relic.Name)
@@ -457,7 +495,7 @@ Public Class Relics
         Next
 
         ' Update all rad/int values
-        For Each node As TreeNode In RelicTree.Nodes
+        For Each node As TreeNode In RelicTree1.Nodes
             For Each kid As TreeNode In node.Nodes
                 If Not kid.Name.Contains("Hidden") Then
                     Dim rtot As Double = 0

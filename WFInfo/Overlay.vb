@@ -58,7 +58,6 @@ Public Class Overlay
     Private Sub tHide_Tick(sender As Object, e As EventArgs) Handles tHide.Tick
         Me.Hide()
         tHide.Stop()
-        Main.Invoke(Sub() Main.lbStatus.Text = "Ready for next reward")
     End Sub
 
     Public Sub ShowLoading(right As Integer, top As Integer)
