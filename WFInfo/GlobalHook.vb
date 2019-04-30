@@ -100,13 +100,12 @@
     End Function
 
     Public Sub New()
-        Try
-            MSHHookID = SetWindowsHookEx(WH_MOUSE_LL, MSLLHookProcDelegate, IntPtr.Zero, 0)
-            KBDHHookID = SetWindowsHookEx(WH_KEYBOARD_LL, KBDLLHookProcDelegate, IntPtr.Zero, 0)
-        Catch ex As Exception
-            MSHHookID = SetWindowsHookEx(WH_MOUSE_LL, MSLLHookProcDelegate, Marshal.GetHINSTANCE(Reflection.Assembly.GetExecutingAssembly.GetModules()(0)).ToInt32, 0)
-            KBDHHookID = SetWindowsHookEx(WH_KEYBOARD_LL, KBDLLHookProcDelegate, Marshal.GetHINSTANCE(Reflection.Assembly.GetExecutingAssembly.GetModules()(0)).ToInt32, 0)
-        End Try
+
+        Dim pointer As IntPtr = Marshal.GetHINSTANCE(Reflection.Assembly.GetExecutingAssembly.GetModules()(0))
+
+
+        MSHHookID = SetWindowsHookEx(WH_MOUSE_LL, MSLLHookProcDelegate, pointer, 0)
+        KBDHHookID = SetWindowsHookEx(WH_KEYBOARD_LL, KBDLLHookProcDelegate, pointer, 0)
 
         If MSHHookID = IntPtr.Zero Or KBDHHookID = IntPtr.Zero Then
             Throw New Exception("Could not set hook")

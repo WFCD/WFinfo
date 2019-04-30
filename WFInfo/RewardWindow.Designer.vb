@@ -58,6 +58,7 @@ Partial Class RewardWindow
         Me.topToggle.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.topToggle.BackColor = System.Drawing.Color.Transparent
+        Me.topToggle.Enabled = False
         Me.topToggle.Font = New System.Drawing.Font("Cambria", 11.25!, System.Drawing.FontStyle.Bold)
         Me.topToggle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.topToggle.Location = New System.Drawing.Point(391, 1)
@@ -66,6 +67,7 @@ Partial Class RewardWindow
         Me.topToggle.TabIndex = 25
         Me.topToggle.Text = "Top"
         Me.topToggle.UseVisualStyleBackColor = False
+        Me.topToggle.Visible = False
         '
         'PictureBox3
         '

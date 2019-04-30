@@ -12,7 +12,6 @@
 
     Private Sub RewardWindow_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         UpdateColors(Me)
-        Me.Location = New Point(Main.Location.X, Main.Location.Y + Main.Height + 25)
 
         Dim spacing As Integer = 125
 
@@ -26,23 +25,23 @@
 
             '.BackColor = System.Drawing.Color.FromArgb(87, 108, 117),
             rwrdNames(i) = New Label() With {
-                .Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Bold),
-                .ForeColor = System.Drawing.Color.FromArgb(177, 208, 217),
-                .TextAlign = System.Drawing.ContentAlignment.TopCenter,
+                .Font = New System.Drawing.Font("Tahoma", 10.0!, FontStyle.Bold),
+                .ForeColor = Color.FromArgb(177, 208, 217),
+                .TextAlign = ContentAlignment.TopCenter,
                 .Size = New Drawing.Size(spacing - 5, 35),
                 .Location = New Point(3, 30)
             }
             rwrdVault(i) = New Label() With {
                 .Visible = False,
                 .Font = New System.Drawing.Font("Tahoma", 8.0!),
-                .ForeColor = System.Drawing.Color.FromArgb(177, 208, 217),
-                .TextAlign = System.Drawing.ContentAlignment.TopCenter,
+                .ForeColor = Color.FromArgb(177, 208, 217),
+                .TextAlign = ContentAlignment.TopCenter,
                 .Size = New Drawing.Size(spacing - 5, 15)
             }
             rwrdPlats(i) = New Label() With {
                 .Font = New System.Drawing.Font("Tahoma", 8.0!),
-                .ForeColor = System.Drawing.Color.FromArgb(177, 208, 217),
-                .TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
+                .ForeColor = Color.FromArgb(177, 208, 217),
+                .TextAlign = ContentAlignment.MiddleCenter,
                 .Size = New Drawing.Size(52, 15),
                 .Location = New Point(3, 83)
             }
@@ -53,8 +52,8 @@
             }
             rwrdDucats(i) = New Label() With {
                 .Font = New System.Drawing.Font("Tahoma", 8.0!),
-                .ForeColor = System.Drawing.Color.FromArgb(177, 208, 217),
-                .TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
+                .ForeColor = Color.FromArgb(177, 208, 217),
+                .TextAlign = ContentAlignment.MiddleCenter,
                 .Size = New Drawing.Size(52, 15),
                 .Location = New Point(63, 83)
             }
@@ -127,8 +126,9 @@
 
     Friend Sub Display(foundText As List(Of String))
         Me.Show()
+        Me.TopMost = True
         Me.Size = New Size(foundText.Count * 127 + 1, 105)
-        Dim firstPoint = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
+        Me.Location = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
         Using g As Graphics = CreateGraphics()
             For i = 0 To foundText.Count - 1
                 rwrdPanels(i).Visible = True
@@ -151,6 +151,8 @@
             Next
         End Using
         Dim lastUsedLocation = Me.Location
+        'Me.Refresh()
+        Me.TopMost = False
     End Sub
 
     Private Sub cbtopToggle_Click(sender As Object, e As EventArgs) Handles topToggle.Click

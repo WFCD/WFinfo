@@ -384,7 +384,6 @@ Module OCR
 
         ' Get Player Count from Image
         players = GetPlayers(screen)
-
         Dim top As Integer = 0
         Dim right As Integer = 0
 
@@ -419,7 +418,7 @@ Module OCR
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         If DisplayWindow Then
-            RewardWindow.Display(foundText)
+            Main.Instance.Invoke(Sub() RewardWindow.Display(foundText))
             ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
             Console.WriteLine("DISPLAY WINDOW-" & ParseScreen_timer & "ms")
         Else
@@ -710,7 +709,6 @@ Module OCR
             Next
             ' PERCENTAGE NEEDS TO BE BETWEEN 50% and 70%
 
-            Console.WriteLine(tot_white / bmp.Width)
             If tot_white < bmp.Width * 0.2 OrElse tot_white > bmp.Width * 0.4 Then
                 Return False
             End If

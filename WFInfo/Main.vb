@@ -10,17 +10,18 @@ Public Class Main
     Dim mouseX As Integer
     Dim mouseY As Integer
     Public version As String = Nothing
+    Public Shared Instance As Main
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Try
             '_________________________________________________________________________
             ' Refreshes the UI and moves it to the stored location
             '_________________________________________________________________________
-
+            Instance = Me
             UpdateColors(Me)
 
             If version Is Nothing Then
-                version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
+                version = Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
                 version = version.Substring(0, version.LastIndexOf("."))
             End If
 
@@ -69,7 +70,6 @@ Public Class Main
             '    End If
             'End If
 
-
             '_________________________________________________________________________
             'Refreshes the clipboard, causes issues later if you don't
             '_________________________________________________________________________
@@ -87,20 +87,20 @@ Public Class Main
     Private Sub DoWork()
         DoWork_timer = clock.Elapsed.TotalMilliseconds
         Try
-            If (Glob.db IsNot Nothing) Then
-                Dim elapsed As TimeSpan = Glob.clock.Elapsed
+            If (db IsNot Nothing) Then
+                Dim elapsed As TimeSpan = clock.Elapsed
                 Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds))
-                Me.lbStatus.Text = "Getting Reward Info..."
-                OCR.ParseScreen()
-                elapsed = Glob.clock.Elapsed
+                Invoke(Sub() Me.lbStatus.Text = "Getting Reward Info...")
+                ParseScreen()
+                elapsed = clock.Elapsed
                 Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds - CDbl(Me.DoWork_timer)))
-                Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)"
+                Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
             Else
-                Glob.db = New Data()
-                OCR.ForceUpdateCenter()
-                Invoke(Sub() lbMarketDate.Text = Glob.db.market_data("timestamp").ToString().Substring(5, 11))
-                Invoke(Sub() lbEqmtDate.Text = Glob.db.eqmt_data("timestamp").ToString().Substring(5, 11))
-                Invoke(Sub() lbWikiDate.Text = Glob.db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
+                db = New Data()
+                ForceUpdateCenter()
+                Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
+                Invoke(Sub() lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11))
+                Invoke(Sub() lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
                 Relics.Load_Relic_Tree()
                 Equipment.Load_Eqmt_Tree()
                 For i As Integer = 0 To 3
@@ -112,8 +112,8 @@ Public Class Main
                 Invoke(Sub() lbStatus.Text = "Data Loaded")
             End If
         Catch ex As Exception
-            Me.lbStatus.Text = "ERROR (ParseScreen)"
-            Me.lbStatus.ForeColor = Color.Red
+            Invoke(Sub() Me.lbStatus.Text = "ERROR (ParseScreen)")
+            Invoke(Sub() Me.lbStatus.ForeColor = Color.Red)
             Me.addLog(ex.ToString())
         End Try
     End Sub
@@ -126,7 +126,7 @@ Public Class Main
         Console.WriteLine(txt)
 
         If version Is Nothing Then
-            version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
+            version = Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
             version = version.Substring(0, version.LastIndexOf("."))
         End If
 
@@ -159,7 +159,6 @@ Public Class Main
         Me.Refresh()
         Me.CreateControl()
         Task.Factory.StartNew(Sub() DoWork())
-        Console.WriteLine(Me.Location.ToString())
     End Sub
 
     Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
@@ -306,7 +305,7 @@ Public Class Main
                 End If
             End If
             ' Every 5min update the relic_area
-            OCR.ForceUpdateCenter()
+            ForceUpdateCenter()
         Catch ex As Exception
             Invoke(Sub() lbStatus.Text = "ERROR (Updating DB)")
             Invoke(Sub() lbStatus.ForeColor = Color.Red)
@@ -342,11 +341,11 @@ Public Class Main
 
     Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
         Console.WriteLine("tAutomate Tick")
-        If (Glob.db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso OCR.isWFActive()) Then
-            If (OCR.IsRelicWindow()) Then
+        If (db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso isWFActive()) Then
+            If (IsRelicWindow()) Then
                 If (Not rwrdPanels(0).Visible) Then
                     Me.tAutomate.Interval = 3000
-                    MyBase.Invoke(Sub() Me.DoWork())
+                    Task.Factory.StartNew(Sub() Me.DoWork())
                 End If
             ElseIf (rwrdPanels(0).Visible) Then
                 For i As Integer = 0 To 3
@@ -403,18 +402,18 @@ Module Glob
     Public WithEvents globHook As New GlobalHook()
 
     Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
-        If key = Glob.HKey1 Then
-            Task.Factory.StartNew(Sub() Glob.DoOtherWork())
+        If key = HKey1 Then
+            Task.Factory.StartNew(Sub() DoOtherWork())
         End If
     End Sub
 
     Private DoOtherWork_timer As Long
     Private Sub DoOtherWork()
         DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
-        Main.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
-        OCR.ParseScreen()
+        Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
+        ParseScreen()
         DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
-        Main.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
+        Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
     End Sub
 
     Public Function getCookie()
@@ -729,21 +728,21 @@ Module Glob
                     temp = d(currX, currY) + 1
                     If (temp < d(currX + 1, currY) OrElse d(currX + 1, currY) = 0) Then
                         d(currX + 1, currY) = temp
-                        Glob.AddElement(d, activeX, activeY, currX + 1, currY)
+                        AddElement(d, activeX, activeY, currX + 1, currY)
                     End If
                 End If
                 If (Not maxY) Then
                     temp = d(currX, currY) + 1
                     If (temp < d(currX, currY + 1) OrElse d(currX, currY + 1) = 0) Then
                         d(currX, currY + 1) = temp
-                        Glob.AddElement(d, activeX, activeY, currX, currY + 1)
+                        AddElement(d, activeX, activeY, currX, currY + 1)
                     End If
                 End If
                 If Not maxX And Not maxY Then
-                    temp = d(currX, currY) + Glob.GetDifference(s(currX), t(currY))
+                    temp = d(currX, currY) + GetDifference(s(currX), t(currY))
                     If (temp < d(currX + 1, currY + 1) OrElse d(currX + 1, currY + 1) = 0) Then
                         d(currX + 1, currY + 1) = temp
-                        Glob.AddElement(d, activeX, activeY, currX + 1, currY + 1)
+                        AddElement(d, activeX, activeY, currX + 1, currY + 1)
                     End If
                 End If
             Loop While Not (maxX And maxY)
@@ -775,8 +774,8 @@ Module Glob
         End If
 
         For i As Integer = 0 To ReplacementList.GetLength(0) - 1
-            If (c1 = Glob.ReplacementList(i, 0) Or c2 = Glob.ReplacementList(i, 0)) AndAlso
-               (c1 = Glob.ReplacementList(i, 1) Or c2 = Glob.ReplacementList(i, 1)) Then
+            If (c1 = ReplacementList(i, 0) Or c2 = ReplacementList(i, 0)) AndAlso
+               (c1 = ReplacementList(i, 1) Or c2 = ReplacementList(i, 1)) Then
                 Return 0
             End If
         Next
