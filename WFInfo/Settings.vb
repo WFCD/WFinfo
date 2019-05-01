@@ -75,7 +75,11 @@ Public Class Settings
         'Visual stuff and loading settings
         '_________________________________________________________________________
         UpdateColors(Me)
-        Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
+        If My.Settings.SettingsWinLoc.X = 0 And My.Settings.SettingsWinLoc.Y = 0 Then
+            Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
+        Else
+            Location = My.Settings.SettingsWinLoc
+        End If
         If DisplayWindow Then
             TrackBar1.Value = 2
         End If
@@ -148,6 +152,7 @@ Public Class Settings
         '_________________________________________________________________________
         'Stores the settings when closing
         '_________________________________________________________________________
+        My.Settings.SettingsWinLoc = Location
         saveSettings()
     End Sub
 
@@ -195,6 +200,7 @@ Public Class Settings
 
     Private Sub lbTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseUp
         drag = False
+        My.Settings.SettingsWinLoc = Location
     End Sub
 
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
