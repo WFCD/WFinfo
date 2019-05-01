@@ -112,6 +112,8 @@
         Me.Show()
         Me.TopMost = True
 
+        RewardWindow_Reset()
+
         Me.Size = New Size(foundText.Count * 127 + 1, 105)
         If Not visible Then
             Me.Location = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
@@ -133,6 +135,7 @@
 
                 If foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i)) Then
                     size = g.MeasureString(foundText(i), rwrdNames(i).Font, 120)
+                    Console.WriteLine(foundText(i) & "resizing")
                     rwrdVault(i).Location = New Size(3, 32 + size.Height)
                     rwrdVault(i).Visible = True
                     rwrdVault(i).Text = "Vaulted"

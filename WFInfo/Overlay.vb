@@ -38,6 +38,7 @@ Public Class Overlay
     End Sub
 
     Public Sub LoadText(plat As String, ducat As String, Optional vaulted As Boolean = False)
+
         If vaulted Then
             PictureBox1.Image = vault_img
         Else
