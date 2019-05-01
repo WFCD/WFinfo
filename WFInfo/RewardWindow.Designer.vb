@@ -19,11 +19,11 @@ Partial Class RewardWindow
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.pTitle = New System.Windows.Forms.Panel()
         Me.topToggle = New System.Windows.Forms.CheckBox()
-        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
+        Me.pbIcon = New System.Windows.Forms.PictureBox()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.MainPanel = New System.Windows.Forms.Panel()
         Me.pTitle.SuspendLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'lbTitle
@@ -46,7 +46,7 @@ Partial Class RewardWindow
         Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.pTitle.Controls.Add(Me.lbTitle)
         Me.pTitle.Controls.Add(Me.topToggle)
-        Me.pTitle.Controls.Add(Me.PictureBox3)
+        Me.pTitle.Controls.Add(Me.pbIcon)
         Me.pTitle.Controls.Add(Me.btnClose)
         Me.pTitle.Location = New System.Drawing.Point(0, 0)
         Me.pTitle.Name = "pTitle"
@@ -69,16 +69,16 @@ Partial Class RewardWindow
         Me.topToggle.UseVisualStyleBackColor = False
         Me.topToggle.Visible = False
         '
-        'PictureBox3
+        'pbIcon
         '
-        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
-        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
-        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
-        Me.PictureBox3.Name = "PictureBox3"
-        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
-        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox3.TabIndex = 22
-        Me.PictureBox3.TabStop = False
+        Me.pbIcon.BackColor = System.Drawing.Color.Transparent
+        Me.pbIcon.Image = Global.WFInfo.My.Resources.Resources.WFLogo
+        Me.pbIcon.Location = New System.Drawing.Point(0, -1)
+        Me.pbIcon.Name = "pbIcon"
+        Me.pbIcon.Size = New System.Drawing.Size(25, 25)
+        Me.pbIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.pbIcon.TabIndex = 22
+        Me.pbIcon.TabStop = False
         '
         'btnClose
         '
@@ -124,14 +124,14 @@ Partial Class RewardWindow
         Me.Name = "RewardWindow"
         Me.Text = "Reward Window"
         Me.pTitle.ResumeLayout(False)
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub
     Friend WithEvents lbTitle As Label
     Friend WithEvents pTitle As Panel
     Friend WithEvents btnClose As Button
-    Friend WithEvents PictureBox3 As PictureBox
+    Friend WithEvents pbIcon As PictureBox
     Friend WithEvents MainPanel As Panel
     Friend WithEvents topToggle As CheckBox
 End Class

@@ -41,12 +41,12 @@ Partial Class Relics
         Me.HideOpt = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.pTitle = New System.Windows.Forms.Panel()
-        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
+        Me.pbIcon = New System.Windows.Forms.PictureBox()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
         Me.Panel2.SuspendLayout()
         Me.pTitle.SuspendLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'Panel1
@@ -190,7 +190,7 @@ Partial Class Relics
         '
         Me.pTitle.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
         Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.pTitle.Controls.Add(Me.PictureBox3)
+        Me.pTitle.Controls.Add(Me.pbIcon)
         Me.pTitle.Controls.Add(Me.lbTitle)
         Me.pTitle.Controls.Add(Me.btnClose)
         Me.pTitle.Location = New System.Drawing.Point(1, 1)
@@ -198,16 +198,16 @@ Partial Class Relics
         Me.pTitle.Size = New System.Drawing.Size(456, 27)
         Me.pTitle.TabIndex = 25
         '
-        'PictureBox3
+        'pbIcon
         '
-        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
-        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
-        Me.PictureBox3.Location = New System.Drawing.Point(0, 0)
-        Me.PictureBox3.Name = "PictureBox3"
-        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
-        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox3.TabIndex = 22
-        Me.PictureBox3.TabStop = False
+        Me.pbIcon.BackColor = System.Drawing.Color.Transparent
+        Me.pbIcon.Image = Global.WFInfo.My.Resources.Resources.WFLogo
+        Me.pbIcon.Location = New System.Drawing.Point(0, 0)
+        Me.pbIcon.Name = "pbIcon"
+        Me.pbIcon.Size = New System.Drawing.Size(25, 25)
+        Me.pbIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.pbIcon.TabIndex = 22
+        Me.pbIcon.TabStop = False
         '
         'lbTitle
         '
@@ -238,12 +238,12 @@ Partial Class Relics
         Me.Panel2.ResumeLayout(False)
         Me.pTitle.ResumeLayout(False)
         Me.pTitle.PerformLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub
     Friend WithEvents Panel1 As Panel
-    Friend WithEvents PictureBox3 As PictureBox
+    Friend WithEvents pbIcon As PictureBox
     Friend WithEvents btnClose As Button
     Friend WithEvents pTitle As Panel
     Friend WithEvents lbTitle As Label

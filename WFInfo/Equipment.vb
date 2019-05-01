@@ -17,38 +17,20 @@ Public Class Equipment
     Public Shared Function SetScrollPos(hWnd As IntPtr, nBar As Integer, nPos As Integer, bRedraw As Boolean) As Integer
     End Function
 
-    Private Sub pTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown
+    Private Sub startDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown, lbTitle.MouseDown, pbIcon.MouseDown
         drag = True
         mouseX = Cursor.Position.X - Me.Left
         mouseY = Cursor.Position.Y - Me.Top
     End Sub
 
-    Private Sub pTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles pTitle.MouseMove
+    Private Sub DRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseMove, lbTitle.MouseMove, pbIcon.MouseMove
         If drag Then
             Me.Top = Cursor.Position.Y - mouseY
             Me.Left = Cursor.Position.X - mouseX
         End If
     End Sub
 
-    Private Sub pTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp
-        drag = False
-        My.Settings.EqmtWinLoc = Me.Location
-    End Sub
-
-    Private Sub lbTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseDown
-        drag = True
-        mouseX = Cursor.Position.X - Me.Left
-        mouseY = Cursor.Position.Y - Me.Top
-    End Sub
-
-    Private Sub lbTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseMove
-        If drag Then
-            Me.Top = Cursor.Position.Y - mouseY
-            Me.Left = Cursor.Position.X - mouseX
-        End If
-    End Sub
-
-    Private Sub lbTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseUp
+    Private Sub stopDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp, lbTitle.MouseUp, pbIcon.MouseUp
         drag = False
         My.Settings.EqmtWinLoc = Me.Location
     End Sub

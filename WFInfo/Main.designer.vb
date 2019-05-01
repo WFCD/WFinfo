@@ -40,7 +40,7 @@ Partial Class Main
         Me.btnClose = New System.Windows.Forms.Button()
         Me.pTitle = New System.Windows.Forms.Panel()
         Me.btnHide = New System.Windows.Forms.Button()
-        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
+        Me.pbIcon = New System.Windows.Forms.PictureBox()
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.trayIcon = New System.Windows.Forms.NotifyIcon(Me.components)
         Me.trayMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
@@ -57,7 +57,7 @@ Partial Class Main
         Me.tAutomate = New System.Windows.Forms.Timer(Me.components)
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.trayMenu.SuspendLayout()
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -226,7 +226,7 @@ Partial Class Main
         Me.pTitle.Controls.Add(Me.btnHide)
         Me.pTitle.Controls.Add(Me.lbVersion)
         Me.pTitle.Controls.Add(Me.btnClose)
-        Me.pTitle.Controls.Add(Me.PictureBox3)
+        Me.pTitle.Controls.Add(Me.pbIcon)
         Me.pTitle.Controls.Add(Me.lbTitle)
         Me.pTitle.Location = New System.Drawing.Point(0, 0)
         Me.pTitle.Name = "pTitle"
@@ -250,16 +250,16 @@ Partial Class Main
         Me.btnHide.TextAlign = System.Drawing.ContentAlignment.BottomCenter
         Me.btnHide.UseVisualStyleBackColor = False
         '
-        'PictureBox3
+        'pbIcon
         '
-        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
-        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
-        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
-        Me.PictureBox3.Name = "PictureBox3"
-        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
-        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox3.TabIndex = 23
-        Me.PictureBox3.TabStop = False
+        Me.pbIcon.BackColor = System.Drawing.Color.Transparent
+        Me.pbIcon.Image = Global.WFInfo.My.Resources.Resources.WFLogo
+        Me.pbIcon.Location = New System.Drawing.Point(0, -1)
+        Me.pbIcon.Name = "pbIcon"
+        Me.pbIcon.Size = New System.Drawing.Size(25, 25)
+        Me.pbIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.pbIcon.TabIndex = 23
+        Me.pbIcon.TabStop = False
         '
         'tUpdate
         '
@@ -396,7 +396,7 @@ Partial Class Main
         Me.Panel1.ResumeLayout(False)
         Me.pTitle.ResumeLayout(False)
         Me.pTitle.PerformLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).EndInit()
         Me.trayMenu.ResumeLayout(False)
         CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).EndInit()
@@ -410,7 +410,7 @@ Partial Class Main
     Friend WithEvents Panel1 As Panel
     Friend WithEvents lbTitle As Label
     Friend WithEvents btnClose As Button
-    Friend WithEvents PictureBox3 As PictureBox
+    Friend WithEvents pbIcon As PictureBox
     Friend WithEvents pTitle As Panel
     Friend WithEvents lbVersion As Label
     Friend WithEvents tUpdate As Timer

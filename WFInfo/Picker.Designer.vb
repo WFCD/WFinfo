@@ -46,7 +46,7 @@ Partial Class Picker
         Me.pbSliderFG = New System.Windows.Forms.PictureBox()
         Me.pbSliderBG = New System.Windows.Forms.PictureBox()
         Me.pTitle = New System.Windows.Forms.Panel()
-        Me.PictureBox3 = New System.Windows.Forms.PictureBox()
+        Me.pbIcon = New System.Windows.Forms.PictureBox()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.Panel2 = New System.Windows.Forms.Panel()
@@ -67,7 +67,7 @@ Partial Class Picker
         CType(Me.pbSliderFG, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbSliderBG, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel2.SuspendLayout()
         Me.Panel3.SuspendLayout()
         Me.Panel4.SuspendLayout()
@@ -259,7 +259,7 @@ Partial Class Picker
         '
         Me.pTitle.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
         Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.pTitle.Controls.Add(Me.PictureBox3)
+        Me.pTitle.Controls.Add(Me.pbIcon)
         Me.pTitle.Controls.Add(Me.lbTitle)
         Me.pTitle.Controls.Add(Me.btnClose)
         Me.pTitle.Location = New System.Drawing.Point(0, 0)
@@ -267,16 +267,16 @@ Partial Class Picker
         Me.pTitle.Size = New System.Drawing.Size(454, 27)
         Me.pTitle.TabIndex = 30
         '
-        'PictureBox3
+        'pbIcon
         '
-        Me.PictureBox3.BackColor = System.Drawing.Color.Transparent
-        Me.PictureBox3.Image = Global.WFInfo.My.Resources.Resources.WFLogo
-        Me.PictureBox3.Location = New System.Drawing.Point(0, -1)
-        Me.PictureBox3.Name = "PictureBox3"
-        Me.PictureBox3.Size = New System.Drawing.Size(25, 25)
-        Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox3.TabIndex = 22
-        Me.PictureBox3.TabStop = False
+        Me.pbIcon.BackColor = System.Drawing.Color.Transparent
+        Me.pbIcon.Image = Global.WFInfo.My.Resources.Resources.WFLogo
+        Me.pbIcon.Location = New System.Drawing.Point(0, -1)
+        Me.pbIcon.Name = "pbIcon"
+        Me.pbIcon.Size = New System.Drawing.Size(25, 25)
+        Me.pbIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.pbIcon.TabIndex = 22
+        Me.pbIcon.TabStop = False
         '
         'lbTitle
         '
@@ -414,7 +414,7 @@ Partial Class Picker
         CType(Me.pbSliderBG, System.ComponentModel.ISupportInitialize).EndInit()
         Me.pTitle.ResumeLayout(False)
         Me.pTitle.PerformLayout()
-        CType(Me.PictureBox3, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel2.ResumeLayout(False)
         Me.Panel2.PerformLayout()
         Me.Panel3.ResumeLayout(False)
@@ -442,7 +442,7 @@ Partial Class Picker
     Friend WithEvents tGetShade As Timer
     Friend WithEvents pbSliderFG As PictureBox
     Friend WithEvents pTitle As Panel
-    Friend WithEvents PictureBox3 As PictureBox
+    Friend WithEvents pbIcon As PictureBox
     Friend WithEvents lbTitle As Label
     Friend WithEvents btnClose As Button
     Friend WithEvents Panel2 As Panel

@@ -14,38 +14,20 @@ Public Class Relics
     Private hidden_file_path As String = Path.Combine(appData, "WFInfo\hidden.json")
     Public eras As New List(Of String) From {"Lith", "Meso", "Neo", "Axi"}
 
-    Private Sub pTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown
+    Private Sub startDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown, lbTitle.MouseDown, pbIcon.MouseDown
         drag = True
         mouseX = Cursor.Position.X - Me.Left
         mouseY = Cursor.Position.Y - Me.Top
     End Sub
 
-    Private Sub pTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles pTitle.MouseMove
+    Private Sub DRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseMove, lbTitle.MouseMove, pbIcon.MouseMove
         If drag Then
             Me.Top = Cursor.Position.Y - mouseY
             Me.Left = Cursor.Position.X - mouseX
         End If
     End Sub
 
-    Private Sub pTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp
-        drag = False
-        My.Settings.RelicWinLoc = Me.Location
-    End Sub
-
-    Private Sub lbTitle_MouseDown(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseDown
-        drag = True
-        mouseX = Cursor.Position.X - Me.Left
-        mouseY = Cursor.Position.Y - Me.Top
-    End Sub
-
-    Private Sub lbTitle_MouseMove(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseMove
-        If drag Then
-            Me.Top = Cursor.Position.Y - mouseY
-            Me.Left = Cursor.Position.X - mouseX
-        End If
-    End Sub
-
-    Private Sub lbTitle_MouseUp(sender As Object, e As MouseEventArgs) Handles lbTitle.MouseUp
+    Private Sub stopDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp, lbTitle.MouseUp, pbIcon.MouseUp
         drag = False
         My.Settings.RelicWinLoc = Me.Location
     End Sub
