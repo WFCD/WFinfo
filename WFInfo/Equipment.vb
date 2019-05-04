@@ -183,10 +183,6 @@ Public Class Equipment
         If Me.Location.X = 0 And Me.Location.Y = 0 Then
             Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         End If
-        If Not IsWindowCompletelyOnScreen(Me) Then
-            Dim scr As Screen = GetMainScreen()
-            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
-        End If
         If My.Settings.EqmtOne Then
             EqmtTree2.Visible = False
             EqmtTree1.Select()
@@ -197,6 +193,13 @@ Public Class Equipment
             Label2.Text = "All Equipment"
         End If
         SortSelection.SelectedIndex = My.Settings.EqmtSort
+    End Sub
+
+    Private Sub Eqmt_VisibleChanged(sender As Object, e As EventArgs) Handles Me.VisibleChanged
+        If Me.Visible And Not IsWindowMoveable(Me) Then
+            Dim scr As Screen = GetMainScreen()
+            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
+        End If
     End Sub
 
     Private Sub EqmtTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles EqmtTree1.DrawNode, EqmtTree2.DrawNode

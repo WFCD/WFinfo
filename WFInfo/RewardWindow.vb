@@ -73,6 +73,13 @@
 
     End Sub
 
+    Private Sub RewardWindow_VisibleChanged(sender As Object, e As EventArgs) Handles Me.VisibleChanged
+        If Me.Visible And Not IsWindowMoveable(Me) Then
+            Dim scr As Screen = GetMainScreen()
+            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
+        End If
+    End Sub
+
     Private Sub startDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown, lbTitle.MouseDown, pbIcon.MouseDown
         drag = True
         mouseX = Cursor.Position.X - Me.Left
@@ -117,10 +124,6 @@
         Me.Size = New Size(foundText.Count * 127 + 1, 105)
         If Not visible Then
             Me.Location = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
-        End If
-        If Not IsWindowCompletelyOnScreen(Me) Then
-            Dim scr As Screen = GetMainScreen()
-            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
         End If
 
         Using g As Graphics = CreateGraphics()

@@ -24,13 +24,15 @@ Public Class Picker
         pbPreview.BackColor = LastSelected.BackColor
 
         Dim screenWidth As Integer = Screen.PrimaryScreen.Bounds.Width
-        Me.Location = Settings.Location()
-        If Not IsWindowCompletelyOnScreen(Me) Then
+        Me.Location = New Point(Settings.Location.X, Settings.Location.Y)
+    End Sub
+
+    Private Sub Picker_VisibleChanged(sender As Object, e As EventArgs) Handles Me.VisibleChanged
+        If Me.Visible And Not IsWindowMoveable(Me) Then
             Dim scr As Screen = GetMainScreen()
             Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
         End If
     End Sub
-
 
     Private Sub pbColorWheel_MouseDown(sender As Object, e As MouseEventArgs) Handles pbColorWheel.MouseDown
         tGetColor.Start()

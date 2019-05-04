@@ -80,10 +80,6 @@ Public Class Settings
         Else
             Location = My.Settings.SettingsWinLoc
         End If
-        If Not IsWindowCompletelyOnScreen(Me) Then
-            Dim scr As Screen = GetMainScreen()
-            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
-        End If
         If DisplayWindow Then
             TrackBar1.Value = 2
         End If
@@ -93,6 +89,13 @@ Public Class Settings
         ScaleBar.Value = My.Settings.Scaling
         TextBox1.Text = My.Settings.Scaling & "%"
         ScaleOption.SelectedIndex = My.Settings.ScaleType
+    End Sub
+
+    Private Sub Settings_VisibleChanged(sender As Object, e As EventArgs) Handles Me.VisibleChanged
+        If Me.Visible And Not IsWindowMoveable(Me) Then
+            Dim scr As Screen = GetMainScreen()
+            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
+        End If
     End Sub
 
     Private Sub Settings_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress, btnHkey1.KeyPress

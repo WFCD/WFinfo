@@ -96,10 +96,6 @@ Public Class Relics
         If Me.Location.X = 0 And Me.Location.Y = 0 Then
             Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         End If
-        If Not IsWindowCompletelyOnScreen(Me) Then
-            Dim scr As Screen = GetMainScreen()
-            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
-        End If
         If My.Settings.TreeOne Then
             RelicTree2.Visible = False
             RelicTree1.Select()
@@ -110,6 +106,13 @@ Public Class Relics
             Label2.Text = "All Relics"
         End If
         SortSelection.SelectedIndex = My.Settings.SortType
+    End Sub
+
+    Private Sub Relics_VisibleChanged(sender As Object, e As EventArgs) Handles Me.VisibleChanged
+        If Me.Visible And Not IsWindowMoveable(Me) Then
+            Dim scr As Screen = GetMainScreen()
+            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
+        End If
     End Sub
 
     Private Sub RelicTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles RelicTree1.DrawNode, RelicTree2.DrawNode

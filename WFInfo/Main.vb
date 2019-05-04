@@ -158,11 +158,14 @@ Public Class Main
         '_________________________________________________________________________
         Me.Refresh()
         Me.CreateControl()
-        If Not IsWindowCompletelyOnScreen(Me) Then
+        Task.Factory.StartNew(Sub() DoWork())
+    End Sub
+
+    Private Sub Main_VisibleChanged(sender As Object, e As EventArgs) Handles Me.VisibleChanged
+        If Me.Visible And Not IsWindowMoveable(Me) Then
             Dim scr As Screen = GetMainScreen()
             Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
         End If
-        Task.Factory.StartNew(Sub() DoWork())
     End Sub
 
     Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
@@ -490,8 +493,8 @@ Module Glob
         Return False
     End Function
 
-    Public Function IsWindowCompletelyOnScreen(form As Form) As Boolean
-        Dim winRect As Rectangle = New Rectangle(form.Location.X, form.Location.Y, form.Width, form.Height)
+    Public Function IsWindowMoveable(form As Form) As Boolean
+        Dim winRect As Point = New Point(form.Location.X + (form.Size.Width / 2), form.Location.Y)
         Return Screen.AllScreens.Any(Function(s) s.WorkingArea.Contains(winRect))
     End Function
 
