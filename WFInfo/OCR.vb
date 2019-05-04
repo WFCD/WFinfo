@@ -14,6 +14,14 @@ Module OCR
     Private uiScaling As Double = -1.0
     Private center As Point = Nothing
 
+    Private pixRwrdWid As Integer = 1732 '1516
+    Private pixRwrdHei As Integer = 349 '305
+    Private pixRwrdPos As Integer = 363 '318
+    Private pixSlctWid As Integer = 198 '172
+    Private pixSlctHei As Integer = 25 '22
+    Private pixSlctPos As Integer = 50 '42
+
+
     Dim rarity As New List(Of Color) From {Color.FromArgb(171, 159, 117), Color.FromArgb(175, 175, 175), Color.FromArgb(134, 98, 50)}
 
     <DllImport("user32.dll")>
@@ -87,8 +95,12 @@ Module OCR
 
     Private Function GetUIScaling() As Double
         uiScaling = My.Settings.Scaling / 100
-        '     All values are based on my PC 1680x1050
-        uiScaling *= win_area.Width / 1680
+        '     All values are based on 1920x1080
+        If win_area.Width / win_area.Height > 16 / 9 Then
+            uiScaling *= win_area.Height / 1080
+        Else
+            uiScaling *= win_area.Width / 1920
+        End If
         uiScaling *= dpiScaling
         Return uiScaling
     End Function
@@ -159,16 +171,11 @@ Module OCR
         '     Also UI Scaling is 3 computations (5 if you include writing) (who knows how many with reads)
         GetUIScaling()
 
-        ' Vertically Centered (1680x1050 @ 100%)
-        '    Width of 172
-        Dim wid As Integer = (uiScaling * 172)
+        Dim wid As Integer = (uiScaling * pixSlctWid)
         Dim left As Integer = center.X - Math.Ceiling(wid / 2)
 
-        ' Horizontally Offset (1680x1050 @ 100%)
-        '    Displaced 42 below center
-        '    Height of 22
-        Dim hei As Integer = (uiScaling * 22)
-        Dim top As Integer = center.Y + (uiScaling * 42)
+        Dim hei As Integer = (uiScaling * pixSlctHei)
+        Dim top As Integer = center.Y + (uiScaling * pixSlctPos)
 
         Using bmp As New Bitmap(wid, hei)
             Using graph As Graphics = Graphics.FromImage(bmp)
@@ -202,9 +209,9 @@ Module OCR
                     End If
                 End If
                 gap += 1
-                ' "white" lines must be <12px
-                ' gaps must be <12px
-                If gap > 14 * uiScaling Then
+                ' "white" lines must be <14px
+                ' gaps must be <14px
+                If gap > 16 * uiScaling Then
                     Return False
                 End If
             Next
@@ -239,9 +246,9 @@ Module OCR
         ' Relic area is "centered" vertically and offset horizontally
         '   bot is up 13px relative to the center
         '   top is up 318px relative to the center
-        Dim wid As Integer = 1516 * uiScaling + 2
-        Dim hei As Integer = 305 * uiScaling + 2
-        Dim top As Integer = 318 * uiScaling + 2
+        Dim wid As Integer = pixRwrdWid * uiScaling + 2
+        Dim hei As Integer = pixRwrdHei * uiScaling + 2
+        Dim top As Integer = pixRwrdPos * uiScaling + 2
 
         Dim ss_area As New Rectangle(center.X - wid / 2, center.Y - top, wid, hei)
         If Debug Then
