@@ -31,12 +31,12 @@ Partial Class Relics
         Dim TreeNode4 As System.Windows.Forms.TreeNode = New System.Windows.Forms.TreeNode("Axi")
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Relics))
         Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.RelicTree2 = New System.Windows.Forms.TreeView()
+        Me.RelicTree2 = New DoubleBufferedTreeView()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.SortSelection = New System.Windows.Forms.ComboBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
-        Me.RelicTree1 = New System.Windows.Forms.TreeView()
+        Me.RelicTree1 = New DoubleBufferedTreeView()
         Me.HideMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.HideOpt = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnClose = New System.Windows.Forms.Button()
@@ -259,13 +259,13 @@ Partial Class Relics
     Friend WithEvents btnClose As Button
     Friend WithEvents pTitle As Panel
     Friend WithEvents lbTitle As Label
-    Friend WithEvents RelicTree1 As TreeView
+    Friend WithEvents RelicTree1 As DoubleBufferedTreeView
     Friend WithEvents Panel2 As Panel
     Friend WithEvents Label2 As Label
     Friend WithEvents HideMenu As ContextMenuStrip
     Friend WithEvents HideOpt As ToolStripMenuItem
     Friend WithEvents Label1 As Label
-    Friend WithEvents RelicTree2 As TreeView
+    Friend WithEvents RelicTree2 As DoubleBufferedTreeView
     Friend WithEvents SortSelection As ComboBox
     Friend WithEvents BottomResize As Panel
 End Class

@@ -4,7 +4,7 @@ Imports Newtonsoft.Json.Linq
 
 Public Class Relics
     Private drag As Boolean = False
-    Private resize As Boolean = False
+    Private resizing As Boolean = False
     Private mouseX As Integer
     Private mouseY As Integer
     Private RelicToHide As TreeNode = Nothing
@@ -34,15 +34,15 @@ Public Class Relics
     End Sub
 
     Private Sub startResize(sender As Object, e As EventArgs) Handles BottomResize.MouseDown
-        resize = True
+        resizing = True
         mouseY = Cursor.Position.Y - Size.Height
-        RelicTree1.BeginUpdate()
-        RelicTree2.BeginUpdate()
+        'RelicTree1.BeginUpdate()
+        'RelicTree2.BeginUpdate()
     End Sub
 
     Private Sub contResize(sender As Object, e As EventArgs) Handles BottomResize.MouseMove
-        If resize Then
-            Dim change As Integer = (Cursor.Position.Y - mouseY)
+        If resizing Then
+            Dim change As Integer = Cursor.Position.Y - mouseY
             If change < 100 Then
                 change = 100
                 mouseY = Cursor.Position.Y - 100
@@ -57,9 +57,9 @@ Public Class Relics
     End Sub
 
     Private Sub stopResize(sender As Object, e As EventArgs) Handles BottomResize.MouseUp
-        RelicTree1.EndUpdate()
-        RelicTree2.EndUpdate()
-        resize = False
+        'RelicTree1.EndUpdate()
+        'RelicTree2.EndUpdate()
+        resizing = False
     End Sub
 
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click

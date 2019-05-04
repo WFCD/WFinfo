@@ -145,6 +145,9 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BufferedTreeView.vb">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Data.vb" />
     <Compile Include="GlobalHook.vb" />
     <Compile Include="LogWatcher.vb">
