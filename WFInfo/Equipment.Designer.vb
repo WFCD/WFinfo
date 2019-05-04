@@ -33,12 +33,9 @@ Partial Class Equipment
         Dim TreeNode6 As System.Windows.Forms.TreeNode = New System.Windows.Forms.TreeNode("Companion")
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Equipment))
         Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.Line1 = New System.Windows.Forms.Label()
-        Me.Line3 = New System.Windows.Forms.Label()
-        Me.Line2 = New System.Windows.Forms.Label()
         Me.Panel3 = New System.Windows.Forms.Panel()
-        Me.EqmtTree1 = New System.Windows.Forms.TreeView()
-        Me.EqmtTree2 = New System.Windows.Forms.TreeView()
+        Me.EqmtTree1 = New WFInfo.DoubleBufferedTreeView()
+        Me.EqmtTree2 = New WFInfo.DoubleBufferedTreeView()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Label5 = New System.Windows.Forms.Label()
         Me.Label4 = New System.Windows.Forms.Label()
@@ -53,6 +50,10 @@ Partial Class Equipment
         Me.pbIcon = New System.Windows.Forms.PictureBox()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.AddMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.BottomResize = New System.Windows.Forms.Panel()
+        Me.Line1 = New System.Windows.Forms.Label()
+        Me.Line2 = New System.Windows.Forms.Label()
+        Me.Line3 = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
         Me.Panel3.SuspendLayout()
         Me.Panel2.SuspendLayout()
@@ -64,39 +65,12 @@ Partial Class Equipment
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel1.Controls.Add(Me.Line1)
-        Me.Panel1.Controls.Add(Me.Line3)
-        Me.Panel1.Controls.Add(Me.Line2)
         Me.Panel1.Controls.Add(Me.Panel3)
         Me.Panel1.Controls.Add(Me.Panel2)
-        Me.Panel1.Location = New System.Drawing.Point(1, 27)
+        Me.Panel1.Location = New System.Drawing.Point(0, 26)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(456, 371)
         Me.Panel1.TabIndex = 24
-        '
-        'Line1
-        '
-        Me.Line1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Line1.Location = New System.Drawing.Point(207, 30)
-        Me.Line1.Name = "Line1"
-        Me.Line1.Size = New System.Drawing.Size(1, 345)
-        Me.Line1.TabIndex = 30
-        '
-        'Line3
-        '
-        Me.Line3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Line3.Location = New System.Drawing.Point(367, 30)
-        Me.Line3.Name = "Line3"
-        Me.Line3.Size = New System.Drawing.Size(1, 345)
-        Me.Line3.TabIndex = 29
-        '
-        'Line2
-        '
-        Me.Line2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Line2.Location = New System.Drawing.Point(287, 30)
-        Me.Line2.Name = "Line2"
-        Me.Line2.Size = New System.Drawing.Size(1, 345)
-        Me.Line2.TabIndex = 28
         '
         'Panel3
         '
@@ -283,7 +257,7 @@ Partial Class Equipment
         Me.pTitle.Controls.Add(Me.pbIcon)
         Me.pTitle.Controls.Add(Me.lbTitle)
         Me.pTitle.Controls.Add(Me.btnClose)
-        Me.pTitle.Location = New System.Drawing.Point(1, 1)
+        Me.pTitle.Location = New System.Drawing.Point(0, 0)
         Me.pTitle.Name = "pTitle"
         Me.pTitle.Size = New System.Drawing.Size(456, 27)
         Me.pTitle.TabIndex = 25
@@ -321,12 +295,50 @@ Partial Class Equipment
         Me.AddMenu.ShowItemToolTips = False
         Me.AddMenu.Size = New System.Drawing.Size(36, 4)
         '
+        'BottomResize
+        '
+        Me.BottomResize.BackColor = System.Drawing.Color.Transparent
+        Me.BottomResize.Cursor = System.Windows.Forms.Cursors.SizeNS
+        Me.BottomResize.ForeColor = System.Drawing.Color.Transparent
+        Me.BottomResize.Location = New System.Drawing.Point(6, 391)
+        Me.BottomResize.Name = "BottomResize"
+        Me.BottomResize.Size = New System.Drawing.Size(444, 5)
+        Me.BottomResize.TabIndex = 28
+        '
+        'Line1
+        '
+        Me.Line1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Line1.Location = New System.Drawing.Point(208, 58)
+        Me.Line1.Name = "Line1"
+        Me.Line1.Size = New System.Drawing.Size(1, 345)
+        Me.Line1.TabIndex = 31
+        '
+        'Line2
+        '
+        Me.Line2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Line2.Location = New System.Drawing.Point(287, 57)
+        Me.Line2.Name = "Line2"
+        Me.Line2.Size = New System.Drawing.Size(1, 345)
+        Me.Line2.TabIndex = 32
+        '
+        'Line3
+        '
+        Me.Line3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Line3.Location = New System.Drawing.Point(367, 57)
+        Me.Line3.Name = "Line3"
+        Me.Line3.Size = New System.Drawing.Size(1, 345)
+        Me.Line3.TabIndex = 33
+        '
         'Equipment
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(458, 399)
+        Me.ClientSize = New System.Drawing.Size(456, 397)
+        Me.Controls.Add(Me.Line3)
+        Me.Controls.Add(Me.Line2)
+        Me.Controls.Add(Me.Line1)
+        Me.Controls.Add(Me.BottomResize)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.DoubleBuffered = True
@@ -360,9 +372,10 @@ Partial Class Equipment
     Friend WithEvents Label5 As Label
     Friend WithEvents Label4 As Label
     Friend WithEvents Label3 As Label
+    Friend WithEvents EqmtTree2 As DoubleBufferedTreeView
+    Friend WithEvents EqmtTree1 As DoubleBufferedTreeView
+    Friend WithEvents BottomResize As Panel
+    Friend WithEvents Line1 As Label
     Friend WithEvents Line2 As Label
     Friend WithEvents Line3 As Label
-    Friend WithEvents Line1 As Label
-    Friend WithEvents EqmtTree2 As TreeView
-    Friend WithEvents EqmtTree1 As TreeView
 End Class

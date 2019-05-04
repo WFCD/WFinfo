@@ -36,29 +36,24 @@ Public Class Relics
     Private Sub startResize(sender As Object, e As EventArgs) Handles BottomResize.MouseDown
         resizing = True
         mouseY = Cursor.Position.Y - Size.Height
-        'RelicTree1.BeginUpdate()
-        'RelicTree2.BeginUpdate()
     End Sub
 
     Private Sub contResize(sender As Object, e As EventArgs) Handles BottomResize.MouseMove
         If resizing Then
-            Dim change As Integer = Cursor.Position.Y - mouseY
-            If change < 100 Then
-                change = 100
-                mouseY = Cursor.Position.Y - 100
+            Dim newSize As Integer = Cursor.Position.Y - mouseY
+            If newSize < 100 Then
+                newSize = 100
             End If
-            Size = New Size(Size.Width, change)
-            BottomResize.Location = New Point(BottomResize.Location.X, Size.Height - 6)
-            Panel1.Size = New Size(Panel1.Size.Width, Size.Height - 26)
-            RelicTree1.Size = New Size(RelicTree1.Size.Width, Size.Height - 57)
-            RelicTree2.Size = New Size(RelicTree2.Size.Width, Size.Height - 57)
+            Size = New Size(Size.Width, newSize)
+            BottomResize.Location = New Point(BottomResize.Location.X, newSize - 6)
+            Panel1.Size = New Size(Panel1.Size.Width, newSize - 26)
+            RelicTree1.Size = New Size(RelicTree1.Size.Width, newSize - 57)
+            RelicTree2.Size = New Size(RelicTree2.Size.Width, newSize - 57)
         End If
 
     End Sub
 
     Private Sub stopResize(sender As Object, e As EventArgs) Handles BottomResize.MouseUp
-        'RelicTree1.EndUpdate()
-        'RelicTree2.EndUpdate()
         resizing = False
     End Sub
 

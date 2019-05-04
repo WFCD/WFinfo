@@ -2,6 +2,7 @@
 
 Public Class Equipment
     Private drag As Boolean = False
+    Private resizing As Boolean = False
     Private mouseX As Integer
     Private mouseY As Integer
     Private AddItem As TreeNode = Nothing
@@ -33,6 +34,34 @@ Public Class Equipment
     Private Sub stopDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp, lbTitle.MouseUp, pbIcon.MouseUp
         drag = False
         My.Settings.EqmtWinLoc = Me.Location
+    End Sub
+
+    Private Sub startResize(sender As Object, e As EventArgs) Handles BottomResize.MouseDown
+        resizing = True
+        mouseY = Cursor.Position.Y - Size.Height
+    End Sub
+
+    Private Sub contResize(sender As Object, e As EventArgs) Handles BottomResize.MouseMove
+        If resizing Then
+            Dim newSize As Integer = Cursor.Position.Y - mouseY
+            If newSize < 100 Then
+                newSize = 100
+            End If
+            Size = New Size(Size.Width, newSize)
+            BottomResize.Location = New Point(BottomResize.Location.X, newSize - 6)
+            Line1.Size = New Size(1, newSize)
+            Line2.Size = Line1.Size
+            Line3.Size = Line1.Size
+            Panel1.Size = New Size(Panel1.Size.Width, newSize - 26)
+            Panel3.Size = New Size(Panel3.Size.Width, newSize - 57)
+            EqmtTree1.Size = New Size(EqmtTree1.Size.Width, newSize - 87)
+            EqmtTree2.Size = New Size(EqmtTree2.Size.Width, newSize - 87)
+        End If
+
+    End Sub
+
+    Private Sub stopResize(sender As Object, e As EventArgs) Handles BottomResize.MouseUp
+        resizing = False
     End Sub
 
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
