@@ -179,12 +179,13 @@ Public Class Equipment
 
     Private Sub Eqmt_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         UpdateColors(Me)
-    End Sub
-
-    Private Sub Eqmt_Opening(sender As Object, e As EventArgs) Handles Me.Shown
         Me.Location = My.Settings.EqmtWinLoc
         If Me.Location.X = 0 And Me.Location.Y = 0 Then
             Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
+        End If
+        If Not IsWindowCompletelyOnScreen(Me) Then
+            Dim scr As Screen = GetMainScreen()
+            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
         End If
         If My.Settings.EqmtOne Then
             EqmtTree2.Visible = False

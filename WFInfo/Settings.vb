@@ -80,6 +80,10 @@ Public Class Settings
         Else
             Location = My.Settings.SettingsWinLoc
         End If
+        If Not IsWindowCompletelyOnScreen(Me) Then
+            Dim scr As Screen = GetMainScreen()
+            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
+        End If
         If DisplayWindow Then
             TrackBar1.Value = 2
         End If

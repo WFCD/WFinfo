@@ -25,6 +25,10 @@ Public Class Picker
 
         Dim screenWidth As Integer = Screen.PrimaryScreen.Bounds.Width
         Me.Location = Settings.Location()
+        If Not IsWindowCompletelyOnScreen(Me) Then
+            Dim scr As Screen = GetMainScreen()
+            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
+        End If
     End Sub
 
 

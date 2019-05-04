@@ -118,7 +118,10 @@
         If Not visible Then
             Me.Location = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
         End If
-
+        If Not IsWindowCompletelyOnScreen(Me) Then
+            Dim scr As Screen = GetMainScreen()
+            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
+        End If
 
         Using g As Graphics = CreateGraphics()
             For i = 0 To foundText.Count - 1

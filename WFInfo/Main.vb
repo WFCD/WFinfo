@@ -158,6 +158,10 @@ Public Class Main
         '_________________________________________________________________________
         Me.Refresh()
         Me.CreateControl()
+        If Not IsWindowCompletelyOnScreen(Me) Then
+            Dim scr As Screen = GetMainScreen()
+            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
+        End If
         Task.Factory.StartNew(Sub() DoWork())
     End Sub
 
@@ -484,6 +488,22 @@ Module Glob
 
         'Return found
         Return False
+    End Function
+
+    Public Function IsWindowCompletelyOnScreen(form As Form) As Boolean
+        Dim winRect As Rectangle = New Rectangle(form.Location.X, form.Location.Y, form.Width, form.Height)
+        Return Screen.AllScreens.Any(Function(s) s.WorkingArea.Contains(winRect))
+    End Function
+
+    Public Function GetMainScreen() As Screen
+        Console.WriteLine(Main.Instance.Location)
+        For Each scr As Screen In Screen.AllScreens
+            Console.WriteLine(scr.WorkingArea)
+            If scr.WorkingArea.Contains(Main.Instance.Location) Then
+                Return scr
+            End If
+        Next
+        Return Screen.PrimaryScreen
     End Function
 
     Public Sub UpdateColors(f As Form)
