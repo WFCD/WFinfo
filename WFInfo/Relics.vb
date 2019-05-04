@@ -4,6 +4,7 @@ Imports Newtonsoft.Json.Linq
 
 Public Class Relics
     Private drag As Boolean = False
+    Private resize As Boolean = False
     Private mouseX As Integer
     Private mouseY As Integer
     Private RelicToHide As TreeNode = Nothing
@@ -16,24 +17,53 @@ Public Class Relics
 
     Private Sub startDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown, lbTitle.MouseDown, pbIcon.MouseDown
         drag = True
-        mouseX = Cursor.Position.X - Me.Left
-        mouseY = Cursor.Position.Y - Me.Top
+        mouseX = Cursor.Position.X - Left
+        mouseY = Cursor.Position.Y - Top
     End Sub
 
     Private Sub DRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseMove, lbTitle.MouseMove, pbIcon.MouseMove
         If drag Then
-            Me.Top = Cursor.Position.Y - mouseY
-            Me.Left = Cursor.Position.X - mouseX
+            Top = Cursor.Position.Y - mouseY
+            Left = Cursor.Position.X - mouseX
         End If
     End Sub
 
     Private Sub stopDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseUp, lbTitle.MouseUp, pbIcon.MouseUp
         drag = False
-        My.Settings.RelicWinLoc = Me.Location
+        My.Settings.RelicWinLoc = Location
+    End Sub
+
+    Private Sub startResize(sender As Object, e As EventArgs) Handles BottomResize.MouseDown
+        resize = True
+        mouseY = Cursor.Position.Y - Size.Height
+        RelicTree1.BeginUpdate()
+        RelicTree2.BeginUpdate()
+    End Sub
+
+    Private Sub contResize(sender As Object, e As EventArgs) Handles BottomResize.MouseMove
+        If resize Then
+            Dim change As Integer = (Cursor.Position.Y - mouseY)
+            If change < 100 Then
+                change = 100
+                mouseY = Cursor.Position.Y - 100
+            End If
+            Size = New Size(Size.Width, change)
+            BottomResize.Location = New Point(BottomResize.Location.X, Size.Height - 6)
+            Panel1.Size = New Size(Panel1.Size.Width, Size.Height - 26)
+            RelicTree1.Size = New Size(RelicTree1.Size.Width, Size.Height - 57)
+            RelicTree2.Size = New Size(RelicTree2.Size.Width, Size.Height - 57)
+        End If
+
+    End Sub
+
+    Private Sub stopResize(sender As Object, e As EventArgs) Handles BottomResize.MouseUp
+        RelicTree1.EndUpdate()
+        RelicTree2.EndUpdate()
+        resize = False
     End Sub
 
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
-        Me.Hide()
+        Hide()
     End Sub
 
     Private Sub Label2_MouseEnter(sender As Object, e As EventArgs) Handles Label2.MouseEnter
@@ -92,9 +122,9 @@ Public Class Relics
 
     Private Sub Relics_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         UpdateColors(Me)
-        Me.Location = My.Settings.RelicWinLoc
-        If Me.Location.X = 0 And Me.Location.Y = 0 Then
-            Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
+        Location = My.Settings.RelicWinLoc
+        If Location.X = 0 And Location.Y = 0 Then
+            Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         End If
         If My.Settings.TreeOne Then
             RelicTree2.Visible = False
@@ -109,9 +139,9 @@ Public Class Relics
     End Sub
 
     Private Sub Relics_VisibleChanged(sender As Object, e As EventArgs) Handles Me.VisibleChanged
-        If Me.Visible And Not IsWindowMoveable(Me) Then
+        If Visible And Not IsWindowMoveable(Me) Then
             Dim scr As Screen = GetMainScreen()
-            Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
+            Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
         End If
     End Sub
 
@@ -156,7 +186,7 @@ Public Class Relics
 
                         right += 10 * (split(1).Length - 2)
 
-                        Dim rect As SizeF = e.Graphics.MeasureString("Vaulted", Me.Font)
+                        Dim rect As SizeF = e.Graphics.MeasureString("Vaulted", Font)
                         Using br = New SolidBrush(My.Settings.cBackground)
                             e.Graphics.FillRectangle(br, right - rect.Width - 10, e.Bounds.Top + 1, rect.Width + 10, rect.Height)
                         End Using
@@ -523,7 +553,7 @@ Public Class NodeSorter
     Public type As Integer = 0 ' 0: Name, 1: Intact Plat, 2: Rad Bonus
 
     Public Sub New(x As Integer)
-        Me.relic = x
+        relic = x
     End Sub
 
     Private Function IComparer_Compare(x As Object, y As Object) As Integer Implements IComparer.Compare
@@ -537,7 +567,7 @@ Public Class NodeSorter
             Return tx.Index - ty.Index
         End If
 
-        If Me.relic = 0 Then
+        If relic = 0 Then
             If strx.Length = 4 OrElse strx.Length = 3 Then
                 ' Lith < Meso < Neo < Axi
                 Dim relics As String() = {"Lith", "Meso", "Neo", "Axi"}
@@ -546,7 +576,7 @@ Public Class NodeSorter
                 Return strx.Length - stry.Length
             End If
             If tx.Parent Is Nothing OrElse ty.Parent Is Nothing Then
-                If Me.type > 0 Then
+                If type > 0 Then
                     If tx.Parent IsNot Nothing Then
                         erax = tx.Parent.Text
                         If erax = "Hidden" Then
@@ -573,13 +603,13 @@ Public Class NodeSorter
                     eray = ty.Parent.Parent.Text
                 End If
             End If
-        ElseIf Me.relic = 1 Then
+        ElseIf relic = 1 Then
             Dim splitx As String() = strx.Split(" ")
             Dim splity As String() = stry.Split(" ")
             If splitx.Length = 1 Or splity.Length = 1 Then
                 ' If one is "Hidden"
                 Return splity.Length - splitx.Length
-            ElseIf Me.type = 0 AndAlso splitx(0) <> splity(0) Then
+            ElseIf type = 0 AndAlso splitx(0) <> splity(0) Then
                 ' If the Eras are different 
                 '    AND the sort type is name
                 Return Relics.eras.IndexOf(splitx(0)) - Relics.eras.IndexOf(splity(0))
@@ -589,13 +619,13 @@ Public Class NodeSorter
             erax = splitx(0)
             eray = splity(0)
         End If
-        If Me.type <= 0 Then
+        If type <= 0 Then
             Return String.Compare(strx, stry)
         End If
 
         Dim jobx As JObject = db.relic_data(erax)(strx)
         Dim joby As JObject = db.relic_data(eray)(stry)
-        If Me.type = 1 Then
+        If type = 1 Then
             Return (Double.Parse(joby("int"), culture) - Double.Parse(jobx("int"), culture)) * 100
         End If
         Return (Double.Parse(joby("rad"), culture) - Double.Parse(jobx("rad"), culture)) * 100

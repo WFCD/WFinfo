@@ -43,6 +43,7 @@ Partial Class Relics
         Me.pTitle = New System.Windows.Forms.Panel()
         Me.pbIcon = New System.Windows.Forms.PictureBox()
         Me.lbTitle = New System.Windows.Forms.Label()
+        Me.BottomResize = New System.Windows.Forms.Panel()
         Me.Panel1.SuspendLayout()
         Me.Panel2.SuspendLayout()
         Me.pTitle.SuspendLayout()
@@ -56,7 +57,7 @@ Partial Class Relics
         Me.Panel1.Controls.Add(Me.RelicTree2)
         Me.Panel1.Controls.Add(Me.Panel2)
         Me.Panel1.Controls.Add(Me.RelicTree1)
-        Me.Panel1.Location = New System.Drawing.Point(1, 27)
+        Me.Panel1.Location = New System.Drawing.Point(0, 26)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(456, 371)
         Me.Panel1.TabIndex = 24
@@ -193,7 +194,7 @@ Partial Class Relics
         Me.pTitle.Controls.Add(Me.pbIcon)
         Me.pTitle.Controls.Add(Me.lbTitle)
         Me.pTitle.Controls.Add(Me.btnClose)
-        Me.pTitle.Location = New System.Drawing.Point(1, 1)
+        Me.pTitle.Location = New System.Drawing.Point(0, 0)
         Me.pTitle.Name = "pTitle"
         Me.pTitle.Size = New System.Drawing.Size(456, 27)
         Me.pTitle.TabIndex = 25
@@ -221,12 +222,23 @@ Partial Class Relics
         Me.lbTitle.TabIndex = 17
         Me.lbTitle.Text = "Relics"
         '
+        'BottomResize
+        '
+        Me.BottomResize.BackColor = System.Drawing.Color.Transparent
+        Me.BottomResize.Cursor = System.Windows.Forms.Cursors.SizeNS
+        Me.BottomResize.ForeColor = System.Drawing.Color.Transparent
+        Me.BottomResize.Location = New System.Drawing.Point(6, 391)
+        Me.BottomResize.Name = "BottomResize"
+        Me.BottomResize.Size = New System.Drawing.Size(444, 5)
+        Me.BottomResize.TabIndex = 27
+        '
         'Relics
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(458, 399)
+        Me.ClientSize = New System.Drawing.Size(456, 397)
+        Me.Controls.Add(Me.BottomResize)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.DoubleBuffered = True
@@ -255,4 +267,5 @@ Partial Class Relics
     Friend WithEvents Label1 As Label
     Friend WithEvents RelicTree2 As TreeView
     Friend WithEvents SortSelection As ComboBox
+    Friend WithEvents BottomResize As Panel
 End Class
