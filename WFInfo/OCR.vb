@@ -120,6 +120,8 @@ Module OCR
         Dim hr As New HandleRef(WF_Proc, WF_Proc.MainWindowHandle)
         GetWindowRect(hr, window)
         GetClientRect(hr, win_area)
+        Main.addLog("WINDOW AREA: " & window.ToString())
+        Main.addLog("CLIENT AREA: " & win_area.ToString())
         If window.Width = 0 Or window.Height = 0 Or win_area.Width = 0 Or win_area.Height = 0 Then
             WF_Proc = Nothing
             window = Nothing
