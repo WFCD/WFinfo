@@ -121,10 +121,8 @@ Module OCR
         GetWindowRect(hr, window)
         GetClientRect(hr, win_area)
 
-        If Debug Then
-            Main.addLog("WINDOW AREA: " & window.ToString())
-            Main.addLog("CLIENT AREA: " & win_area.ToString())
-        End If
+        Main.addLog("WINDOW AREA: " & window.ToString())
+        Main.addLog("CLIENT AREA: " & win_area.ToString())
 
         If window.Width = 0 Or window.Height = 0 Or win_area.Width = 0 Or win_area.Height = 0 Then
             WF_Proc = Nothing
@@ -152,9 +150,7 @@ Module OCR
             ' Get Center points
             center = New Point(dpiScaling * horz_center, dpiScaling * vert_center)
 
-            If Debug Then
-                Main.addLog("UPDATED CENTER COORS: " & center.ToString())
-            End If
+            Main.addLog("UPDATED CENTER COORS: " & center.ToString())
 
             engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         End If
@@ -257,9 +253,7 @@ Module OCR
         Dim top As Integer = pixRwrdPos * uiScaling + 2
 
         Dim ss_area As New Rectangle(center.X - wid / 2, center.Y - top, wid, hei)
-        If Debug Then
-            Main.addLog("TAKING SCREENSHOT:" & vbCrLf & "DPI SCALE: " & dpiScaling & vbCrLf & "SS REGION: " & ss_area.ToString())
-        End If
+        Main.addLog("TAKING SCREENSHOT:" & vbCrLf & "DPI SCALE: " & dpiScaling & vbCrLf & "SS REGION: " & ss_area.ToString())
         Dim ret As New Bitmap(wid, hei)
         Using graph As Graphics = Graphics.FromImage(ret)
             graph.CopyFromScreen(ss_area.X, ss_area.Y, 0, 0, New Size(ss_area.Width, ss_area.Height), CopyPixelOperation.SourceCopy)
@@ -450,9 +444,7 @@ Module OCR
             ' Move over if you don't have all 4
             For i = 0 To foundText.Count - 1
 
-                If Debug Then
-                    Main.addLog("DISPLAY OVERLAY " & (i + 1) & ":" & vbCrLf & "Right, Top: " & right & ", " & top)
-                End If
+                Main.addLog("DISPLAY OVERLAY " & (i + 1) & ":" & vbCrLf & "Right, Top: " & right & ", " & top)
                 Dim plat As Double = db.market_data(foundText(i))("plat")
                 Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
                 Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
@@ -560,9 +552,6 @@ Module OCR
 
         Dim left As Integer = x
         Dim top As Integer = y
-        If Debug Then
-            My.Settings.DebugCount += 1
-        End If
         engine.SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789[]")
 
         Dim more As Boolean = True
@@ -587,6 +576,7 @@ Module OCR
 
                         If Debug Then
                             bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+                            My.Settings.DebugCount += 1
                         End If
 
                         For l As Integer = 0 To bmpSize.Width - 1

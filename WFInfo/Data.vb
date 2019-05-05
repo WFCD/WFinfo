@@ -24,9 +24,7 @@ Class Data
     Private webClient As WebClient
 
     Public Sub New()
-        If Debug Then
-            Main.addLog("CREATING DATABASE")
-        End If
+        Main.addLog("CREATING DATABASE")
         If Not My.Computer.FileSystem.DirectoryExists(appData + "\WFInfo") Then
             Directory.CreateDirectory(appData + "\WFInfo")
         End If
@@ -40,58 +38,42 @@ Class Data
     End Sub
 
     Public Sub Save_JObject(data As JObject)
-        If Debug Then
-            Main.addLog("SAVING DEBUG JSON: debug" & save_count.ToString() & ".json")
-        End If
+        Main.addLog("SAVING DEBUG JSON: debug" & save_count.ToString() & ".json")
         File.WriteAllText(Path.Combine(appData, "WFInfo\debug" & save_count.ToString() & ".json"), JsonConvert.SerializeObject(data, Formatting.Indented))
         save_count += 1
     End Sub
 
     Public Sub Save_Market()
-        If Debug Then
-            Main.addLog("SAVING MARKET DATABASE")
-        End If
+        Main.addLog("SAVING MARKET DATABASE")
         File.WriteAllText(market_items_path, JsonConvert.SerializeObject(market_items, Formatting.Indented))
         File.WriteAllText(market_data_path, JsonConvert.SerializeObject(market_data, Formatting.Indented))
     End Sub
 
     Public Sub Save_Relics()
-        If Debug Then
-            Main.addLog("SAVING RELIC DATABASE")
-        End If
+        Main.addLog("SAVING RELIC DATABASE")
         File.WriteAllText(relic_data_path, JsonConvert.SerializeObject(relic_data, Formatting.Indented))
     End Sub
 
     Public Sub Save_Names()
-        If Debug Then
-            Main.addLog("SAVING NAME DATABASE")
-        End If
+        Main.addLog("SAVING NAME DATABASE")
         File.WriteAllText(name_data_path, JsonConvert.SerializeObject(name_data, Formatting.Indented))
     End Sub
 
     Public Sub Save_Eqmt()
-        If Debug Then
-            Main.addLog("SAVING EQMT DATABASE")
-        End If
+        Main.addLog("SAVING EQMT DATABASE")
         File.WriteAllText(eqmt_data_path, JsonConvert.SerializeObject(eqmt_data, Formatting.Indented))
     End Sub
 
     Private Function Load_Market_Items(Optional force As Boolean = False) As Boolean
-        If Debug Then
-            Main.addLog("LOADING MARKET ITEM DATABASE")
-        End If
+        Main.addLog("LOADING MARKET ITEM DATABASE")
         If Not force AndAlso File.Exists(market_items_path) Then
             If market_items Is Nothing Then
                 market_items = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(market_items_path))
             End If
-            If Debug Then
-                Main.addLog("MARKET ITEM DATABASE EXISTS")
-            End If
+            Main.addLog("MARKET ITEM DATABASE EXISTS")
             Return False
         End If
-        If Debug Then
-            Main.addLog("LOADING NEW MARKET ITEM DATABASE")
-        End If
+        Main.addLog("LOADING NEW MARKET ITEM DATABASE")
         Dim m_i_temp As JObject
         Try
             m_i_temp = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items"))
@@ -111,9 +93,7 @@ Class Data
     End Function
 
     Private Function Load_Market_Data(Optional force As Boolean = False) As Boolean
-        If Debug Then
-            Main.addLog("LOADING MARKET DATABASE")
-        End If
+        Main.addLog("LOADING MARKET DATABASE")
         If Not force AndAlso File.Exists(market_data_path) Then
             If market_data Is Nothing Then
                 market_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(market_data_path))
@@ -121,16 +101,12 @@ Class Data
             Dim timestamp As Date = DateTime.Parse(market_data("timestamp"))
             Dim dayAgo As Date = Date.Now.AddDays(-1)
             If timestamp > dayAgo Then
-                If Debug Then
-                    Main.addLog("MARKET DATABASE EXISTS")
-                End If
+                Main.addLog("MARKET DATABASE EXISTS")
                 Return False
             End If
         End If
 
-        If Debug Then
-            Main.addLog("LOADING NEW MARKET DATABASE")
-        End If
+        Main.addLog("LOADING NEW MARKET DATABASE")
 
 
         Dim market_temp As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/tools/ducats"))
@@ -191,9 +167,7 @@ Class Data
     End Function
 
     Private Sub Load_Market_Item(item_name As String, url As String)
-        If Debug Then
-            Main.addLog("LOADING MISSING MARKET ITEM -- " & item_name)
-        End If
+        Main.addLog("LOADING MISSING MARKET ITEM -- " & item_name)
 
         Dim stats As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"))
         stats = stats("payload")("statistics_closed")("90days").Last
@@ -218,9 +192,7 @@ Class Data
     End Sub
 
     Private Function Load_Drop_Data(Optional force As Boolean = False) As Boolean
-        If Debug Then
-            Main.addLog("LOADING DROP DATABASE")
-        End If
+        Main.addLog("LOADING DROP DATABASE")
         Dim request As WebRequest = Nothing
         If eqmt_data Is Nothing Then
             If File.Exists(eqmt_data_path) Then
@@ -248,16 +220,12 @@ Class Data
                     eqmt_data.TryGetValue("timestamp", Nothing) AndAlso
                     eqmt_data("timestamp").ToString() = relic_data("timestamp").ToString() AndAlso
                     last_mod < DateTime.Parse(relic_data("timestamp")) Then
-                    If Debug Then
-                        Main.addLog("DROP DATABASE EXISTS")
-                    End If
+                    Main.addLog("DROP DATABASE EXISTS")
                     Return False
                 End If
             End Using
         End If
-        If Debug Then
-            Main.addLog("LOADING NEW DROP DATABASE")
-        End If
+        Main.addLog("LOADING NEW DROP DATABASE")
 
         relic_data = New JObject()
         name_data = New Dictionary(Of String, String)()
@@ -431,9 +399,7 @@ Class Data
         ' Mainly weapons
         ' https://warframe.fandom.com/wiki/Special:Export/Module:Weapons/data
 
-        If Debug Then
-            Main.addLog("LOADING NEW WIKI DATABASE")
-        End If
+        Main.addLog("LOADING NEW WIKI DATABASE")
         Dim data As String = webClient.DownloadString("https://warframe.fandom.com/wiki/Special:Export/Module:Weapons/data")
 
         Dim start As Integer = data.IndexOf("<timestamp>") + 11
@@ -498,9 +464,7 @@ Class Data
     End Function
 
     Public Function Update() As Boolean
-        If Debug Then
-            Main.addLog("UPDATING DATABASES")
-        End If
+        Main.addLog("UPDATING DATABASES")
         Dim save_market As Boolean = Load_Market_Items() Or Load_Market_Data()
 
         For Each elem As KeyValuePair(Of String, String) In market_items
@@ -521,20 +485,16 @@ Class Data
             Save_Relics()
             Save_Names()
         End If
-        If Debug Then
-            If save_market Or save_drop Then
-                Main.addLog("DATABASES NEEDED UPDATES")
-            Else
-                Main.addLog("DATABASES DID NOT NEED UPDATES")
-            End If
+        If save_market Or save_drop Then
+            Main.addLog("DATABASES NEEDED UPDATES")
+        Else
+            Main.addLog("DATABASES DID NOT NEED UPDATES")
         End If
         Return save_market Or save_drop
     End Function
 
     Public Sub ForceMarketUpdate()
-        If Debug Then
-            Main.addLog("FORCING MARKET UPDATE")
-        End If
+        Main.addLog("FORCING MARKET UPDATE")
         Load_Market_Items(True)
         Load_Market_Data(True)
 
@@ -549,9 +509,7 @@ Class Data
     End Sub
 
     Public Sub ForceEqmtUpdate()
-        If Debug Then
-            Main.addLog("FORCING EQMT UPDATE")
-        End If
+        Main.addLog("FORCING EQMT UPDATE")
         Load_Drop_Data(True)
         Load_Eqmt_Rqmts()
         Save_Eqmt()
@@ -561,9 +519,7 @@ Class Data
     End Sub
 
     Public Sub ForceWikiUpdate()
-        If Debug Then
-            Main.addLog("FORCING WIKI UPDATE")
-        End If
+        Main.addLog("FORCING WIKI UPDATE")
         Load_Eqmt_Rqmts()
         Save_Eqmt()
     End Sub
@@ -606,9 +562,7 @@ Class Data
                 lowest = prop.Value
             End If
         Next
-        If Debug Then
-            Main.addLog("FOUND PART: " & lowest & vbCrLf & "FROM: " & string1)
-        End If
+        Main.addLog("FOUND PART: " & lowest & vbCrLf & "FROM: " & string1)
         Return lowest
     End Function
 
