@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{15BADBA3-A42E-4B5E-A1EC-B9D827E31A97}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>UnitTestProject2</RootNamespace>
-    <AssemblyName>UnitTestProject2</AssemblyName>
+    <RootNamespace>WFInfoTests</RootNamespace>
+    <AssemblyName>WFInfoTests</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
@@ -27,7 +27,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>UnitTestProject2.xml</DocumentationFile>
+    <DocumentationFile>WFInfoTests.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -36,7 +36,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>UnitTestProject2.xml</DocumentationFile>
+    <DocumentationFile>WFInfoTests.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
