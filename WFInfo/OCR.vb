@@ -8,7 +8,6 @@ Public Class OCR
     Public WF_Proc As Process = Nothing
 
     Public window As Rect = Nothing
-    Public win_area As Rect = Nothing
 
     Public dpiScaling As Double = -1.0
     Public uiScaling As Double = -1.0
@@ -28,13 +27,13 @@ Public Class OCR
     Public Shared Function GetWindowRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
     End Function
 
+    <DllImport("User32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
+    Shared Function GetWindowLong(hWnd As IntPtr, nIndex As Int16) As Int32
+    End Function
+
     <System.Runtime.InteropServices.DllImport("dwmapi.dll", PreserveSig:=False)>
     Public Shared Sub DwmEnableComposition(bEnable As Boolean)
     End Sub
-
-    <DllImport("user32.dll")>
-    Public Shared Function GetClientRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
-    End Function
 
     <DllImport("gdi32.dll")>
     Public Shared Function GetDeviceCaps(hdc As IntPtr, nIndex As Integer) As Integer
@@ -96,10 +95,10 @@ Public Class OCR
     Public Overridable Function GetUIScaling() As Double
         uiScaling = My.Settings.Scaling / 100
         '     All values are based on 1920x1080
-        If win_area.Width / win_area.Height > 16 / 9 Then
-            uiScaling *= win_area.Height / 1080
+        If window.Width / window.Height > 16 / 9 Then
+            uiScaling *= window.Height / 1080
         Else
-            uiScaling *= win_area.Width / 1920
+            uiScaling *= window.Width / 1920
         End If
         uiScaling *= dpiScaling
         Return uiScaling
@@ -119,15 +118,29 @@ Public Class OCR
     Public Overridable Sub UpdateCenter()
         Dim hr As New HandleRef(WF_Proc, WF_Proc.MainWindowHandle)
         GetWindowRect(hr, window)
-        GetClientRect(hr, win_area)
-
         Main.addLog("WINDOW AREA: " & window.ToString())
-        Main.addLog("CLIENT AREA: " & win_area.ToString())
 
-        If window.Width = 0 Or window.Height = 0 Or win_area.Width = 0 Or win_area.Height = 0 Then
+        Dim GWL_STYLE As Int32 = -16
+        Dim WS_THICKFRAME As Integer = 262144
+        Dim WS_MAXIMIZE As Integer = 16777216
+        'Dim GWL_EXSTYLE As Int32 = -20
+        'Console.WriteLine("GWL_STYLE: " & Hex(GetWindowLong(WF_Proc.MainWindowHandle, GWL_STYLE)))
+        'Console.WriteLine("GWL_EXSTYLE: " & Hex(GetWindowLong(WF_Proc.MainWindowHandle, GWL_EXSTYLE)))
+        Dim styles As Integer = GetWindowLong(WF_Proc.MainWindowHandle, GWL_STYLE)
+        If (styles And WS_THICKFRAME) <> 0 Then
+            Console.WriteLine("WINDOWED")
+            window = New Rect(window.X1 + 8, window.Y1 + 30, window.Width - 8, window.Height - 30)
+            Main.addLog("WINDOWED ADJUSTMENT: " & window.ToString())
+        Else
+            Console.WriteLine("BORDERLESS")
+        End If
+
+
+
+
+        If window.Width <= 0 Or window.Height <= 0 Then
             WF_Proc = Nothing
             window = Nothing
-            win_area = Nothing
         Else
             ' Get DPI Scaling
             dpiScaling = GetScalingFactor()
@@ -136,18 +149,13 @@ Public Class OCR
             Dim horz_center As Integer = window.X1
             ' Padding from left and right are equal, so can just use window.Width to get to center
             ' Move to center
-            horz_center += win_area.Width / 2
+            horz_center += window.Width / 2
 
             ' Start at top of the window
             Dim vert_center As Integer = window.Y1
 
             ' move to center
-            vert_center += win_area.Height / 2
-
-            If window.Width <> win_area.Width Then
-                horz_center += 8
-                vert_center += 40
-            End If
+            vert_center += window.Height / 2
 
             ' Get Center points
             center = New Point(dpiScaling * horz_center, dpiScaling * vert_center)
