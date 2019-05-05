@@ -13,6 +13,10 @@
 		color: #b1d0d9 !important;
 	}
 
+	::-webkit-scrollbar { 
+    display: none; 
+	}
+
 	html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
 		margin: 0;
 		padding: 0;
@@ -2057,18 +2061,22 @@
 			-webkit-align-items: stretch;
 			-ms-align-items: stretch;
 			align-items: stretch;
+			justify-content: space-between;
 		}
 
 		.flex.flex-2 .col {
 			width: 48%;
+			justify-content: center;
 		}
 
 		.flex.flex-3 .col {
 			width: 31%;
+			justify-content: center;
 		}
 
 		.flex.flex-4 .col {
 			width: 22%;
+			justify-content: center;
 		}
 
 		.flex.flex-tabs {
@@ -2431,9 +2439,15 @@
 			
 		}
 
-			.image.fit img {
-				width: 100%;
-			}
+		.image.fit img {
+			width: 100%;
+		}
+
+		.image.fit2 img{
+			position: absolute;               /* 2 */
+			top: 50%;                         /* 3 */
+			transform: translate(0, -50%)  
+		}
 
 		.image.main {
 			display: block;
@@ -2447,10 +2461,11 @@
 		.image.col{
 			background: rgba(255, 255, 255, 0.075);
 			border-radius: 4px;
-			margin: auto 0 0 auto;
 			overflow: hidden;
 			position: relative;
+			justify-content: center;
 		}
+
 		.image.highlight{
 			background: rgba(255, 255, 255, 0.075);
 			border-radius: 4px;
