@@ -146,7 +146,7 @@ Public Class OCR
 
             If window.Width <> win_area.Width Then
                 horz_center += 8
-                vert_center += 39
+                vert_center += 40
             End If
 
             ' Get Center points
