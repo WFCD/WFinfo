@@ -79,4 +79,9 @@ Imports WFInfo
         Screenshot_Override = False
     End Sub
 
+    <TestMethod()> Public Sub TestTesseract()
+
+
+
+    End Sub
 End Class

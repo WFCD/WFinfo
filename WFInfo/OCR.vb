@@ -132,20 +132,22 @@ Public Class OCR
             ' Get DPI Scaling
             dpiScaling = GetScalingFactor()
 
-            Dim padding As Integer = (window.Width - win_area.Width) / 2
-
             ' Start at left of window
             Dim horz_center As Integer = window.X1
             ' Padding from left and right are equal, so can just use window.Width to get to center
             ' Move to center
-            horz_center += window.Width / 2
+            horz_center += win_area.Width / 2
 
             ' Start at top of the window
             Dim vert_center As Integer = window.Y1
-            ' Padding from top
-            vert_center += window.Height - win_area.Height - padding
+
             ' move to center
             vert_center += win_area.Height / 2
+
+            If window.Width <> win_area.Width Then
+                horz_center += 8
+                vert_center += 39
+            End If
 
             ' Get Center points
             center = New Point(dpiScaling * horz_center, dpiScaling * vert_center)
