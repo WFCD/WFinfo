@@ -1,43 +1,43 @@
 ﻿Imports System.Text.RegularExpressions
 Imports Tesseract
 
-Module OCR
-    Private engine As New TesseractEngine("", "eng") With {
+Public Class OCR
+    Public engine As New TesseractEngine("", "eng") With {
         .DefaultPageSegMode = PageSegMode.SingleLine
     }
-    Private WF_Proc As Process = Nothing
+    Public WF_Proc As Process = Nothing
 
-    Private window As Rect = Nothing
-    Private win_area As Rect = Nothing
+    Public window As Rect = Nothing
+    Public win_area As Rect = Nothing
 
-    Private dpiScaling As Double = -1.0
-    Private uiScaling As Double = -1.0
-    Private center As Point = Nothing
+    Public dpiScaling As Double = -1.0
+    Public uiScaling As Double = -1.0
+    Public center As Point = Nothing
 
-    Private pixRwrdWid As Integer = 1732 '1516
-    Private pixRwrdHei As Integer = 349 '305
-    Private pixRwrdPos As Integer = 363 '318
-    Private pixSlctWid As Integer = 198 '172
-    Private pixSlctHei As Integer = 25 '22
-    Private pixSlctPos As Integer = 50 '42
+    Public pixRwrdWid As Integer = 1732 '1516
+    Public pixRwrdHei As Integer = 349 '305
+    Public pixRwrdPos As Integer = 363 '318
+    Public pixSlctWid As Integer = 198 '172
+    Public pixSlctHei As Integer = 25 '22
+    Public pixSlctPos As Integer = 50 '42
 
 
-    Dim rarity As New List(Of Color) From {Color.FromArgb(171, 159, 117), Color.FromArgb(175, 175, 175), Color.FromArgb(134, 98, 50)}
+    Public rarity As New List(Of Color) From {Color.FromArgb(171, 159, 117), Color.FromArgb(175, 175, 175), Color.FromArgb(134, 98, 50)}
 
     <DllImport("user32.dll")>
-    Private Function GetWindowRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
+    Public Shared Function GetWindowRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
     End Function
 
     <System.Runtime.InteropServices.DllImport("dwmapi.dll", PreserveSig:=False)>
-    Private Sub DwmEnableComposition(bEnable As Boolean)
+    Public Shared Sub DwmEnableComposition(bEnable As Boolean)
     End Sub
 
     <DllImport("user32.dll")>
-    Private Function GetClientRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
+    Public Shared Function GetClientRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
     End Function
 
     <DllImport("gdi32.dll")>
-    Public Function GetDeviceCaps(hdc As IntPtr, nIndex As Integer) As Integer
+    Public Shared Function GetDeviceCaps(hdc As IntPtr, nIndex As Integer) As Integer
     End Function
 
     Public Enum DeviceCap
@@ -45,7 +45,7 @@ Module OCR
         DESKTOPVERTRES = 117
     End Enum
 
-    Private Function GetWFProc() As Boolean
+    Public Overridable Function GetWFProc() As Boolean
         For Each p As Process In Process.GetProcesses
             If p.ProcessName.Contains("Warframe") Then
                 If WF_Proc Is Nothing OrElse p.Handle <> WF_Proc.Handle Then
@@ -55,10 +55,10 @@ Module OCR
                 Return True
             End If
         Next
-        Return Nothing
+        Return False
     End Function
 
-    Public Function isWFActive() As Boolean
+    Public Overridable Function isWFActive() As Boolean
         If WF_Proc Is Nothing Then
             GetWFProc()
         ElseIf WF_Proc.HasExited Then
@@ -67,7 +67,7 @@ Module OCR
         Return WF_Proc IsNot Nothing
     End Function
 
-    Private Function GetScalingFactor() As Double
+    Public Overridable Function GetScalingFactor() As Double
         Using form As New Form()
             Using g As Graphics = form.CreateGraphics()
                 If g.DpiX <> 96 Then
@@ -93,7 +93,7 @@ Module OCR
         Return 1
     End Function
 
-    Private Function GetUIScaling() As Double
+    Public Overridable Function GetUIScaling() As Double
         uiScaling = My.Settings.Scaling / 100
         '     All values are based on 1920x1080
         If win_area.Width / win_area.Height > 16 / 9 Then
@@ -105,7 +105,7 @@ Module OCR
         Return uiScaling
     End Function
 
-    Public Sub ForceUpdateCenter()
+    Public Overridable Sub ForceUpdateCenter()
         ' May updated center twice
         '   It will occur if WF_Proc is nothing when isWFActive is called
         '   Given that isWFActive is called every minute
@@ -116,7 +116,7 @@ Module OCR
         End If
     End Sub
 
-    Private Sub UpdateCenter()
+    Public Overridable Sub UpdateCenter()
         Dim hr As New HandleRef(WF_Proc, WF_Proc.MainWindowHandle)
         GetWindowRect(hr, window)
         GetClientRect(hr, win_area)
@@ -156,7 +156,7 @@ Module OCR
         End If
     End Sub
 
-    Private Function DefaultParseText(bmp As Bitmap) As String
+    Public Overridable Function DefaultParseText(bmp As Bitmap) As String
         Using bmp
             Using page As Page = engine.Process(bmp)
                 Return page.GetText().Trim
@@ -164,7 +164,7 @@ Module OCR
         End Using
     End Function
 
-    Public Function IsRelicWindow() As Boolean
+    Public Overridable Function IsRelicWindow() As Boolean
         If Not isWFActive() Then
             Return False
         End If
@@ -234,30 +234,25 @@ Module OCR
     '    BEGIN RELIC REWARDS STUFF
     '_____________________________________________________
 
-    Private Function GetRelicWindow() As Bitmap
-        ' NOT NEEDED
-        '     Because this is a private function
-        '     All public functions will confirm before processing
-
-        'If Not isWFActive() Then
-        '    Return False
-        'End If
-
-        GetUIScaling()
-
-        ' Relic area is "centered" vertically and offset horizontally
-        '   bot is up 13px relative to the center
-        '   top is up 318px relative to the center
-        Dim wid As Integer = pixRwrdWid * uiScaling + 2
-        Dim hei As Integer = pixRwrdHei * uiScaling + 2
-        Dim top As Integer = pixRwrdPos * uiScaling + 2
-
+    Public Overridable Function Screenshot(wid As Integer, hei As Integer, top As Integer) As Bitmap
         Dim ss_area As New Rectangle(center.X - wid / 2, center.Y - top, wid, hei)
         Main.addLog("TAKING SCREENSHOT:" & vbCrLf & "DPI SCALE: " & dpiScaling & vbCrLf & "SS REGION: " & ss_area.ToString())
         Dim ret As New Bitmap(wid, hei)
         Using graph As Graphics = Graphics.FromImage(ret)
             graph.CopyFromScreen(ss_area.X, ss_area.Y, 0, 0, New Size(ss_area.Width, ss_area.Height), CopyPixelOperation.SourceCopy)
         End Using
+        Return ret
+    End Function
+
+    Public Overridable Function GetRelicWindow() As Bitmap
+        GetUIScaling()
+
+        Dim wid As Integer = pixRwrdWid * uiScaling + 2
+        Dim hei As Integer = pixRwrdHei * uiScaling + 2
+        Dim top As Integer = pixRwrdPos * uiScaling + 2
+
+        Dim ret As Bitmap = Screenshot(wid, hei, top)
+
         If Debug Then
             ret.Save(appData & "\WFInfo\tests\SS-" & My.Settings.SSCount.ToString() & ".png")
             My.Settings.SSCount += 1
@@ -265,7 +260,7 @@ Module OCR
         Return ret
     End Function
 
-    Private Function GetPlayers(screen As Image) As Integer
+    Public Overridable Function GetPlayers(screen As Image) As Integer
         Dim count As Integer = 0
 
         Dim CropRect As New Rectangle(0, screen.Height * 0.95, screen.Width, 4)
@@ -303,7 +298,7 @@ Module OCR
         Return count
     End Function
 
-    Private Function ColortoRarity(clr As Color, Optional diff As Integer = 50) As Integer
+    Public Overridable Function ColortoRarity(clr As Color, Optional diff As Integer = 50) As Integer
         Dim ret As Integer = 3
         Dim temp As Integer
         For Each rare As Color In rarity
@@ -325,8 +320,8 @@ Module OCR
         Return ret
     End Function
 
-    Private GetPartText_timer As Long = 0
-    Private Function GetPartText(screen As Bitmap, plyr_count As Integer, plyr As Integer, Optional multi As Boolean = False) As String
+    Public GetPartText_timer As Long = 0
+    Public Overridable Function GetPartText(screen As Bitmap, plyr_count As Integer, plyr As Integer, Optional multi As Boolean = False) As String
         GetPartText_timer = clock.Elapsed.TotalMilliseconds
         ' This will not only check the bottom line of text
         '   But also will check one line up if the bottom line is ONLY "BLUEPRINT"
@@ -382,8 +377,8 @@ Module OCR
     End Function
 
     ' THIS WILL BE IGNORING FULLSCREEN FOR NOW
-    Private ParseScreen_timer As Long = 0
-    Public Sub ParseScreen()
+    Public ParseScreen_timer As Long = 0
+    Public Overridable Sub ParseScreen()
         If Not isWFActive() Then
             Return
         End If
@@ -464,14 +459,14 @@ Module OCR
     '    BEGIN RELIC Refinement STUFF
     '_____________________________________________________
 
-    Private scrollLoc As Integer = -100
-    Private eraLoc As Integer = -1
+    Public scrollLoc As Integer = -100
+    Public eraLoc As Integer = -1
 
-    Private RefineORSelection As Boolean = False
+    Public RefineORSelection As Boolean = False
     Public FoundRefineWin As Boolean = False
     Public RefineOverlayShown As Boolean = False
 
-    Public Function CheckEraSelection() As Boolean
+    Public Overridable Function CheckEraSelection() As Boolean
         Console.WriteLine("CheckEraSelection")
 
         GetUIScaling()
@@ -500,7 +495,7 @@ Module OCR
         Return True
     End Function
 
-    Public Function CheckScrollBar() As Boolean
+    Public Overridable Function CheckScrollBar() As Boolean
         Console.WriteLine("CheckScrollBar")
         ' Look for changes in scroll bar on right side of window
         ' if changes found, hide overlays and start ~200ms timer
@@ -530,7 +525,7 @@ Module OCR
         Return True
     End Function
 
-    Private Sub UpdateRefineOverlay()
+    Public Overridable Sub UpdateRefineOverlay()
 
         ' Need to split up 
 
@@ -666,12 +661,12 @@ Module OCR
 
     End Sub
 
-    Public Sub ShowRelicOverlay()
+    Public Overridable Sub ShowRelicOverlay()
         GetUIScaling()
         UpdateRefineOverlay()
     End Sub
 
-    Public Function IsRefinementWindow() As Boolean
+    Public Overridable Function IsRefinementWindow() As Boolean
         If Not isWFActive() Then
             FoundRefineWin = False
             Return False
@@ -742,4 +737,4 @@ Module OCR
         FoundRefineWin = False
         Return False
     End Function
-End Module
+End Class

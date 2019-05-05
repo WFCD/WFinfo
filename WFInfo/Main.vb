@@ -91,13 +91,13 @@ Public Class Main
                 Dim elapsed As TimeSpan = clock.Elapsed
                 Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds))
                 Invoke(Sub() Me.lbStatus.Text = "Getting Reward Info...")
-                ParseScreen()
+                parser.ParseScreen()
                 elapsed = clock.Elapsed
                 Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds - CDbl(Me.DoWork_timer)))
                 Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
             Else
                 db = New Data()
-                ForceUpdateCenter()
+                parser.ForceUpdateCenter()
                 Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
                 Invoke(Sub() lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11))
                 Invoke(Sub() lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
@@ -278,7 +278,7 @@ Public Class Main
                 End If
             End If
             ' Every 5min update the relic_area
-            ForceUpdateCenter()
+            parser.ForceUpdateCenter()
         Catch ex As Exception
             Invoke(Sub() lbStatus.Text = "ERROR (Updating DB)")
             Invoke(Sub() lbStatus.ForeColor = Color.Red)
@@ -314,8 +314,8 @@ Public Class Main
 
     Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
         Console.WriteLine("tAutomate Tick")
-        If (db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso isWFActive()) Then
-            If (IsRelicWindow()) Then
+        If (db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso parser.isWFActive()) Then
+            If (parser.IsRelicWindow()) Then
                 If (Not rwrdPanels(0).Visible) Then
                     Me.tAutomate.Interval = 3000
                     Task.Factory.StartNew(Sub() Me.DoWork())
@@ -374,6 +374,8 @@ Module Glob
     Public ReplacementList As Char(,)
     Public WithEvents globHook As New GlobalHook()
 
+    Public parser As New OCR()
+
     Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
         If key = HKey1 Then
             Task.Factory.StartNew(Sub() DoOtherWork())
@@ -384,7 +386,7 @@ Module Glob
     Private Sub DoOtherWork()
         DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
         Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
-        ParseScreen()
+        parser.ParseScreen()
         DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
         Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
     End Sub
