@@ -154,12 +154,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="OCR.vb" />
-    <Compile Include="Picker.Designer.vb">
-      <DependentUpon>Picker.vb</DependentUpon>
-    </Compile>
-    <Compile Include="Picker.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Main.designer.vb">
       <DependentUpon>Main.vb</DependentUpon>
     </Compile>
@@ -213,9 +207,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Picker.resx">
-      <DependentUpon>Picker.vb</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.vb</DependentUpon>
     </EmbeddedResource>

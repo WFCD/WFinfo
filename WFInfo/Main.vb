@@ -1,4 +1,4 @@
-﻿Imports System.ComponentModel
+Imports System.ComponentModel
 Imports System.Drawing.Imaging
 Imports System.IO
 
@@ -18,7 +18,6 @@ Public Class Main
             ' Refreshes the UI and moves it to the stored location
             '_________________________________________________________________________
             Instance = Me
-            UpdateColors(Me)
 
             If version Is Nothing Then
                 version = Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
@@ -41,34 +40,6 @@ Public Class Main
             If (Not Directory.Exists(appData + "\WFInfo\debug")) Then
                 Directory.CreateDirectory(appData + "\WFInfo\debug")
             End If
-
-
-            '_________________________________________________________________________
-            ' Gets the xcsrf token from browser cookies for listing parts while in game
-            '_________________________________________________________________________
-            'Try
-            '    If getCookie() Then
-            '        getXcsrf()
-            '    End If
-            'Catch ex As Exception
-            '    addLog(ex.ToString())
-            'End Try
-
-
-            '_________________________________________________________________________
-            ' Sets up screenshot settings for fullscreen mode (Steam only, not fully supported)
-            '_________________________________________________________________________
-
-            'If My.Settings.LocStorage.Length <= 1 Then
-            '    My.Settings.LocStorage = Environment.ExpandEnvironmentVariables("%Userprofile%\Pictures\Warframe")
-            '    My.Settings.LastFile = Nothing
-            'End If
-
-            'If Fullscreen Then
-            '    If Not Directory.GetFiles(My.Settings.LocStorage).Count = 0 Then
-            '        My.Settings.LastFile = Directory.GetFiles(My.Settings.LocStorage).OrderByDescending(Function(f) New FileInfo(f).LastWriteTime).First()
-            '    End If
-            'End If
 
             '_________________________________________________________________________
             'Refreshes the clipboard, causes issues later if you don't
@@ -94,7 +65,9 @@ Public Class Main
                 parser.ParseScreen()
                 elapsed = clock.Elapsed
                 Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds - CDbl(Me.DoWork_timer)))
-                Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
+                If Me.DoWork_timer > 10 Then
+                    Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
+                End If
             Else
                 db = New Data()
                 parser.ForceUpdateCenter()
@@ -352,7 +325,7 @@ Module Glob
     Public DisplayWindow As Boolean = My.Settings.ResultWindow
     Public Debug As Boolean = My.Settings.Debug
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-    Public textColor As Color = My.Settings.cText
+    Public textColor As Color = Color.FromArgb(177, 208, 217)
     Public textBrush As Brush = New SolidBrush(textColor)
     Public stealthColor As Color = Color.FromArgb(80, 100, 100)
     Public stealthBrush As Brush = New SolidBrush(stealthColor)
@@ -364,9 +337,13 @@ Module Glob
     Public uncommonBrush As Brush = New SolidBrush(uncommonColor)
     Public rareColor As Color = Color.FromArgb(255, 215, 0)
     Public rareBrush As Brush = New SolidBrush(rareColor)
-    Public bgColor As Color = My.Settings.cBackground
+    Public bgColor As Color = Color.FromArgb(27, 27, 27)
+    Public rarity As New List(Of Color) From {Color.FromArgb(171, 159, 117), Color.FromArgb(175, 175, 175), Color.FromArgb(134, 98, 50)}
     Public bgBrush As Brush = New SolidBrush(bgColor)
     Public culture As System.Globalization.CultureInfo = New System.Globalization.CultureInfo("en")
+    Public tahoma10 As New Font("Tahoma", 10.0!, FontStyle.Bold)
+    Public tahoma8 As New Font("Tahoma", 10.0!, FontStyle.Bold)
+
 
     Public rwrdPanels(4) As Overlay
     Public relicPanels(9) As Overlay
@@ -388,112 +365,13 @@ Module Glob
         Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
         parser.ParseScreen()
         DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
-        Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
+        If DoOtherWork_timer > 50 Then ' Asumption made that if the Parse screen takes longer than 50 ms to prosses then Warframe *has* to be running seeing as the fasters OCR time I've seen is ~400ms
+            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
+        Else
+            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Warframe Not Active (" & DoOtherWork_timer & "ms)")
+        End If
     End Sub
 
-    Public Function getCookie()
-        '_________________________________________________________________________
-        'Checks FF cookie then Chrome Cookie, if it exists in neither returns false, true if found, also sets cookie
-        '_________________________________________________________________________
-        Dim found As Boolean = False
-        'Dim ChromePath As String = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\Google\Chrome\User Data\Default\Cookies"
-
-        'If File.Exists(appData + "\Mozilla\Firefox\Profiles") Then
-        '    Dim FFpath As String = Directory.GetDirectories(appData + "\Mozilla\Firefox\Profiles")(0) + "\cookies.sqlite"
-        '    If File.Exists(FFpath) Then
-        '        If Not checkCookie(FFpath, True) = True Then
-        '            If File.Exists(ChromePath) Then
-        '                If checkCookie(ChromePath) = True Then
-        '                    found = True
-        '                End If
-        '            End If
-        '        Else
-        '            found = True
-        '        End If
-        '    End If
-        'ElseIf File.Exists(ChromePath) Then
-        '    If checkCookie(ChromePath) = True Then
-        '        found = True
-        '    End If
-        'End If
-        Return found
-    End Function
-
-    Private Function checkCookie(path As String, Optional FireFox As Boolean = False)
-        '_________________________________________________________________________
-        'Decrypts cookie to get JWT and returns true if all goes well
-        '_________________________________________________________________________
-        'Dim SQLconnect As New SQLiteConnection
-        'Dim SQLcommand As New SQLiteCommand
-
-        'SQLconnect.ConnectionString = "Data Source=" & path & ";"
-        'SQLconnect.Open()
-
-
-        'SQLcommand = SQLconnect.CreateCommand
-        'If FireFox Then
-        '    SQLcommand.CommandText = "SELECT * FROM moz_cookies"
-        'Else
-        '    SQLcommand.CommandText = "SELECT name,encrypted_value FROM Cookies"
-        'End If
-        'Dim SQLreader As SQLiteDataReader = SQLcommand.ExecuteReader()
-        'Dim cdmblk As String = " "
-        'Dim found As Boolean = False
-        'While SQLreader.Read
-        '    If FireFox Then
-        '        If SQLreader(3).contains("JWT") Then
-        '            cookie = "JWT=" + SQLreader(4) + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
-        '            found = True
-        '        End If
-        '    Else
-        '        Dim encryptedData = SQLreader(1)
-        '        If SQLreader(0).Contains("JWT") Then
-        '            Dim decodedData = System.Security.Cryptography.ProtectedData.Unprotect(encryptedData, Nothing, System.Security.Cryptography.DataProtectionScope.LocalMachine)
-        '            Dim plainText = System.Text.Encoding.ASCII.GetString(decodedData)
-        '            cookie = "JWT=" + plainText + "; cdmblk0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0,0:0:0:0:0:0:0:0:0:0:0:0:0:0"
-        '            found = True
-        '        End If
-        '    End If
-        'End While
-
-
-
-        'SQLcommand.Dispose()
-        'SQLconnect.Close()
-        'Return found
-        Return False
-    End Function
-
-    Private Function getXcsrf()
-        '_________________________________________________________________________
-        'Gets a fresh xcsrf token from warframe.market
-        '_________________________________________________________________________
-        'Dim uri As New Uri("https://warframe.market")
-        'ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-        'Dim req As HttpWebRequest = HttpWebRequest.Create(uri)
-        'req.ContentType = "application/json"
-        'req.Method = "GET"
-        'req.Connection = "warframe.market:443 HTTP/1.1"
-        'req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
-        'req.Host = "warframe.market:443"
-        'req.Headers.Add("cookie", cookie)
-        'req.Headers.Add("X-Requested-With", "XMLHttpRequest")
-        'req.KeepAlive = True
-
-        'Dim response = req.GetResponse()
-        'Dim stream = response.GetResponseStream()
-        'Dim found As Boolean = False
-        'Dim reader As StreamReader = New StreamReader(stream)
-        'xcsrf = reader.ReadLine()
-        'Do Until xcsrf.Contains("csrf-token")
-        '    xcsrf = reader.ReadLine()
-        '    found = True
-        'Loop
-        'xcsrf = xcsrf.Substring(xcsrf.IndexOf("##"), 130)
-
-        'Return found
-        Return False
-    End Function
 
     Public Function IsWindowMoveable(form As Form) As Boolean
         Dim winRect As Point = New Point(form.Location.X + (form.Size.Width / 2), form.Location.Y)
@@ -511,73 +389,6 @@ Module Glob
         Return Screen.PrimaryScreen
     End Function
 
-    Public Sub UpdateColors(f As Form)
-        '_________________________________________________________________________
-        'Updates the application colors for people who use custom colors
-        '_________________________________________________________________________
-        For Each c As Control In f.Controls
-            If c.Name = "pTitle" Then
-                c.BackColor = My.Settings.cTitleBar
-                For Each c2 As Control In c.Controls
-                    If TypeOf c2 Is Label Then c2.ForeColor = My.Settings.cText
-                    If TypeOf c2 Is PictureBox Then c2.BackColor = My.Settings.cTitleBar
-                    If TypeOf c2 Is Button Then c2.BackColor = My.Settings.cTitleBar
-                    If TypeOf c2 Is Button Then c2.ForeColor = My.Settings.cText
-                    If c2.Name = "lbStatus" Then c2.ForeColor = Color.Lime
-                Next
-            Else
-                If TypeOf c Is PictureBox Then c.BackColor = My.Settings.cSideBar
-                If TypeOf c Is Label Then c.ForeColor = My.Settings.cText
-                If TypeOf c Is Panel Then c.BackColor = My.Settings.cBackground
-                If TypeOf c Is Label Then c.ForeColor = My.Settings.cText
-                If TypeOf c Is Button Then c.ForeColor = My.Settings.cText
-                If TypeOf c Is Button Then c.BackColor = My.Settings.cTitleBar
-                If c.Name = "pbSideBar" Then c.BackColor = My.Settings.cSideBar
-                If TypeOf c Is TextBox Then c.BackColor = My.Settings.cBackground
-                If TypeOf c Is TextBox Then c.ForeColor = My.Settings.cText
-                If c.Name.Contains("DropShadow") Then
-                    c.ForeColor = Color.FromArgb(10, 10, 10)
-                End If
-                For Each c2 As Control In c.Controls
-                    If TypeOf c2 Is TextBox Then c2.BackColor = My.Settings.cTitleBar
-                    If TypeOf c2 Is ComboBox Then c2.BackColor = My.Settings.cTitleBar
-                    If TypeOf c2 Is ComboBox Then c2.ForeColor = My.Settings.cText
-                    If TypeOf c2 Is TreeView Then c2.BackColor = My.Settings.cBackground
-                    If TypeOf c2 Is TreeView Then c2.ForeColor = My.Settings.cText
-                    If TypeOf c2 Is Panel Then c2.BackColor = My.Settings.cBackground
-                    If TypeOf c2 Is Label Then c2.ForeColor = My.Settings.cText
-                    If TypeOf c2 Is Button Then c2.ForeColor = My.Settings.cText
-                    If TypeOf c2 Is Button Then c2.BackColor = My.Settings.cTitleBar
-                    If TypeOf c2 Is CheckBox Then c2.ForeColor = My.Settings.cText
-                    If c2.Name = "pbSideBar" Then c2.BackColor = My.Settings.cSideBar
-                    If c2.Name.Contains("DropShadow") Then
-                        c2.ForeColor = Color.FromArgb(10, 10, 10)
-                    End If
-                    For Each c3 As Control In c2.Controls
-                        If TypeOf c3 Is ComboBox Then c3.BackColor = My.Settings.cTitleBar
-                        If TypeOf c3 Is ComboBox Then c3.ForeColor = My.Settings.cText
-                        If TypeOf c3 Is TreeView Then c3.BackColor = My.Settings.cBackground
-                        If TypeOf c3 Is TreeView Then c3.ForeColor = My.Settings.cText
-                        If TypeOf c3 Is Panel Then c3.BackColor = My.Settings.cBackground
-                        If TypeOf c3 Is Label Then c3.ForeColor = My.Settings.cText
-                        If TypeOf c3 Is Button Then c3.ForeColor = My.Settings.cText
-                        If TypeOf c3 Is Button Then c3.BackColor = My.Settings.cTitleBar
-                        If TypeOf c3 Is CheckBox Then c3.ForeColor = My.Settings.cText
-                        For Each c4 As Control In c3.Controls
-                            If TypeOf c4 Is TreeView Then c4.BackColor = My.Settings.cBackground
-                            If TypeOf c4 Is TreeView Then c4.ForeColor = My.Settings.cText
-                            If TypeOf c4 Is Panel Then c4.BackColor = My.Settings.cBackground
-                            If TypeOf c4 Is Label Then c4.ForeColor = My.Settings.cText
-                            If TypeOf c4 Is Button Then c4.ForeColor = My.Settings.cText
-                            If TypeOf c4 Is Button Then c4.BackColor = My.Settings.cTitleBar
-                            If TypeOf c4 Is CheckBox Then c4.ForeColor = My.Settings.cText
-                            If c4.Name = "pbSideBar" Then c4.BackColor = My.Settings.cSideBar
-                        Next
-                    Next
-                Next
-            End If
-        Next
-    End Sub
 
     Public Function Tint(ByVal bmpSource As Bitmap, ByVal clrScaleColor As Color, ByVal sngScaleDepth As Single) As Bitmap
 

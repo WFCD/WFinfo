@@ -1,4 +1,4 @@
-﻿Imports System.Text.RegularExpressions
+Imports System.Text.RegularExpressions
 Imports Tesseract
 
 Public Class OCR
@@ -26,8 +26,6 @@ Public Class OCR
         Dim Right As Integer
         Dim Bottom As Integer
     End Structure
-
-    Public rarity As New List(Of Color) From {Color.FromArgb(171, 159, 117), Color.FromArgb(175, 175, 175), Color.FromArgb(134, 98, 50)}
 
     <DllImport("user32.dll")>
     Public Shared Function GetWindowRect(ByVal hWnd As HandleRef, ByRef lpRect As RECT) As Boolean

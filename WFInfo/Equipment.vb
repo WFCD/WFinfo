@@ -1,4 +1,4 @@
-﻿Imports Newtonsoft.Json.Linq
+Imports Newtonsoft.Json.Linq
 
 Public Class Equipment
     Private drag As Boolean = False
@@ -69,11 +69,11 @@ Public Class Equipment
     End Sub
 
     Private Sub Label2_MouseEnter(sender As Object, e As EventArgs) Handles Label2.MouseEnter
-        Label2.BackColor = My.Settings.cTray
+        Label2.BackColor = bgColor
     End Sub
 
     Private Sub Label2_MouseLeave(sender As Object, e As EventArgs) Handles Label2.MouseLeave
-        Label2.BackColor = My.Settings.cBackground
+        Label2.BackColor = bgColor
     End Sub
 
     Private Sub AddMenu_Click(sender As Object, e As ToolStripItemClickedEventArgs) Handles AddMenu.ItemClicked
@@ -207,7 +207,6 @@ Public Class Equipment
     End Sub
 
     Private Sub Eqmt_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        UpdateColors(Me)
         Me.Location = My.Settings.EqmtWinLoc
         If Me.Location.X = 0 And Me.Location.Y = 0 Then
             Me.Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
@@ -238,12 +237,12 @@ Public Class Equipment
             Return
         End If
         If types.Contains(e.Node.Text) Then
-            e.Graphics.DrawLine(New Pen(My.Settings.cBackground), 50, e.Bounds.Top, 450, e.Bounds.Top)
-            e.Graphics.DrawLine(New Pen(My.Settings.cBackground), 50, e.Bounds.Bottom, 450, e.Bounds.Bottom)
+            e.Graphics.DrawLine(New Pen(bgColor), 50, e.Bounds.Top, 450, e.Bounds.Top)
+            e.Graphics.DrawLine(New Pen(bgColor), 50, e.Bounds.Bottom, 450, e.Bounds.Bottom)
             Return
         End If
-        e.Graphics.DrawLine(New Pen(My.Settings.cBackground), 60, e.Bounds.Top, 450, e.Bounds.Top)
-        e.Graphics.DrawLine(New Pen(My.Settings.cBackground), 60, e.Bounds.Bottom, 450, e.Bounds.Bottom)
+        e.Graphics.DrawLine(New Pen(bgColor), 60, e.Bounds.Top, 450, e.Bounds.Top)
+        e.Graphics.DrawLine(New Pen(bgColor), 60, e.Bounds.Bottom, 450, e.Bounds.Bottom)
 
         Dim brush As Brush = textBrush
 
@@ -337,7 +336,7 @@ Public Class Equipment
     End Sub
 
     Public Sub Load_Eqmt_Tree()
-        Label2.BackColor = My.Settings.cBackground
+        Label2.BackColor = bgColor
         If EqmtTree1.Nodes(0).Nodes.Count > 1 Then
             Return
         End If

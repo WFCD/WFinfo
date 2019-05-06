@@ -8,10 +8,9 @@ Public Class Overlay
     Public Sub New()
         InitializeComponent()
         'Me.CreateControl()
-        UpdateColors(Me)
-        loading_img = Tint(PictureBox1.Image, My.Settings.cTray, 0.25)
-        vault_img = Tint(My.Resources.Panel_V, My.Settings.cTray, 0.25)
-        unvault_img = Tint(My.Resources.Panel_UV, My.Settings.cTray, 0.25)
+        loading_img = Tint(PictureBox1.Image, bgColor, 0.25)
+        vault_img = Tint(My.Resources.Panel_V, bgColor, 0.25)
+        unvault_img = Tint(My.Resources.Panel_UV, bgColor, 0.25)
         PictureBox1.Image = loading_img
 
         Me.BackColor = Color.Black

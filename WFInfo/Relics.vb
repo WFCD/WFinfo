@@ -62,11 +62,11 @@ Public Class Relics
     End Sub
 
     Private Sub Label2_MouseEnter(sender As Object, e As EventArgs) Handles Label2.MouseEnter
-        Label2.BackColor = My.Settings.cTray
+        Label2.BackColor = bgColor
     End Sub
 
     Private Sub Label2_MouseLeave(sender As Object, e As EventArgs) Handles Label2.MouseLeave
-        Label2.BackColor = My.Settings.cBackground
+        Label2.BackColor = bgColor
     End Sub
 
     Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree1.AfterCollapse, RelicTree2.AfterCollapse
@@ -116,7 +116,6 @@ Public Class Relics
     End Sub
 
     Private Sub Relics_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        UpdateColors(Me)
         Location = My.Settings.RelicWinLoc
         If Location.X = 0 And Location.Y = 0 Then
             Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
@@ -182,7 +181,7 @@ Public Class Relics
                         right += 10 * (split(1).Length - 2)
 
                         Dim rect As SizeF = e.Graphics.MeasureString("Vaulted", Font)
-                        Using br = New SolidBrush(My.Settings.cBackground)
+                        Using br = New SolidBrush(bgColor)
                             e.Graphics.FillRectangle(br, right - rect.Width - 10, e.Bounds.Top + 1, rect.Width + 10, rect.Height)
                         End Using
                         e.Graphics.DrawString("Vaulted", RelicTree1.Font, stealthBrush, right, e.Bounds.Top + 1, sf)
@@ -196,7 +195,7 @@ Public Class Relics
                     If rtot > 0 Then
                         rtot_str = "+" + rtot_str
                     End If
-                    Using br = New SolidBrush(My.Settings.cText)
+                    Using br = New SolidBrush(textColor)
                         e.Graphics.FillRectangle(bgBrush, 220, e.Bounds.Top, 180, e.Bounds.Height)
                         e.Graphics.DrawString("RAD:", RelicTree1.Font, br, 255, e.Bounds.Top, sf)
                         e.Graphics.DrawString(rtot_str, RelicTree1.Font, br, 300, e.Bounds.Top, sf)
@@ -221,7 +220,7 @@ Public Class Relics
             Dim name As String = split(2)
             If name <> "Forma Blueprint" Then
                 Dim vals As JObject = db.market_data(name)
-                Using br = New SolidBrush(My.Settings.cBackground)
+                Using br = New SolidBrush(bgColor)
                     e.Graphics.FillRectangle(br, 260, e.Bounds.Top, 130, e.Bounds.Height)
                 End Using
                 e.Graphics.DrawString(Double.Parse(vals("plat"), culture).ToString("N1"), RelicTree1.Font, brush, 300, e.Bounds.Top + 1, sf)
@@ -238,8 +237,8 @@ Public Class Relics
         Else
             left = 80
         End If
-        e.Graphics.DrawLine(New Pen(My.Settings.cBackground), left, e.Bounds.Top, 450, e.Bounds.Top)
-        e.Graphics.DrawLine(New Pen(My.Settings.cBackground), left, e.Bounds.Bottom, 450, e.Bounds.Bottom)
+        e.Graphics.DrawLine(New Pen(bgColor), left, e.Bounds.Top, 450, e.Bounds.Top)
+        e.Graphics.DrawLine(New Pen(bgColor), left, e.Bounds.Bottom, 450, e.Bounds.Bottom)
     End Sub
 
     Private Sub HideMenu_Click(sender As Object, e As ToolStripItemClickedEventArgs) Handles HideMenu.ItemClicked
@@ -356,7 +355,7 @@ Public Class Relics
     End Sub
 
     Public Sub Load_Relic_Tree()
-        Label2.BackColor = My.Settings.cBackground
+        'Label2.BackColor = bgColor
         Dim hide As TreeNode = Nothing
         If RelicTree1.Nodes(0).Nodes.Count > 1 Then
             Return

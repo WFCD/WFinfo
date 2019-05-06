@@ -15,7 +15,7 @@ Option Explicit On
 Namespace My
     
     <Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute(),  _
-     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.8.0.0"),  _
+     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.9.0.0"),  _
      Global.System.ComponentModel.EditorBrowsableAttribute(Global.System.ComponentModel.EditorBrowsableState.Advanced)>  _
     Partial Friend NotInheritable Class MySettings
         Inherits Global.System.Configuration.ApplicationSettingsBase
@@ -147,66 +147,6 @@ Namespace My
             End Get
             Set
                 Me("SteamSettings") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("15, 15, 15")>  _
-        Public Property cTitleBar() As Global.System.Drawing.Color
-            Get
-                Return CType(Me("cTitleBar"),Global.System.Drawing.Color)
-            End Get
-            Set
-                Me("cTitleBar") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("27, 27, 27")>  _
-        Public Property cBackground() As Global.System.Drawing.Color
-            Get
-                Return CType(Me("cBackground"),Global.System.Drawing.Color)
-            End Get
-            Set
-                Me("cBackground") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("23, 23, 23")>  _
-        Public Property cSideBar() As Global.System.Drawing.Color
-            Get
-                Return CType(Me("cSideBar"),Global.System.Drawing.Color)
-            End Get
-            Set
-                Me("cSideBar") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("177, 208, 217")>  _
-        Public Property cText() As Global.System.Drawing.Color
-            Get
-                Return CType(Me("cText"),Global.System.Drawing.Color)
-            End Get
-            Set
-                Me("cText") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("23, 23, 23")>  _
-        Public Property cTray() As Global.System.Drawing.Color
-            Get
-                Return CType(Me("cTray"),Global.System.Drawing.Color)
-            End Get
-            Set
-                Me("cTray") = value
             End Set
         End Property
         

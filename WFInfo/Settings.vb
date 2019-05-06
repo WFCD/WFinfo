@@ -74,7 +74,6 @@ Public Class Settings
         '_________________________________________________________________________
         'Visual stuff and loading settings
         '_________________________________________________________________________
-        UpdateColors(Me)
         If My.Settings.SettingsWinLoc.X = 0 And My.Settings.SettingsWinLoc.Y = 0 Then
             Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         Else
@@ -195,10 +194,6 @@ Public Class Settings
 
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
         Me.Close()
-    End Sub
-
-    Private Sub btnCustomize_Click(sender As Object, e As EventArgs) Handles btnCustomize.Click
-        Picker.Show()
     End Sub
 
     Private Sub saveSettings()

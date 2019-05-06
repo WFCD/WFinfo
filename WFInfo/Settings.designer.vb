@@ -37,8 +37,6 @@ Partial Class Settings
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.cbAutomation = New System.Windows.Forms.CheckBox()
         Me.cbDebug = New System.Windows.Forms.CheckBox()
-        Me.Panel4 = New System.Windows.Forms.Panel()
-        Me.btnCustomize = New System.Windows.Forms.Button()
         Me.Panel3 = New System.Windows.Forms.Panel()
         Me.Label12 = New System.Windows.Forms.Label()
         Me.Label11 = New System.Windows.Forms.Label()
@@ -49,7 +47,6 @@ Partial Class Settings
         Me.pTitle.SuspendLayout()
         CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel2.SuspendLayout()
-        Me.Panel4.SuspendLayout()
         Me.Panel3.SuspendLayout()
         CType(Me.TrackBar1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -326,30 +323,6 @@ Partial Class Settings
         Me.cbDebug.Text = "Debug Mode"
         Me.cbDebug.UseVisualStyleBackColor = False
         '
-        'Panel4
-        '
-        Me.Panel4.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.Panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel4.Controls.Add(Me.btnCustomize)
-        Me.Panel4.Location = New System.Drawing.Point(1, 276)
-        Me.Panel4.Name = "Panel4"
-        Me.Panel4.Size = New System.Drawing.Size(319, 42)
-        Me.Panel4.TabIndex = 22
-        '
-        'btnCustomize
-        '
-        Me.btnCustomize.BackColor = System.Drawing.Color.FromArgb(CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer), CType(CType(22, Byte), Integer))
-        Me.btnCustomize.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.btnCustomize.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold)
-        Me.btnCustomize.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.btnCustomize.Location = New System.Drawing.Point(14, 8)
-        Me.btnCustomize.Name = "btnCustomize"
-        Me.btnCustomize.Size = New System.Drawing.Size(290, 24)
-        Me.btnCustomize.TabIndex = 13
-        Me.btnCustomize.Text = "Customize UI"
-        Me.btnCustomize.TextAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.btnCustomize.UseVisualStyleBackColor = False
-        '
         'Panel3
         '
         Me.Panel3.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
@@ -416,9 +389,8 @@ Partial Class Settings
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(321, 319)
+        Me.ClientSize = New System.Drawing.Size(321, 277)
         Me.Controls.Add(Me.Panel3)
-        Me.Controls.Add(Me.Panel4)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.Controls.Add(Me.Panel2)
@@ -435,7 +407,6 @@ Partial Class Settings
         CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel2.ResumeLayout(False)
         Me.Panel2.PerformLayout()
-        Me.Panel4.ResumeLayout(False)
         Me.Panel3.ResumeLayout(False)
         Me.Panel3.PerformLayout()
         CType(Me.TrackBar1, System.ComponentModel.ISupportInitialize).EndInit()
@@ -451,7 +422,6 @@ Partial Class Settings
     Friend WithEvents cbDebug As CheckBox
     Friend WithEvents btnClose As Button
     Friend WithEvents pbIcon As PictureBox
-    Friend WithEvents Panel4 As Panel
     Friend WithEvents Label2 As Label
     Friend WithEvents ScaleBar As TrackBar
     Friend WithEvents Label8 As Label
@@ -463,7 +433,6 @@ Partial Class Settings
     Friend WithEvents Label1 As Label
     Friend WithEvents ScaleOption As ComboBox
     Friend WithEvents cbAutomation As CheckBox
-    Friend WithEvents btnCustomize As Button
     Friend WithEvents Panel3 As Panel
     Friend WithEvents Label12 As Label
     Friend WithEvents Label11 As Label

@@ -126,7 +126,7 @@ Partial Class Main
         '
         Me.lbWikiDate.BackColor = System.Drawing.Color.Transparent
         Me.lbWikiDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbWikiDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
+        Me.lbWikiDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.lbWikiDate.Location = New System.Drawing.Point(156, 59)
         Me.lbWikiDate.Name = "lbWikiDate"
         Me.lbWikiDate.Size = New System.Drawing.Size(120, 18)
@@ -149,7 +149,7 @@ Partial Class Main
         '
         Me.lbEqmtDate.BackColor = System.Drawing.Color.Transparent
         Me.lbEqmtDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbEqmtDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
+        Me.lbEqmtDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.lbEqmtDate.Location = New System.Drawing.Point(156, 34)
         Me.lbEqmtDate.Name = "lbEqmtDate"
         Me.lbEqmtDate.Size = New System.Drawing.Size(120, 18)
@@ -160,7 +160,7 @@ Partial Class Main
         '
         Me.lbMarketDate.BackColor = System.Drawing.Color.Transparent
         Me.lbMarketDate.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lbMarketDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(120, Byte), Integer), CType(CType(140, Byte), Integer), CType(CType(140, Byte), Integer))
+        Me.lbMarketDate.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.lbMarketDate.Location = New System.Drawing.Point(156, 9)
         Me.lbMarketDate.Name = "lbMarketDate"
         Me.lbMarketDate.Size = New System.Drawing.Size(120, 18)
@@ -314,7 +314,7 @@ Partial Class Main
         '
         'pbSideBar
         '
-        Me.pbSideBar.BackColor = System.Drawing.Color.FromArgb(CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer), CType(CType(23, Byte), Integer))
+        Me.pbSideBar.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.pbSideBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.pbSideBar.Location = New System.Drawing.Point(304, 25)
         Me.pbSideBar.Name = "pbSideBar"
@@ -324,7 +324,7 @@ Partial Class Main
         '
         'pbRelic
         '
-        Me.pbRelic.BackColor = System.Drawing.Color.Transparent
+        Me.pbRelic.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.pbRelic.Image = Global.WFInfo.My.Resources.Resources.Relic
         Me.pbRelic.Location = New System.Drawing.Point(305, 55)
         Me.pbRelic.Name = "pbRelic"
@@ -336,7 +336,7 @@ Partial Class Main
         '
         'pbSettings
         '
-        Me.pbSettings.BackColor = System.Drawing.Color.Transparent
+        Me.pbSettings.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.pbSettings.Image = Global.WFInfo.My.Resources.Resources.Settings
         Me.pbSettings.Location = New System.Drawing.Point(305, 105)
         Me.pbSettings.Name = "pbSettings"
@@ -348,7 +348,7 @@ Partial Class Main
         '
         'pbEqmt
         '
-        Me.pbEqmt.BackColor = System.Drawing.Color.Transparent
+        Me.pbEqmt.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.pbEqmt.Image = Global.WFInfo.My.Resources.Resources.foundry
         Me.pbEqmt.Location = New System.Drawing.Point(305, 80)
         Me.pbEqmt.Name = "pbEqmt"
@@ -360,7 +360,7 @@ Partial Class Main
         '
         'pbHome
         '
-        Me.pbHome.BackColor = System.Drawing.Color.Transparent
+        Me.pbHome.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.pbHome.Image = Global.WFInfo.My.Resources.Resources.home
         Me.pbHome.Location = New System.Drawing.Point(305, 30)
         Me.pbHome.Name = "pbHome"

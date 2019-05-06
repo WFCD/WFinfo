@@ -11,56 +11,54 @@
     Private Shared rwrdDucatIcon(4) As PictureBox
 
     Private Sub RewardWindow_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        UpdateColors(Me)
 
         Dim spacing As Integer = 125
 
         For i As Integer = 0 To 3
             rwrdPanels(i) = New Panel With {
                 .Visible = False,
-                .Size = New Drawing.Size(128, 105),
+                .Size = New Size(128, 105),
                 .Location = New Point(127 * i - 1, 0),
                 .BorderStyle = BorderStyle.FixedSingle
             }
 
-            '.BackColor = System.Drawing.Color.FromArgb(87, 108, 117),
             rwrdNames(i) = New Label() With {
-                .Font = New System.Drawing.Font("Tahoma", 10.0!, FontStyle.Bold),
-                .ForeColor = Color.FromArgb(177, 208, 217),
+                .Font = tahoma10,
+                .ForeColor = textColor,
                 .TextAlign = ContentAlignment.TopCenter,
-                .Size = New Drawing.Size(spacing - 5, 35),
+                .Size = New Size(spacing - 5, 35),
                 .Location = New Point(3, 30)
             }
             rwrdVault(i) = New Label() With {
                 .Visible = False,
-                .Font = New System.Drawing.Font("Tahoma", 8.0!),
-                .ForeColor = Color.FromArgb(177, 208, 217),
+                .Font = tahoma8,
+                .ForeColor = textColor,
                 .TextAlign = ContentAlignment.TopCenter,
-                .Size = New Drawing.Size(spacing - 5, 15)
+                .Size = New Size(spacing - 5, 15)
             }
             rwrdPlats(i) = New Label() With {
-                .Font = New System.Drawing.Font("Tahoma", 8.0!),
-                .ForeColor = Color.FromArgb(177, 208, 217),
+                .Font = tahoma8,
+                .ForeColor = textColor,
                 .TextAlign = ContentAlignment.MiddleCenter,
-                .Size = New Drawing.Size(52, 15),
+                .Size = New Size(52, 15),
                 .Location = New Point(3, 83)
             }
             rwrdPlatIcon(i) = New PictureBox() With {
                 .Image = My.Resources.plat,
                 .SizeMode = PictureBoxSizeMode.StretchImage,
-                .Size = New Drawing.Size(13, 13)
+                .Size = New Size(13, 13)
             }
             rwrdDucats(i) = New Label() With {
-                .Font = New System.Drawing.Font("Tahoma", 8.0!),
-                .ForeColor = Color.FromArgb(177, 208, 217),
+                .Font = tahoma8,
+                .ForeColor = textColor,
                 .TextAlign = ContentAlignment.MiddleCenter,
-                .Size = New Drawing.Size(52, 15),
+                .Size = New Size(52, 15),
                 .Location = New Point(63, 83)
             }
             rwrdDucatIcon(i) = New PictureBox() With {
                 .Image = My.Resources.ducat_w,
                 .SizeMode = PictureBoxSizeMode.StretchImage,
-                .Size = New Drawing.Size(13, 13)
+                .Size = New Size(13, 13)
             }
             rwrdPanels(i).Controls.Add(rwrdVault(i))
             rwrdPanels(i).Controls.Add(rwrdNames(i))
