@@ -38,8 +38,8 @@ Public Class Main
             '_________________________________________________________________________
             'Readies the test folder for debug mode (Saves screenshots for debugging)
             '_________________________________________________________________________
-            If (Not Directory.Exists(appData + "\WFInfo\tests")) Then
-                Directory.CreateDirectory(appData + "\WFInfo\tests")
+            If (Not Directory.Exists(appData + "\WFInfo\debug")) Then
+                Directory.CreateDirectory(appData + "\WFInfo\debug")
             End If
 
 
@@ -59,10 +59,10 @@ Public Class Main
             ' Sets up screenshot settings for fullscreen mode (Steam only, not fully supported)
             '_________________________________________________________________________
 
-            If My.Settings.LocStorage.Length <= 1 Then
-                My.Settings.LocStorage = Environment.ExpandEnvironmentVariables("%Userprofile%\Pictures\Warframe")
-                My.Settings.LastFile = Nothing
-            End If
+            'If My.Settings.LocStorage.Length <= 1 Then
+            '    My.Settings.LocStorage = Environment.ExpandEnvironmentVariables("%Userprofile%\Pictures\Warframe")
+            '    My.Settings.LastFile = Nothing
+            'End If
 
             'If Fullscreen Then
             '    If Not Directory.GetFiles(My.Settings.LocStorage).Count = 0 Then
@@ -136,12 +136,12 @@ Public Class Main
         If Not My.Computer.FileSystem.DirectoryExists(appData + "\WFInfo") Then
             Directory.CreateDirectory(appData + "\WFInfo")
         End If
-        If My.Computer.FileSystem.FileExists(appData + "\WFInfo\WFInfo.log") Then
-            logStore = My.Computer.FileSystem.ReadAllText(appData + "\WFInfo\WFInfo.log")
+        If My.Computer.FileSystem.FileExists(appData + "\WFInfo\Debug\WFInfo.log") Then
+            logStore = My.Computer.FileSystem.ReadAllText(appData + "\WFInfo\Debug\WFInfo.log")
         Else
-            File.Create(appData + "\WFInfo\WFInfo.log").Dispose()
+            File.Create(appData + "\WFInfo\Debug\WFInfo.log").Dispose()
         End If
-        My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\WFInfo.log",
+        My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\Debug\WFInfo.log",
         dateTime + vbNewLine + txt + vbNewLine + vbNewLine + logStore, False)
     End Sub
 

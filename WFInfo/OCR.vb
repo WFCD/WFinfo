@@ -266,10 +266,7 @@ Public Class OCR
                         "Screen bounds: " & window.ToString & vbCrLf &
                         "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
                     Dim font As New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120.0))
-
-                    Dim boundsLen As Double = graph.MeasureString("Screen bounds: " & window.ToString, font).Width
-                    Dim attemptLen As Double = graph.MeasureString("Tried looking at " & ss_area.ToString, font).Width
-                    Dim printBounds As SizeF = graph.MeasureString(print, font, Math.Max(boundsLen, attemptLen))
+                    Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
 
                     Dim textbox = New Rectangle(center.X, center.Y, printBounds.Width, printBounds.Height)
 
@@ -278,6 +275,7 @@ Public Class OCR
                     graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
                     graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
                     debugRet.Save(appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
+                    Main.addLog("SAVING SCREENSHOT" & appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
                     My.Settings.SSCount += 1
                 End Using
             End If
@@ -599,6 +597,8 @@ Public Class OCR
 
                         If Debug Then
                             bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+                            Main.addLog("SAVING SCREENSHOT" & appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+
                             My.Settings.DebugCount += 1
                         End If
 
@@ -617,6 +617,8 @@ Public Class OCR
                         Next
                         If Debug Then
                             bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+                            Main.addLog("SAVING SCREENSHOT" & appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+
                         End If
                         If Not more Then
                             Exit For
@@ -632,6 +634,8 @@ Public Class OCR
                         graph.CopyFromScreen(left, top, 0, 0, bmpSize, CopyPixelOperation.SourceCopy)
                         If Debug Then
                             bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "2-" & My.Settings.DebugCount & ".png")
+                            Main.addLog("SAVING SCREENSHOT" & appData & "\WFInfo\tests\RR" & i & j & "2-" & My.Settings.DebugCount & ".png")
+
                         End If
                         Dim multi As Boolean = True
                         For k As Integer = 0 To bmpSize.Height - 1
