@@ -250,20 +250,30 @@ Public Class OCR
                 Dim debugRet As New Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height)
                 Using graph As Graphics = Graphics.FromImage(debugRet)
                     graph.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size, CopyPixelOperation.SourceCopy)
-                    Dim print =
+                    Dim print As String =
                         "Tried looking at " & ss_area.ToString & vbCrLf &
                         "Screen resolution: " & Screen.PrimaryScreen.Bounds.Size.ToString & vbCrLf &
                         "Screen center: " & center.ToString & vbCrLf &
                         "Screen bounds: " & window.ToString & vbCrLf &
-                        "UI scaling: " & uiScaling & " Windows scaling: " & dpiScaling
-                    Dim font = New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120))
-                    Dim textbox = New Rectangle(center.X, center.Y, (Screen.PrimaryScreen.Bounds.Width / 7), (Screen.PrimaryScreen.Bounds.Height / 18))
+                        "UI scaling: " & uiScaling & vbTab & " Windows scaling: " & dpiScaling
+                    Dim font As New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120.0))
+
+                    Dim boundsLen As Double = graph.MeasureString("Screen bounds: " & window.ToString, font).Width
+                    Dim attemptLen As Double = graph.MeasureString("Tried looking at " & ss_area.ToString, font).Width
+                    Dim textLen As Double = attemptLen
+                    If boundsLen > attemptLen Then
+                        textLen = boundsLen
+                    End If
+                    Dim printBounds As SizeF = graph.MeasureString(print, font, textLen)
+
+                    Dim textbox = New Rectangle(center.X, center.Y, printBounds.Width, printBounds.Height)
 
                     graph.FillEllipse(Brushes.Red, center.X - 3, center.Y - 3, 3, 3)    'Dot centered at where it thinks the center of warframe is
                     graph.DrawRectangle(New Pen(Brushes.Red), ss_area)                  'The area that it tried to read from
                     graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
                     graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
                     debugRet.Save(appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
+                    My.Settings.SSCount += 1
                 End Using
             End If
 
@@ -285,10 +295,6 @@ Public Class OCR
 
         Dim ret As Bitmap = Screenshot(wid, hei, top)
 
-        If Debug Then
-            ret.Save(appData & "\WFInfo\tests\SS-" & My.Settings.SSCount.ToString() & ".png")
-            My.Settings.SSCount += 1
-        End If
         Return ret
     End Function
 
