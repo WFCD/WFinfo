@@ -264,7 +264,7 @@ Public Class OCR
                         "Screen resolution: " & Screen.PrimaryScreen.Bounds.Size.ToString & vbCrLf &
                         "Screen center: " & center.ToString & vbCrLf &
                         "Screen bounds: " & window.ToString & vbCrLf &
-                        "UI scaling: " & uiScaling & vbTab & " Windows scaling: " & dpiScaling
+                        "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
                     Dim font As New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120.0))
 
                     Dim boundsLen As Double = graph.MeasureString("Screen bounds: " & window.ToString, font).Width
@@ -328,15 +328,8 @@ Public Class OCR
                         last = i
                         Exit For
                     End If
-                    If Debug Then
-                        CropImage.SetPixel(i, j, Color.White)
-                    End If
                 Next
             Next
-            If Debug Then
-                CropImage.Save(appData & "\WFInfo\tests\Plyr-" & My.Settings.PlyrCount.ToString() & ".png")
-                My.Settings.PlyrCount += 1
-            End If
         End Using
         Return count
     End Function
@@ -392,14 +385,6 @@ Public Class OCR
             GetPartText_timer -= clock.Elapsed.TotalMilliseconds
             Console.WriteLine("IMAGE FILTER-" & GetPartText_timer & "ms")
             GetPartText_timer = clock.Elapsed.TotalMilliseconds
-
-            If Debug Then
-                bmp.Save(appData & "\WFInfo\tests\Text-" & My.Settings.EtcCount.ToString() & ".png")
-                My.Settings.EtcCount += 1
-                GetPartText_timer -= clock.Elapsed.TotalMilliseconds
-                Console.WriteLine("SAVE IMAGE-" & GetPartText_timer & "ms")
-                GetPartText_timer = clock.Elapsed.TotalMilliseconds
-            End If
             ' ONLY one page can be used at a time
             '   So we have to get the text and dispose of the page quickly
             Dim ret As String = ""
