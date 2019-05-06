@@ -260,11 +260,7 @@ Public Class OCR
 
                     Dim boundsLen As Double = graph.MeasureString("Screen bounds: " & window.ToString, font).Width
                     Dim attemptLen As Double = graph.MeasureString("Tried looking at " & ss_area.ToString, font).Width
-                    Dim textLen As Double = attemptLen
-                    If boundsLen > attemptLen Then
-                        textLen = boundsLen
-                    End If
-                    Dim printBounds As SizeF = graph.MeasureString(print, font, textLen)
+                    Dim printBounds As SizeF = graph.MeasureString(print, font, Math.Max(boundsLen, attemptLen))
 
                     Dim textbox = New Rectangle(center.X, center.Y, printBounds.Width, printBounds.Height)
 
