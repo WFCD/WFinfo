@@ -254,6 +254,7 @@ Public Class OCR
                         "Tried looking at " & ss_area.ToString & vbCrLf &
                         "Screen resolution: " & Screen.PrimaryScreen.Bounds.Size.ToString & vbCrLf &
                         "Screen center: " & center.ToString & vbCrLf &
+                        "Screen bounds: " & window.ToString & vbCrLf &
                         "UI scaling: " & uiScaling & " Windows scaling: " & dpiScaling
                     Dim font = New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120))
                     Dim textbox = New Rectangle(center.X, center.Y, (Screen.PrimaryScreen.Bounds.Width / 7), (Screen.PrimaryScreen.Bounds.Height / 18))
