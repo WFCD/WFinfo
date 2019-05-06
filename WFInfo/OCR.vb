@@ -18,7 +18,7 @@ Public Class OCR
     Public pixRwrdPos As Integer = 363 '318
     Public pixSlctWid As Integer = 198 '172
     Public pixSlctHei As Integer = 25 '22
-    Public pixSlctPos As Integer = 50 '42
+    Public pixSlctPos As Integer = 49 '42
 
     <StructLayout(LayoutKind.Sequential)> Public Structure RECT
         Dim Left As Integer
@@ -195,6 +195,8 @@ Public Class OCR
         Dim hei As Integer = (uiScaling * pixSlctHei)
         Dim top As Integer = center.Y + (uiScaling * pixSlctPos)
 
+        Main.addLog("CHECKING FOR REWARDS: {X=" & left & ",Y=" & top & ",Width=" & wid & ",Height=" & hei & "}")
+
         Using bmp As New Bitmap(wid, hei)
             Using graph As Graphics = Graphics.FromImage(bmp)
                 If DisplayWindow Then
@@ -275,7 +277,7 @@ Public Class OCR
                     graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
                     graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
                     debugRet.Save(appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
-                    Main.addLog("SAVING SCREENSHOT" & appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
+                    Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
                     My.Settings.SSCount += 1
                 End Using
             End If
@@ -597,7 +599,7 @@ Public Class OCR
 
                         If Debug Then
                             bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
-                            Main.addLog("SAVING SCREENSHOT" & appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+                            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
 
                             My.Settings.DebugCount += 1
                         End If
@@ -617,7 +619,7 @@ Public Class OCR
                         Next
                         If Debug Then
                             bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
-                            Main.addLog("SAVING SCREENSHOT" & appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+                            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
 
                         End If
                         If Not more Then
@@ -634,7 +636,7 @@ Public Class OCR
                         graph.CopyFromScreen(left, top, 0, 0, bmpSize, CopyPixelOperation.SourceCopy)
                         If Debug Then
                             bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "2-" & My.Settings.DebugCount & ".png")
-                            Main.addLog("SAVING SCREENSHOT" & appData & "\WFInfo\tests\RR" & i & j & "2-" & My.Settings.DebugCount & ".png")
+                            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\tests\RR" & i & j & "2-" & My.Settings.DebugCount & ".png")
 
                         End If
                         Dim multi As Boolean = True
