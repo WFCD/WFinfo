@@ -248,6 +248,30 @@ Public Class OCR
         Dim ss_area As New Rectangle(center.X - wid / 2, center.Y - top, wid, hei)
         Main.addLog("TAKING SCREENSHOT:" & vbCrLf & "DPI SCALE: " & dpiScaling & vbCrLf & "SS REGION: " & ss_area.ToString())
         Dim ret As New Bitmap(wid, hei)
+        Try
+            If Debug Then
+                Dim debugRet As New Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height)
+                Using graph As Graphics = Graphics.FromImage(debugRet)
+                    graph.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size, CopyPixelOperation.SourceCopy)
+                    Dim print =
+                        "Tried looking at " & ss_area.ToString & vbCrLf &
+                        "Screen resolution: " & Screen.PrimaryScreen.Bounds.Size.ToString & vbCrLf &
+                        "Screen center: " & center.ToString & vbCrLf &
+                        "UI scaling: " & uiScaling & " Windows scaling: " & dpiScaling
+                    Dim font = New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120))
+                    Dim textbox = New Rectangle(center.X, center.Y, (Screen.PrimaryScreen.Bounds.Width / 7), (Screen.PrimaryScreen.Bounds.Height / 18))
+
+                    graph.FillEllipse(Brushes.Red, center.X - 3, center.Y - 3, 3, 3)    'Dot centered at where it thinks the center of warframe is
+                    graph.DrawRectangle(New Pen(Brushes.Red), ss_area)                  'The area that it tried to read from
+                    graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
+                    graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
+                    debugRet.Save(appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
+                End Using
+            End If
+
+        Catch e As Exception
+            Console.WriteLine(e.ToString)
+        End Try
         Using graph As Graphics = Graphics.FromImage(ret)
             graph.CopyFromScreen(ss_area.X, ss_area.Y, 0, 0, New Size(ss_area.Width, ss_area.Height), CopyPixelOperation.SourceCopy)
         End Using
@@ -398,7 +422,7 @@ Public Class OCR
         Dim foundText As New List(Of String)()
         ' Start timer
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
-
+        UpdateCenter()
         screen = GetRelicWindow()
 
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
