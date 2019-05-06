@@ -128,11 +128,8 @@ Public Class OCR
         'Console.WriteLine("GWL_EXSTYLE: " & Hex(GetWindowLong(WF_Proc.MainWindowHandle, GWL_EXSTYLE)))
         Dim styles As Integer = GetWindowLong(WF_Proc.MainWindowHandle, GWL_STYLE)
         If (styles And WS_THICKFRAME) <> 0 Then
-            Console.WriteLine("WINDOWED")
             window = New Rect(window.X1 + 8, window.Y1 + 30, window.Width - 8, window.Height - 30)
             Main.addLog("WINDOWED ADJUSTMENT: " & window.ToString())
-        Else
-            Console.WriteLine("BORDERLESS")
         End If
 
 
