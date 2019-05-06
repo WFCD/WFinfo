@@ -7,7 +7,7 @@ Public Class OCR
     }
     Public WF_Proc As Process = Nothing
 
-    Public window As Rect = Nothing
+    Public window As Rectangle = Nothing
 
     Public dpiScaling As Double = -1.0
     Public uiScaling As Double = -1.0
@@ -20,11 +20,17 @@ Public Class OCR
     Public pixSlctHei As Integer = 25 '22
     Public pixSlctPos As Integer = 50 '42
 
+    <StructLayout(LayoutKind.Sequential)> Public Structure RECT
+        Dim Left As Integer
+        Dim Top As Integer
+        Dim Right As Integer
+        Dim Bottom As Integer
+    End Structure
 
     Public rarity As New List(Of Color) From {Color.FromArgb(171, 159, 117), Color.FromArgb(175, 175, 175), Color.FromArgb(134, 98, 50)}
 
     <DllImport("user32.dll")>
-    Public Shared Function GetWindowRect(ByVal hWnd As HandleRef, ByRef lpRect As Rect) As Boolean
+    Public Shared Function GetWindowRect(ByVal hWnd As HandleRef, ByRef lpRect As RECT) As Boolean
     End Function
 
     <DllImport("User32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
@@ -117,7 +123,10 @@ Public Class OCR
 
     Public Overridable Sub UpdateCenter()
         Dim hr As New HandleRef(WF_Proc, WF_Proc.MainWindowHandle)
-        GetWindowRect(hr, window)
+        Dim tempRect As New RECT
+        GetWindowRect(hr, tempRect)
+        window = New Rectangle(tempRect.Left, tempRect.Top, tempRect.Right - tempRect.Left, tempRect.Bottom - tempRect.Top)
+
         Main.addLog("WINDOW AREA: " & window.ToString())
 
         Dim GWL_STYLE As Int32 = -16
@@ -128,7 +137,7 @@ Public Class OCR
         'Console.WriteLine("GWL_EXSTYLE: " & Hex(GetWindowLong(WF_Proc.MainWindowHandle, GWL_EXSTYLE)))
         Dim styles As Integer = GetWindowLong(WF_Proc.MainWindowHandle, GWL_STYLE)
         If (styles And WS_THICKFRAME) <> 0 Then
-            window = New Rect(window.X1 + 8, window.Y1 + 30, window.Width - 8, window.Height - 30)
+            window = New Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38)
             Main.addLog("WINDOWED ADJUSTMENT: " & window.ToString())
         End If
 
@@ -143,13 +152,13 @@ Public Class OCR
             dpiScaling = GetScalingFactor()
 
             ' Start at left of window
-            Dim horz_center As Integer = window.X1
+            Dim horz_center As Integer = window.Left
             ' Padding from left and right are equal, so can just use window.Width to get to center
             ' Move to center
             horz_center += window.Width / 2
 
             ' Start at top of the window
-            Dim vert_center As Integer = window.Y1
+            Dim vert_center As Integer = window.Top
 
             ' move to center
             vert_center += window.Height / 2
