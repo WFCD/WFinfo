@@ -26,21 +26,6 @@
     <Setting Name="SteamSettings" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="cTitleBar" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">15, 15, 15</Value>
-    </Setting>
-    <Setting Name="cBackground" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">27, 27, 27</Value>
-    </Setting>
-    <Setting Name="cSideBar" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">23, 23, 23</Value>
-    </Setting>
-    <Setting Name="cText" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">177, 208, 217</Value>
-    </Setting>
-    <Setting Name="cTray" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">23, 23, 23</Value>
-    </Setting>
     <Setting Name="TreeOne" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
