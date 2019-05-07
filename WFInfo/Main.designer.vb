@@ -39,6 +39,7 @@ Partial Class Main
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.pTitle = New System.Windows.Forms.Panel()
+        Me.WarningIcon = New System.Windows.Forms.PictureBox()
         Me.btnHide = New System.Windows.Forms.Button()
         Me.pbIcon = New System.Windows.Forms.PictureBox()
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
@@ -49,21 +50,23 @@ Partial Class Main
         Me.trayEquipment = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.trayExit = New System.Windows.Forms.ToolStripMenuItem()
-        Me.pbSideBar = New System.Windows.Forms.PictureBox()
-        Me.pbRelic = New System.Windows.Forms.PictureBox()
-        Me.pbSettings = New System.Windows.Forms.PictureBox()
-        Me.pbEqmt = New System.Windows.Forms.PictureBox()
-        Me.pbHome = New System.Windows.Forms.PictureBox()
         Me.tAutomate = New System.Windows.Forms.Timer(Me.components)
+        Me.pbHome = New System.Windows.Forms.PictureBox()
+        Me.pbEqmt = New System.Windows.Forms.PictureBox()
+        Me.pbSettings = New System.Windows.Forms.PictureBox()
+        Me.pbRelic = New System.Windows.Forms.PictureBox()
+        Me.pbSideBar = New System.Windows.Forms.PictureBox()
+        Me.OutOfDate = New System.Windows.Forms.ToolTip(Me.components)
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
+        CType(Me.WarningIcon, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.trayMenu.SuspendLayout()
-        CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.pbEqmt, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbEqmt, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'Panel1
@@ -223,6 +226,7 @@ Partial Class Main
         '
         Me.pTitle.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
         Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.pTitle.Controls.Add(Me.WarningIcon)
         Me.pTitle.Controls.Add(Me.btnHide)
         Me.pTitle.Controls.Add(Me.lbVersion)
         Me.pTitle.Controls.Add(Me.btnClose)
@@ -232,6 +236,18 @@ Partial Class Main
         Me.pTitle.Name = "pTitle"
         Me.pTitle.Size = New System.Drawing.Size(334, 27)
         Me.pTitle.TabIndex = 6
+        '
+        'WarningIcon
+        '
+        Me.WarningIcon.BackColor = System.Drawing.Color.Transparent
+        Me.WarningIcon.Image = Global.WFInfo.My.Resources.Resources.warning_sign
+        Me.WarningIcon.Location = New System.Drawing.Point(124, 7)
+        Me.WarningIcon.Name = "WarningIcon"
+        Me.WarningIcon.Size = New System.Drawing.Size(11, 11)
+        Me.WarningIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.WarningIcon.TabIndex = 26
+        Me.WarningIcon.TabStop = False
+        Me.WarningIcon.Visible = False
         '
         'btnHide
         '
@@ -312,51 +328,10 @@ Partial Class Main
         Me.trayExit.Size = New System.Drawing.Size(107, 22)
         Me.trayExit.Text = "Exit"
         '
-        'pbSideBar
+        'tAutomate
         '
-        Me.pbSideBar.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.pbSideBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.pbSideBar.Location = New System.Drawing.Point(304, 25)
-        Me.pbSideBar.Name = "pbSideBar"
-        Me.pbSideBar.Size = New System.Drawing.Size(30, 106)
-        Me.pbSideBar.TabIndex = 18
-        Me.pbSideBar.TabStop = False
-        '
-        'pbRelic
-        '
-        Me.pbRelic.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.pbRelic.Image = Global.WFInfo.My.Resources.Resources.Relic
-        Me.pbRelic.Location = New System.Drawing.Point(305, 55)
-        Me.pbRelic.Name = "pbRelic"
-        Me.pbRelic.Padding = New System.Windows.Forms.Padding(9, 0, 8, 0)
-        Me.pbRelic.Size = New System.Drawing.Size(28, 21)
-        Me.pbRelic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.pbRelic.TabIndex = 14
-        Me.pbRelic.TabStop = False
-        '
-        'pbSettings
-        '
-        Me.pbSettings.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.pbSettings.Image = Global.WFInfo.My.Resources.Resources.Settings
-        Me.pbSettings.Location = New System.Drawing.Point(305, 105)
-        Me.pbSettings.Name = "pbSettings"
-        Me.pbSettings.Padding = New System.Windows.Forms.Padding(3, 0, 3, 0)
-        Me.pbSettings.Size = New System.Drawing.Size(28, 21)
-        Me.pbSettings.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.pbSettings.TabIndex = 15
-        Me.pbSettings.TabStop = False
-        '
-        'pbEqmt
-        '
-        Me.pbEqmt.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.pbEqmt.Image = Global.WFInfo.My.Resources.Resources.foundry
-        Me.pbEqmt.Location = New System.Drawing.Point(305, 80)
-        Me.pbEqmt.Name = "pbEqmt"
-        Me.pbEqmt.Padding = New System.Windows.Forms.Padding(6, 0, 6, 0)
-        Me.pbEqmt.Size = New System.Drawing.Size(28, 21)
-        Me.pbEqmt.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.pbEqmt.TabIndex = 16
-        Me.pbEqmt.TabStop = False
+        Me.tAutomate.Enabled = True
+        Me.tAutomate.Interval = 1000
         '
         'pbHome
         '
@@ -370,10 +345,57 @@ Partial Class Main
         Me.pbHome.TabIndex = 17
         Me.pbHome.TabStop = False
         '
-        'tAutomate
+        'pbEqmt
         '
-        Me.tAutomate.Enabled = True
-        Me.tAutomate.Interval = 1000
+        Me.pbEqmt.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.pbEqmt.Image = Global.WFInfo.My.Resources.Resources.foundry
+        Me.pbEqmt.Location = New System.Drawing.Point(305, 80)
+        Me.pbEqmt.Name = "pbEqmt"
+        Me.pbEqmt.Padding = New System.Windows.Forms.Padding(6, 0, 6, 0)
+        Me.pbEqmt.Size = New System.Drawing.Size(28, 21)
+        Me.pbEqmt.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.pbEqmt.TabIndex = 16
+        Me.pbEqmt.TabStop = False
+        '
+        'pbSettings
+        '
+        Me.pbSettings.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.pbSettings.Image = Global.WFInfo.My.Resources.Resources.Settings
+        Me.pbSettings.Location = New System.Drawing.Point(305, 105)
+        Me.pbSettings.Name = "pbSettings"
+        Me.pbSettings.Padding = New System.Windows.Forms.Padding(3, 0, 3, 0)
+        Me.pbSettings.Size = New System.Drawing.Size(28, 21)
+        Me.pbSettings.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.pbSettings.TabIndex = 15
+        Me.pbSettings.TabStop = False
+        '
+        'pbRelic
+        '
+        Me.pbRelic.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.pbRelic.Image = Global.WFInfo.My.Resources.Resources.Relic
+        Me.pbRelic.Location = New System.Drawing.Point(305, 55)
+        Me.pbRelic.Name = "pbRelic"
+        Me.pbRelic.Padding = New System.Windows.Forms.Padding(9, 0, 8, 0)
+        Me.pbRelic.Size = New System.Drawing.Size(28, 21)
+        Me.pbRelic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.pbRelic.TabIndex = 14
+        Me.pbRelic.TabStop = False
+        '
+        'pbSideBar
+        '
+        Me.pbSideBar.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.pbSideBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.pbSideBar.Location = New System.Drawing.Point(304, 25)
+        Me.pbSideBar.Name = "pbSideBar"
+        Me.pbSideBar.Size = New System.Drawing.Size(30, 106)
+        Me.pbSideBar.TabIndex = 18
+        Me.pbSideBar.TabStop = False
+        '
+        'OutOfDate
+        '
+        Me.OutOfDate.AutoPopDelay = 5000
+        Me.OutOfDate.InitialDelay = 200
+        Me.OutOfDate.ReshowDelay = 100
         '
         'Main
         '
@@ -396,13 +418,14 @@ Partial Class Main
         Me.Panel1.ResumeLayout(False)
         Me.pTitle.ResumeLayout(False)
         Me.pTitle.PerformLayout()
+        CType(Me.WarningIcon, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).EndInit()
         Me.trayMenu.ResumeLayout(False)
-        CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.pbEqmt, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbEqmt, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbSettings, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbRelic, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.pbSideBar, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub
@@ -435,4 +458,6 @@ Partial Class Main
     Friend WithEvents Label2 As Label
     Friend WithEvents lbStatus As Label
     Friend WithEvents tAutomate As Timer
+    Friend WithEvents WarningIcon As PictureBox
+    Friend WithEvents OutOfDate As ToolTip
 End Class

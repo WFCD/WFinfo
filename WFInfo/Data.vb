@@ -64,6 +64,15 @@ Class Data
         File.WriteAllText(eqmt_data_path, JsonConvert.SerializeObject(eqmt_data, Formatting.Indented))
     End Sub
 
+    Public Function Get_Current_Version() As String
+        webClient.Headers.Add("User-Agent", "random-facades")
+        Dim github As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.github.com/repos/random-facades/WFInfo/releases/latest"))
+        If github.TryGetValue("tag_name", Nothing) Then
+            Return github("tag_name").ToString().Remove(0, 1)
+        End If
+        Return Main.Instance.version
+    End Function
+
     Private Function Load_Market_Items(Optional force As Boolean = False) As Boolean
         Main.addLog("LOADING MARKET ITEM DATABASE")
         If Not force AndAlso File.Exists(market_items_path) Then

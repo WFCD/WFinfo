@@ -333,6 +333,7 @@
     <None Include="Resources\gear_h.png" />
     <None Include="Resources\foundry.png" />
     <None Include="Resources\foundry_h.png" />
+    <None Include="Resources\warning-sign.png" />
     <Content Include="x64\SQLite.Interop.dll" />
     <Content Include="x86\SQLite.Interop.dll" />
     <None Include="Resources\panelBG.bmp" />

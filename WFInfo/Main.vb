@@ -24,7 +24,7 @@ Public Class Main
                 version = version.Substring(0, version.LastIndexOf("."))
             End If
 
-            lbVersion.Text = "v" + version
+            lbVersion.Text = "v" & version
             Me.Location = My.Settings.MainLoc
             Automate = My.Settings.Automate
             tAutomate.Enabled = Automate
@@ -59,17 +59,22 @@ Public Class Main
         DoWork_timer = clock.Elapsed.TotalMilliseconds
         Try
             If (db IsNot Nothing) Then
-                Dim elapsed As TimeSpan = clock.Elapsed
-                Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds))
-                Invoke(Sub() Me.lbStatus.Text = "Getting Reward Info...")
-                parser.ParseScreen()
-                elapsed = clock.Elapsed
-                Me.DoWork_timer = CLng(Math.Round(elapsed.TotalMilliseconds - CDbl(Me.DoWork_timer)))
-                If Me.DoWork_timer > 10 Then
+                If parser.isWFActive() Then
+                    Invoke(Sub() Me.lbStatus.Text = "Getting Reward Info...")
+                    parser.ParseScreen()
+                    DoWork_timer = clock.Elapsed.TotalMilliseconds - DoWork_timer
                     Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
                 End If
             Else
                 db = New Data()
+                If version <> db.Get_Current_Version() Then
+                    Invoke(Sub() WarningIcon.Visible = True)
+                    Invoke(Sub() OutOfDate.SetToolTip(WarningIcon, "Version is Out of Date"))
+                    Invoke(Sub() OutOfDate.SetToolTip(lbTitle, "Version is Out of Date"))
+                    Invoke(Sub() OutOfDate.SetToolTip(pTitle, "Version is Out of Date"))
+                    Invoke(Sub() OutOfDate.SetToolTip(lbVersion, "Version is Out of Date"))
+                    Invoke(Sub() OutOfDate.SetToolTip(pbIcon, "Version is Out of Date"))
+                End If
                 parser.ForceUpdateCenter()
                 Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
                 Invoke(Sub() lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11))
@@ -342,7 +347,8 @@ Module Glob
     Public bgBrush As Brush = New SolidBrush(bgColor)
     Public culture As System.Globalization.CultureInfo = New System.Globalization.CultureInfo("en")
     Public tahoma10 As New Font("Tahoma", 10.0!, FontStyle.Bold)
-    Public tahoma8 As New Font("Tahoma", 10.0!, FontStyle.Bold)
+    Public tahoma8_bold As New Font("Tahoma", 8.0!, FontStyle.Bold)
+    Public tahoma8 As New Font("Tahoma", 8.0!)
 
 
     Public rwrdPanels(4) As Overlay
@@ -361,14 +367,14 @@ Module Glob
 
     Private DoOtherWork_timer As Long
     Private Sub DoOtherWork()
-        DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
-        Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
-        parser.ParseScreen()
-        DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
-        If DoOtherWork_timer > 50 Then ' Asumption made that if the Parse screen takes longer than 50 ms to prosses then Warframe *has* to be running seeing as the fasters OCR time I've seen is ~400ms
+        If parser.isWFActive() Then
+            DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
+            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
+            parser.ParseScreen()
+            DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
             Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
         Else
-            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Warframe Not Active (" & DoOtherWork_timer & "ms)")
+            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Warframe Not Active")
         End If
     End Sub
 

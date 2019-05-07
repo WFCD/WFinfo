@@ -12,6 +12,12 @@ Public Class OCR
     Public dpiScaling As Double = -1.0
     Public uiScaling As Double = -1.0
     Public center As Point = Nothing
+    Public currStyle As WindowStyle
+    Public Enum WindowStyle
+        FULLSCREEN
+        BORDERLESS
+        WINDOWED
+    End Enum
 
     Public pixRwrdWid As Integer = 1732 '1516
     Public pixRwrdHei As Integer = 349 '305
@@ -47,6 +53,11 @@ Public Class OCR
         VERTRES = 10
         DESKTOPVERTRES = 117
     End Enum
+
+    Public Sub New()
+        engine.SetVariable("load_system_dawg", False)
+        engine.SetVariable("user_words_suffix", "prime-words")
+    End Sub
 
     Public Overridable Function GetWFProc() As Boolean
         For Each p As Process In Process.GetProcesses
@@ -128,19 +139,25 @@ Public Class OCR
         Main.addLog("WINDOW AREA: " & window.ToString())
 
         Dim GWL_STYLE As Int32 = -16
-        Dim WS_THICKFRAME As Integer = 262144
-        Dim WS_MAXIMIZE As Integer = 16777216
+        Dim WS_THICKFRAME As Long = 262144
+        Dim WS_MAXIMIZE As Long = 16777216
+        Dim WS_POPUP As Long = 2147483648
         'Dim GWL_EXSTYLE As Int32 = -20
         'Console.WriteLine("GWL_STYLE: " & Hex(GetWindowLong(WF_Proc.MainWindowHandle, GWL_STYLE)))
         'Console.WriteLine("GWL_EXSTYLE: " & Hex(GetWindowLong(WF_Proc.MainWindowHandle, GWL_EXSTYLE)))
-        Dim styles As Integer = GetWindowLong(WF_Proc.MainWindowHandle, GWL_STYLE)
+        Dim styles As Long = GetWindowLong(WF_Proc.MainWindowHandle, GWL_STYLE)
         If (styles And WS_THICKFRAME) <> 0 Then
             window = New Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38)
             Main.addLog("WINDOWED ADJUSTMENT: " & window.ToString())
+            currStyle = WindowStyle.WINDOWED
+            DwmEnableComposition(True)
+        ElseIf (styles And WS_POPUP) <> 0 Then
+            currStyle = WindowStyle.BORDERLESS
+            DwmEnableComposition(True)
+        Else
+            currStyle = WindowStyle.FULLSCREEN
+            DwmEnableComposition(False)
         End If
-
-
-
 
         If window.Width <= 0 Or window.Height <= 0 Then
             WF_Proc = Nothing
@@ -197,10 +214,6 @@ Public Class OCR
 
         Using bmp As New Bitmap(wid, hei)
             Using graph As Graphics = Graphics.FromImage(bmp)
-                If DisplayWindow Then
-                    DwmEnableComposition(False)
-                End If
-
                 graph.CopyFromScreen(left, top, 0, 0, New Size(wid, hei), CopyPixelOperation.SourceCopy)
             End Using
 
@@ -234,7 +247,7 @@ Public Class OCR
                 End If
             Next
             ' PERCENTAGE NEEDS TO BE BETWEEN 50% and 70%
-            If tot_white < bmp.Width * 0.5 OrElse tot_white > bmp.Width * 0.7 Then
+            If tot_white < bmp.Width * 0.4 OrElse tot_white > bmp.Width * 0.6 Then
                 Return False
             End If
 
