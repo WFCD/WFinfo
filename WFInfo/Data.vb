@@ -1,4 +1,4 @@
-﻿Imports System.IO
+Imports System.IO
 Imports System.Net
 Imports System.Text.RegularExpressions
 Imports Newtonsoft.Json
@@ -533,23 +533,32 @@ Class Data
         Save_Eqmt()
     End Sub
 
-    Public Function GetPlat(guess As Object) As Integer
-        Dim partUrl = guess.replace("*", "")
-        Dim partName = partUrl.Replace(vbLf, "")
-        partUrl = partUrl.replace(" ", "%5F").Replace(vbLf, "").Replace("&", "and")
+    Public temp_timer As Long = 0
+    Public Function GetPlatLive(item_url As String) As JArray
+        temp_timer = clock.Elapsed.TotalMilliseconds
+        Dim stats As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items/" + item_url + "/orders")) 'Get initial list of orders
+        temp_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("Time taken to download all listings: " & -temp_timer)
+        temp_timer = clock.Elapsed.TotalMilliseconds
 
-        Dim elem As JObject = Nothing
-        If Not market_data.TryGetValue(partName, elem) Then
-            Dim partName2 As String = partName.Replace("and", "&")
-            If Not market_data.TryGetValue(partName2, elem) Then
-                Load_Market_Item(partName, partUrl)
-                If Not market_data.TryGetValue(partName, elem) Then
-                    Return 0
-                End If
+        Dim sellers As New JArray
+        For Each listing In stats("payload")("orders")
+            If listing("order_type").ToString = "buy" Or listing("user")("status").ToString = "offline" Then 'check if order is a: a sell, b: acvtive 
+                Continue For
             End If
-        End If
-        Return elem("plat")
+            sellers.Add(listing)
+        Next
+
+        'sellers = sellers.Sort(Function(jo1, jo2) CDec(jo1.Item("Rate")).CompareTo(CDec(jo2.Item("Rate"))))
+        'sellers = sellers.OrderBy(Of Integer)(Function(jo1, jo2) CDec(jo1.Item("Rate")).CompareTo(CDec(jo2.Item("Rate"))))
+        'Dim sorted As JArray = (sellers.OrderBy(Of platinum))
+        temp_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("Time taken to process sell and online listings: " & -temp_timer)
+        Console.WriteLine(sellers)
+        Return sellers 'return list of *recent* sellers. Price may fluctuate 
+
     End Function
+
 
     Public Function IsPartVaulted(name As String) As Boolean
         Dim eqmt As String = name.Substring(0, name.IndexOf("Prime") + 5)

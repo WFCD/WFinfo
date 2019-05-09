@@ -57,6 +57,7 @@ Partial Class Main
         Me.pbRelic = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
         Me.OutOfDate = New System.Windows.Forms.ToolTip(Me.components)
+        Me.Button1 = New System.Windows.Forms.Button()
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
         CType(Me.WarningIcon, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -73,6 +74,7 @@ Partial Class Main
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel1.Controls.Add(Me.Button1)
         Me.Panel1.Controls.Add(Me.lbStatus)
         Me.Panel1.Controls.Add(Me.lbWiki)
         Me.Panel1.Controls.Add(Me.Label2)
@@ -397,6 +399,15 @@ Partial Class Main
         Me.OutOfDate.InitialDelay = 200
         Me.OutOfDate.ReshowDelay = 100
         '
+        'Button1
+        '
+        Me.Button1.Location = New System.Drawing.Point(3, 54)
+        Me.Button1.Name = "Button1"
+        Me.Button1.Size = New System.Drawing.Size(39, 23)
+        Me.Button1.TabIndex = 31
+        Me.Button1.Text = "Button1"
+        Me.Button1.UseVisualStyleBackColor = True
+        '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -460,4 +471,5 @@ Partial Class Main
     Friend WithEvents tAutomate As Timer
     Friend WithEvents WarningIcon As PictureBox
     Friend WithEvents OutOfDate As ToolTip
+    Friend WithEvents Button1 As Button
 End Class

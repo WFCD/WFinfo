@@ -309,6 +309,10 @@ Public Class Main
             Me.tAutomate.Interval = 5000
         End If
     End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        db.GetPlatLive("redeemer_prime_blueprint")
+    End Sub
 End Class
 
 Module Glob
@@ -349,7 +353,7 @@ Module Glob
     Public tahoma10 As New Font("Tahoma", 10.0!, FontStyle.Bold)
     Public tahoma8_bold As New Font("Tahoma", 8.0!, FontStyle.Bold)
     Public tahoma8 As New Font("Tahoma", 8.0!)
-
+    Public timeFrame As String = "48hours"
 
     Public rwrdPanels(4) As Overlay
     Public relicPanels(9) As Overlay

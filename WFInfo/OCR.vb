@@ -263,39 +263,38 @@ Public Class OCR
     '    BEGIN RELIC REWARDS STUFF
     '_____________________________________________________
 
-    Public Overridable Function Screenshot(wid As Integer, hei As Integer, top As Integer) As Bitmap
-        Dim ss_area As New Rectangle(center.X - wid / 2, center.Y - top, wid, hei)
+    Public Overridable Function Screenshot(width As Integer, height As Integer, heightPosition As Integer) As Bitmap
+        Dim ss_area As New Rectangle(center.X - width / 2,
+                                     center.Y - heightPosition,
+                                     width,
+                                     height)
         Main.addLog("TAKING SCREENSHOT:" & vbCrLf & "DPI SCALE: " & dpiScaling & vbCrLf & "SS REGION: " & ss_area.ToString())
-        Dim ret As New Bitmap(wid, hei)
-        Try
-            If Debug Then
-                Dim debugRet As New Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height)
-                Using graph As Graphics = Graphics.FromImage(debugRet)
-                    graph.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size, CopyPixelOperation.SourceCopy)
-                    Dim print As String =
+        Dim ret As New Bitmap(width, height)
+        If Debug Then 'screenshot the whole screen
+            Dim debugRet As New Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height)
+            Using graph As Graphics = Graphics.FromImage(debugRet)
+                graph.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size, CopyPixelOperation.SourceCopy)
+                Dim print As String =
                         "Tried looking at " & ss_area.ToString & vbCrLf &
                         "Screen resolution: " & Screen.PrimaryScreen.Bounds.Size.ToString & vbCrLf &
                         "Screen center: " & center.ToString & vbCrLf &
                         "Screen bounds: " & window.ToString & vbCrLf &
                         "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
-                    Dim font As New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120.0))
-                    Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
+                Dim font As New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120.0))
+                Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
 
-                    Dim textbox = New Rectangle(center.X, center.Y, printBounds.Width, printBounds.Height)
+                Dim textbox = New Rectangle(center.X, center.Y, printBounds.Width, printBounds.Height)
 
-                    graph.FillEllipse(Brushes.Red, center.X - 3, center.Y - 3, 3, 3)    'Dot centered at where it thinks the center of warframe is
-                    graph.DrawRectangle(New Pen(Brushes.Red), ss_area)                  'The area that it tried to read from
-                    graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
-                    graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
-                    debugRet.Save(appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
-                    Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
-                    My.Settings.SSCount += 1
-                End Using
-            End If
+                graph.FillEllipse(Brushes.Red, center.X - 3, center.Y - 3, 3, 3)    'Dot centered at where it thinks the center of warframe is
+                graph.DrawRectangle(New Pen(Brushes.Red), ss_area)                  'The area that it tried to read from
+                graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
+                graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
+                debugRet.Save(appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
+                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
+                My.Settings.SSCount += 1
+            End Using
+        End If
 
-        Catch e As Exception
-            Console.WriteLine(e.ToString)
-        End Try
         Using graph As Graphics = Graphics.FromImage(ret)
             graph.CopyFromScreen(ss_area.X, ss_area.Y, 0, 0, New Size(ss_area.Width, ss_area.Height), CopyPixelOperation.SourceCopy)
         End Using
@@ -415,7 +414,6 @@ Public Class OCR
         End Using
     End Function
 
-    ' THIS WILL BE IGNORING FULLSCREEN FOR NOW
     Public ParseScreen_timer As Long = 0
     Public Overridable Sub ParseScreen()
         If Not isWFActive() Then
@@ -783,3 +781,18 @@ Public Class OCR
         Return False
     End Function
 End Class
+
+'Notes for inventory parsing:
+'All these are taken at 16:9 Examples are taken at the highest scaling factor
+'@ 99-100% scaling = 6  items per row, example: https://i.imgur.com/5xexNtw.png
+'@ 98-90%  scaling = 7  items per row, example: https://i.imgur.com/t1p9Gzp.png
+'@ 89-84%  scaling = 8  items per row, example: https://i.imgur.com/5i9ztVj.png
+'@ 83-77%  scaling = 9  items per row, example: https://i.imgur.com/oJDLyME.png
+'@ 76-72%  scaling = 10 items per row, example: https://i.imgur.com/RGBGBeM.png
+'@ 71-68%  scaling = 11 items per row, example: https://i.imgur.com/U2poYYG.png
+'@ 67-64%  scaling = 12 items per row, example: https://i.imgur.com/18hKGeT.png
+'@ 63-60%  scaling = 13 items per row, example: https://i.imgur.com/2yvtA4g.png
+'@ 59-57%  scaling = 14 items per row, example: https://i.imgur.com/ucd71Pp.png
+'@ 56-54%  scaling = 15 items per row, example: https://i.imgur.com/0a5FAKg.png
+'@ 53-51%  scaling = 16 items per row, example: https://i.imgur.com/mBemIRN.png
+'@ 50-50%  scaling = 17 items per row, example: https://i.imgur.com/9hcgnt5.png
