@@ -27,6 +27,7 @@ Partial Class Main
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Main))
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.Button1 = New System.Windows.Forms.Button()
         Me.lbStatus = New System.Windows.Forms.Label()
         Me.lbWiki = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
@@ -39,7 +40,6 @@ Partial Class Main
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.pTitle = New System.Windows.Forms.Panel()
-        Me.WarningIcon = New System.Windows.Forms.PictureBox()
         Me.btnHide = New System.Windows.Forms.Button()
         Me.pbIcon = New System.Windows.Forms.PictureBox()
         Me.tUpdate = New System.Windows.Forms.Timer(Me.components)
@@ -57,10 +57,8 @@ Partial Class Main
         Me.pbRelic = New System.Windows.Forms.PictureBox()
         Me.pbSideBar = New System.Windows.Forms.PictureBox()
         Me.OutOfDate = New System.Windows.Forms.ToolTip(Me.components)
-        Me.Button1 = New System.Windows.Forms.Button()
         Me.Panel1.SuspendLayout()
         Me.pTitle.SuspendLayout()
-        CType(Me.WarningIcon, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.trayMenu.SuspendLayout()
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -88,6 +86,15 @@ Partial Class Main
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(334, 106)
         Me.Panel1.TabIndex = 19
+        '
+        'Button1
+        '
+        Me.Button1.Location = New System.Drawing.Point(3, 54)
+        Me.Button1.Name = "Button1"
+        Me.Button1.Size = New System.Drawing.Size(39, 23)
+        Me.Button1.TabIndex = 31
+        Me.Button1.Text = "Button1"
+        Me.Button1.UseVisualStyleBackColor = True
         '
         'lbStatus
         '
@@ -228,7 +235,6 @@ Partial Class Main
         '
         Me.pTitle.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
         Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.pTitle.Controls.Add(Me.WarningIcon)
         Me.pTitle.Controls.Add(Me.btnHide)
         Me.pTitle.Controls.Add(Me.lbVersion)
         Me.pTitle.Controls.Add(Me.btnClose)
@@ -238,18 +244,6 @@ Partial Class Main
         Me.pTitle.Name = "pTitle"
         Me.pTitle.Size = New System.Drawing.Size(334, 27)
         Me.pTitle.TabIndex = 6
-        '
-        'WarningIcon
-        '
-        Me.WarningIcon.BackColor = System.Drawing.Color.Transparent
-        Me.WarningIcon.Image = Global.WFInfo.My.Resources.Resources.warning_sign
-        Me.WarningIcon.Location = New System.Drawing.Point(124, 7)
-        Me.WarningIcon.Name = "WarningIcon"
-        Me.WarningIcon.Size = New System.Drawing.Size(11, 11)
-        Me.WarningIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.WarningIcon.TabIndex = 26
-        Me.WarningIcon.TabStop = False
-        Me.WarningIcon.Visible = False
         '
         'btnHide
         '
@@ -399,15 +393,6 @@ Partial Class Main
         Me.OutOfDate.InitialDelay = 200
         Me.OutOfDate.ReshowDelay = 100
         '
-        'Button1
-        '
-        Me.Button1.Location = New System.Drawing.Point(3, 54)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(39, 23)
-        Me.Button1.TabIndex = 31
-        Me.Button1.Text = "Button1"
-        Me.Button1.UseVisualStyleBackColor = True
-        '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -429,7 +414,6 @@ Partial Class Main
         Me.Panel1.ResumeLayout(False)
         Me.pTitle.ResumeLayout(False)
         Me.pTitle.PerformLayout()
-        CType(Me.WarningIcon, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.pbIcon, System.ComponentModel.ISupportInitialize).EndInit()
         Me.trayMenu.ResumeLayout(False)
         CType(Me.pbHome, System.ComponentModel.ISupportInitialize).EndInit()
@@ -469,7 +453,6 @@ Partial Class Main
     Friend WithEvents Label2 As Label
     Friend WithEvents lbStatus As Label
     Friend WithEvents tAutomate As Timer
-    Friend WithEvents WarningIcon As PictureBox
     Friend WithEvents OutOfDate As ToolTip
     Friend WithEvents Button1 As Button
 End Class

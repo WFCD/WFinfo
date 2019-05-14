@@ -1,6 +1,7 @@
 Imports System.ComponentModel
 Imports System.Drawing.Imaging
 Imports System.IO
+Imports System.Text.RegularExpressions
 
 Public Class Main
     Private Declare Sub mouse_event Lib "user32" (ByVal dwFlags As Integer, ByVal dx As Integer, ByVal dy As Integer, ByVal cButtons As Integer, ByVal dwExtraInfo As Integer)
@@ -10,6 +11,7 @@ Public Class Main
     Dim mouseX As Integer
     Dim mouseY As Integer
     Public version As String = Nothing
+    Public versionNum As Integer = 0
     Public Shared Instance As Main
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -22,6 +24,7 @@ Public Class Main
             If version Is Nothing Then
                 version = Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
                 version = version.Substring(0, version.LastIndexOf("."))
+                versionNum = VersionToInteger(version)
             End If
 
             lbVersion.Text = "v" & version
@@ -60,6 +63,7 @@ Public Class Main
         Try
             If (db IsNot Nothing) Then
                 If parser.isWFActive() Then
+                    Invoke(Sub() lbStatus.ForeColor = textColor)
                     Invoke(Sub() Me.lbStatus.Text = "Getting Reward Info...")
                     parser.ParseScreen()
                     DoWork_timer = clock.Elapsed.TotalMilliseconds - DoWork_timer
@@ -67,14 +71,6 @@ Public Class Main
                 End If
             Else
                 db = New Data()
-                If version <> db.Get_Current_Version() Then
-                    Invoke(Sub() WarningIcon.Visible = True)
-                    Invoke(Sub() OutOfDate.SetToolTip(WarningIcon, "Version is Out of Date"))
-                    Invoke(Sub() OutOfDate.SetToolTip(lbTitle, "Version is Out of Date"))
-                    Invoke(Sub() OutOfDate.SetToolTip(pTitle, "Version is Out of Date"))
-                    Invoke(Sub() OutOfDate.SetToolTip(lbVersion, "Version is Out of Date"))
-                    Invoke(Sub() OutOfDate.SetToolTip(pbIcon, "Version is Out of Date"))
-                End If
                 parser.ForceUpdateCenter()
                 Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
                 Invoke(Sub() lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11))
@@ -87,11 +83,16 @@ Public Class Main
                 For i As Integer = 0 To 8
                     relicPanels(i) = New Overlay()
                 Next
-                Invoke(Sub() lbStatus.Text = "Data Loaded")
+                If versionNum < db.Get_Current_Version() Then
+                    Invoke(Sub() lbStatus.Text = "Data Loaded")
+                Else
+                    Invoke(Sub() lbStatus.Text = "New Version Available")
+                    Invoke(Sub() lbStatus.ForeColor = Color.FromArgb(0, 125, 255))
+                End If
             End If
         Catch ex As Exception
-            Invoke(Sub() Me.lbStatus.Text = "ERROR (ParseScreen)")
-            Invoke(Sub() Me.lbStatus.ForeColor = Color.Red)
+            Invoke(Sub() lbStatus.Text = "ERROR (ParseScreen)")
+            Invoke(Sub() lbStatus.ForeColor = Color.Red)
             Me.addLog(ex.ToString())
         End Try
     End Sub
@@ -159,7 +160,7 @@ Public Class Main
     End Sub
 
     Private Sub pbHome_Click(sender As Object, e As EventArgs) Handles pbHome.Click
-        Process.Start("https://github.com/random-facades/WFInfo")
+        Process.Start("https://random-facades.github.io/WFInfo/")
     End Sub
 
     Private Sub pbHome_MouseEnter(sender As Object, e As EventArgs) Handles pbHome.MouseEnter
@@ -313,6 +314,12 @@ Public Class Main
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
         db.GetPlatLive("redeemer_prime_blueprint")
     End Sub
+
+    Private Sub lbStatus_Click(sender As Object, e As EventArgs) Handles lbStatus.Click
+        If lbStatus.Text = "New Version Available" Then
+            pbHome_Click(sender, e)
+        End If
+    End Sub
 End Class
 
 Module Glob
@@ -373,11 +380,13 @@ Module Glob
     Private Sub DoOtherWork()
         If parser.isWFActive() Then
             DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
+            Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
             Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
             parser.ParseScreen()
             DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
             Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
         Else
+            Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
             Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Warframe Not Active")
         End If
     End Sub
@@ -593,5 +602,21 @@ Module Glob
         Next
 
         Return 1
+    End Function
+
+    Public Function VersionToInteger(vers As String) As Integer
+        Dim versParts As String() = Regex.Replace(vers, "[^0-9\.]+", "").Split(".")
+        If versParts.Count = 3 Then
+            Dim ret As Integer = 0
+            For i As Integer = 0 To 2
+                If versParts(i).Length = 0 Then
+                    Return -1
+                End If
+                ret += Integer.Parse(versParts(i)) * Math.Pow(100, 2 - i)
+                Console.WriteLine(ret)
+            Next
+            Return ret
+        End If
+        Return -1
     End Function
 End Module
