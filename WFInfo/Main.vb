@@ -83,7 +83,7 @@ Public Class Main
                 For i As Integer = 0 To 8
                     relicPanels(i) = New Overlay()
                 Next
-                If versionNum < db.Get_Current_Version() Then
+                If versionNum >= db.Get_Current_Version() Then
                     Invoke(Sub() lbStatus.Text = "Data Loaded")
                 Else
                     Invoke(Sub() lbStatus.Text = "New Version Available")

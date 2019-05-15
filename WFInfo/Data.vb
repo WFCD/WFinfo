@@ -43,6 +43,12 @@ Class Data
         save_count += 1
     End Sub
 
+    Public Sub Save_JArray(data As JArray)
+        Main.addLog("SAVING DEBUG JSON: debug" & save_count.ToString() & ".json")
+        File.WriteAllText(Path.Combine(appData, "WFInfo\debug" & save_count.ToString() & ".json"), JsonConvert.SerializeObject(data, Formatting.Indented))
+        save_count += 1
+    End Sub
+
     Public Sub Save_Market()
         Main.addLog("SAVING MARKET DATABASE")
         File.WriteAllText(market_items_path, JsonConvert.SerializeObject(market_items, Formatting.Indented))
@@ -71,6 +77,36 @@ Class Data
             Return VersionToInteger(github("tag_name").ToString())
         End If
         Return Main.Instance.versionNum
+    End Function
+
+    Public Function Load_Nexus_Items() As Boolean
+        Dim nexus_db As JArray = JsonConvert.DeserializeObject(Of JArray)(webClient.DownloadString("https://api.nexus-stats.com/warframe/v1/items?data=prices"))
+        Dim save_db As New JObject()
+
+        For Each item As JObject In nexus_db
+            If item("type").ToString() = "Prime" Then
+                Dim temp As New JObject()
+                For Each part As JObject In item("components")
+                    If part("name").ToString() <> "Set" Then
+                        Dim str_name As String = item("name").ToString() & " " & part("name").ToString()
+                        Dim check As JValue = part("combined")("avg")
+                        If check.Value Is Nothing Then
+                            Dim str_url As String = Regex.Replace(str_name.ToLower(), " ", "_")
+                            Load_Market_Item(str_name, str_url)
+                        Else
+                            temp(part("name").ToString()) = check
+                            market_data(str_name)("plat") = Math.Round(check.Value(Of Double), 2)
+                            Console.WriteLine(market_data(str_name)("plat"))
+                        End If
+                    End If
+                Next
+
+                save_db(item("name").ToString()) = temp
+            End If
+        Next
+
+        Save_JObject(save_db)
+        Return True
     End Function
 
     Private Function Load_Market_Items(Optional force As Boolean = False) As Boolean
@@ -144,6 +180,11 @@ Class Data
         job("plat") = 0
         market_data("Forma Blueprint") = job
         market_data("timestamp") = Date.Now.ToString("R")
+
+        ' OVERWRITE ALL DATA FROM DUCANATOR CAUSE IT SUCKS
+        '    :'(
+        '                   except the ducat values, those are nice
+        Load_Nexus_Items()
         Return True
     End Function
 
