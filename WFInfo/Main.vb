@@ -97,6 +97,7 @@ Public Class Main
         End Try
     End Sub
 
+    Private log_lock As Object
     Public Sub addLog(txt As String)
         '_________________________________________________________________________
         'Function for storing log data
@@ -120,8 +121,11 @@ Public Class Main
         Else
             File.Create(appData + "\WFInfo\Debug\WFInfo.log").Dispose()
         End If
-        My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\Debug\WFInfo.log",
-        dateTime + vbNewLine + txt + vbNewLine + vbNewLine + logStore, False)
+
+        SyncLock log_lock
+            My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\Debug\WFInfo.log",
+            dateTime + vbNewLine + txt + vbNewLine + vbNewLine + logStore, False)
+        End SyncLock
     End Sub
 
     Private Sub Main_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
