@@ -96,7 +96,6 @@ Class Data
                         Else
                             temp(part("name").ToString()) = check
                             market_data(str_name)("plat") = Math.Round(check.Value(Of Double), 2)
-                            Console.WriteLine(market_data(str_name)("plat"))
                         End If
                     End If
                 Next

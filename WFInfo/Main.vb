@@ -97,7 +97,7 @@ Public Class Main
         End Try
     End Sub
 
-    Private log_lock As Object
+    Private log_lock As New Object()
     Public Sub addLog(txt As String)
         '_________________________________________________________________________
         'Function for storing log data
@@ -618,7 +618,6 @@ Module Glob
                     Return -1
                 End If
                 ret += Integer.Parse(versParts(i)) * Math.Pow(100, 2 - i)
-                Console.WriteLine(ret)
             Next
             Return ret
         End If
