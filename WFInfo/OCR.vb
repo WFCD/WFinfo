@@ -439,19 +439,15 @@ Public Class OCR
 
         If Not DisplayWindow Then
             Dim pad As Integer = screen.Height * 0.05
-            top = center.Y - pixRwrdPos * uiScaling + pad
+            top = center.Y - pixRwrdPos * (uiScaling / dpiScaling) + pad
             right = center.X - screen.Width / 2 - pad
             ' Adjust for <4 players
             right -= (players - 4) * screen.Width / 8
-            Dim dpiright = right / dpiScaling
-            Dim dpitop = top / dpiScaling
             For i = 0 To players - 1
-                dpiright += screen.Width / 4
+                right += screen.Width / 4
                 Dim j As Integer = i
-                Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(dpiright, dpitop))
+                Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right / dpiScaling, top / dpiScaling))
             Next
-            dpiright = 0
-            dpitop = 0
         End If
 
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
