@@ -111,20 +111,21 @@ Public Class Main
         End If
 
         appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-        Dim dateTime As String = "[" + System.DateTime.Now + " " + version + "]"
-        Dim logStore As String = ""
+        Dim logTXT As String = "[" + System.DateTime.Now + " " + version + "]" + vbNewLine + txt + vbNewLine + vbNewLine
+
         If Not My.Computer.FileSystem.DirectoryExists(appData + "\WFInfo") Then
             Directory.CreateDirectory(appData + "\WFInfo")
-        End If
-        If My.Computer.FileSystem.FileExists(appData + "\WFInfo\Debug\WFInfo.log") Then
-            logStore = My.Computer.FileSystem.ReadAllText(appData + "\WFInfo\Debug\WFInfo.log")
-        Else
+            Directory.CreateDirectory(appData + "\WFInfo\Debug")
+            File.Create(appData + "\WFInfo\Debug\WFInfo.log").Dispose()
+        ElseIf Not My.Computer.FileSystem.DirectoryExists(appData + "\WFInfo\Debug") Then
+            Directory.CreateDirectory(appData + "\WFInfo\Debug")
+            File.Create(appData + "\WFInfo\Debug\WFInfo.log").Dispose()
+        ElseIf Not My.Computer.FileSystem.FileExists(appData + "\WFInfo\Debug\WFInfo.log") Then
             File.Create(appData + "\WFInfo\Debug\WFInfo.log").Dispose()
         End If
 
         SyncLock log_lock
-            My.Computer.FileSystem.WriteAllText(appData + "\WFInfo\Debug\WFInfo.log",
-            dateTime + vbNewLine + txt + vbNewLine + vbNewLine + logStore, False)
+            File.AppendAllText(appData + "\WFInfo\Debug\WFInfo.log", logTXT)
         End SyncLock
     End Sub
 
