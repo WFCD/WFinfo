@@ -273,7 +273,8 @@ Public Class OCR
         If Debug Then 'screenshot the whole screen
             Dim debugRet As New Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height)
             Using graph As Graphics = Graphics.FromImage(debugRet)
-                graph.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, Screen.PrimaryScreen.Bounds.Size, CopyPixelOperation.SourceCopy)
+                Dim screenSize As New Size(Screen.PrimaryScreen.Bounds.Width * dpiScaling, Screen.PrimaryScreen.Bounds.Height * dpiScaling)
+                graph.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, screenSize, CopyPixelOperation.SourceCopy)
                 Dim print As String =
                         "Tried looking at " & ss_area.ToString & vbCrLf &
                         "Screen resolution: " & Screen.PrimaryScreen.Bounds.Size.ToString & vbCrLf &
