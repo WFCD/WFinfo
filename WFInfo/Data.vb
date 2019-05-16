@@ -81,11 +81,9 @@ Class Data
 
     Public Function Load_Nexus_Items() As Boolean
         Dim nexus_db As JArray = JsonConvert.DeserializeObject(Of JArray)(webClient.DownloadString("https://api.nexus-stats.com/warframe/v1/items?data=prices"))
-        Dim save_db As New JObject()
 
         For Each item As JObject In nexus_db
             If item("type").ToString() = "Prime" Then
-                Dim temp As New JObject()
                 For Each part As JObject In item("components")
                     If part("name").ToString() <> "Set" Then
                         Dim str_name As String = item("name").ToString() & " " & part("name").ToString()
@@ -94,17 +92,25 @@ Class Data
                             Dim str_url As String = Regex.Replace(str_name.ToLower(), " ", "_")
                             Load_Market_Item(str_name, str_url)
                         Else
-                            temp(part("name").ToString()) = check
-                            market_data(str_name)("plat") = Math.Round(check.Value(Of Double), 2)
+                            Dim plat As Double = check
+                            Dim mark As Double = market_data(str_name)("plat")
+                            If mark < plat Then
+                                plat = part("combined")("median")
+                                If mark < plat Then
+                                    plat = part("combined")("min")
+                                    If mark < plat Then
+                                        plat = mark
+                                    End If
+                                End If
+                            End If
+                            market_data(str_name)("plat") = Math.Round(plat, 2)
                         End If
                     End If
                 Next
 
-                save_db(item("name").ToString()) = temp
             End If
         Next
 
-        Save_JObject(save_db)
         Return True
     End Function
 
