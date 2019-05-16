@@ -446,7 +446,9 @@ Public Class OCR
             For i = 0 To players - 1
                 right += screen.Width / 4
                 Dim j As Integer = i
-                Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right, top))
+                Dim dpiright = right / dpiScaling
+                Dim dpitop = top / dpiScaling
+                Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(dpiright, dpitop))
             Next
         End If
 
