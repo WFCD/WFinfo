@@ -289,8 +289,8 @@ Public Class OCR
                 graph.DrawRectangle(New Pen(Brushes.Red), ss_area)                  'The area that it tried to read from
                 graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
                 graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
-                debugRet.Save(appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
-                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\tests\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
+                debugRet.Save(appData & "\WFInfo\debug\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
+                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
                 My.Settings.SSCount += 1
             End Using
         End If
@@ -607,8 +607,8 @@ Public Class OCR
                         graph.CopyFromScreen(left, top + bmpSize.Height, 0, 0, bmpSize, CopyPixelOperation.SourceCopy)
 
                         If Debug Then
-                            bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
-                            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+                            bmp.Save(appData & "\WFInfo\debug\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+                            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
 
                             My.Settings.DebugCount += 1
                         End If
@@ -627,8 +627,8 @@ Public Class OCR
                             Next
                         Next
                         If Debug Then
-                            bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
-                            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\tests\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+                            bmp.Save(appData & "\WFInfo\debug\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
+                            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\RR" & i & j & "1-" & My.Settings.DebugCount & ".png")
 
                         End If
                         If Not more Then
@@ -644,8 +644,8 @@ Public Class OCR
                     Using graph As Graphics = Graphics.FromImage(bmp)
                         graph.CopyFromScreen(left, top, 0, 0, bmpSize, CopyPixelOperation.SourceCopy)
                         If Debug Then
-                            bmp.Save(appData & "\WFInfo\tests\RR" & i & j & "2-" & My.Settings.DebugCount & ".png")
-                            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\tests\RR" & i & j & "2-" & My.Settings.DebugCount & ".png")
+                            bmp.Save(appData & "\WFInfo\debug\RR" & i & j & "2-" & My.Settings.DebugCount & ".png")
+                            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\RR" & i & j & "2-" & My.Settings.DebugCount & ".png")
 
                         End If
                         Dim multi As Boolean = True
