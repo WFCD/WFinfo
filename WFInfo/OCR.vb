@@ -443,13 +443,15 @@ Public Class OCR
             right = center.X - screen.Width / 2 - pad
             ' Adjust for <4 players
             right -= (players - 4) * screen.Width / 8
+            Dim dpiright = right / dpiScaling
+            Dim dpitop = top / dpiScaling
             For i = 0 To players - 1
-                right += screen.Width / 4
+                dpiright += screen.Width / 4
                 Dim j As Integer = i
-                Dim dpiright = right / dpiScaling
-                Dim dpitop = top / dpiScaling
                 Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(dpiright, dpitop))
             Next
+            dpiright = 0
+            dpitop = 0
         End If
 
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
