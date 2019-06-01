@@ -374,10 +374,12 @@ Module Glob
     Public WithEvents globHook As New GlobalHook()
 
     Public parser As New OCR()
+    Public parser2 As New OCR2()
 
     Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
         If key = HKey1 Then
             Task.Factory.StartNew(Sub() DoOtherWork())
+            Task.Factory.StartNew(Sub() parser2.IsRelicWindow())
         End If
     End Sub
 
