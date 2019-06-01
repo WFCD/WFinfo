@@ -2,11 +2,13 @@
 Imports Tesseract
 
 Public Class OCR2
-    ' Pixel measurements for reward screen @ 1920 x 1080
+    ' Pixel measurements for reward screen @ 1920 x 1080 with 100% scale
     Public Const pixRwrdWid As Integer = 968
     Public Const pixRwrdHei As Integer = 235
     Public Const pixRwrdYDisp As Integer = 185
     Public Const pixRwrdLineHei As Integer = 22
+    Public Const pixRwrdLineWid As Integer = 240
+
 
     ' Pixel measurements for detecting reward screen
     Public Const pixFissWid As Integer = 354
@@ -16,12 +18,22 @@ Public Class OCR2
 
     ' Colors for "VOIDFISSURE/REWARDS"
     Public Const pixProfWid As Integer = 39
-    '   Height is always 1px
+    ' Height is always 1px
     ' Public Const pixProfHei As Integer = 1
     Public Const pixProfXDisp As Integer = 98
     Public Const pixProfYDisp As Integer = 86
-    Public FissClr1 As Color = Color.FromArgb(189, 168, 101)
+    Public FissClr1 As Color = Color.FromArgb(189, 168, 101)    ' default
+    Public FissClr2 As Color = Color.FromArgb(153, 31, 35)      ' stalker
+    Public FissClr3 As Color = Color.FromArgb(238, 193, 105)    ' baruk
+    Public FissClr4 As Color = Color.FromArgb(35, 201, 245)     ' corpus
+    Public FissClr5 As Color = Color.FromArgb(57, 105, 192)     ' fortuna
+    Public FissClr6 As Color = Color.FromArgb(255, 189, 102)    ' grineer
+    Public FissClr7 As Color = Color.FromArgb(36, 184, 242)     ' lotus
+    Public FissClr8 As Color = Color.FromArgb(140, 38, 92)      ' nidus
+    Public FissClr9 As Color = Color.FromArgb(20, 41, 29)       ' orokin
+    Public FissClr10 As Color = Color.FromArgb(9, 78, 106)      ' tenno
 
+    Public fissColors As Color() = {FissClr1, FissClr2, FissClr3, FissClr4, FissClr5, FissClr6, FissClr7, FissClr8, FissClr9, FissClr10}
 
     ' Warframe window stats
     '   Warframe process
@@ -90,6 +102,32 @@ Public Class OCR2
     '----------------------------------------------------------------------
     ' Utility Functions
     '----------------------------------------------------------------------
+
+    Public Overridable Function cleanImage(image As Bitmap) As Bitmap
+        Dim uiColor As Color = Nothing
+        Dim clr As Color = Nothing
+        For i As Integer = 0 To image.Width - 1
+            For j As Integer = 0 To image.Height - 1 'Loops through the whole image starting at the first line going down
+                clr = image.GetPixel(i, j)
+                If clr = uiColor Then 'if found color is the UI color then make it black
+                    image.SetPixel(i, j, Color.Black)
+                    Continue For
+
+                ElseIf uiColor = Nothing Then 'if ui color is not set yet see if the current pixle is part of the ui colors
+                    For Each color In fissColors
+                        If clr = color Then 'if the currecnt pixle is part of the ui colors set it to black and set ui colors
+                            image.SetPixel(i, j, Color.Black)
+                            uiColor = color
+                            Continue For
+                        End If
+                    Next
+
+                End If
+                image.SetPixel(i, j, Color.White) 'default to setting the pixle to white
+            Next
+        Next
+        Return image
+    End Function
 
     Public Overridable Function GetDPIScaling() As Double
         dpiScaling = 1
@@ -355,9 +393,8 @@ Public Class OCR2
 
 
     Public GetPartText_timer As Long = 0
-    Public Overridable Function GetPartText(screen As Bitmap, plyr_count As Integer, plyr As Integer) As String
+    Public Overridable Function GetPartText(screen As Bitmap, plyr_count As Integer, plyr As Integer, Optional multiLine As Boolean = False) As String
         GetPartText_timer = clock.Elapsed.TotalMilliseconds
-
         Return "N/A"
     End Function
 
