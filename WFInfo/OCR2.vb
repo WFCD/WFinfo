@@ -30,6 +30,8 @@ Public Class OCR2
     ' Public Const pixProfHei As Integer = 1
     Public Const pixProfXDisp As Integer = 98
     Public Const pixProfYDisp As Integer = 86
+
+    Public uiColor As Color
     Public FissClr1 As Color = Color.FromArgb(189, 168, 101)    ' default
     Public FissClr2 As Color = Color.FromArgb(153, 31, 35)      ' stalker
     Public FissClr3 As Color = Color.FromArgb(238, 193, 105)    ' baruk
@@ -112,27 +114,51 @@ Public Class OCR2
     ' Utility Functions
     '----------------------------------------------------------------------
 
-    Public Overridable Function cleanImage(image As Bitmap) As Bitmap
-        Dim uiColor As Color = Nothing
-        Dim clr As Color = Nothing
-        For i As Integer = 0 To image.Width - 1
-            For j As Integer = 0 To image.Height - 1 'Loops through the whole image starting at the first line going down
-                clr = image.GetPixel(i, j)
-                If ColorThreshold(clr, uiColor) Then 'if found color is the UI color then make it black
-                    image.SetPixel(i, j, Color.Black)
-                    Continue For
+    Public Overridable Function getUiColor()
+        Dim bnds As New Rectangle(window.Left + pixFissXDisp * totalScaling,
+                                  window.Top + pixFissYDisp * totalScaling,
+                                  pixFissWid * totalScaling,
+                                  pixFissHei * totalScaling)
+        Using bmp As New Bitmap(bnds.Width + 40, bnds.Height + 40)
+            Using graph As Graphics = Graphics.FromImage(bmp)
+                graph.CopyFromScreen(pixProfXDisp * totalScaling, pixProfYDisp * totalScaling, 0, 0, New Size(pixProfWid * totalScaling, 1), CopyPixelOperation.SourceCopy)
+            End Using
 
-                ElseIf uiColor = Nothing Then 'if ui color is not set yet see if the current pixle is part of the ui colors
-                    For Each color In fissColors
-                        If ColorThreshold(clr, uiColor) Then 'if the currecnt pixle is part of the ui colors set it to black and set ui colors
-                            image.SetPixel(i, j, Color.Black)
-                            uiColor = color
-                            Continue For
-                        End If
-                    Next
+            Dim clr As Color = Nothing
+            Dim R, G, B As Integer
 
+            For i As Integer = 0 To pixProfWid * totalScaling - 1
+                clr = bmp.GetPixel(i, 0)
+                R += clr.R
+                G += clr.G
+                B += clr.B
+                bmp.SetPixel(i, 0, Color.White)
+            Next
+            R /= pixProfWid * totalScaling
+            G /= pixProfWid * totalScaling
+            B /= pixProfWid * totalScaling
+
+            Dim detectedColor = Color.FromArgb(R, G, B)
+
+            For Each knowColor In fissColors
+                If ColorThreshold(detectedColor, knowColor) Then
+                    uiColor = detectedColor
+                    Exit Function
                 End If
-                image.SetPixel(i, j, Color.White) 'default to setting the pixle to white
+            Next
+            Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
+        End Using
+    End Function
+
+    Public Overridable Function cleanImage(image As Bitmap) As Bitmap
+        For i As Integer = 0 To image.Width - 1
+            For j As Integer = 0 To image.Height - 1
+                Dim currentPixle = image.GetPixel(i, j)
+                If ColorThreshold(currentPixle, uiColor) Then
+                    image.SetPixel(i, j, Color.Black)
+                Else
+                    image.SetPixel(i, j, Color.White)
+                End If
             Next
         Next
         Return image
@@ -268,46 +294,31 @@ Public Class OCR2
 
         GetUIScaling()
 
-        Dim bnds As New Rectangle(window.Left + pixFissXDisp * totalScaling, window.Top + pixFissYDisp * totalScaling,
-                                  pixFissWid * totalScaling, pixFissHei * totalScaling)
+        Dim bnds As New Rectangle(window.Left + pixFissXDisp * totalScaling,
+                                  window.Top + pixFissYDisp * totalScaling,
+                                  pixFissWid * totalScaling,
+                                  pixFissHei * totalScaling)
 
         Using bmp As New Bitmap(bnds.Width + 40, bnds.Height + 40)
             Using graph As Graphics = Graphics.FromImage(bmp)
-                graph.CopyFromScreen(pixProfXDisp * totalScaling, pixProfYDisp * totalScaling, 0, 0, New Size(pixProfWid * totalScaling, 1), CopyPixelOperation.SourceCopy)
-
                 graph.CopyFromScreen(bnds.X, bnds.Y, 20, 20, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
             End Using
 
-            Dim clr As Color = Nothing
-            Dim R, G, B As Integer
-
-
-            For i As Integer = 0 To pixProfWid * totalScaling - 1
-                clr = bmp.GetPixel(i, 0)
-                R += clr.R
-                G += clr.G
-                B += clr.B
-                bmp.SetPixel(i, 0, Color.White)
-            Next
-
-            R /= pixProfWid * totalScaling
-            G /= pixProfWid * totalScaling
-            B /= pixProfWid * totalScaling
-
-            FissClr1 = Color.FromArgb(R, G, B)
+            getUiColor()
 
             Dim found As Boolean = False
             For i As Integer = 0 To bmp.Width - 1
                 For j As Integer = 0 To bmp.Height - 1
-                    clr = bmp.GetPixel(i, j)
-                    If ColorThreshold(clr, FissClr1) Then
+                    Dim currentPixle = bmp.GetPixel(i, j)
+                    If ColorThreshold(currentPixle, uiColor) Then
                         found = True
                         bmp.SetPixel(i, j, Color.Black)
                     Else
-                        bmp.SetPixel(i, j, Color.White)
+                            bmp.SetPixel(i, j, Color.White)
                     End If
                 Next
             Next
+
             If Debug Then
                 bmp.Save(appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.EtcCount.ToString() & ".png")
                 Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.EtcCount.ToString() & ".png")
