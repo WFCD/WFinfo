@@ -348,7 +348,7 @@ Public Class OCR
     Public Overridable Function ColortoRarity(clr As Color, Optional diff As Integer = 50) As Integer
         Dim ret As Integer = 3
         Dim temp As Integer
-        For Each rare As Color In rarity
+        For Each rare As Color In parser2.rarity
             temp = clr.R
             temp -= rare.R
             If temp > -diff AndAlso temp < diff Then
@@ -434,7 +434,7 @@ Public Class OCR
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         ' Get Player Count from Image
-        players = GetPlayers(screen)
+        players = parser2.GetPlayers()
         Dim top As Integer = 0
         Dim right As Integer = 0
 
