@@ -118,13 +118,13 @@ Public Class OCR2
         For i As Integer = 0 To image.Width - 1
             For j As Integer = 0 To image.Height - 1 'Loops through the whole image starting at the first line going down
                 clr = image.GetPixel(i, j)
-                If clr = uiColor Then 'if found color is the UI color then make it black
+                If ColorThreshold(clr, uiColor) Then 'if found color is the UI color then make it black
                     image.SetPixel(i, j, Color.Black)
                     Continue For
 
                 ElseIf uiColor = Nothing Then 'if ui color is not set yet see if the current pixle is part of the ui colors
                     For Each color In fissColors
-                        If clr = color Then 'if the currecnt pixle is part of the ui colors set it to black and set ui colors
+                        If ColorThreshold(clr, uiColor) Then 'if the currecnt pixle is part of the ui colors set it to black and set ui colors
                             image.SetPixel(i, j, Color.Black)
                             uiColor = color
                             Continue For
