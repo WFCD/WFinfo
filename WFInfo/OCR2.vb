@@ -114,7 +114,7 @@ Public Class OCR2
     ' Utility Functions
     '----------------------------------------------------------------------
 
-    Public Overridable Function getUiColor()
+    Public Overridable Sub getUiColor()
         Dim bnds As New Rectangle(window.Left + pixFissXDisp * totalScaling,
                                   window.Top + pixFissYDisp * totalScaling,
                                   pixFissWid * totalScaling,
@@ -143,12 +143,12 @@ Public Class OCR2
             For Each knowColor In fissColors
                 If ColorThreshold(detectedColor, knowColor) Then
                     uiColor = detectedColor
-                    Exit Function
+                    Exit Sub
                 End If
             Next
             Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
         End Using
-    End Function
+    End Sub
 
     Public Overridable Function cleanImage(image As Bitmap) As Bitmap
         For i As Integer = 0 To image.Width - 1
