@@ -115,11 +115,7 @@ Public Class OCR2
     '----------------------------------------------------------------------
 
     Public Overridable Sub getUiColor()
-        Dim bnds As New Rectangle(window.Left + pixFissXDisp * totalScaling,
-                                  window.Top + pixFissYDisp * totalScaling,
-                                  pixFissWid * totalScaling,
-                                  pixFissHei * totalScaling)
-        Using bmp As New Bitmap(bnds.Width + 40, bnds.Height + 40)
+        Using bmp As New Bitmap(CInt(pixProfWid * totalScaling), 1)
             Using graph As Graphics = Graphics.FromImage(bmp)
                 graph.CopyFromScreen(pixProfXDisp * totalScaling, pixProfYDisp * totalScaling, 0, 0, New Size(pixProfWid * totalScaling, 1), CopyPixelOperation.SourceCopy)
             End Using
