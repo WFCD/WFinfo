@@ -8,6 +8,15 @@ Public Class OCR2
     Public Const pixRwrdYDisp As Integer = 185
     Public Const pixRwrdLineHei As Integer = 22
 
+    ' Pixel measurement for rarity bars for player count
+    '   Width is same as pixRwrdWid
+    ' Public Const pixRareWid As Integer = pixRwrdWid
+    '   Height is always 1px
+    ' Public Const pixRareHei As Integer = 1
+    '   Box is centered horizontally
+    ' Public Const pixRareXDisp As Integer = ???
+    Public Const pixRareYDisp As Integer = 196
+
     ' Pixel measurements for detecting reward screen
     Public Const pixFissWid As Integer = 354
     Public Const pixFissHei As Integer = 45
@@ -22,6 +31,7 @@ Public Class OCR2
     Public Const pixProfYDisp As Integer = 86
     Public FissClr1 As Color = Color.FromArgb(189, 168, 101)
 
+    Public rarity As New List(Of Color) From {Color.FromArgb(182, 105, 77), Color.FromArgb(119, 119, 119), Color.FromArgb(163, 143, 70)}
 
     ' Warframe window stats
     '   Warframe process
@@ -286,6 +296,9 @@ Public Class OCR2
     ' Public Overridable Function Screenshot(width As Integer, height As Integer, heightPosition As Integer) As Bitmap
     Public Overridable Function GetRelicWindow() As Bitmap
 
+        GetDPIScaling()
+        GetUIScaling()
+
         Dim width As Integer = pixRwrdWid * totalScaling
         Dim height As Integer = pixRwrdHei * totalScaling
 
@@ -345,10 +358,68 @@ Public Class OCR2
         Return ret
     End Function
 
-    Public Overridable Function GetPlayers(screen As Image) As Integer
-        Dim count As Integer = 1
+    Public Overridable Function GetPlayers() As Integer
+        If Not IsWFActive() Then
+            Return False
+        End If
 
-        ' TODO: Calculate player count... somehow
+        GetUIScaling()
+
+        Dim count As Integer = 0
+        Dim bnds As New Rectangle(center.X - pixRwrdWid * totalScaling / 2, center.Y - pixRareYDisp * totalScaling,
+                                  pixRwrdWid * totalScaling, 1)
+
+        Using bmp As New Bitmap(bnds.Width, bnds.Height)
+            Using graph As Graphics = Graphics.FromImage(bmp)
+
+                graph.CopyFromScreen(bnds.X, bnds.Y, 0, 0, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
+            End Using
+
+            Dim clr As Color = Nothing
+            Dim thresh As Color = Nothing
+            Dim x As Integer = 0
+            Dim scanWid As Integer = 30 * totalScaling
+            For i As Integer = 0 To 7
+                x = (i + 0.5) * bmp.Width / 8 - scanWid / 2
+                clr = bmp.GetPixel(x, 0)
+                If ColorThreshold(clr, rarity(0)) Then
+                    thresh = rarity(0)
+                ElseIf ColorThreshold(clr, rarity(1)) Then
+                    thresh = rarity(1)
+                ElseIf ColorThreshold(clr, rarity(2)) Then
+                    thresh = rarity(2)
+                Else
+                    Continue For
+                End If
+
+                Dim success As Boolean = True
+                For j As Integer = 1 To scanWid - 1
+                    clr = bmp.GetPixel(x + j, 0)
+                    If ColorThreshold(clr, thresh) Then
+                        bmp.SetPixel(x + j, 0, Color.Black)
+                    Else
+                        success = False
+                        bmp.SetPixel(x + j, 0, Color.White)
+                        Exit For
+                    End If
+                Next
+                If success Then
+                    count += 1
+                ElseIf count > 0 Then
+                    Exit For
+                End If
+            Next
+            If count Mod 2 = 0 Then
+                count /= 2
+            Else
+                Main.addLog("ERROR WITH PLAYER CALCULATION: FOUND " & count / 2 & " SEGMENTS")
+                bmp.Save(appData & "\WFInfo\debug\RareBar-" & My.Settings.EtcCount.ToString() & ".png")
+                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\RareBar-" & My.Settings.EtcCount.ToString() & ".png")
+                My.Settings.EtcCount += 1
+
+                count = 0
+            End If
+        End Using
 
         Return count
     End Function

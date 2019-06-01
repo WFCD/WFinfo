@@ -359,7 +359,6 @@ Module Glob
     Public rareColor As Color = Color.FromArgb(255, 215, 0)
     Public rareBrush As Brush = New SolidBrush(rareColor)
     Public bgColor As Color = Color.FromArgb(27, 27, 27)
-    Public rarity As New List(Of Color) From {Color.FromArgb(171, 159, 117), Color.FromArgb(175, 175, 175), Color.FromArgb(134, 98, 50)}
     Public bgBrush As Brush = New SolidBrush(bgColor)
     Public culture As System.Globalization.CultureInfo = New System.Globalization.CultureInfo("en")
     Public tahoma10 As New Font("Tahoma", 10.0!, FontStyle.Bold)
