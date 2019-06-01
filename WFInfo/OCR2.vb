@@ -256,7 +256,7 @@ Public Class OCR2
     '    BEGIN RELIC REWARDS STUFF
     '_____________________________________________________
 
-    Public Overridable Function ColorThreshold(test As Color, thresh As Color)
+    Public Overridable Function ColorThreshold(test As Color, thresh As Color) As Boolean
         Dim threshold As Integer = 10
         Return (Math.Abs(CInt(test.R) - thresh.R) < threshold) AndAlso (Math.Abs(CInt(test.G) - thresh.G) < threshold) AndAlso (Math.Abs(CInt(test.B) - thresh.B) < threshold)
     End Function
