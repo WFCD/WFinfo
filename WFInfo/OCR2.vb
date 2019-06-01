@@ -15,8 +15,12 @@ Public Class OCR2
     Public Const pixFissYDisp As Integer = 43
 
     ' Colors for "VOIDFISSURE/REWARDS"
-    Public ReadOnly FissClr1 As Color = Color.FromArgb(190, 169, 102)
-    Public ReadOnly FissClr2 As Color = Color.FromArgb(245, 227, 173)
+    Public Const pixProfWid As Integer = 39
+    '   Height is always 1px
+    ' Public Const pixProfHei As Integer = 1
+    Public Const pixProfXDisp As Integer = 98
+    Public Const pixProfYDisp As Integer = 86
+    Public FissClr1 As Color = Color.FromArgb(189, 168, 101)
 
 
     ' Warframe window stats
@@ -205,7 +209,7 @@ Public Class OCR2
     '    BEGIN RELIC REWARDS STUFF
     '_____________________________________________________
 
-    Public Overloads Function ColorThreshold(test As Color, thresh As Color)
+    Public Overridable Function ColorThreshold(test As Color, thresh As Color)
         Dim threshold As Integer = 10
         Return (Math.Abs(CInt(test.R) - thresh.R) < threshold) AndAlso (Math.Abs(CInt(test.G) - thresh.G) < threshold) AndAlso (Math.Abs(CInt(test.B) - thresh.B) < threshold)
     End Function
@@ -217,23 +221,39 @@ Public Class OCR2
 
         GetUIScaling()
 
-        ' TODO: Add check for top left text
-        ' Look for: "VOID FISSURE/REWARDS"
-
         Dim bnds As New Rectangle(window.Left + pixFissXDisp * totalScaling, window.Top + pixFissYDisp * totalScaling,
                                   pixFissWid * totalScaling, pixFissHei * totalScaling)
 
         Using bmp As New Bitmap(bnds.Width + 40, bnds.Height + 40)
             Using graph As Graphics = Graphics.FromImage(bmp)
+                graph.CopyFromScreen(pixProfXDisp * totalScaling, pixProfYDisp * totalScaling, 0, 0, New Size(pixProfWid * totalScaling, 1), CopyPixelOperation.SourceCopy)
+
                 graph.CopyFromScreen(bnds.X, bnds.Y, 20, 20, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
             End Using
 
-            Dim found As Boolean = False
             Dim clr As Color = Nothing
+            Dim R, G, B As Integer
+
+
+            For i As Integer = 0 To pixProfWid * totalScaling - 1
+                clr = bmp.GetPixel(i, 0)
+                R += clr.R
+                G += clr.G
+                B += clr.B
+                bmp.SetPixel(i, 0, Color.White)
+            Next
+
+            R /= pixProfWid * totalScaling
+            G /= pixProfWid * totalScaling
+            B /= pixProfWid * totalScaling
+
+            FissClr1 = Color.FromArgb(R, G, B)
+
+            Dim found As Boolean = False
             For i As Integer = 0 To bmp.Width - 1
                 For j As Integer = 0 To bmp.Height - 1
                     clr = bmp.GetPixel(i, j)
-                    If ColorThreshold(clr, FissClr1) OrElse ColorThreshold(clr, FissClr2) Then
+                    If ColorThreshold(clr, FissClr1) Then
                         found = True
                         bmp.SetPixel(i, j, Color.Black)
                     Else
@@ -241,10 +261,11 @@ Public Class OCR2
                     End If
                 Next
             Next
-
-            bmp.Save(appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.SSCount.ToString() & ".png")
-            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.SSCount.ToString() & ".png")
-            My.Settings.SSCount += 1
+            If Debug Then
+                bmp.Save(appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.EtcCount.ToString() & ".png")
+                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.EtcCount.ToString() & ".png")
+                My.Settings.EtcCount += 1
+            End If
 
             If Not found Then
                 Return False
@@ -252,26 +273,29 @@ Public Class OCR2
 
             Dim ret As String = DefaultParseText(bmp, 0)
             ' Finds: VUIIJ FISSUHE/HEWAHDS
+            Console.WriteLine("---" & ret & "---")
 
-            If LevDist(ret, "VUIIJ FISSUHE/HEWAHDS") < 4 Then
+            If LevDist(ret, "VUIIJ FISSUHE") < 4 Then
+                Console.WriteLine("REWARD WINDOW FOUND")
                 Return True
             End If
         End Using
-
-
         Return False
     End Function
 
     ' Public Overridable Function Screenshot(width As Integer, height As Integer, heightPosition As Integer) As Bitmap
     Public Overridable Function GetRelicWindow() As Bitmap
 
-        Dim width As Integer = pixRwrdWid * uiScaling + 2
-        Dim height As Integer = pixRwrdHei * uiScaling + 2
+        Dim width As Integer = pixRwrdWid * totalScaling
+        Dim height As Integer = pixRwrdHei * totalScaling
 
         Dim ss_area As New Rectangle(center.X - width / 2,
-                                     center.Y - pixRwrdYDisp * uiScaling,
+                                     center.Y - pixRwrdYDisp * totalScaling,
                                      width,
                                      height)
+
+        Dim vf_area As New Rectangle(window.Left + pixFissXDisp * totalScaling, window.Top + pixFissYDisp * totalScaling,
+                                  pixFissWid * totalScaling, pixFissHei * totalScaling)
 
         Main.addLog("TAKING SCREENSHOT:" & vbCrLf & "DPI SCALE: " & dpiScaling & vbCrLf & "SS REGION: " & ss_area.ToString())
         Dim ret As New Bitmap(width, height)
@@ -289,12 +313,23 @@ Public Class OCR2
                 Dim font As New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120.0))
                 Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
 
-                Dim textbox = New Rectangle(center.X, center.Y, printBounds.Width, printBounds.Height)
+                Dim textbox = New Rectangle(center.X, ss_area.Bottom + 3, printBounds.Width, printBounds.Height)
+
+                Dim print2 As String =
+                        "Tried looking at " & vf_area.ToString & vbCrLf &
+                        "Screen top-left: " & (New Point(window.X, window.Y)).ToString & vbCrLf &
+                        "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
+
+                Dim printBounds2 As SizeF = graph.MeasureString(print2, font, graph.MeasureString(print2, font).Width)
+                Dim textbox2 = New Rectangle((vf_area.Left + vf_area.Right) / 2, vf_area.Bottom + 3, printBounds2.Width, printBounds2.Height)
 
                 graph.FillEllipse(Brushes.Red, center.X - 3, center.Y - 3, 3, 3)    'Dot centered at where it thinks the center of warframe is
                 graph.DrawRectangle(New Pen(Brushes.Red), ss_area)                  'The area that it tried to read from
                 graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
                 graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
+                graph.DrawRectangle(New Pen(Brushes.Red), vf_area)                  'The area that it tried to read from
+                graph.FillRectangle(Brushes.Black, textbox2)                         'Black background for text box
+                graph.DrawString(print2, font, Brushes.Red, textbox2)                 'Debug text ontop of screenshot
 
                 ' TODO: Add text box and rectangle for relic check at top left
 
