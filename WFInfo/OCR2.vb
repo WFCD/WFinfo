@@ -150,6 +150,7 @@ Public Class OCR2
         End Using
     End Sub
 
+    Public imageFilter_timer As Long = 0
     Public Overridable Function CleanImage(image As Bitmap, Optional thresh As Integer = 10) As Bitmap
         For i As Integer = 0 To image.Width - 1
             For j As Integer = 0 To image.Height - 1
@@ -161,6 +162,8 @@ Public Class OCR2
                 End If
             Next
         Next
+        imageFilter_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("IMAGE FILTER-" & GetPartText_timer & "ms")
         Return image
     End Function
 
@@ -489,7 +492,18 @@ Public Class OCR2
     Public GetPartText_timer As Long = 0
     Public Overridable Function GetPartText(screen As Bitmap, plyr_count As Integer, plyr As Integer, Optional multiLine As Boolean = False) As String
         GetPartText_timer = clock.Elapsed.TotalMilliseconds
-        Return "N/A"
+
+        Dim cleaned = CleanImage(screen)
+
+        Dim ret As String = ""
+        Using page As Page = engine(plyr).Process(screen)
+            ret = Regex.Replace(page.GetText(), "[^A-Z& ]", "").Trim
+        End Using
+
+        GetPartText_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("LINE-" & GetPartText_timer & "ms")
+
+        Return ret
     End Function
 
     Public ParsePlayer_timer() As Long = {0, 0, 0, 0}
