@@ -103,10 +103,15 @@ Public Class OCR2
     Public Sub New()
         For i As Integer = 0 To 4
             engine(i) = New TesseractEngine("", "eng")
-            engine(i).DefaultPageSegMode = PageSegMode.SingleLine
+            If i = 0 Then
+                engine(i).DefaultPageSegMode = PageSegMode.SingleLine
+                engine(i).SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ/")
+            Else
+                engine(i).DefaultPageSegMode = PageSegMode.SingleLine
+                engine(i).SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&/")
+            End If
             engine(i).SetVariable("load_system_dawg", False)
             engine(i).SetVariable("user_words_suffix", "prime-words")
-            engine(i).SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ/")
         Next
     End Sub
 
@@ -114,7 +119,7 @@ Public Class OCR2
     ' Utility Functions
     '----------------------------------------------------------------------
 
-    Public Overridable Sub getUiColor()
+    Public Overridable Sub GetUiColor()
         Using bmp As New Bitmap(CInt(pixProfWid * totalScaling), 1)
             Using graph As Graphics = Graphics.FromImage(bmp)
                 graph.CopyFromScreen(pixProfXDisp * totalScaling, pixProfYDisp * totalScaling, 0, 0, New Size(pixProfWid * totalScaling, 1), CopyPixelOperation.SourceCopy)
@@ -135,7 +140,6 @@ Public Class OCR2
             B /= pixProfWid * totalScaling
 
             Dim detectedColor = Color.FromArgb(R, G, B)
-
             For Each knowColor In fissColors
                 If ColorThreshold(detectedColor, knowColor) Then
                     uiColor = detectedColor
@@ -146,11 +150,11 @@ Public Class OCR2
         End Using
     End Sub
 
-    Public Overridable Function cleanImage(image As Bitmap) As Bitmap
+    Public Overridable Function CleanImage(image As Bitmap, Optional thresh As Integer = 10) As Bitmap
         For i As Integer = 0 To image.Width - 1
             For j As Integer = 0 To image.Height - 1
                 Dim currentPixle = image.GetPixel(i, j)
-                If ColorThreshold(currentPixle, uiColor) Then
+                If ColorThreshold(currentPixle, uiColor, thresh) Then
                     image.SetPixel(i, j, Color.Black)
                 Else
                     image.SetPixel(i, j, Color.White)
@@ -273,22 +277,23 @@ Public Class OCR2
         End Using
     End Function
 
+    Public Overridable Function ColorThreshold(test As Color, thresh As Color, Optional threshold As Integer = 10) As Boolean
+        Return (Math.Abs(CInt(test.R) - thresh.R) < threshold) AndAlso (Math.Abs(CInt(test.G) - thresh.G) < threshold) AndAlso (Math.Abs(CInt(test.B) - thresh.B) < threshold)
+    End Function
+
     '_____________________________________________________
     '
     '    BEGIN RELIC REWARDS STUFF
     '_____________________________________________________
-
-    Public Overridable Function ColorThreshold(test As Color, thresh As Color) As Boolean
-        Dim threshold As Integer = 10
-        Return (Math.Abs(CInt(test.R) - thresh.R) < threshold) AndAlso (Math.Abs(CInt(test.G) - thresh.G) < threshold) AndAlso (Math.Abs(CInt(test.B) - thresh.B) < threshold)
-    End Function
 
     Public Overridable Function IsRelicWindow() As Boolean
         If Not IsWFActive() Then
             Return False
         End If
 
+        GetDPIScaling()
         GetUIScaling()
+        GetUiColor()
 
         Dim bnds As New Rectangle(window.Left + pixFissXDisp * totalScaling,
                                   window.Top + pixFissYDisp * totalScaling,
@@ -300,17 +305,16 @@ Public Class OCR2
                 graph.CopyFromScreen(bnds.X, bnds.Y, 20, 20, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
             End Using
 
-            getUiColor()
-
+            Dim clr As Color = Nothing
             Dim found As Boolean = False
             For i As Integer = 0 To bmp.Width - 1
                 For j As Integer = 0 To bmp.Height - 1
-                    Dim currentPixle = bmp.GetPixel(i, j)
-                    If ColorThreshold(currentPixle, uiColor) Then
+                    clr = bmp.GetPixel(i, j)
+                    If ColorThreshold(clr, uiColor) Then
                         found = True
                         bmp.SetPixel(i, j, Color.Black)
                     Else
-                            bmp.SetPixel(i, j, Color.White)
+                        bmp.SetPixel(i, j, Color.White)
                     End If
                 Next
             Next
@@ -468,11 +472,55 @@ Public Class OCR2
         Return count
     End Function
 
+    Public Overridable Function GetPlayerImage(plyr As Integer, count As Integer) As Bitmap
+        Dim width As Integer = pixRwrdWid / 4 * totalScaling
+        Dim lineHeight As Integer = pixRwrdLineHei * totalScaling
+
+        Dim left As Integer = center.X - width * (count / 2 - plyr)
+        Dim top As Integer = center.Y - pixRwrdYDisp * totalScaling + pixRwrdHei * totalScaling - lineHeight
+
+        Dim ret As New Bitmap(width + 10, lineHeight + 10)
+        Using graph As Graphics = Graphics.FromImage(ret)
+            graph.CopyFromScreen(left, top, 5, 5, New Size(width, lineHeight), CopyPixelOperation.SourceCopy)
+        End Using
+        Return CleanImage(ret, 50)
+    End Function
 
     Public GetPartText_timer As Long = 0
     Public Overridable Function GetPartText(screen As Bitmap, plyr_count As Integer, plyr As Integer, Optional multiLine As Boolean = False) As String
         GetPartText_timer = clock.Elapsed.TotalMilliseconds
         Return "N/A"
     End Function
+
+    Public ParsePlayer_timer() As Long = {0, 0, 0, 0}
+    Public Overridable Sub ParsePlayer(plyr As Integer, count As Integer)
+        ParsePlayer_timer(plyr) = clock.Elapsed.TotalMilliseconds
+        Dim text As Bitmap = GetPlayerImage(plyr, count)
+
+        text.Save(appData & "\WFInfo\debug\PLYR" & plyr & "-" & My.Settings.EtcCount.ToString() & ".png")
+        Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\PLYR" & plyr & "-" & My.Settings.EtcCount.ToString() & ".png")
+        My.Settings.EtcCount += 1
+
+        Console.WriteLine("FOUND TEXT FOR PLAYER " & plyr & ": " & DefaultParseText(text, plyr + 1))
+
+    End Sub
+
+    Public ParseScreen_timer As Long = 0
+    Public Overridable Sub ParseScreen()
+        If Not IsWFActive() Then
+            Return
+        End If
+
+        GetDPIScaling()
+        GetUIScaling()
+        GetUiColor()
+
+
+        Dim count As Integer = GetPlayers()
+        For i As Integer = 0 To count - 1
+            Dim plyr As Integer = i
+            Task.Factory.StartNew(Sub() ParsePlayer(plyr, count))
+        Next
+    End Sub
 
 End Class

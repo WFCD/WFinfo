@@ -65,7 +65,7 @@ Public Class Main
                 If parser.isWFActive() Then
                     Invoke(Sub() lbStatus.ForeColor = textColor)
                     Invoke(Sub() Me.lbStatus.Text = "Getting Reward Info...")
-                    parser.ParseScreen()
+                    parser2.ParseScreen()
                     DoWork_timer = clock.Elapsed.TotalMilliseconds - DoWork_timer
                     Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
                 End If
@@ -378,7 +378,6 @@ Module Glob
     Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
         If key = HKey1 Then
             Task.Factory.StartNew(Sub() DoOtherWork())
-            Task.Factory.StartNew(Sub() parser2.IsRelicWindow())
         End If
     End Sub
 
@@ -388,7 +387,7 @@ Module Glob
             DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
             Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
             Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
-            parser.ParseScreen()
+            parser2.ParseScreen()
             DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
             Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
         Else
