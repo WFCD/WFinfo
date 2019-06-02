@@ -2,7 +2,7 @@
 Imports Tesseract
 
 Public Class OCR2
-    ' Pixel measurements for reward screen @ 1920 x 1080 with 100% scale
+    ' Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
     Public Const pixRwrdWid As Integer = 968
     Public Const pixRwrdHei As Integer = 235
     Public Const pixRwrdYDisp As Integer = 185
@@ -66,6 +66,10 @@ Public Class OCR2
     ' 1-4 for players 1 to 4
     Public engine(5) As TesseractEngine
 
+    ' List of results found by OCR, didn't have a better place to put it
+    Public foundText As New List(Of String)()
+
+
     Public Enum WindowStyle
         FULLSCREEN
         BORDERLESS
@@ -124,6 +128,7 @@ Public Class OCR2
             Using graph As Graphics = Graphics.FromImage(bmp)
                 graph.CopyFromScreen(pixProfXDisp * totalScaling, pixProfYDisp * totalScaling, 0, 0, New Size(pixProfWid * totalScaling, 1), CopyPixelOperation.SourceCopy)
             End Using
+            bmp.Save(appData & "\WFInfo\debug\COLOR_CHECK-" & My.Settings.EtcCount.ToString() & ".png")
 
             Dim clr As Color = Nothing
             Dim R, G, B As Integer
@@ -514,9 +519,17 @@ Public Class OCR2
         text.Save(appData & "\WFInfo\debug\PLYR" & plyr & "-" & My.Settings.EtcCount.ToString() & ".png")
         Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\PLYR" & plyr & "-" & My.Settings.EtcCount.ToString() & ".png")
         My.Settings.EtcCount += 1
+        Dim result = DefaultParseText(text, plyr + 1)
 
-        Console.WriteLine("FOUND TEXT FOR PLAYER " & plyr & ": " & DefaultParseText(text, plyr + 1))
+        Console.WriteLine("FOUND TEXT FOR PLAYER " & plyr & ": " & result)
+        ParsePlayer_timer(plyr) -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("LINE-" & ParsePlayer_timer(plyr) & "ms")
 
+        result = db.GetPartName(result)
+        foundText.Add(result)
+
+        ParsePlayer_timer(plyr) -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("GET ALL PARTS-" & ParsePlayer_timer(plyr) & "ms")
     End Sub
 
     Public ParseScreen_timer As Long = 0
@@ -529,12 +542,50 @@ Public Class OCR2
         GetUIScaling()
         GetUiColor()
 
-
         Dim count As Integer = GetPlayers()
         For i As Integer = 0 To count - 1
             Dim plyr As Integer = i
             Task.Factory.StartNew(Sub() ParsePlayer(plyr, count))
         Next
+
+        ' Display window true = seperate window
+        ' Display window false = overlay
+        If DisplayWindow Then
+            'run window
+            Main.Instance.Invoke(Sub() RewardWindow.Display(foundText))
+            ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+            Console.WriteLine("DISPLAY WINDOW-" & ParseScreen_timer & "ms")
+        Else
+            'run overlay
+            ' Move over if you don't have all 4
+
+            Dim bounds = Screen.PrimaryScreen.Bounds.Size
+            Dim pad As Integer = bounds.Height * 0.05
+            Dim top = center.Y - pixFissHei * uiScaling + pad
+            Dim right = center.X - bounds.Width / 2 - pad
+            ' Adjust for <4 players
+            right -= (count - 4) * bounds.Width / 8
+            For i = 0 To count - 1
+                Right += bounds.Width / 4
+                Dim j As Integer = i
+                Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right / dpiScaling, top / dpiScaling))
+            Next
+
+            For i = 0 To foundText.Count - 1
+
+                Main.addLog("DISPLAY OVERLAY " & (i + 1) & ":" & vbCrLf & "Right, Top: " & right & ", " & top)
+                Dim plat As Double = db.market_data(foundText(i))("plat")
+                Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
+                Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
+                Console.WriteLine(foundText(i) & "--" & plat & "---" & ducat)
+                Dim j As Integer = i
+                rwrdPanels(j).Invoke(Sub() rwrdPanels(j).LoadText(plat.ToString("N1"), ducat, vaulted))
+
+            Next
+            ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+            Console.WriteLine("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")
+        End If
+
     End Sub
 
 End Class
