@@ -604,16 +604,18 @@ Public Class OCR2
                 Dim textbox2 = New Rectangle((vf_area.Left + vf_area.Right) / 2, vf_area.Bottom + 3, printBounds2.Width, printBounds2.Height)
 
                 graph.DrawRectangle(New Pen(Brushes.DeepPink), ss_area)                  'The area that it tried to read from
-                For Each rect In foundRec
-                    graph.DrawRectangle(New Pen(Brushes.HotPink), rect)             'Draws a box around each text box
+                For i As Integer = 0 To foundRec.Count - 1
+                    Dim elem = foundRec(i)
+                    graph.DrawRectangle(New Pen(Brushes.HotPink), elem)             'Draws a box around each text box
+                    Dim rewardBox = New Rectangle(elem.Left, elem.Bottom + 3, printBounds.Width, printBounds.Height)
+                    graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
+                    graph.DrawString(foundText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
                 Next
                 graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
                 graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
                 graph.DrawRectangle(New Pen(Brushes.Red), vf_area)                  'The area that it tried to read from
                 graph.FillRectangle(Brushes.Black, textbox2)                        'Black background for text box
                 graph.DrawString(print2, font, Brushes.Red, textbox2)               'Debug text ontop of screenshot
-
-                ' TODO: Add text box and rectangle for relic check at top left
 
                 debugRet.Save(appData & "\WFInfo\debug\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
                 Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\SSFULL-" & My.Settings.EtcCount.ToString() & ".png")
