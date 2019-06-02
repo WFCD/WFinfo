@@ -524,6 +524,7 @@ Public Class OCR2
         Console.WriteLine("FOUND TEXT FOR PLAYER " & plyr & ": " & result)
         ParsePlayer_timer(plyr) -= clock.Elapsed.TotalMilliseconds
         Console.WriteLine("LINE-" & ParsePlayer_timer(plyr) & "ms")
+        ParsePlayer_timer(plyr) = clock.Elapsed.TotalMilliseconds
 
         result = db.GetPartName(result)
         foundText.Add(result)
@@ -534,6 +535,8 @@ Public Class OCR2
 
     Public ParseScreen_timer As Long = 0
     Public Overridable Sub ParseScreen()
+        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
+
         If Not IsWFActive() Then
             Return
         End If
@@ -545,6 +548,7 @@ Public Class OCR2
         Dim count As Integer = GetPlayers()
         For i As Integer = 0 To count - 1
             Dim plyr As Integer = i
+            Console.WriteLine("Running player: " & plyr)
             Task.Factory.StartNew(Sub() ParsePlayer(plyr, count))
         Next
 
@@ -566,7 +570,7 @@ Public Class OCR2
             ' Adjust for <4 players
             right -= (count - 4) * bounds.Width / 8
             For i = 0 To count - 1
-                Right += bounds.Width / 4
+                right += bounds.Width / 4
                 Dim j As Integer = i
                 Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right / dpiScaling, top / dpiScaling))
             Next
