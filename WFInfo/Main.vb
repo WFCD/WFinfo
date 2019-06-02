@@ -97,7 +97,7 @@ Public Class Main
         End Try
     End Sub
 
-    Private Shared log_lock As Object = New Object()
+    Private Shared log_lock As New Object()
     Public Sub addLog(txt As String)
         '_________________________________________________________________________
         'Function for storing log data
