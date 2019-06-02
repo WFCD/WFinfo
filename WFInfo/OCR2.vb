@@ -6,7 +6,7 @@ Public Class OCR2
     Public Const pixRwrdWid As Integer = 968
     Public Const pixRwrdHei As Integer = 235
     Public Const pixRwrdYDisp As Integer = 185
-    Public Const pixRwrdLineHei As Integer = 22
+    Public Const pixRwrdLineHei As Integer = 44
     Public Const pixRwrdLineWid As Integer = 240
 
     ' Pixel measurement for rarity bars for player count
@@ -68,6 +68,7 @@ Public Class OCR2
 
     ' List of results found by OCR, didn't have a better place to put it
     Public foundText As New List(Of String)()
+    Public foundRec As New List(Of Rectangle)()
 
 
     Public Enum WindowStyle
@@ -350,7 +351,9 @@ Public Class OCR2
     End Function
 
     ' Public Overridable Function Screenshot(width As Integer, height As Integer, heightPosition As Integer) As Bitmap
-    Public Overridable Function GetRelicWindow() As Bitmap
+    Public Overridable Function GetRelicWindow() As Bitmap 'Depricated? Not being used in the new ocr
+
+        Console.Write("Going into get relic window")
 
         GetDPIScaling()
         GetUIScaling()
@@ -427,7 +430,6 @@ Public Class OCR2
 
         Using bmp As New Bitmap(bnds.Width, bnds.Height)
             Using graph As Graphics = Graphics.FromImage(bmp)
-
                 graph.CopyFromScreen(bnds.X, bnds.Y, 0, 0, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
             End Using
 
@@ -477,6 +479,8 @@ Public Class OCR2
             End If
         End Using
 
+
+
         Return count
     End Function
 
@@ -491,6 +495,11 @@ Public Class OCR2
         Using graph As Graphics = Graphics.FromImage(ret)
             graph.CopyFromScreen(left, top, 5, 5, New Size(width, lineHeight), CopyPixelOperation.SourceCopy)
         End Using
+
+        If Debug Then
+            foundRec.Add(New Rectangle(New Point(left, top), New Size(width, lineHeight)))
+        End If
+
         Return CleanImage(ret, 50)
     End Function
 
@@ -557,6 +566,60 @@ Public Class OCR2
         Catch ex As Exception
             ' working as intended
         End Try
+
+        If Debug Then
+
+            Dim ss_area As New Rectangle(center.X - pixRwrdWid * totalScaling / 2,
+                                         center.Y - pixRwrdYDisp * totalScaling,
+                                         pixRwrdWid * totalScaling,
+                                         pixRwrdHei * totalScaling)
+
+
+            Dim vf_area As New Rectangle(window.Left + pixFissXDisp * totalScaling,
+                                         window.Top + pixFissYDisp * totalScaling,
+                                         pixFissWid * totalScaling,
+                                         pixFissHei * totalScaling)
+
+            Dim debugRet As New Bitmap(CInt(Screen.PrimaryScreen.Bounds.Width * dpiScaling), CInt(Screen.PrimaryScreen.Bounds.Height * dpiScaling))
+            Using graph As Graphics = Graphics.FromImage(debugRet)
+                Dim screenSize As New Size(Screen.PrimaryScreen.Bounds.Width * dpiScaling, Screen.PrimaryScreen.Bounds.Height * dpiScaling)
+                graph.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, screenSize, CopyPixelOperation.SourceCopy)
+                Dim print As String =
+                        "Tried looking at " & ss_area.ToString & vbCrLf &
+                        "Screen resolution: " & Screen.PrimaryScreen.Bounds.Size.ToString & vbCrLf &
+                        "Screen center: " & center.ToString & vbCrLf &
+                        "Screen bounds: " & window.ToString & vbCrLf &
+                        "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
+                Dim font As New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120.0))
+                Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
+
+                Dim textbox = New Rectangle(ss_area.Right, ss_area.Bottom + 3, printBounds.Width, printBounds.Height)
+
+                Dim print2 As String =
+                        "Tried looking at " & vf_area.ToString & vbCrLf &
+                        "Screen top-left: " & (New Point(window.X, window.Y)).ToString & vbCrLf &
+                        "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
+
+                Dim printBounds2 As SizeF = graph.MeasureString(print2, font, graph.MeasureString(print2, font).Width)
+                Dim textbox2 = New Rectangle((vf_area.Left + vf_area.Right) / 2, vf_area.Bottom + 3, printBounds2.Width, printBounds2.Height)
+
+                graph.DrawRectangle(New Pen(Brushes.DeepPink), ss_area)                  'The area that it tried to read from
+                For Each rect In foundRec
+                    graph.DrawRectangle(New Pen(Brushes.HotPink), rect)             'Draws a box around each text box
+                Next
+                graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
+                graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
+                graph.DrawRectangle(New Pen(Brushes.Red), vf_area)                  'The area that it tried to read from
+                graph.FillRectangle(Brushes.Black, textbox2)                        'Black background for text box
+                graph.DrawString(print2, font, Brushes.Red, textbox2)               'Debug text ontop of screenshot
+
+                ' TODO: Add text box and rectangle for relic check at top left
+
+                debugRet.Save(appData & "\WFInfo\debug\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
+                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\SSFULL-" & My.Settings.EtcCount.ToString() & ".png")
+                My.Settings.EtcCount += 1
+            End Using
+        End If
 
         ' Display window true = seperate window
         ' Display window false = overlay
