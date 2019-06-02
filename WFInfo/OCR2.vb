@@ -546,11 +546,17 @@ Public Class OCR2
         GetUiColor()
 
         Dim count As Integer = GetPlayers()
+        Dim tasks(4) As Task
         For i As Integer = 0 To count - 1
             Dim plyr As Integer = i
             Console.WriteLine("Running player: " & plyr)
-            Task.Factory.StartNew(Sub() ParsePlayer(plyr, count))
+            tasks(i) = Task.Factory.StartNew(Sub() ParsePlayer(plyr, count))
         Next
+        Try
+            Task.WaitAll(tasks)
+        Catch ex As Exception
+            ' working as intended
+        End Try
 
         ' Display window true = seperate window
         ' Display window false = overlay

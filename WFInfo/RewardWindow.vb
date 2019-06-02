@@ -1,4 +1,4 @@
-﻿Public Class RewardWindow
+Public Class RewardWindow
     Dim drag As Boolean = False
     Dim mouseX As Integer
     Dim mouseY As Integer
