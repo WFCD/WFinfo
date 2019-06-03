@@ -129,8 +129,8 @@ Public Class OCR2
             Using graph As Graphics = Graphics.FromImage(bmp)
                 graph.CopyFromScreen(pixProfXDisp * totalScaling, pixProfYDisp * totalScaling, 0, 0, New Size(pixProfWid * totalScaling, 1), CopyPixelOperation.SourceCopy)
             End Using
-            bmp.Save(appData & "\WFInfo\debug\COLOR_CHECK-" & My.Settings.EtcCount.ToString() & ".png")
-
+            bmp.Save(appData & "\WFInfo\debug\COLOR_CHECK-" & My.Settings.ColorcheckCount.ToString() & ".png")
+            My.Settings.ColorcheckCount += 1
             Dim clr As Color = Nothing
             Dim R, G, B As Integer
 
@@ -329,9 +329,9 @@ Public Class OCR2
             Next
 
             If Debug Then
-                bmp.Save(appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.EtcCount.ToString() & ".png")
-                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.EtcCount.ToString() & ".png")
-                My.Settings.EtcCount += 1
+                bmp.Save(appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.FisschckCount.ToString() & ".png")
+                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.FisschckCount.ToString() & ".png")
+                My.Settings.FisschckCount += 1
             End If
 
             If Not found Then
@@ -471,9 +471,9 @@ Public Class OCR2
                 count /= 2
             Else
                 Main.addLog("ERROR WITH PLAYER CALCULATION: FOUND " & count / 2 & " SEGMENTS")
-                bmp.Save(appData & "\WFInfo\debug\RareBar-" & My.Settings.EtcCount.ToString() & ".png")
-                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\RareBar-" & My.Settings.EtcCount.ToString() & ".png")
-                My.Settings.EtcCount += 1
+                bmp.Save(appData & "\WFInfo\debug\RareBar-" & My.Settings.RarebarCount.ToString() & ".png")
+                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\RareBar-" & My.Settings.RarebarCount.ToString() & ".png")
+                My.Settings.RarebarCount += 1
 
                 count = 0
             End If
@@ -525,8 +525,8 @@ Public Class OCR2
         ParsePlayer_timer(plyr) = clock.Elapsed.TotalMilliseconds
         Dim text As Bitmap = GetPlayerImage(plyr, count)
 
-        text.Save(appData & "\WFInfo\debug\PLYR" & plyr & "-" & My.Settings.EtcCount.ToString() & ".png")
-        Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\PLYR" & plyr & "-" & My.Settings.EtcCount.ToString() & ".png")
+        text.Save(appData & "\WFInfo\debug\SCAN" & My.Settings.EtcCount.ToString() & "-PLYR-" & plyr & ".png")
+        Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\SCAN" & My.Settings.EtcCount.ToString() & "-PLYR: " & plyr & ".png")
         My.Settings.EtcCount += 1
         Dim result = DefaultParseText(text, plyr + 1)
 
@@ -559,7 +559,6 @@ Public Class OCR2
         Dim tasks(3) As Task
         For i As Integer = 0 To count - 1
             Dim plyr As Integer = i
-            Console.WriteLine("Running player: " & plyr)
             tasks(i) = Task.Run(Sub() ParsePlayer(plyr, count))
         Next
         Task.WaitAll(tasks)
@@ -605,7 +604,7 @@ Public Class OCR2
                     Dim elem = foundRec(i)
                     graph.DrawRectangle(New Pen(Brushes.HotPink), elem)             'Draws a box around each text box
                     Dim printBoundsRelic As SizeF = graph.MeasureString(foundText(i), font, graph.MeasureString(foundText(i), font).Width)
-                    Dim rewardBox = New Rectangle(elem.Left, elem.Bottom + 3, printBoundsRelic.Width, printBoundsRelic.Height)
+                    Dim rewardBox = New Rectangle(elem.Left + 3, elem.Bottom + 3, printBoundsRelic.Width, printBoundsRelic.Height)
                     graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
                     graph.DrawString(foundText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
                 Next
@@ -615,9 +614,10 @@ Public Class OCR2
                 graph.FillRectangle(Brushes.Black, textbox2)                        'Black background for text box
                 graph.DrawString(print2, font, Brushes.Red, textbox2)               'Debug text ontop of screenshot
 
-                debugRet.Save(appData & "\WFInfo\debug\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
-                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\SSFULL-" & My.Settings.EtcCount.ToString() & ".png")
-                My.Settings.EtcCount += 1
+                debugRet.Save(appData & "\WFInfo\debug\SSFUL-" & My.Settings.SSCount.ToString() & ".png")
+                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
+                My.Settings.SSCount += 1
+
             End Using
         End If
 
@@ -632,14 +632,14 @@ Public Class OCR2
             'run overlay
             ' Move over if you don't have all 4
 
-            Dim bounds = Screen.PrimaryScreen.Bounds.Size
-            Dim pad As Integer = bounds.Height * 0.05
-            Dim top = center.Y - pixFissHei * uiScaling + pad
-            Dim right = center.X - bounds.Width / 2 - pad
-            ' Adjust for <4 players
-            right -= (count - 4) * bounds.Width / 8
+            Dim bounds = New Size(pixRwrdWid, pixRwrdHei) 'The size of the ui box.
+            Dim pad As Integer = bounds.Height * 0.05 'padding to prevent it from looking off.
+            Dim top = center.Y - pixRwrdYDisp * totalScaling + pad 'from center to the top it's 248px
+
+            Dim right = center.X - bounds.Width / 2 - pad * totalScaling ' Adjust for <4 players //todo, shouldn't this be left?
+            right -= (count - 3) * bounds.Width / 8 * totalScaling
             For i = 0 To count - 1
-                right += bounds.Width / 4
+                right += bounds.Width / 4 * totalScaling
                 Dim j As Integer = i
                 Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right / dpiScaling, top / dpiScaling))
             Next
