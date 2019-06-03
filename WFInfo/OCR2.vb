@@ -224,19 +224,42 @@ Public Class OCR2
                 Return True
             End If
         Next
+        WF_Proc = Nothing
+        If Debug Then
+            FakeUpdateCenter()
+        End If
         Return False
     End Function
 
     Public Overridable Function IsWFActive() As Boolean
-        If WF_Proc Is Nothing Then
+        If WF_Proc Is Nothing OrElse WF_Proc.HasExited Then
             GetWFProc()
-        ElseIf WF_Proc.HasExited Then
-            WF_Proc = Nothing
         End If
-        Return WF_Proc IsNot Nothing
+        If WF_Proc Is Nothing And Debug Then
+            FakeUpdateCenter()
+        End If
+        Return WF_Proc IsNot Nothing Or Debug
     End Function
 
+    Public Overridable Sub FakeUpdateCenter()
+        window = Screen.PrimaryScreen.Bounds
+
+        ' Get DPI Scaling
+        GetDPIScaling()
+
+        ' Get Window Points
+        Dim horz_center As Integer = window.Left + (window.Width / 2)
+        Dim vert_center As Integer = window.Top + (window.Height / 2)
+        center = New Point(dpiScaling * horz_center, dpiScaling * vert_center)
+
+        Main.addLog("UPDATED CENTER COORS: " & center.ToString())
+    End Sub
+
     Public Overridable Sub UpdateCenter()
+        If WF_Proc Is Nothing Then
+            Return
+        End If
+
         Dim hr As New HandleRef(WF_Proc, WF_Proc.MainWindowHandle)
         Dim tempRect As New RECT
         GetWindowRect(hr, tempRect)
@@ -548,6 +571,7 @@ Public Class OCR2
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         If Not IsWFActive() Then
+            Console.WriteLine("What what")
             Return
         End If
 
