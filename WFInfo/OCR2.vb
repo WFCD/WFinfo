@@ -536,7 +536,8 @@ Public Class OCR2
         ParsePlayer_timer(plyr) = clock.Elapsed.TotalMilliseconds
 
         result = db.GetPartName(result)
-        foundText.Add(result)
+
+        foundText(plyr) = result
 
         ParsePlayer_timer(plyr) -= clock.Elapsed.TotalMilliseconds
         Console.WriteLine("GET ALL PARTS-" & ParsePlayer_timer(plyr) & "ms")
@@ -555,17 +556,14 @@ Public Class OCR2
         GetUiColor()
 
         Dim count As Integer = GetPlayers()
-        Dim tasks(4) As Task
+        Dim tasks(3) As Task
         For i As Integer = 0 To count - 1
             Dim plyr As Integer = i
             Console.WriteLine("Running player: " & plyr)
-            tasks(i) = Task.Factory.StartNew(Sub() ParsePlayer(plyr, count))
+            tasks(i) = Task.Run(Sub() ParsePlayer(plyr, count))
         Next
-        Try
-            Task.WaitAll(tasks)
-        Catch ex As Exception
-            ' working as intended
-        End Try
+        Task.WaitAll(tasks)
+
 
         If Debug Then
 
@@ -592,7 +590,6 @@ Public Class OCR2
                         "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
                 Dim font As New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120.0))
                 Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
-
                 Dim textbox = New Rectangle(ss_area.Right, ss_area.Bottom + 3, printBounds.Width, printBounds.Height)
 
                 Dim print2 As String =
@@ -607,7 +604,8 @@ Public Class OCR2
                 For i As Integer = 0 To foundRec.Count - 1
                     Dim elem = foundRec(i)
                     graph.DrawRectangle(New Pen(Brushes.HotPink), elem)             'Draws a box around each text box
-                    Dim rewardBox = New Rectangle(elem.Left, elem.Bottom + 3, printBounds.Width, printBounds.Height)
+                    Dim printBoundsRelic As SizeF = graph.MeasureString(foundText(i), font, graph.MeasureString(foundText(i), font).Width)
+                    Dim rewardBox = New Rectangle(elem.Left, elem.Bottom + 3, printBoundsRelic.Width, printBoundsRelic.Height)
                     graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
                     graph.DrawString(foundText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
                 Next
