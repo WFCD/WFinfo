@@ -1,4 +1,4 @@
-﻿Imports System.Text.RegularExpressions
+Imports System.Text.RegularExpressions
 Imports Tesseract
 
 Public Class OCR2
@@ -527,7 +527,7 @@ Public Class OCR2
 
         text.Save(appData & "\WFInfo\debug\SCAN" & My.Settings.EtcCount.ToString() & "-PLYR-" & plyr & ".png")
         Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\SCAN" & My.Settings.EtcCount.ToString() & "-PLYR: " & plyr & ".png")
-        My.Settings.EtcCount += 1
+
         Dim result = DefaultParseText(text, plyr + 1)
 
         Console.WriteLine("FOUND TEXT FOR PLAYER " & plyr & ": " & result)
@@ -562,7 +562,7 @@ Public Class OCR2
             tasks(i) = Task.Run(Sub() ParsePlayer(plyr, count))
         Next
         Task.WaitAll(tasks)
-
+        My.Settings.EtcCount += 1
 
         If Debug Then
 
@@ -632,21 +632,21 @@ Public Class OCR2
             'run overlay
             ' Move over if you don't have all 4
 
-            Dim bounds = New Size(pixRwrdWid, pixRwrdHei) 'The size of the ui box.
-            Dim pad As Integer = bounds.Height * 0.05 'padding to prevent it from looking off.
-            Dim top = center.Y - pixRwrdYDisp * totalScaling + pad 'from center to the top it's 248px
 
-            Dim right = center.X - bounds.Width / 2 - pad * totalScaling ' Adjust for <4 players //todo, shouldn't this be left?
-            right -= (count - 3) * bounds.Width / 8 * totalScaling
+
+            Dim pad As Integer = pixRwrdHei * 0.05 * totalScaling 'padding to prevent it from looking off.
+            Dim top = center.Y - pixRwrdYDisp * totalScaling + pad 'from center to the top it's 248px
+            Dim left = center.X - (pixRwrdWid / 2 * totalScaling) - pad 'Going from the center you substract half of the width times the ui scale.
+            Dim offset = pixRwrdWid / 4 * totalScaling
             For i = 0 To count - 1
-                right += bounds.Width / 4 * totalScaling
+                left += offset
                 Dim j As Integer = i
-                Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right / dpiScaling, top / dpiScaling))
+                Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(left / dpiScaling, top / dpiScaling))
             Next
 
             For i = 0 To foundText.Count - 1
 
-                Main.addLog("DISPLAY OVERLAY " & (i + 1) & ":" & vbCrLf & "Right, Top: " & right & ", " & top)
+                Main.addLog("DISPLAY OVERLAY " & (i + 1) & ":" & vbCrLf & "Left, Top: " & left & ", " & top)
                 Dim plat As Double = db.market_data(foundText(i))("plat")
                 Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
                 Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
