@@ -556,12 +556,12 @@ Public Class OCR2
         GetUiColor()
 
         Dim count As Integer = GetPlayers()
-        Dim tasks(3) As Task
+        Dim tasks As New List(Of Task)
         For i As Integer = 0 To count - 1
             Dim plyr As Integer = i
-            tasks(i) = Task.Run(Sub() ParsePlayer(plyr, count))
+            tasks.Add(Task.Run(Sub() ParsePlayer(plyr, count)))
         Next
-        Task.WaitAll(tasks)
+        Task.WaitAll(tasks.ToArray())
         My.Settings.EtcCount += 1
 
         If Debug Then
