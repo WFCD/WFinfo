@@ -112,7 +112,7 @@ Public Class RewardWindow
 
     End Sub
 
-    Friend Sub Display(foundText As List(Of String))
+    Friend Sub Display(foundText As String())
         Dim visible As Boolean = Me.Visible
         Me.Show()
         Me.TopMost = True

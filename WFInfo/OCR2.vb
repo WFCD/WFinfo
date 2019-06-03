@@ -64,11 +64,11 @@ Public Class OCR2
     ' Tesseract engines for each reward
     ' 0 for relic window checks or any system checks
     ' 1-4 for players 1 to 4
-    Public engine(5) As TesseractEngine
+    Public engine(4) As TesseractEngine
 
     ' List of results found by OCR, didn't have a better place to put it
-    Public foundText As New List(Of String)()
-    Public foundRec As New List(Of Rectangle)()
+    Public foundText(3) As String
+    Public foundRec(3) As Rectangle
 
 
     Public Enum WindowStyle
@@ -497,7 +497,7 @@ Public Class OCR2
         End Using
 
         If Debug Then
-            foundRec.Add(New Rectangle(New Point(left, top), New Size(width, lineHeight)))
+            foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight))
         End If
 
         Return CleanImage(ret, 50)
@@ -601,7 +601,7 @@ Public Class OCR2
                 Dim textbox2 = New Rectangle((vf_area.Left + vf_area.Right) / 2, vf_area.Bottom + 3, printBounds2.Width, printBounds2.Height)
 
                 graph.DrawRectangle(New Pen(Brushes.DeepPink), ss_area)                  'The area that it tried to read from
-                For i As Integer = 0 To foundRec.Count - 1
+                For i As Integer = 0 To count - 1
                     Dim elem = foundRec(i)
                     graph.DrawRectangle(New Pen(Brushes.HotPink), elem)             'Draws a box around each text box
                     Dim printBoundsRelic As SizeF = graph.MeasureString(foundText(i), font, graph.MeasureString(foundText(i), font).Width)

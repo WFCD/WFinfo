@@ -423,7 +423,7 @@ Public Class OCR
 
         Dim screen As Bitmap
         Dim players As Integer = 0
-        Dim foundText As New List(Of String)()
+        Dim foundText(3) As String
         ' Start timer
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
         UpdateCenter()
@@ -463,7 +463,7 @@ Public Class OCR
             ' Finds text in those images, then adds to list
             Dim text As String = GetPartText(screen, players, i)
             text = db.GetPartName(text)
-            foundText.Add(text)
+            foundText(i) = text
         Next
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
         Console.WriteLine("GET ALL PARTS-" & ParseScreen_timer & "ms")
