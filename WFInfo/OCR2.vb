@@ -6,7 +6,7 @@ Public Class OCR2
     Public Const pixRwrdWid As Integer = 968
     Public Const pixRwrdHei As Integer = 235
     Public Const pixRwrdYDisp As Integer = 185
-    Public Const pixRwrdLineHei As Integer = 22
+    Public Const pixRwrdLineHei As Integer = 44
     Public Const pixRwrdLineWid As Integer = 240
 
     ' Pixel measurement for rarity bars for player count
@@ -112,7 +112,7 @@ Public Class OCR2
                 engine(i).DefaultPageSegMode = PageSegMode.SingleLine
                 engine(i).SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ/")
             Else
-                engine(i).DefaultPageSegMode = PageSegMode.SingleLine
+                engine(i).DefaultPageSegMode = PageSegMode.SingleBlock
                 engine(i).SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&/")
             End If
             engine(i).SetVariable("load_system_dawg", False)
@@ -512,15 +512,15 @@ Public Class OCR2
         Dim width As Integer = pixRwrdWid / 4 * totalScaling
         Dim lineHeight As Integer = pixRwrdLineHei * totalScaling
 
-        Dim left As Integer = center.X - width * (count / 2 - plyr)
+        Dim left As Integer = center.X - width * (count / 2 - plyr) + 5
         Dim top As Integer = center.Y - pixRwrdYDisp * totalScaling + pixRwrdHei * totalScaling - lineHeight
 
-        Dim ret As New Bitmap(width + 10, lineHeight + 10)
+        Dim ret As New Bitmap(width, lineHeight + 10)
         Using graph As Graphics = Graphics.FromImage(ret)
             If multiLine Then
-                graph.CopyFromScreen(left, top + lineHeight, 5, 5, New Size(width, lineHeight), CopyPixelOperation.SourceCopy)
+                graph.CopyFromScreen(left, top + lineHeight, 5, 5, New Size(width - 10, lineHeight), CopyPixelOperation.SourceCopy)
             Else
-                graph.CopyFromScreen(left, top, 5, 5, New Size(width, lineHeight), CopyPixelOperation.SourceCopy)
+                graph.CopyFromScreen(left, top, 5, 5, New Size(width - 10, lineHeight), CopyPixelOperation.SourceCopy)
             End If
         End Using
         If Debug Then
@@ -530,7 +530,7 @@ Public Class OCR2
                 foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight))
             End If
         End If
-        Return CleanImage(ret, 50)
+        Return CleanImage(ret, 30)
     End Function
 
     Public GetPartText_timer As Long = 0
