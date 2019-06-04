@@ -6,7 +6,7 @@ Public Class OCR2
     Public Const pixRwrdWid As Integer = 968
     Public Const pixRwrdHei As Integer = 235
     Public Const pixRwrdYDisp As Integer = 185
-    Public Const pixRwrdLineHei As Integer = 44
+    Public Const pixRwrdLineHei As Integer = 24
     Public Const pixRwrdLineWid As Integer = 240
 
     ' Pixel measurement for rarity bars for player count
@@ -153,6 +153,7 @@ Public Class OCR2
                 End If
             Next
             Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
+            Throw New System.Exception("Couldn't find matching ui color out of: " & detectedColor.ToString)
         End Using
     End Sub
 
@@ -507,7 +508,7 @@ Public Class OCR2
         Return count
     End Function
 
-    Public Overridable Function GetPlayerImage(plyr As Integer, count As Integer) As Bitmap
+    Public Overridable Function GetPlayerImage(plyr As Integer, count As Integer, Optional multiLine As Boolean = False) As Bitmap
         Dim width As Integer = pixRwrdWid / 4 * totalScaling
         Dim lineHeight As Integer = pixRwrdLineHei * totalScaling
 
@@ -516,18 +517,24 @@ Public Class OCR2
 
         Dim ret As New Bitmap(width + 10, lineHeight + 10)
         Using graph As Graphics = Graphics.FromImage(ret)
-            graph.CopyFromScreen(left, top, 5, 5, New Size(width, lineHeight), CopyPixelOperation.SourceCopy)
+            If multiLine Then
+                graph.CopyFromScreen(left, top + lineHeight, 5, 5, New Size(width, lineHeight), CopyPixelOperation.SourceCopy)
+            Else
+                graph.CopyFromScreen(left, top, 5, 5, New Size(width, lineHeight), CopyPixelOperation.SourceCopy)
+            End If
         End Using
-
         If Debug Then
-            foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight))
+            If multiLine Then
+                foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight * 2))
+            Else
+                foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight))
+            End If
         End If
-
         Return CleanImage(ret, 50)
     End Function
 
     Public GetPartText_timer As Long = 0
-    Public Overridable Function GetPartText(screen As Bitmap, plyr_count As Integer, plyr As Integer, Optional multiLine As Boolean = False) As String
+    Public Overridable Function GetPartText(screen As Bitmap, plyr_count As Integer, plyr As Integer) As String
         GetPartText_timer = clock.Elapsed.TotalMilliseconds
 
         Dim cleaned = CleanImage(screen)
@@ -558,9 +565,10 @@ Public Class OCR2
         Console.WriteLine("LINE-" & ParsePlayer_timer(plyr) & "ms")
         ParsePlayer_timer(plyr) = clock.Elapsed.TotalMilliseconds
 
-        result = db.GetPartName(result)
-
-        foundText(plyr) = result
+        foundText(plyr) = db.GetPartName(result)
+        'todo: Add cause to call GetPlayerImage(plyr, count, true) if the results are: Blueprint, Handle
+        'Those are the current ones I'm aware of right now.
+        'I was thinking of adding that in here
 
         ParsePlayer_timer(plyr) -= clock.Elapsed.TotalMilliseconds
         Console.WriteLine("GET ALL PARTS-" & ParsePlayer_timer(plyr) & "ms")
