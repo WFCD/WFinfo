@@ -144,17 +144,20 @@ Public Class OCR2
             R /= pixProfWid * totalScaling
             G /= pixProfWid * totalScaling
             B /= pixProfWid * totalScaling
-
-            Dim detectedColor = Color.FromArgb(R, G, B)
-            For Each knowColor In fissColors
-                If ColorThreshold(detectedColor, knowColor) Then
-                    uiColor = detectedColor
-                    Exit Sub
-                End If
-            Next
-            Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
-            Throw New System.Exception("Couldn't find matching ui color out of: " & detectedColor.ToString)
+            Try
+                Dim detectedColor = Color.FromArgb(R, G, B)
+                For Each knowColor In fissColors
+                    If ColorThreshold(detectedColor, knowColor) Then
+                        uiColor = detectedColor
+                        Exit Sub
+                    End If
+                Next
+                Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
+            Catch ex As Exception
+                Throw New System.Exception("Couldn't find matching ui color out of: " & ex.ToString)
+            End Try
         End Using
+
     End Sub
 
     Public imageFilter_timer As Long = 0
@@ -508,27 +511,20 @@ Public Class OCR2
         Return count
     End Function
 
-    Public Overridable Function GetPlayerImage(plyr As Integer, count As Integer, Optional multiLine As Boolean = False) As Bitmap
-        Dim width As Integer = pixRwrdWid / 4 * totalScaling
+    Public Overridable Function GetPlayerImage(plyr As Integer, count As Integer) As Bitmap
+        Dim padding = 6
+        Dim width As Integer = pixRwrdWid / 4 * totalScaling - padding
         Dim lineHeight As Integer = pixRwrdLineHei * totalScaling
 
-        Dim left As Integer = center.X - width * (count / 2 - plyr) + 5
+        Dim left As Integer = center.X - (width + padding) * (count / 2 - plyr) + 3
         Dim top As Integer = center.Y - pixRwrdYDisp * totalScaling + pixRwrdHei * totalScaling - lineHeight
 
         Dim ret As New Bitmap(width, lineHeight + 10)
         Using graph As Graphics = Graphics.FromImage(ret)
-            If multiLine Then
-                graph.CopyFromScreen(left, top + lineHeight, 5, 5, New Size(width - 10, lineHeight), CopyPixelOperation.SourceCopy)
-            Else
-                graph.CopyFromScreen(left, top, 5, 5, New Size(width - 10, lineHeight), CopyPixelOperation.SourceCopy)
-            End If
+            graph.CopyFromScreen(left, top, 5, 5, New Size(width, lineHeight), CopyPixelOperation.SourceCopy)
         End Using
         If Debug Then
-            If multiLine Then
-                foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight * 2))
-            Else
-                foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight))
-            End If
+            foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight))
         End If
         Return CleanImage(ret, 30)
     End Function
@@ -566,9 +562,6 @@ Public Class OCR2
         ParsePlayer_timer(plyr) = clock.Elapsed.TotalMilliseconds
 
         foundText(plyr) = db.GetPartName(result)
-        'todo: Add cause to call GetPlayerImage(plyr, count, true) if the results are: Blueprint, Handle
-        'Those are the current ones I'm aware of right now.
-        'I was thinking of adding that in here
 
         ParsePlayer_timer(plyr) -= clock.Elapsed.TotalMilliseconds
         Console.WriteLine("GET ALL PARTS-" & ParsePlayer_timer(plyr) & "ms")
@@ -677,7 +670,6 @@ Public Class OCR2
             Next
 
             For i = 0 To foundText.Count - 1
-
                 Main.addLog("DISPLAY OVERLAY " & (i + 1) & ":" & vbCrLf & "Left, Top: " & left & ", " & top)
                 Dim plat As Double = db.market_data(foundText(i))("plat")
                 Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
@@ -685,7 +677,6 @@ Public Class OCR2
                 Console.WriteLine(foundText(i) & "--" & plat & "---" & ducat)
                 Dim j As Integer = i
                 rwrdPanels(j).Invoke(Sub() rwrdPanels(j).LoadText(plat.ToString("N1"), ducat, vaulted))
-
             Next
             ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
             Console.WriteLine("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")

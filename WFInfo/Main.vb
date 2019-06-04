@@ -382,17 +382,23 @@ Module Glob
 
     Private DoOtherWork_timer As Long
     Private Sub DoOtherWork()
-        If parser2.IsWFActive() Then
-            DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
-            Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
-            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
-            parser2.ParseScreen()
-            DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
-            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
-        Else
-            Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
-            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Warframe Not Active")
-        End If
+        Try
+            If parser2.IsWFActive() Then
+                DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
+                Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
+                Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
+                parser2.ParseScreen()
+                DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
+                Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
+            Else
+                Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
+                Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Warframe Not Active")
+            End If
+        Catch ex As Exception
+            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "ERROR (ParseScreen)")
+            Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = Color.Red)
+            Main.addLog(ex.ToString())
+        End Try
     End Sub
 
 
