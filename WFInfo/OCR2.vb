@@ -6,7 +6,7 @@ Public Class OCR2
     Public Const pixRwrdWid As Integer = 968
     Public Const pixRwrdHei As Integer = 235
     Public Const pixRwrdYDisp As Integer = 185
-    Public Const pixRwrdLineHei As Integer = 24
+    Public Const pixRwrdLineHei As Integer = 22
     Public Const pixRwrdLineWid As Integer = 240
 
     ' Pixel measurement for rarity bars for player count
