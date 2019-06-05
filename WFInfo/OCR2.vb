@@ -16,7 +16,7 @@ Public Class OCR2
     ' Public Const pixRareHei As Integer = 1
     '   Box is centered horizontally
     ' Public Const pixRareXDisp As Integer = ???
-    Public Const pixRareYDisp As Integer = 196
+    Public Const pixRareYDisp As Integer = 195
 
     ' Pixel measurements for detecting reward screen
     Public Const pixFissWid As Integer = 354
@@ -43,7 +43,7 @@ Public Class OCR2
     Public FissClr9 As Color = Color.FromArgb(20, 41, 29)       ' orokin
     Public FissClr10 As Color = Color.FromArgb(9, 78, 106)      ' tenno
 
-    Public rarity As New List(Of Color) From {Color.FromArgb(182, 105, 77), Color.FromArgb(119, 119, 119), Color.FromArgb(163, 143, 70)}
+    Public rarity As New List(Of Color) From {Color.FromArgb(120, 70, 60), Color.FromArgb(82, 85, 87), Color.FromArgb(120, 100, 50)}
     Public fissColors As Color() = {FissClr1, FissClr2, FissClr3, FissClr4, FissClr5, FissClr6, FissClr7, FissClr8, FissClr9, FissClr10}
 
     ' Warframe window stats
@@ -149,6 +149,7 @@ Public Class OCR2
                 For Each knowColor In fissColors
                     If ColorThreshold(detectedColor, knowColor) Then
                         uiColor = detectedColor
+                        Console.WriteLine(uiColor)
                         Exit Sub
                     End If
                 Next
@@ -369,7 +370,7 @@ Public Class OCR2
             ' Finds: VUIIJ FISSUHE/HEWAHDS
             Console.WriteLine("---" & ret & "---")
 
-            If LevDist(ret, "VUIIJ FISSUHE") < 4 Then
+            If LevDist(ret, "VOID FISSURE") < 4 Then
                 Console.WriteLine("REWARD WINDOW FOUND")
                 Return True
             End If
@@ -467,20 +468,21 @@ Public Class OCR2
             For i As Integer = 0 To 7
                 x = (i + 0.5) * bmp.Width / 8 - scanWid / 2
                 clr = bmp.GetPixel(x, 0)
-                If ColorThreshold(clr, rarity(0)) Then
+                If ColorThreshold(clr, rarity(0), 30) Then
                     thresh = rarity(0)
-                ElseIf ColorThreshold(clr, rarity(1)) Then
+                ElseIf ColorThreshold(clr, rarity(1), 30) Then
                     thresh = rarity(1)
-                ElseIf ColorThreshold(clr, rarity(2)) Then
+                ElseIf ColorThreshold(clr, rarity(2), 30) Then
                     thresh = rarity(2)
                 Else
+                    Console.WriteLine("DIDN'T FIND COLOR: " & clr.ToString())
                     Continue For
                 End If
 
                 Dim success As Boolean = True
                 For j As Integer = 1 To scanWid - 1
                     clr = bmp.GetPixel(x + j, 0)
-                    If ColorThreshold(clr, thresh) Then
+                    If ColorThreshold(clr, thresh, 30) Then
                         bmp.SetPixel(x + j, 0, Color.Black)
                     Else
                         success = False
@@ -494,6 +496,9 @@ Public Class OCR2
                     Exit For
                 End If
             Next
+            bmp.Save(appData & "\WFInfo\debug\RareBar-" & My.Settings.RarebarCount.ToString() & ".png")
+            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\RareBar-" & My.Settings.RarebarCount.ToString() & ".png")
+            My.Settings.RarebarCount += 1
             If count Mod 2 = 0 Then
                 count /= 2
             Else
