@@ -318,6 +318,11 @@ Public Class OCR2
         Return (Math.Abs(CInt(test.R) - thresh.R) < threshold) AndAlso (Math.Abs(CInt(test.G) - thresh.G) < threshold) AndAlso (Math.Abs(CInt(test.B) - thresh.B) < threshold)
     End Function
 
+    Public Overridable Function HueThreshold(test As Color, thresh As Color, Optional threshold As Integer = 3) As Boolean
+        Dim hue As Single = test.GetHue()
+        Return False
+    End Function
+
     '_____________________________________________________
     '
     '    BEGIN RELIC REWARDS STUFF
