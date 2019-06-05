@@ -427,7 +427,6 @@ Public Class OCR
         ' Start timer
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
         UpdateCenter()
-        screen = parser2.GetRelicWindow()
 
         ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
         Console.WriteLine("SCREENSHOT-" & ParseScreen_timer & "ms")

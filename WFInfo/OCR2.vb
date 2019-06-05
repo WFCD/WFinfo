@@ -163,6 +163,7 @@ Public Class OCR2
 
     Public imageFilter_timer As Long = 0
     Public Overridable Function CleanImage(image As Bitmap, Optional thresh As Integer = 10) As Bitmap
+        imageFilter_timer = clock.Elapsed.TotalMilliseconds
         For i As Integer = 0 To image.Width - 1
             For j As Integer = 0 To image.Height - 1
                 Dim currentPixle = image.GetPixel(i, j)
@@ -174,7 +175,7 @@ Public Class OCR2
             Next
         Next
         imageFilter_timer -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("IMAGE FILTER-" & GetPartText_timer & "ms")
+        Console.WriteLine("IMAGE FILTER" & imageFilter_timer & "ms")
         Return image
     End Function
 
@@ -319,8 +320,8 @@ Public Class OCR2
     End Function
 
     Public Overridable Function HueThreshold(test As Color, thresh As Color, Optional threshold As Integer = 3) As Boolean
-        Dim hue As Single = test.GetHue()
-        Return False
+        Dim hue As Single = Math.Abs(test.GetHue() - thresh.GetHue())
+        Return hue < threshold
     End Function
 
     '_____________________________________________________
@@ -381,73 +382,6 @@ Public Class OCR2
             End If
         End Using
         Return False
-    End Function
-
-    ' Public Overridable Function Screenshot(width As Integer, height As Integer, heightPosition As Integer) As Bitmap
-    Public Overridable Function GetRelicWindow() As Bitmap 'Depricated? Not being used in the new ocr
-
-        Console.Write("Going into get relic window")
-
-        GetDPIScaling()
-        GetUIScaling()
-
-        Dim width As Integer = pixRwrdWid * totalScaling
-        Dim height As Integer = pixRwrdHei * totalScaling
-
-        Dim ss_area As New Rectangle(center.X - width / 2,
-                                     center.Y - pixRwrdYDisp * totalScaling,
-                                     width,
-                                     height)
-
-        Dim vf_area As New Rectangle(window.Left + pixFissXDisp * totalScaling, window.Top + pixFissYDisp * totalScaling,
-                                  pixFissWid * totalScaling, pixFissHei * totalScaling)
-
-        Main.addLog("TAKING SCREENSHOT:" & vbCrLf & "DPI SCALE: " & dpiScaling & vbCrLf & "SS REGION: " & ss_area.ToString())
-        Dim ret As New Bitmap(width, height)
-        If Debug Then 'screenshot the whole screen
-            Dim debugRet As New Bitmap(CInt(Screen.PrimaryScreen.Bounds.Width * dpiScaling), CInt(Screen.PrimaryScreen.Bounds.Height * dpiScaling))
-            Using graph As Graphics = Graphics.FromImage(debugRet)
-                Dim screenSize As New Size(Screen.PrimaryScreen.Bounds.Width * dpiScaling, Screen.PrimaryScreen.Bounds.Height * dpiScaling)
-                graph.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, screenSize, CopyPixelOperation.SourceCopy)
-                Dim print As String =
-                        "Tried looking at " & ss_area.ToString & vbCrLf &
-                        "Screen resolution: " & Screen.PrimaryScreen.Bounds.Size.ToString & vbCrLf &
-                        "Screen center: " & center.ToString & vbCrLf &
-                        "Screen bounds: " & window.ToString & vbCrLf &
-                        "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
-                Dim font As New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120.0))
-                Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
-
-                Dim textbox = New Rectangle(center.X, ss_area.Bottom + 3, printBounds.Width, printBounds.Height)
-
-                Dim print2 As String =
-                        "Tried looking at " & vf_area.ToString & vbCrLf &
-                        "Screen top-left: " & (New Point(window.X, window.Y)).ToString & vbCrLf &
-                        "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
-
-                Dim printBounds2 As SizeF = graph.MeasureString(print2, font, graph.MeasureString(print2, font).Width)
-                Dim textbox2 = New Rectangle((vf_area.Left + vf_area.Right) / 2, vf_area.Bottom + 3, printBounds2.Width, printBounds2.Height)
-
-                graph.FillEllipse(Brushes.Red, center.X - 3, center.Y - 3, 3, 3)    'Dot centered at where it thinks the center of warframe is
-                graph.DrawRectangle(New Pen(Brushes.Red), ss_area)                  'The area that it tried to read from
-                graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
-                graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
-                graph.DrawRectangle(New Pen(Brushes.Red), vf_area)                  'The area that it tried to read from
-                graph.FillRectangle(Brushes.Black, textbox2)                         'Black background for text box
-                graph.DrawString(print2, font, Brushes.Red, textbox2)                 'Debug text ontop of screenshot
-
-                ' TODO: Add text box and rectangle for relic check at top left
-
-                debugRet.Save(appData & "\WFInfo\debug\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
-                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
-                My.Settings.SSCount += 1
-            End Using
-        End If
-
-        Using graph As Graphics = Graphics.FromImage(ret)
-            graph.CopyFromScreen(ss_area.X, ss_area.Y, 0, 0, New Size(ss_area.Width, ss_area.Height), CopyPixelOperation.SourceCopy)
-        End Using
-        Return ret
     End Function
 
     Public Overridable Function GetPlayers() As Integer
@@ -536,24 +470,7 @@ Public Class OCR2
         If Debug Then
             foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight))
         End If
-        Return CleanImage(ret, 30)
-    End Function
-
-    Public GetPartText_timer As Long = 0
-    Public Overridable Function GetPartText(screen As Bitmap, plyr_count As Integer, plyr As Integer) As String
-        GetPartText_timer = clock.Elapsed.TotalMilliseconds
-
-        Dim cleaned = CleanImage(screen)
-
-        Dim ret As String = ""
-        Using page As Page = engine(plyr).Process(screen)
-            ret = Regex.Replace(page.GetText(), "[^A-Z& ]", "").Trim
-        End Using
-
-        GetPartText_timer -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("LINE-" & GetPartText_timer & "ms")
-
-        Return ret
+        Return CleanImage(ret, Math.Max(uiColor.R, Math.Max(uiColor.G, uiColor.B)) / 8 + 20)
     End Function
 
     Public ParsePlayer_timer() As Long = {0, 0, 0, 0}
