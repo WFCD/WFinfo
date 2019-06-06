@@ -45,7 +45,7 @@ Public Class OCR2
     Public FissClr9 As Color = Color.FromArgb(20, 41, 29)       ' orokin
     Public FissClr10 As Color = Color.FromArgb(9, 78, 106)      ' tenno
 
-    Public rarity As New List(Of Color) From {Color.FromArgb(180, 135, 110), Color.FromArgb(200, 200, 200), Color.FromArgb(210, 190, 105)}
+    Public rarity As New List(Of Color) From {Color.FromArgb(180, 135, 110), Color.FromArgb(200, 200, 200), Color.FromArgb(212, 192, 120)}
     Public fissColors As Color() = {FissClr1, FissClr2, FissClr3, FissClr4, FissClr5, FissClr6, FissClr7, FissClr8, FissClr9, FissClr10}
 
     ' Warframe window stats
