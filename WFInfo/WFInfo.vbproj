@@ -175,6 +175,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="NameTray.Designer.vb">
+      <DependentUpon>NameTray.vb</DependentUpon>
+    </Compile>
+    <Compile Include="NameTray.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="OCR2.vb" />
     <Compile Include="Overlay.Designer.vb">
       <DependentUpon>Overlay.vb</DependentUpon>
@@ -216,6 +222,9 @@
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NameTray.resx">
+      <DependentUpon>NameTray.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Overlay.resx">
       <DependentUpon>Overlay.vb</DependentUpon>
@@ -311,6 +320,8 @@
     <None Include="Resources\foundry.png" />
     <None Include="Resources\foundry_h.png" />
     <None Include="Resources\warning-sign.png" />
+    <None Include="Resources\Roboto.bmp" />
+    <None Include="Resources\NameTray.png" />
     <Content Include="x64\liblept1760.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
