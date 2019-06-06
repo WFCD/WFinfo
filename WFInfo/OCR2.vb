@@ -5,7 +5,7 @@ Public Class OCR2
     ' Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
     Public Const pixRwrdWid As Integer = 972
     Public Const pixRwrdHei As Integer = 235
-    Public Const pixRwrdYDisp As Integer = 185
+    Public Const pixRwrdYDisp As Integer = 316
     Public Const pixRwrdLineHei As Integer = 44
     Public Const pixRwrdLineWid As Integer = 240
 
@@ -16,7 +16,7 @@ Public Class OCR2
     ' Public Const pixRareHei As Integer = 1
     '   Box is centered horizontally
     ' Public Const pixRareXDisp As Integer = ???
-    Public Const pixRareYDisp As Integer = 197
+    Public Const pixRareYDisp As Integer = 58
 
     Public Const pixProfWid As Integer = 48
     Public Const pixProfTotWid As Integer = 192
