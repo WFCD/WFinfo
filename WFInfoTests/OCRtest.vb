@@ -4,7 +4,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports WFInfo
 
 <TestClass()> Public Class OCRtest
-    Inherits OCR
+    Inherits OCR2
 
     Public isWFActive_Skip As Boolean = False
     Public Overrides Function isWFActive() As Boolean
@@ -31,22 +31,22 @@ Imports WFInfo
     End Function
 
     Public GetScalingFactor_Skip As Boolean = False
-    Public Overrides Function GetScalingFactor() As Double
+    Public Overrides Function GetDPIScaling() As Double
         If GetScalingFactor_Skip Then
             Return -1.0
         End If
-        Return MyBase.GetScalingFactor()
+        Return MyBase.GetDPIScaling()
     End Function
 
     Public Screenshot_Override As Boolean = False
-    Public Overrides Function Screenshot(wid As Integer, hei As Integer, top As Integer) As Bitmap
+    Public Overrides Function GetPlayerImage(plyr As Integer, count As Integer) As Bitmap
         If Screenshot_Override Then
             ' Do something
-            If wid < 0 Or hei < 0 Then
+            If plyr < 0 Or count < 0 Then
                 Return Nothing
             End If
         End If
-        Return MyBase.Screenshot(wid, hei, top)
+        Return MyBase.GetPlayerImage(plyr, count)
     End Function
 
     Public UpdateCenter_Skip As Boolean = False
@@ -71,11 +71,11 @@ Imports WFInfo
         GetUIScaling_Skip = False
 
         GetScalingFactor_Skip = True
-        Assert.AreEqual(-1.0, GetScalingFactor())
+        Assert.AreEqual(-1.0, GetDPIScaling())
         GetScalingFactor_Skip = False
 
         Screenshot_Override = True
-        Assert.IsNull(Screenshot(-1, -1, -1))
+        Assert.IsNull(GetPlayerImage(-1, -1))
         Screenshot_Override = False
     End Sub
 

@@ -154,7 +154,6 @@
     <Compile Include="LogWatcher.vb">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="OCR.vb" />
     <Compile Include="Main.designer.vb">
       <DependentUpon>Main.vb</DependentUpon>
     </Compile>

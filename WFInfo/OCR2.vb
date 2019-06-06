@@ -9,7 +9,7 @@ Public Class OCR2
     Public Const pixRwrdLineHei As Integer = 44
     Public Const pixRwrdLineWid As Integer = 240
 
-    ' Pixel measurement for rarity bars for player count
+    ' Pixel measurement for player bars for player count
     '   Width is same as pixRwrdWid
     ' Public Const pixRareWid As Integer = pixRwrdWid
     '   Height is always 1px
@@ -18,6 +18,13 @@ Public Class OCR2
     ' Public Const pixRareXDisp As Integer = ???
     Public Const pixRareYDisp As Integer = 195
 
+    Public Const pixProfWid As Integer = 48
+    Public Const pixProfTotWid As Integer = 192
+    ' Height is always 1px
+    ' Public Const pixProfHei As Integer = 1
+    Public Const pixProfXDisp As Integer = 93
+    Public Const pixProfYDisp As Integer = 86
+
     ' Pixel measurements for detecting reward screen
     Public Const pixFissWid As Integer = 354
     Public Const pixFissHei As Integer = 45
@@ -25,11 +32,6 @@ Public Class OCR2
     Public Const pixFissYDisp As Integer = 43
 
     ' Colors for "VOIDFISSURE/REWARDS"
-    Public Const pixProfWid As Integer = 39
-    ' Height is always 1px
-    ' Public Const pixProfHei As Integer = 1
-    Public Const pixProfXDisp As Integer = 98
-    Public Const pixProfYDisp As Integer = 86
 
     Public uiColor As Color
     Public FissClr1 As Color = Color.FromArgb(189, 168, 101)    ' default
@@ -43,7 +45,7 @@ Public Class OCR2
     Public FissClr9 As Color = Color.FromArgb(20, 41, 29)       ' orokin
     Public FissClr10 As Color = Color.FromArgb(9, 78, 106)      ' tenno
 
-    Public rarity As New List(Of Color) From {Color.FromArgb(120, 70, 60), Color.FromArgb(82, 85, 87), Color.FromArgb(120, 100, 50)}
+    Public rarity As New List(Of Color) From {Color.FromArgb(120, 70, 60), Color.FromArgb(80, 83, 89), Color.FromArgb(117, 109, 75)}
     Public fissColors As Color() = {FissClr1, FissClr2, FissClr3, FissClr4, FissClr5, FissClr6, FissClr7, FissClr8, FissClr9, FissClr10}
 
     ' Warframe window stats
@@ -65,6 +67,9 @@ Public Class OCR2
     ' 0 for relic window checks or any system checks
     ' 1-4 for players 1 to 4
     Public engine(4) As TesseractEngine
+    Public tasks(3) As Task
+    Public running As New List(Of Task)
+    Public plyr_count As Integer = -1
 
     ' List of results found by OCR, didn't have a better place to put it
     Public foundText(3) As String
@@ -117,6 +122,7 @@ Public Class OCR2
             End If
             engine(i).SetVariable("load_system_dawg", False)
             engine(i).SetVariable("user_words_suffix", "prime-words")
+
         Next
     End Sub
 
@@ -124,46 +130,49 @@ Public Class OCR2
     ' Utility Functions
     '----------------------------------------------------------------------
 
-    Public Overridable Sub GetUiColor()
-        Using bmp As New Bitmap(CInt(pixProfWid * totalScaling), 1)
+    Public Overridable Sub GetUiColor(Optional bmp As Bitmap = Nothing)
+        Dim reset As Boolean = bmp Is Nothing
+        uiColor = Nothing
+        Dim width As Integer = pixProfWid * totalScaling / 2
+        If bmp Is Nothing Then
+            bmp = New Bitmap(width, 1)
             Using graph As Graphics = Graphics.FromImage(bmp)
-                graph.CopyFromScreen(pixProfXDisp * totalScaling, pixProfYDisp * totalScaling, 0, 0, New Size(pixProfWid * totalScaling, 1), CopyPixelOperation.SourceCopy)
+                graph.CopyFromScreen(pixProfXDisp * totalScaling + width / 2, pixProfYDisp * totalScaling, 0, 0, New Size(width, 1), CopyPixelOperation.SourceCopy)
             End Using
+        End If
+        If Debug Then
             bmp.Save(appData & "\WFInfo\debug\COLOR_CHECK-" & My.Settings.ColorcheckCount.ToString() & ".png")
             My.Settings.ColorcheckCount += 1
-            Dim clr As Color = Nothing
-            Dim R, G, B As Integer
+        End If
+        Dim clr As Color = Nothing
+        Dim R, G, B As Integer
 
-            For i As Integer = 0 To pixProfWid * totalScaling - 1
-                clr = bmp.GetPixel(i, 0)
-                R += clr.R
-                G += clr.G
-                B += clr.B
-                bmp.SetPixel(i, 0, Color.White)
-            Next
-            R /= pixProfWid * totalScaling
-            G /= pixProfWid * totalScaling
-            B /= pixProfWid * totalScaling
-            Try
-                Dim detectedColor = Color.FromArgb(R, G, B)
-                For Each knowColor In fissColors
-                    If ColorThreshold(detectedColor, knowColor) Then
-                        uiColor = detectedColor
-                        Console.WriteLine(uiColor)
-                        Exit Sub
-                    End If
-                Next
-                Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
-            Catch ex As Exception
-                Throw New System.Exception("Couldn't find matching ui color out of: " & ex.ToString)
-            End Try
-        End Using
-
+        For i As Integer = 0 To width - 1
+            clr = bmp.GetPixel(i, 0)
+            R += clr.R
+            G += clr.G
+            B += clr.B
+        Next
+        R /= width
+        G /= width
+        B /= width
+        Dim detectedColor = Color.FromArgb(R, G, B)
+        For Each knowColor In fissColors
+            If ColorThreshold(detectedColor, knowColor) Then
+                uiColor = detectedColor
+                If reset Then
+                    bmp.Dispose()
+                End If
+                Exit Sub
+            End If
+        Next
+        Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
+        If reset Then
+            bmp.Dispose()
+        End If
     End Sub
 
-    Public imageFilter_timer As Long = 0
     Public Overridable Function CleanImage(image As Bitmap, Optional thresh As Integer = 10) As Bitmap
-        imageFilter_timer = clock.Elapsed.TotalMilliseconds
         For i As Integer = 0 To image.Width - 1
             For j As Integer = 0 To image.Height - 1
                 Dim currentPixle = image.GetPixel(i, j)
@@ -174,8 +183,6 @@ Public Class OCR2
                 End If
             Next
         Next
-        imageFilter_timer -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("IMAGE FILTER" & imageFilter_timer & "ms")
         Return image
     End Function
 
@@ -231,7 +238,7 @@ Public Class OCR2
             End If
         Next
         WF_Proc = Nothing
-        If Debug Then
+        If Debug And window = Nothing Then
             FakeUpdateCenter()
         End If
         Return False
@@ -241,7 +248,7 @@ Public Class OCR2
         If WF_Proc Is Nothing OrElse WF_Proc.HasExited Then
             GetWFProc()
         End If
-        If WF_Proc Is Nothing And Debug Then
+        If WF_Proc Is Nothing And Debug And window = Nothing Then
             FakeUpdateCenter()
         End If
         Return WF_Proc IsNot Nothing Or Debug
@@ -319,9 +326,12 @@ Public Class OCR2
         Return (Math.Abs(CInt(test.R) - thresh.R) < threshold) AndAlso (Math.Abs(CInt(test.G) - thresh.G) < threshold) AndAlso (Math.Abs(CInt(test.B) - thresh.B) < threshold)
     End Function
 
-    Public Overridable Function HueThreshold(test As Color, thresh As Color, Optional threshold As Integer = 3) As Boolean
+    Public Overridable Function HSVThreshold(test As Color, thresh As Color, Optional thresh_hue As Integer = 10, Optional thresh_sat As Double = 0.05, Optional thresh_brg As Double = 0.05) As Boolean
         Dim hue As Single = Math.Abs(test.GetHue() - thresh.GetHue())
-        Return hue < threshold
+        If hue > 2 * thresh_hue Then
+            hue = Math.Abs(360 - hue)
+        End If
+        Return (hue < thresh_hue) AndAlso (Math.Abs(test.GetSaturation() - thresh.GetSaturation()) < thresh_sat) AndAlso (Math.Abs(test.GetBrightness() - thresh.GetBrightness()) < thresh_brg)
     End Function
 
     '_____________________________________________________
@@ -353,7 +363,7 @@ Public Class OCR2
             For i As Integer = 0 To bmp.Width - 1
                 For j As Integer = 0 To bmp.Height - 1
                     clr = bmp.GetPixel(i, j)
-                    If ColorThreshold(clr, uiColor) Then
+                    If ColorThreshold(clr, uiColor, Math.Max(uiColor.R, Math.Max(uiColor.G, uiColor.B)) / 7 + 30) Then
                         found = True
                         bmp.SetPixel(i, j, Color.Black)
                     Else
@@ -364,7 +374,6 @@ Public Class OCR2
 
             If Debug Then
                 bmp.Save(appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.FisschckCount.ToString() & ".png")
-                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.FisschckCount.ToString() & ".png")
                 My.Settings.FisschckCount += 1
             End If
 
@@ -372,12 +381,10 @@ Public Class OCR2
                 Return False
             End If
 
-            Dim ret As String = DefaultParseText(bmp, 0)
-            ' Finds: VUIIJ FISSUHE/HEWAHDS
-            Console.WriteLine("---" & ret & "---")
+            Dim ret As String = DefaultParseText(bmp, 0).Replace(" ", "")
+            ' Finds: YOID FILS S URE -> YOIDFILSSURE
 
-            If LevDist(ret, "VOID FISSURE") < 4 Then
-                Console.WriteLine("REWARD WINDOW FOUND")
+            If LevDist(ret, "VOIDFISSURE") < 4 Then
                 Return True
             End If
         End Using
@@ -385,73 +392,52 @@ Public Class OCR2
     End Function
 
     Public Overridable Function GetPlayers() As Integer
-        If Not IsWFActive() Then
-            Return False
-        End If
+        Dim width As Integer = 4 * totalScaling
+        width *= 2
+        Dim quarter As Integer = pixRwrdWid * totalScaling / 4
+        Dim bnds As New Rectangle(center.X - quarter * 2, center.Y - pixRareYDisp * totalScaling - 5,
+                                  quarter * 4, 11)
 
-        GetUIScaling()
 
-        Dim count As Integer = 0
-        Dim bnds As New Rectangle(center.X - pixRwrdWid * totalScaling / 2, center.Y - pixRareYDisp * totalScaling,
-                                  pixRwrdWid * totalScaling, 1)
+        Dim count As Integer = -1
+        Dim clr As Color = Nothing
 
         Using bmp As New Bitmap(bnds.Width, bnds.Height)
             Using graph As Graphics = Graphics.FromImage(bmp)
                 graph.CopyFromScreen(bnds.X, bnds.Y, 0, 0, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
             End Using
+            bmp.Save(appData & "\WFInfo\debug\RARE_BAR-" & My.Settings.RarebarCount.ToString() & ".png")
+            My.Settings.RarebarCount += 1
 
-            Dim clr As Color = Nothing
-            Dim thresh As Color = Nothing
-            Dim x As Integer = 0
-            Dim scanWid As Integer = 30 * totalScaling
-            For i As Integer = 0 To 7
-                x = (i + 0.5) * bmp.Width / 8 - scanWid / 2
-                clr = bmp.GetPixel(x, 0)
-                If ColorThreshold(clr, rarity(0), 30) Then
-                    thresh = rarity(0)
-                ElseIf ColorThreshold(clr, rarity(1), 30) Then
-                    thresh = rarity(1)
-                ElseIf ColorThreshold(clr, rarity(2), 30) Then
-                    thresh = rarity(2)
-                Else
-                    Console.WriteLine("DIDN'T FIND COLOR: " & clr.ToString())
-                    Continue For
-                End If
-
-                Dim success As Boolean = True
-                For j As Integer = 1 To scanWid - 1
-                    clr = bmp.GetPixel(x + j, 0)
-                    If ColorThreshold(clr, thresh, 30) Then
-                        bmp.SetPixel(x + j, 0, Color.Black)
-                    Else
-                        success = False
-                        bmp.SetPixel(x + j, 0, Color.White)
+            For n As Integer = 1 To 4
+                Dim i As Integer = 5 - n
+                Dim failed As Boolean = False
+                Dim x As Integer = quarter / 2 * i
+                x -= width / 2
+                For j As Integer = 0 To Math.Max(0, width - 5)
+                    clr = bmp.GetPixel(x + j, 5)
+                    Console.WriteLine("(" & (x + j) & ", 5) - " & clr.ToString() & " Bright: " & clr.GetBrightness())
+                    If clr.GetBrightness() > 0.5 Then
+                        failed = True
                         Exit For
                     End If
                 Next
-                If success Then
-                    count += 1
-                ElseIf count > 0 Then
-                    Exit For
+                If failed Then
+                    ' if 4 then odd number and at least 1
+                    ' if 3 then even number and at least 2
+                    ' if 2 then odd number and 3
+                    ' if 1 then even number and 4
+
+                    count = n
+                    Console.WriteLine("CURRENT PLAYER COUNT: " & count)
                 End If
+                Console.WriteLine("-------------------------------------------")
             Next
-            bmp.Save(appData & "\WFInfo\debug\RareBar-" & My.Settings.RarebarCount.ToString() & ".png")
-            Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\RareBar-" & My.Settings.RarebarCount.ToString() & ".png")
-            My.Settings.RarebarCount += 1
-            If count Mod 2 = 0 Then
-                count /= 2
-            Else
-                Main.addLog("ERROR WITH PLAYER CALCULATION: FOUND " & count / 2 & " SEGMENTS")
-                bmp.Save(appData & "\WFInfo\debug\RareBar-" & My.Settings.RarebarCount.ToString() & ".png")
-                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\RareBar-" & My.Settings.RarebarCount.ToString() & ".png")
-                My.Settings.RarebarCount += 1
-
-                count = 0
-            End If
         End Using
+        Console.WriteLine(count)
 
 
-
+        Console.WriteLine("FOUND " & count & " PLAYERS")
         Return count
     End Function
 
@@ -470,28 +456,22 @@ Public Class OCR2
         If Debug Then
             foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight))
         End If
-        Return CleanImage(ret, Math.Max(uiColor.R, Math.Max(uiColor.G, uiColor.B)) / 8 + 20)
+        Return CleanImage(ret, Math.Max(uiColor.R, Math.Max(uiColor.G, uiColor.B)) / 7 + 30)
     End Function
 
     Public ParsePlayer_timer() As Long = {0, 0, 0, 0}
-    Public Overridable Sub ParsePlayer(plyr As Integer, count As Integer)
+    Public Overridable Sub ParsePlayer(plyr As Integer)
         ParsePlayer_timer(plyr) = clock.Elapsed.TotalMilliseconds
-        Dim text As Bitmap = GetPlayerImage(plyr, count)
+        Dim text As Bitmap = GetPlayerImage(plyr, plyr_count)
 
         text.Save(appData & "\WFInfo\debug\SCAN" & My.Settings.EtcCount.ToString() & "-PLYR-" & plyr & ".png")
-        Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\SCAN" & My.Settings.EtcCount.ToString() & "-PLYR: " & plyr & ".png")
 
         Dim result = DefaultParseText(text, plyr + 1)
-
-        Console.WriteLine("FOUND TEXT FOR PLAYER " & plyr & ": " & result)
-        ParsePlayer_timer(plyr) -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("LINE-" & ParsePlayer_timer(plyr) & "ms")
-        ParsePlayer_timer(plyr) = clock.Elapsed.TotalMilliseconds
 
         foundText(plyr) = db.GetPartName(result)
 
         ParsePlayer_timer(plyr) -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("GET ALL PARTS-" & ParsePlayer_timer(plyr) & "ms")
+        Console.WriteLine("PLAYER(" & plyr & ") PARSE-" & ParsePlayer_timer(plyr) & "ms")
     End Sub
 
     Public ParseScreen_timer As Long = 0
@@ -499,7 +479,6 @@ Public Class OCR2
         ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         If Not IsWFActive() Then
-            Console.WriteLine("What what")
             Return
         End If
 
@@ -507,17 +486,31 @@ Public Class OCR2
         GetUIScaling()
         GetUiColor()
 
-        Dim count As Integer = GetPlayers()
-        Dim tasks As New List(Of Task)
-        For i As Integer = 0 To count - 1
+        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("GET COLOR & SCALING-" & ParseScreen_timer & "ms")
+        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
+
+        plyr_count = GetPlayers()
+
+        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("GET PLAYER COUNT-" & ParseScreen_timer & "ms")
+        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
+
+
+        For i As Integer = 0 To plyr_count - 1
             Dim plyr As Integer = i
-            tasks.Add(Task.Run(Sub() ParsePlayer(plyr, count)))
+            running.Add(Task.Factory.StartNew(Sub() ParsePlayer(plyr)))
         Next
-        Task.WaitAll(tasks.ToArray())
+
+        Task.WaitAll(running.ToArray())
+        running.Clear()
+
         My.Settings.EtcCount += 1
+        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("GET ALL PARTS-" & ParseScreen_timer & "ms")
+        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
         If Debug Then
-
             Dim ss_area As New Rectangle(center.X - pixRwrdWid * totalScaling / 2,
                                          center.Y - pixRwrdYDisp * totalScaling,
                                          pixRwrdWid * totalScaling,
@@ -552,7 +545,7 @@ Public Class OCR2
                 Dim textbox2 = New Rectangle((vf_area.Left + vf_area.Right) / 2, vf_area.Bottom + 3, printBounds2.Width, printBounds2.Height)
 
                 graph.DrawRectangle(New Pen(Brushes.DeepPink), ss_area)                  'The area that it tried to read from
-                For i As Integer = 0 To count - 1
+                For i As Integer = 0 To plyr_count - 1
                     Dim elem = foundRec(i)
                     graph.DrawRectangle(New Pen(Brushes.HotPink), elem)             'Draws a box around each text box
                     Dim printBoundsRelic As SizeF = graph.MeasureString(foundText(i), font, graph.MeasureString(foundText(i), font).Width)
@@ -567,10 +560,12 @@ Public Class OCR2
                 graph.DrawString(print2, font, Brushes.Red, textbox2)               'Debug text ontop of screenshot
 
                 debugRet.Save(appData & "\WFInfo\debug\SSFUL-" & My.Settings.SSCount.ToString() & ".png")
-                Main.addLog("SAVING SCREENSHOT: " & appData & "\WFInfo\debug\SSFULL-" & My.Settings.SSCount.ToString() & ".png")
                 My.Settings.SSCount += 1
 
             End Using
+            ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+            Console.WriteLine("PRINT DEBUG-" & ParseScreen_timer & "ms")
+            ParseScreen_timer = clock.Elapsed.TotalMilliseconds
         End If
 
         ' Display window true = seperate window
@@ -590,18 +585,16 @@ Public Class OCR2
             Dim top = center.Y - pixRwrdYDisp * totalScaling + pad 'from center to the top it's 248px
             Dim left = center.X - (pixRwrdWid / 2 * totalScaling) - pad 'Going from the center you substract half of the width times the ui scale.
             Dim offset = pixRwrdWid / 4 * totalScaling
-            For i = 0 To count - 1
+            For i = 0 To plyr_count - 1
                 left += offset
                 Dim j As Integer = i
                 Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(left / dpiScaling, top / dpiScaling))
             Next
 
             For i = 0 To foundText.Count - 1
-                Main.addLog("DISPLAY OVERLAY " & (i + 1) & ":" & vbCrLf & "Left, Top: " & left & ", " & top)
                 Dim plat As Double = db.market_data(foundText(i))("plat")
                 Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
                 Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
-                Console.WriteLine(foundText(i) & "--" & plat & "---" & ducat)
                 Dim j As Integer = i
                 rwrdPanels(j).Invoke(Sub() rwrdPanels(j).LoadText(plat.ToString("N1"), ducat, vaulted))
             Next
