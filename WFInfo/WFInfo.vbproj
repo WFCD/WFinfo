@@ -309,10 +309,8 @@
     <None Include="Resources\Target.png" />
     <None Include="Resources\Target1.png" />
     <None Include="Resources\TargetBox.png" />
-    <None Include="Resources\PlaqueTray.png" />
     <None Include="Resources\Relic.png" />
     <None Include="Resources\Relic_h.png" />
-    <None Include="Resources\ducat.gif" />
     <None Include="Resources\plat.gif" />
     <None Include="Resources\ducat_w.gif" />
     <None Include="Resources\gear.png" />
@@ -320,7 +318,6 @@
     <None Include="Resources\foundry.png" />
     <None Include="Resources\foundry_h.png" />
     <None Include="Resources\warning-sign.png" />
-    <None Include="Resources\Roboto.bmp" />
     <None Include="Resources\NameTray.png" />
     <Content Include="x64\liblept1760.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

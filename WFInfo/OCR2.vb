@@ -3,7 +3,7 @@ Imports Tesseract
 
 Public Class OCR2
     ' Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
-    Public Const pixRwrdWid As Integer = 968
+    Public Const pixRwrdWid As Integer = 972
     Public Const pixRwrdHei As Integer = 235
     Public Const pixRwrdYDisp As Integer = 185
     Public Const pixRwrdLineHei As Integer = 44
@@ -16,7 +16,7 @@ Public Class OCR2
     ' Public Const pixRareHei As Integer = 1
     '   Box is centered horizontally
     ' Public Const pixRareXDisp As Integer = ???
-    Public Const pixRareYDisp As Integer = 199
+    Public Const pixRareYDisp As Integer = 197
 
     Public Const pixProfWid As Integer = 48
     Public Const pixProfTotWid As Integer = 192
@@ -37,7 +37,7 @@ Public Class OCR2
     Public FissClr1 As Color = Color.FromArgb(189, 168, 101)    ' default
     Public FissClr2 As Color = Color.FromArgb(153, 31, 35)      ' stalker 
     Public FissClr3 As Color = Color.FromArgb(238, 193, 105)    ' baruk
-    Public FissClr4 As Color = Color.FromArgb(35, 201, 245)     ' corpus
+    Public FissClr4 As Color = Color.FromArgb(50, 201, 225)     ' corpus
     Public FissClr5 As Color = Color.FromArgb(57, 105, 192)     ' fortuna
     Public FissClr6 As Color = Color.FromArgb(255, 189, 102)    ' grineer
     Public FissClr7 As Color = Color.FromArgb(36, 184, 242)     ' lotus
@@ -45,7 +45,7 @@ Public Class OCR2
     Public FissClr9 As Color = Color.FromArgb(20, 41, 29)       ' orokin
     Public FissClr10 As Color = Color.FromArgb(9, 78, 106)      ' tenno
 
-    Public rarity As New List(Of Color) From {Color.FromArgb(185, 135, 110), Color.FromArgb(200, 200, 200), Color.FromArgb(210, 190, 105)}
+    Public rarity As New List(Of Color) From {Color.FromArgb(180, 135, 110), Color.FromArgb(200, 200, 200), Color.FromArgb(210, 190, 105)}
     Public fissColors As Color() = {FissClr1, FissClr2, FissClr3, FissClr4, FissClr5, FissClr6, FissClr7, FissClr8, FissClr9, FissClr10}
 
     ' Warframe window stats
@@ -183,9 +183,9 @@ Public Class OCR2
             For j As Integer = 0 To image.Height - 1
                 Dim currentPixle = image.GetPixel(i, j)
                 If ColorThreshold(currentPixle, uiColor, thresh) Then
-                    image.SetPixel(i, j, Color.White)
-                Else
                     image.SetPixel(i, j, Color.Black)
+                Else
+                    image.SetPixel(i, j, Color.White)
                 End If
             Next
         Next
@@ -417,11 +417,11 @@ Public Class OCR2
             For n As Integer = 1 To 4
                 Dim i As Integer = 5 - n
                 Dim failed As Boolean = False
-                Dim x As Integer = quarter / 2 * i
-                x -= width / 2
+                Dim x As Integer = quarter / 2 * i + 1
+                x -= width
                 For j As Integer = 0 To width - 1
-                    clr = bmp.GetPixel(x - 2 + j, 4)
-                    If ColorThreshold(clr, rarity(0), 20) OrElse ColorThreshold(clr, rarity(1), 25) OrElse ColorThreshold(clr, rarity(2), 20) Then
+                    clr = bmp.GetPixel(x + j, 4)
+                    If ColorThreshold(clr, rarity(0)) OrElse ColorThreshold(clr, rarity(1), 5) OrElse ColorThreshold(clr, rarity(2)) Then
                         bmp.SetPixel(x + j, 3, Color.White)
                         failed = True
                         'Exit For
@@ -449,12 +449,12 @@ Public Class OCR2
     End Function
 
     Public Overridable Function GetPlayerImage(plyr As Integer, count As Integer) As Bitmap
-        Dim padding = 6
+        Dim padding As Integer = 8 * totalScaling
         Dim width As Integer = pixRwrdWid / 4 * totalScaling - padding
         Dim lineHeight As Integer = pixRwrdLineHei * totalScaling
 
         Dim left As Integer = center.X - (width + padding) * (count / 2 - plyr) + 3
-        Dim top As Integer = center.Y - pixRwrdYDisp * totalScaling + pixRwrdHei * totalScaling - lineHeight
+        Dim top As Integer = center.Y - pixRwrdYDisp * totalScaling + pixRwrdHei * totalScaling - lineHeight - 1
 
         Dim ret As New Bitmap(width, lineHeight + 10)
         Using graph As Graphics = Graphics.FromImage(ret)
@@ -600,14 +600,14 @@ Public Class OCR2
                 Main.Instance.Invoke(Sub() namePanels(j).ShowLoading(right / dpiScaling, (center.Y - pixRareYDisp * totalScaling - 6 * pad) / dpiScaling, (offset - pad * 2) / dpiScaling))
             Next
 
-            For i = 0 To foundText.Count - 1
+            For i = 0 To plyr_count - 1
                 Try
                     Dim plat As Double = db.market_data(foundText(i))("plat")
                     Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
                     Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
                     Dim j As Integer = i
                     rwrdPanels(j).Invoke(Sub() rwrdPanels(j).LoadText(plat.ToString("N1"), ducat, vaulted))
-                namePanels(j).Invoke(Sub() namePanels(j).LoadText(foundText(j)))
+                    namePanels(j).Invoke(Sub() namePanels(j).LoadText(foundText(j)))
                 Catch ex As Exception
                     Main.addLog("Something went wrong displaying overlay nr:" & i & ": " & ex.ToString)
                 End Try
