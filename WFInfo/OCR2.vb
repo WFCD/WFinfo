@@ -35,9 +35,9 @@ Public Class OCR2
 
     Public uiColor As Color
     Public FissClr1 As Color = Color.FromArgb(189, 168, 101)    ' default
-    Public FissClr2 As Color = Color.FromArgb(153, 31, 35)      ' stalker 
+    Public FissClr2 As Color = Color.FromArgb(150, 31, 35)      ' stalker 
     Public FissClr3 As Color = Color.FromArgb(238, 193, 105)    ' baruk
-    Public FissClr4 As Color = Color.FromArgb(50, 201, 225)     ' corpus
+    Public FissClr4 As Color = Color.FromArgb(50, 200, 225)     ' corpus
     Public FissClr5 As Color = Color.FromArgb(57, 105, 192)     ' fortuna
     Public FissClr6 As Color = Color.FromArgb(255, 189, 102)    ' grineer
     Public FissClr7 As Color = Color.FromArgb(36, 184, 242)     ' lotus
@@ -74,6 +74,8 @@ Public Class OCR2
     ' List of results found by OCR, didn't have a better place to put it
     Public foundText(3) As String
     Public foundRec(3) As Rectangle
+
+    Public Shared debugFile As Bitmap = Nothing
 
 
     Public Enum WindowStyle
@@ -130,7 +132,7 @@ Public Class OCR2
     ' Utility Functions
     '----------------------------------------------------------------------
 
-    Public Overridable Sub GetUiColor(Optional bmp As Bitmap = Nothing)
+    Public Overridable Function GetUiColor(Optional bmp As Bitmap = Nothing) As Boolean
         Dim reset As Boolean = bmp Is Nothing
         uiColor = Nothing
         Dim width As Integer = pixProfWid * totalScaling / 2
@@ -138,9 +140,17 @@ Public Class OCR2
             If bmp Is Nothing Then
                 width = pixProfWid * totalScaling / 2
                 bmp = New Bitmap(width, 1)
-                Using graph As Graphics = Graphics.FromImage(bmp)
-                    graph.CopyFromScreen(pixProfXDisp * totalScaling + width / 2, pixProfYDisp * totalScaling, 0, 0, New Size(width, 1), CopyPixelOperation.SourceCopy)
-                End Using
+                If Debug AndAlso debugFile IsNot Nothing Then
+                    Dim x As Integer = pixProfXDisp * totalScaling + width / 2
+                    Dim y As Integer = pixProfYDisp * totalScaling
+                    For i As Integer = 0 To bmp.Width - 1
+                        bmp.SetPixel(i, 0, debugFile.GetPixel(x + i, y))
+                    Next
+                Else
+                    Using graph As Graphics = Graphics.FromImage(bmp)
+                        graph.CopyFromScreen(pixProfXDisp * totalScaling + width / 2, pixProfYDisp * totalScaling, 0, 0, New Size(width, 1), CopyPixelOperation.SourceCopy)
+                    End Using
+                End If
             End If
         Catch ex As Exception
             Main.addLog("Something went wrong while getuing UI color: " & ex.ToString)
@@ -163,20 +173,22 @@ Public Class OCR2
         B /= width
         Dim detectedColor = Color.FromArgb(R, G, B)
         For Each knowColor In fissColors
-            If ColorThreshold(detectedColor, knowColor, 30) Then
+            If ColorThreshold(detectedColor, knowColor, 20) Then
                 uiColor = detectedColor
                 If reset Then
                     bmp.Dispose()
                 End If
-                Exit Sub
+                Return True
             End If
         Next
         Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
-        Throw New Exception("Unable to determen UI color")
+        Main.Instance.Invoke(Sub() Main.Instance.lbStatus.Text = "ERROR(UI color not found)")
+        Main.Instance.Invoke(Sub() Main.Instance.lbStatus.ForeColor = Color.Red)
+        Return False
         If reset Then
             bmp.Dispose()
         End If
-    End Sub
+    End Function
 
     Public Overridable Function CleanImage(image As Bitmap, Optional thresh As Integer = 10) As Bitmap
         For i As Integer = 0 To image.Width - 1
@@ -347,54 +359,61 @@ Public Class OCR2
     '_____________________________________________________
 
     Public Overridable Function IsRelicWindow() As Boolean
-        If Not IsWFActive() Then
-            Return False
-        End If
+        Try
 
-        GetDPIScaling()
-        GetUIScaling()
-        GetUiColor()
-
-        Dim bnds As New Rectangle(window.Left + pixFissXDisp * totalScaling,
-                                  window.Top + pixFissYDisp * totalScaling,
-                                  pixFissWid * totalScaling,
-                                  pixFissHei * totalScaling)
-
-        Using bmp As New Bitmap(bnds.Width + 40, bnds.Height + 40)
-            Using graph As Graphics = Graphics.FromImage(bmp)
-                graph.CopyFromScreen(bnds.X, bnds.Y, 20, 20, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
-            End Using
-
-            Dim clr As Color = Nothing
-            Dim found As Boolean = False
-            For i As Integer = 0 To bmp.Width - 1
-                For j As Integer = 0 To bmp.Height - 1
-                    clr = bmp.GetPixel(i, j)
-                    If ColorThreshold(clr, uiColor, Math.Max(uiColor.R, Math.Max(uiColor.G, uiColor.B)) / 7 + 30) Then
-                        found = True
-                        bmp.SetPixel(i, j, Color.Black)
-                    Else
-                        bmp.SetPixel(i, j, Color.White)
-                    End If
-                Next
-            Next
-
-            If Debug Then
-                bmp.Save(appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.FisschckCount.ToString() & ".png")
-                My.Settings.FisschckCount += 1
-            End If
-
-            If Not found Then
+            If Not IsWFActive() Then
                 Return False
             End If
 
-            Dim ret As String = DefaultParseText(bmp, 0).Replace(" ", "")
-            ' Finds: YOID FILS S URE -> YOIDFILSSURE
+            GetDPIScaling()
+            GetUIScaling()
+            If GetUiColor() Then
 
-            If LevDist(ret, "VOIDFISSURE") < 4 Then
-                Return True
+
+                Dim bnds As New Rectangle(window.Left + pixFissXDisp * totalScaling,
+                                            window.Top + pixFissYDisp * totalScaling,
+                                            pixFissWid * totalScaling,
+                                            pixFissHei * totalScaling)
+
+                Using bmp As New Bitmap(bnds.Width + 40, bnds.Height + 40)
+                    Using graph As Graphics = Graphics.FromImage(bmp)
+                        graph.CopyFromScreen(bnds.X, bnds.Y, 20, 20, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
+                    End Using
+
+                    Dim clr As Color = Nothing
+                    Dim found As Boolean = False
+                    For i As Integer = 0 To bmp.Width - 1
+                        For j As Integer = 0 To bmp.Height - 1
+                            clr = bmp.GetPixel(i, j)
+                            If ColorThreshold(clr, uiColor, Math.Max(uiColor.R, Math.Max(uiColor.G, uiColor.B)) / 7 + 30) Then
+                                found = True
+                                bmp.SetPixel(i, j, Color.Black)
+                            Else
+                                bmp.SetPixel(i, j, Color.White)
+                            End If
+                        Next
+                    Next
+
+                    If Debug Then
+                        bmp.Save(appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.FisschckCount.ToString() & ".png")
+                        My.Settings.FisschckCount += 1
+                    End If
+
+                    If Not found Then
+                        Return False
+                    End If
+
+                    Dim ret As String = DefaultParseText(bmp, 0).Replace(" ", "")
+                    ' Finds: YOID FILS S URE -> YOIDFILSSURE
+
+                    If LevDist(ret, "VOIDFISSURE") < 4 Then
+                        Return True
+                    End If
+                End Using
             End If
-        End Using
+        Catch ex As Exception
+
+        End Try
         Return False
     End Function
 
@@ -410,9 +429,17 @@ Public Class OCR2
         Dim clr As Color = Nothing
 
         Using bmp As New Bitmap(bnds.Width, bnds.Height)
-            Using graph As Graphics = Graphics.FromImage(bmp)
-                graph.CopyFromScreen(bnds.X, bnds.Y, 0, 0, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
-            End Using
+            If Debug AndAlso debugFile IsNot Nothing Then
+                For x As Integer = 0 To bnds.Width - 1
+                    For y As Integer = 0 To bnds.Height - 1
+                        bmp.SetPixel(x, y, debugFile.GetPixel(bnds.X + x, bnds.Y + y))
+                    Next
+                Next
+            Else
+                Using graph As Graphics = Graphics.FromImage(bmp)
+                    graph.CopyFromScreen(bnds.X, bnds.Y, 0, 0, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
+                End Using
+            End If
 
             For n As Integer = 1 To 4
                 Dim i As Integer = 5 - n
@@ -421,7 +448,7 @@ Public Class OCR2
                 x -= width
                 For j As Integer = 0 To width - 1
                     clr = bmp.GetPixel(x + j, 4)
-                    If ColorThreshold(clr, rarity(0)) OrElse ColorThreshold(clr, rarity(1), 5) OrElse ColorThreshold(clr, rarity(2)) Then
+                    If ColorThreshold(clr, rarity(0), 20) OrElse ColorThreshold(clr, rarity(1), 5) OrElse ColorThreshold(clr, rarity(2), 20) Then
                         bmp.SetPixel(x + j, 3, Color.White)
                         failed = True
                         'Exit For
@@ -448,6 +475,29 @@ Public Class OCR2
         Return count
     End Function
 
+    Public Sub CheckImage()
+        Dim ssFile = New OpenFileDialog()
+        ssFile.Title = "Please select a relic screenshot"
+
+        If ssFile.ShowDialog() = DialogResult.OK Then
+            Console.WriteLine(ssFile.FileName)
+            debugFile = Bitmap.FromFile(ssFile.FileName)
+
+            window = New Rectangle(0, 0, debugFile.Width, debugFile.Height)
+
+            ' Get DPI Scaling
+            GetDPIScaling()
+
+            ' Get Window Points
+            Dim horz_center As Integer = window.Left + (window.Width / 2)
+            Dim vert_center As Integer = window.Top + (window.Height / 2)
+            center = New Point(dpiScaling * horz_center, dpiScaling * vert_center)
+
+            ParseScreen()
+            debugFile = Nothing
+        End If
+    End Sub
+
     Public Overridable Function GetPlayerImage(plyr As Integer, count As Integer) As Bitmap
         Dim padding As Integer = 8 * totalScaling
         Dim width As Integer = pixRwrdWid / 4 * totalScaling - padding
@@ -456,10 +506,18 @@ Public Class OCR2
         Dim left As Integer = center.X - (width + padding) * (count / 2 - plyr) + 3
         Dim top As Integer = center.Y - pixRwrdYDisp * totalScaling + pixRwrdHei * totalScaling - lineHeight - 1
 
-        Dim ret As New Bitmap(width, lineHeight + 10)
-        Using graph As Graphics = Graphics.FromImage(ret)
-            graph.CopyFromScreen(left, top, 5, 5, New Size(width, lineHeight), CopyPixelOperation.SourceCopy)
-        End Using
+        Dim ret As New Bitmap(width + 10, lineHeight + 10)
+        If Debug AndAlso debugFile IsNot Nothing Then
+            For x As Integer = 0 To width - 1
+                For y As Integer = 0 To lineHeight - 1
+                    ret.SetPixel(x + 5, y + 5, debugFile.GetPixel(left + x, top + y))
+                Next
+            Next
+        Else
+            Using graph As Graphics = Graphics.FromImage(ret)
+                graph.CopyFromScreen(left, top, 5, 5, New Size(width, lineHeight), CopyPixelOperation.SourceCopy)
+            End Using
+        End If
         If Debug Then
             foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight))
         End If
@@ -483,138 +541,163 @@ Public Class OCR2
 
     Public ParseScreen_timer As Long = 0
     Public Overridable Sub ParseScreen()
-        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
+        Try
 
-        If Not IsWFActive() Then
-            Return
-        End If
-
-        GetDPIScaling()
-        GetUIScaling()
-        GetUiColor()
-
-        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("GET COLOR & SCALING-" & ParseScreen_timer & "ms")
-        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
-
-        plyr_count = GetPlayers()
-
-        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("GET PLAYER COUNT-" & ParseScreen_timer & "ms")
-        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
-
-
-        For i As Integer = 0 To plyr_count - 1
-            Dim plyr As Integer = i
-            running.Add(Task.Factory.StartNew(Sub() ParsePlayer(plyr)))
-        Next
-
-        Task.WaitAll(running.ToArray())
-        running.Clear()
-
-        My.Settings.EtcCount += 1
-        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
-        Console.WriteLine("GET ALL PARTS-" & ParseScreen_timer & "ms")
-        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
-
-        If Debug Then
-            Dim ss_area As New Rectangle(center.X - pixRwrdWid * totalScaling / 2,
-                                         center.Y - pixRwrdYDisp * totalScaling,
-                                         pixRwrdWid * totalScaling,
-                                         pixRwrdHei * totalScaling)
-
-
-            Dim vf_area As New Rectangle(window.Left + pixFissXDisp * totalScaling,
-                                         window.Top + pixFissYDisp * totalScaling,
-                                         pixFissWid * totalScaling,
-                                         pixFissHei * totalScaling)
-
-            Dim debugRet As New Bitmap(CInt(Screen.PrimaryScreen.Bounds.Width * dpiScaling), CInt(Screen.PrimaryScreen.Bounds.Height * dpiScaling))
-            Using graph As Graphics = Graphics.FromImage(debugRet)
-                Dim screenSize As New Size(Screen.PrimaryScreen.Bounds.Width * dpiScaling, Screen.PrimaryScreen.Bounds.Height * dpiScaling)
-                graph.CopyFromScreen(Screen.PrimaryScreen.Bounds.X, Screen.PrimaryScreen.Bounds.Y, 0, 0, screenSize, CopyPixelOperation.SourceCopy)
-                Dim print As String =
-                        "Tried looking at " & ss_area.ToString & vbCrLf &
-                        "Screen resolution: " & Screen.PrimaryScreen.Bounds.Size.ToString & vbCrLf &
-                        "Screen center: " & center.ToString & vbCrLf &
-                        "Screen bounds: " & window.ToString & vbCrLf &
-                        "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
-                Dim font As New Font("Tahoma", (Screen.PrimaryScreen.Bounds.Height / 120.0))
-                Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
-                Dim textbox = New Rectangle(ss_area.Right, ss_area.Bottom + 3, printBounds.Width, printBounds.Height)
-
-                Dim print2 As String =
-                        "Tried looking at " & vf_area.ToString & vbCrLf &
-                        "Screen top-left: " & (New Point(window.X, window.Y)).ToString & vbCrLf &
-                        "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
-
-                Dim printBounds2 As SizeF = graph.MeasureString(print2, font, graph.MeasureString(print2, font).Width)
-                Dim textbox2 = New Rectangle((vf_area.Left + vf_area.Right) / 2, vf_area.Bottom + 3, printBounds2.Width, printBounds2.Height)
-
-                graph.DrawRectangle(New Pen(Brushes.DeepPink), ss_area)                  'The area that it tried to read from
-                For i As Integer = 0 To plyr_count - 1
-                    Dim elem = foundRec(i)
-                    graph.DrawRectangle(New Pen(Brushes.HotPink), elem)             'Draws a box around each text box
-                    Dim printBoundsRelic As SizeF = graph.MeasureString(foundText(i), font, graph.MeasureString(foundText(i), font).Width)
-                    Dim rewardBox = New Rectangle(elem.Left + 3, elem.Bottom + 3, printBoundsRelic.Width, printBoundsRelic.Height)
-                    graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
-                    graph.DrawString(foundText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
-                Next
-                graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
-                graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
-                graph.DrawRectangle(New Pen(Brushes.Red), vf_area)                  'The area that it tried to read from
-                graph.FillRectangle(Brushes.Black, textbox2)                        'Black background for text box
-                graph.DrawString(print2, font, Brushes.Red, textbox2)               'Debug text ontop of screenshot
-
-                debugRet.Save(appData & "\WFInfo\debug\SSFUL-" & My.Settings.SSCount.ToString() & ".png")
-                My.Settings.SSCount += 1
-
-            End Using
-            ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
-            Console.WriteLine("PRINT DEBUG-" & ParseScreen_timer & "ms")
             ParseScreen_timer = clock.Elapsed.TotalMilliseconds
-        End If
 
-        ' Display window true = seperate window
-        ' Display window false = overlay
-        If DisplayWindow Then
-            'run window
-            Main.Instance.Invoke(Sub() RewardWindow.Display(foundText))
-            ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
-            Console.WriteLine("DISPLAY WINDOW-" & ParseScreen_timer & "ms")
-        Else
-            'run overlay
-            ' Move over if you don't have all 4
+            If Not IsWFActive() Then
+                Return
+            End If
+
+            GetDPIScaling()
+            GetUIScaling()
+            If GetUiColor() Then
 
 
+                ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+                Console.WriteLine("GET COLOR & SCALING-" & ParseScreen_timer & "ms")
+                ParseScreen_timer = clock.Elapsed.TotalMilliseconds
 
-            Dim pad As Integer = pixRwrdHei * 0.05 * totalScaling 'padding to prevent it from looking off.
-            Dim top = center.Y - pixRwrdYDisp * totalScaling + pad 'from center to the top it's 248px
-            Dim right = center.X - (pixRwrdWid / 2 * totalScaling) - pad 'Going from the center you substract half of the width times the ui scale.
-            Dim offset = pixRwrdWid / 4 * totalScaling
-            right += offset * (4 - plyr_count) / 2
-            For i = 0 To plyr_count - 1
-                right += offset
-                Dim j As Integer = i
-                Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right / dpiScaling, top / dpiScaling))
-                Main.Instance.Invoke(Sub() namePanels(j).ShowLoading(right / dpiScaling, (center.Y - pixRareYDisp * totalScaling - 6 * pad) / dpiScaling, (offset - pad * 2) / dpiScaling))
-            Next
+                plyr_count = GetPlayers()
 
-            For i = 0 To plyr_count - 1
-                Try
-                    Dim plat As Double = db.market_data(foundText(i))("plat")
-                    Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
-                    Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
-                    Dim j As Integer = i
-                    rwrdPanels(j).Invoke(Sub() rwrdPanels(j).LoadText(plat.ToString("N1"), ducat, vaulted))
-                    namePanels(j).Invoke(Sub() namePanels(j).LoadText(foundText(j)))
-                Catch ex As Exception
-                    Main.addLog("Something went wrong displaying overlay nr:" & i & ": " & ex.ToString)
-                End Try
-            Next
-            ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
-            Console.WriteLine("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")
-        End If
+                ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+                Console.WriteLine("GET PLAYER COUNT-" & ParseScreen_timer & "ms")
+                ParseScreen_timer = clock.Elapsed.TotalMilliseconds
+
+
+                If Debug AndAlso debugFile IsNot Nothing Then
+                    For i As Integer = 0 To plyr_count - 1
+                        ParsePlayer(i)
+                    Next
+                Else
+                    For i As Integer = 0 To plyr_count - 1
+                        Dim plyr As Integer = i
+                        running.Add(Task.Factory.StartNew(Sub() ParsePlayer(plyr)))
+                    Next
+
+                    Task.WaitAll(running.ToArray())
+                    running.Clear()
+                End If
+
+                My.Settings.EtcCount += 1
+                ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+                Console.WriteLine("GET ALL PARTS-" & ParseScreen_timer & "ms")
+                ParseScreen_timer = clock.Elapsed.TotalMilliseconds
+
+                If Debug Then
+
+                    Console.WriteLine("TIME TO PRINT")
+
+                    Dim screenBounds As Rectangle = Screen.PrimaryScreen.Bounds
+                    If Debug AndAlso debugFile IsNot Nothing Then
+                        screenBounds = window
+                    End If
+
+                    Dim ss_area As New Rectangle(center.X - pixRwrdWid * totalScaling / 2,
+                                                center.Y - pixRwrdYDisp * totalScaling,
+                                                pixRwrdWid * totalScaling,
+                                                pixRwrdHei * totalScaling)
+
+
+                    Dim vf_area As New Rectangle(window.Left + pixFissXDisp * totalScaling,
+                                                window.Top + pixFissYDisp * totalScaling,
+                                                pixFissWid * totalScaling,
+                                                pixFissHei * totalScaling)
+
+                    Dim debugRet As New Bitmap(CInt(screenBounds.Width * dpiScaling), CInt(screenBounds.Height * dpiScaling))
+                    Using graph As Graphics = Graphics.FromImage(debugRet)
+                        Dim screenSize As New Size(screenBounds.Width * dpiScaling, screenBounds.Height * dpiScaling)
+                        If Debug AndAlso debugFile IsNot Nothing Then
+                            graph.DrawImage(debugFile, 0, 0)
+                        Else
+                            graph.CopyFromScreen(screenBounds.X, screenBounds.Y, 0, 0, screenSize, CopyPixelOperation.SourceCopy)
+                        End If
+                        Dim print As String =
+                            "Tried looking at " & ss_area.ToString & vbCrLf &
+                            "Screen resolution: " & screenBounds.Size.ToString & vbCrLf &
+                            "Screen center: " & center.ToString & vbCrLf &
+                            "Screen bounds: " & window.ToString & vbCrLf &
+                            "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
+                        Dim font As New Font("Tahoma", (screenBounds.Height / 120.0))
+                        Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
+                        Dim textbox = New Rectangle(ss_area.Right, ss_area.Bottom + 3, printBounds.Width, printBounds.Height)
+
+                        Dim print2 As String =
+                            "Tried looking at " & vf_area.ToString & vbCrLf &
+                            "Screen top-left: " & (New Point(window.X, window.Y)).ToString & vbCrLf &
+                            "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
+
+                        Dim printBounds2 As SizeF = graph.MeasureString(print2, font, graph.MeasureString(print2, font).Width)
+                        Dim textbox2 = New Rectangle((vf_area.Left + vf_area.Right) / 2, vf_area.Bottom + 3, printBounds2.Width, printBounds2.Height)
+
+                        graph.DrawRectangle(New Pen(Brushes.DeepPink), ss_area)                  'The area that it tried to read from
+                        For i As Integer = 0 To plyr_count - 1
+                            Dim elem = foundRec(i)
+                            graph.DrawRectangle(New Pen(Brushes.HotPink), elem)             'Draws a box around each text box
+                            Dim printBoundsRelic As SizeF = graph.MeasureString(foundText(i), font)
+                            Dim rewardBox = New Rectangle(elem.Left + 3, elem.Bottom + 3, printBoundsRelic.Width + 4, printBoundsRelic.Height)
+                            graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
+                            graph.DrawString(foundText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
+                        Next
+                        graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
+                        graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
+                        graph.DrawRectangle(New Pen(Brushes.Red), vf_area)                  'The area that it tried to read from
+                        graph.FillRectangle(Brushes.Black, textbox2)                        'Black background for text box
+                        graph.DrawString(print2, font, Brushes.Red, textbox2)               'Debug text ontop of screenshot
+
+                        debugRet.Save(appData & "\WFInfo\debug\SSFUL-" & My.Settings.SSCount.ToString() & ".png")
+                        My.Settings.SSCount += 1
+
+                    End Using
+                    ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+                    Console.WriteLine("PRINT DEBUG-" & ParseScreen_timer & "ms")
+                    ParseScreen_timer = clock.Elapsed.TotalMilliseconds
+                End If
+
+                ' Display window true = seperate window
+                ' Display window false = overlay
+                If DisplayWindow Then
+                    'run window
+                    Main.Instance.Invoke(Sub() RewardWindow.Display(foundText))
+                    ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+                    Console.WriteLine("DISPLAY WINDOW-" & ParseScreen_timer & "ms")
+                Else
+                    'run overlay
+                    ' Move over if you don't have all 4
+
+
+
+                    Dim pad As Integer = pixRwrdHei * 0.05 * totalScaling 'padding to prevent it from looking off.
+                    Dim top = center.Y - pixRwrdYDisp * totalScaling + pad 'from center to the top it's 248px
+                    Dim right = center.X - (pixRwrdWid / 2 * totalScaling) - pad 'Going from the center you substract half of the width times the ui scale.
+                    Dim offset = pixRwrdWid / 4 * totalScaling
+                    right += offset * (4 - plyr_count) / 2
+                    For i = 0 To plyr_count - 1
+                        right += offset
+                        Dim j As Integer = i
+                        Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right / dpiScaling, top / dpiScaling))
+                        Main.Instance.Invoke(Sub() namePanels(j).ShowLoading(right / dpiScaling, (top + pixRwrdHei * totalScaling) / dpiScaling, (offset - pad * 2) / dpiScaling))
+                    Next
+
+                    For i = 0 To plyr_count - 1
+                        Try
+                            Dim plat As Double = db.market_data(foundText(i))("plat")
+                            Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
+                            Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
+                            Dim j As Integer = i
+                            rwrdPanels(j).Invoke(Sub() rwrdPanels(j).LoadText(plat.ToString("N1"), ducat, vaulted))
+                            namePanels(j).Invoke(Sub() namePanels(j).LoadText(foundText(j)))
+                        Catch ex As Exception
+                            Main.addLog("Something went wrong displaying overlay nr:" & i & ": " & ex.ToString)
+                        End Try
+                    Next
+                    ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+                    Console.WriteLine("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")
+                End If
+            End If
+        Catch ex As Exception
+
+        End Try
 
     End Sub
 

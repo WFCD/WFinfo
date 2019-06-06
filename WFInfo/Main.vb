@@ -66,8 +66,10 @@ Public Class Main
                     Invoke(Sub() lbStatus.ForeColor = textColor)
                     Invoke(Sub() Me.lbStatus.Text = "Getting Reward Info...")
                     parser2.ParseScreen()
-                    DoWork_timer = clock.Elapsed.TotalMilliseconds - DoWork_timer
-                    Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
+                    If lbStatus.ForeColor <> Color.Red Then
+                        DoWork_timer = clock.Elapsed.TotalMilliseconds - DoWork_timer
+                        Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
+                    End If
                 End If
             Else
                 db = New Data()
@@ -376,9 +378,18 @@ Module Glob
 
     Public parser2 As New OCR2()
 
+    <DllImport("user32.dll", SetLastError:=True, CharSet:=CharSet.Unicode)>
+    Private Function GetKeyState(ByVal nVirtKey As Integer) As Short
+    End Function
+
     Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
         If key = HKey1 Then
-            Task.Factory.StartNew(Sub() DoOtherWork())
+            If Debug And GetKeyState(&H10) < -126 Then
+                Main.Instance.Invoke(Sub() parser2.CheckImage())
+            Else
+                Task.Factory.StartNew(Sub() DoOtherWork())
+            End If
+
         End If
     End Sub
 
@@ -390,8 +401,10 @@ Module Glob
                 Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
                 Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
                 parser2.ParseScreen()
-                DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
-                Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
+                If Main.Instance.lbStatus.ForeColor <> Color.Red Then
+                    DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
+                    Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
+                End If
             Else
                 Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
                 Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Warframe Not Active")
