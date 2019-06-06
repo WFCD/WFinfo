@@ -395,8 +395,8 @@ Module Glob
                 Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Warframe Not Active")
             End If
         Catch ex As Exception
-            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "ERROR (ParseScreen)")
-            Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = Color.Red)
+            'Main.Instance.Invoke(Sub() Main.lbStatus.Text = "ERROR (ParseScreen)")
+            'Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = Color.Red)
             Main.addLog(ex.ToString())
         End Try
     End Sub

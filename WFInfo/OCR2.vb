@@ -134,12 +134,17 @@ Public Class OCR2
         Dim reset As Boolean = bmp Is Nothing
         uiColor = Nothing
         Dim width As Integer = pixProfWid * totalScaling / 2
-        If bmp Is Nothing Then
-            bmp = New Bitmap(width, 1)
-            Using graph As Graphics = Graphics.FromImage(bmp)
-                graph.CopyFromScreen(pixProfXDisp * totalScaling + width / 2, pixProfYDisp * totalScaling, 0, 0, New Size(width, 1), CopyPixelOperation.SourceCopy)
-            End Using
-        End If
+        Try
+            If bmp Is Nothing Then
+                width = pixProfWid * totalScaling / 2
+                bmp = New Bitmap(width, 1)
+                Using graph As Graphics = Graphics.FromImage(bmp)
+                    graph.CopyFromScreen(pixProfXDisp * totalScaling + width / 2, pixProfYDisp * totalScaling, 0, 0, New Size(width, 1), CopyPixelOperation.SourceCopy)
+                End Using
+            End If
+        Catch ex As Exception
+            Main.addLog("Something went wrong while getuing UI color: " & ex.ToString)
+        End Try
         If Debug Then
             bmp.Save(appData & "\WFInfo\debug\COLOR_CHECK-" & My.Settings.ColorcheckCount.ToString() & ".png")
             My.Settings.ColorcheckCount += 1
@@ -178,9 +183,9 @@ Public Class OCR2
             For j As Integer = 0 To image.Height - 1
                 Dim currentPixle = image.GetPixel(i, j)
                 If ColorThreshold(currentPixle, uiColor, thresh) Then
-                    image.SetPixel(i, j, Color.Black)
-                Else
                     image.SetPixel(i, j, Color.White)
+                Else
+                    image.SetPixel(i, j, Color.Black)
                 End If
             Next
         Next
@@ -225,6 +230,7 @@ Public Class OCR2
             uiScaling *= window.Width / 1920
         End If
         totalScaling = dpiScaling * uiScaling
+
         Return uiScaling
     End Function
 
@@ -393,13 +399,13 @@ Public Class OCR2
     End Function
 
     Public Overridable Function GetPlayers() As Integer
-        Dim width As Integer = 4 * totalScaling
-        width *= 2
+        Dim width As Integer = 8 * totalScaling
+        'width *= 2 Why not just multiply the total scaling by 8 instead of 4 if we're gonna double it later anyway?
         Dim quarter As Integer = pixRwrdWid * totalScaling / 4
-        Dim bnds As New Rectangle(center.X - quarter * 2, center.Y - pixRareYDisp * totalScaling - 5,
-                                  quarter * 4, 11)
-
-
+        Dim bnds As New Rectangle(center.X - quarter * 2,
+                                  center.Y - pixRareYDisp * totalScaling - 5,
+                                  quarter * 4,
+                                  11)
         Dim count As Integer = -1
         Dim clr As Color = Nothing
 
@@ -457,7 +463,7 @@ Public Class OCR2
         If Debug Then
             foundRec(plyr) = New Rectangle(New Point(left, top), New Size(width, lineHeight))
         End If
-        Return CleanImage(ret, Math.Max(uiColor.R, Math.Max(uiColor.G, uiColor.B)) / 7 + 30)
+        Return CleanImage(ret, 30) 'Math.Min(uiColor.R, Math.Max(uiColor.G, uiColor.B)) / 7 + 30
     End Function
 
     Public ParsePlayer_timer() As Long = {0, 0, 0, 0}
@@ -593,11 +599,15 @@ Public Class OCR2
             Next
 
             For i = 0 To foundText.Count - 1
-                Dim plat As Double = db.market_data(foundText(i))("plat")
-                Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
-                Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
-                Dim j As Integer = i
-                rwrdPanels(j).Invoke(Sub() rwrdPanels(j).LoadText(plat.ToString("N1"), ducat, vaulted))
+                Try
+                    Dim plat As Double = db.market_data(foundText(i))("plat")
+                    Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
+                    Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
+                    Dim j As Integer = i
+                    rwrdPanels(j).Invoke(Sub() rwrdPanels(j).LoadText(plat.ToString("N1"), ducat, vaulted))
+                Catch ex As Exception
+                    Main.addLog("Something went wrong displaying overlay nr:" & i & ": " & ex.ToString)
+                End Try
             Next
             ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
             Console.WriteLine("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")
