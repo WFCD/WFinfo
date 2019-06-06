@@ -23,7 +23,7 @@ Public Class OCR2
     ' Height is always 1px
     ' Public Const pixProfHei As Integer = 1
     Public Const pixProfXDisp As Integer = 93
-    Public Const pixProfYDisp As Integer = 86
+    Public Const pixProfYDisp As Integer = 87
 
     ' Pixel measurements for detecting reward screen
     Public Const pixFissWid As Integer = 354
@@ -35,7 +35,7 @@ Public Class OCR2
 
     Public uiColor As Color
     Public FissClr1 As Color = Color.FromArgb(189, 168, 101)    ' default
-    Public FissClr2 As Color = Color.FromArgb(153, 31, 35)      ' stalker
+    Public FissClr2 As Color = Color.FromArgb(153, 31, 35)      ' stalker 
     Public FissClr3 As Color = Color.FromArgb(238, 193, 105)    ' baruk
     Public FissClr4 As Color = Color.FromArgb(35, 201, 245)     ' corpus
     Public FissClr5 As Color = Color.FromArgb(57, 105, 192)     ' fortuna
@@ -158,7 +158,7 @@ Public Class OCR2
         B /= width
         Dim detectedColor = Color.FromArgb(R, G, B)
         For Each knowColor In fissColors
-            If ColorThreshold(detectedColor, knowColor) Then
+            If ColorThreshold(detectedColor, knowColor, 30) Then
                 uiColor = detectedColor
                 If reset Then
                     bmp.Dispose()
@@ -167,6 +167,7 @@ Public Class OCR2
             End If
         Next
         Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
+        Throw New Exception("Unable to determen UI color")
         If reset Then
             bmp.Dispose()
         End If
@@ -413,8 +414,8 @@ Public Class OCR2
                 Dim x As Integer = quarter / 2 * i
                 x -= width / 2
                 For j As Integer = 0 To width - 1
-                    clr = bmp.GetPixel(x + j, 4)
-                    If ColorThreshold(clr, rarity(0)) OrElse ColorThreshold(clr, rarity(1), 5) OrElse ColorThreshold(clr, rarity(2)) Then
+                    clr = bmp.GetPixel(x - 2 + j, 4)
+                    If ColorThreshold(clr, rarity(0), 20) OrElse ColorThreshold(clr, rarity(1), 25) OrElse ColorThreshold(clr, rarity(2), 20) Then
                         bmp.SetPixel(x + j, 3, Color.White)
                         failed = True
                         'Exit For
