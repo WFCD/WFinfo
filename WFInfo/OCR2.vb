@@ -16,7 +16,7 @@ Public Class OCR2
     ' Public Const pixRareHei As Integer = 1
     '   Box is centered horizontally
     ' Public Const pixRareXDisp As Integer = ???
-    Public Const pixRareYDisp As Integer = 195
+    Public Const pixRareYDisp As Integer = 199
 
     Public Const pixProfWid As Integer = 48
     Public Const pixProfTotWid As Integer = 192
@@ -45,7 +45,7 @@ Public Class OCR2
     Public FissClr9 As Color = Color.FromArgb(20, 41, 29)       ' orokin
     Public FissClr10 As Color = Color.FromArgb(9, 78, 106)      ' tenno
 
-    Public rarity As New List(Of Color) From {Color.FromArgb(120, 70, 60), Color.FromArgb(80, 83, 89), Color.FromArgb(117, 109, 75)}
+    Public rarity As New List(Of Color) From {Color.FromArgb(185, 135, 110), Color.FromArgb(200, 200, 200), Color.FromArgb(210, 190, 105)}
     Public fissColors As Color() = {FissClr1, FissClr2, FissClr3, FissClr4, FissClr5, FissClr6, FissClr7, FissClr8, FissClr9, FissClr10}
 
     ' Warframe window stats
@@ -406,21 +406,20 @@ Public Class OCR2
             Using graph As Graphics = Graphics.FromImage(bmp)
                 graph.CopyFromScreen(bnds.X, bnds.Y, 0, 0, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
             End Using
-            If Debug Then
-                bmp.Save(appData & "\WFInfo\debug\RARE_BAR-" & My.Settings.RarebarCount.ToString() & ".png")
-                My.Settings.RarebarCount += 1
-            End If
 
             For n As Integer = 1 To 4
                 Dim i As Integer = 5 - n
                 Dim failed As Boolean = False
                 Dim x As Integer = quarter / 2 * i
                 x -= width / 2
-                For j As Integer = 0 To Math.Max(0, width - 5)
-                    clr = bmp.GetPixel(x + j, 5)
-                    If clr.GetBrightness() > 0.5 Then
+                For j As Integer = 0 To width - 1
+                    clr = bmp.GetPixel(x + j, 4)
+                    If ColorThreshold(clr, rarity(0)) OrElse ColorThreshold(clr, rarity(1), 5) OrElse ColorThreshold(clr, rarity(2)) Then
+                        bmp.SetPixel(x + j, 3, Color.White)
                         failed = True
-                        Exit For
+                        'Exit For
+                    Else
+                        bmp.SetPixel(x + j, 3, Color.Black)
                     End If
                 Next
                 If failed Then
@@ -428,10 +427,13 @@ Public Class OCR2
                     ' if 3 then even number and at least 2
                     ' if 2 then odd number and 3
                     ' if 1 then even number and 4
-
                     count = n
                 End If
             Next
+            If Debug Then
+                bmp.Save(appData & "\WFInfo\debug\RARE_BAR-" & My.Settings.RarebarCount.ToString() & ".png")
+                My.Settings.RarebarCount += 1
+            End If
         End Using
 
 
