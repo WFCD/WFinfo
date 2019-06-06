@@ -406,8 +406,10 @@ Public Class OCR2
             Using graph As Graphics = Graphics.FromImage(bmp)
                 graph.CopyFromScreen(bnds.X, bnds.Y, 0, 0, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
             End Using
-            bmp.Save(appData & "\WFInfo\debug\RARE_BAR-" & My.Settings.RarebarCount.ToString() & ".png")
-            My.Settings.RarebarCount += 1
+            If Debug Then
+                bmp.Save(appData & "\WFInfo\debug\RARE_BAR-" & My.Settings.RarebarCount.ToString() & ".png")
+                My.Settings.RarebarCount += 1
+            End If
 
             For n As Integer = 1 To 4
                 Dim i As Integer = 5 - n
@@ -416,7 +418,6 @@ Public Class OCR2
                 x -= width / 2
                 For j As Integer = 0 To Math.Max(0, width - 5)
                     clr = bmp.GetPixel(x + j, 5)
-                    Console.WriteLine("(" & (x + j) & ", 5) - " & clr.ToString() & " Bright: " & clr.GetBrightness())
                     If clr.GetBrightness() > 0.5 Then
                         failed = True
                         Exit For
@@ -429,12 +430,9 @@ Public Class OCR2
                     ' if 1 then even number and 4
 
                     count = n
-                    Console.WriteLine("CURRENT PLAYER COUNT: " & count)
                 End If
-                Console.WriteLine("-------------------------------------------")
             Next
         End Using
-        Console.WriteLine(count)
 
 
         Console.WriteLine("FOUND " & count & " PLAYERS")
