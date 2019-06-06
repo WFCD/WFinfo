@@ -590,12 +590,14 @@ Public Class OCR2
 
             Dim pad As Integer = pixRwrdHei * 0.05 * totalScaling 'padding to prevent it from looking off.
             Dim top = center.Y - pixRwrdYDisp * totalScaling + pad 'from center to the top it's 248px
-            Dim left = center.X - (pixRwrdWid / 2 * totalScaling) - pad 'Going from the center you substract half of the width times the ui scale.
+            Dim right = center.X - (pixRwrdWid / 2 * totalScaling) - pad 'Going from the center you substract half of the width times the ui scale.
             Dim offset = pixRwrdWid / 4 * totalScaling
+            right += offset * (4 - plyr_count) / 2
             For i = 0 To plyr_count - 1
-                left += offset
+                right += offset
                 Dim j As Integer = i
-                Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(left / dpiScaling, top / dpiScaling))
+                Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right / dpiScaling, top / dpiScaling))
+                Main.Instance.Invoke(Sub() namePanels(j).ShowLoading(right / dpiScaling, (center.Y - pixRareYDisp * totalScaling - 6 * pad) / dpiScaling, (offset - pad * 2) / dpiScaling))
             Next
 
             For i = 0 To foundText.Count - 1
@@ -605,6 +607,7 @@ Public Class OCR2
                     Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
                     Dim j As Integer = i
                     rwrdPanels(j).Invoke(Sub() rwrdPanels(j).LoadText(plat.ToString("N1"), ducat, vaulted))
+                namePanels(j).Invoke(Sub() namePanels(j).LoadText(foundText(j)))
                 Catch ex As Exception
                     Main.addLog("Something went wrong displaying overlay nr:" & i & ": " & ex.ToString)
                 End Try

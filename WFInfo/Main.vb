@@ -79,6 +79,7 @@ Public Class Main
                 Equipment.Load_Eqmt_Tree()
                 For i As Integer = 0 To 3
                     rwrdPanels(i) = New Overlay()
+                    namePanels(i) = New NameTray()
                 Next
                 For i As Integer = 0 To 8
                     relicPanels(i) = New Overlay()
@@ -366,7 +367,8 @@ Module Glob
     Public tahoma8 As New Font("Tahoma", 8.0!)
     Public timeFrame As String = "48hours"
 
-    Public rwrdPanels(4) As Overlay
+    Public rwrdPanels(3) As Overlay
+    Public namePanels(3) As NameTray
     Public relicPanels(9) As Overlay
 
     Public ReplacementList As Char(,)
