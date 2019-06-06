@@ -73,6 +73,7 @@ Public Class OCR2
 
     ' List of results found by OCR, didn't have a better place to put it
     Public foundText(3) As String
+    Public tessText(3) As String
     Public foundRec(3) As Rectangle
 
     Public Shared debugFile As Bitmap = Nothing
@@ -532,7 +533,7 @@ Public Class OCR2
         text.Save(appData & "\WFInfo\debug\SCAN" & My.Settings.EtcCount.ToString() & "-PLYR-" & plyr & ".png")
 
         Dim result = DefaultParseText(text, plyr + 1)
-
+        tessText(plyr) = result
         foundText(plyr) = db.GetPartName(result)
 
         ParsePlayer_timer(plyr) -= clock.Elapsed.TotalMilliseconds
@@ -638,6 +639,11 @@ Public Class OCR2
                             Dim rewardBox = New Rectangle(elem.Left + 3, elem.Bottom + 3, printBoundsRelic.Width + 4, printBoundsRelic.Height)
                             graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
                             graph.DrawString(foundText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
+
+                            printBoundsRelic = graph.MeasureString(tessText(i), font)
+                            rewardBox = New Rectangle(elem.Left + 3, rewardBox.Bottom + 3, printBoundsRelic.Width + 4, printBoundsRelic.Height)
+                            graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
+                            graph.DrawString(tessText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
                         Next
                         graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
                         graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
