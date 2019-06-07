@@ -109,6 +109,8 @@ Partial Class Overlay
         Me.Controls.Add(Me.lbPlat)
         Me.Controls.Add(Me.PictureBox1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
+        Me.MaximizeBox = False
+        Me.MinimizeBox = False
         Me.Name = "Overlay"
         Me.ShowInTaskbar = False
         Me.TopMost = True

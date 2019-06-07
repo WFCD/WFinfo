@@ -303,7 +303,7 @@ Partial Class Settings
         Me.cbAutomation.BackColor = System.Drawing.Color.Transparent
         Me.cbAutomation.Font = New System.Drawing.Font("Tahoma", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cbAutomation.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.cbAutomation.Location = New System.Drawing.Point(185, 11)
+        Me.cbAutomation.Location = New System.Drawing.Point(185, 13)
         Me.cbAutomation.Name = "cbAutomation"
         Me.cbAutomation.Size = New System.Drawing.Size(93, 17)
         Me.cbAutomation.TabIndex = 24

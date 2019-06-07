@@ -163,6 +163,16 @@ Namespace My.Resources
         '''<summary>
         '''  Looks up a localized resource of type System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property NameTray() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("NameTray", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property Panel_UV() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("Panel_UV", resourceCulture)
@@ -176,16 +186,6 @@ Namespace My.Resources
         Friend ReadOnly Property Panel_V() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("Panel_V", resourceCulture)
-                Return CType(obj,System.Drawing.Bitmap)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Looks up a localized resource of type System.Drawing.Bitmap.
-        '''</summary>
-        Friend ReadOnly Property PlaqueTray() As System.Drawing.Bitmap
-            Get
-                Dim obj As Object = ResourceManager.GetObject("PlaqueTray", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
@@ -236,16 +236,6 @@ Namespace My.Resources
         Friend ReadOnly Property Settings_h() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("Settings_h", resourceCulture)
-                Return CType(obj,System.Drawing.Bitmap)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Looks up a localized resource of type System.Drawing.Bitmap.
-        '''</summary>
-        Friend ReadOnly Property Tray() As System.Drawing.Bitmap
-            Get
-                Dim obj As Object = ResourceManager.GetObject("Tray", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property

@@ -1,4 +1,4 @@
-﻿Public Class RewardWindow
+Public Class RewardWindow
     Dim drag As Boolean = False
     Dim mouseX As Integer
     Dim mouseY As Integer
@@ -112,36 +112,39 @@
 
     End Sub
 
-    Friend Sub Display(foundText As List(Of String))
+    Friend Sub Display(foundText As String(), plyrs As Integer)
         Dim visible As Boolean = Me.Visible
         Me.Show()
         Me.TopMost = True
 
         RewardWindow_Reset()
 
-        Me.Size = New Size(foundText.Count * 127 + 1, 105)
+        Me.Size = New Size(4 * 127 + 1, 105)
         If Not visible Then
             Me.Location = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
         End If
 
         Using g As Graphics = CreateGraphics()
-            For i = 0 To foundText.Count - 1
-                rwrdPanels(i).Visible = True
+            For i = 0 To plyrs - 1
+                If foundText(i) IsNot Nothing Then
 
-                rwrdNames(i).Text = foundText(i)
-                rwrdPlats(i).Text = db.market_data(foundText(i))("plat")
-                Dim size As SizeF = g.MeasureString(rwrdPlats(i).Text, rwrdPlats(i).Font)
-                rwrdPlatIcon(i).Location = New Point(CInt(28.5 + size.Width / 2), 84)
+                    rwrdPanels(i).Visible = True
 
-                rwrdDucats(i).Text = db.market_data(foundText(i))("ducats").ToString()
-                size = g.MeasureString(rwrdDucats(i).Text, rwrdDucats(i).Font)
-                rwrdDucatIcon(i).Location = New Point(CInt(88.5 + size.Width / 2), 84)
+                    rwrdNames(i).Text = foundText(i)
+                    rwrdPlats(i).Text = db.market_data(foundText(i))("plat")
+                    Dim size As SizeF = g.MeasureString(rwrdPlats(i).Text, rwrdPlats(i).Font)
+                    rwrdPlatIcon(i).Location = New Point(CInt(28.5 + size.Width / 2), 84)
 
-                If foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i)) Then
-                    size = g.MeasureString(foundText(i), rwrdNames(i).Font, 120)
-                    rwrdVault(i).Location = New Size(3, 32 + size.Height)
-                    rwrdVault(i).Visible = True
-                    rwrdVault(i).Text = "Vaulted"
+                    rwrdDucats(i).Text = db.market_data(foundText(i))("ducats").ToString()
+                    size = g.MeasureString(rwrdDucats(i).Text, rwrdDucats(i).Font)
+                    rwrdDucatIcon(i).Location = New Point(CInt(88.5 + size.Width / 2), 84)
+
+                    If foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i)) Then
+                        size = g.MeasureString(foundText(i), rwrdNames(i).Font, 120)
+                        rwrdVault(i).Location = New Size(3, 32 + size.Height)
+                        rwrdVault(i).Visible = True
+                        rwrdVault(i).Text = "Vaulted"
+                    End If
                 End If
             Next
         End Using
@@ -159,5 +162,4 @@
             Console.WriteLine("Sending to background")
         End If
     End Sub
-
 End Class

@@ -62,16 +62,18 @@ Public Class Main
         DoWork_timer = clock.Elapsed.TotalMilliseconds
         Try
             If (db IsNot Nothing) Then
-                If parser.isWFActive() Then
+                If parser2.IsWFActive() Then
                     Invoke(Sub() lbStatus.ForeColor = textColor)
                     Invoke(Sub() Me.lbStatus.Text = "Getting Reward Info...")
                     parser2.ParseScreen()
-                    DoWork_timer = clock.Elapsed.TotalMilliseconds - DoWork_timer
-                    Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
+                    If lbStatus.ForeColor <> Color.Red Then
+                        DoWork_timer = clock.Elapsed.TotalMilliseconds - DoWork_timer
+                        Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
+                    End If
                 End If
             Else
                 db = New Data()
-                parser.ForceUpdateCenter()
+                parser2.UpdateCenter()
                 Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
                 Invoke(Sub() lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11))
                 Invoke(Sub() lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11))
@@ -79,6 +81,7 @@ Public Class Main
                 Equipment.Load_Eqmt_Tree()
                 For i As Integer = 0 To 3
                     rwrdPanels(i) = New Overlay()
+                    namePanels(i) = New NameTray()
                 Next
                 For i As Integer = 0 To 8
                     relicPanels(i) = New Overlay()
@@ -97,7 +100,7 @@ Public Class Main
         End Try
     End Sub
 
-    Private log_lock As New Object()
+    Private Shared log_lock As New Object()
     Public Sub addLog(txt As String)
         '_________________________________________________________________________
         'Function for storing log data
@@ -262,7 +265,7 @@ Public Class Main
                 End If
             End If
             ' Every 5min update the relic_area
-            parser.ForceUpdateCenter()
+            parser2.UpdateCenter()
         Catch ex As Exception
             Invoke(Sub() lbStatus.Text = "ERROR (Updating DB)")
             Invoke(Sub() lbStatus.ForeColor = Color.Red)
@@ -296,22 +299,28 @@ Public Class Main
         Equipment.Refresh()
     End Sub
 
+    Private FoundSomething As Boolean = False
     Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
         Console.WriteLine("tAutomate Tick")
-        If (db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso parser.isWFActive()) Then
-            If (parser.IsRelicWindow()) Then
-                If (Not rwrdPanels(0).Visible) Then
+        If (db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso parser2.IsWFActive()) Then
+            If (parser2.IsRelicWindow()) Then
+                If Not FoundSomething Then
+                    FoundSomething = True
                     Me.tAutomate.Interval = 3000
                     Task.Factory.StartNew(Sub() Me.DoWork())
                 End If
             ElseIf (rwrdPanels(0).Visible) Then
+                FoundSomething = False
                 For i As Integer = 0 To 3
                     rwrdPanels(i).Hide()
+                    namePanels(i).Hide()
                 Next
             Else
+                FoundSomething = False
                 Me.tAutomate.Interval = 1000
             End If
         Else
+            FoundSomething = False
             Me.tAutomate.Interval = 5000
         End If
     End Sub
@@ -366,34 +375,51 @@ Module Glob
     Public tahoma8 As New Font("Tahoma", 8.0!)
     Public timeFrame As String = "48hours"
 
-    Public rwrdPanels(4) As Overlay
+    Public rwrdPanels(3) As Overlay
+    Public namePanels(3) As NameTray
     Public relicPanels(9) As Overlay
 
     Public ReplacementList As Char(,)
     Public WithEvents globHook As New GlobalHook()
 
-    Public parser As New OCR()
     Public parser2 As New OCR2()
+
+    <DllImport("user32.dll", SetLastError:=True, CharSet:=CharSet.Unicode)>
+    Private Function GetKeyState(ByVal nVirtKey As Integer) As Short
+    End Function
 
     Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
         If key = HKey1 Then
-            Task.Factory.StartNew(Sub() DoOtherWork())
+            If Debug And GetKeyState(&H10) < -126 Then
+                Main.Instance.Invoke(Sub() parser2.CheckImage())
+            Else
+                Task.Factory.StartNew(Sub() DoOtherWork())
+            End If
+
         End If
     End Sub
 
     Private DoOtherWork_timer As Long
     Private Sub DoOtherWork()
-        If parser.isWFActive() Then
-            DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
-            Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
-            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
-            parser2.ParseScreen()
-            DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
-            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
-        Else
-            Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
-            Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Warframe Not Active")
-        End If
+        Try
+            If parser2.IsWFActive() Then
+                DoOtherWork_timer = clock.Elapsed.TotalMilliseconds
+                Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
+                Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Getting Reward Info...")
+                parser2.ParseScreen()
+                If Main.Instance.lbStatus.ForeColor <> Color.Red Then
+                    DoOtherWork_timer = clock.Elapsed.TotalMilliseconds - DoOtherWork_timer
+                    Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Rewards Shown (" & DoOtherWork_timer & "ms)")
+                End If
+            Else
+                Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = textColor)
+                Main.Instance.Invoke(Sub() Main.lbStatus.Text = "Warframe Not Active")
+            End If
+        Catch ex As Exception
+            'Main.Instance.Invoke(Sub() Main.lbStatus.Text = "ERROR (ParseScreen)")
+            'Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = Color.Red)
+            Main.addLog(ex.ToString())
+        End Try
     End Sub
 
 
