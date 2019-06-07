@@ -112,20 +112,20 @@ Public Class RewardWindow
 
     End Sub
 
-    Friend Sub Display(foundText As String())
+    Friend Sub Display(foundText As String(), plyrs As Integer)
         Dim visible As Boolean = Me.Visible
         Me.Show()
         Me.TopMost = True
 
         RewardWindow_Reset()
 
-        Me.Size = New Size(foundText.Count * 127 + 1, 105)
+        Me.Size = New Size(4 * 127 + 1, 105)
         If Not visible Then
             Me.Location = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
         End If
 
         Using g As Graphics = CreateGraphics()
-            For i = 0 To foundText.Count - 1
+            For i = 0 To plyrs - 1
                 If foundText(i) IsNot Nothing Then
 
                     rwrdPanels(i).Visible = True
@@ -162,5 +162,4 @@ Public Class RewardWindow
             Console.WriteLine("Sending to background")
         End If
     End Sub
-
 End Class

@@ -7,8 +7,8 @@
         Me.BackColor = Color.Black
         Me.TopMost = True
 
-        Dim fontSize As Integer = 12
-        Dim allFont As New Font(lbPDropShadow.Font.FontFamily, fontSize, FontStyle.Bold)
+        Dim fontSize As Single = 13.75
+        Dim allFont As New Font(lbPDropShadow.Font.FontFamily, fontSize)
 
         lbPDropShadow.Location = New Point(1, 1)
         lbPDropShadow.Font = allFont
@@ -21,8 +21,9 @@
 
 
     Public Sub LoadText(name As String)
+        Console.WriteLine(name)
 
-        lbPlat.Text = name
+        lbPlat.Text = name.Replace("&", "&&")
         lbPDropShadow.Text = lbPlat.Text
 
         If Not My.Settings.Automate Then

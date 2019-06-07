@@ -64,7 +64,7 @@ Partial Class NameTray
         'lbPDropShadow
         '
         Me.lbPDropShadow.BackColor = System.Drawing.Color.Transparent
-        Me.lbPDropShadow.Font = New System.Drawing.Font("Calibri", 21.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbPDropShadow.Font = New System.Drawing.Font("Corbel", 21.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbPDropShadow.ForeColor = System.Drawing.Color.FromArgb(CType(CType(18, Byte), Integer), CType(CType(20, Byte), Integer), CType(CType(24, Byte), Integer))
         Me.lbPDropShadow.Location = New System.Drawing.Point(12, 9)
         Me.lbPDropShadow.Name = "lbPDropShadow"

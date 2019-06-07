@@ -156,10 +156,6 @@ Public Class OCR2
         Catch ex As Exception
             Main.addLog("Something went wrong while getuing UI color: " & ex.ToString)
         End Try
-        If Debug Then
-            bmp.Save(appData & "\WFInfo\debug\COLOR_CHECK-" & My.Settings.ColorcheckCount.ToString() & ".png")
-            My.Settings.ColorcheckCount += 1
-        End If
         Dim clr As Color = Nothing
         Dim R, G, B As Integer
 
@@ -183,8 +179,6 @@ Public Class OCR2
             End If
         Next
         Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
-        Main.Instance.Invoke(Sub() Main.Instance.lbStatus.Text = "ERROR(UI color not found)")
-        Main.Instance.Invoke(Sub() Main.Instance.lbStatus.ForeColor = Color.Red)
         Return False
         If reset Then
             bmp.Dispose()
@@ -395,11 +389,6 @@ Public Class OCR2
                         Next
                     Next
 
-                    If Debug Then
-                        bmp.Save(appData & "\WFInfo\debug\FISS_CHECK-" & My.Settings.FisschckCount.ToString() & ".png")
-                        My.Settings.FisschckCount += 1
-                    End If
-
                     If Not found Then
                         Return False
                     End If
@@ -587,8 +576,6 @@ Public Class OCR2
 
                 If Debug Then
 
-                    Console.WriteLine("TIME TO PRINT")
-
                     Dim screenBounds As Rectangle = Screen.PrimaryScreen.Bounds
                     If Debug AndAlso debugFile IsNot Nothing Then
                         screenBounds = window
@@ -613,6 +600,7 @@ Public Class OCR2
                         Else
                             graph.CopyFromScreen(screenBounds.X, screenBounds.Y, 0, 0, screenSize, CopyPixelOperation.SourceCopy)
                         End If
+                        debugRet.Save(appData & "\WFInfo\debug\SSCLEAN-" & My.Settings.SSCount.ToString() & ".png")
                         Dim print As String =
                             "Tried looking at " & ss_area.ToString & vbCrLf &
                             "Screen resolution: " & screenBounds.Size.ToString & vbCrLf &
@@ -664,7 +652,7 @@ Public Class OCR2
                 ' Display window false = overlay
                 If DisplayWindow Then
                     'run window
-                    Main.Instance.Invoke(Sub() RewardWindow.Display(foundText))
+                    Main.Instance.Invoke(Sub() RewardWindow.Display(foundText, plyr_count))
                     ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
                     Console.WriteLine("DISPLAY WINDOW-" & ParseScreen_timer & "ms")
                 Else
@@ -682,7 +670,7 @@ Public Class OCR2
                         right += offset
                         Dim j As Integer = i
                         Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right / dpiScaling, top / dpiScaling))
-                        Main.Instance.Invoke(Sub() namePanels(j).ShowLoading(right / dpiScaling, (top + pixRwrdHei * totalScaling) / dpiScaling, (offset - pad * 2) / dpiScaling))
+                        Main.Instance.Invoke(Sub() namePanels(j).ShowLoading((right + pad / 2) / dpiScaling, (top + pixRwrdHei * totalScaling) / dpiScaling, (offset - pad) / dpiScaling))
                     Next
 
                     For i = 0 To plyr_count - 1
@@ -700,6 +688,9 @@ Public Class OCR2
                     ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
                     Console.WriteLine("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")
                 End If
+            Else
+                Main.Instance.Invoke(Sub() Main.Instance.lbStatus.Text = "ERROR(UI color not found)")
+                Main.Instance.Invoke(Sub() Main.Instance.lbStatus.ForeColor = Color.Red)
             End If
         Catch ex As Exception
 

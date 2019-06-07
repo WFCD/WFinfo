@@ -299,22 +299,28 @@ Public Class Main
         Equipment.Refresh()
     End Sub
 
+    Private FoundSomething As Boolean = False
     Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
         Console.WriteLine("tAutomate Tick")
         If (db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso parser2.IsWFActive()) Then
             If (parser2.IsRelicWindow()) Then
-                If (Not rwrdPanels(0).Visible) Then
+                If Not FoundSomething Then
+                    FoundSomething = True
                     Me.tAutomate.Interval = 3000
                     Task.Factory.StartNew(Sub() Me.DoWork())
                 End If
             ElseIf (rwrdPanels(0).Visible) Then
+                FoundSomething = False
                 For i As Integer = 0 To 3
                     rwrdPanels(i).Hide()
+                    namePanels(i).Hide()
                 Next
             Else
+                FoundSomething = False
                 Me.tAutomate.Interval = 1000
             End If
         Else
+            FoundSomething = False
             Me.tAutomate.Interval = 5000
         End If
     End Sub
