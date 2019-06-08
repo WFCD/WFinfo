@@ -680,7 +680,7 @@ Public Class OCR2
                     If Debug AndAlso debugFile IsNot Nothing Then
                         graph.DrawImage(debugFile, 0, 0)
                     Else
-                        graph.CopyFromScreen(screenBounds.X, screenBounds.Y, 0, 0, screenSize, CopyPixelOperation.SourceCopy)
+                        graph.CopyFromScreen(screenBounds.Left, screenBounds.Top, 0, 0, screenSize, CopyPixelOperation.SourceCopy)
                     End If
 
                     If Debug Then
