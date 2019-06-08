@@ -630,8 +630,6 @@ Public Class OCR2
                     'run overlay
                     ' Move over if you don't have all 4
 
-
-
                     Dim pad As Integer = pixRwrdHei * 0.05 * totalScaling 'padding to prevent it from looking off.
                     Dim top = center.Y - pixRwrdYDisp * totalScaling + pad 'from center to the top it's 248px
                     Dim right = center.X - (pixRwrdWid / 2 * totalScaling) - pad 'Going from the center you substract half of the width times the ui scale.
