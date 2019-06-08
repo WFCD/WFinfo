@@ -34,19 +34,22 @@ Public Class OCR2
     ' Colors for "VOIDFISSURE/REWARDS"
 
     Public uiColor As Color
-    Public FissClr1 As Color = Color.FromArgb(189, 168, 101)    ' default
-    Public FissClr2 As Color = Color.FromArgb(150, 31, 35)      ' stalker 
-    Public FissClr3 As Color = Color.FromArgb(238, 193, 105)    ' baruk
-    Public FissClr4 As Color = Color.FromArgb(50, 200, 225)     ' corpus
-    Public FissClr5 As Color = Color.FromArgb(57, 105, 192)     ' fortuna
-    Public FissClr6 As Color = Color.FromArgb(255, 189, 102)    ' grineer
-    Public FissClr7 As Color = Color.FromArgb(36, 184, 242)     ' lotus
-    Public FissClr8 As Color = Color.FromArgb(140, 38, 92)      ' nidus
-    Public FissClr9 As Color = Color.FromArgb(20, 41, 29)       ' orokin
-    Public FissClr10 As Color = Color.FromArgb(9, 78, 106)      ' tenno
+    Public FissClr1 As Color = Color.FromArgb(189, 168, 101)    ' Vitruvian
+    Public FissClr2 As Color = Color.FromArgb(150, 31, 35)      ' Stalker 
+    Public FissClr3 As Color = Color.FromArgb(238, 193, 105)    ' Baruk
+    Public FissClr4 As Color = Color.FromArgb(50, 200, 225)     ' Corpus
+    Public FissClr5 As Color = Color.FromArgb(57, 105, 192)     ' Fortuna
+    Public FissClr6 As Color = Color.FromArgb(255, 189, 102)    ' Grineer
+    Public FissClr7 As Color = Color.FromArgb(36, 184, 242)     ' Lotus
+    Public FissClr8 As Color = Color.FromArgb(140, 38, 92)      ' Nidus
+    Public FissClr9 As Color = Color.FromArgb(20, 41, 29)       ' Orokin
+    Public FissClr10 As Color = Color.FromArgb(9, 78, 106)      ' Tenno
+    Public FissClr11 As Color = Color.FromArgb(2, 127, 217)     ' High contrast
+    Public FissClr12 As Color = Color.FromArgb(255, 255, 255)   ' Legacy
+    Public FissClr13 As Color = Color.FromArgb(158, 159, 167)   ' Equinox
 
     Public rarity As New List(Of Color) From {Color.FromArgb(180, 135, 110), Color.FromArgb(200, 200, 200), Color.FromArgb(212, 192, 120)}
-    Public fissColors As Color() = {FissClr1, FissClr2, FissClr3, FissClr4, FissClr5, FissClr6, FissClr7, FissClr8, FissClr9, FissClr10}
+    Public fissColors As Color() = {FissClr1, FissClr2, FissClr3, FissClr4, FissClr5, FissClr6, FissClr7, FissClr8, FissClr9, FissClr10, FissClr11, FissClr12, FissClr13}
 
     ' Warframe window stats
     '   Warframe process
