@@ -149,7 +149,7 @@ Public Class OCR2
                     Next
                 Else
                     Using graph As Graphics = Graphics.FromImage(bmp)
-                        graph.CopyFromScreen(pixProfXDisp * totalScaling + width / 2, pixProfYDisp * totalScaling, 0, 0, New Size(width, 1), CopyPixelOperation.SourceCopy)
+                        graph.CopyFromScreen(window.Left + pixProfXDisp * totalScaling + width / 2, window.Top + pixProfYDisp * totalScaling, 0, 0, New Size(width, 1), CopyPixelOperation.SourceCopy)
                     End Using
                 End If
             End If
@@ -178,6 +178,7 @@ Public Class OCR2
                 Return True
             End If
         Next
+
         Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
         If reset Then
             bmp.Dispose()
@@ -571,7 +572,7 @@ Public Class OCR2
     End Sub
 
     Public ParseScreen_timer As Long = 0
-    Public Overridable Sub ParseScreen()
+    Public Overridable Sub ParseScreen(Optional fromAuto As Boolean = False)
         Try
 
             ParseScreen_timer = clock.Elapsed.TotalMilliseconds
@@ -582,7 +583,7 @@ Public Class OCR2
 
             GetDPIScaling()
             GetUIScaling()
-            If GetUiColor() Then
+            If fromAuto OrElse GetUiColor() Then
 
 
                 ParseScreen_timer -= clock.Elapsed.TotalMilliseconds

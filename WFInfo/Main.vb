@@ -65,7 +65,7 @@ Public Class Main
                 If parser2.IsWFActive() Then
                     Invoke(Sub() lbStatus.ForeColor = textColor)
                     Invoke(Sub() Me.lbStatus.Text = "Getting Reward Info...")
-                    parser2.ParseScreen()
+                    parser2.ParseScreen(True)
                     If lbStatus.ForeColor <> Color.Red Then
                         DoWork_timer = clock.Elapsed.TotalMilliseconds - DoWork_timer
                         Invoke(Sub() Me.lbStatus.Text = "Rewards Shown (" & DoWork_timer & "ms)")
