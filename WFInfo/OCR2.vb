@@ -379,6 +379,11 @@ Public Class OCR2
                         graph.CopyFromScreen(bnds.X, bnds.Y, 20, 20, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
                     End Using
 
+                    If Debug Then
+                        bmp.Save(appData & "\WFInfo\debug\FISS-CHECK-" & My.Settings.DebugCount.ToString() & ".png")
+                        My.Settings.DebugCount += 1
+                    End If
+
                     Dim clr As Color = Nothing
                     Dim found As Boolean = False
                     For i As Integer = 0 To bmp.Width - 1
