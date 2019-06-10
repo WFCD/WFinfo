@@ -178,7 +178,11 @@ Public Class Main
     End Sub
 
     Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
-        Settings.Show()
+        If Settings IsNot Nothing Then
+            Settings.BringToFront()
+        Else
+            Settings.Show()
+        End If
     End Sub
 
     Private Sub pbSettings_MouseEnter(sender As Object, e As EventArgs) Handles pbSettings.MouseEnter
@@ -203,8 +207,12 @@ Public Class Main
 
     Private Sub pbRelic_Click(sender As Object, e As EventArgs) Handles pbRelic.Click
         If db IsNot Nothing AndAlso db.relic_data IsNot Nothing Then
-            Relics.Load_Relic_Tree()
-            Relics.Show()
+            If Relics IsNot Nothing Then
+                Relics.BringToFront()
+            Else
+                Relics.Load_Relic_Tree()
+                Relics.Show()
+            End If
         End If
     End Sub
 
@@ -230,8 +238,13 @@ Public Class Main
 
     Private Sub pbEqmt_Click(sender As Object, e As EventArgs) Handles pbEqmt.Click
         If db IsNot Nothing AndAlso db.eqmt_data IsNot Nothing Then
-            Equipment.Load_Eqmt_Tree()
-            Equipment.Show()
+            If Equipment IsNot Nothing Then
+                Equipment.BringToFront()
+            Else
+                Equipment.Load_Eqmt_Tree()
+                Equipment.Show()
+            End If
+
         End If
     End Sub
 
