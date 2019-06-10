@@ -35,6 +35,7 @@ Public Class Main
             Me.Refresh()
             Me.Activate()
             Me.Refresh()
+            WorkAround()
             clock.Restart()
 
             '_________________________________________________________________________
@@ -136,6 +137,27 @@ Public Class Main
 
         My.Settings.MainLoc = Me.Location
         My.Settings.Save()
+    End Sub
+
+    Private Sub WorkAround()
+        If Debug Then
+            watcher.EnableRaisingEvents = True
+            AddHandler watcher.Changed, AddressOf watcher_Changed
+            AddHandler watcher.Created, AddressOf watcher_Created
+            AddHandler watcher.Renamed, AddressOf watcher_Renamed
+            Console.WriteLine(watcher.Path)
+
+        End If
+    End Sub
+    Private Sub watcher_Changed(ByVal sender As Object, ByVal e As FileSystemEventArgs)
+        Console.Write(e.FullPath)
+    End Sub
+    Private Sub watcher_Created(ByVal sender As Object, ByVal e As FileSystemEventArgs)
+        Console.Write(e.FullPath)
+    End Sub
+
+    Private Sub watcher_Renamed(ByVal sender As Object, ByVal e As FileSystemEventArgs)
+        Console.Write(e.FullPath)
     End Sub
 
     Private Sub Main_Shown(sender As Object, e As EventArgs) Handles Me.Shown
@@ -374,6 +396,7 @@ Module Glob
     Public tahoma8_bold As New Font("Tahoma", 8.0!, FontStyle.Bold)
     Public tahoma8 As New Font("Tahoma", 8.0!)
     Public timeFrame As String = "48hours"
+    Public watcher As FileSystemWatcher = New FileSystemWatcher("C:\New folder") ' Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) & "\Warframe"
 
     Public rwrdPanels(3) As Overlay
     Public namePanels(3) As NameTray
