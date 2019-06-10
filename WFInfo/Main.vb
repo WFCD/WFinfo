@@ -113,9 +113,6 @@ Public Class Main
             version = version.Substring(0, version.LastIndexOf("."))
         End If
 
-        appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-        Dim logTXT As String = "[" + System.DateTime.Now + " " + version + "]" + vbNewLine + txt + vbNewLine + vbNewLine
-
         If Not My.Computer.FileSystem.DirectoryExists(appData + "\WFInfo") Then
             Directory.CreateDirectory(appData + "\WFInfo")
             Directory.CreateDirectory(appData + "\WFInfo\Debug")
@@ -126,6 +123,9 @@ Public Class Main
         ElseIf Not My.Computer.FileSystem.FileExists(appData + "\WFInfo\Debug\WFInfo.log") Then
             File.Create(appData + "\WFInfo\Debug\WFInfo.log").Dispose()
         End If
+
+        appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+        Dim logTXT As String = "[" + System.DateTime.Now + " " + version + "] " + vbTab + txt + vbNewLine
 
         SyncLock log_lock
             File.AppendAllText(appData + "\WFInfo\Debug\WFInfo.log", logTXT)
@@ -326,7 +326,7 @@ Public Class Main
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        db.GetPlatLive("redeemer_prime_blueprint")
+        Overlay2.Show()
     End Sub
 
     Private Sub lbStatus_Click(sender As Object, e As EventArgs) Handles lbStatus.Click
@@ -383,10 +383,6 @@ Module Glob
     Public WithEvents globHook As New GlobalHook()
 
     Public parser2 As New OCR2()
-
-    <DllImport("user32.dll", SetLastError:=True, CharSet:=CharSet.Unicode)>
-    Private Function GetKeyState(ByVal nVirtKey As Integer) As Short
-    End Function
 
     Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
         If key = HKey1 Then

@@ -81,40 +81,11 @@ Public Class OCR2
 
     Public Shared debugFile As Bitmap = Nothing
 
-
     Public Enum WindowStyle
         FULLSCREEN
         BORDERLESS
         WINDOWED
     End Enum
-
-    Public Enum DeviceCap
-        VERTRES = 10
-        DESKTOPVERTRES = 117
-    End Enum
-
-    <StructLayout(LayoutKind.Sequential)> Public Structure RECT
-        Dim Left As Integer
-        Dim Top As Integer
-        Dim Right As Integer
-        Dim Bottom As Integer
-    End Structure
-
-    <DllImport("user32.dll")>
-    Public Shared Function GetWindowRect(ByVal hWnd As HandleRef, ByRef lpRect As RECT) As Boolean
-    End Function
-
-    <DllImport("User32.dll", CharSet:=CharSet.Auto, SetLastError:=True)>
-    Shared Function GetWindowLong(hWnd As IntPtr, nIndex As Int16) As Int32
-    End Function
-
-    <DllImport("dwmapi.dll", PreserveSig:=False)>
-    Public Shared Sub DwmEnableComposition(bEnable As Boolean)
-    End Sub
-
-    <DllImport("gdi32.dll")>
-    Public Shared Function GetDeviceCaps(hdc As IntPtr, nIndex As Integer) As Integer
-    End Function
 
     Public Sub New()
         For i As Integer = 0 To 4
@@ -316,7 +287,7 @@ Public Class OCR2
             DwmEnableComposition(False)
         End If
 
-        If window.Width <= 0 Or window.Height <= 0 Then
+        If window.X < -20000 Or window.Y <= -20000 Then
             WF_Proc = Nothing
             window = Nothing
         Else
@@ -414,64 +385,6 @@ Public Class OCR2
 
         End Try
         Return False
-    End Function
-
-    Public Overridable Function TestFunction() As Integer
-        Dim width As Integer = 8 * totalScaling
-        'width *= 2 Why not just multiply the total scaling by 8 instead of 4 if we're gonna double it later anyway?
-        Dim quarter As Integer = pixRwrdWid * totalScaling / 4
-        Dim bnds As New Rectangle(center.X - quarter * 2,
-                                  center.Y - pixRareYDisp * totalScaling - 5,
-                                  quarter * 4,
-                                  11)
-        Dim count As Integer = -1
-        Dim clr As Color = Nothing
-
-        Using bmp As New Bitmap(bnds.Width, bnds.Height)
-            If Debug AndAlso debugFile IsNot Nothing Then
-                For x As Integer = 0 To bnds.Width - 1
-                    For y As Integer = 0 To bnds.Height - 1
-                        bmp.SetPixel(x, y, debugFile.GetPixel(bnds.X + x, bnds.Y + y))
-                    Next
-                Next
-            Else
-                Using graph As Graphics = Graphics.FromImage(bmp)
-                    graph.CopyFromScreen(bnds.X, bnds.Y, 0, 0, New Size(bnds.Width, bnds.Height), CopyPixelOperation.SourceCopy)
-                End Using
-            End If
-
-            For n As Integer = 1 To 4
-                Dim i As Integer = 5 - n
-                Dim failed As Boolean = False
-                Dim x As Integer = quarter / 2 * i + 1
-                x -= width
-                For j As Integer = 0 To width - 1
-                    clr = bmp.GetPixel(x + j, 4)
-                    If ColorThreshold(clr, rarity(0), 20) OrElse ColorThreshold(clr, rarity(1), 5) OrElse ColorThreshold(clr, rarity(2), 20) Then
-                        bmp.SetPixel(x + j, 3, Color.White)
-                        failed = True
-                        'Exit For
-                    Else
-                        bmp.SetPixel(x + j, 3, Color.Black)
-                    End If
-                Next
-                If failed Then
-                    ' if 4 then odd number and at least 1
-                    ' if 3 then even number and at least 2
-                    ' if 2 then odd number and 3
-                    ' if 1 then even number and 4
-                    count = n
-                End If
-            Next
-            If Debug Then
-                bmp.Save(appData & "\WFInfo\debug\RARE_BAR-" & My.Settings.RarebarCount.ToString() & ".png")
-                My.Settings.RarebarCount += 1
-            End If
-        End Using
-
-
-        Console.WriteLine("FOUND " & count & " PLAYERS")
-        Return count
     End Function
 
     Public Overridable Function GetPlayers() As Integer
@@ -664,87 +577,88 @@ Public Class OCR2
                 End If
 
 
-                Dim screenBounds As Rectangle = Screen.PrimaryScreen.Bounds
-                If Debug AndAlso debugFile IsNot Nothing Then
-                    screenBounds = window
-                End If
-
-                Dim ss_area As New Rectangle(center.X - pixRwrdWid * totalScaling / 2,
-                                            center.Y - pixRwrdYDisp * totalScaling,
-                                            pixRwrdWid * totalScaling,
-                                            pixRwrdHei * totalScaling)
-
-
-                Dim vf_area As New Rectangle(window.Left + pixFissXDisp * totalScaling,
-                                            window.Top + pixFissYDisp * totalScaling,
-                                            pixFissWid * totalScaling,
-                                            pixFissHei * totalScaling)
-
-                Dim debugRet As New Bitmap(CInt(screenBounds.Width * dpiScaling), CInt(screenBounds.Height * dpiScaling))
-                Using graph As Graphics = Graphics.FromImage(debugRet)
-                    Dim screenSize As New Size(screenBounds.Width * dpiScaling, screenBounds.Height * dpiScaling)
-                    If Debug AndAlso debugFile IsNot Nothing Then
-                        graph.DrawImage(debugFile, 0, 0)
-                    Else
-                        graph.CopyFromScreen(screenBounds.Left, screenBounds.Top, 0, 0, screenSize, CopyPixelOperation.SourceCopy)
-                    End If
-
-                    If Debug Then
-                        debugRet.Save(appData & "\WFInfo\debug\SSCLEAN-" & My.Settings.SSCount.ToString() & ".png")
-                    End If
-                    Dim print As String =
-                        "Tried looking at " & ss_area.ToString & vbCrLf &
-                        "Screen resolution: " & screenBounds.Size.ToString & vbCrLf &
-                        "Screen center: " & center.ToString & vbCrLf &
-                        "Screen bounds: " & window.ToString & vbCrLf &
-                        "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
-                    Dim font As New Font("Tahoma", (screenBounds.Height / 120.0))
-                    Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
-                    Dim textbox = New Rectangle(ss_area.Right, ss_area.Bottom + 3, printBounds.Width, printBounds.Height)
-
-                    Dim print2 As String =
-                        "Tried looking at " & vf_area.ToString & vbCrLf &
-                        "Screen top-left: " & (New Point(window.X, window.Y)).ToString & vbCrLf &
-                        "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
-
-                    Dim printBounds2 As SizeF = graph.MeasureString(print2, font, graph.MeasureString(print2, font).Width)
-                    Dim textbox2 = New Rectangle((vf_area.Left + vf_area.Right) / 2, vf_area.Bottom + 3, printBounds2.Width, printBounds2.Height)
-
-                    graph.DrawRectangle(New Pen(Brushes.DeepPink), ss_area)                  'The area that it tried to read from
-                    For i As Integer = 0 To plyr_count - 1
-                        Dim elem = foundRec(i)
-                        graph.DrawRectangle(New Pen(Brushes.HotPink), elem)             'Draws a box around each text box
-                        Dim printBoundsRelic As SizeF = graph.MeasureString(foundText(i), font)
-                        Dim rewardBox = New Rectangle(elem.Left + 3, elem.Bottom + 3, printBoundsRelic.Width + 4, printBoundsRelic.Height)
-                        graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
-                        graph.DrawString(foundText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
-
-                        printBoundsRelic = graph.MeasureString(tessText(i), font)
-                        rewardBox = New Rectangle(elem.Left + 3, rewardBox.Bottom + 3, printBoundsRelic.Width + 4, printBoundsRelic.Height)
-                        graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
-                        graph.DrawString(tessText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
-                    Next
-                    graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
-                    graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
-                    graph.DrawRectangle(New Pen(Brushes.Red), vf_area)                  'The area that it tried to read from
-                    graph.FillRectangle(Brushes.Black, textbox2)                        'Black background for text box
-                    graph.DrawString(print2, font, Brushes.Red, textbox2)               'Debug text ontop of screenshot
-
-                    debugRet.Save(appData & "\WFInfo\debug\SSFUL-" & My.Settings.SSCount.ToString() & ".png")
-                    My.Settings.SSCount += 1
-
-                End Using
-                ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
-                Console.WriteLine("PRINT DEBUG-" & ParseScreen_timer & "ms")
-                ParseScreen_timer = clock.Elapsed.TotalMilliseconds
             Else
                 Main.Instance.Invoke(Sub() Main.Instance.lbStatus.Text = "ERROR(UI color not found)")
                 Main.Instance.Invoke(Sub() Main.Instance.lbStatus.ForeColor = Color.Red)
             End If
+
         Catch ex As Exception
 
         End Try
 
+        Dim screenBounds As Rectangle = Screen.PrimaryScreen.Bounds
+        If Debug AndAlso debugFile IsNot Nothing Then
+            screenBounds = window
+        End If
+
+        Dim ss_area As New Rectangle(center.X - pixRwrdWid * totalScaling / 2,
+                                    center.Y - pixRwrdYDisp * totalScaling,
+                                    pixRwrdWid * totalScaling,
+                                    pixRwrdHei * totalScaling)
+
+
+        Dim vf_area As New Rectangle(window.Left + pixFissXDisp * totalScaling,
+                                    window.Top + pixFissYDisp * totalScaling,
+                                    pixFissWid * totalScaling,
+                                    pixFissHei * totalScaling)
+
+        Dim debugRet As New Bitmap(CInt(screenBounds.Width * dpiScaling), CInt(screenBounds.Height * dpiScaling))
+        Using graph As Graphics = Graphics.FromImage(debugRet)
+            Dim screenSize As New Size(screenBounds.Width * dpiScaling, screenBounds.Height * dpiScaling)
+            If Debug AndAlso debugFile IsNot Nothing Then
+                graph.DrawImage(debugFile, 0, 0)
+            Else
+                graph.CopyFromScreen(screenBounds.Left, screenBounds.Top, 0, 0, screenSize, CopyPixelOperation.SourceCopy)
+            End If
+
+            If Debug Then
+                debugRet.Save(appData & "\WFInfo\debug\SSCLEAN-" & My.Settings.SSCount.ToString() & ".png")
+            End If
+            Dim print As String =
+                "Tried looking at " & ss_area.ToString & vbCrLf &
+                "Screen resolution: " & screenBounds.Size.ToString & vbCrLf &
+                "Screen center: " & center.ToString & vbCrLf &
+                "Screen bounds: " & window.ToString & vbCrLf &
+                "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
+            Dim font As New Font("Tahoma", (screenBounds.Height / 120.0))
+            Dim printBounds As SizeF = graph.MeasureString(print, font, graph.MeasureString(print, font).Width)
+            Dim textbox = New Rectangle(ss_area.Right, ss_area.Bottom + 3, printBounds.Width, printBounds.Height)
+
+            Dim print2 As String =
+                "Tried looking at " & vf_area.ToString & vbCrLf &
+                "Screen top-left: " & (New Point(window.X, window.Y)).ToString & vbCrLf &
+                "UI scaling: " & uiScaling & vbTab & vbTab & " Windows scaling: " & dpiScaling
+
+            Dim printBounds2 As SizeF = graph.MeasureString(print2, font, graph.MeasureString(print2, font).Width)
+            Dim textbox2 = New Rectangle((vf_area.Left + vf_area.Right) / 2, vf_area.Bottom + 3, printBounds2.Width, printBounds2.Height)
+
+            graph.DrawRectangle(New Pen(Brushes.DeepPink), ss_area)                  'The area that it tried to read from
+            For i As Integer = 0 To plyr_count - 1
+                Dim elem = foundRec(i)
+                graph.DrawRectangle(New Pen(Brushes.HotPink), elem)             'Draws a box around each text box
+                Dim printBoundsRelic As SizeF = graph.MeasureString(foundText(i), font)
+                Dim rewardBox = New Rectangle(elem.Left + 3, elem.Bottom + 3, printBoundsRelic.Width + 4, printBoundsRelic.Height)
+                graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
+                graph.DrawString(foundText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
+
+                printBoundsRelic = graph.MeasureString(tessText(i), font)
+                rewardBox = New Rectangle(elem.Left + 3, rewardBox.Bottom + 3, printBoundsRelic.Width + 4, printBoundsRelic.Height)
+                graph.FillRectangle(Brushes.Black, rewardBox)                   'Black background for reward box
+                graph.DrawString(tessText(i), font, Brushes.HotPink, rewardBox) 'Debug text ontop of screenshot
+            Next
+            graph.FillRectangle(Brushes.Black, textbox)                         'Black background for text box
+            graph.DrawString(print, font, Brushes.Red, textbox)                 'Debug text ontop of screenshot
+            graph.DrawRectangle(New Pen(Brushes.Red), vf_area)                  'The area that it tried to read from
+            graph.FillRectangle(Brushes.Black, textbox2)                        'Black background for text box
+            graph.DrawString(print2, font, Brushes.Red, textbox2)               'Debug text ontop of screenshot
+
+            debugRet.Save(appData & "\WFInfo\debug\SSFUL-" & My.Settings.SSCount.ToString() & ".png")
+            My.Settings.SSCount += 1
+
+        End Using
+        ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+        Console.WriteLine("PRINT DEBUG-" & ParseScreen_timer & "ms")
+        ParseScreen_timer = clock.Elapsed.TotalMilliseconds
     End Sub
 
 End Class

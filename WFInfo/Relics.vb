@@ -528,7 +528,7 @@ Public Class Relics
                                 itot += (plat * iperc)
                                 count += 1
                             Else
-                                Console.WriteLine("MISSING RELIC PLAT VALUES: " + temp.FullPath + " -- " + temp.Text)
+                                Main.addLog("MISSING RELIC PLAT VALUES: " + temp.FullPath + " -- " + temp.Text)
                             End If
                         End If
                     Next

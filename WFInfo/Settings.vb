@@ -275,7 +275,6 @@ Public Class Settings
         End If
         ScaleBar.Value = value
         My.Settings.Scaling = value
-        Console.WriteLine("Submit current: " & value)
         TextBox1.Text = value & "%"
     End Sub
 End Class

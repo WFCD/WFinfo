@@ -156,10 +156,8 @@ Public Class RewardWindow
     Private Sub cbtopToggle_Click(sender As Object, e As EventArgs) Handles topToggle.Click
         If topToggle.Checked Then
             Me.TopMost = True
-            Console.WriteLine("Sending to foreground")
         Else
             Me.TopMost = False
-            Console.WriteLine("Sending to background")
         End If
     End Sub
 End Class

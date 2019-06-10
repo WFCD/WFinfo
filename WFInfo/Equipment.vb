@@ -10,14 +10,6 @@ Public Class Equipment
     Public Tree2Sorter As New EqmtSorter(1)
     Public types As String() = {"Warframe", "Primary", "Secondary", "Melee", "Archwing", "Companion"}
 
-    <DllImport("user32.dll", CharSet:=CharSet.Auto)>
-    Public Shared Function GetScrollPos(hWnd As IntPtr, nBar As Integer) As Integer
-    End Function
-
-    <DllImport("user32.dll")>
-    Public Shared Function SetScrollPos(hWnd As IntPtr, nBar As Integer, nPos As Integer, bRedraw As Boolean) As Integer
-    End Function
-
     Private Sub startDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown, lbTitle.MouseDown, pbIcon.MouseDown
         drag = True
         mouseX = Cursor.Position.X - Me.Left
