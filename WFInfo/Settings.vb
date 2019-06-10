@@ -218,7 +218,7 @@ Public Class Settings
         If ScaleOption.SelectedIndex = 0 Then
             ScaleBar.Value = 100
         ElseIf ScaleOption.SelectedIndex = 1 Then
-            ScaleBar.Value = 95
+            ScaleBar.Value = 62
         End If
         ScaleBar_Scroll(sender, e)
         'Kek: To remove the blue highlight... because I don't like the look of it
