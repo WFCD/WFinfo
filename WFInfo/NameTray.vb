@@ -21,7 +21,6 @@
 
 
     Public Sub LoadText(name As String)
-        Console.WriteLine(name)
 
         lbPlat.Text = name.Replace("&", "&&")
         lbPDropShadow.Text = lbPlat.Text

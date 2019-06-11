@@ -22,6 +22,8 @@ Class Data
 
     Private save_count As Integer = 0
     Private webClient As WebClient
+    Public WithEvents watcher As New FileSystemWatcher()
+
 
     Public Sub New()
         Main.addLog("CREATING DATABASE")
@@ -33,6 +35,9 @@ Class Data
         webClient.Headers.Add("platform", "pc")
         webClient.Headers.Add("language", "en")
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+
+        watcher.Path = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) & "\Warframe"
+        watcher.EnableRaisingEvents = True
 
         Update()
     End Sub
@@ -626,7 +631,7 @@ Class Data
                 lowest = prop.Value
             End If
         Next
-        Main.addLog("FOUND PART: " & lowest & vbCrLf & "FROM: " & string1)
+        Main.addLog("FOUND PART: " & lowest & vbTab & vbTab & "FROM: " & string1)
         Return lowest
     End Function
 
@@ -721,4 +726,18 @@ Class Data
         Next
         Return lowest
     End Function
+
+    Private waiting As Boolean = False
+
+    Private Sub watcher_Created(ByVal sender As Object, ByVal e As FileSystemEventArgs) Handles watcher.Created
+        waiting = True
+    End Sub
+
+    Private Sub watcher_Changed(ByVal sender As Object, ByVal e As FileSystemEventArgs) Handles watcher.Changed
+        If waiting Then
+            waiting = False
+            Threading.Thread.Sleep(500)
+            parser2.ParseFile(e.FullPath)
+        End If
+    End Sub
 End Class
