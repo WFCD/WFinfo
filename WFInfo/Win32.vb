@@ -11,6 +11,8 @@
     Public Const WM_LBUTTONUP = &H202
     Public Const WM_RBUTTONDOWN = &H204
     Public Const WM_RBUTTONUP = &H205
+    Public Const WM_XBUTTONDOWN = &H20B
+    Public Const WM_XBUTTONUP = &H20C
     Public Const WM_MOUSEWHEEL = &H20A
     Public Const WM_MOUSEHWHEEL = &H20E
 

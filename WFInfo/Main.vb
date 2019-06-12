@@ -352,6 +352,7 @@ Module Glob
     Public db As Data
     Public qItems As New List(Of String)()
     Public HKey1 As Integer = My.Settings.HKey1
+    Public MKey1 As Integer = My.Settings.MKey1
     Public HideShots As Boolean = False     ' Bool to hide screenshot notifications in fullscreen mode
     'Public Equipment As String               ' List of leveled equipment
     'Public Fullscreen As Boolean = False

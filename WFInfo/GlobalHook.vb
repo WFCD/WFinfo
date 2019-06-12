@@ -31,10 +31,22 @@
                     RaiseEvent KeyDown(Keys.LButton)
                 Case WM_RBUTTONDOWN
                     RaiseEvent KeyDown(Keys.RButton)
+                Case WM_XBUTTONDOWN
+                    If (CType(Marshal.PtrToStructure(lParam, struct.GetType()), MSLLHOOKSTRUCT).mouseData >> 16) = 1 Then
+                        RaiseEvent KeyDown(Keys.XButton1)
+                    Else
+                        RaiseEvent KeyDown(Keys.XButton2)
+                    End If
                 Case WM_LBUTTONUP
                     RaiseEvent KeyUp(Keys.LButton)
                 Case WM_RBUTTONUP
                     RaiseEvent KeyUp(Keys.RButton)
+                Case WM_XBUTTONUP
+                    If (CType(Marshal.PtrToStructure(lParam, struct.GetType()), MSLLHOOKSTRUCT).mouseData >> 16) = 1 Then
+                        RaiseEvent KeyDown(Keys.XButton1)
+                    Else
+                        RaiseEvent KeyDown(Keys.XButton2)
+                    End If
                 Case WM_MOUSEWHEEL
                     RaiseEvent MouseScroll(CType(Marshal.PtrToStructure(lParam, struct.GetType()), MSLLHOOKSTRUCT).mouseData >> 16)
             End Select
