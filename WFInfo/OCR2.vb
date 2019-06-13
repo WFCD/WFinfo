@@ -89,11 +89,12 @@ Public Class OCR2
 
     Public Sub New()
         For i As Integer = 0 To 4
-            engine(i) = New TesseractEngine("", "eng")
             If i = 0 Then
+                engine(i) = New TesseractEngine("", "englimited")
                 engine(i).DefaultPageSegMode = PageSegMode.SingleLine
                 engine(i).SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ/")
             Else
+                engine(i) = New TesseractEngine("", "engbest")
                 engine(i).DefaultPageSegMode = PageSegMode.SingleBlock
                 engine(i).SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&/")
             End If
