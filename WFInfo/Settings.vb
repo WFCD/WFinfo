@@ -23,18 +23,17 @@ Public Class Settings
     End Sub
 	
 	Private Sub btnHkey1_MouseUp(sender as Object, e as MouseEventArgs) Handles btnHkey1.MouseUp
-        If key1Tog Then
+        If key1Tog And (e.Button = MouseButtons.XButton1 Or e.Button = MouseButtons.XButton2) Then
             key1Tog = False
-            HKey1 = -1
-            MKey1 = e.Button
-			Select Case e.Button
-				Case MouseButtons.XButton1
-                        btnHkey1.Text = "MOUSE 4"
-				Case MouseButtons.XButton2
-                        btnHkey1.Text = "MOUSE 5"
-			End Select
-		End If
-	End Sub
+            HKey1 = e.Button
+            Select Case e.Button
+                Case MouseButtons.XButton1
+                    btnHkey1.Text = "MOUSE 4"
+                Case MouseButtons.XButton2
+                    btnHkey1.Text = "MOUSE 5"
+            End Select
+        End If
+    End Sub
 
     Private Sub btnHkey1_KeyUp(sender As Object, e As KeyEventArgs) Handles btnHkey1.KeyUp
         '_________________________________________________________________________
@@ -43,7 +42,6 @@ Public Class Settings
         If key1Tog Then
             key1Tog = False
             HKey1 = e.KeyCode
-            MKey1 = -1
             e.SuppressKeyPress = True
             If e.KeyCode = Keys.PrintScreen Then
                 btnHkey1.Text = "Print Screen"
@@ -215,7 +213,6 @@ Public Class Settings
         ''Saves settings
         My.Settings.Automate = cbAutomation.Checked
         My.Settings.HKey1 = HKey1
-        My.Settings.MKey1 = MKey1
         My.Settings.HKey1Text = btnHkey1.Text
         My.Settings.Debug = cbDebug.Checked
         My.Settings.Scaling = ScaleBar.Value

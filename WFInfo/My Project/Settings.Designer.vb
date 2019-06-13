@@ -377,18 +377,6 @@ Namespace My
                 Me("ColorcheckCount") = value
             End Set
         End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("-1")>  _
-        Public Property MKey1() As Integer
-            Get
-                Return CType(Me("MKey1"),Integer)
-            End Get
-            Set
-                Me("MKey1") = value
-            End Set
-        End Property
     End Class
 End Namespace
 
