@@ -36,7 +36,12 @@ Class Data
         webClient.Headers.Add("language", "en")
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
-        watcher.Path = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) & "\Warframe"
+
+        Dim path As String = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) & "\Warframe"
+        If Not My.Computer.FileSystem.DirectoryExists(path) Then
+            Directory.CreateDirectory(path)
+        End If
+        watcher.Path = path
         watcher.EnableRaisingEvents = True
 
         Update()
