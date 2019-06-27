@@ -7,19 +7,19 @@ WFinfo provides recent platinum values from warframe.market of each primed item.
 
 # Features
 
-## Fissure Prices
+### Fissure Prices
 
 ![Fissure Prices](https://i.imgur.com/Fl2z7qS.png)
 
 To get the prices of the prime drops during a fissure event, press the assigned hotkey (Print Screen by default) during the reward screen. The Platinum and Ducat prices can either be displayed over Warframe itself or shown on a window located on a second screen. To make things easier there is also the Automation Mode, which will check Warframe if you are on the reward screen every second, If it finds any, it will display the Plat/Ducat values in your preferred way.
 
-## Relic Panel
+### Relic Panel
 
 ![Relic Panel](https://i.imgur.com/k2yEW87.png)
 
 The Relics panel allows you to look at all relics and see how much plat they award on average unrefined, and how much more platinum it awards when refined to radiant. Some relics this is small because the high plat items are common rewards, and others it is large because the rare reward is the high plat item.
 
-## Equipment Panel
+### Equipment Panel
 
 ![Equipment Panel](https://i.imgur.com/bQRDYvR.png)
 
