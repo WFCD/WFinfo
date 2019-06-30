@@ -129,7 +129,7 @@ Class Data
             Return False
         End Try
         market_items = New Dictionary(Of String, String)()
-        For Each elem As JObject In m_i_temp("payload")("items")
+For Each elem As JObject In m_i_temp("payload")("items")
             Dim name As String = elem("item_name")
             If name.Contains("Prime ") Then
                 market_items(elem("id")) = name + "|" + elem("url_name").ToString()
