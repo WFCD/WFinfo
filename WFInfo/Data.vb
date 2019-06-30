@@ -95,13 +95,10 @@ Class Data
         For Each item As JObject In nexus_db
             If item("name").ToString().Contains("Prime") Then
                 For Each part As JObject In item("components")
-                    If part("name").ToString() <> "Set" Then
+                    If part("name").ToString() <> "Set" AndAlso Not part("name").ToString().Contains("Prime") Then
                         Dim str_name As String = item("name").ToString() & " " & part("name").ToString()
                         Dim check As JValue = part("prices")("selling")("current")("median")
-                        If check.Value Is Nothing Then
-                            Dim str_url As String = Regex.Replace(str_name.ToLower(), " ", "_")
-                            Load_Market_Item(str_name, str_url)
-                        Else
+                        If check.Value IsNot Nothing AndAlso market_data.TryGetValue(str_name, Nothing) Then
                             market_data(str_name)("plat") = check.ToObject(Of Double)
                         End If
                     End If
