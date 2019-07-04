@@ -45,6 +45,9 @@ Class Data
         watcher.EnableRaisingEvents = True
 
         Update()
+
+
+        Dim test As New Sheets()
     End Sub
 
     Public Sub Save_JObject(data As JObject)

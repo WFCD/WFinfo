@@ -141,6 +141,19 @@ Namespace My.Resources
         End Property
         
         '''<summary>
+        '''  Looks up a localized string similar to {
+        '''  &quot;type&quot;: &quot;service_account&quot;,
+        '''  &quot;project_id&quot;: &quot;wfinfo&quot;,
+        '''  &quot;private_key_id&quot;: &quot;a99126b110941194abf09b95afb357799464265d&quot;,
+        '''  &quot;private_key&quot;: &quot;-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4wcaLYg0Njl5Y\nDIwzv7itzNezVtlgOhByiC0O2WQRikUVGorpkafRjFxJ0g38E5QfeC4QFycIUik5\nT3ilmzZZzDUCFD5s1RLEl6vMZvb+vbWZq0DlzZHZcBhirslLTD5HMsI2v2Hl5SeS\n9rEAYVzNHZqB1E+zpGfdd7YL3ZSceOvIAKzmeTiQ485PN6f6Udsxp6jx23epYTr0\nzfaj6AYr3+EL7drQwn1DM4AQDp1ixggL08CETZwj76youV2MsuYZYQuq4hwNC0yZ\ndwfqAbUhWSeHmY [rest of string was truncated]&quot;;.
+        '''</summary>
+        Friend ReadOnly Property google_creds() As String
+            Get
+                Return ResourceManager.GetString("google-creds", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
         '''  Looks up a localized resource of type System.Drawing.Bitmap.
         '''</summary>
         Friend ReadOnly Property home() As System.Drawing.Bitmap
@@ -236,16 +249,6 @@ Namespace My.Resources
         Friend ReadOnly Property Settings_h() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("Settings_h", resourceCulture)
-                Return CType(obj,System.Drawing.Bitmap)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Looks up a localized resource of type System.Drawing.Bitmap.
-        '''</summary>
-        Friend ReadOnly Property warning_sign() As System.Drawing.Bitmap
-            Get
-                Dim obj As Object = ResourceManager.GetObject("warning-sign", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property

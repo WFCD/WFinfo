@@ -121,9 +121,6 @@
   <data name="Donate_h" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Donate_h.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="warning-sign" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\warning-sign.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Relic" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Relic.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -177,5 +174,8 @@
   </data>
   <data name="NameTray" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\NameTray.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="google-creds" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\google-creds.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
 </root>
