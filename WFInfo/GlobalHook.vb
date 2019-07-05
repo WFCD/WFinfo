@@ -28,10 +28,13 @@
             Dim struct As MSLLHOOKSTRUCT
             Select Case wParam
                 Case WM_LBUTTONDOWN
+                    Console.WriteLine("WM_LBUTTONDOWN")
                     RaiseEvent KeyDown(Keys.LButton)
                 Case WM_RBUTTONDOWN
+                    Console.WriteLine("WM_RBUTTONDOWN")
                     RaiseEvent KeyDown(Keys.RButton)
                 Case WM_XBUTTONDOWN
+                    Console.WriteLine("WM_XBUTTONDOWN")
                     If (CType(Marshal.PtrToStructure(lParam, struct.GetType()), MSLLHOOKSTRUCT).mouseData >> 16) = 1 Then
                         RaiseEvent KeyDown(Keys.XButton1)
                     Else
@@ -58,10 +61,13 @@
 
         Dim pointer As IntPtr = Marshal.GetHINSTANCE(Reflection.Assembly.GetExecutingAssembly.GetModules()(0))
 
-
         MSHHookID = SetWindowsHookEx(WH_MOUSE_LL, MSLLHookProcDelegate, pointer, 0)
         KBDHHookID = SetWindowsHookEx(WH_KEYBOARD_LL, KBDLLHookProcDelegate, pointer, 0)
 
+        Dim msg As Message
+        While GetMessage(msg, Nothing, 0, 0)
+            DispatchMessage(msg)
+        End While
         If MSHHookID = IntPtr.Zero Or KBDHHookID = IntPtr.Zero Then
             Throw New Exception("Could not set hook")
         End If

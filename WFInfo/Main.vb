@@ -32,9 +32,6 @@ Public Class Main
             Automate = My.Settings.Automate
             tAutomate.Enabled = Automate
             Me.MaximizeBox = False
-            Me.Refresh()
-            Me.Activate()
-            Me.Refresh()
             clock.Restart()
 
             addLog(vbNewLine & "*******************************************" & vbNewLine & "**" & vbNewLine & "**  WFINFO STARTING" & vbNewLine & "**" & vbNewLine & "*******************************************")
@@ -44,14 +41,6 @@ Public Class Main
             '_________________________________________________________________________
             If (Not Directory.Exists(appData + "\WFInfo\debug")) Then
                 Directory.CreateDirectory(appData + "\WFInfo\debug")
-            End If
-
-            '_________________________________________________________________________
-            'Refreshes the clipboard, causes issues later if you don't
-            '_________________________________________________________________________
-            If Clipboard.ContainsImage() Then
-                Clipboard.GetImage()
-                CliptoImage = Clipboard.GetImage()
             End If
 
         Catch ex As Exception
@@ -74,6 +63,9 @@ Public Class Main
                     End If
                 End If
             Else
+                'This has to be here cause it's after the hook is created,
+                '    but not in the same thread... cause... well, it turns into a nuclear wasteland
+                initHandlers()
                 db = New Data()
                 parser2.UpdateCenter()
                 Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
@@ -145,8 +137,8 @@ Public Class Main
         'Refreshes the application to stop graphical glitches caused by lockup
         'Starts the background timers
         '_________________________________________________________________________
-        Me.Refresh()
         Me.CreateControl()
+        Task.Factory.StartNew(Sub() Glob.initHook())
         Task.Factory.StartNew(Sub() DoWork())
     End Sub
 
@@ -385,11 +377,20 @@ Module Glob
     Public relicPanels(9) As Overlay
 
     Public ReplacementList As Char(,)
-    Public WithEvents globHook As New GlobalHook()
+    Public globHook As GlobalHook
 
     Public parser2 As New OCR2()
 
-    Public Sub keyPressed(key As Keys) Handles globHook.KeyDown
+    Public Sub initHook()
+        globHook = New GlobalHook()
+    End Sub
+
+    Public Sub initHandlers()
+        AddHandler globHook.KeyDown, AddressOf keyPressed
+    End Sub
+
+    Public Sub keyPressed(key As Keys)
+        Console.WriteLine("KEY DOWN")
         If key = HKey1 Then
             If Debug And GetKeyState(&H10) < -126 Then
                 Main.Instance.Invoke(Sub() parser2.CheckImage())

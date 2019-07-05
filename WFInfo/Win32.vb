@@ -77,6 +77,14 @@
     End Function
 
     <DllImport("user32.dll")>
+    Public Function GetMessage(ByRef lpMsg As Message, ByVal hWnd As IntPtr, ByVal wMsgFilterMin As UInteger, ByVal wMsgFilterMax As UInteger) As Boolean
+    End Function
+
+    <DllImport("user32.dll")>
+    Public Function DispatchMessage(ByRef lpMsg As Message) As IntPtr
+    End Function
+
+    <DllImport("user32.dll")>
     Public Function GetScrollPos(hWnd As IntPtr, nBar As Integer) As Integer
     End Function
 
