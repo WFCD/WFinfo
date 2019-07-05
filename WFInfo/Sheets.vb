@@ -7,27 +7,20 @@ Class Sheets
 
     Private cred As GoogleCredential
     Private ReadOnly sheetID = "1uAbqfwBYrcqlWCJad4juankmu9-_UqzBmd7XtrrrwkM"
-    Private ReadOnly range = "prices!A1:H1"
+    Private service As SheetsService
 
     Public Sub New()
         cred = GoogleCredential.FromJson(My.Resources.google_creds).CreateScoped({SheetsService.Scope.SpreadsheetsReadonly})
+        service = New SheetsService(New BaseClientService.Initializer() With
+        {
+            .HttpClientInitializer = cred,
+            .ApplicationName = "WFInfo"
+        })
 
-
-        Dim test As SheetsService = TestRun()
-        Dim response As ValueRange = test.Spreadsheets.Values.Get(sheetID, range).Execute()
-        For Each row In response.Values
-            For Each cell In row
-                Console.WriteLine(cell.ToString())
-            Next
-        Next
     End Sub
 
-    Public Function TestRun() As SheetsService
-        Return New SheetsService(New BaseClientService.Initializer() With
-            {
-                .HttpClientInitializer = cred,
-                .ApplicationName = "WFInfo"
-            })
+    Public Function GetSheet(range As String) As IList(Of IList(Of Object))
+        Dim response As ValueRange = service.Spreadsheets.Values.Get(sheetID, range).Execute()
+        Return response.Values
     End Function
-
 End Class

@@ -149,7 +149,7 @@ Namespace My.Resources
         '''</summary>
         Friend ReadOnly Property google_creds() As String
             Get
-                Return ResourceManager.GetString("google-creds", resourceCulture)
+                Return ResourceManager.GetString("google_creds", resourceCulture)
             End Get
         End Property
         

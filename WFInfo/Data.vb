@@ -24,6 +24,8 @@ Class Data
     Private webClient As WebClient
     Public WithEvents watcher As New FileSystemWatcher()
 
+    Private sheetAPI As Sheets
+
 
     Public Sub New()
         Main.addLog("CREATING DATABASE")
@@ -36,6 +38,7 @@ Class Data
         webClient.Headers.Add("language", "en")
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
+        sheetAPI = New Sheets()
 
         Dim path As String = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) & "\Warframe"
         If Not My.Computer.FileSystem.DirectoryExists(path) Then
@@ -47,7 +50,6 @@ Class Data
         Update()
 
 
-        Dim test As New Sheets()
     End Sub
 
     Public Sub Save_JObject(data As JObject)
@@ -92,57 +94,30 @@ Class Data
         Return Main.Instance.versionNum
     End Function
 
-    Public Function Load_Nexus_Items() As Boolean
-        Dim nexus_db As JArray = JsonConvert.DeserializeObject(Of JArray)(webClient.DownloadString("https://api.nexushub.co/warframe/v1/items?tradable=true"))
-
-        For Each item As JObject In nexus_db
-            If item("name").ToString().Contains("Prime") Then
-                For Each part As JObject In item("components")
-                    If part("name").ToString() <> "Set" AndAlso Not part("name").ToString().Contains("Prime") Then
-                        Dim str_name As String = item("name").ToString() & " " & part("name").ToString()
-                        Dim check As JValue = part("prices")("selling")("current")("median")
-                        If check.Value IsNot Nothing AndAlso market_data.TryGetValue(str_name, Nothing) Then
-                            market_data(str_name)("plat") = check.ToObject(Of Double)
-                        End If
-                    End If
-                Next
-
-            End If
-        Next
-
-        Return True
-    End Function
-
-    Private Function Load_Market_Items(Optional force As Boolean = False) As Boolean
-        Main.addLog("LOADING MARKET ITEM DATABASE")
+    Private Function Load_Items(Optional force As Boolean = False) As Boolean
         If Not force AndAlso File.Exists(market_items_path) Then
             If market_items Is Nothing Then
                 market_items = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(market_items_path))
             End If
-            Main.addLog("MARKET ITEM DATABASE EXISTS")
+            Main.addLog("ITEM DATABASE: GOOD")
             Return False
         End If
-        Main.addLog("LOADING NEW MARKET ITEM DATABASE")
-        Dim m_i_temp As JObject
-        Try
-            m_i_temp = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/items"))
-        Catch ex As System.Net.WebException
-            Main.addLog(ex.Status.ToString())
-            Main.addLog(ex.InnerException.ToString())
-            Return False
-        End Try
+
+        Main.addLog("ITEM DATABASE: LOADING NEW")
         market_items = New Dictionary(Of String, String)()
-For Each elem As JObject In m_i_temp("payload")("items")
-            Dim name As String = elem("item_name")
+
+        Dim sheet = sheetAPI.GetSheet("items!A:C")
+        For Each row In sheet
+            Dim name As String = row(1).ToString()
             If name.Contains("Prime ") Then
-                market_items(elem("id")) = name + "|" + elem("url_name").ToString()
+                market_items(row(0).ToString()) = name + "|" + row(2).ToString()
             End If
         Next
+        Main.addLog("ITEM DATABASE: GOOD")
         Return True
     End Function
 
-    Private Function Load_Market_Data(Optional force As Boolean = False) As Boolean
-        Main.addLog("LOADING MARKET DATABASE")
+    Private Function Load_Market(Optional force As Boolean = False) As Boolean
         If Not force AndAlso File.Exists(market_data_path) Then
             If market_data Is Nothing Then
                 market_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(market_data_path))
@@ -150,47 +125,59 @@ For Each elem As JObject In m_i_temp("payload")("items")
             Dim timestamp As Date = DateTime.Parse(market_data("timestamp"))
             Dim dayAgo As Date = Date.Now.AddDays(-1)
             If timestamp > dayAgo Then
-                Main.addLog("MARKET DATABASE EXISTS")
+                Main.addLog("PLAT DATABASE: GOOD")
                 Return False
             End If
         End If
 
-        Main.addLog("LOADING NEW MARKET DATABASE")
-
-
-        Dim market_temp As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/tools/ducats"))
+        Main.addLog("PLAT DATABASE: LOADING NEW")
         market_data = New JObject()
-        For Each elem As JObject In market_temp("payload")("previous_day")
-            Dim item_name As String = ""
-            If Not market_items.TryGetValue(elem("item"), item_name) Then
-                Load_Market_Items(True)
-            End If
 
-            If market_items.TryGetValue(elem("item"), item_name) Then
-                item_name = item_name.Split("|")(0)
-
-                If Not item_name.Contains("Set") Then
-                    market_data(item_name) = New JObject()
-                    market_data(item_name)("ducats") = elem("ducats")
-                    market_data(item_name)("plat") = elem("wa_price")
-                End If
-            Else
-                Main.addLog("CANNOT FIND:" & elem("item").ToString())
+        Dim sheet = sheetAPI.GetSheet("prices!A:I")
+        For Each row In sheet
+            Dim name As String = row(0).ToString()
+            If name.Contains("Prime ") Then
+                market_data(name) = New JObject()
+                market_data(name)("plat") = Double.Parse(row(8).ToString(), culture)
+                market_data(name)("ducats") = 0
+                market_data(name)("volume") = CInt(row(4)) + CInt(row(6))
             End If
         Next
 
         Dim job As New JObject()
         job("ducats") = 0
         job("plat") = 0
+        job("volume") = 0
         market_data("Forma Blueprint") = job
+
         market_data("timestamp") = Date.Now.ToString("R")
 
-        ' OVERWRITE ALL DATA FROM DUCANATOR CAUSE IT SUCKS
-        '    :'(
-        '                   except the ducat values, those are nice
-        Load_Nexus_Items()
+        Main.addLog("PLAT DATABASE: GOOD")
+        Load_Ducats()
         Return True
     End Function
+
+    Private Sub Load_Ducats()
+        Main.addLog("DUCAT DATABASE: LOADING NEW")
+        Dim market_temp As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.warframe.market/v1/tools/ducats"))
+        For Each elem As JObject In market_temp("payload")("previous_day")
+            Dim item_name As String = ""
+            If Not market_items.TryGetValue(elem("item"), item_name) Then
+                Main.addLog("UNKNOWN MARKET ID: " & elem("item").ToString())
+                Console.WriteLine(elem.ToString())
+            Else
+                item_name = item_name.Split("|")(0)
+
+                If Not market_data.TryGetValue(item_name, Nothing) Then
+                    Main.addLog("MISSING ITEM IN market_data:" & elem("item").ToString())
+                End If
+
+                market_data(item_name)("ducats") = elem("ducats")
+            End If
+        Next
+
+        Main.addLog("DUCAT DATABASE: GOOD")
+    End Sub
 
     Friend Function GetSetPlat(job As JObject, Optional unowned As Boolean = False) As Double
         Dim temp As JObject = Nothing
@@ -519,7 +506,7 @@ For Each elem As JObject In m_i_temp("payload")("items")
 
     Public Function Update() As Boolean
         Main.addLog("UPDATING DATABASES")
-        Dim save_market As Boolean = Load_Market_Items() Or Load_Market_Data()
+        Dim save_market As Boolean = Load_Items() Or Load_Market()
 
         For Each elem As KeyValuePair(Of String, String) In market_items
             Dim name As String = elem.Value.Split("|")(0)
@@ -549,8 +536,8 @@ For Each elem As JObject In m_i_temp("payload")("items")
 
     Public Sub ForceMarketUpdate()
         Main.addLog("FORCING MARKET UPDATE")
-        Load_Market_Items(True)
-        Load_Market_Data(True)
+        Load_Items(True)
+        Load_Market(True)
 
         For Each elem As KeyValuePair(Of String, String) In market_items
             Dim name As String = elem.Value.Split("|")(0)
