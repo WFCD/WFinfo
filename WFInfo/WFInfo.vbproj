@@ -271,6 +271,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="app.manifest" />
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
@@ -281,10 +282,6 @@
       <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
       <SubType>Designer</SubType>
-    </None>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
     <None Include="tessdata\engbest.traineddata">
@@ -331,7 +328,6 @@
     <Content Include="lib\x86\libtesseract400.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Read Me.txt" />
     <None Include="Resources\Panel_V.png" />
     <None Include="Resources\Panel_UV.png" />
     <None Include="Resources\Target.bmp" />
