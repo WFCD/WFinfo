@@ -164,16 +164,15 @@ Class Data
             Dim item_name As String = ""
             If Not market_items.TryGetValue(elem("item"), item_name) Then
                 Main.addLog("UNKNOWN MARKET ID: " & elem("item").ToString())
-                Console.WriteLine(elem.ToString())
             Else
                 item_name = item_name.Split("|")(0)
+                If Not market_data.TryGetValue(item_name, Nothing) Then
+                    Main.addLog("MISSING ITEM IN market_data:" & item_name)
+                End If
+
                 If item_name.Contains(" Set") Then
                     Load_Items(True)
                 Else
-                    If Not market_data.TryGetValue(item_name, Nothing) Then
-                        Main.addLog("MISSING ITEM IN market_data:" & elem("item").ToString())
-                    End If
-
                     market_data(item_name)("ducats") = elem("ducats")
                 End If
             End If
