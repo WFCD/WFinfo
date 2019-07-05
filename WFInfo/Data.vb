@@ -167,12 +167,15 @@ Class Data
                 Console.WriteLine(elem.ToString())
             Else
                 item_name = item_name.Split("|")(0)
+                If item_name.Contains(" Set") Then
+                    Load_Items(True)
+                Else
+                    If Not market_data.TryGetValue(item_name, Nothing) Then
+                        Main.addLog("MISSING ITEM IN market_data:" & elem("item").ToString())
+                    End If
 
-                If Not market_data.TryGetValue(item_name, Nothing) Then
-                    Main.addLog("MISSING ITEM IN market_data:" & elem("item").ToString())
+                    market_data(item_name)("ducats") = elem("ducats")
                 End If
-
-                market_data(item_name)("ducats") = elem("ducats")
             End If
         Next
 
