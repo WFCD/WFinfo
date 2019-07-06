@@ -28,13 +28,10 @@
             Dim struct As MSLLHOOKSTRUCT
             Select Case wParam
                 Case WM_LBUTTONDOWN
-                    Console.WriteLine("WM_LBUTTONDOWN")
                     RaiseEvent KeyDown(Keys.LButton)
                 Case WM_RBUTTONDOWN
-                    Console.WriteLine("WM_RBUTTONDOWN")
                     RaiseEvent KeyDown(Keys.RButton)
                 Case WM_XBUTTONDOWN
-                    Console.WriteLine("WM_XBUTTONDOWN")
                     If (CType(Marshal.PtrToStructure(lParam, struct.GetType()), MSLLHOOKSTRUCT).mouseData >> 16) = 1 Then
                         RaiseEvent KeyDown(Keys.XButton1)
                     Else

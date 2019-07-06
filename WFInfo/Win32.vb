@@ -3,18 +3,24 @@
     Public Const WH_KEYBOARD_LL As Integer = 13
     Public Const WH_MOUSE_LL As Integer = 14
     Public Const HC_ACTION As Integer = 0
-    Public Const WM_KEYDOWN = &H100
-    Public Const WM_KEYUP = &H101
-    Public Const WM_SYSKEYDOWN = &H104
-    Public Const WM_SYSKEYUP = &H105
-    Public Const WM_LBUTTONDOWN = &H201
-    Public Const WM_LBUTTONUP = &H202
-    Public Const WM_RBUTTONDOWN = &H204
-    Public Const WM_RBUTTONUP = &H205
-    Public Const WM_XBUTTONDOWN = &H20B
-    Public Const WM_XBUTTONUP = &H20C
-    Public Const WM_MOUSEWHEEL = &H20A
-    Public Const WM_MOUSEHWHEEL = &H20E
+    Public Const WM_KEYDOWN As Int32 = &H100
+    Public Const WM_KEYUP As Int32 = &H101
+    Public Const WM_SYSKEYDOWN As Int32 = &H104
+    Public Const WM_SYSKEYUP As Int32 = &H105
+    Public Const WM_LBUTTONDOWN As Int32 = &H201
+    Public Const WM_LBUTTONUP As Int32 = &H202
+    Public Const WM_RBUTTONDOWN As Int32 = &H204
+    Public Const WM_RBUTTONUP As Int32 = &H205
+    Public Const WM_XBUTTONDOWN As Int32 = &H20B
+    Public Const WM_XBUTTONUP As Int32 = &H20C
+    Public Const WM_MOUSEWHEEL As Int32 = &H20A
+    Public Const WM_MOUSEHWHEEL As Int32 = &H20E
+    Public Const ULW_COLORKEY As Int32 = &H1
+    Public Const ULW_ALPHA As Int32 = &H2
+    Public Const ULW_OPAQUE As Int32 = &H4
+
+    Public Const AC_SRC_OVER As Int32 = &H0
+    Public Const AC_SRC_ALPHA As Int32 = &H1
 
     <StructLayout(LayoutKind.Sequential)>
     Public Structure MSLLHOOKSTRUCT
@@ -46,6 +52,44 @@
     End Enum
 
     <StructLayout(LayoutKind.Sequential)>
+    Public Structure WinSize
+        Public cx As Int32
+        Public cy As Int32
+
+        Public Sub New(x As Int32, y As Int32)
+            cx = x
+            cy = y
+        End Sub
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential)>
+    Public Structure WinPoint
+        Public x As Int32
+        Public y As Int32
+
+        Public Sub New(px As Int32, py As Int32)
+            x = px
+            y = py
+        End Sub
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential, Pack:=1)>
+    Public Structure ARGB
+        Public Blue As Byte
+        Public Green As Byte
+        Public Red As Byte
+        Public Alpha As Byte
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential, Pack:=1)>
+    Public Structure BLENDFUNCTION
+        Public BlendOp As Byte
+        Public BlendFlags As Byte
+        Public SourceConstantAlpha As Byte
+        Public AlphaFormat As Byte
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential)>
     Public Structure KBDLLHOOKSTRUCT
         Public vkCode As UInt32
         Public scanCode As UInt32
@@ -60,14 +104,6 @@
         Dim Top As Integer
         Dim Right As Integer
         Dim Bottom As Integer
-    End Structure
-
-    <StructLayout(LayoutKind.Sequential)>
-    Public Structure BLENDFUNCTION
-        Dim BlendOp As Byte
-        Dim BlendFlags As Byte
-        Dim SourceConstantAlpha As Byte
-        Dim AlphaFormat As Byte
     End Structure
 
     Public Delegate Function HookProc(ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As Integer
@@ -125,7 +161,7 @@
     End Function
 
     <DllImport("user32.dll", ExactSpelling:=True, SetLastError:=True)>
-    Public Function UpdateLayeredWindow(hwnd As IntPtr, hdcdst As IntPtr, ByRef pptDst As Point, ByRef psize As Size, hdcSrc As IntPtr, ByRef pprSrc As Point, crKey As Int32, ByRef pblend As BLENDFUNCTION, dwFlags As Int32) As Boolean
+    Public Function UpdateLayeredWindow(hwnd As IntPtr, hdcdst As IntPtr, ByRef pptDst As WinPoint, ByRef psize As WinSize, hdcSrc As IntPtr, ByRef pprSrc As WinPoint, crKey As Int32, ByRef pblend As BLENDFUNCTION, dwFlags As Int32) As Boolean
     End Function
 
     <DllImport("user32.dll", ExactSpelling:=True, SetLastError:=True)>

@@ -95,7 +95,6 @@ Partial Class Main
         Me.Button1.TabIndex = 31
         Me.Button1.Text = "TEST"
         Me.Button1.UseVisualStyleBackColor = True
-        Me.Button1.Visible = False
         '
         'lbStatus
         '

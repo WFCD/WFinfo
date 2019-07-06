@@ -323,7 +323,7 @@ Public Class Main
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        Overlay2.Show()
+        PerPixelAlphaForm.DoTheThings()
     End Sub
 
     Private Sub lbStatus_Click(sender As Object, e As EventArgs) Handles lbStatus.Click
@@ -386,11 +386,12 @@ Module Glob
     End Sub
 
     Public Sub initHandlers()
+        ' There's a warning here, and I have no idea how to fix it
+        '   I'll buy you a pizza if you can fix it (I'll paypall you ~7 bucks, that way no weird address transfer)
         AddHandler globHook.KeyDown, AddressOf keyPressed
     End Sub
 
     Public Sub keyPressed(key As Keys)
-        Console.WriteLine("KEY DOWN")
         If key = HKey1 Then
             If Debug And GetKeyState(&H10) < -126 Then
                 Main.Instance.Invoke(Sub() parser2.CheckImage())
