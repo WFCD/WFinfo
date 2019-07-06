@@ -254,6 +254,9 @@
     <EmbeddedResource Include="Equipment.resx">
       <DependentUpon>Equipment.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="PerPixelAlphaForm.resx">
+      <DependentUpon>PerPixelAlphaForm.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Relics.resx">
       <DependentUpon>Relics.vb</DependentUpon>
     </EmbeddedResource>
@@ -367,22 +370,22 @@
   <ItemGroup>
     <PublishFile Include="WFIcon.ico">
       <Visible>False</Visible>
-      <PublishState>Auto</PublishState>
-      <IncludeHash>False</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
+      <PublishState>Auto</PublishState>
+      <IncludeHash>False</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="WFInfo.exe.manifest">
       <Visible>False</Visible>
-      <PublishState>Auto</PublishState>
-      <IncludeHash>False</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
+      <PublishState>Auto</PublishState>
+      <IncludeHash>False</IncludeHash>
       <FileType>ManifestEntryPoint</FileType>
     </PublishFile>
   </ItemGroup>

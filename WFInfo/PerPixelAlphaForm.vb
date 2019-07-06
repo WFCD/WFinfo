@@ -11,35 +11,18 @@ Imports System.Drawing.Imaging
 Public Class PerPixelAlphaForm
     Inherits Form
 
-    Dim drag As Boolean = False      ' Toggle for the custom UI allowing it to drag
-    Dim mouseX As Integer
-    Dim mouseY As Integer
+    Friend WithEvents tHide As Timer
+
+    Private components As System.ComponentModel.IContainer
 
     Public Sub New()
+        InitializeComponent()
         FormBorderStyle = FormBorderStyle.None
         TopMost = True
         ShowInTaskbar = False
     End Sub
 
-    Private Sub startDRAGnDROP(sender As Object, e As MouseEventArgs) Handles Me.MouseDown
-        drag = True
-        mouseX = Cursor.Position.X - Me.Left
-        mouseY = Cursor.Position.Y - Me.Top
-    End Sub
-
-    Private Sub DRAGnDROP(sender As Object, e As MouseEventArgs) Handles Me.MouseMove
-        If drag Then
-            Me.Top = Cursor.Position.Y - mouseY
-            Me.Left = Cursor.Position.X - mouseX
-        End If
-    End Sub
-
-    Private Sub stopDRAGnDROP(sender As Object, e As MouseEventArgs) Handles Me.MouseUp
-        drag = False
-    End Sub
-
-    Public Function TestBitmap(Optional wid As Integer = 200) As Bitmap
-        Dim partName As String = "Loki Prime Systems"
+    Public Function TestBitmap(partName As String, wid As Integer) As Bitmap
         Dim hei As Integer = 100
         Dim pad As Integer = 15
         Dim curve As Integer = 20 * 2
@@ -120,7 +103,7 @@ Public Class PerPixelAlphaForm
     End Function
 
 
-    Public Sub SetBitmap(bitmap As Bitmap, opacity As Byte)
+    Public Sub SetBitmap(bitmap As Bitmap)
         If bitmap.PixelFormat <> PixelFormat.Format32bppArgb Then
             Throw New ApplicationException("The bitmap must be 32ppp with alpha-channel.")
         End If
@@ -136,15 +119,14 @@ Public Class PerPixelAlphaForm
 
             Dim Size As New WinSize(bitmap.Width, bitmap.Height)
             Dim pointSource As New WinPoint(0, 0)
-            Dim topPos As New WinPoint(Left, Top)
             Dim Blend As New BLENDFUNCTION With {
                 .BlendOp = Win32.AC_SRC_OVER,
                 .BlendFlags = 0,
-                .SourceConstantAlpha = opacity,
+                .SourceConstantAlpha = 255,
                 .AlphaFormat = Win32.AC_SRC_ALPHA
             }
 
-            Win32.UpdateLayeredWindow(Handle, screenDc, topPos, Size, memDc, pointSource, 0, Blend, Win32.ULW_ALPHA)
+            Win32.UpdateLayeredWindow(Handle, screenDc, Nothing, Size, memDc, pointSource, 0, Blend, Win32.ULW_ALPHA)
         Finally
             Win32.ReleaseDC(IntPtr.Zero, screenDc)
             If hBitmap <> IntPtr.Zero Then
@@ -163,8 +145,37 @@ Public Class PerPixelAlphaForm
         End Get
     End Property
 
+    '("Loki Prime Systems", New Point(100, 100), 200)
+    Public Sub ShowAtLocation(partName As String, pos As Point, wid As Integer)
+        Me.Show()
+        Me.SetBitmap(TestBitmap(partName, wid))
+        Me.Location = pos
+    End Sub
+
+    Private Sub tHide_Tick(sender As Object, e As EventArgs) Handles tHide.Tick
+        Me.Hide()
+        tHide.Stop()
+    End Sub
+
     Friend Sub DoTheThings()
         Me.Show()
-        Me.SetBitmap(TestBitmap(), 255)
+        'Me.SetBitmap(TestBitmap("Loki Prime Systems"))
+    End Sub
+
+    Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
+        Me.tHide = New System.Windows.Forms.Timer(Me.components)
+        Me.SuspendLayout()
+        '
+        'tHide
+        '
+        Me.tHide.Interval = 10000
+        '
+        'PerPixelAlphaForm
+        '
+        Me.ClientSize = New System.Drawing.Size(284, 262)
+        Me.Name = "PerPixelAlphaForm"
+        Me.ResumeLayout(False)
+
     End Sub
 End Class

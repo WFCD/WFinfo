@@ -555,6 +555,29 @@ Public Class OCR2
                     ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
                     Main.addLog("DISPLAY WINDOW-" & ParseScreen_timer & "ms")
                     ParseScreen_timer = clock.Elapsed.TotalMilliseconds
+                ElseIf newOverlay Then
+
+                    Dim wid As Integer = pixRwrdWid / 4 * totalScaling
+                    Dim top As Integer = center.Y - pixRareYDisp / 2 * totalScaling
+                    Dim left As Integer = center.X - wid * 2
+                    left += wid * (4 - plyr_count) / 2
+                    If Not My.Settings.Automate Then
+                        For i = 0 To plyr_count - 1
+                            Dim j As Integer = i
+                            Main.Instance.Invoke(Sub() rwrdPanels2(j).tHide.Start())
+                        Next
+                    End If
+
+                    For i = 0 To plyr_count - 1
+                        Dim j As Integer = i
+                        Main.Instance.Invoke(Sub() rwrdPanels2(j).ShowAtLocation(foundText(j), New Point(left, top), wid))
+
+                        left += wid
+                    Next
+
+                    ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
+                    Main.addLog("DISPLAY OVERLAYS-" & ParseScreen_timer & "ms")
+                    ParseScreen_timer = clock.Elapsed.TotalMilliseconds
                 Else
                     'run overlay
                     ' Move over if you don't have all 4

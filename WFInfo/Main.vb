@@ -76,6 +76,7 @@ Public Class Main
                 Equipment.Load_Eqmt_Tree()
                 For i As Integer = 0 To 3
                     rwrdPanels(i) = New Overlay()
+                    rwrdPanels2(i) = New PerPixelAlphaForm()
                     namePanels(i) = New NameTray()
                 Next
                 For i As Integer = 0 To 8
@@ -311,10 +312,11 @@ Public Class Main
                     Me.tAutomate.Interval = 3000
                     Task.Factory.StartNew(Sub() Me.DoWork())
                 End If
-            ElseIf (rwrdPanels(0).Visible) Then
+            ElseIf rwrdPanels(0).Visible Or rwrdPanels2(0).Visible Then
                 FoundSomething = False
                 For i As Integer = 0 To 3
                     rwrdPanels(i).Hide()
+                    rwrdPanels2(i).Hide()
                     namePanels(i).Hide()
                 Next
             Else
@@ -328,7 +330,7 @@ Public Class Main
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        PerPixelAlphaForm.DoTheThings()
+        PerPixelAlphaForm.ShowAtLocation("Loki Prime Chassis", New Point(300, 100), 400)
     End Sub
 
     Private Sub lbStatus_Click(sender As Object, e As EventArgs) Handles lbStatus.Click
@@ -345,6 +347,8 @@ Module Glob
 
     ' StopWatch for Code Profiling
     Public clock As New Stopwatch()
+
+    Public newOverlay As Boolean = True
 
     Public db As Data
     Public qItems As New List(Of String)()
@@ -380,6 +384,7 @@ Module Glob
     Public robotoBold As Font
 
     Public rwrdPanels(3) As Overlay
+    Public rwrdPanels2(3) As PerPixelAlphaForm
     Public namePanels(3) As NameTray
     Public relicPanels(9) As Overlay
 
