@@ -178,4 +178,10 @@
   <data name="google_creds" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\google-creds.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="RobotoCondensed_Bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RobotoCondensed-Bold.ttf;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="RobotoCondensed_Regular" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RobotoCondensed-Regular.ttf;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

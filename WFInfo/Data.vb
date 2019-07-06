@@ -47,9 +47,6 @@ Class Data
         watcher.Path = path
         watcher.EnableRaisingEvents = True
 
-        Update()
-
-
     End Sub
 
     Public Sub Save_JObject(data As JObject)

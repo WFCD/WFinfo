@@ -228,6 +228,8 @@ Public Class Equipment
             ' BOUNDS ARE INCORRECT
             Return
         End If
+        e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+
         If types.Contains(e.Node.Text) Then
             e.Graphics.DrawLine(New Pen(bgColor), 50, e.Bounds.Top, 450, e.Bounds.Top)
             e.Graphics.DrawLine(New Pen(bgColor), 50, e.Bounds.Bottom, 450, e.Bounds.Bottom)

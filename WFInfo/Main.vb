@@ -67,6 +67,7 @@ Public Class Main
                 '    but not in the same thread... cause... well, it turns into a nuclear wasteland
                 initHandlers()
                 db = New Data()
+                db.Update()
                 parser2.UpdateCenter()
                 Invoke(Sub() lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11))
                 Invoke(Sub() lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11))
@@ -88,7 +89,11 @@ Public Class Main
                 End If
             End If
         Catch ex As Exception
-            Invoke(Sub() lbStatus.Text = "ERROR (ParseScreen)")
+            If db IsNot Nothing AndAlso versionNum < db.Get_Current_Version() Then
+                Invoke(Sub() lbStatus.Text = "ERROR (Parse Screen) - New Version Available")
+            Else
+                Invoke(Sub() lbStatus.Text = "ERROR (ParseScreen)")
+            End If
             Invoke(Sub() lbStatus.ForeColor = Color.Red)
             Me.addLog(ex.ToString())
         End Try
@@ -371,6 +376,8 @@ Module Glob
     Public tahoma8_bold As New Font("Tahoma", 8.0!, FontStyle.Bold)
     Public tahoma8 As New Font("Tahoma", 8.0!)
     Public timeFrame As String = "48hours"
+    Public privateFonts As New System.Drawing.Text.PrivateFontCollection()
+    Public robotoBold As Font
 
     Public rwrdPanels(3) As Overlay
     Public namePanels(3) As NameTray
@@ -379,7 +386,7 @@ Module Glob
     Public ReplacementList As Char(,)
     Public globHook As GlobalHook
 
-    Public parser2 As New OCR2()
+    Public parser2 As OCR2
 
     Public Sub initHook()
         globHook = New GlobalHook()
@@ -389,6 +396,19 @@ Module Glob
         ' There's a warning here, and I have no idea how to fix it
         '   I'll buy you a pizza if you can fix it (I'll paypall you ~7 bucks, that way no weird address transfer)
         AddHandler globHook.KeyDown, AddressOf keyPressed
+
+        'Added some other shit to here so it can load quicker
+        parser2 = New OCR2()
+
+        'LOAD MEMORY POINTER FOR FONT RESOURCE
+        Dim fontMemPointer As IntPtr = Marshal.AllocCoTaskMem(My.Resources.RobotoCondensed_Regular.Length)
+        'COPY THE DATA TO THE MEMORY LOCATION
+        Marshal.Copy(My.Resources.RobotoCondensed_Regular, 0, fontMemPointer, My.Resources.RobotoCondensed_Regular.Length)
+        'LOAD THE MEMORY FONT INTO THE PRIVATE FONT COLLECTION
+        privateFonts.AddMemoryFont(fontMemPointer, My.Resources.RobotoCondensed_Regular.Length)
+        'FREE UNSAFE MEMORY
+        Marshal.FreeCoTaskMem(fontMemPointer)
+
     End Sub
 
     Public Sub keyPressed(key As Keys)

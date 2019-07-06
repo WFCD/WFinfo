@@ -38,33 +38,84 @@ Public Class PerPixelAlphaForm
         drag = False
     End Sub
 
-    Public Function TestBitmap() As Bitmap
-        Dim bmp As New Bitmap(100, 100)
+    Public Function TestBitmap(Optional wid As Integer = 200) As Bitmap
+        Dim partName As String = "Loki Prime Systems"
+        Dim hei As Integer = 100
+        Dim pad As Integer = 15
+        Dim curve As Integer = 20 * 2
+        Dim textSep As Single = 10
+        Dim oneLine As Single = 10
 
-        Dim clrs As Color() = {Color.FromArgb(0, 255, 255, 255), Color.FromArgb(255, 255, 255, 255), Color.FromArgb(150, 255, 255, 255)}
-        Dim segs As Single() = {0.0, 0.1, 1.0}
+        Dim font As New System.Drawing.Font(privateFonts.Families(0), 12)
+        Dim strFormat As New StringFormat()
+        strFormat.Alignment = StringAlignment.Center
+
+
+        Dim job As Newtonsoft.Json.Linq.JObject = db.market_data(partName)
+        Dim volumeTxt As String = job("volume").ToString() & " sold last 48hrs"
+
+        Using fake As New Bitmap(1, 1)
+            Using g As Graphics = Graphics.FromImage(fake)
+
+                textSep = g.MeasureString(partName, font, wid - pad * 2, strFormat).Height
+                oneLine = g.MeasureString("text", font, wid - pad * 2, strFormat).Height
+                hei = pad * 2 + textSep * 1.5 + oneLine * 2
+
+            End Using
+        End Using
+
+        Dim layout As New RectangleF(pad, pad, wid - pad * 2, hei - pad * 2)
+
+        Dim bmp As New Bitmap(wid, hei)
+
+        Dim clrs As Color() = {Color.FromArgb(0, 0, 0, 0), Color.FromArgb(200, 0, 0, 0), Color.FromArgb(200, 0, 0, 0)}
+        Dim segs As Single() = {0.0, pad * 2 / wid, 1.0}
         Dim blender As New ColorBlend()
         blender.Colors = clrs
         blender.Positions = segs
 
         Dim gp As New GraphicsPath()
         gp.StartFigure()
-        gp.AddArc(0, 0, 10, 10, 180, 90)
-        gp.AddLine(10, 0, 90, 0)
-        gp.AddArc(90, 0, 10, 10, 270, 90)
-        gp.AddLine(100, 10, 100, 90)
-        gp.AddArc(90, 90, 10, 10, 0, 90)
-        gp.AddLine(90, 100, 10, 100)
-        gp.AddArc(0, 90, 10, 10, 90, 90)
-        gp.AddLine(0, 90, 0, 10)
+
+        ' 0,0 w/size 40,40      top-left
+        gp.AddArc(0, 0, curve, curve, 180, 90)
+        ' 60,0 w/size 40,40     top-right
+        gp.AddArc(wid - curve, 0, curve, curve, -90, 90)
+        ' 60,60 w/size 40,40    bottom-right
+        gp.AddArc(wid - curve, hei - curve, curve, curve, 0, 90)
+        ' 0,60 w/size 40,40     bottom-left
+        gp.AddArc(0, hei - curve, curve, curve, 90, 90)
+
         gp.CloseFigure()
 
-        Dim brushie As New PathGradientBrush(gp)
-        brushie.InterpolationColors = blender
-
         Using g As Graphics = Graphics.FromImage(bmp)
-            g.FillRectangle(brushie, 0, 0, 100, 100)
+            g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+
+            Using brushie As New PathGradientBrush(gp)
+                brushie.InterpolationColors = blender
+                brushie.CenterPoint = New PointF(wid / 2, hei / 2)
+
+                g.FillRectangle(brushie, 0, 0, wid, hei)
+                'g.DrawRectangle(New Pen(Glob.rareBrush), New Rectangle(pad, pad, wid - pad * 2, hei - pad * 2))
+
+                g.DrawString(partName, font, Glob.textBrush, layout, strFormat)
+                layout.Y += textSep * 1.5
+
+                Dim tempY As Single = layout.Y + oneLine / 20
+                Dim tempDim As Single = oneLine * 0.8
+                g.DrawImage(My.Resources.plat, CSng(pad * 2.25), tempY, tempDim, tempDim)
+                g.DrawString(job("plat").ToString(), font, textBrush, CSng(pad * 2 + oneLine), layout.Y)
+                g.DrawImage(My.Resources.ducat_w, CSng(wid / 2 + pad), tempY, tempDim, tempDim)
+                g.DrawString(job("ducats").ToString(), font, textBrush, CSng(wid / 2 + pad / 1.25 + oneLine), layout.Y)
+
+
+                'g.DrawString(job("plat"), font, Glob.textBrush, layout, strFormat)
+                layout.Y += oneLine
+                g.DrawString(volumeTxt, font, Glob.textBrush, layout, strFormat)
+
+            End Using
         End Using
+
         Return bmp
     End Function
 

@@ -278,6 +278,8 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
+    <None Include="Resources\RobotoCondensed-Bold.ttf" />
+    <None Include="Resources\RobotoCondensed-Regular.ttf" />
     <None Include="tessdata\engbest.traineddata">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

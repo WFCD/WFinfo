@@ -144,6 +144,8 @@ Public Class Relics
         If e.Bounds.Width = 0 Then
             Return
         End If
+        e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+
         Dim fullPath As String = e.Node.FullPath.Replace("Hidden\", "")
         If sender.Equals(RelicTree2) Then
             fullPath = ReplaceFirst(fullPath, " ", "|")
