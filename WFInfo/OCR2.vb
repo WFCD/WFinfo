@@ -549,13 +549,13 @@ Public Class OCR2
 
                 ' Display window true = seperate window
                 ' Display window false = overlay
-                If DisplayWindow Then
+                If My.Settings.ResultWindow Then
                     'run window
                     Main.Instance.Invoke(Sub() RewardWindow.Display(foundText, plyr_count))
                     ParseScreen_timer -= clock.Elapsed.TotalMilliseconds
                     Main.addLog("DISPLAY WINDOW-" & ParseScreen_timer & "ms")
                     ParseScreen_timer = clock.Elapsed.TotalMilliseconds
-                ElseIf newOverlay Then
+                ElseIf My.Settings.NewOverlay Then
 
                     Dim wid As Integer = pixRwrdWid / 4 * totalScaling
                     Dim top As Integer = center.Y - pixRareYDisp / 2 * totalScaling

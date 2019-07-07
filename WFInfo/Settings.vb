@@ -92,8 +92,10 @@ Public Class Settings
         Else
             Location = My.Settings.SettingsWinLoc
         End If
-        If DisplayWindow Then
+        If My.Settings.ResultWindow Then
             TrackBar1.Value = 2
+        ElseIf My.Settings.NewOverlay Then
+            TrackBar1.Value = 0
         End If
         btnHkey1.Text = My.Settings.HKey1Text
         cbAutomation.Checked = Automate
@@ -249,8 +251,8 @@ Public Class Settings
     End Sub
 
     Private Sub TrackBar1_Scroll_1(sender As Object, e As EventArgs) Handles TrackBar1.Scroll
-        DisplayWindow = (TrackBar1.Value = 2)
-        My.Settings.ResultWindow = DisplayWindow
+        My.Settings.NewOverlay = (TrackBar1.Value = 0)
+        My.Settings.ResultWindow = (TrackBar1.Value = 2)
     End Sub
 
     Private Sub TextBox1_Enter(sender As Object, e As EventArgs) Handles TextBox1.Enter

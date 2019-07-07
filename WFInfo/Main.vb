@@ -76,7 +76,7 @@ Public Class Main
                 Equipment.Load_Eqmt_Tree()
                 For i As Integer = 0 To 3
                     rwrdPanels(i) = New Overlay()
-                    rwrdPanels2(i) = New PerPixelAlphaForm()
+                    rwrdPanels2(i) = New AlphaOverlay()
                     namePanels(i) = New NameTray()
                 Next
                 For i As Integer = 0 To 8
@@ -330,7 +330,7 @@ Public Class Main
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        PerPixelAlphaForm.ShowAtLocation("Loki Prime Chassis", New Point(300, 100), 400)
+        AlphaOverlay.ShowAtLocation("Loki Prime Chassis", New Point(300, 100), 400)
     End Sub
 
     Private Sub lbStatus_Click(sender As Object, e As EventArgs) Handles lbStatus.Click
@@ -348,8 +348,6 @@ Module Glob
     ' StopWatch for Code Profiling
     Public clock As New Stopwatch()
 
-    Public newOverlay As Boolean = True
-
     Public db As Data
     Public qItems As New List(Of String)()
     Public HKey1 As Integer = My.Settings.HKey1
@@ -358,7 +356,6 @@ Module Glob
     'Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
     Public Automate As Boolean = False
-    Public DisplayWindow As Boolean = My.Settings.ResultWindow
     Public Debug As Boolean = My.Settings.Debug
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Public textColor As Color = Color.FromArgb(177, 208, 217)
@@ -384,7 +381,7 @@ Module Glob
     Public robotoBold As Font
 
     Public rwrdPanels(3) As Overlay
-    Public rwrdPanels2(3) As PerPixelAlphaForm
+    Public rwrdPanels2(3) As AlphaOverlay
     Public namePanels(3) As NameTray
     Public relicPanels(9) As Overlay
 

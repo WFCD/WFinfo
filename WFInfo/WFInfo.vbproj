@@ -173,7 +173,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="PerPixelAlphaForm.vb">
+    <Compile Include="AlphaOverlay.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Sheets.vb" />
@@ -254,8 +254,8 @@
     <EmbeddedResource Include="Equipment.resx">
       <DependentUpon>Equipment.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PerPixelAlphaForm.resx">
-      <DependentUpon>PerPixelAlphaForm.vb</DependentUpon>
+    <EmbeddedResource Include="AlphaOverlay.resx">
+      <DependentUpon>AlphaOverlay.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Relics.resx">
       <DependentUpon>Relics.vb</DependentUpon>

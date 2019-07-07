@@ -596,6 +596,11 @@ Class Data
         Return db.eqmt_data(eqmt)("parts")(name)("vaulted")
     End Function
 
+    Friend Function IsPartOwned(name As String) As String
+        Dim eqmt As String = name.Substring(0, name.IndexOf("Prime") + 5)
+        Return db.eqmt_data(eqmt)("parts")(name)("owned").ToString() & "/" & db.eqmt_data(eqmt)("parts")(name)("count").ToString()
+    End Function
+
     Public Function GetPartName(string1 As String) As String
         '_________________________________________________________________________
         'Checks the levDist of a string and returns the index in Names() of the closest part

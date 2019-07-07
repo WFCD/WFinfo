@@ -42,6 +42,7 @@ Partial Class Settings
         Me.Label11 = New System.Windows.Forms.Label()
         Me.Label10 = New System.Windows.Forms.Label()
         Me.TrackBar1 = New System.Windows.Forms.TrackBar()
+        Me.Label9 = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
         CType(Me.ScaleBar, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pTitle.SuspendLayout()
@@ -327,6 +328,7 @@ Partial Class Settings
         '
         Me.Panel3.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel3.Controls.Add(Me.Label9)
         Me.Panel3.Controls.Add(Me.Label12)
         Me.Panel3.Controls.Add(Me.Label11)
         Me.Panel3.Controls.Add(Me.Label10)
@@ -354,7 +356,7 @@ Partial Class Settings
         Me.Label11.BackColor = System.Drawing.Color.Transparent
         Me.Label11.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
         Me.Label11.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label11.Location = New System.Drawing.Point(225, 47)
+        Me.Label11.Location = New System.Drawing.Point(255, 47)
         Me.Label11.Name = "Label11"
         Me.Label11.Size = New System.Drawing.Size(51, 13)
         Me.Label11.TabIndex = 38
@@ -366,7 +368,7 @@ Partial Class Settings
         Me.Label10.BackColor = System.Drawing.Color.Transparent
         Me.Label10.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
         Me.Label10.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label10.Location = New System.Drawing.Point(38, 47)
+        Me.Label10.Location = New System.Drawing.Point(133, 47)
         Me.Label10.Name = "Label10"
         Me.Label10.Size = New System.Drawing.Size(51, 13)
         Me.Label10.TabIndex = 36
@@ -375,14 +377,25 @@ Partial Class Settings
         'TrackBar1
         '
         Me.TrackBar1.LargeChange = 1
-        Me.TrackBar1.Location = New System.Drawing.Point(53, 25)
+        Me.TrackBar1.Location = New System.Drawing.Point(27, 25)
         Me.TrackBar1.Maximum = 2
-        Me.TrackBar1.Minimum = 1
         Me.TrackBar1.Name = "TrackBar1"
-        Me.TrackBar1.Size = New System.Drawing.Size(212, 45)
+        Me.TrackBar1.Size = New System.Drawing.Size(261, 45)
         Me.TrackBar1.TabIndex = 37
         Me.TrackBar1.TickStyle = System.Windows.Forms.TickStyle.None
         Me.TrackBar1.Value = 1
+        '
+        'Label9
+        '
+        Me.Label9.AutoSize = True
+        Me.Label9.BackColor = System.Drawing.Color.Transparent
+        Me.Label9.Font = New System.Drawing.Font("Tahoma", 8.0!, System.Drawing.FontStyle.Bold)
+        Me.Label9.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.Label9.Location = New System.Drawing.Point(6, 47)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(77, 13)
+        Me.Label9.TabIndex = 39
+        Me.Label9.Text = "New Overlay"
         '
         'Settings
         '
@@ -439,4 +452,5 @@ Partial Class Settings
     Friend WithEvents Label10 As Label
     Friend WithEvents TrackBar1 As TrackBar
     Friend WithEvents TextBox1 As TextBox
+    Friend WithEvents Label9 As Label
 End Class

@@ -8,7 +8,7 @@
 Imports System.Drawing.Drawing2D
 Imports System.Drawing.Imaging
 
-Public Class PerPixelAlphaForm
+Public Class AlphaOverlay
     Inherits Form
 
     Friend WithEvents tHide As Timer
@@ -31,11 +31,19 @@ Public Class PerPixelAlphaForm
         Dim oneLine As Single = 10
 
         Dim font As New System.Drawing.Font(privateFonts.Families(0), 12)
+        Dim smol As New System.Drawing.Font(privateFonts.Families(0), 8)
         Dim strFormat As New StringFormat()
         strFormat.Alignment = StringAlignment.Center
+        Dim flipFormat As New StringFormat()
+        flipFormat.Alignment = StringAlignment.Far
 
 
         Dim job As Newtonsoft.Json.Linq.JObject = db.market_data(partName)
+        Dim valuted As Boolean = (Not partName.Equals("Forma Blueprint")) AndAlso db.IsPartVaulted(partName)
+        Dim owned As String = ""
+        If Not partName.Equals("Forma Blueprint") Then
+            owned = db.IsPartOwned(partName) & " Owned"
+        End If
         Dim volumeTxt As String = job("volume").ToString() & " sold last 48hrs"
         Dim platWid As Integer = 0
         Dim ducatWid As Integer = 0
@@ -45,14 +53,14 @@ Public Class PerPixelAlphaForm
 
                 textSep = g.MeasureString(partName, font, wid - pad * 2, strFormat).Height
                 oneLine = g.MeasureString("text", font, wid - pad * 2, strFormat).Height
-                hei = pad * 2 + textSep * 1.5 + oneLine * 2
+                hei = pad * 2 + textSep * 1.5 + oneLine * 3
                 platWid = oneLine * 0.8 + g.MeasureString(job("plat").ToString(), font).Width
                 ducatWid = oneLine * 0.8 + g.MeasureString(job("ducats").ToString(), font).Width
 
             End Using
         End Using
 
-        Dim layout As New RectangleF(pad, pad, wid - pad * 2, hei - pad * 2)
+        Dim layout As New RectangleF(pad, pad + oneLine / 2, wid - pad * 2, hei - pad * 2)
 
         Dim bmp As New Bitmap(wid, hei)
 
@@ -85,6 +93,12 @@ Public Class PerPixelAlphaForm
 
                 g.FillRectangle(brushie, 0, 0, wid, hei)
                 'g.DrawRectangle(New Pen(Glob.rareBrush), New Rectangle(pad, pad, wid - pad * 2, hei - pad * 2))
+
+                If valuted Then
+                    g.DrawString("Vaulted", smol, Glob.stealthBrush, wid - pad * 1.5, pad * 0.75, flipFormat)
+                End If
+
+                g.DrawString(owned, smol, Glob.stealthBrush, pad * 1.5, pad * 0.75)
 
                 g.DrawString(partName, font, Glob.textBrush, layout, strFormat)
                 layout.Y += textSep * 1.5
@@ -168,11 +182,6 @@ Public Class PerPixelAlphaForm
         tHide.Stop()
     End Sub
 
-    Friend Sub DoTheThings()
-        Me.Show()
-        'Me.SetBitmap(TestBitmap("Loki Prime Systems"))
-    End Sub
-
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.tHide = New System.Windows.Forms.Timer(Me.components)
@@ -185,7 +194,7 @@ Public Class PerPixelAlphaForm
         'PerPixelAlphaForm
         '
         Me.ClientSize = New System.Drawing.Size(284, 262)
-        Me.Name = "PerPixelAlphaForm"
+        Me.Name = "AlphaOverlay"
         Me.ResumeLayout(False)
 
     End Sub
