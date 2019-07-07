@@ -12,6 +12,7 @@ Public Class PerPixelAlphaForm
     Inherits Form
 
     Friend WithEvents tHide As Timer
+    Private savedPos As Point
 
     Private components As System.ComponentModel.IContainer
 
@@ -36,6 +37,8 @@ Public Class PerPixelAlphaForm
 
         Dim job As Newtonsoft.Json.Linq.JObject = db.market_data(partName)
         Dim volumeTxt As String = job("volume").ToString() & " sold last 48hrs"
+        Dim platWid As Integer = 0
+        Dim ducatWid As Integer = 0
 
         Using fake As New Bitmap(1, 1)
             Using g As Graphics = Graphics.FromImage(fake)
@@ -43,6 +46,8 @@ Public Class PerPixelAlphaForm
                 textSep = g.MeasureString(partName, font, wid - pad * 2, strFormat).Height
                 oneLine = g.MeasureString("text", font, wid - pad * 2, strFormat).Height
                 hei = pad * 2 + textSep * 1.5 + oneLine * 2
+                platWid = oneLine * 0.8 + g.MeasureString(job("plat").ToString(), font).Width
+                ducatWid = oneLine * 0.8 + g.MeasureString(job("ducats").ToString(), font).Width
 
             End Using
         End Using
@@ -84,12 +89,17 @@ Public Class PerPixelAlphaForm
                 g.DrawString(partName, font, Glob.textBrush, layout, strFormat)
                 layout.Y += textSep * 1.5
 
-                Dim tempY As Single = layout.Y + oneLine / 20
+                Dim imgY As Single = layout.Y + oneLine / 20
+
                 Dim tempDim As Single = oneLine * 0.8
-                g.DrawImage(My.Resources.plat, CSng(pad * 2.25), tempY, tempDim, tempDim)
-                g.DrawString(job("plat").ToString(), font, textBrush, CSng(pad * 2 + oneLine), layout.Y)
-                g.DrawImage(My.Resources.ducat_w, CSng(wid / 2 + pad), tempY, tempDim, tempDim)
-                g.DrawString(job("ducats").ToString(), font, textBrush, CSng(wid / 2 + pad / 1.25 + oneLine), layout.Y)
+                Dim platX As Single = wid / 3 - platWid / 2 + 1
+
+                g.DrawImage(My.Resources.plat, platX, imgY, tempDim, tempDim)
+                g.DrawString(job("plat").ToString(), font, textBrush, platX + tempDim + 1, layout.Y)
+
+                Dim ducatX As Single = 2 * wid / 3 - platWid / 2 + 1
+                g.DrawImage(My.Resources.ducat_w, ducatX, imgY, tempDim, tempDim)
+                g.DrawString(job("ducats").ToString(), font, textBrush, ducatX + tempDim + 1, layout.Y)
 
 
                 'g.DrawString(job("plat"), font, Glob.textBrush, layout, strFormat)
@@ -118,6 +128,7 @@ Public Class PerPixelAlphaForm
             oldBitmap = SelectObject(memDc, hBitmap)
 
             Dim Size As New WinSize(bitmap.Width, bitmap.Height)
+            Dim posPoint As New WinPoint(savedPos.X, savedPos.Y)
             Dim pointSource As New WinPoint(0, 0)
             Dim Blend As New BLENDFUNCTION With {
                 .BlendOp = Win32.AC_SRC_OVER,
@@ -126,7 +137,7 @@ Public Class PerPixelAlphaForm
                 .AlphaFormat = Win32.AC_SRC_ALPHA
             }
 
-            Win32.UpdateLayeredWindow(Handle, screenDc, Nothing, Size, memDc, pointSource, 0, Blend, Win32.ULW_ALPHA)
+            Win32.UpdateLayeredWindow(Handle, screenDc, posPoint, Size, memDc, pointSource, 0, Blend, Win32.ULW_ALPHA)
         Finally
             Win32.ReleaseDC(IntPtr.Zero, screenDc)
             If hBitmap <> IntPtr.Zero Then
@@ -148,8 +159,8 @@ Public Class PerPixelAlphaForm
     '("Loki Prime Systems", New Point(100, 100), 200)
     Public Sub ShowAtLocation(partName As String, pos As Point, wid As Integer)
         Me.Show()
+        savedPos = pos
         Me.SetBitmap(TestBitmap(partName, wid))
-        Me.Location = pos
     End Sub
 
     Private Sub tHide_Tick(sender As Object, e As EventArgs) Handles tHide.Tick
