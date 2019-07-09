@@ -119,11 +119,13 @@ Class Data
             If market_data Is Nothing Then
                 market_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(market_data_path))
             End If
-            Dim timestamp As Date = DateTime.Parse(market_data("timestamp"))
-            Dim dayAgo As Date = Date.Now.AddDays(-1)
-            If timestamp > dayAgo Then
-                Main.addLog("PLAT DATABASE: GOOD")
-                Return False
+            If IsUpdated(market_data) Then
+                Dim timestamp As Date = DateTime.Parse(market_data("timestamp"))
+                Dim dayAgo As Date = Date.Now.AddDays(-1)
+                If timestamp > dayAgo Then
+                    Main.addLog("PLAT DATABASE: GOOD")
+                    Return False
+                End If
             End If
         End If
 
@@ -152,6 +154,16 @@ Class Data
         Main.addLog("PLAT DATABASE: GOOD")
         Load_Ducats()
         Return True
+    End Function
+
+    Private Function IsUpdated(market_data As JObject) As Boolean
+        Dim job As JObject = Nothing
+        If market_data.TryGetValue("Loki Prime Blueprint", job) Then
+            If job.TryGetValue("volume", Nothing) Then
+                Return True
+            End If
+        End If
+        Return False
     End Function
 
     Private Sub Load_Ducats()

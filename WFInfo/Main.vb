@@ -330,7 +330,13 @@ Public Class Main
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        AlphaOverlay.ShowAtLocation("Loki Prime Chassis", New Point(300, 100), 400)
+        Try
+            AlphaOverlay.ShowAtLocation("Loki Prime Chassis", New Point(300, 100), 200)
+        Catch ex As Exception
+            addLog(ex.ToString())
+            Invoke(Sub() lbStatus.Text = "ERROR (Test button)")
+            Invoke(Sub() lbStatus.ForeColor = Color.Red)
+        End Try
     End Sub
 
     Private Sub lbStatus_Click(sender As Object, e As EventArgs) Handles lbStatus.Click

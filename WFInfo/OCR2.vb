@@ -577,7 +577,7 @@ Public Class OCR2
                     For i = 0 To plyr_count - 1
                         Dim j As Integer = i
                         Main.Instance.Invoke(Sub() rwrdPanels2(j).ShowAtLocation(foundText(j), New Point(left, top), wid))
-
+                        Main.addLog("DISPLAY NEW OVERLAY: " & foundText(i) & " @ (" & left & ", " & top & ")")
                         left += wid
                     Next
 
@@ -598,6 +598,7 @@ Public Class OCR2
                         Dim j As Integer = i
                         Main.Instance.Invoke(Sub() rwrdPanels(j).ShowLoading(right / dpiScaling, top / dpiScaling))
                         Main.Instance.Invoke(Sub() namePanels(j).ShowLoading((right + pad / 2) / dpiScaling, (top + pixRwrdHei * totalScaling) / dpiScaling, (offset - pad) / dpiScaling))
+                        Main.addLog("DISPLAY OLD OVERLAY: " & foundText(i) & " @ (" & right & ", " & top & ")")
                     Next
 
                     For i = 0 To plyr_count - 1
