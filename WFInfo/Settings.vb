@@ -224,6 +224,7 @@ Public Class Settings
 
     Private Sub ScaleBar_Scroll(sender As Object, e As EventArgs) Handles ScaleBar.Scroll
         TextBox1.Text = ScaleBar.Value & "%"
+        parser2.UpdateCenter()
         saveSettings()
     End Sub
 
@@ -238,6 +239,8 @@ Public Class Settings
         ScaleBar_Scroll(sender, e)
         'Kek: To remove the blue highlight... because I don't like the look of it
         ActiveControl = Panel1
+        parser2.UpdateCenter()
+        saveSettings()
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs)

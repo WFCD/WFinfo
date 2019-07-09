@@ -330,6 +330,9 @@ Public Class OCR2
                 Return False
             End If
 
+            GetDPIScaling()
+            GetUIScaling()
+
             If GetUiColor() Then
 
 
@@ -511,6 +514,9 @@ Public Class OCR2
                 Main.addLog("Warframe Process Not Found")
                 Return
             End If
+
+            GetDPIScaling()
+            GetUIScaling()
 
             If fromAuto OrElse GetUiColor() Then
 
