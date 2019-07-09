@@ -17,6 +17,7 @@ Public Class OCR2
     '   Box is centered horizontally
     ' Public Const pixRareXDisp As Integer = ???
     Public Const pixRareYDisp As Integer = 58
+    Public Const pixOverlayPos As Integer = 30
 
     Public Const pixProfWid As Integer = 48
     Public Const pixProfTotWid As Integer = 192
@@ -564,7 +565,7 @@ Public Class OCR2
                 ElseIf My.Settings.NewOverlay Then
 
                     Dim wid As Integer = pixRwrdWid / 4 * totalScaling
-                    Dim top As Integer = center.Y - pixRareYDisp / 2 * totalScaling
+                    Dim top As Integer = center.Y + pixOverlayPos * totalScaling
                     Dim left As Integer = center.X - wid * 2
                     left += wid * (4 - plyr_count) / 2
                     If Not My.Settings.Automate Then

@@ -13,6 +13,7 @@ Public Class AlphaOverlay
 
     Friend WithEvents tHide As Timer
     Private savedPos As Point
+    Public Shared topBrush As Brush = New SolidBrush(Color.FromArgb(130, 140, 150))
 
     Private components As System.ComponentModel.IContainer
 
@@ -24,14 +25,11 @@ Public Class AlphaOverlay
     End Sub
 
     Public Function TestBitmap(partName As String, wid As Integer) As Bitmap
-        Dim hei As Integer = 100
-        Dim pad As Integer = 15
-        Dim curve As Integer = 20 * 2
-        Dim textSep As Single = 10
-        Dim oneLine As Single = 10
+        Dim pad As Integer = 15 * parser2.totalScaling
+        Dim curve As Integer = 50 * parser2.totalScaling
 
-        Dim font As New System.Drawing.Font(privateFonts.Families(0), 12)
-        Dim smol As New System.Drawing.Font(privateFonts.Families(0), 8)
+        Dim font As New System.Drawing.Font(privateFonts.Families(0), CInt(14 * parser2.totalScaling))
+        Dim smol As New System.Drawing.Font(privateFonts.Families(0), CInt(11 * parser2.totalScaling))
         Dim strFormat As New StringFormat()
         strFormat.Alignment = StringAlignment.Center
         Dim flipFormat As New StringFormat()
@@ -42,17 +40,26 @@ Public Class AlphaOverlay
         Dim valuted As Boolean = (Not partName.Equals("Forma Blueprint")) AndAlso db.IsPartVaulted(partName)
         Dim owned As String = ""
         If Not partName.Equals("Forma Blueprint") Then
-            owned = db.IsPartOwned(partName) & " Owned"
+            owned = db.IsPartOwned(partName) & " OWNED"
+            If owned.Chars(0) = CChar("0") Then
+                owned = ""
+            End If
         End If
+
         Dim volumeTxt As String = job("volume").ToString() & " sold last 48hrs"
         Dim platWid As Integer = 0
         Dim ducatWid As Integer = 0
+        Dim smolWid As Integer = 0
+        Dim textSep As Single = 0
+        Dim oneLine As Single = 0
+        Dim hei As Integer = 0
 
         Using fake As New Bitmap(1, 1)
             Using g As Graphics = Graphics.FromImage(fake)
 
                 textSep = g.MeasureString(partName, font, wid - pad * 2, strFormat).Height
                 oneLine = g.MeasureString("text", font, wid - pad * 2, strFormat).Height
+                smolWid = g.MeasureString("text", smol).Height
                 hei = pad * 2 + textSep * 1.5 + oneLine * 3
                 platWid = oneLine * 0.8 + g.MeasureString(job("plat").ToString(), font).Width
                 ducatWid = oneLine * 0.8 + g.MeasureString(job("ducats").ToString(), font).Width
@@ -60,11 +67,11 @@ Public Class AlphaOverlay
             End Using
         End Using
 
-        Dim layout As New RectangleF(pad, pad + oneLine / 2, wid - pad * 2, hei - pad * 2)
+        Dim layout As New RectangleF(pad, pad + smolWid, wid - pad * 2, hei - pad * 2)
 
         Dim bmp As New Bitmap(wid, hei)
 
-        Dim clrs As Color() = {Color.FromArgb(0, 0, 0, 0), Color.FromArgb(200, 0, 0, 0), Color.FromArgb(200, 0, 0, 0)}
+        Dim clrs As Color() = {Color.FromArgb(0, 0, 0, 0), Color.FromArgb(150, 0, 0, 0), Color.FromArgb(150, 0, 0, 0)}
         Dim segs As Single() = {0.0, pad * 2 / wid, 1.0}
         Dim blender As New ColorBlend()
         blender.Colors = clrs
@@ -95,10 +102,9 @@ Public Class AlphaOverlay
                 'g.DrawRectangle(New Pen(Glob.rareBrush), New Rectangle(pad, pad, wid - pad * 2, hei - pad * 2))
 
                 If valuted Then
-                    g.DrawString("Vaulted", smol, Glob.stealthBrush, wid - pad * 1.5, pad * 0.75, flipFormat)
+                    g.DrawString("VAULTED", smol, topBrush, wid - pad * 1.5, pad * 0.75, flipFormat)
                 End If
-
-                g.DrawString(owned, smol, Glob.stealthBrush, pad * 1.5, pad * 0.75)
+                g.DrawString(owned, smol, topBrush, pad * 1.5, pad * 0.75)
 
                 g.DrawString(partName, font, Glob.textBrush, layout, strFormat)
                 layout.Y += textSep * 1.5
