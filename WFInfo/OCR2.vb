@@ -144,7 +144,7 @@ Public Class OCR2
             Dim detectedColor = Color.FromArgb(R, G, B)
             For Each knowColor In fissColors
                 If ColorThreshold(detectedColor, knowColor, 20) Then
-                    uiColor = detectedColor
+                    uiColor = knowColor
                     Return True
                 End If
             Next
