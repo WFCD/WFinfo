@@ -153,6 +153,9 @@ Class Data
 
         Main.addLog("PLAT DATABASE: GOOD")
         Load_Ducats()
+        If force AndAlso relic_data IsNot Nothing Then
+            Check_Ducats()
+        End If
         Return True
     End Function
 
@@ -188,6 +191,44 @@ Class Data
         Next
 
         Main.addLog("DUCAT DATABASE: GOOD")
+    End Sub
+
+    Public Sub Check_Ducats()
+        Dim job As JObject = Nothing
+        Dim needDucats As New List(Of String)
+
+        For Each elem As KeyValuePair(Of String, JToken) In market_data
+            If elem.Key.Contains("Prime") Then
+                job = elem.Value
+                If job("ducats").ToObject(Of Integer) = 0 Then
+                    Console.WriteLine("FOUND A ZERO: " & elem.Key)
+                    needDucats.Add(elem.Key)
+                End If
+            End If
+        Next
+
+        For Each era As KeyValuePair(Of String, JToken) In relic_data
+            If era.Key.Length < 5 Then
+                For Each relic As KeyValuePair(Of String, JToken) In era.Value.ToObject(Of JObject)
+                    For Each rarity As KeyValuePair(Of String, JToken) In relic.Value.ToObject(Of JObject)
+                        Dim name As String = rarity.Value
+                        If needDucats.Contains(name) Then
+                            If rarity.Key.Contains("rare") Then
+                                market_data(name)("ducats") = 100
+                            ElseIf rarity.Key.Contains("un") Then
+                                market_data(name)("ducats") = 45
+                            Else
+                                market_data(name)("ducats") = 15
+                            End If
+                            needDucats.Remove(name)
+                            If needDucats.Count = 0 Then
+                                Return
+                            End If
+                        End If
+                    Next
+                Next
+            End If
+        Next
     End Sub
 
     Friend Function GetSetPlat(job As JObject, Optional unowned As Boolean = False) As Double
@@ -527,15 +568,16 @@ Class Data
                 save_market = True
             End If
         Next
-        If save_market Then
-            Me.Save_Market()
-        End If
         Dim save_drop As Boolean = Load_Drop_Data()
         If save_drop Then
             Load_Eqmt_Rqmts()
             Save_Eqmt()
             Save_Relics()
             Save_Names()
+        End If
+        If save_market Then
+            Check_Ducats()
+            Me.Save_Market()
         End If
         If save_market Or save_drop Then
             Main.addLog("DATABASES NEEDED UPDATES")
