@@ -9,6 +9,7 @@ Public Class RewardWindow
     Private Shared rwrdPlatIcon(4) As PictureBox
     Private Shared rwrdDucats(4) As Label
     Private Shared rwrdDucatIcon(4) As PictureBox
+    Private Shared rwrdRates(4) As Label
 
     Private Sub RewardWindow_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
@@ -17,7 +18,7 @@ Public Class RewardWindow
         For i As Integer = 0 To 3
             rwrdPanels(i) = New Panel With {
                 .Visible = False,
-                .Size = New Size(128, 105),
+                .Size = New Size(128, 126),
                 .Location = New Point(127 * i - 1, 0),
                 .BorderStyle = BorderStyle.FixedSingle
             }
@@ -28,6 +29,13 @@ Public Class RewardWindow
                 .TextAlign = ContentAlignment.TopCenter,
                 .Size = New Size(spacing - 5, 35),
                 .Location = New Point(3, 30)
+            }
+            rwrdRates(i) = New Label() With {
+                .Font = tahoma8,
+                .ForeColor = textColor,
+                .TextAlign = ContentAlignment.TopCenter,
+                .Size = New Size(128, 20),
+                .Location = New Point(0, 103)
             }
             rwrdVault(i) = New Label() With {
                 .Visible = False,
@@ -66,6 +74,7 @@ Public Class RewardWindow
             rwrdPanels(i).Controls.Add(rwrdPlats(i))
             rwrdPanels(i).Controls.Add(rwrdDucatIcon(i))
             rwrdPanels(i).Controls.Add(rwrdDucats(i))
+            rwrdPanels(i).Controls.Add(rwrdRates(i))
             MainPanel.Controls.Add(rwrdPanels(i))
         Next
 
@@ -117,9 +126,10 @@ Public Class RewardWindow
         Me.Show()
         Me.TopMost = True
 
+
         RewardWindow_Reset()
 
-        Me.Size = New Size(4 * 127 + 1, 105)
+        Me.Size = New Size(foundText.Count * 127 + 1, 126)
         If Not visible Then
             Me.Location = New Point(Main.Location.X + (Main.Width - Me.Size.Width) / 2, Main.Location.Y + Main.Height + 25)
         End If
@@ -127,15 +137,16 @@ Public Class RewardWindow
         Using g As Graphics = CreateGraphics()
             For i = 0 To plyrs - 1
                 If foundText(i) IsNot Nothing Then
-
+                    Dim job As Newtonsoft.Json.Linq.JObject = db.market_data(foundText(i))
                     rwrdPanels(i).Visible = True
-
                     rwrdNames(i).Text = foundText(i)
                     rwrdPlats(i).Text = db.market_data(foundText(i))("plat")
+                    rwrdDucats(i).Text = db.market_data(foundText(i))("ducats").ToString()
+                    rwrdRates(i).Text = job("volume").ToString() & " sold last 48hrs"
+
                     Dim size As SizeF = g.MeasureString(rwrdPlats(i).Text, rwrdPlats(i).Font)
                     rwrdPlatIcon(i).Location = New Point(CInt(28.5 + size.Width / 2), 84)
 
-                    rwrdDucats(i).Text = db.market_data(foundText(i))("ducats").ToString()
                     size = g.MeasureString(rwrdDucats(i).Text, rwrdDucats(i).Font)
                     rwrdDucatIcon(i).Location = New Point(CInt(88.5 + size.Width / 2), 84)
 

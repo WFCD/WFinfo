@@ -45,9 +45,9 @@ Partial Class RewardWindow
         Me.pTitle.BackColor = System.Drawing.Color.FromArgb(CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer), CType(CType(15, Byte), Integer))
         Me.pTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.pTitle.Controls.Add(Me.lbTitle)
-        Me.pTitle.Controls.Add(Me.topToggle)
         Me.pTitle.Controls.Add(Me.pbIcon)
         Me.pTitle.Controls.Add(Me.btnClose)
+        Me.pTitle.Controls.Add(Me.topToggle)
         Me.pTitle.Location = New System.Drawing.Point(0, 0)
         Me.pTitle.Name = "pTitle"
         Me.pTitle.Size = New System.Drawing.Size(477, 27)
