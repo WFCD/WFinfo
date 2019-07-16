@@ -25,11 +25,11 @@ Public Class AlphaOverlay
     End Sub
 
     Public Function TestBitmap(partName As String, wid As Integer) As Bitmap
-        Dim pad As Integer = 15 * parser2.totalScaling
-        Dim curve As Integer = 50 * parser2.totalScaling
+        Dim pad As Integer = 15 * parser2.uiScaling
+        Dim curve As Integer = 50 * parser2.uiScaling
 
-        Dim font As New System.Drawing.Font(privateFonts.Families(0), CInt(14 * parser2.totalScaling))
-        Dim smol As New System.Drawing.Font(privateFonts.Families(0), CInt(11 * parser2.totalScaling))
+        Dim font As New Font(privateFonts.Families(0), CInt(14 * parser2.uiScaling))
+        Dim smol As New Font(privateFonts.Families(0), CInt(11 * parser2.uiScaling))
         Dim strFormat As New StringFormat()
         strFormat.Alignment = StringAlignment.Center
         Dim flipFormat As New StringFormat()

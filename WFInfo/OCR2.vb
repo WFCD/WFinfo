@@ -213,11 +213,15 @@ Public Class OCR2
     Public Overridable Function GetWFProc() As Boolean
         For Each p As Process In Process.GetProcesses
             If p.ProcessName.Contains("Warframe") Then
-                If WF_Proc Is Nothing OrElse p.Handle <> WF_Proc.Handle Then
-                    WF_Proc = p
-                    UpdateCenter()
-                End If
-                Return True
+                Try
+                    If WF_Proc Is Nothing OrElse p.Handle <> WF_Proc.Handle Then
+                        WF_Proc = p
+                        UpdateCenter()
+                    End If
+                    Return True
+                Catch ex As Exception
+                    Main.addLog("Game crash")
+                End Try
             End If
         Next
         WF_Proc = Nothing
@@ -564,9 +568,9 @@ Public Class OCR2
                     ParseScreen_timer = clock.Elapsed.TotalMilliseconds
                 ElseIf My.Settings.NewOverlay Then
 
-                    Dim wid As Integer = pixRwrdWid / 4 * totalScaling
-                    Dim top As Integer = center.Y + pixOverlayPos * totalScaling
-                    Dim left As Integer = center.X - wid * 2
+                    Dim wid As Integer = pixRwrdWid / 4 * uiScaling 'totalScaling
+                    Dim top As Integer = (center.Y / dpiScaling) + pixOverlayPos * uiScaling 'totalScaling
+                    Dim left As Integer = (center.X / dpiScaling) - wid * 2
                     left += wid * (4 - plyr_count) / 2
                     If Not My.Settings.Automate Then
                         For i = 0 To plyr_count - 1
