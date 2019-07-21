@@ -170,6 +170,7 @@
     </Compile>
     <Compile Include="Data.vb" />
     <Compile Include="GlobalHook.vb" />
+    <Compile Include="LogCapture.vb" />
     <Compile Include="My Project\Resources.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -179,9 +180,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Sheets.vb" />
-    <Compile Include="LogWatcher.vb">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Main.designer.vb">
       <DependentUpon>Main.vb</DependentUpon>
     </Compile>
@@ -372,22 +370,22 @@
   <ItemGroup>
     <PublishFile Include="WFIcon.ico">
       <Visible>False</Visible>
+      <PublishState>Auto</PublishState>
+      <IncludeHash>False</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Auto</PublishState>
-      <IncludeHash>False</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="WFInfo.exe.manifest">
       <Visible>False</Visible>
+      <PublishState>Auto</PublishState>
+      <IncludeHash>False</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Auto</PublishState>
-      <IncludeHash>False</IncludeHash>
       <FileType>ManifestEntryPoint</FileType>
     </PublishFile>
   </ItemGroup>

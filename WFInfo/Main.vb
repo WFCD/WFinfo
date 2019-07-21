@@ -29,8 +29,6 @@ Public Class Main
 
             lbVersion.Text = "v" & version
             Me.Location = My.Settings.MainLoc
-            Automate = My.Settings.Automate
-            tAutomate.Enabled = Automate
             Me.MaximizeBox = False
             clock.Restart()
 
@@ -156,8 +154,10 @@ Public Class Main
     End Sub
 
     Private Sub pbSettings_Click(sender As Object, e As EventArgs) Handles pbSettings.Click
-        Settings.Show()
-        Settings.BringToFront()
+        If db IsNot Nothing AndAlso db.relic_data IsNot Nothing Then
+            Settings.Show()
+            Settings.BringToFront()
+        End If
     End Sub
 
     Private Sub pbSettings_MouseEnter(sender As Object, e As EventArgs) Handles pbSettings.MouseEnter
@@ -302,33 +302,6 @@ Public Class Main
         Equipment.Refresh()
     End Sub
 
-    Private FoundSomething As Boolean = False
-    Private Sub tAutomate_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tAutomate.Tick
-        Console.WriteLine("tAutomate Tick")
-        If (db IsNot Nothing AndAlso rwrdPanels(0) IsNot Nothing AndAlso parser2.IsWFActive()) Then
-            If (parser2.IsRelicWindow()) Then
-                If Not FoundSomething Then
-                    FoundSomething = True
-                    Me.tAutomate.Interval = 3000
-                    Task.Factory.StartNew(Sub() Me.DoWork())
-                End If
-            ElseIf rwrdPanels(0).Visible Or rwrdPanels2(0).Visible Then
-                FoundSomething = False
-                For i As Integer = 0 To 3
-                    rwrdPanels(i).Hide()
-                    rwrdPanels2(i).Hide()
-                    namePanels(i).Hide()
-                Next
-            Else
-                FoundSomething = False
-                Me.tAutomate.Interval = 1000
-            End If
-        Else
-            FoundSomething = False
-            Me.tAutomate.Interval = 5000
-        End If
-    End Sub
-
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
         Try
             AlphaOverlay.ShowAtLocation("Loki Prime Chassis", New Point(300, 100), 200)
@@ -361,7 +334,6 @@ Module Glob
     'Public Equipment As String               ' List of leveled equipment
     'Public Fullscreen As Boolean = False
     Public key1Tog As Boolean = False
-    Public Automate As Boolean = False
     Public Debug As Boolean = My.Settings.Debug
     Public appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Public textColor As Color = Color.FromArgb(177, 208, 217)
@@ -428,6 +400,11 @@ Module Glob
             End If
 
         End If
+    End Sub
+
+    Public Sub DoDelayWork()
+        Threading.Thread.Sleep(500)
+        DoOtherWork()
     End Sub
 
     Private DoOtherWork_timer As Long

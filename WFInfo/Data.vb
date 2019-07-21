@@ -22,7 +22,8 @@ Class Data
 
     Private save_count As Integer = 0
     Private webClient As WebClient
-    Public WithEvents watcher As New FileSystemWatcher()
+    Public WithEvents ScreenshotWatcher As New FileSystemWatcher()
+    Public EElogWatcher As LogCapture = Nothing
 
     Private sheetAPI As Sheets
 
@@ -44,9 +45,35 @@ Class Data
         If Not My.Computer.FileSystem.DirectoryExists(path) Then
             Directory.CreateDirectory(path)
         End If
-        watcher.Path = path
-        watcher.EnableRaisingEvents = True
+        ScreenshotWatcher.Path = path
+        ScreenshotWatcher.EnableRaisingEvents = True
 
+
+        If My.Settings.NewAuto Then
+            Enable_LogCapture()
+        End If
+    End Sub
+
+    Public Sub Enable_LogCapture()
+        If EElogWatcher Is Nothing Then
+            Try
+                EElogWatcher = New LogCapture()
+                AddHandler EElogWatcher.TextChanged, AddressOf log_Changed
+            Catch ex As Exception
+                Main.addLog("FAILED TO START LogCapture")
+                Main.Instance.Invoke(Sub() Main.lbStatus.Text = "ERROR (LogCapture)")
+                Main.Instance.Invoke(Sub() Main.lbStatus.ForeColor = Color.Red)
+                Console.WriteLine(ex.ToString())
+            End Try
+        End If
+    End Sub
+
+    Public Sub Disable_LogCapture()
+        If EElogWatcher IsNot Nothing Then
+            RemoveHandler EElogWatcher.TextChanged, AddressOf log_Changed
+            EElogWatcher.Dispose()
+            EElogWatcher = Nothing
+        End If
     End Sub
 
     Public Sub Save_JObject(data As JObject)
@@ -768,15 +795,22 @@ Class Data
 
     Private waiting As Boolean = False
 
-    Private Sub watcher_Created(ByVal sender As Object, ByVal e As FileSystemEventArgs) Handles watcher.Created
+    Private Sub watcher_Created(ByVal sender As Object, ByVal e As FileSystemEventArgs) Handles ScreenshotWatcher.Created
         waiting = True
     End Sub
 
-    Private Sub watcher_Changed(ByVal sender As Object, ByVal e As FileSystemEventArgs) Handles watcher.Changed
+    Private Sub watcher_Changed(ByVal sender As Object, ByVal e As FileSystemEventArgs) Handles ScreenshotWatcher.Changed
         If waiting Then
             waiting = False
             Threading.Thread.Sleep(500)
             parser2.ParseFile(e.FullPath)
+        End If
+    End Sub
+
+    Private Sub log_Changed(sender As Object, line As String)
+        If line.Contains("Created /Lotus/Interface/ProjectionRewardChoice.swf") Then
+            Console.WriteLine(line)
+            Task.Factory.StartNew(Sub() DoDelayWork())
         End If
     End Sub
 End Class

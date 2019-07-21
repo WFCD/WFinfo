@@ -98,7 +98,7 @@ Public Class Settings
             TrackBar1.Value = 0
         End If
         btnHkey1.Text = My.Settings.HKey1Text
-        cbAutomation.Checked = Automate
+        cbAutomation.Checked = My.Settings.NewAuto
         cbDebug.Checked = Debug
         ScaleBar.Value = My.Settings.Scaling
         TextBox1.Text = My.Settings.Scaling & "%"
@@ -178,8 +178,14 @@ Public Class Settings
     End Sub
 
     Private Sub cbAutomation_Click(sender As Object, e As EventArgs) Handles cbAutomation.Click
-        Automate = cbAutomation.Checked
-        Main.tAutomate.Enabled = Automate
+        If cbAutomation.Checked Then
+            cbAutomation.Checked = False
+            Dim accept As Boolean = MessageBox.Show("Do you want to enable the new auto mode?" & vbNewLine & "This connects to the warframe debug log to detect the reward window. It captures the output through inter-process communcation called a ""Shared Memory Object"". This communication is the debug information that is written to EE.log. However, the file is ~5 seconds behind the actual game events, and thus can't be used. If you're comfortable with this connection, hit Yes." & vbNewLine & "If you want more information, please contact Kekasi on Discord.", "Confirm Automation Mode", MessageBoxButtons.YesNo) = DialogResult.Yes
+            cbAutomation.Checked = accept
+            My.Settings.NewAuto = accept
+        Else
+            My.Settings.NewAuto = False
+        End If
         saveSettings()
     End Sub
 
@@ -213,7 +219,12 @@ Public Class Settings
 
     Private Sub saveSettings()
         ''Saves settings
-        My.Settings.Automate = cbAutomation.Checked
+        My.Settings.NewAuto = cbAutomation.Checked
+        If My.Settings.NewAuto Then
+            db.Enable_LogCapture()
+        Else
+            db.Disable_LogCapture()
+        End If
         My.Settings.HKey1 = HKey1
         My.Settings.HKey1Text = btnHkey1.Text
         My.Settings.Debug = cbDebug.Checked
@@ -224,7 +235,9 @@ Public Class Settings
 
     Private Sub ScaleBar_Scroll(sender As Object, e As EventArgs) Handles ScaleBar.Scroll
         TextBox1.Text = ScaleBar.Value & "%"
-        parser2.UpdateCenter()
+        If parser2 IsNot Nothing Then
+            parser2.UpdateCenter()
+        End If
         saveSettings()
     End Sub
 
@@ -239,7 +252,9 @@ Public Class Settings
         ScaleBar_Scroll(sender, e)
         'Kek: To remove the blue highlight... because I don't like the look of it
         ActiveControl = Panel1
-        parser2.UpdateCenter()
+        If parser2 IsNot Nothing Then
+            parser2.UpdateCenter()
+        End If
         saveSettings()
     End Sub
 

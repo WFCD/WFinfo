@@ -210,7 +210,7 @@ Public Class OCR2
         Return uiScaling
     End Function
 
-    Public Overridable Function GetWFProc() As Boolean
+    Public Overridable Function GetWFProc() As Process
         For Each p As Process In Process.GetProcesses
             If p.ProcessName.Contains("Warframe") Then
                 Try
@@ -218,7 +218,7 @@ Public Class OCR2
                         WF_Proc = p
                         UpdateCenter()
                     End If
-                    Return True
+                    Return WF_Proc
                 Catch ex As Exception
                     Main.addLog("Game crash")
                 End Try
@@ -228,7 +228,7 @@ Public Class OCR2
         If Debug And window = Nothing Then
             FakeUpdateCenter()
         End If
-        Return False
+        Return Nothing
     End Function
 
     Public Overridable Function IsWFActive() As Boolean

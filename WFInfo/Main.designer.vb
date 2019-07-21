@@ -50,7 +50,6 @@ Partial Class Main
         Me.trayEquipment = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.trayExit = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tAutomate = New System.Windows.Forms.Timer(Me.components)
         Me.pbHome = New System.Windows.Forms.PictureBox()
         Me.pbEqmt = New System.Windows.Forms.PictureBox()
         Me.pbSettings = New System.Windows.Forms.PictureBox()
@@ -325,11 +324,6 @@ Partial Class Main
         Me.trayExit.Size = New System.Drawing.Size(107, 22)
         Me.trayExit.Text = "Exit"
         '
-        'tAutomate
-        '
-        Me.tAutomate.Enabled = True
-        Me.tAutomate.Interval = 1000
-        '
         'pbHome
         '
         Me.pbHome.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
@@ -453,7 +447,6 @@ Partial Class Main
     Friend WithEvents pbHome As PictureBox
     Friend WithEvents Label2 As Label
     Friend WithEvents lbStatus As Label
-    Friend WithEvents tAutomate As Timer
     Friend WithEvents OutOfDate As ToolTip
     Friend WithEvents Button1 As Button
 End Class

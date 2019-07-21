@@ -15,9 +15,9 @@ Imports WFInfo
     End Function
 
     Public GetWFProc_Skip As Boolean = False
-    Public Overrides Function GetWFProc() As Boolean
+    Public Overrides Function GetWFProc() As Process
         If GetWFProc_Skip Then
-            Return True
+            Return Nothing
         End If
         Return MyBase.GetWFProc()
     End Function
@@ -62,7 +62,7 @@ Imports WFInfo
         isWFActive_Skip = False
 
         GetWFProc_Skip = True
-        Assert.IsTrue(GetWFProc())
+        Assert.AreEqual(GetWFProc(), Nothing)
         GetWFProc_Skip = False
 
         uiScaling = -1.0

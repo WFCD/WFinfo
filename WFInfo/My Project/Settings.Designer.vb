@@ -389,6 +389,18 @@ Namespace My
                 Me("NewOverlay") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("False")>  _
+        Public Property NewAuto() As Boolean
+            Get
+                Return CType(Me("NewAuto"),Boolean)
+            End Get
+            Set
+                Me("NewAuto") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

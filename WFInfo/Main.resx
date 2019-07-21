@@ -604,9 +604,6 @@
         8PIAAAAASUVORK5CYII=
 </value>
   </data>
-  <metadata name="tAutomate.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>969, 17</value>
-  </metadata>
   <metadata name="OutOfDate.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>1079, 17</value>
   </metadata>
