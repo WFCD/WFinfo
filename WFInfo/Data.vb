@@ -808,8 +808,8 @@ Class Data
     End Sub
 
     Private Sub log_Changed(sender As Object, line As String)
+        Console.WriteLine(line)
         If line.Contains("Created /Lotus/Interface/ProjectionRewardChoice.swf") Then
-            Console.WriteLine(line)
             Task.Factory.StartNew(Sub() DoDelayWork())
         End If
     End Sub

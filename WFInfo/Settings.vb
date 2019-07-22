@@ -180,7 +180,14 @@ Public Class Settings
     Private Sub cbAutomation_Click(sender As Object, e As EventArgs) Handles cbAutomation.Click
         If cbAutomation.Checked Then
             cbAutomation.Checked = False
-            Dim accept As Boolean = MessageBox.Show("Do you want to enable the new auto mode?" & vbNewLine & "This connects to the warframe debug log to detect the reward window. It captures the output through inter-process communcation called a ""Shared Memory Object"". This communication is the debug information that is written to EE.log. However, the file is ~5 seconds behind the actual game events, and thus can't be used. If you're comfortable with this connection, hit Yes." & vbNewLine & "If you want more information, please contact Kekasi on Discord.", "Confirm Automation Mode", MessageBoxButtons.YesNo) = DialogResult.Yes
+            Dim message As String = "Do you want to enable the new auto mode?"
+            message &= vbNewLine & "This connects to the warframe debug logger to detect the reward window."
+            message &= vbNewLine & "The logger contains info about your pc specs, your public IP, and your email."
+            message &= vbNewLine & "We will be ignoring all of that and only looking for the Fissure Reward Screen."
+            message &= vbNewLine & "We will begin listening after your approval, and it is completely inactive currently."
+            message &= vbNewLine & "If you opt-in, we will be using a windows method to receive this info quicker, but it is the same info being written to EE.log, which you can check before agreeing."
+            message &= vbNewLine & "If you want more information or have questions, please contact us on Discord."
+            Dim accept As Boolean = MessageBox.Show(message, "Automation Mode Opt-In", MessageBoxButtons.YesNo, MessageBoxIcon.None, MessageBoxDefaultButton.Button2) = DialogResult.Yes
             cbAutomation.Checked = accept
             My.Settings.NewAuto = accept
         Else
