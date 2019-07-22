@@ -31,12 +31,12 @@ Partial Class Relics
         Dim TreeNode4 As System.Windows.Forms.TreeNode = New System.Windows.Forms.TreeNode("Axi")
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Relics))
         Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.RelicTree2 = New DoubleBufferedTreeView()
+        Me.RelicTree2 = New WFInfo.DoubleBufferedTreeView()
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.SortSelection = New System.Windows.Forms.ComboBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
-        Me.RelicTree1 = New DoubleBufferedTreeView()
+        Me.RelicTree1 = New WFInfo.DoubleBufferedTreeView()
         Me.HideMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.HideOpt = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnClose = New System.Windows.Forms.Button()
@@ -96,7 +96,7 @@ Partial Class Relics
         Me.SortSelection.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold)
         Me.SortSelection.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.SortSelection.FormattingEnabled = True
-        Me.SortSelection.Items.AddRange(New Object() {"Name", "Intact Plat", "Rad Bonus"})
+        Me.SortSelection.Items.AddRange(New Object() {"Name", "Intact Plat", "Radiant Plat", "Diff (Rad - Int)"})
         Me.SortSelection.Location = New System.Drawing.Point(292, 2)
         Me.SortSelection.Name = "SortSelection"
         Me.SortSelection.Size = New System.Drawing.Size(150, 26)
