@@ -11,9 +11,11 @@ Public Class Relics
     Private Relic2ToHide As TreeNode = Nothing
     Public Tree1Sorter As New NodeSorter(0)
     Public Tree2Sorter As New NodeSorter(1)
+    Public Tree3Sorter As New NodeSorter(0)
     Private hidden_nodes As JObject                                      ' Contains list of nodes to hide                {"Lith": ["A1","A2",...], "Meso": [...], "Neo": [...], "Axi": [...]}
     Private hidden_file_path As String = Path.Combine(appData, "WFInfo\hidden.json")
     Public eras As New List(Of String) From {"Lith", "Meso", "Neo", "Axi"}
+    Private current_filters As String() = Nothing
 
     ' ************************************
     ' * Drag n Drop code
@@ -74,7 +76,7 @@ Public Class Relics
     End Sub
 
     Private Sub Label2_MouseEnter(sender As Object, e As EventArgs) Handles Label2.MouseEnter
-        Label2.BackColor = bgColor
+        Label2.BackColor = bgHighlightColor
     End Sub
 
     Private Sub Label2_MouseLeave(sender As Object, e As EventArgs) Handles Label2.MouseLeave
@@ -85,12 +87,16 @@ Public Class Relics
         RelicTree2.Visible = My.Settings.TreeOne
         My.Settings.TreeOne = Not My.Settings.TreeOne
         RelicTree1.Visible = My.Settings.TreeOne
+        Label2.Select()
         If My.Settings.TreeOne Then
-            RelicTree1.Select()
+            Tree3Sorter.relic = 0
             Label2.Text = "Relic Eras"
         Else
-            RelicTree2.Select()
+            Tree3Sorter.relic = 1
             Label2.Text = "All Relics"
+        End If
+        If RelicTree3.Visible Then
+            UpdateRelicTree3(current_filters)
         End If
     End Sub
 
@@ -151,7 +157,7 @@ Public Class Relics
             End If
         End If
 
-        If sender.Equals(RelicTree1) Then
+        If RelicTree1.Visible Then
             RelicToHide = e.Node
             Dim era As String = e.Node.FullPath.Split("\")(0)
             For Each node As TreeNode In RelicTree2.Nodes.Find(e.Node.Name, True)
@@ -193,13 +199,14 @@ Public Class Relics
         If Location.X = 0 And Location.Y = 0 Then
             Location = New Point(Main.Location.X + Main.Width + 25, Main.Location.Y)
         End If
+        Label2.Select()
         If My.Settings.TreeOne Then
+            Tree3Sorter.relic = 0
             RelicTree2.Visible = False
-            RelicTree1.Select()
             Label2.Text = "Relic Eras"
         Else
+            Tree3Sorter.relic = 1
             RelicTree1.Visible = False
-            RelicTree2.Select()
             Label2.Text = "All Relics"
         End If
         SortSelection.SelectedIndex = My.Settings.SortType
@@ -283,6 +290,7 @@ Public Class Relics
 
         RelicTree1.TreeViewNodeSorter = Tree1Sorter
         RelicTree2.TreeViewNodeSorter = Tree2Sorter
+        RelicTree3.TreeViewNodeSorter = Tree3Sorter
         RelicTree1.Sort()
         RelicTree2.Sort()
     End Sub
@@ -448,7 +456,7 @@ Public Class Relics
         End If
     End Sub
 
-    Private Sub RelicTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles RelicTree1.DrawNode, RelicTree2.DrawNode
+    Private Sub RelicTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles RelicTree1.DrawNode, RelicTree2.DrawNode, RelicTree3.DrawNode
         e.DrawDefault = True
         If e.Bounds.Width = 0 Then
             Return
@@ -456,9 +464,8 @@ Public Class Relics
         e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
 
         Dim fullPath As String = e.Node.FullPath.Replace("Hidden\", "")
-        If sender.Equals(RelicTree2) Then
+        If RelicTree2.Visible Then
             fullPath = ReplaceFirst(fullPath, " ", "|")
-
         End If
         Dim split As String() = fullPath.Split(New Char() {CChar("\"), CChar("|")})
 
@@ -545,6 +552,13 @@ Public Class Relics
                 e.Graphics.DrawString(vals("ducats"), RelicTree1.Font, brush, 370, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.ducat_w, 370, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
             End If
+            If RelicTree3.Visible AndAlso Not CheckNode(e.Node.Parent, current_filters) AndAlso CheckNode(e.Node, current_filters) Then
+                Dim loc As Integer = 43
+                If RelicTree2.Visible Then
+                    loc = 24
+                End If
+                e.Graphics.DrawString(ChrW(&H2605), RelicTree1.Font, starBrush, loc, e.Bounds.Top + 1)
+            End If
         End If
         Dim left As Integer = 20
         If e.Node.Parent Is Nothing Then
@@ -566,20 +580,123 @@ Public Class Relics
         My.Settings.SortType = SortSelection.SelectedIndex
         Tree1Sorter.type = My.Settings.SortType
         Tree2Sorter.type = My.Settings.SortType
+        Tree3Sorter.type = My.Settings.SortType
         RelicTree1.Sort()
         RelicTree2.Sort()
-        If RelicTree1.Visible Then
-            RelicTree1.Select()
-        Else
-            RelicTree2.Select()
-        End If
+        RelicTree3.Sort()
+        Label2.Select()
 
+    End Sub
+
+    Private Sub FilterText_Enter(sender As Object, e As EventArgs) Handles FilterText.Enter
+        If FilterText.Text = "Filter Terms..." Then
+            FilterText.Text = ""
+            FilterText.ForeColor = textColor
+        End If
+    End Sub
+
+    Private Sub FilterText_Exit(sender As Object, e As EventArgs) Handles FilterText.Leave
+        If FilterText.Text = "" Then
+            FilterText.Text = "Filter Terms..."
+            FilterText.ForeColor = stealthColor
+        End If
+    End Sub
+
+    Private Sub FilterText_TextChanged(sender As Object, e As EventArgs) Handles FilterText.TextChanged
+        If FilterText.Text.Length = 0 OrElse FilterText.Text = "Filter Terms..." Then
+            RelicTree3.Visible = False
+        Else
+            RelicTree3.Visible = True
+            current_filters = FilterText.Text.ToLower().Split(" ")
+            UpdateRelicTree3(current_filters)
+        End If
+    End Sub
+
+    Private Sub UpdateRelicTree3(filters As String())
+        RelicTree3.Nodes.Clear()
+        If RelicTree1.Visible Then
+            Tree3Sorter.relic = 0
+            'RelicTree1
+            For Each era As TreeNode In RelicTree1.Nodes
+                Dim eraNode As TreeNode = Nothing
+                For Each node As TreeNode In era.Nodes
+                    If node.Text = "Hidden" Then
+                        'Parse the hidden list
+                        For Each hide As TreeNode In node.Nodes
+                            If CheckNodes(hide.Nodes, filters) Then
+                                If eraNode Is Nothing Then
+                                    eraNode = New TreeNode(era.Text)
+                                    RelicTree3.Nodes.Add(eraNode)
+                                End If
+                                eraNode.Nodes.Add(hide.Clone())
+                            End If
+                        Next
+
+                    Else
+                        If CheckNodes(node.Nodes, filters) Then
+                            If eraNode Is Nothing Then
+                                eraNode = New TreeNode(era.Text)
+                                RelicTree3.Nodes.Add(eraNode)
+                            End If
+                            eraNode.Nodes.Add(node.Clone())
+                        End If
+                    End If
+                Next
+            Next
+        Else
+            Tree3Sorter.relic = 1
+            'RelicTree2
+            ' {Relics, Hidden:{Relics}}
+            For Each node As TreeNode In RelicTree2.Nodes
+                If node.Text = "Hidden" Then
+                    'Parse the hidden list
+                    For Each hide As TreeNode In node.Nodes
+                        If CheckNodes(hide.Nodes, filters) Then
+                            RelicTree3.Nodes.Add(hide.Clone())
+                        End If
+                    Next
+                Else
+                    If CheckNodes(node.Nodes, filters) Then
+                        RelicTree3.Nodes.Add(node.Clone())
+                    End If
+                End If
+            Next
+        End If
+        Console.WriteLine(Tree3Sorter.relic)
+        RelicTree3.Sort()
+    End Sub
+
+    Private Function CheckNodes(nodes As TreeNodeCollection, filters() As String) As Boolean
+        Dim matchesAll As Boolean = True
+        For Each node As TreeNode In nodes
+            If CheckNode(node, filters) Then
+                Return True
+            End If
+        Next
+        Return False
+    End Function
+
+    Private Function CheckNode(node As TreeNode, filters() As String) As Boolean
+        Dim checkStr As String = node.FullPath.ToLower()
+        For Each filt As String In filters
+            If Not checkStr.Contains(filt) Then
+                Return False
+            End If
+        Next
+        Return True
+    End Function
+
+    Private Sub FilterText_EnterKey(sender As Object, e As KeyPressEventArgs) Handles FilterText.KeyPress
+        If e.KeyChar = Chr(Keys.Enter) Then
+            Label2.Select()
+            e.Handled = True
+        End If
     End Sub
 End Class
 
 Public Class NodeSorter
     Implements IComparer
-    Dim relic As Integer = 0
+    Public relic As Integer = 0
     Public type As Integer = 0 ' 0: Name, 1: Intact Plat, 2: Rad Bonus
 
     Public Sub New(x As Integer)
@@ -618,6 +735,15 @@ Public Class NodeSorter
                 Return 100
             ElseIf stry = "Hidden" Then
                 Return -100
+            End If
+
+            ' ISSUE WITH ADDING NODES DURING SORT
+            '   ONLY WITH FILTER SCRIPT
+            '   workaround by using whichever parent is not dead as primary
+            If tx.Parent Is Nothing Then
+                tx = ty
+            ElseIf ty.Parent Is Nothing Then
+                ty = tx
             End If
 
             erax = tx.Parent.Text
