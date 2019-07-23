@@ -59,6 +59,7 @@ Public Class Relics
             Panel1.Size = New Size(Panel1.Size.Width, newSize - 26)
             RelicTree1.Size = New Size(RelicTree1.Size.Width, newSize - 57)
             RelicTree2.Size = New Size(RelicTree2.Size.Width, newSize - 57)
+            RelicTree3.Size = New Size(RelicTree3.Size.Width, newSize - 57)
         End If
 
     End Sub
@@ -587,6 +588,10 @@ Public Class Relics
         Label2.Select()
 
     End Sub
+
+    ' ************************************
+    ' * Treeview Filter code
+    ' ************************************
 
     Private Sub FilterText_Enter(sender As Object, e As EventArgs) Handles FilterText.Enter
         If FilterText.Text = "Filter Terms..." Then

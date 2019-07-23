@@ -137,6 +137,7 @@ Class Data
                 market_items(row(0).ToString()) = name + "|" + row(2).ToString()
             End If
         Next
+        market_items("version") = Main.Instance.version
         Main.addLog("ITEM DATABASE: GOOD")
         Return True
     End Function
@@ -670,7 +671,6 @@ Class Data
         Return sellers 'return list of *recent* sellers. Price may fluctuate 
 
     End Function
-
 
     Public Function IsPartVaulted(name As String) As Boolean
         Dim eqmt As String = name.Substring(0, name.IndexOf("Prime") + 5)
