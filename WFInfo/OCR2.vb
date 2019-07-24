@@ -110,8 +110,16 @@ Public Class OCR2
     '----------------------------------------------------------------------
 
     Public Overridable Function GetUiColor() As Boolean
+        Main.addLog("GET UI COLOR DEBUG INFO")
+        Main.addLog("TOTAL SCALING: " & totalScaling)
+        Main.addLog("window: " & window.ToString())
+        Main.addLog("pixProfXDisp: " & pixProfXDisp)
+        Main.addLog("pixProfYDisp: " & pixProfYDisp)
+        Main.addLog("pixProfWid: " & pixProfWid)
+
         uiColor = Nothing
         Dim width As Integer = pixProfWid * totalScaling / 2
+        Main.addLog("Calulated width (pixProfWid * totalScaling / 2): " & width)
 
         Using bmp As New Bitmap(width, 1)
             Dim clr As Color = Nothing
@@ -129,6 +137,8 @@ Public Class OCR2
             Else
                 Using graph As Graphics = Graphics.FromImage(bmp)
                     graph.CopyFromScreen(window.Left + pixProfXDisp * totalScaling + width / 2, window.Top + pixProfYDisp * totalScaling, 0, 0, New Size(width, 1), CopyPixelOperation.SourceCopy)
+                    Main.addLog("Calulated X Position (window.Left + pixProfXDisp * totalScaling + width / 2): " & (window.Left + pixProfXDisp * totalScaling + width / 2))
+                    Main.addLog("Calulated Y Position (window.Top + pixProfYDisp * totalScaling): " & (window.Top + pixProfYDisp * totalScaling))
                 End Using
                 For i As Integer = 0 To width - 1
                     clr = bmp.GetPixel(i, 0)
@@ -141,15 +151,20 @@ Public Class OCR2
             R /= width
             G /= width
             B /= width
+
             Dim detectedColor = Color.FromArgb(R, G, B)
+            Main.addLog("DETECTED COLOR: " & detectedColor.ToString() & " AT (" & (window.Left + pixProfXDisp * totalScaling + width / 2) & ", " & (window.Top + pixProfYDisp * totalScaling) & ", " & width)
+
+            'window.Left + pixProfXDisp * totalScaling + width / 2, window.Top + pixProfYDisp * totalScaling
             For Each knowColor In fissColors
                 If ColorThreshold(detectedColor, knowColor, 20) Then
                     uiColor = knowColor
+                    Main.addLog("UI COLOR MATCHES " & knowColor.ToString())
                     Return True
                 End If
             Next
 
-            Main.addLog("Couldn't find matching ui color out of: " & detectedColor.ToString)
+            Main.addLog("UI COLOR NOT FOUND")
         End Using
         Return False
     End Function
@@ -193,6 +208,7 @@ Public Class OCR2
             End If
         End Using
 
+        Main.addLog("UPDATING DPI SCALING TO: " & dpiScaling)
         totalScaling = dpiScaling * uiScaling
         Return dpiScaling
     End Function
@@ -207,6 +223,7 @@ Public Class OCR2
         End If
         totalScaling = dpiScaling * uiScaling
 
+        Main.addLog("UPDATING UI SCALING TO: " & uiScaling)
         Return uiScaling
     End Function
 
