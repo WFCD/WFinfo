@@ -341,7 +341,7 @@ Public Class Equipment
         Dim cast As JObject = Nothing
         Dim eqmt As TreeNode = Nothing
         For Each kvp As KeyValuePair(Of String, JToken) In db.eqmt_data
-            If Not kvp.Key.Contains("timestamp") Then
+            If Not kvp.Key.Contains("timestamp") AndAlso kvp.Key <> "version" Then
                 cast = kvp.Value
                 eqmt = EqmtTree1.Nodes.Find(cast("type"), False)(0).Nodes.Add(kvp.Key)
                 eqmt.Name = kvp.Key

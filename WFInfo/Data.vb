@@ -123,8 +123,10 @@ Class Data
             If market_items Is Nothing Then
                 market_items = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))(File.ReadAllText(market_items_path))
             End If
-            Main.addLog("ITEM DATABASE: GOOD")
-            Return False
+            If market_items.TryGetValue("version", Nothing) AndAlso market_items("version") = Main.Instance.version Then
+                Main.addLog("ITEM DATABASE: GOOD")
+                Return False
+            End If
         End If
 
         Main.addLog("ITEM DATABASE: LOADING NEW")
@@ -147,7 +149,7 @@ Class Data
             If market_data Is Nothing Then
                 market_data = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(market_data_path))
             End If
-            If IsUpdated(market_data) Then
+            If market_data.TryGetValue("version", Nothing) AndAlso market_data("version") = Main.Instance.version AndAlso IsUpdated(market_data) Then
                 Dim timestamp As Date = DateTime.Parse(market_data("timestamp"))
                 Dim dayAgo As Date = Date.Now.AddDays(-1)
                 If timestamp > dayAgo Then
@@ -178,6 +180,7 @@ Class Data
         market_data("Forma Blueprint") = job
 
         market_data("timestamp") = Date.Now.ToString("R")
+        market_data("version") = Main.Instance.version
 
         Main.addLog("PLAT DATABASE: GOOD")
         Load_Ducats()
@@ -323,7 +326,7 @@ Class Data
             End If
         End If
 
-        If Not force AndAlso File.Exists(relic_data_path) AndAlso File.Exists(eqmt_data_path) Then
+        If Not force AndAlso File.Exists(relic_data_path) AndAlso File.Exists(eqmt_data_path) AndAlso eqmt_data.TryGetValue("version", Nothing) AndAlso eqmt_data("version") = Main.Instance.version Then
             request = WebRequest.Create("https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html")
             request.Method = "HEAD"
             ' Move last_mod back one hour, so that it doesn't equal timestamp
@@ -497,6 +500,7 @@ Class Data
             End If
             index = drop_data.IndexOf("<tr>", tr_stop)
         End While
+        eqmt_data("version") = Main.Instance.version
         Return True
     End Function
 
@@ -515,13 +519,23 @@ Class Data
         Next
     End Sub
 
-    Private Function Load_Eqmt_Rqmts() As Boolean
+    Private Function Load_Eqmt_Rqmts(Optional force As Boolean = False) As Boolean
         ' Load wiki data on prime eqmt requirements
         ' Mainly weapons
         ' https://warframe.fandom.com/wiki/Special:Export/Module:Weapons/data
 
+        If Not force Then
+            Dim timestamp As Date = DateTime.Parse(eqmt_data("rqmts_timestamp"))
+            Dim dayAgo As Date = Date.Now.AddDays(-1)
+            If timestamp > dayAgo Then
+                Main.addLog("WIKI DATABASE: GOOD")
+                Return False
+            End If
+        End If
         Main.addLog("LOADING NEW WIKI DATABASE")
         Dim data As String = webClient.DownloadString("https://warframe.fandom.com/wiki/Special:Export/Module:Weapons/data")
+
+
 
         Dim start As Integer = data.IndexOf("<timestamp>") + 11
         Dim last As Integer = data.IndexOf("<", start)
@@ -530,54 +544,46 @@ Class Data
         data = data.Substring(0, data.LastIndexOf("}") + 1)
         data = Regex.Replace(data, "&quot;", """")
         data = Regex.Replace(data, "&amp;", "&")
-        data = Regex.Replace(data, "--\[\[[\s\S]*?--\]\]", "")
-        data = Regex.Replace(data, "--([^\[\]][^\n]*)?\n", "")
-        data = Regex.Replace(data, "\[|\]", "")
-        data = Regex.Replace(data, "\s*=\s*", "=")
-        data = Regex.Replace(data, "\{([^\}=]+)\}", "[$1]")
-        data = Regex.Replace(data, "\{((?:[^\}\{=]*\{[^\}\{]*\}[^\}\{=]*)*)\}", "[$1]")
-        data = Regex.Replace(data, "([\{,]\s*)([^\{\}\[\]\""=,]+?)(=\s*)", "$1""$2""$3")
-        data = Regex.Replace(data, "([\[=,]\s*)([^\{\}\[\]\""=,]+?)(,\s*)", "$1""$2""$3")
-        data = Regex.Replace(data, ",(\s*[\]\}])", "$1")
-        data = Regex.Replace(data, "=", ":")
-        data = Regex.Replace(data, """""([^,])", """$1")
+
+        Dim lua As New NLua.Lua()
+        Dim tempLua As NLua.LuaTable = lua.DoString("local data = " & data & vbNewLine & "return data")(0)("Weapons")
+
+        Dim dataDict As Dictionary(Of Object, Object) = lua.GetTableDict(tempLua)
 
 
-        Dim data_job As JObject = JsonConvert.DeserializeObject(Of JObject)(data)("Weapons")
         'File.WriteAllText(debug_path, JsonConvert.SerializeObject(data_job, Formatting.Indented))
         For Each kvp As KeyValuePair(Of String, JToken) In eqmt_data
-            If Not kvp.Key.Contains("timestamp") Then
-                If data_job.TryGetValue(kvp.Key, Nothing) Then
-                    eqmt_data(kvp.Key)("type") = data_job(kvp.Key)("Type")
-                    Dim temp As New Dictionary(Of String, Integer)()
-                    For Each part As JObject In data_job(kvp.Key)("Cost")("Parts")
-                        If part("Type").ToString() = "PrimePart" Then
-                            For Each relic_part As KeyValuePair(Of String, JToken) In kvp.Value.Item("parts").ToObject(Of JObject)
-                                If relic_part.Key.Contains(part("Name").ToString()) Then
-                                    eqmt_data(kvp.Key)("parts")(relic_part.Key)("count") = part("Count")
-                                    Exit For
-                                End If
-                            Next
-                        ElseIf part("Type").ToString() = "Weapon" AndAlso part("Name").ToString().Contains("Prime") Then
-                            If Not temp.ContainsKey(part("Name")) Then
-                                temp(part("Name")) = 0
-                            End If
-                            temp(part("Name")) += part("Count").ToObject(Of Integer)
-                        End If
-                    Next
+            If Not kvp.Key.Contains("timestamp") And dataDict.ContainsKey(kvp.Key) Then
+                eqmt_data(kvp.Key)("type") = JToken.FromObject(tempLua(kvp.Key)("Type"))
+                Dim temp As New Dictionary(Of String, Integer)()
 
-                    If temp.Count > 0 Then
-                        For Each entry As KeyValuePair(Of String, Integer) In temp
-                            Dim job As JObject = eqmt_data(kvp.Key)("parts")
-                            If Not job.TryGetValue(entry.Key, Nothing) Then
-                                job = New JObject()
-                                job("owned") = 0
-                                job("vaulted") = False
-                                eqmt_data(kvp.Key)("parts")(entry.Key) = job
+                For Each part As NLua.LuaTable In tempLua(kvp.Key)("Cost")("Parts").Values
+                    If part("Type").ToString() = "PrimePart" Then
+                        For Each relic_part As KeyValuePair(Of String, JToken) In kvp.Value.Item("parts").ToObject(Of JObject)
+                            If relic_part.Key.Contains(part("Name").ToString()) Then
+                                eqmt_data(kvp.Key)("parts")(relic_part.Key)("count") = JToken.FromObject(part("Count"))
+                                Exit For
                             End If
-                            eqmt_data(kvp.Key)("parts")(entry.Key)("count") = entry.Value
                         Next
+                    ElseIf part("Type").ToString() = "Weapon" AndAlso part("Name").Contains("Prime") Then
+                        If Not temp.ContainsKey(part("Name")) Then
+                            temp(part("Name")) = 0
+                        End If
+                        temp(part("Name")) += part("Count")
                     End If
+                Next
+
+                If temp.Count > 0 Then
+                    For Each entry As KeyValuePair(Of String, Integer) In temp
+                        Dim job As JObject = eqmt_data(kvp.Key)("parts")
+                        If Not job.TryGetValue(entry.Key, Nothing) Then
+                            job = New JObject()
+                            job("owned") = 0
+                            job("vaulted") = False
+                            eqmt_data(kvp.Key)("parts")(entry.Key) = job
+                        End If
+                        eqmt_data(kvp.Key)("parts")(entry.Key)("count") = entry.Value
+                    Next
                 End If
             End If
         Next
@@ -589,21 +595,26 @@ Class Data
         Dim save_market As Boolean = Load_Items() Or Load_Market()
 
         For Each elem As KeyValuePair(Of String, String) In market_items
-            Dim name As String = elem.Value.Split("|")(0)
-            If Not name.Contains(" Set") AndAlso Not market_data.TryGetValue(name, Nothing) Then
-                Dim split As String() = elem.Value.Split("|")
-                Load_Market_Item(split(0), split(1))
-                save_market = True
+            If elem.Key <> "version" Then
+                Dim name As String = elem.Value.Split("|")(0)
+
+                If Not name.Contains(" Set") AndAlso Not market_data.TryGetValue(name, Nothing) Then
+                    Dim split As String() = elem.Value.Split("|")
+                    Load_Market_Item(split(0), split(1))
+                    save_market = True
+                End If
             End If
         Next
+
         Dim save_drop As Boolean = Load_Drop_Data()
+        save_drop = Load_Eqmt_Rqmts(save_drop)
         If save_drop Then
-            Load_Eqmt_Rqmts()
             Save_Eqmt()
             Save_Relics()
             Save_Names()
         End If
-        If save_market Then
+
+        If save_market Or save_drop Then
             Check_Ducats()
             Me.Save_Market()
         End If
@@ -621,10 +632,12 @@ Class Data
         Load_Market(True)
 
         For Each elem As KeyValuePair(Of String, String) In market_items
-            Dim name As String = elem.Value.Split("|")(0)
-            If Not name.Contains(" Set") AndAlso Not market_data.TryGetValue(name, Nothing) Then
-                Dim split As String() = elem.Value.Split("|")
-                Load_Market_Item(split(0), split(1))
+            If elem.Key <> "version" Then
+                Dim name As String = elem.Value.Split("|")(0)
+                If Not name.Contains(" Set") AndAlso Not market_data.TryGetValue(name, Nothing) Then
+                    Dim split As String() = elem.Value.Split("|")
+                    Load_Market_Item(split(0), split(1))
+                End If
             End If
         Next
         Save_Market()
@@ -633,7 +646,7 @@ Class Data
     Public Sub ForceEqmtUpdate()
         Main.addLog("FORCING EQMT UPDATE")
         Load_Drop_Data(True)
-        Load_Eqmt_Rqmts()
+        Load_Eqmt_Rqmts(True)
         Save_Eqmt()
         Save_Relics()
         Save_Names()
@@ -642,7 +655,7 @@ Class Data
 
     Public Sub ForceWikiUpdate()
         Main.addLog("FORCING WIKI UPDATE")
-        Load_Eqmt_Rqmts()
+        Load_Eqmt_Rqmts(True)
         Save_Eqmt()
     End Sub
 
