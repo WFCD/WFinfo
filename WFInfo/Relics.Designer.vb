@@ -31,6 +31,7 @@ Partial Class Relics
         Dim TreeNode4 As System.Windows.Forms.TreeNode = New System.Windows.Forms.TreeNode("Axi")
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Relics))
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.RelicTree0 = New WFInfo.DoubleBufferedTreeView()
         Me.RelicTree3 = New WFInfo.DoubleBufferedTreeView()
         Me.Panel3 = New System.Windows.Forms.Panel()
         Me.FilterText = New System.Windows.Forms.TextBox()
@@ -59,6 +60,7 @@ Partial Class Relics
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel1.Controls.Add(Me.RelicTree0)
         Me.Panel1.Controls.Add(Me.RelicTree3)
         Me.Panel1.Controls.Add(Me.Panel3)
         Me.Panel1.Controls.Add(Me.RelicTree2)
@@ -68,6 +70,22 @@ Partial Class Relics
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(456, 394)
         Me.Panel1.TabIndex = 24
+        '
+        'RelicTree0
+        '
+        Me.RelicTree0.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.RelicTree0.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.RelicTree0.CausesValidation = False
+        Me.RelicTree0.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll
+        Me.RelicTree0.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
+        Me.RelicTree0.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.RelicTree0.FullRowSelect = True
+        Me.RelicTree0.ItemHeight = 16
+        Me.RelicTree0.Location = New System.Drawing.Point(-1, 53)
+        Me.RelicTree0.Name = "RelicTree0"
+        Me.RelicTree0.Size = New System.Drawing.Size(473, 340)
+        Me.RelicTree0.TabIndex = 27
+        Me.RelicTree0.Visible = False
         '
         'RelicTree3
         '
@@ -333,4 +351,5 @@ Partial Class Relics
     Friend WithEvents FilterText As TextBox
     Friend WithEvents Label3 As Label
     Friend WithEvents RelicTree3 As DoubleBufferedTreeView
+    Friend WithEvents RelicTree0 As DoubleBufferedTreeView
 End Class
