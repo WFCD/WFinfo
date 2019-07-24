@@ -237,7 +237,7 @@ Public Class OCR2
                     End If
                     Return WF_Proc
                 Catch ex As Exception
-                    Main.addLog("Game crash")
+                    Main.addLog("Game crash: " & ex.ToString())
                 End Try
             End If
         Next

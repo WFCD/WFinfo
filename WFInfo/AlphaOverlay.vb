@@ -195,9 +195,9 @@ Public Class AlphaOverlay
         '
         'tHide
         '
-        Me.tHide.Interval = 10000
+        Me.tHide.Interval = 13000
         '
-        'PerPixelAlphaForm
+        'AlphaOverlay
         '
         Me.ClientSize = New System.Drawing.Size(284, 262)
         Me.Name = "AlphaOverlay"

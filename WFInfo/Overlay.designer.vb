@@ -97,7 +97,7 @@ Partial Class Overlay
         '
         'tHide
         '
-        Me.tHide.Interval = 10000
+        Me.tHide.Interval = 13000
         '
         'Overlay
         '

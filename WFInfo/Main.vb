@@ -406,7 +406,7 @@ Module Glob
     End Sub
 
     Public Sub DoDelayWork()
-        Threading.Thread.Sleep(500)
+        Threading.Thread.Sleep(1000)
         DoOtherWork()
     End Sub
 
