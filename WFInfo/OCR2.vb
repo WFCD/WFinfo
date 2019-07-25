@@ -229,7 +229,7 @@ Public Class OCR2
 
     Public Overridable Function GetWFProc() As Process
         For Each p As Process In Process.GetProcesses
-            If p.ProcessName.Contains("Warframe") Then
+            If p.MainWindowTitle = "Warframe" Then
                 Try
                     If WF_Proc Is Nothing OrElse p.Handle <> WF_Proc.Handle Then
                         WF_Proc = p
@@ -294,13 +294,10 @@ Public Class OCR2
             window = New Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38)
             Main.addLog("WINDOWED ADJUSTMENT: " & window.ToString())
             currStyle = WindowStyle.WINDOWED
-            DwmEnableComposition(True)
         ElseIf (styles And WS_POPUP) <> 0 Then
             currStyle = WindowStyle.BORDERLESS
-            DwmEnableComposition(True)
         Else
             currStyle = WindowStyle.FULLSCREEN
-            DwmEnableComposition(False)
         End If
 
         If window.X < -20000 Or window.Y < -20000 Then

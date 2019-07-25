@@ -152,9 +152,9 @@
     Public Function GetWindowLong(hWnd As IntPtr, nIndex As Int16) As Int32
     End Function
 
-    <DllImport("dwmapi.dll", PreserveSig:=False)>
-    Public Sub DwmEnableComposition(bEnable As Boolean)
-    End Sub
+    '<DllImport("dwmapi.dll", PreserveSig:=False)>
+    'Public Sub DwmEnableComposition(bEnable As Boolean)
+    'End Sub
 
     <DllImport("gdi32.dll")>
     Public Function GetDeviceCaps(hdc As IntPtr, nIndex As Integer) As Integer

@@ -26,6 +26,7 @@ Class Data
     Public EElogWatcher As LogCapture = Nothing
 
     Private sheetAPI As Sheets
+    Private lua As NLua.Lua
 
 
     Public Sub New()
@@ -48,6 +49,7 @@ Class Data
         ScreenshotWatcher.Path = path
         ScreenshotWatcher.EnableRaisingEvents = True
 
+        lua = New NLua.Lua()
 
         If My.Settings.NewAuto Then
             Enable_LogCapture()
@@ -539,13 +541,12 @@ Class Data
 
         Dim start As Integer = data.IndexOf("<timestamp>") + 11
         Dim last As Integer = data.IndexOf("<", start)
-        eqmt_data("rqmts_timestamp") = DateTime.Parse(data.Substring(start, last - start)).ToString("R")
+        eqmt_data("rqmts_timestamp") = Date.Now.ToString("R")
         data = data.Substring(data.IndexOf("{", data.IndexOf("<text")))
         data = data.Substring(0, data.LastIndexOf("}") + 1)
         data = Regex.Replace(data, "&quot;", """")
         data = Regex.Replace(data, "&amp;", "&")
 
-        Dim lua As New NLua.Lua()
         Dim tempLua As NLua.LuaTable = lua.DoString("local data = " & data & vbNewLine & "return data")(0)("Weapons")
 
         Dim dataDict As Dictionary(Of Object, Object) = lua.GetTableDict(tempLua)
