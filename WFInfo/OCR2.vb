@@ -142,6 +142,12 @@ Public Class OCR2
                 End Using
                 For i As Integer = 0 To width - 1
                     clr = bmp.GetPixel(i, 0)
+                    For Each knowColor In fissColors
+                        If ColorThreshold(clr, knowColor, 20) Then
+                            uiColor = knowColor
+                            Return True
+                        End If
+                    Next
                     R += clr.R
                     G += clr.G
                     B += clr.B
@@ -153,16 +159,13 @@ Public Class OCR2
             B /= width
 
             Dim detectedColor = Color.FromArgb(R, G, B)
+            'For Each knowColor In fissColors
+            'If ColorThreshold(detectedColor, knowColor, 20) Then
+            'uiColor = knowColor
+            'Return True
+            'End If
+            'Next
             Main.addLog("DETECTED COLOR: " & detectedColor.ToString() & " AT (" & (window.Left + pixProfXDisp * totalScaling + width / 2) & ", " & (window.Top + pixProfYDisp * totalScaling) & ", " & width)
-
-            'window.Left + pixProfXDisp * totalScaling + width / 2, window.Top + pixProfYDisp * totalScaling
-            For Each knowColor In fissColors
-                If ColorThreshold(detectedColor, knowColor, 20) Then
-                    uiColor = knowColor
-                    Main.addLog("UI COLOR MATCHES " & knowColor.ToString())
-                    Return True
-                End If
-            Next
 
             Main.addLog("UI COLOR NOT FOUND")
         End Using
