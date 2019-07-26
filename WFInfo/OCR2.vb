@@ -25,6 +25,8 @@ Public Class OCR2
     ' Public Const pixProfHei As Integer = 1
     Public Const pixProfXDisp As Integer = 93
     Public Const pixProfYDisp As Integer = 87
+    Public Const pixProfXSpecial As Double = 117
+    Public Const pixProfYSpecial As Double = 87
 
     ' Pixel measurements for detecting reward screen
     Public Const pixFissWid As Integer = 354
@@ -38,7 +40,7 @@ Public Class OCR2
     Public FissClr1 As Color = Color.FromArgb(189, 168, 101)    ' Vitruvian
     Public FissClr2 As Color = Color.FromArgb(150, 31, 35)      ' Stalker 
     Public FissClr3 As Color = Color.FromArgb(238, 193, 105)    ' Baruk
-    Public FissClr4 As Color = Color.FromArgb(50, 200, 225)     ' Corpus
+    Public FissClr4 As Color = Color.FromArgb(35, 200, 245)     ' Corpus
     Public FissClr5 As Color = Color.FromArgb(57, 105, 192)     ' Fortuna
     Public FissClr6 As Color = Color.FromArgb(255, 189, 102)    ' Grineer
     Public FissClr7 As Color = Color.FromArgb(36, 184, 242)     ' Lotus
@@ -63,9 +65,10 @@ Public Class OCR2
     Public center As Point = Nothing
 
     ' Scaling adjustments
-    Public dpiScaling As Double = -1.0
-    Public uiScaling As Double = -1.0
-    Public totalScaling As Double = -1.0
+    Public dpiScaling As Double = 1.0
+    Public screenScaling As Double = 1.0
+    Public uiScaling As Double = 1.0
+    Public totalScaling As Double = 1.0
 
     ' Tesseract engines for each reward
     ' 0 for relic window checks or any system checks
@@ -110,20 +113,75 @@ Public Class OCR2
     '----------------------------------------------------------------------
 
     Public Overridable Function GetUiColor() As Boolean
-        Main.addLog("GET UI COLOR DEBUG INFO")
-        Main.addLog("TOTAL SCALING: " & totalScaling)
-        Main.addLog("window: " & window.ToString())
-        Main.addLog("pixProfXDisp: " & pixProfXDisp)
-        Main.addLog("pixProfYDisp: " & pixProfYDisp)
-        Main.addLog("pixProfWid: " & pixProfWid)
+        uiColor = Nothing
+
+        Dim clr As Color = Nothing
+        If debugFile IsNot Nothing Then
+            Dim R As Integer = 0
+            Dim G As Integer = 0
+            Dim B As Integer = 0
+            Dim width As Integer = pixProfWid * totalScaling / 2
+            Dim x As Integer = pixProfXDisp * totalScaling + width / 2
+            Dim y As Integer = pixProfYDisp * totalScaling
+            For i As Integer = 0 To width - 1
+                clr = debugFile.GetPixel(x + i, y)
+                R += clr.R
+                G += clr.G
+                B += clr.B
+            Next
+            R /= width
+            G /= width
+            B /= width
+
+            Dim detectedColor = Color.FromArgb(R, G, B)
+            For Each knowColor In fissColors
+                If ColorThreshold(detectedColor, knowColor, 20) Then
+                    uiColor = knowColor
+                    Return True
+                End If
+            Next
+
+        Else
+            Dim scalingMod As Double = totalScaling * 40 / My.Settings.Scaling
+
+            Dim startX As Integer = CInt(pixProfXSpecial * scalingMod)
+            Dim startY As Integer = CInt(pixProfYSpecial * scalingMod)
+            Dim endX As Integer = CInt(pixProfXSpecial * scalingMod * 3)
+            Dim endY As Integer = CInt(pixProfYSpecial * scalingMod * 3)
+
+            Using bmp As New Bitmap(endX - startX, endY - startY)
+                Using graph As Graphics = Graphics.FromImage(bmp)
+                    graph.CopyFromScreen(startX, startY, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy)
+                End Using
+                For y As Integer = 1 To bmp.Height
+                    Dim newY As Integer = bmp.Height - y
+                    Dim newX As Integer = bmp.Width * (newY / bmp.Height)
+                    clr = bmp.GetPixel(newX, newY)
+                    For Each knowColor In fissColors
+                        If ColorThreshold(clr, knowColor, 10) Then
+                            uiColor = knowColor
+                            Main.addLog("FOUND COLOR " & clr.ToString() & " AT (" & (startX + newX) & ", " & (startY + newY) & ")")
+                            Main.addLog("ESTIMATED SCALING: " & CInt(100 * (startX + newX) / (pixProfXSpecial * screenScaling)) & "%")
+                            Main.addLog("USER INPUT SCALING: " & My.Settings.Scaling & "%")
+                            Return True
+                        End If
+                    Next
+                Next
+            End Using
+        End If
+        Return False
+    End Function
+
+    Public Overridable Function FindUiColor() As Boolean
 
         uiColor = Nothing
         Dim width As Integer = pixProfWid * totalScaling / 2
-        Main.addLog("Calulated width (pixProfWid * totalScaling / 2): " & width)
 
         Using bmp As New Bitmap(width, 1)
             Dim clr As Color = Nothing
-            Dim R, G, B As Integer
+            Dim R As Integer = 0
+            Dim G As Integer = 0
+            Dim B As Integer = 0
 
             If debugFile IsNot Nothing Then
                 Dim x As Integer = pixProfXDisp * totalScaling + width / 2
@@ -136,22 +194,36 @@ Public Class OCR2
                 Next
             Else
                 Using graph As Graphics = Graphics.FromImage(bmp)
-                    graph.CopyFromScreen(window.Left + pixProfXDisp * totalScaling + width / 2, window.Top + pixProfYDisp * totalScaling, 0, 0, New Size(width, 1), CopyPixelOperation.SourceCopy)
-                    Main.addLog("Calulated X Position (window.Left + pixProfXDisp * totalScaling + width / 2): " & (window.Left + pixProfXDisp * totalScaling + width / 2))
-                    Main.addLog("Calulated Y Position (window.Top + pixProfYDisp * totalScaling): " & (window.Top + pixProfYDisp * totalScaling))
+                    Dim x As Integer = window.Left + pixProfXDisp * totalScaling + width / 2
+                    Dim y As Integer = window.Top + pixProfYDisp * totalScaling
+                    graph.CopyFromScreen(x, y, 0, 0, New Size(width, 1), CopyPixelOperation.SourceCopy)
+                    Main.addLog("Pulled UI Color from : (" & x & ", " & y & ") x " & width & "px")
                 End Using
+                Dim foundColors As String = ""
                 For i As Integer = 0 To width - 1
                     clr = bmp.GetPixel(i, 0)
-                    For Each knowColor In fissColors
-                        If ColorThreshold(clr, knowColor, 20) Then
-                            uiColor = knowColor
-                            Return True
+                    Dim foundAclr As Boolean = False
+                    For j As Integer = 0 To fissColors.Length - 1
+                        If ColorThreshold(clr, fissColors(j), 20) Then
+                            If i <> 0 Then
+                                foundColors &= ", "
+                            End If
+                            foundColors &= j
+                            foundAclr = True
+                            Exit For
                         End If
                     Next
+                    If Not foundAclr Then
+                        If i <> 0 Then
+                            foundColors &= ", "
+                        End If
+                        foundColors &= "-1"
+                    End If
                     R += clr.R
                     G += clr.G
                     B += clr.B
                 Next
+                Main.addLog("Colors found: " & foundColors)
             End If
 
             R /= width
@@ -159,13 +231,12 @@ Public Class OCR2
             B /= width
 
             Dim detectedColor = Color.FromArgb(R, G, B)
-            'For Each knowColor In fissColors
-            'If ColorThreshold(detectedColor, knowColor, 20) Then
-            'uiColor = knowColor
-            'Return True
-            'End If
-            'Next
-            Main.addLog("DETECTED COLOR: " & detectedColor.ToString() & " AT (" & (window.Left + pixProfXDisp * totalScaling + width / 2) & ", " & (window.Top + pixProfYDisp * totalScaling) & ", " & width)
+            For Each knowColor In fissColors
+                If ColorThreshold(detectedColor, knowColor, 20) Then
+                    uiColor = knowColor
+                    Return True
+                End If
+            Next
 
             Main.addLog("UI COLOR NOT FOUND")
         End Using
@@ -187,62 +258,71 @@ Public Class OCR2
     End Function
 
     Public Overridable Function GetDPIScaling() As Double
-        dpiScaling = 1
+        Dim tempScaling As Double = 1
 
         Using form As New Form()
             Using g As Graphics = form.CreateGraphics()
                 If g.DpiX <> 96 Then
-                    Main.addLog("FOUND DPI: g.DpiX")
-                    dpiScaling = g.DpiX / 96
-                    Return dpiScaling
+                    tempScaling = g.DpiX / 96
                 ElseIf g.DpiY <> 96 Then
-                    Main.addLog("FOUND DPI: g.DpiY")
-                    dpiScaling = g.DpiY / 96
-                    Return dpiScaling
+                    tempScaling = g.DpiY / 96
                 End If
             End Using
         End Using
 
-        Using g As Graphics = Graphics.FromHwnd(IntPtr.Zero)
-            Dim desktop As IntPtr = g.GetHdc()
-            dpiScaling = GetDeviceCaps(desktop, DeviceCap.DESKTOPVERTRES) / GetDeviceCaps(desktop, DeviceCap.VERTRES)
-            If dpiScaling <> 1 Then
-                Main.addLog("FOUND DPI: VERTRES")
-            End If
-        End Using
+        If tempScaling = 1 Then
+            Using g As Graphics = Graphics.FromHwnd(IntPtr.Zero)
+                Dim desktop As IntPtr = g.GetHdc()
+                tempScaling = GetDeviceCaps(desktop, DeviceCap.DESKTOPVERTRES) / GetDeviceCaps(desktop, DeviceCap.VERTRES)
+            End Using
+        End If
 
-        Main.addLog("UPDATING DPI SCALING TO: " & dpiScaling)
-        totalScaling = dpiScaling * uiScaling
+        If tempScaling <> dpiScaling Then
+            dpiScaling = tempScaling
+            Main.addLog("UPDATING DPI SCALING TO: " & dpiScaling)
+            totalScaling = dpiScaling * uiScaling
+        End If
+
         Return dpiScaling
     End Function
 
     Public Overridable Function GetUIScaling() As Double
-        uiScaling = My.Settings.Scaling / 100
+        Dim tempScaling As Double = My.Settings.Scaling / 100
         '     All values are based on 1920x1080
         If window.Width / window.Height > 16 / 9 Then
-            uiScaling *= window.Height / 1080
+            screenScaling = window.Height / 1080
         Else
-            uiScaling *= window.Width / 1920
+            screenScaling = window.Width / 1920
         End If
-        totalScaling = dpiScaling * uiScaling
+        tempScaling *= screenScaling
+        If tempScaling <> uiScaling Then
+            uiScaling = tempScaling
+            totalScaling = dpiScaling * uiScaling
 
-        Main.addLog("UPDATING UI SCALING TO: " & uiScaling)
+            Main.addLog("UPDATING UI SCALING TO: " & uiScaling)
+        End If
         Return uiScaling
     End Function
 
     Public Overridable Function GetWFProc() As Process
         For Each p As Process In Process.GetProcesses
-            If p.MainWindowTitle = "Warframe" Then
-                Try
-                    If WF_Proc Is Nothing OrElse p.Handle <> WF_Proc.Handle Then
-                        WF_Proc = p
-                        UpdateCenter()
+            Try
+                If p.MainWindowTitle = "Warframe" Then
+                    Dim hr As New HandleRef(p, p.MainWindowHandle)
+                    Dim tempRect As New RECT
+                    GetWindowRect(hr, tempRect)
+
+                    If tempRect.Left <> tempRect.Right AndAlso tempRect.Top <> tempRect.Bottom Then
+                        If WF_Proc Is Nothing OrElse p.Handle <> WF_Proc.Handle Then
+                            WF_Proc = p
+                            UpdateCenter()
+                        End If
+                        Return WF_Proc
                     End If
-                    Return WF_Proc
-                Catch ex As Exception
-                    Main.addLog("Game crash: " & ex.ToString())
-                End Try
-            End If
+                End If
+            Catch ex As Exception
+                Main.addLog("EXCEPTION DURING GetWFProc() with PROCESS " & p.Id & ": " & ex.ToString())
+            End Try
         Next
         WF_Proc = Nothing
         If Debug And window = Nothing Then
@@ -285,38 +365,42 @@ Public Class OCR2
         Dim tempRect As New RECT
         GetWindowRect(hr, tempRect)
 
-        window = New Rectangle(tempRect.Left, tempRect.Top, tempRect.Right - tempRect.Left, tempRect.Bottom - tempRect.Top)
-        Main.addLog("WINDOW AREA: " & window.ToString())
+        Dim tempWindow As New Rectangle(tempRect.Left, tempRect.Top, tempRect.Right - tempRect.Left, tempRect.Bottom - tempRect.Top)
 
-        Dim GWL_STYLE As Int32 = -16
-        Dim WS_THICKFRAME As Long = 262144
-        Dim WS_MAXIMIZE As Long = 16777216
-        Dim WS_POPUP As Long = 2147483648
-        Dim styles As Long = GetWindowLong(WF_Proc.MainWindowHandle, GWL_STYLE)
-        If (styles And WS_THICKFRAME) <> 0 Then
-            window = New Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38)
-            Main.addLog("WINDOWED ADJUSTMENT: " & window.ToString())
-            currStyle = WindowStyle.WINDOWED
-        ElseIf (styles And WS_POPUP) <> 0 Then
-            currStyle = WindowStyle.BORDERLESS
-        Else
-            currStyle = WindowStyle.FULLSCREEN
-        End If
+        If tempWindow.Width <> window.Width OrElse tempWindow.Height <> window.Height Then
+            window = tempWindow
+            Main.addLog("UPDATED WINDOW AREA: " & window.ToString())
 
-        If window.X < -20000 Or window.Y < -20000 Then
-            WF_Proc = Nothing
-            window = Nothing
-        Else
-            ' Get Scaling
-            GetDPIScaling()
-            GetUIScaling()
+            Dim GWL_STYLE As Int32 = -16
+            Dim WS_THICKFRAME As Long = 262144
+            Dim WS_MAXIMIZE As Long = 16777216
+            Dim WS_POPUP As Long = 2147483648
+            Dim styles As Long = GetWindowLong(WF_Proc.MainWindowHandle, GWL_STYLE)
+            If (styles And WS_THICKFRAME) <> 0 Then
+                window = New Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38)
+                Main.addLog("WINDOWED ADJUSTMENT: " & window.ToString())
+                currStyle = WindowStyle.WINDOWED
+            ElseIf (styles And WS_POPUP) <> 0 Then
+                currStyle = WindowStyle.BORDERLESS
+            Else
+                currStyle = WindowStyle.FULLSCREEN
+            End If
 
-            ' Get Window Points
-            Dim horz_center As Integer = window.Left + (window.Width / 2)
-            Dim vert_center As Integer = window.Top + (window.Height / 2)
-            center = New Point(dpiScaling * horz_center, dpiScaling * vert_center)
+            If window.X < -20000 Or window.Y < -20000 Then
+                WF_Proc = Nothing
+                window = Nothing
+            Else
+                ' Get Scaling
+                GetDPIScaling()
+                GetUIScaling()
 
-            Main.addLog("UPDATED CENTER COORS: " & center.ToString())
+                ' Get Window Points
+                Dim horz_center As Integer = window.Left + (window.Width / 2)
+                Dim vert_center As Integer = window.Top + (window.Height / 2)
+                center = New Point(dpiScaling * horz_center, dpiScaling * vert_center)
+
+                Main.addLog("UPDATED CENTER COORS: " & center.ToString())
+            End If
         End If
     End Sub
 
