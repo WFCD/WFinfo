@@ -235,7 +235,7 @@ Partial Class Equipment
         Me.EqmtTree1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.EqmtTree1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.EqmtTree1.CausesValidation = False
-        Me.EqmtTree1.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll
+        Me.EqmtTree1.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText
         Me.EqmtTree1.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
         Me.EqmtTree1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.EqmtTree1.FullRowSelect = True
@@ -262,7 +262,7 @@ Partial Class Equipment
         Me.EqmtTree2.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.EqmtTree2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.EqmtTree2.CausesValidation = False
-        Me.EqmtTree2.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll
+        Me.EqmtTree2.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText
         Me.EqmtTree2.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
         Me.EqmtTree2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.EqmtTree2.FullRowSelect = True
@@ -356,7 +356,7 @@ Partial Class Equipment
         Me.Label1.TabIndex = 22
         Me.Label1.Text = "Sort By:"
         '
-        'Label2
+        'btnSwap
         '
         Me.btnSwap.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.btnSwap.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(100, Byte), Integer), CType(CType(100, Byte), Integer), CType(CType(100, Byte), Integer))

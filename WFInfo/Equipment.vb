@@ -328,20 +328,57 @@ Public Class Equipment
     ' Custom Draw
 
     Private Sub EqmtTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles EqmtTree1.DrawNode, EqmtTree2.DrawNode
-        e.DrawDefault = True
-        If e.Bounds.Width = 0 Then
+        'e.DrawDefault = True
+        If e.Bounds.Width = 0 OrElse e.Bounds.X = -1 Then
             ' BOUNDS ARE INCORRECT
             Return
         End If
         e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
 
+
+        Dim depth As Integer = GetTreeViewDepth(e.Node)
+        Dim rgb As Integer = 20 + 10 * depth + 5 * (e.Node.Index Mod 2)
+
+        Dim altBrush As New SolidBrush(Color.FromArgb(rgb, rgb, rgb))
+
+        e.Graphics.FillRectangle(altBrush, e.Bounds.X, e.Bounds.Y, EqmtTree1.Width, 16)
+
+        e.Graphics.DrawString(e.Node.Text, tahoma9_bold, textBrush, New PointF(e.Bounds.X, e.Bounds.Y))
+
         If types.Contains(e.Node.Text) Then
-            e.Graphics.DrawLine(New Pen(bgColor), 50, e.Bounds.Top, 450, e.Bounds.Top)
-            e.Graphics.DrawLine(New Pen(bgColor), 50, e.Bounds.Bottom, 450, e.Bounds.Bottom)
             Return
         End If
-        e.Graphics.DrawLine(New Pen(bgColor), 60, e.Bounds.Top, 450, e.Bounds.Top)
-        e.Graphics.DrawLine(New Pen(bgColor), 60, e.Bounds.Bottom, 450, e.Bounds.Bottom)
+
+        Dim vaulted As Boolean = False
+        If e.Node.Text.Contains("Prime") Then
+            ' EQMT
+
+            Dim eqmt As JObject = Nothing
+            If db.eqmt_data.TryGetValue(e.Node.Name, eqmt) Then
+                For Each kvp As KeyValuePair(Of String, JToken) In eqmt("parts").ToObject(Of JObject)
+                    If kvp.Value("vaulted").ToObject(Of Boolean) Then
+                        vaulted = True
+                        Exit For
+                    End If
+                Next
+            End If
+
+        Else
+            ' PART
+            '   node.Name = full part (matches db.market_data)
+            Dim job As JObject = Nothing
+            If db.eqmt_data.TryGetValue(e.Node.Parent.Name, job) Then
+                If job("parts").ToObject(Of JObject).TryGetValue(e.Node.Name, job) Then
+                    If job("vaulted").ToObject(Of Boolean) Then
+                        vaulted = True
+                    End If
+                End If
+            End If
+        End If
+
+        If vaulted Then
+            e.Graphics.DrawString("Vaulted", tahoma9_bold, stealthBrush, New PointF(e.Bounds.Right, e.Bounds.Y))
+        End If
 
         Dim brush As Brush = textBrush
 

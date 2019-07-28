@@ -561,32 +561,7 @@ Public Class Relics
             If db.relic_data.TryGetValue(split(0), find) Then
                 If find.TryGetValue(split(1), find) Then
                     If find("vaulted") Then
-                        Dim right As Integer = 115
-                        If fullPath.Contains("|") Then
-                            If e.Node.FullPath.Contains("Meso") Then
-                                right = 131
-                            ElseIf e.Node.FullPath.Contains("Axi") Then
-                                right = 118
-                            ElseIf e.Node.FullPath.Contains("Lith") Then
-                                right = 123
-                            Else
-                                right = 122
-                            End If
-                            If e.Node.FullPath.Contains("Hidden") Then
-                                right += 20
-                            End If
-
-                        ElseIf e.Node.FullPath.Contains("Hidden") Then
-                            right = 135
-                        End If
-
-                        right += 10 * (split(1).Length - 2)
-
-                        Dim rect As SizeF = e.Graphics.MeasureString("Vaulted", tahoma9_bold)
-                        Using br = New SolidBrush(bgColor)
-                            e.Graphics.FillRectangle(br, right - rect.Width - 10, e.Bounds.Top + 1, rect.Width + 10, rect.Height)
-                        End Using
-                        e.Graphics.DrawString("Vaulted", tahoma9_bold, stealthBrush, right, e.Bounds.Top + 1, sf)
+                        e.Graphics.DrawString("Vaulted", tahoma9_bold, stealthBrush, New PointF(e.Bounds.Right, e.Bounds.Y))
                     End If
 
                     Dim itot As String = CDbl(find("int")).ToString("N1")

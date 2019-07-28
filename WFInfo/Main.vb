@@ -351,8 +351,9 @@ Module Glob
     Public rareColor As Color = Color.FromArgb(255, 215, 0)
     Public rareBrush As Brush = New SolidBrush(rareColor)
     Public bgColor As Color = Color.FromArgb(27, 27, 27)
-    Public bgHighlightColor As Color = Color.FromArgb(50, 50, 50)
     Public bgBrush As Brush = New SolidBrush(bgColor)
+    Public bgHighlightColor As Color = Color.FromArgb(50, 50, 50)
+    Public bgHighlightBrush As Brush = New SolidBrush(bgHighlightColor)
     Public culture As System.Globalization.CultureInfo = New System.Globalization.CultureInfo("en")
     Public tahoma10 As New Font("Tahoma", 10.0!, FontStyle.Bold)
     Public tahoma9_bold As New Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
@@ -660,5 +661,15 @@ Module Glob
             Return ret
         End If
         Return -1
+    End Function
+
+    Public Function GetTreeViewDepth(node As TreeNode) As Integer
+        Dim depth As Integer = 0
+        Dim parent As TreeNode = node.Parent
+        While parent IsNot Nothing
+            depth += 1
+            parent = parent.Parent
+        End While
+        Return depth
     End Function
 End Module
