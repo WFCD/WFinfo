@@ -31,7 +31,6 @@ Partial Class Relics
         Dim TreeNode4 As System.Windows.Forms.TreeNode = New System.Windows.Forms.TreeNode("Axi")
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Relics))
         Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.RelicTree0 = New WFInfo.DoubleBufferedTreeView()
         Me.RelicTree3 = New WFInfo.DoubleBufferedTreeView()
         Me.Panel3 = New System.Windows.Forms.Panel()
         Me.Panel4 = New System.Windows.Forms.Panel()
@@ -65,7 +64,6 @@ Partial Class Relics
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel1.Controls.Add(Me.RelicTree0)
         Me.Panel1.Controls.Add(Me.RelicTree3)
         Me.Panel1.Controls.Add(Me.Panel3)
         Me.Panel1.Controls.Add(Me.RelicTree2)
@@ -76,28 +74,12 @@ Partial Class Relics
         Me.Panel1.Size = New System.Drawing.Size(456, 394)
         Me.Panel1.TabIndex = 24
         '
-        'RelicTree0
-        '
-        Me.RelicTree0.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.RelicTree0.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.RelicTree0.CausesValidation = False
-        Me.RelicTree0.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll
-        Me.RelicTree0.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
-        Me.RelicTree0.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.RelicTree0.FullRowSelect = True
-        Me.RelicTree0.ItemHeight = 16
-        Me.RelicTree0.Location = New System.Drawing.Point(-1, 53)
-        Me.RelicTree0.Name = "RelicTree0"
-        Me.RelicTree0.Size = New System.Drawing.Size(473, 340)
-        Me.RelicTree0.TabIndex = 27
-        Me.RelicTree0.Visible = False
-        '
         'RelicTree3
         '
         Me.RelicTree3.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.RelicTree3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.RelicTree3.CausesValidation = False
-        Me.RelicTree3.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll
+        Me.RelicTree3.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText
         Me.RelicTree3.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
         Me.RelicTree3.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.RelicTree3.FullRowSelect = True
@@ -209,7 +191,7 @@ Partial Class Relics
         Me.RelicTree2.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.RelicTree2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.RelicTree2.CausesValidation = False
-        Me.RelicTree2.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll
+        Me.RelicTree2.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText
         Me.RelicTree2.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
         Me.RelicTree2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.RelicTree2.FullRowSelect = True
@@ -276,7 +258,7 @@ Partial Class Relics
         Me.RelicTree1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.RelicTree1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.RelicTree1.CausesValidation = False
-        Me.RelicTree1.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll
+        Me.RelicTree1.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText
         Me.RelicTree1.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
         Me.RelicTree1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.RelicTree1.FullRowSelect = True
@@ -418,7 +400,6 @@ Partial Class Relics
     Friend WithEvents Panel3 As Panel
     Friend WithEvents Label3 As Label
     Friend WithEvents RelicTree3 As DoubleBufferedTreeView
-    Friend WithEvents RelicTree0 As DoubleBufferedTreeView
     Friend WithEvents btnExpand As Button
     Friend WithEvents btnCollapse As Button
     Friend WithEvents VaultCheck As CheckBox

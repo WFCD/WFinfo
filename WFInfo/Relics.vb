@@ -82,7 +82,7 @@ Public Class Relics
             btnSwap.Text = "All Relics"
         End If
         If RelicTree3.Visible Then
-            ReloadRelicTree3()
+            UpdateRelicTree3(current_filters)
         End If
     End Sub
 
@@ -136,7 +136,7 @@ Public Class Relics
         End If
 
         If RelicTree3.Visible Then
-            ReloadRelicTree3()
+            UpdateRelicTree3(current_filters)
         End If
     End Sub
 
@@ -191,6 +191,7 @@ Public Class Relics
         If e.Button <> MouseButtons.Right Then
             RelicToHide = Nothing
             Relic2ToHide = Nothing
+            sender.SelectedNode = Nothing
             Return
         End If
         e.Node.TreeView.SelectedNode = e.Node
@@ -430,8 +431,6 @@ Public Class Relics
                             Else
                                 Main.addLog("MISSING RELIC PLAT VALUES: " + era.Key & " " & relic.Key & " - " & part.Key & ": " & part.Value.ToString())
                             End If
-                        Else
-                            Console.WriteLine(era.Key & " " & relic.Key & " - " & part.Key & ": " & part.Value.ToString())
                         End If
                     Next
                     db.relic_data(era.Key)(relic.Key)("rad") = rtot
@@ -484,7 +483,7 @@ Public Class Relics
 
     ' Treeview Event code
 
-    Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree1.AfterCollapse, RelicTree2.AfterCollapse
+    Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree1.AfterCollapse, RelicTree2.AfterCollapse, RelicTree3.AfterCollapse
         Dim temp As String = "|" + e.Node.FullPath.Replace("\", " ") + "|"
         If e.Node.Text <> "Hidden" Then
             temp = temp.Replace("Hidden ", "")
@@ -495,19 +494,24 @@ Public Class Relics
         temp = temp.Replace("|", "")
         Dim era_name As String() = temp.Split(" ")
         If era_name.Count = 2 AndAlso era_name(1).Length = 2 Then
-            Dim other As TreeView = RelicTree1
-            If sender.Equals(RelicTree1) Then
-                other = RelicTree2
+            If sender.Equals(RelicTree3) OrElse sender.Equals(RelicTree2) Then
+                For Each node As TreeNode In RelicTree1.Nodes.Find(era_name(1), True)
+                    If node.IsExpanded AndAlso node.FullPath.Contains(era_name(0)) Then
+                        node.Collapse()
+                    End If
+                Next
             End If
-            For Each node As TreeNode In other.Nodes.Find(era_name(1), True)
-                If node.IsExpanded AndAlso node.FullPath.Contains(era_name(0)) Then
-                    node.Collapse()
-                End If
-            Next
+            If sender.Equals(RelicTree3) OrElse sender.Equals(RelicTree1) Then
+                For Each node As TreeNode In RelicTree2.Nodes.Find(era_name(1), True)
+                    If node.IsExpanded AndAlso node.FullPath.Contains(era_name(0)) Then
+                        node.Collapse()
+                    End If
+                Next
+            End If
         End If
     End Sub
 
-    Private Sub RelicTree_Expand(sender As Object, e As TreeViewEventArgs) Handles RelicTree1.AfterExpand, RelicTree2.AfterExpand
+    Private Sub RelicTree_Expand(sender As Object, e As TreeViewEventArgs) Handles RelicTree1.AfterExpand, RelicTree2.AfterExpand, RelicTree3.AfterExpand
         Dim temp As String = "|" + e.Node.FullPath.Replace("\", " ") + "|"
         If e.Node.Text <> "Hidden" Then
             temp = temp.Replace("Hidden ", "")
@@ -518,21 +522,26 @@ Public Class Relics
         temp = temp.Replace("|", "")
         Dim era_name As String() = temp.Split(" ")
         If era_name.Count = 2 AndAlso era_name(1).Length = 2 Then
-            Dim other As TreeView = RelicTree1
-            If sender.Equals(RelicTree1) Then
-                other = RelicTree2
+            If sender.Equals(RelicTree3) OrElse sender.Equals(RelicTree2) Then
+                For Each node As TreeNode In RelicTree1.Nodes.Find(era_name(1), True)
+                    If Not node.IsExpanded AndAlso node.FullPath.Contains(era_name(0)) Then
+                        node.Expand()
+                    End If
+                Next
             End If
-            For Each node As TreeNode In other.Nodes.Find(era_name(1), True)
-                If Not node.IsExpanded AndAlso node.FullPath.Contains(era_name(0)) Then
-                    node.Expand()
-                End If
-            Next
+            If sender.Equals(RelicTree3) OrElse sender.Equals(RelicTree1) Then
+                For Each node As TreeNode In RelicTree2.Nodes.Find(era_name(1), True)
+                    If Not node.IsExpanded AndAlso node.FullPath.Contains(era_name(0)) Then
+                        node.Expand()
+                    End If
+                Next
+            End If
         End If
     End Sub
 
     Private Sub RelicTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles RelicTree1.DrawNode, RelicTree2.DrawNode, RelicTree3.DrawNode
         e.DrawDefault = True
-        If e.Bounds.IsEmpty Then
+        If e.Bounds.IsEmpty OrElse e.Bounds.Left = -1 Then
             Return
         End If
         e.Graphics.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
@@ -629,6 +638,40 @@ Public Class Relics
                 e.Graphics.DrawString(vals("ducats"), RelicTree1.Font, brush, 370, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.ducat_w, 370, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
             End If
+            If RelicTree3.Visible AndAlso Not CheckNode(e.Node.Parent, current_filters) AndAlso CheckNode(e.Node, current_filters) Then
+                e.DrawDefault = False
+                Dim highlights As List(Of Integer()) = CombineSegments(GetMatchedText(e.Node, current_filters))
+                Dim loc As Integer = 43
+                If RelicTree2.Visible Then
+                    loc = 24
+                End If
+                Dim boundRect As Rectangle = e.Bounds
+                Dim textToDraw As String = ""
+                If highlights(0)(0) <> 0 Then
+                    textToDraw = e.Node.Text.Substring(0, highlights(0)(0))
+                    TextRenderer.DrawText(e.Graphics, textToDraw, RelicTree1.Font, boundRect, e.Node.ForeColor, e.Node.BackColor, TextFormatFlags.Left Or TextFormatFlags.VerticalCenter)
+                    boundRect.X += e.Graphics.MeasureString(textToDraw, RelicTree1.Font, 9999, StringFormat.GenericTypographic).Width + 2
+                    If textToDraw.Trim.Length <> textToDraw.Length Then
+                        boundRect.X += 4
+                    End If
+                End If
+                For i As Integer = 0 To highlights.Count - 1
+                    Dim seg As Integer() = highlights(i)
+                    textToDraw = e.Node.Text.Substring(seg(0), seg(1) - seg(0))
+                    TextRenderer.DrawText(e.Graphics, textToDraw, RelicTree1.Font, boundRect, e.Node.BackColor, e.Node.ForeColor, TextFormatFlags.Left Or TextFormatFlags.VerticalCenter)
+                    boundRect.X += e.Graphics.MeasureString(textToDraw, RelicTree1.Font, 9999, StringFormat.GenericTypographic).Width + 2
+
+                    textToDraw = e.Node.Text.Substring(seg(1))
+                    If i < highlights.Count - 1 Then
+                        textToDraw = e.Node.Text.Substring(seg(1), highlights(i + 1)(0) - seg(1))
+                    End If
+                    TextRenderer.DrawText(e.Graphics, textToDraw, RelicTree1.Font, boundRect, e.Node.ForeColor, e.Node.BackColor, TextFormatFlags.Left Or TextFormatFlags.VerticalCenter)
+                    boundRect.X += e.Graphics.MeasureString(textToDraw, RelicTree1.Font, 9999, StringFormat.GenericTypographic).Width + 1
+                    If textToDraw.Trim.Length <> textToDraw.Length Then
+                        boundRect.X += 4
+                    End If
+                Next
+            End If
         End If
         Dim left As Integer = 20
         If e.Node.Parent Is Nothing Then
@@ -668,6 +711,12 @@ Public Class Relics
         End If
     End Sub
 
+    Private Sub RelicTree_MouseEnter(sender As Object, e As EventArgs) Handles RelicTree1.MouseEnter, RelicTree2.MouseEnter, RelicTree3.MouseEnter
+        Dim treeCast As TreeView = sender
+        treeCast.Select()
+        treeCast.SelectedNode = Nothing
+    End Sub
+
     Private Sub FilterText_Exit(sender As Object, e As EventArgs) Handles FilterText.Leave
         If FilterText.Text = "" Then
             FilterText.Text = "Filter Terms..."
@@ -678,7 +727,6 @@ Public Class Relics
     Private Sub FilterText_TextChanged(sender As Object, e As EventArgs) Handles FilterText.TextChanged
         RelicTree3.Visible = False
         If FilterText.Text.Length <> 0 AndAlso FilterText.Text <> "Filter Terms..." Then
-            RelicTree3.Nodes.Clear()
             Dim textTemp As String = FilterText.Text.Trim
             If FilterText.Text.Chars(0) = "!"c Then
                 textTemp = textTemp.Substring(1)
@@ -689,21 +737,56 @@ Public Class Relics
             If textTemp.Length > 0 Then
                 current_filters = textTemp.ToLower().Split(" ")
                 UpdateRelicTree3(current_filters)
+            Else
+                RelicTree3.Nodes.Clear()
             End If
         End If
     End Sub
 
-    Private Sub ReloadRelicTree3()
-        RelicTree3.Visible = False
-        RelicTree3.Nodes.Clear()
-        UpdateRelicTree3(current_filters)
+    Private Sub RecursiveGetExpandedNodes(nodes As TreeNodeCollection, ByRef arr As List(Of String))
+        For Each kid As TreeNode In nodes
+            If kid.IsExpanded Then
+                arr.Add(kid.FullPath.Replace("\Hidden", ""))
+            End If
+            If kid.Nodes.Count > 0 Then
+                RecursiveGetExpandedNodes(kid.Nodes, arr)
+            End If
+        Next
+    End Sub
+
+    Private Function GetExpandedNodes(tree As TreeView) As List(Of String)
+        Dim ret As New List(Of String)
+        RecursiveGetExpandedNodes(tree.Nodes, ret)
+        Return ret
+    End Function
+
+    Private Sub RecursiveExpandNodes(nodes As TreeNodeCollection, arr As List(Of String))
+        For Each kid As TreeNode In nodes
+            If arr.Contains(kid.FullPath) Then
+                kid.Expand()
+            End If
+            If kid.Nodes.Count > 0 Then
+                RecursiveExpandNodes(kid.Nodes, arr)
+            End If
+        Next
     End Sub
 
     Private Sub UpdateRelicTree3(filters As String())
+        RelicTree3.Visible = False
+        Dim nodes As List(Of String) = Nothing
+        If showAll Then
+            If RelicTree1.Visible Then
+                nodes = GetExpandedNodes(RelicTree1)
+            Else
+                nodes = GetExpandedNodes(RelicTree2)
+            End If
+        End If
+
+        RelicTree3.Nodes.Clear()
+
         If RelicTree1.Visible Then
             Tree3Sorter.relic = 0
             'RelicTree1
-            Console.WriteLine("RelicTree1")
             For Each era As TreeNode In RelicTree1.Nodes
                 Dim eraNode As TreeNode = Nothing
                 For Each node As TreeNode In era.Nodes
@@ -768,7 +851,6 @@ Public Class Relics
             Tree3Sorter.relic = 1
             'RelicTree2
             ' {Relics, Hidden:{Relics}}
-            Console.WriteLine("RelicTree2")
             For Each node As TreeNode In RelicTree2.Nodes
                 If node.Text = "Hidden" Then
                     'Parse the hidden list
@@ -810,10 +892,15 @@ Public Class Relics
                 End If
             Next
         End If
+
         RelicTree3.Sort()
 
-        If Not showAll And RelicTree3.Nodes.Count > 0 Then
-            RelicTree3.ExpandAll()
+        If RelicTree3.Nodes.Count > 0 Then
+            If showAll Then
+                RecursiveExpandNodes(RelicTree3.Nodes, nodes)
+            Else
+                RelicTree3.ExpandAll()
+            End If
             RelicTree3.Nodes(0).EnsureVisible()
         End If
         RelicTree3.Visible = True
@@ -837,6 +924,41 @@ Public Class Relics
             End If
         Next
         Return True
+    End Function
+
+    Private Function GetMatchedText(node As TreeNode, filters As String()) As List(Of Integer())
+        Dim ret As New List(Of Integer())
+        Dim checkStr As String = node.Text.ToLower()
+        For Each filt As String In filters
+            If checkStr.Contains(filt) Then
+                Dim first As Integer = checkStr.IndexOf(filt)
+                Do
+                    Dim last As Integer = first + filt.Length
+                    ret.Add({first, last})
+                    first = checkStr.IndexOf(filt, last)
+                Loop While first <> -1
+            End If
+        Next
+        ret.Sort(Function(x, y) x(0).CompareTo(y(0)))
+        Return ret
+    End Function
+
+    Private Function CombineSegments(arr As List(Of Integer())) As List(Of Integer())
+        Dim ret As New List(Of Integer())
+        Dim i As Integer = 0
+        While i < arr.Count
+            Dim hold As Integer() = arr(i)
+            i += 1
+            While i < arr.Count AndAlso arr(i)(0) <= hold(1)
+                If arr(i)(1) > hold(1) Then
+                    hold(1) = arr(i)(1)
+                End If
+                i += 1
+            End While
+            ret.Add(hold)
+        End While
+
+        Return ret
     End Function
 
     Private Sub FilterText_EnterKey(sender As Object, e As KeyPressEventArgs) Handles FilterText.KeyPress
@@ -874,7 +996,13 @@ Public Class NodeSorter
         Dim erax As String = ""
         Dim eray As String = ""
         If strx.Contains("Prime") OrElse strx.Contains("Forma") OrElse stry.Contains("Prime") OrElse stry.Contains("Forma") Then
-            Return tx.Index - ty.Index
+            If tx.ForeColor.G = ty.ForeColor.G Then
+                If Not db.market_data.TryGetValue(strx, Nothing) OrElse Not db.market_data.TryGetValue(stry, Nothing) Then
+                    Return -1
+                End If
+                Return db.market_data(stry)("ducats").ToObject(Of Integer) - db.market_data(strx)("ducats").ToObject(Of Integer)
+            End If
+            Return CInt(ty.ForeColor.G) - CInt(tx.ForeColor.G)
         End If
 
         If relic = 0 Then
