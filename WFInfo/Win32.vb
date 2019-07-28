@@ -164,8 +164,16 @@
     Public Function UpdateLayeredWindow(hwnd As IntPtr, hdcdst As IntPtr, ByRef pptDst As WinPoint, ByRef psize As WinSize, hdcSrc As IntPtr, ByRef pprSrc As WinPoint, crKey As Int32, ByRef pblend As BLENDFUNCTION, dwFlags As Int32) As Boolean
     End Function
 
+    <DllImport("user32.dll")>
+    Public Function RedrawWindow(hwnd As IntPtr, lprc As IntPtr, hrgn As IntPtr, flags As UInteger) As Boolean
+    End Function
+
     <DllImport("user32.dll", ExactSpelling:=True, SetLastError:=True)>
     Public Function GetDC(hwnd As IntPtr) As IntPtr
+    End Function
+
+    <DllImport("user32.dll")>
+    Public Function GetWindowDC(hwnd As IntPtr) As IntPtr
     End Function
 
     <DllImport("user32.dll", ExactSpelling:=True)>

@@ -34,6 +34,10 @@ Partial Class Equipment
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Equipment))
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.Panel3 = New System.Windows.Forms.Panel()
+        Me.Line1 = New System.Windows.Forms.Label()
+        Me.Line2 = New System.Windows.Forms.Label()
+        Me.Line3 = New System.Windows.Forms.Label()
+        Me.BottomResize = New System.Windows.Forms.Panel()
         Me.EqmtTree1 = New WFInfo.DoubleBufferedTreeView()
         Me.EqmtTree2 = New WFInfo.DoubleBufferedTreeView()
         Me.Label6 = New System.Windows.Forms.Label()
@@ -50,10 +54,6 @@ Partial Class Equipment
         Me.pbIcon = New System.Windows.Forms.PictureBox()
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.AddMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
-        Me.BottomResize = New System.Windows.Forms.Panel()
-        Me.Line1 = New System.Windows.Forms.Label()
-        Me.Line2 = New System.Windows.Forms.Label()
-        Me.Line3 = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
         Me.Panel3.SuspendLayout()
         Me.Panel2.SuspendLayout()
@@ -69,22 +69,60 @@ Partial Class Equipment
         Me.Panel1.Controls.Add(Me.Panel2)
         Me.Panel1.Location = New System.Drawing.Point(0, 26)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(456, 371)
+        Me.Panel1.Size = New System.Drawing.Size(456, 388)
         Me.Panel1.TabIndex = 24
         '
         'Panel3
         '
         Me.Panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel3.Controls.Add(Me.Line1)
+        Me.Panel3.Controls.Add(Me.Line2)
+        Me.Panel3.Controls.Add(Me.Line3)
+        Me.Panel3.Controls.Add(Me.BottomResize)
         Me.Panel3.Controls.Add(Me.EqmtTree1)
         Me.Panel3.Controls.Add(Me.EqmtTree2)
         Me.Panel3.Controls.Add(Me.Label6)
         Me.Panel3.Controls.Add(Me.Label5)
         Me.Panel3.Controls.Add(Me.Label4)
         Me.Panel3.Controls.Add(Me.Label3)
-        Me.Panel3.Location = New System.Drawing.Point(-1, 30)
+        Me.Panel3.Location = New System.Drawing.Point(-1, 54)
         Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(456, 340)
+        Me.Panel3.Size = New System.Drawing.Size(456, 333)
         Me.Panel3.TabIndex = 25
+        '
+        'Line1
+        '
+        Me.Line1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Line1.Location = New System.Drawing.Point(207, 0)
+        Me.Line1.Name = "Line1"
+        Me.Line1.Size = New System.Drawing.Size(1, 345)
+        Me.Line1.TabIndex = 31
+        '
+        'Line2
+        '
+        Me.Line2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Line2.Location = New System.Drawing.Point(287, 0)
+        Me.Line2.Name = "Line2"
+        Me.Line2.Size = New System.Drawing.Size(1, 345)
+        Me.Line2.TabIndex = 32
+        '
+        'Line3
+        '
+        Me.Line3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Line3.Location = New System.Drawing.Point(367, 0)
+        Me.Line3.Name = "Line3"
+        Me.Line3.Size = New System.Drawing.Size(1, 345)
+        Me.Line3.TabIndex = 33
+        '
+        'BottomResize
+        '
+        Me.BottomResize.BackColor = System.Drawing.Color.Transparent
+        Me.BottomResize.Cursor = System.Windows.Forms.Cursors.SizeNS
+        Me.BottomResize.ForeColor = System.Drawing.Color.Transparent
+        Me.BottomResize.Location = New System.Drawing.Point(5, 326)
+        Me.BottomResize.Name = "BottomResize"
+        Me.BottomResize.Size = New System.Drawing.Size(444, 5)
+        Me.BottomResize.TabIndex = 28
         '
         'EqmtTree1
         '
@@ -95,7 +133,7 @@ Partial Class Equipment
         Me.EqmtTree1.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
         Me.EqmtTree1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.EqmtTree1.FullRowSelect = True
-        Me.EqmtTree1.Location = New System.Drawing.Point(-1, 29)
+        Me.EqmtTree1.Location = New System.Drawing.Point(-1, 22)
         Me.EqmtTree1.Name = "EqmtTree1"
         TreeNode1.Name = "warframe"
         TreeNode1.Text = "Warframe"
@@ -122,7 +160,7 @@ Partial Class Equipment
         Me.EqmtTree2.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
         Me.EqmtTree2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.EqmtTree2.FullRowSelect = True
-        Me.EqmtTree2.Location = New System.Drawing.Point(-1, 29)
+        Me.EqmtTree2.Location = New System.Drawing.Point(-1, 22)
         Me.EqmtTree2.Name = "EqmtTree2"
         Me.EqmtTree2.Size = New System.Drawing.Size(473, 310)
         Me.EqmtTree2.TabIndex = 26
@@ -134,7 +172,7 @@ Partial Class Equipment
         Me.Label6.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.Label6.Location = New System.Drawing.Point(207, -1)
         Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(81, 31)
+        Me.Label6.Size = New System.Drawing.Size(81, 24)
         Me.Label6.TabIndex = 25
         Me.Label6.Text = "Owned"
         Me.Label6.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -146,7 +184,7 @@ Partial Class Equipment
         Me.Label5.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.Label5.Location = New System.Drawing.Point(287, -1)
         Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(81, 31)
+        Me.Label5.Size = New System.Drawing.Size(81, 24)
         Me.Label5.TabIndex = 24
         Me.Label5.Text = "Ducat"
         Me.Label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -158,7 +196,7 @@ Partial Class Equipment
         Me.Label4.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.Label4.Location = New System.Drawing.Point(367, -1)
         Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(88, 31)
+        Me.Label4.Size = New System.Drawing.Size(88, 24)
         Me.Label4.TabIndex = 23
         Me.Label4.Text = "Plat"
         Me.Label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -170,7 +208,7 @@ Partial Class Equipment
         Me.Label3.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
         Me.Label3.Location = New System.Drawing.Point(-1, -1)
         Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(205, 31)
+        Me.Label3.Size = New System.Drawing.Size(205, 24)
         Me.Label3.TabIndex = 22
         Me.Label3.Text = "Name"
         Me.Label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -295,50 +333,12 @@ Partial Class Equipment
         Me.AddMenu.ShowItemToolTips = False
         Me.AddMenu.Size = New System.Drawing.Size(36, 4)
         '
-        'BottomResize
-        '
-        Me.BottomResize.BackColor = System.Drawing.Color.Transparent
-        Me.BottomResize.Cursor = System.Windows.Forms.Cursors.SizeNS
-        Me.BottomResize.ForeColor = System.Drawing.Color.Transparent
-        Me.BottomResize.Location = New System.Drawing.Point(6, 391)
-        Me.BottomResize.Name = "BottomResize"
-        Me.BottomResize.Size = New System.Drawing.Size(444, 5)
-        Me.BottomResize.TabIndex = 28
-        '
-        'Line1
-        '
-        Me.Line1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Line1.Location = New System.Drawing.Point(208, 58)
-        Me.Line1.Name = "Line1"
-        Me.Line1.Size = New System.Drawing.Size(1, 345)
-        Me.Line1.TabIndex = 31
-        '
-        'Line2
-        '
-        Me.Line2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Line2.Location = New System.Drawing.Point(287, 57)
-        Me.Line2.Name = "Line2"
-        Me.Line2.Size = New System.Drawing.Size(1, 345)
-        Me.Line2.TabIndex = 32
-        '
-        'Line3
-        '
-        Me.Line3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Line3.Location = New System.Drawing.Point(367, 57)
-        Me.Line3.Name = "Line3"
-        Me.Line3.Size = New System.Drawing.Size(1, 345)
-        Me.Line3.TabIndex = 33
-        '
         'Equipment
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(456, 397)
-        Me.Controls.Add(Me.Line3)
-        Me.Controls.Add(Me.Line2)
-        Me.Controls.Add(Me.Line1)
-        Me.Controls.Add(Me.BottomResize)
+        Me.ClientSize = New System.Drawing.Size(456, 414)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.DoubleBuffered = True
