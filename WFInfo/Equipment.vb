@@ -10,6 +10,8 @@ Public Class Equipment
     Public Tree2Sorter As New EqmtSorter(1)
     Public types As String() = {"Warframe", "Primary", "Secondary", "Melee", "Archwing", "Companion"}
 
+    ' DRAG n DROP code
+
     Private Sub startDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown, lbTitle.MouseDown, pbIcon.MouseDown
         drag = True
         mouseX = Cursor.Position.X - Me.Left
@@ -27,6 +29,8 @@ Public Class Equipment
         drag = False
         My.Settings.EqmtWinLoc = Me.Location
     End Sub
+
+    ' Resize Code
 
     Private Sub startResize(sender As Object, e As EventArgs) Handles BottomResize.MouseDown
         resizing = True
@@ -57,17 +61,43 @@ Public Class Equipment
         resizing = False
     End Sub
 
+    ' Form Button/ETC Code
+
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
         Me.Hide()
     End Sub
 
-    Private Sub Label2_MouseEnter(sender As Object, e As EventArgs) Handles Label2.MouseEnter
-        Label2.BackColor = bgColor
+    Private Sub btnSwap_Click(sender As Object, e As EventArgs) Handles btnSwap.Click
+        EqmtTree2.Visible = My.Settings.EqmtOne
+        My.Settings.EqmtOne = Not My.Settings.EqmtOne
+        EqmtTree1.Visible = My.Settings.EqmtOne
+        lbTitle.Select()
+        If My.Settings.EqmtOne Then
+            EqmtTree1.Sort()
+            EqmtTree1.Select()
+            btnSwap.Text = "Equipment Groups"
+        Else
+            EqmtTree2.Sort()
+            EqmtTree2.Select()
+            btnSwap.Text = "All Equipment"
+        End If
     End Sub
 
-    Private Sub Label2_MouseLeave(sender As Object, e As EventArgs) Handles Label2.MouseLeave
-        Label2.BackColor = bgColor
+    Private Sub SortSelection_SelectedIndexChanged(sender As Object, e As EventArgs) Handles SortSelection.SelectedIndexChanged
+        My.Settings.EqmtSort = SortSelection.SelectedIndex
+        Tree1Sorter.type = My.Settings.EqmtSort
+        Tree2Sorter.type = My.Settings.EqmtSort
+        EqmtTree1.Sort()
+        EqmtTree2.Sort()
+        If EqmtTree1.Visible Then
+            EqmtTree1.Select()
+        Else
+            EqmtTree2.Select()
+        End If
+
     End Sub
+
+    ' Right Click Menu
 
     Private Sub AddMenu_Click(sender As Object, e As ToolStripItemClickedEventArgs) Handles AddMenu.ItemClicked
         If e.ClickedItem.Name = "0" Then
@@ -164,6 +194,8 @@ Public Class Equipment
         End If
     End Sub
 
+    ' Collapse/Expand code
+
     Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles EqmtTree1.AfterCollapse, EqmtTree2.AfterCollapse
         Dim temp As String = "|" + e.Node.FullPath + "|"
         If My.Settings.ExpandedRelics.Contains(temp) Then
@@ -199,6 +231,15 @@ Public Class Equipment
         Next
     End Sub
 
+    Private Sub CheckIfExpand(node As TreeNode)
+        Dim temp As String = "|" + node.FullPath + "|"
+        If My.Settings.ExpandedRelics.Contains(temp) Then
+            node.Expand()
+        End If
+    End Sub
+
+    ' Startup/Show Code
+
     Private Sub Eqmt_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Location = My.Settings.EqmtWinLoc
         If Me.Location.X = 0 And Me.Location.Y = 0 Then
@@ -207,11 +248,11 @@ Public Class Equipment
         If My.Settings.EqmtOne Then
             EqmtTree2.Visible = False
             EqmtTree1.Select()
-            Label2.Text = "Equipment Groups"
+            btnSwap.Text = "Equipment Groups"
         Else
             EqmtTree1.Visible = False
             EqmtTree2.Select()
-            Label2.Text = "All Equipment"
+            btnSwap.Text = "All Equipment"
         End If
         SortSelection.SelectedIndex = My.Settings.EqmtSort
     End Sub
@@ -222,6 +263,69 @@ Public Class Equipment
             Me.Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
         End If
     End Sub
+
+    Public Sub Load_Eqmt_Tree()
+        btnSwap.BackColor = bgColor
+        If EqmtTree1.Nodes(0).Nodes.Count > 1 Then
+            Return
+        End If
+        For Each node As TreeNode In EqmtTree1.Nodes
+            CheckIfExpand(node)
+        Next
+
+        Dim cast As JObject = Nothing
+        Dim eqmt As TreeNode = Nothing
+        For Each kvp As KeyValuePair(Of String, JToken) In db.eqmt_data
+            If Not kvp.Key.Contains("timestamp") AndAlso kvp.Key <> "version" Then
+                cast = kvp.Value
+                eqmt = EqmtTree1.Nodes.Find(cast("type"), False)(0).Nodes.Add(kvp.Key)
+                eqmt.Name = kvp.Key
+                cast = cast("parts")
+                For Each part As KeyValuePair(Of String, JToken) In cast
+                    Dim node As TreeNode = eqmt.Nodes.Add(part.Key)
+                    node.Name = part.Key
+                    If node.Text.Contains("Prime ") Then
+                        node.Text = node.Text.Substring(node.Text.IndexOf("Prime ") + 6)
+                    End If
+                Next
+                CheckIfExpand(eqmt)
+
+                eqmt = eqmt.Clone()
+                EqmtTree2.Nodes.Add(eqmt)
+                CheckIfExpand(eqmt)
+            End If
+        Next
+
+        EqmtTree1.TreeViewNodeSorter = Tree1Sorter
+        EqmtTree2.TreeViewNodeSorter = Tree2Sorter
+        EqmtTree1.Sort()
+        EqmtTree2.Sort()
+    End Sub
+
+    Friend Sub RefreshData()
+        Dim cast As JObject = Nothing
+        Dim eqmt As TreeNode = Nothing
+        For Each kvp As KeyValuePair(Of String, JToken) In db.eqmt_data
+            If EqmtTree1.Nodes.Find(kvp.Key, True).Length = 0 Then
+                cast = kvp.Value
+                eqmt = EqmtTree1.Nodes.Find(cast("type"), False)(0).Nodes.Add(kvp.Key)
+                eqmt.Name = kvp.Key
+                cast = cast("parts")
+                For Each part As KeyValuePair(Of String, JToken) In cast
+                    Dim node As TreeNode = eqmt.Nodes.Add(part.Key)
+                    node.Name = part.Key
+                    If node.Text.Contains("Prime ") Then
+                        node.Text = node.Text.Substring(node.Text.IndexOf("Prime ") + 6)
+                    End If
+                Next
+
+                eqmt = eqmt.Clone()
+                EqmtTree2.Nodes.Add(eqmt)
+            End If
+        Next
+    End Sub
+
+    ' Custom Draw
 
     Private Sub EqmtTree_DrawItem(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DrawTreeNodeEventArgs) Handles EqmtTree1.DrawNode, EqmtTree2.DrawNode
         e.DrawDefault = True
@@ -299,103 +403,6 @@ Public Class Equipment
             e.Graphics.DrawString(owned.ToString() + "/" + count.ToString(), EqmtTree1.Font, brush, 215, e.Bounds.Top + 1, sf)
             e.Graphics.DrawString(plat, EqmtTree1.Font, brush, 375, e.Bounds.Top + 1, sf)
         End If
-    End Sub
-
-    Private Sub Label2_Click(sender As Object, e As EventArgs) Handles Label2.Click
-        EqmtTree2.Visible = My.Settings.EqmtOne
-        My.Settings.EqmtOne = Not My.Settings.EqmtOne
-        EqmtTree1.Visible = My.Settings.EqmtOne
-        If My.Settings.EqmtOne Then
-            EqmtTree1.Sort()
-            EqmtTree1.Select()
-            Label2.Text = "Equipment Groups"
-        Else
-            EqmtTree2.Sort()
-            EqmtTree2.Select()
-            Label2.Text = "All Equipment"
-        End If
-    End Sub
-
-    Private Sub SortSelection_SelectedIndexChanged(sender As Object, e As EventArgs) Handles SortSelection.SelectedIndexChanged
-        My.Settings.EqmtSort = SortSelection.SelectedIndex
-        Tree1Sorter.type = My.Settings.EqmtSort
-        Tree2Sorter.type = My.Settings.EqmtSort
-        EqmtTree1.Sort()
-        EqmtTree2.Sort()
-        If EqmtTree1.Visible Then
-            EqmtTree1.Select()
-        Else
-            EqmtTree2.Select()
-        End If
-
-    End Sub
-
-    Public Sub Load_Eqmt_Tree()
-        Label2.BackColor = bgColor
-        If EqmtTree1.Nodes(0).Nodes.Count > 1 Then
-            Return
-        End If
-        For Each node As TreeNode In EqmtTree1.Nodes
-            CheckIfExpand(node)
-        Next
-
-        Dim cast As JObject = Nothing
-        Dim eqmt As TreeNode = Nothing
-        For Each kvp As KeyValuePair(Of String, JToken) In db.eqmt_data
-            If Not kvp.Key.Contains("timestamp") AndAlso kvp.Key <> "version" Then
-                cast = kvp.Value
-                eqmt = EqmtTree1.Nodes.Find(cast("type"), False)(0).Nodes.Add(kvp.Key)
-                eqmt.Name = kvp.Key
-                cast = cast("parts")
-                For Each part As KeyValuePair(Of String, JToken) In cast
-                    Dim node As TreeNode = eqmt.Nodes.Add(part.Key)
-                    node.Name = part.Key
-                    If node.Text.Contains("Prime ") Then
-                        node.Text = node.Text.Substring(node.Text.IndexOf("Prime ") + 6)
-                    End If
-                Next
-                CheckIfExpand(eqmt)
-
-                eqmt = eqmt.Clone()
-                EqmtTree2.Nodes.Add(eqmt)
-                CheckIfExpand(eqmt)
-            End If
-        Next
-
-        EqmtTree1.TreeViewNodeSorter = Tree1Sorter
-        EqmtTree2.TreeViewNodeSorter = Tree2Sorter
-        EqmtTree1.Sort()
-        EqmtTree2.Sort()
-    End Sub
-
-    Private Sub CheckIfExpand(node As TreeNode)
-        Dim temp As String = "|" + node.FullPath + "|"
-        If My.Settings.ExpandedRelics.Contains(temp) Then
-            node.Expand()
-        End If
-    End Sub
-
-    Friend Sub RefreshData()
-        Dim cast As JObject = Nothing
-        Dim eqmt As TreeNode = Nothing
-        For Each kvp As KeyValuePair(Of String, JToken) In db.eqmt_data
-            If EqmtTree1.Nodes.Find(kvp.Key, True).Length = 0 Then
-                cast = kvp.Value
-                eqmt = EqmtTree1.Nodes.Find(cast("type"), False)(0).Nodes.Add(kvp.Key)
-                eqmt.Name = kvp.Key
-                cast = cast("parts")
-                For Each part As KeyValuePair(Of String, JToken) In cast
-                    Dim node As TreeNode = eqmt.Nodes.Add(part.Key)
-                    node.Name = part.Key
-                    If node.Text.Contains("Prime ") Then
-                        node.Text = node.Text.Substring(node.Text.IndexOf("Prime ") + 6)
-                    End If
-                Next
-
-                eqmt = eqmt.Clone()
-                EqmtTree2.Nodes.Add(eqmt)
-            End If
-        Next
     End Sub
 End Class
 

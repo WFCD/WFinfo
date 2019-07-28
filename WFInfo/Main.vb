@@ -355,6 +355,7 @@ Module Glob
     Public bgBrush As Brush = New SolidBrush(bgColor)
     Public culture As System.Globalization.CultureInfo = New System.Globalization.CultureInfo("en")
     Public tahoma10 As New Font("Tahoma", 10.0!, FontStyle.Bold)
+    Public tahoma9_bold As New Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
     Public tahoma8_bold As New Font("Tahoma", 8.0!, FontStyle.Bold)
     Public tahoma8 As New Font("Tahoma", 8.0!)
     Public timeFrame As String = "48hours"

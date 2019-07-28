@@ -582,11 +582,11 @@ Public Class Relics
 
                         right += 10 * (split(1).Length - 2)
 
-                        Dim rect As SizeF = e.Graphics.MeasureString("Vaulted", Font)
+                        Dim rect As SizeF = e.Graphics.MeasureString("Vaulted", tahoma9_bold)
                         Using br = New SolidBrush(bgColor)
                             e.Graphics.FillRectangle(br, right - rect.Width - 10, e.Bounds.Top + 1, rect.Width + 10, rect.Height)
                         End Using
-                        e.Graphics.DrawString("Vaulted", RelicTree1.Font, stealthBrush, right, e.Bounds.Top + 1, sf)
+                        e.Graphics.DrawString("Vaulted", tahoma9_bold, stealthBrush, right, e.Bounds.Top + 1, sf)
                     End If
 
                     Dim itot As String = CDbl(find("int")).ToString("N1")
@@ -602,16 +602,16 @@ Public Class Relics
 
                     Using br = New SolidBrush(textColor)
                         e.Graphics.FillRectangle(bgBrush, 200, e.Bounds.Top, 180, e.Bounds.Height)
-                        e.Graphics.DrawString("INT", RelicTree1.Font, br, 216, e.Bounds.Top, sf)
+                        e.Graphics.DrawString("INT", tahoma9_bold, br, 216, e.Bounds.Top, sf)
                         e.Graphics.DrawImage(My.Resources.plat, 217, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
-                        e.Graphics.DrawString(":", RelicTree1.Font, br, 235, e.Bounds.Top, sf)
-                        e.Graphics.DrawString(itot, RelicTree1.Font, br, 270, e.Bounds.Top, sf)
+                        e.Graphics.DrawString(":", tahoma9_bold, br, 235, e.Bounds.Top, sf)
+                        e.Graphics.DrawString(itot, tahoma9_bold, br, 270, e.Bounds.Top, sf)
 
-                        e.Graphics.DrawString("RAD", RelicTree1.Font, br, 321, e.Bounds.Top, sf)
+                        e.Graphics.DrawString("RAD", tahoma9_bold, br, 321, e.Bounds.Top, sf)
                         e.Graphics.DrawImage(My.Resources.plat, 322, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
-                        e.Graphics.DrawString(":", RelicTree1.Font, br, 340, e.Bounds.Top, sf)
-                        e.Graphics.DrawString(rtot, RelicTree1.Font, br, 375, e.Bounds.Top, sf)
-                        e.Graphics.DrawString(diff, RelicTree1.Font, br, 375, e.Bounds.Top)
+                        e.Graphics.DrawString(":", tahoma9_bold, br, 340, e.Bounds.Top, sf)
+                        e.Graphics.DrawString(rtot, tahoma9_bold, br, 375, e.Bounds.Top, sf)
+                        e.Graphics.DrawString(diff, tahoma9_bold, br, 375, e.Bounds.Top)
                     End Using
                 End If
             End If
@@ -633,9 +633,9 @@ Public Class Relics
                 Using br = New SolidBrush(bgColor)
                     e.Graphics.FillRectangle(br, 260, e.Bounds.Top, 130, e.Bounds.Height)
                 End Using
-                e.Graphics.DrawString(Double.Parse(vals("plat"), culture).ToString("N1"), RelicTree1.Font, brush, 300, e.Bounds.Top + 1, sf)
+                e.Graphics.DrawString(Double.Parse(vals("plat"), culture).ToString("N1"), tahoma9_bold, brush, 300, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.plat, 300, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
-                e.Graphics.DrawString(vals("ducats"), RelicTree1.Font, brush, 370, e.Bounds.Top + 1, sf)
+                e.Graphics.DrawString(vals("ducats"), tahoma9_bold, brush, 370, e.Bounds.Top + 1, sf)
                 e.Graphics.DrawImage(My.Resources.ducat_w, 370, e.Bounds.Top + 2, e.Bounds.Height - 4, e.Bounds.Height - 4)
             End If
             If RelicTree3.Visible AndAlso Not CheckNode(e.Node.Parent, current_filters) AndAlso CheckNode(e.Node, current_filters) Then
@@ -649,8 +649,8 @@ Public Class Relics
                 Dim textToDraw As String = ""
                 If highlights(0)(0) <> 0 Then
                     textToDraw = e.Node.Text.Substring(0, highlights(0)(0))
-                    TextRenderer.DrawText(e.Graphics, textToDraw, RelicTree1.Font, boundRect, e.Node.ForeColor, e.Node.BackColor, TextFormatFlags.Left Or TextFormatFlags.VerticalCenter)
-                    boundRect.X += e.Graphics.MeasureString(textToDraw, RelicTree1.Font, 9999, StringFormat.GenericTypographic).Width + 2
+                    TextRenderer.DrawText(e.Graphics, textToDraw, tahoma9_bold, boundRect, e.Node.ForeColor, e.Node.BackColor, TextFormatFlags.Left Or TextFormatFlags.VerticalCenter)
+                    boundRect.X += e.Graphics.MeasureString(textToDraw, tahoma9_bold, 9999, StringFormat.GenericTypographic).Width + 2
                     If textToDraw.Trim.Length <> textToDraw.Length Then
                         boundRect.X += 4
                     End If
@@ -658,15 +658,15 @@ Public Class Relics
                 For i As Integer = 0 To highlights.Count - 1
                     Dim seg As Integer() = highlights(i)
                     textToDraw = e.Node.Text.Substring(seg(0), seg(1) - seg(0))
-                    TextRenderer.DrawText(e.Graphics, textToDraw, RelicTree1.Font, boundRect, e.Node.BackColor, e.Node.ForeColor, TextFormatFlags.Left Or TextFormatFlags.VerticalCenter)
-                    boundRect.X += e.Graphics.MeasureString(textToDraw, RelicTree1.Font, 9999, StringFormat.GenericTypographic).Width + 2
+                    TextRenderer.DrawText(e.Graphics, textToDraw, tahoma9_bold, boundRect, e.Node.BackColor, e.Node.ForeColor, TextFormatFlags.Left Or TextFormatFlags.VerticalCenter)
+                    boundRect.X += e.Graphics.MeasureString(textToDraw, tahoma9_bold, 9999, StringFormat.GenericTypographic).Width + 2
 
                     textToDraw = e.Node.Text.Substring(seg(1))
                     If i < highlights.Count - 1 Then
                         textToDraw = e.Node.Text.Substring(seg(1), highlights(i + 1)(0) - seg(1))
                     End If
-                    TextRenderer.DrawText(e.Graphics, textToDraw, RelicTree1.Font, boundRect, e.Node.ForeColor, e.Node.BackColor, TextFormatFlags.Left Or TextFormatFlags.VerticalCenter)
-                    boundRect.X += e.Graphics.MeasureString(textToDraw, RelicTree1.Font, 9999, StringFormat.GenericTypographic).Width + 1
+                    TextRenderer.DrawText(e.Graphics, textToDraw, tahoma9_bold, boundRect, e.Node.ForeColor, e.Node.BackColor, TextFormatFlags.Left Or TextFormatFlags.VerticalCenter)
+                    boundRect.X += e.Graphics.MeasureString(textToDraw, tahoma9_bold, 9999, StringFormat.GenericTypographic).Width + 1
                     If textToDraw.Trim.Length <> textToDraw.Length Then
                         boundRect.X += 4
                     End If

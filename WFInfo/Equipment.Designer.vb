@@ -54,7 +54,7 @@ Partial Class Equipment
         Me.Panel2 = New System.Windows.Forms.Panel()
         Me.SortSelection = New System.Windows.Forms.ComboBox()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
+        Me.btnSwap = New System.Windows.Forms.Button()
         Me.HideOpt = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.pTitle = New System.Windows.Forms.Panel()
@@ -324,7 +324,7 @@ Partial Class Equipment
         Me.Panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.Panel2.Controls.Add(Me.SortSelection)
         Me.Panel2.Controls.Add(Me.Label1)
-        Me.Panel2.Controls.Add(Me.Label2)
+        Me.Panel2.Controls.Add(Me.btnSwap)
         Me.Panel2.Location = New System.Drawing.Point(-1, -1)
         Me.Panel2.Name = "Panel2"
         Me.Panel2.Size = New System.Drawing.Size(456, 32)
@@ -358,16 +358,18 @@ Partial Class Equipment
         '
         'Label2
         '
-        Me.Label2.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.Label2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Label2.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label2.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label2.Location = New System.Drawing.Point(-1, -1)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(209, 32)
-        Me.Label2.TabIndex = 21
-        Me.Label2.Text = "All Equipment"
-        Me.Label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.btnSwap.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.btnSwap.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(100, Byte), Integer), CType(CType(100, Byte), Integer), CType(CType(100, Byte), Integer))
+        Me.btnSwap.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer))
+        Me.btnSwap.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnSwap.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Bold)
+        Me.btnSwap.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.btnSwap.Location = New System.Drawing.Point(-1, -1)
+        Me.btnSwap.Name = "btnSwap"
+        Me.btnSwap.Size = New System.Drawing.Size(209, 32)
+        Me.btnSwap.TabIndex = 21
+        Me.btnSwap.Text = "All Equipment"
+        Me.btnSwap.UseVisualStyleBackColor = False
         '
         'HideOpt
         '
@@ -472,7 +474,7 @@ Partial Class Equipment
     Friend WithEvents pTitle As Panel
     Friend WithEvents lbTitle As Label
     Friend WithEvents Panel2 As Panel
-    Friend WithEvents Label2 As Label
+    Friend WithEvents btnSwap As Button
     Friend WithEvents HideOpt As ToolStripMenuItem
     Friend WithEvents Label1 As Label
     Friend WithEvents SortSelection As ComboBox
