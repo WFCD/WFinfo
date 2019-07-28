@@ -36,18 +36,19 @@ Public Class Equipment
     Private Sub contResize(sender As Object, e As EventArgs) Handles BottomResize.MouseMove
         If resizing Then
             Dim newSize As Integer = Cursor.Position.Y - mouseY
-            If newSize < 100 Then
-                newSize = 100
+            If newSize < 200 Then
+                newSize = 200
             End If
             Size = New Size(Size.Width, newSize)
-            BottomResize.Location = New Point(BottomResize.Location.X, newSize - 64)
+            BottomResize.Location = New Point(BottomResize.Location.X, newSize - 87)
+
             Line1.Size = New Size(1, newSize)
             Line2.Size = Line1.Size
             Line3.Size = Line1.Size
-            Panel1.Size = New Size(Panel1.Size.Width, newSize - 26)
-            Panel3.Size = New Size(Panel3.Size.Width, newSize - 57)
-            EqmtTree1.Size = New Size(EqmtTree1.Size.Width, newSize - 80)
-            EqmtTree2.Size = New Size(EqmtTree2.Size.Width, newSize - 80)
+            Panel1.Size = New Size(Panel1.Size.Width, newSize - 27)
+            Panel3.Size = New Size(Panel3.Size.Width, newSize - 58)
+            EqmtTree1.Size = New Size(EqmtTree1.Size.Width, newSize - 81)
+            EqmtTree2.Size = New Size(EqmtTree2.Size.Width, newSize - 81)
         End If
 
     End Sub

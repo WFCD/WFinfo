@@ -35,7 +35,7 @@ Partial Class Relics
         Me.RelicTree3 = New WFInfo.DoubleBufferedTreeView()
         Me.Panel3 = New System.Windows.Forms.Panel()
         Me.Panel4 = New System.Windows.Forms.Panel()
-        Me.FilterText = New System.Windows.Forms.TextBox()
+        Me.FilterText = New WFInfo.CustomTextBox()
         Me.VaultCheck = New System.Windows.Forms.CheckBox()
         Me.btnCollapse = New System.Windows.Forms.Button()
         Me.btnExpand = New System.Windows.Forms.Button()
@@ -423,5 +423,5 @@ Partial Class Relics
     Friend WithEvents btnCollapse As Button
     Friend WithEvents VaultCheck As CheckBox
     Friend WithEvents Panel4 As Panel
-    Friend WithEvents FilterText As TextBox
+    Friend WithEvents FilterText As CustomTextBox
 End Class

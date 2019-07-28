@@ -33,6 +33,13 @@ Partial Class Equipment
         Dim TreeNode6 As System.Windows.Forms.TreeNode = New System.Windows.Forms.TreeNode("Companion")
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Equipment))
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.Panel4 = New System.Windows.Forms.Panel()
+        Me.Panel5 = New System.Windows.Forms.Panel()
+        Me.FilterText = New System.Windows.Forms.TextBox()
+        Me.VaultCheck = New System.Windows.Forms.CheckBox()
+        Me.btnCollapse = New System.Windows.Forms.Button()
+        Me.btnExpand = New System.Windows.Forms.Button()
+        Me.Label7 = New System.Windows.Forms.Label()
         Me.Panel3 = New System.Windows.Forms.Panel()
         Me.Line1 = New System.Windows.Forms.Label()
         Me.Line2 = New System.Windows.Forms.Label()
@@ -55,6 +62,8 @@ Partial Class Equipment
         Me.lbTitle = New System.Windows.Forms.Label()
         Me.AddMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.Panel1.SuspendLayout()
+        Me.Panel4.SuspendLayout()
+        Me.Panel5.SuspendLayout()
         Me.Panel3.SuspendLayout()
         Me.Panel2.SuspendLayout()
         Me.pTitle.SuspendLayout()
@@ -65,12 +74,109 @@ Partial Class Equipment
         '
         Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel1.Controls.Add(Me.Panel4)
         Me.Panel1.Controls.Add(Me.Panel3)
         Me.Panel1.Controls.Add(Me.Panel2)
         Me.Panel1.Location = New System.Drawing.Point(0, 26)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(456, 388)
+        Me.Panel1.Size = New System.Drawing.Size(456, 387)
         Me.Panel1.TabIndex = 24
+        '
+        'Panel4
+        '
+        Me.Panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel4.Controls.Add(Me.Panel5)
+        Me.Panel4.Controls.Add(Me.VaultCheck)
+        Me.Panel4.Controls.Add(Me.btnCollapse)
+        Me.Panel4.Controls.Add(Me.btnExpand)
+        Me.Panel4.Controls.Add(Me.Label7)
+        Me.Panel4.Location = New System.Drawing.Point(-1, 30)
+        Me.Panel4.Name = "Panel4"
+        Me.Panel4.Size = New System.Drawing.Size(456, 24)
+        Me.Panel4.TabIndex = 26
+        '
+        'Panel5
+        '
+        Me.Panel5.BackColor = System.Drawing.Color.FromArgb(CType(CType(40, Byte), Integer), CType(CType(40, Byte), Integer), CType(CType(40, Byte), Integer))
+        Me.Panel5.Controls.Add(Me.FilterText)
+        Me.Panel5.Location = New System.Drawing.Point(234, -1)
+        Me.Panel5.Name = "Panel5"
+        Me.Panel5.Size = New System.Drawing.Size(221, 24)
+        Me.Panel5.TabIndex = 28
+        '
+        'FilterText
+        '
+        Me.FilterText.BackColor = System.Drawing.Color.FromArgb(CType(CType(40, Byte), Integer), CType(CType(40, Byte), Integer), CType(CType(40, Byte), Integer))
+        Me.FilterText.BorderStyle = System.Windows.Forms.BorderStyle.None
+        Me.FilterText.Font = New System.Drawing.Font("Tahoma", 11.5!)
+        Me.FilterText.ForeColor = System.Drawing.Color.FromArgb(CType(CType(100, Byte), Integer), CType(CType(100, Byte), Integer), CType(CType(100, Byte), Integer))
+        Me.FilterText.Location = New System.Drawing.Point(3, 3)
+        Me.FilterText.MaxLength = 255
+        Me.FilterText.Name = "FilterText"
+        Me.FilterText.Size = New System.Drawing.Size(215, 19)
+        Me.FilterText.TabIndex = 26
+        Me.FilterText.Text = "Filter Terms..."
+        Me.FilterText.WordWrap = False
+        '
+        'VaultCheck
+        '
+        Me.VaultCheck.AutoSize = True
+        Me.VaultCheck.CheckAlign = System.Drawing.ContentAlignment.MiddleRight
+        Me.VaultCheck.Checked = True
+        Me.VaultCheck.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.VaultCheck.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.VaultCheck.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Bold)
+        Me.VaultCheck.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.VaultCheck.Location = New System.Drawing.Point(50, 0)
+        Me.VaultCheck.Name = "VaultCheck"
+        Me.VaultCheck.Size = New System.Drawing.Size(120, 21)
+        Me.VaultCheck.TabIndex = 27
+        Me.VaultCheck.Text = "Show Vaulted"
+        '
+        'btnCollapse
+        '
+        Me.btnCollapse.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.btnCollapse.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(100, Byte), Integer), CType(CType(100, Byte), Integer), CType(CType(100, Byte), Integer))
+        Me.btnCollapse.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer))
+        Me.btnCollapse.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnCollapse.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Bold)
+        Me.btnCollapse.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.btnCollapse.Location = New System.Drawing.Point(23, -1)
+        Me.btnCollapse.Name = "btnCollapse"
+        Me.btnCollapse.Size = New System.Drawing.Size(24, 24)
+        Me.btnCollapse.TabIndex = 26
+        Me.btnCollapse.Text = "-"
+        Me.btnCollapse.UseCompatibleTextRendering = True
+        Me.btnCollapse.UseVisualStyleBackColor = False
+        '
+        'btnExpand
+        '
+        Me.btnExpand.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.btnExpand.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(100, Byte), Integer), CType(CType(100, Byte), Integer), CType(CType(100, Byte), Integer))
+        Me.btnExpand.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer), CType(CType(50, Byte), Integer))
+        Me.btnExpand.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnExpand.Font = New System.Drawing.Font("Tahoma", 10.0!, System.Drawing.FontStyle.Bold)
+        Me.btnExpand.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.btnExpand.Location = New System.Drawing.Point(-1, -1)
+        Me.btnExpand.Name = "btnExpand"
+        Me.btnExpand.Size = New System.Drawing.Size(25, 24)
+        Me.btnExpand.TabIndex = 25
+        Me.btnExpand.Text = "+"
+        Me.btnExpand.UseCompatibleTextRendering = True
+        Me.btnExpand.UseVisualStyleBackColor = False
+        '
+        'Label7
+        '
+        Me.Label7.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.Label7.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Label7.Font = New System.Drawing.Font("Tahoma", 11.0!, System.Drawing.FontStyle.Bold)
+        Me.Label7.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.Label7.Location = New System.Drawing.Point(179, -3)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(61, 26)
+        Me.Label7.TabIndex = 23
+        Me.Label7.Text = "Filter:"
+        Me.Label7.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'Panel3
         '
@@ -85,7 +191,7 @@ Partial Class Equipment
         Me.Panel3.Controls.Add(Me.Label5)
         Me.Panel3.Controls.Add(Me.Label4)
         Me.Panel3.Controls.Add(Me.Label3)
-        Me.Panel3.Location = New System.Drawing.Point(-1, 54)
+        Me.Panel3.Location = New System.Drawing.Point(-1, 53)
         Me.Panel3.Name = "Panel3"
         Me.Panel3.Size = New System.Drawing.Size(456, 333)
         Me.Panel3.TabIndex = 25
@@ -338,7 +444,7 @@ Partial Class Equipment
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
-        Me.ClientSize = New System.Drawing.Size(456, 414)
+        Me.ClientSize = New System.Drawing.Size(456, 413)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.pTitle)
         Me.DoubleBuffered = True
@@ -347,6 +453,10 @@ Partial Class Equipment
         Me.Name = "Equipment"
         Me.Text = "Equipment"
         Me.Panel1.ResumeLayout(False)
+        Me.Panel4.ResumeLayout(False)
+        Me.Panel4.PerformLayout()
+        Me.Panel5.ResumeLayout(False)
+        Me.Panel5.PerformLayout()
         Me.Panel3.ResumeLayout(False)
         Me.Panel2.ResumeLayout(False)
         Me.Panel2.PerformLayout()
@@ -378,4 +488,11 @@ Partial Class Equipment
     Friend WithEvents Line1 As Label
     Friend WithEvents Line2 As Label
     Friend WithEvents Line3 As Label
+    Friend WithEvents Panel4 As Panel
+    Friend WithEvents Panel5 As Panel
+    Friend WithEvents FilterText As TextBox
+    Friend WithEvents VaultCheck As CheckBox
+    Friend WithEvents btnCollapse As Button
+    Friend WithEvents btnExpand As Button
+    Friend WithEvents Label7 As Label
 End Class

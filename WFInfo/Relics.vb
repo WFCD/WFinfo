@@ -16,9 +16,7 @@ Public Class Relics
     Private hidden_file_path As String = Path.Combine(appData, "WFInfo\hidden.json")
     Public eras As New List(Of String) From {"Lith", "Meso", "Neo", "Axi"}
 
-    ' ************************************
-    ' * Drag n Drop code
-    ' ************************************
+    ' Drag n Drop code
 
     Private Sub startDRAGnDROP(sender As Object, e As MouseEventArgs) Handles pTitle.MouseDown, lbTitle.MouseDown, pbIcon.MouseDown
         drag = True
@@ -38,9 +36,7 @@ Public Class Relics
         My.Settings.RelicWinLoc = Location
     End Sub
 
-    ' ************************************
-    ' * Resizing code
-    ' ************************************
+    ' Resizing code
 
     Private Sub startResize(sender As Object, e As EventArgs) Handles BottomResize.MouseDown
         resizing = True
@@ -67,9 +63,7 @@ Public Class Relics
         resizing = False
     End Sub
 
-    ' ************************************
-    ' * Buttons/Checkbox code
-    ' ************************************
+    ' Buttons/Checkbox code
 
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
         Hide()
@@ -146,9 +140,7 @@ Public Class Relics
         End If
     End Sub
 
-    ' ************************************
-    ' * Hide/Show code
-    ' ************************************
+    ' Hide/Show code
 
     Private Sub HideMenu_Click(sender As Object, e As ToolStripItemClickedEventArgs) Handles HideMenu.ItemClicked
         Dim split As String() = RelicToHide.FullPath.Replace("Hidden\", "").Split("\")
@@ -256,9 +248,7 @@ Public Class Relics
         End If
     End Sub
 
-    ' ************************************
-    ' * Startup code
-    ' ************************************
+    ' Startup code
 
     Private Sub Relics_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Location = My.Settings.RelicWinLoc
@@ -284,7 +274,13 @@ Public Class Relics
             Dim scr As Screen = GetMainScreen()
             Location = New Point(scr.WorkingArea.X + 200, scr.WorkingArea.Y + 200)
         End If
+
+        If FilterText.Text <> "Filter Terms..." Then
+            FilterText.Select()
+        End If
     End Sub
+
+    ' TreeView Edit/Modification code
 
     Public Sub Load_Relic_Tree()
         Dim hide As TreeNode = Nothing
@@ -486,9 +482,7 @@ Public Class Relics
         Next
     End Sub
 
-    ' ************************************
-    ' * Treeview code
-    ' ************************************
+    ' Treeview Event code
 
     Private Sub RelicTree_Collapse(sender As Object, e As TreeViewEventArgs) Handles RelicTree1.AfterCollapse, RelicTree2.AfterCollapse
         Dim temp As String = "|" + e.Node.FullPath.Replace("\", " ") + "|"
@@ -648,9 +642,7 @@ Public Class Relics
         e.Graphics.DrawLine(New Pen(bgColor), left, e.Bounds.Bottom, 450, e.Bounds.Bottom)
     End Sub
 
-    ' ************************************
-    ' * Treeview Sort code
-    ' ************************************
+    ' Treeview Sort code
 
     Private Sub SortSelection_SelectedIndexChanged(sender As Object, e As EventArgs) Handles SortSelection.SelectedIndexChanged
         My.Settings.SortType = SortSelection.SelectedIndex
@@ -664,9 +656,8 @@ Public Class Relics
 
     End Sub
 
-    ' ************************************
-    ' * Treeview Filter code
-    ' ************************************
+    ' Treeview Filter code
+
     Private current_filters As String() = Nothing
     Private showAll As Boolean = True
 

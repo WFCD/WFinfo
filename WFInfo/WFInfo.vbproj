@@ -171,6 +171,9 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomTextBox.vb">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DoubleBufferedTreeView.vb">
       <SubType>Component</SubType>
     </Compile>
@@ -327,6 +330,9 @@
     <Content Include="lib\x64\libtesseract400.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="lib\x64\lua53.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="lib\x86\liblept1760.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -356,6 +362,9 @@
     <None Include="Resources\Panel.png" />
     <None Include="Resources\DnPPanel.png" />
     <None Include="Resources\Tray.png" />
+    <Content Include="lib\x86\lua53.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="WFIcon.ico" />
   </ItemGroup>
   <ItemGroup>
