@@ -427,6 +427,7 @@ Class Data
                             eqmt_data(prime) = New JObject()
                             eqmt_data(prime)("parts") = New JObject()
                             eqmt_data(prime)("type") = ""
+                            eqmt_data(prime)("vaulted") = True
                         End If
 
                         Dim job As JObject = eqmt_data(prime)("parts")
@@ -502,9 +503,26 @@ Class Data
             End If
             index = drop_data.IndexOf("<tr>", tr_stop)
         End While
+
+        Get_Set_Vault_Status()
         eqmt_data("version") = Main.Instance.version
         Return True
     End Function
+
+    Private Sub Get_Set_Vault_Status()
+        For Each kvp As KeyValuePair(Of String, JToken) In db.eqmt_data
+            If kvp.Key.Contains("Prime") Then
+                Dim vaulted As Boolean = False
+                For Each part As KeyValuePair(Of String, JToken) In kvp.Value("parts").ToObject(Of JObject)
+                    If part.Value("vaulted").ToObject(Of Boolean) Then
+                        vaulted = True
+                        Exit For
+                    End If
+                Next
+                db.eqmt_data(kvp.Key)("vaulted") = vaulted
+            End If
+        Next
+    End Sub
 
     Private Sub Mark_Eqmt_Unvaulted(era As String, name As String)
         Dim job As JObject = relic_data(era)(name)

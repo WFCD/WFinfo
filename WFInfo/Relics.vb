@@ -129,14 +129,16 @@ Public Class Relics
     End Sub
 
     Private Sub VaultCheck_CheckedChanged(sender As Object, e As EventArgs) Handles VaultCheck.CheckedChanged
-        If VaultCheck.Checked Then
-            Load_Relic_Tree()
-        Else
-            Remove_Vaulted()
-        End If
+        If Me.Visible Then
+            If VaultCheck.Checked Then
+                Load_Relic_Tree()
+            Else
+                Remove_Vaulted()
+            End If
 
-        If RelicTree3.Visible Then
-            UpdateRelicTree3(current_filters)
+            If RelicTree3.Visible Then
+                UpdateRelicTree3(current_filters)
+            End If
         End If
     End Sub
 
@@ -279,6 +281,7 @@ Public Class Relics
         If FilterText.Text <> "Filter Terms..." Then
             FilterText.Select()
         End If
+        VaultCheck.Checked = True
     End Sub
 
     ' TreeView Edit/Modification code
