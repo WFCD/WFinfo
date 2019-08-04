@@ -264,7 +264,7 @@ Public Class Main
             If tUpdate_Count = 0 Then
                 If db IsNot Nothing AndAlso db.Update() Then
                     Relics.Reload_Data()
-                    Equipment.RefreshData()
+                    Equipment.Load_Eqmt_Tree()
                 End If
             End If
             ' Every 5min update the relic_area

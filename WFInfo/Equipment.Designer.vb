@@ -47,6 +47,7 @@ Partial Class Equipment
         Me.BottomResize = New System.Windows.Forms.Panel()
         Me.EqmtTree1 = New WFInfo.DoubleBufferedTreeView()
         Me.EqmtTree2 = New WFInfo.DoubleBufferedTreeView()
+        Me.EqmtTree3 = New WFInfo.DoubleBufferedTreeView()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Label5 = New System.Windows.Forms.Label()
         Me.Label4 = New System.Windows.Forms.Label()
@@ -185,6 +186,7 @@ Partial Class Equipment
         Me.Panel3.Controls.Add(Me.Line2)
         Me.Panel3.Controls.Add(Me.Line3)
         Me.Panel3.Controls.Add(Me.BottomResize)
+        Me.Panel3.Controls.Add(Me.EqmtTree3)
         Me.Panel3.Controls.Add(Me.EqmtTree1)
         Me.Panel3.Controls.Add(Me.EqmtTree2)
         Me.Panel3.Controls.Add(Me.Label6)
@@ -199,7 +201,7 @@ Partial Class Equipment
         'Line1
         '
         Me.Line1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Line1.Location = New System.Drawing.Point(207, 0)
+        Me.Line1.Location = New System.Drawing.Point(217, 0)
         Me.Line1.Name = "Line1"
         Me.Line1.Size = New System.Drawing.Size(1, 345)
         Me.Line1.TabIndex = 31
@@ -207,7 +209,7 @@ Partial Class Equipment
         'Line2
         '
         Me.Line2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Line2.Location = New System.Drawing.Point(287, 0)
+        Me.Line2.Location = New System.Drawing.Point(292, 0)
         Me.Line2.Name = "Line2"
         Me.Line2.Size = New System.Drawing.Size(1, 345)
         Me.Line2.TabIndex = 32
@@ -271,14 +273,29 @@ Partial Class Equipment
         Me.EqmtTree2.Size = New System.Drawing.Size(473, 310)
         Me.EqmtTree2.TabIndex = 26
         '
+        'EqmtTree3
+        '
+        Me.EqmtTree3.BackColor = System.Drawing.Color.FromArgb(CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer), CType(CType(27, Byte), Integer))
+        Me.EqmtTree3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.EqmtTree3.CausesValidation = False
+        Me.EqmtTree3.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText
+        Me.EqmtTree3.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Bold)
+        Me.EqmtTree3.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
+        Me.EqmtTree3.FullRowSelect = True
+        Me.EqmtTree3.Location = New System.Drawing.Point(-1, 22)
+        Me.EqmtTree3.Name = "EqmtTree2"
+        Me.EqmtTree3.Size = New System.Drawing.Size(473, 310)
+        Me.EqmtTree3.TabIndex = 29
+        Me.EqmtTree3.Visible = False
+        '
         'Label6
         '
         Me.Label6.BackColor = System.Drawing.Color.Transparent
         Me.Label6.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label6.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label6.Location = New System.Drawing.Point(207, -1)
+        Me.Label6.Location = New System.Drawing.Point(217, -1)
         Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(81, 24)
+        Me.Label6.Size = New System.Drawing.Size(76, 24)
         Me.Label6.TabIndex = 25
         Me.Label6.Text = "Owned"
         Me.Label6.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -288,9 +305,9 @@ Partial Class Equipment
         Me.Label5.BackColor = System.Drawing.Color.Transparent
         Me.Label5.Font = New System.Drawing.Font("Tahoma", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label5.ForeColor = System.Drawing.Color.FromArgb(CType(CType(177, Byte), Integer), CType(CType(208, Byte), Integer), CType(CType(217, Byte), Integer))
-        Me.Label5.Location = New System.Drawing.Point(287, -1)
+        Me.Label5.Location = New System.Drawing.Point(292, -1)
         Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(81, 24)
+        Me.Label5.Size = New System.Drawing.Size(76, 24)
         Me.Label5.TabIndex = 24
         Me.Label5.Text = "Ducat"
         Me.Label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -484,6 +501,7 @@ Partial Class Equipment
     Friend WithEvents Label5 As Label
     Friend WithEvents Label4 As Label
     Friend WithEvents Label3 As Label
+    Friend WithEvents EqmtTree3 As DoubleBufferedTreeView
     Friend WithEvents EqmtTree2 As DoubleBufferedTreeView
     Friend WithEvents EqmtTree1 As DoubleBufferedTreeView
     Friend WithEvents BottomResize As Panel

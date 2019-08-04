@@ -682,17 +682,17 @@ Public Class Relics
     Private current_filters As String() = Nothing
     Private showAll As Boolean = True
 
+    Private Sub RelicTree_MouseEnter(sender As Object, e As EventArgs) Handles RelicTree1.MouseEnter, RelicTree2.MouseEnter, RelicTree3.MouseEnter
+        Dim treeCast As TreeView = sender
+        treeCast.Select()
+        treeCast.SelectedNode = Nothing
+    End Sub
+
     Private Sub FilterText_Enter(sender As Object, e As EventArgs) Handles FilterText.Enter
         If FilterText.Text = "Filter Terms..." Then
             FilterText.Text = ""
             FilterText.ForeColor = textColor
         End If
-    End Sub
-
-    Private Sub RelicTree_MouseEnter(sender As Object, e As EventArgs) Handles RelicTree1.MouseEnter, RelicTree2.MouseEnter, RelicTree3.MouseEnter
-        Dim treeCast As TreeView = sender
-        treeCast.Select()
-        treeCast.SelectedNode = Nothing
     End Sub
 
     Private Sub FilterText_Exit(sender As Object, e As EventArgs) Handles FilterText.Leave
@@ -718,6 +718,13 @@ Public Class Relics
             Else
                 RelicTree3.Nodes.Clear()
             End If
+        End If
+    End Sub
+
+    Private Sub FilterText_EnterKey(sender As Object, e As KeyPressEventArgs) Handles FilterText.KeyPress
+        If e.KeyChar = Chr(Keys.Enter) Then
+            RelicTree3.Select()
+            e.Handled = True
         End If
     End Sub
 
@@ -904,23 +911,6 @@ Public Class Relics
         Return True
     End Function
 
-    Private Function GetMatchedText(node As TreeNode, filters As String()) As List(Of Integer())
-        Dim ret As New List(Of Integer())
-        Dim checkStr As String = node.Text.ToLower()
-        For Each filt As String In filters
-            If checkStr.Contains(filt) Then
-                Dim first As Integer = checkStr.IndexOf(filt)
-                Do
-                    Dim last As Integer = first + filt.Length
-                    ret.Add({first, last})
-                    first = checkStr.IndexOf(filt, last)
-                Loop While first <> -1
-            End If
-        Next
-        ret.Sort(Function(x, y) x(0).CompareTo(y(0)))
-        Return ret
-    End Function
-
     Private Function CombineSegments(arr As List(Of Integer())) As List(Of Integer())
         Dim ret As New List(Of Integer())
         Dim i As Integer = 0
@@ -939,12 +929,22 @@ Public Class Relics
         Return ret
     End Function
 
-    Private Sub FilterText_EnterKey(sender As Object, e As KeyPressEventArgs) Handles FilterText.KeyPress
-        If e.KeyChar = Chr(Keys.Enter) Then
-            RelicTree3.Select()
-            e.Handled = True
-        End If
-    End Sub
+    Private Function GetMatchedText(node As TreeNode, filters As String()) As List(Of Integer())
+        Dim ret As New List(Of Integer())
+        Dim checkStr As String = node.Text.ToLower()
+        For Each filt As String In filters
+            If checkStr.Contains(filt) Then
+                Dim first As Integer = checkStr.IndexOf(filt)
+                Do
+                    Dim last As Integer = first + filt.Length
+                    ret.Add({first, last})
+                    first = checkStr.IndexOf(filt, last)
+                Loop While first <> -1
+            End If
+        Next
+        ret.Sort(Function(x, y) x(0).CompareTo(y(0)))
+        Return ret
+    End Function
 End Class
 
 Public Class NodeSorter
