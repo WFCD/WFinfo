@@ -166,12 +166,14 @@ Public Class OCR2
                     clr = bmp.GetPixel(newX, newY)
                     Dim minThresh As Integer = 999
                     Dim minColor As String = Nothing
+                    Dim minInd As Integer = 0
                     For i As Integer = 0 To fissColors.Length - 1
                         Dim knowColor As Color = fissColors(i)
                         Dim tempThresh As Integer = ColorDifference(clr, knowColor)
                         If tempThresh < minThresh Then
                             minThresh = tempThresh
-                            minColor = fissNames(i) & "(" & minThresh & ")"
+                            minColor = minThresh & "," & fissNames(i)
+                            minInd = i
                         End If
                         If ColorThreshold(clr, knowColor, 10) Then
                             uiColor = knowColor
@@ -181,9 +183,10 @@ Public Class OCR2
                             Return True
                         End If
                     Next
+                    minColor = String.Format("#{0:X2}{1:X2}{2:X2}", clr.R, clr.G, clr.B) & "(" & minColor & ")"
                     If minThresh < closestThresh Then
                         closestThresh = minThresh
-                        closestColor = minColor
+                        closestColor = minInd & ", " & minColor
                     End If
                     debugList.Add(minThresh)
                     debugClrList.Add(minColor)
