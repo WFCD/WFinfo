@@ -53,6 +53,7 @@ Public Class OCR2
 
     Public rarity As New List(Of Color) From {Color.FromArgb(180, 135, 110), Color.FromArgb(200, 200, 200), Color.FromArgb(212, 192, 120)}
     Public fissColors As Color() = {FissClr1, FissClr2, FissClr3, FissClr4, FissClr5, FissClr6, FissClr7, FissClr8, FissClr9, FissClr10, FissClr11, FissClr12, FissClr13}
+    Public fissNames As String() = {"Vitruvian", "Stalker", "Baruk", "Corpus", "Fortuna", "Grineer", "Lotus", "Nidus", "Orokin", "Tenno", "Highcontrast", "Legacy", "Equinox"}
 
     ' Warframe window stats
     '   Warframe process
@@ -137,6 +138,7 @@ Public Class OCR2
             For Each knowColor In fissColors
                 If ColorThreshold(detectedColor, knowColor, 20) Then
                     uiColor = knowColor
+                    Main.addLog("FOUND COLOR: " & uiColor.ToString())
                     Return True
                 End If
             Next
@@ -149,6 +151,11 @@ Public Class OCR2
             Dim endX As Integer = CInt(pixProfXSpecial * scalingMod * 3)
             Dim endY As Integer = CInt(pixProfYSpecial * scalingMod * 3)
 
+            Dim debugList As New List(Of Integer)
+            Dim debugClrList As New List(Of String)
+            Dim closestThresh As Integer = 999
+            Dim closestColor As String = Nothing
+
             Using bmp As New Bitmap(endX - startX, endY - startY)
                 Using graph As Graphics = Graphics.FromImage(bmp)
                     graph.CopyFromScreen(startX, startY, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy)
@@ -157,7 +164,15 @@ Public Class OCR2
                     Dim newY As Integer = bmp.Height - y
                     Dim newX As Integer = bmp.Width * (newY / bmp.Height)
                     clr = bmp.GetPixel(newX, newY)
-                    For Each knowColor In fissColors
+                    Dim minThresh As Integer = 999
+                    Dim minColor As String = Nothing
+                    For i As Integer = 0 To fissColors.Length - 1
+                        Dim knowColor As Color = fissColors(i)
+                        Dim tempThresh As Integer = ColorDifference(clr, knowColor)
+                        If tempThresh < minThresh Then
+                            minThresh = tempThresh
+                            minColor = fissNames(i) & "(" & minThresh & ")"
+                        End If
                         If ColorThreshold(clr, knowColor, 10) Then
                             uiColor = knowColor
                             Main.addLog("FOUND COLOR " & clr.ToString() & " AT (" & (startX + newX) & ", " & (startY + newY) & ")")
@@ -166,8 +181,16 @@ Public Class OCR2
                             Return True
                         End If
                     Next
+                    If minThresh < closestThresh Then
+                        closestThresh = minThresh
+                        closestColor = minColor
+                    End If
+                    debugList.Add(minThresh)
+                    debugClrList.Add(minColor)
                 Next
             End Using
+            Main.addLog("UI COLOR NOT FOUND - CLOSEST: " & closestColor)
+            Main.addLog("UI COLOR NOT FOUND - THRESHOLDS: " & String.Join(", ", debugClrList))
         End If
         Return False
     End Function
@@ -414,6 +437,10 @@ Public Class OCR2
 
     Public Overridable Function ColorThreshold(test As Color, thresh As Color, Optional threshold As Integer = 10) As Boolean
         Return (Math.Abs(CInt(test.R) - thresh.R) < threshold) AndAlso (Math.Abs(CInt(test.G) - thresh.G) < threshold) AndAlso (Math.Abs(CInt(test.B) - thresh.B) < threshold)
+    End Function
+
+    Public Overridable Function ColorDifference(test As Color, thresh As Color) As Integer
+        Return Math.Abs(CInt(test.R) - thresh.R) + Math.Abs(CInt(test.G) - thresh.G) + Math.Abs(CInt(test.B) - thresh.B)
     End Function
 
     Public Overridable Function HSVThreshold(test As Color, thresh As Color, Optional thresh_hue As Integer = 10, Optional thresh_sat As Double = 0.05, Optional thresh_brg As Double = 0.05) As Boolean

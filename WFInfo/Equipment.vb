@@ -217,12 +217,15 @@ Public Class Equipment
         If My.Settings.EqmtSort = 2 OrElse My.Settings.EqmtSort = 3 Then
             AddItem.TreeView.BeginUpdate()
             ' Find bottom part
-            Dim bot = AddItem.Nodes(0)
-            For i As Integer = 1 To AddItem.Nodes.Count - 1
-                If Tree1Sorter.IComparer_Compare(bot, AddItem.Nodes(i)) < 0 Then
-                    bot = AddItem.Nodes(i)
-                End If
-            Next
+            Dim bot = AddItem
+            If AddItem.Nodes.Count > 0 Then
+                bot = AddItem.Nodes(0)
+                For i As Integer = 1 To AddItem.Nodes.Count - 1
+                    If Tree1Sorter.IComparer_Compare(bot, AddItem.Nodes(i)) < 0 Then
+                        bot = AddItem.Nodes(i)
+                    End If
+                Next
+            End If
 
             AddItem.TreeView.Sort()
             AddItem.TreeView.EndUpdate()
@@ -234,7 +237,7 @@ Public Class Equipment
         db.Save_Eqmt()
     End Sub
 
-    Private Sub EqmtTree_Click(sender As Object, e As TreeNodeMouseClickEventArgs) Handles EqmtTree1.NodeMouseClick, EqmtTree2.NodeMouseClick
+    Private Sub EqmtTree_Click(sender As Object, e As TreeNodeMouseClickEventArgs) Handles EqmtTree1.NodeMouseClick, EqmtTree2.NodeMouseClick, EqmtTree3.NodeMouseClick
         e.Node.TreeView.SelectedNode = e.Node
         AddMenu.Items.Clear()
         If e.Button <> MouseButtons.Right OrElse types.Contains(e.Node.Text) Then
