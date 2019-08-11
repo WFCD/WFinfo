@@ -463,6 +463,8 @@ Class Data
             index = drop_data.IndexOf("<tr>", tr_stop)
         End While
 
+        Mark_All_Eqmt_Vaulted()
+
         ' Find NOT Vauled Relics in Missions
         last = drop_data.IndexOf("id=""relicRewards""")
         index = drop_data.IndexOf("<tr>")
@@ -508,6 +510,17 @@ Class Data
         eqmt_data("version") = Main.Instance.version
         Return True
     End Function
+
+    Private Sub Mark_All_Eqmt_Vaulted()
+        For Each kvp As KeyValuePair(Of String, JToken) In db.eqmt_data
+            If kvp.Key.Contains("Prime") Then
+                db.eqmt_data(kvp.Key)("vaulted") = True
+                For Each part As KeyValuePair(Of String, JToken) In kvp.Value("parts").ToObject(Of JObject)
+                    db.eqmt_data(kvp.Key)("parts")(part.Key)("vaulted") = True
+                Next
+            End If
+        Next
+    End Sub
 
     Private Sub Get_Set_Vault_Status()
         For Each kvp As KeyValuePair(Of String, JToken) In db.eqmt_data

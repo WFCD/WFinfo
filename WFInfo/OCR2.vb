@@ -158,7 +158,7 @@ Public Class OCR2
 
             Using bmp As New Bitmap(endX - startX, endY - startY)
                 Using graph As Graphics = Graphics.FromImage(bmp)
-                    graph.CopyFromScreen(startX, startY, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy)
+                    graph.CopyFromScreen(window.X + startX, window.Y + startY, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy)
                 End Using
                 For y As Integer = 1 To bmp.Height
                     Dim newY As Integer = bmp.Height - y
