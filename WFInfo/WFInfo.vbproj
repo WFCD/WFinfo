@@ -179,6 +179,7 @@
     </Compile>
     <Compile Include="Data.vb" />
     <Compile Include="GlobalHook.vb" />
+    <Compile Include="JSONsettings.vb" />
     <Compile Include="LogCapture.vb" />
     <Compile Include="My Project\Resources.Designer.vb">
       <AutoGen>True</AutoGen>

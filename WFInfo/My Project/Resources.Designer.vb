@@ -145,7 +145,7 @@ Namespace My.Resources
         '''  &quot;type&quot;: &quot;service_account&quot;,
         '''  &quot;project_id&quot;: &quot;wfinfo&quot;,
         '''  &quot;private_key_id&quot;: &quot;a99126b110941194abf09b95afb357799464265d&quot;,
-        '''  &quot;private_key&quot;: &quot;-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4wcaLYg0Njl5Y\nDIwzv7itzNezVtlgOhByiC0O2WQRikUVGorpkafRjFxJ0g38E5QfeC4QFycIUik5\nT3ilmzZZzDUCFD5s1RLEl6vMZvb+vbWZq0DlzZHZcBhirslLTD5HMsI2v2Hl5SeS\n9rEAYVzNHZqB1E+zpGfdd7YL3ZSceOvIAKzmeTiQ485PN6f6Udsxp6jx23epYTr0\nzfaj6AYr3+EL7drQwn1DM4AQDp1ixggL08CETZwj76youV2MsuYZYQuq4hwNC0yZ\ndwfqAbUhWSeHmY [rest of string was truncated]&quot;;.
+        '''  &quot;private_key&quot;: &quot;-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC4wcaLYg0Njl5Y\nDIwzv7itzNezVtlgOhByiC0O2WQRikUVGorpkafRjFxJ0g38E5QfeC4QFycIUik5\nT3ilmzZZzDUCFD5s1RLEl6vMZvb+vbWZq0DlzZHZcBhirslLTD5HMsI2v2Hl5SeS\n9rEAYVzNHZqB1E+zpGfdd7YL3ZSceOvIAKzmeTiQ485PN6f6Udsxp6jx23epYTr0\nzfaj6AYr3+EL7drQwn1DM4AQDp1ixggL08CETZwj76youV2MsuYZYQuq4hwNC0yZ\ndwfqAbUhWS [rest of string was truncated]&quot;;.
         '''</summary>
         Friend ReadOnly Property google_creds() As String
             Get

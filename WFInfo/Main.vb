@@ -169,7 +169,7 @@ Public Class Main
     End Sub
 
     Private Sub pbHome_Click(sender As Object, e As EventArgs) Handles pbHome.Click
-        Process.Start("https://random-facades.github.io/WFInfo/")
+        Process.Start("https://wfinfo.warframestat.us/")
     End Sub
 
     Private Sub pbHome_MouseEnter(sender As Object, e As EventArgs) Handles pbHome.MouseEnter
@@ -370,6 +370,7 @@ Module Glob
 
     Public ReplacementList As Char(,)
     Public globHook As GlobalHook
+    Public Settings As New JSONsettings()
 
     Public parser2 As OCR2
 
@@ -408,7 +409,7 @@ Module Glob
     End Sub
 
     Public Sub DoDelayWork()
-        Threading.Thread.Sleep(1000)
+        Threading.Thread.Sleep(Glob.Settings.delay)
         DoOtherWork()
     End Sub
 

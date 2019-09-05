@@ -112,8 +112,8 @@ Class Data
     End Sub
 
     Public Function Get_Current_Version() As Integer
-        webClient.Headers.Add("User-Agent", "random-facades")
-        Dim github As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.github.com/repos/random-facades/WFInfo/releases/latest"))
+        webClient.Headers.Add("User-Agent", "WFCD")
+        Dim github As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases/latest"))
         If github.TryGetValue("tag_name", Nothing) Then
             Return VersionToInteger(github("tag_name").ToString())
         End If
