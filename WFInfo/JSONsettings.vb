@@ -8,21 +8,20 @@ Public Class JSONsettings
     Public delay As Integer = 1000
 
     Public Sub New()
-        If Directory.Exists(appData) AndAlso File.Exists(settings_path) Then
+        Try
             job = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(settings_path))
             delay = job("delay").ToObject(Of Integer)
-        Else
+        Catch ex As Exception
             job = New JObject()
             job("delay") = delay
             SaveFile()
-        End If
+        End Try
     End Sub
 
     Public Sub SaveFile()
         If Not Directory.Exists(Path.Combine(appData, "WFInfo")) Then
             Directory.CreateDirectory(Path.Combine(appData, "WFInfo"))
         End If
-        File.Create(Path.Combine(appData, "WFInfo\settings.json"))
         File.WriteAllText(settings_path, JsonConvert.SerializeObject(job, Formatting.Indented))
     End Sub
 End Class
