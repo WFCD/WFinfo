@@ -4,8 +4,8 @@ Imports Newtonsoft.Json.Linq
 
 Public Class JSONsettings
     Private job As JObject
-    Private ReadOnly settings_path As String = Path.Combine(appData, "WFInfo\settings.json")
     Private ReadOnly appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+    Private ReadOnly settings_path As String = Path.Combine(appData, "WFInfo\settings.json")
     Public delay As Integer = 1000
 
     Public Sub New()
