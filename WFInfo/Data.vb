@@ -24,6 +24,7 @@ Class Data
     Private webClient As WebClient
     Public WithEvents ScreenshotWatcher As New FileSystemWatcher()
     Public EElogWatcher As LogCapture = Nothing
+    Public githubVersion As String
 
     Private sheetAPI As Sheets
     Private lua As NLua.Lua
@@ -115,10 +116,31 @@ Class Data
         webClient.Headers.Add("User-Agent", "WFCD")
         Dim github As JObject = JsonConvert.DeserializeObject(Of JObject)(webClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases/latest"))
         If github.TryGetValue("tag_name", Nothing) Then
+            githubVersion = github("tag_name").ToString()
             Return VersionToInteger(github("tag_name").ToString())
         End If
         Return Main.Instance.versionNum
     End Function
+
+    Public Sub download(url As String)
+        Dim req As HttpWebRequest = DirectCast(HttpWebRequest.Create(url), HttpWebRequest)
+        Dim response As HttpWebResponse
+        Dim resUri As String
+        response = req.GetResponse
+        resUri = response.ResponseUri.AbsoluteUri
+        Console.WriteLine("Downloading to" & My.Application.Info.DirectoryPath & "/WFinfo" & githubVersion & ".exe")
+        Try
+            My.Computer.Network.DownloadFile(resUri, My.Application.Info.DirectoryPath & "/WFInfonew.exe")
+            Dim fs As FileStream = File.Create(My.Application.Info.DirectoryPath & "/update.bat")
+            Dim info As Byte() = New Text.UTF8Encoding(True).GetBytes("timeout 2" & vbNewLine & "del WFInfo.exe" & vbNewLine & "rename WFInfonew.exe WFInfo.exe" & vbNewLine & "start WFInfo.exe")
+            fs.Write(info, 0, info.Length)
+            fs.Close()
+            Process.Start(My.Application.Info.DirectoryPath & "/update.bat")
+            Application.Exit()
+        Catch ex As Exception
+
+        End Try
+    End Sub
 
     Private Function Load_Items(Optional force As Boolean = False) As Boolean
         If Not force AndAlso File.Exists(market_items_path) Then

@@ -85,17 +85,17 @@ Public Class Main
                 Else
                     Invoke(Sub() lbStatus.Text = "New Version Available")
                     Invoke(Sub() lbStatus.ForeColor = Color.FromArgb(0, 125, 255))
+                    Try
+                        db.download("https://github.com/WFCD/WFinfo/releases/latest/download/WFInfo.exe")
+                        Invoke(Sub() lbStatus.Text = "New Version downloaded, " & db.githubVersion)
+                    Catch ex As Exception
+                        ex.ToString()
+                    End Try
                 End If
             End If
         Catch ex As Exception
             If db IsNot Nothing AndAlso versionNum < db.Get_Current_Version() Then
                 Invoke(Sub() lbStatus.Text = "ERROR (Parse Screen) - New Version Available")
-                Try
-                    My.Computer.Network.DownloadFile("https://github.com/WFCD/WFinfo/releases/latest/download/WFInfo.exe", "My.Application.Info.DirectoryPath/WFinfo" & versionNum & ".exe")
-                    Invoke(Sub() lbStatus.Text = "ERROR (Parse Screen) - New Version downloaded, please start WFinfo" & versionNum & ".exe")
-                Catch e As Exception
-                    e.ToString()
-                End Try
             Else
                 Invoke(Sub() lbStatus.Text = "ERROR (ParseScreen)")
             End If
