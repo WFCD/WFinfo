@@ -375,7 +375,7 @@ Module Glob
     Public relicPanels(9) As Overlay
 
     Public ReplacementList As Char(,)
-    Public globHook As New GlobalHook
+    Public globHook As GlobalHook
     Public Settings As New JSONsettings()
 
     Public parser2 As OCR2
