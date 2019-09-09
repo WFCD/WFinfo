@@ -90,6 +90,12 @@ Public Class Main
         Catch ex As Exception
             If db IsNot Nothing AndAlso versionNum < db.Get_Current_Version() Then
                 Invoke(Sub() lbStatus.Text = "ERROR (Parse Screen) - New Version Available")
+                Try
+                    My.Computer.Network.DownloadFile("https://github.com/WFCD/WFinfo/releases/latest/download/WFInfo.exe", "My.Application.Info.DirectoryPath/WFinfo" & versionNum & ".exe")
+                    Invoke(Sub() lbStatus.Text = "ERROR (Parse Screen) - New Version downloaded, please start WFinfo" & versionNum & ".exe")
+                Catch e As Exception
+                    e.ToString()
+                End Try
             Else
                 Invoke(Sub() lbStatus.Text = "ERROR (ParseScreen)")
             End If
@@ -369,7 +375,7 @@ Module Glob
     Public relicPanels(9) As Overlay
 
     Public ReplacementList As Char(,)
-    Public globHook As GlobalHook
+    Public globHook As New GlobalHook
     Public Settings As New JSONsettings()
 
     Public parser2 As OCR2
@@ -381,7 +387,7 @@ Module Glob
     Public Sub initHandlers()
         ' There's a warning here, and I have no idea how to fix it
         '   I'll buy you a pizza if you can fix it (I'll paypall you ~7 bucks, that way no weird address transfer)
-        AddHandler globHook.KeyDown, AddressOf keyPressed
+        AddHandler GlobalHook.KeyDown, AddressOf keyPressed
 
         'Added some other shit to here so it can load quicker
         parser2 = New OCR2()
