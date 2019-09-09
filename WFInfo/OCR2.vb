@@ -741,7 +741,7 @@ Public Class OCR2
                         Try
                             Dim plat As Double = db.market_data(foundText(i))("plat")
                             Dim ducat As Double = db.market_data(foundText(i))("ducats").ToString()
-                            Dim vaulted As Boolean = foundText(i).Equals("Forma Blueprint") OrElse db.IsPartVaulted(foundText(i))
+                            Dim vaulted As Boolean = db.IsPartVaulted(foundText(i)) ' foundText(i).Equals("Forma Blueprint") OrElse
                             Dim j As Integer = i
                             rwrdPanels(j).Invoke(Sub() rwrdPanels(j).LoadText(plat.ToString("N1"), ducat, vaulted))
                             namePanels(j).Invoke(Sub() namePanels(j).LoadText(foundText(j)))
