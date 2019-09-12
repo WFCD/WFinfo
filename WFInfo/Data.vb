@@ -876,7 +876,7 @@ Class Data
 
     Private Sub log_Changed(sender As Object, line As String)
         Console.WriteLine(line)
-        If line.Contains("Created /Lotus/Interface/ProjectionRewardChoice.swf") Then
+        If line.Contains("Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf") Then '"Created /Lotus/Interface/ProjectionRewardChoice.swf" Or
             Task.Factory.StartNew(Sub() DoDelayWork())
         End If
     End Sub

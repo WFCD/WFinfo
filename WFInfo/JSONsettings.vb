@@ -7,14 +7,17 @@ Public Class JSONsettings
     Private ReadOnly appData As String = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
     Private ReadOnly settings_path As String = Path.Combine(appData, "WFInfo\settings.json")
     Public delay As Integer = 1000
+    Public delayDuplicate As Integer = 10000
 
     Public Sub New()
         Try
             job = JsonConvert.DeserializeObject(Of JObject)(File.ReadAllText(settings_path))
             delay = job("delay").ToObject(Of Integer)
+            delayDuplicate = job("delayDuplicate").ToObject(Of Integer)
         Catch ex As Exception
             job = New JObject()
             job("delay") = delay
+            job("delayDuplicate") = delayDuplicate
             SaveFile()
         End Try
     End Sub

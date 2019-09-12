@@ -20,7 +20,6 @@ Public Class Main
             ' Refreshes the UI and moves it to the stored location
             '_________________________________________________________________________
             Instance = Me
-
             If version Is Nothing Then
                 version = Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
                 version = version.Substring(0, version.LastIndexOf("."))
@@ -112,7 +111,6 @@ Public Class Main
         '_________________________________________________________________________
 
         Console.WriteLine(txt)
-
         If version Is Nothing Then
             version = Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
             version = version.Substring(0, version.LastIndexOf("."))
@@ -130,7 +128,7 @@ Public Class Main
         End If
 
         appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-        Dim logTXT As String = "[" + System.DateTime.Now + " " + version + "] " + vbTab + txt + vbNewLine
+        Dim logTXT As String = "[" + DateTime.Now + " " + version + "] " + vbTab + txt + vbNewLine
 
         SyncLock log_lock
             File.AppendAllText(appData + "\WFInfo\Debug\WFInfo.log", logTXT)
@@ -378,6 +376,7 @@ Module Glob
     Public ReplacementList As Char(,)
     Public globHook As GlobalHook
     Public Settings As New JSONsettings()
+    Private dateLastOperation = DateTime.MinValue.Ticks
 
     Public parser2 As OCR2
 
@@ -416,9 +415,22 @@ Module Glob
     End Sub
 
     Public Sub DoDelayWork()
-        Threading.Thread.Sleep(Glob.Settings.delay)
-        DoOtherWork()
+        If Not duplicate() Then
+            Threading.Thread.Sleep(Glob.Settings.delay)
+            DoOtherWork()
+        End If
     End Sub
+
+    Private Function duplicate()
+        Dim dateNow = DateTime.Now.Ticks
+        If dateNow - dateLastOperation > (Glob.Settings.delayDuplicate * 10) Then
+            dateLastOperation = dateNow
+            Return False
+        Else
+            Return True
+        End If
+
+    End Function
 
     Private DoOtherWork_timer As Long
     Private Sub DoOtherWork()
