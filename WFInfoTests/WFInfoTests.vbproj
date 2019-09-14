@@ -119,9 +119,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WFInfo\WFInfo.vbproj">
+    <ProjectReference Include="..\WFInfo\WFInfoVB.vbproj">
       <Project>{c06ea0ef-aa04-44c1-bfa5-a328400fb023}</Project>
-      <Name>WFInfo</Name>
+      <Name>WFInfoVB</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

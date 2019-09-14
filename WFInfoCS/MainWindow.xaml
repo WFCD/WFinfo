@@ -1,0 +1,27 @@
+﻿<Window x:Class="WFInfoCS.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WFInfoCS"
+        mc:Ignorable="d"
+        Title="WFInfo" Height="131" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None">
+    <Grid Background="#FF1B1B1B">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="304"/>
+            <ColumnDefinition Width="30"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="84"/>
+            <RowDefinition Height="21"/>
+        </Grid.RowDefinitions>
+        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
+
+        <Image HorizontalAlignment="Left" Height="24" VerticalAlignment="Center" Width="25" RenderTransformOrigin="-1.263,-0.625" Margin="1,1,0,1" Source="Resources/WFLogo.png" />
+        <TextBlock HorizontalAlignment="Left" Margin="48,6,0,4" TextWrapping="Wrap" Text="WFInfo" VerticalAlignment="Center" Height="16" Width="38"/>
+        <TextBlock HorizontalAlignment="Left" Margin="112,6,0,4" TextWrapping="Wrap" Text="vX.X.X" VerticalAlignment="Center" Height="16" Foreground="#FFB1D0D9" FontFamily="Cambria" FontSize="11" Width="29"/>
+        <Rectangle Fill="#FF1B1B1B" HorizontalAlignment="Left" Height="26" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Margin="0,23,0,0" Grid.Row="1" Grid.ColumnSpan="2"/>
+
+    </Grid>
+</Window>
