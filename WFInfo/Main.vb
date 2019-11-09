@@ -284,6 +284,8 @@ Public Class Main
 
     Private Async Sub lbMarket_Click(sender As Object, e As EventArgs) Handles lbMarket.Click
         lbMarketDate.Text = "Loading..."
+        Relics.Close()
+        Equipment.Close()
         Await Task.Run(Sub() db.ForceMarketUpdate())
         lbMarketDate.Text = db.market_data("timestamp").ToString().Substring(5, 11)
         Equipment.Refresh()
@@ -293,6 +295,8 @@ Public Class Main
     Private Async Sub lbEqmt_Click(sender As Object, e As EventArgs) Handles lbEqmt.Click
         lbEqmtDate.Text = "Loading..."
         lbWikiDate.Text = "Loading..."
+        Relics.Close()
+        Equipment.Close()
         Await Task.Run(Sub() db.ForceEqmtUpdate())
         lbEqmtDate.Text = db.eqmt_data("timestamp").ToString().Substring(5, 11)
         lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11)
@@ -302,6 +306,8 @@ Public Class Main
 
     Private Async Sub lbWiki_Click(sender As Object, e As EventArgs) Handles lbWiki.Click
         lbWikiDate.Text = "Loading..."
+        Relics.Close()
+        Equipment.Close()
         Await Task.Run(Sub() db.ForceWikiUpdate())
         lbWikiDate.Text = db.eqmt_data("rqmts_timestamp").ToString().Substring(5, 11)
         Equipment.Refresh()
