@@ -13,14 +13,16 @@ namespace WFInfoCS
         private string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
         private Brush lightBlue = new SolidColorBrush(Color.FromRgb(177, 208, 217));
         private string buildVersion = "v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        private uint hotKey = 0x24;
-        public Main(){
+        private string hotKey = "Home";
+        public LowLevelListener listener = new LowLevelListener();
 
+        public Main(){
+            listener.hook();
         }
 
         public void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
-            string path = appPath + @"\Debug";
+            string path = AppPath + @"\Debug";
             Console.WriteLine(argm);
             Directory.CreateDirectory(path);
             using (StreamWriter sw = File.AppendText(path + @"\debug.txt"))
@@ -33,7 +35,7 @@ namespace WFInfoCS
         //getters, boring shit
         public string BuildVersion { get => buildVersion; }
         public Brush LightBlue { get => lightBlue; }
-        public string AppPath { get => AppPath; }
-        public uint HotKey { get => hotKey; }
+        public string HotKey { get => hotKey; set => hotKey = value; }
+        public string AppPath { get => appPath; }
     }
 }

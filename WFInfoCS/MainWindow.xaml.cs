@@ -25,7 +25,7 @@ namespace WFInfoCS
     /// </summary>
     public partial class MainWindow : Window{
         Main main = new Main();
-
+        private LowLevelListener _listener;
         public MainWindow(){
             try {
                 String thisprocessname = Process.GetCurrentProcess().ProcessName;
@@ -33,7 +33,10 @@ namespace WFInfoCS
                     main.AddLog("Duplicate process found");
                     this.Close();
                 }
+                //_listener = new LowLevelListener();
+                //_listener.OnKeyPressed += _listener_OnKeyPressed;
 
+                //_listener.HookKeyboard();
                 InitializeComponent();
                 Version.Text = main.BuildVersion;
                 ChangeStatus("loaded", 0);
@@ -44,6 +47,17 @@ namespace WFInfoCS
             }
             }
 
+
+        //*void _listener_OnKeyPressed(object sender, KeyPressedArgs e)
+        //{
+        //    Console.WriteLine(e.KeyPressed.ToString());
+        //    if (e.KeyPressed.ToString() == main.HotKey){
+        //        ChangeStatus("Hotkey pressed", 0);
+        //    }
+        //    else { ChangeStatus("Other key pressed", 0); 
+        //       return; 
+        //    }
+        //}
         public void ChangeStatus(string status, int serverity){
             Status.Text = "Status: " + status;
             switch (serverity)
@@ -64,56 +78,8 @@ namespace WFInfoCS
         }
 
 
-        [DllImport("user32.dll")]
-        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
-
-        [DllImport("user32.dll")]
-        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
-
-        private const int HOTKEY_ID = 9000;
-
-        //Modifiers:
-        private const uint MOD_NONE = 0x0000; //[NONE]
-
-        private HwndSource source;
-
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            base.OnSourceInitialized(e);
-
-            IntPtr handle = new WindowInteropHelper(this).Handle;
-            source = HwndSource.FromHwnd(handle);
-            source.AddHook(HwndHook);
-
-            RegisterHotKey(handle, HOTKEY_ID, MOD_NONE, main.HotKey); //VK_HOME
-        }
-
-
-        private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-        {
-            const int WM_HOTKEY = 0x0312;
-            switch (msg)
-            {
-                case WM_HOTKEY:
-                    switch (wParam.ToInt32())
-                    {
-                        case HOTKEY_ID:
-                            int vkey = (((int)lParam >> 16) & 0xFFFF);
-                            if (vkey == main.HotKey)
-                            {
-                                ChangeStatus("Hotkey pressed", 0);
-                            }
-                            handled = true;
-                            break;
-                    }
-                    break;
-            }
-            return IntPtr.Zero;
-        }
-
-
         private void Exit(object sender, RoutedEventArgs e){
+            main.listener.unHook();
             this.Close();
         }
 

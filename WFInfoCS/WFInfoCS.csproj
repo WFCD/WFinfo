@@ -100,7 +100,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="GlobalHook.cs" />
+    <Compile Include="LowLevelListener.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Sheets.cs" />
     <Page Include="MainWindow.xaml">
