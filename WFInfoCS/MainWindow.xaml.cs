@@ -23,7 +23,7 @@ namespace WFInfoCS
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window{
-        private string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        private string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
         private Brush LightBlue = new SolidColorBrush(Color.FromRgb(177, 208, 217));
 
         public string BuildVersion = "v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -48,7 +48,7 @@ namespace WFInfoCS
             }
 
         public void AddLog(string argm){ //write to the debug file, includes version and UTCtime
-            string path = appData + @"\WFInfoCS\Debug";
+            string path = appPath + @"\Debug";
             Console.WriteLine(argm);
             Directory.CreateDirectory(path);
             using (StreamWriter sw = File.AppendText(path + @"\debug.txt")){
