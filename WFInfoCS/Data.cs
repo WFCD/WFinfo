@@ -26,5 +26,6 @@ namespace WFInfoCS
 
         WebClient WebClient = new WebClient();
         private Sheets sheetsAPI;
+        //private NLua.Lua Lua;
     }
 }
