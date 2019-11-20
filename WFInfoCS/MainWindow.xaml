@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfoCS"
         mc:Ignorable="d"
-        Title="WFInfo" Height="131" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None">
-    <Grid Background="#FF1B1B1B">
+        Title="WFInfo" Height="131" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070">
+    <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="304"/>
             <ColumnDefinition Width="30"/>
@@ -16,12 +16,98 @@
             <RowDefinition Height="84"/>
             <RowDefinition Height="21"/>
         </Grid.RowDefinitions>
-        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
+        <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,0,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
+            <Rectangle.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleY="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Rectangle.RenderTransform>
+        </Rectangle>
+        <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,28,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
+            <Rectangle.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleY="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Rectangle.RenderTransform>
+        </Rectangle>
+        <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,56,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.RowSpan="2" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
+            <Rectangle.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleY="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Rectangle.RenderTransform>
+        </Rectangle>
 
-        <Image HorizontalAlignment="Left" Height="24" VerticalAlignment="Center" Width="25" RenderTransformOrigin="-1.263,-0.625" Margin="1,1,0,1" Source="Resources/WFLogo.png" />
-        <TextBlock HorizontalAlignment="Left" Margin="48,6,0,4" TextWrapping="Wrap" Text="WFInfo" VerticalAlignment="Center" Height="16" Width="38"/>
-        <TextBlock HorizontalAlignment="Left" Margin="112,6,0,4" TextWrapping="Wrap" Text="vX.X.X" VerticalAlignment="Center" Height="16" Foreground="#FFB1D0D9" FontFamily="Cambria" FontSize="11" Width="29"/>
-        <Rectangle Fill="#FF1B1B1B" HorizontalAlignment="Left" Height="26" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Margin="0,23,0,0" Grid.Row="1" Grid.ColumnSpan="2"/>
+        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
+        <Rectangle HorizontalAlignment="Left" Height="131" Grid.RowSpan="3" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Grid.ColumnSpan="2"/>
+        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="21" Stroke="#FF646464" VerticalAlignment="Top" Width="305" Grid.ColumnSpan="2" Grid.Row="2"/>
+
+        <Image HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" >
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform Y="0.25"/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+        <TextBlock HorizontalAlignment="Left" Margin="28,1,0,0" TextWrapping="Wrap" Text="WFInfo" VerticalAlignment="Center" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Foreground="#FFB1D0D9" FontSize="22" Height="25" Width="70"/>
+        <TextBlock x:Name="Version" HorizontalAlignment="Left" Margin="104,11,0,83" TextWrapping="Wrap" Text="vX.X.X" VerticalAlignment="Center" Height="16" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="11" Width="46" Grid.RowSpan="2"/>
+        <Button x:Name="minimise" Content="_" HorizontalAlignment="Left" Margin="275,0,0,0" VerticalAlignment="Top" Width="30" Height="27" Click="Minimise" Foreground="#FFB1D0D9" FontSize="16" RenderTransformOrigin="0.5,1" Grid.RowSpan="2" BorderBrush="#FF646464" Grid.ColumnSpan="2" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed">
+            <Button.Background>
+                <ImageBrush/>
+            </Button.Background>
+        </Button>
+        <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="0,0,0,83" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" Grid.RowSpan="2" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        <TextBlock x:Name="Status" HorizontalAlignment="Left" Margin="1,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="Status: Loading..." VerticalAlignment="Top" Height="20" Width="302" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="16" Foreground="#FFB1D0D9"/>
+        <Button x:Name="Website" Content="" HorizontalAlignment="Center" Margin="0,0,0,57" Width="30" Click="Website_click" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
+            <Button.Background>
+                <ImageBrush ImageSource="Resources/home.png" Stretch="Uniform"/>
+            </Button.Background>
+        </Button>
+        <Button x:Name="Relics" Content="x" HorizontalAlignment="Center" Margin="0,26,0,31" Width="30" Click="Relics_click" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
+            <Button.Background>
+                <ImageBrush ImageSource="Resources/Relic.png" Stretch="Uniform"/>
+            </Button.Background>
+        </Button>
+        <Button x:Name="Settings" Content="x" HorizontalAlignment="Center" Margin="0,78,0,0" Width="30" Click="Settings_click" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1">
+            <Button.Background>
+                <ImageBrush ImageSource="Resources/Settings.png" Stretch="Uniform"/>
+            </Button.Background>
+        </Button>
+        <Button x:Name="Gear" Content="x" HorizontalAlignment="Center" Margin="0,52,0,5" Width="30" Click="Gear_click" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1">
+            <Button.Background>
+                <ImageBrush ImageSource="Resources/gear.png" Stretch="Uniform"/>
+            </Button.Background>
+        </Button>
+        <TextBlock x:Name="Market_Data" HorizontalAlignment="Left" Margin="29,1,0,0" Grid.Row="1" TextWrapping="Wrap" Text=" Market Data: Loading..." VerticalAlignment="Top" Height="27" Width="275" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="22" Foreground="#FFB1D0D9" TextAlignment="Center"/>
+        <Button x:Name="ReloadMarket" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="29" Height="29" Foreground="{x:Null}" Click="ReloadMarketClick">
+            <Button.Background>
+                <ImageBrush ImageSource="Resources/Reload.png"/>
+            </Button.Background>
+        </Button>
+        <Button x:Name="ReloadDrop" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="29" Height="29" Foreground="{x:Null}" Margin="0,28,0,0" Click="ReloadDropClick">
+            <Button.Background>
+                <ImageBrush ImageSource="Resources/Reload.png"/>
+            </Button.Background>
+        </Button>
+        <Button x:Name="ReloadWiki" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="29" Height="29" Foreground="{x:Null}" Margin="0,56,0,0" Grid.RowSpan="2" Click="ReloadWikiClick">
+            <Button.Background>
+                <ImageBrush ImageSource="Resources/Reload.png"/>
+            </Button.Background>
+        </Button>
+        <TextBlock x:Name="Drop_Data" HorizontalAlignment="Left" Margin="29,28,0,0" Grid.Row="1" TextWrapping="Wrap" Text=" Drop Data: Loading..." VerticalAlignment="Top" Height="28" Width="275" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="22" Foreground="#FFB1D0D9" TextAlignment="Center"/>
+        <TextBlock x:Name="Wiki_Data" HorizontalAlignment="Left" Margin="29,56,0,0" Grid.Row="1" TextWrapping="Wrap" Text=" Wiki Data: Loading..." VerticalAlignment="Top" Height="28" Width="275" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="22" Foreground="#FFB1D0D9" TextAlignment="Center"/>
 
     </Grid>
 </Window>
