@@ -25,7 +25,6 @@ namespace WFInfoCS
     /// </summary>
     public partial class MainWindow : Window{
         Main main = new Main();
-        private LowLevelListener _listener;
         public MainWindow(){
             try {
                 String thisprocessname = Process.GetCurrentProcess().ProcessName;
@@ -47,17 +46,6 @@ namespace WFInfoCS
             }
             }
 
-
-        //*void _listener_OnKeyPressed(object sender, KeyPressedArgs e)
-        //{
-        //    Console.WriteLine(e.KeyPressed.ToString());
-        //    if (e.KeyPressed.ToString() == main.HotKey){
-        //        ChangeStatus("Hotkey pressed", 0);
-        //    }
-        //    else { ChangeStatus("Other key pressed", 0); 
-        //       return; 
-        //    }
-        //}
         public void ChangeStatus(string status, int serverity){
             Status.Text = "Status: " + status;
             switch (serverity)
