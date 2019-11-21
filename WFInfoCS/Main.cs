@@ -5,16 +5,17 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Media;
+using Xamarin.Forms;
 
 namespace WFInfoCS
 {
     class Main{
         private string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
-        private Brush lightBlue = new SolidColorBrush(Color.FromRgb(177, 208, 217));
+        private Brush lightBlue = new SolidColorBrush(System.Windows.Media.Color.FromRgb(177, 208, 217));
         private string buildVersion = "v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
         private string hotKey = "Home";
-        public LowLevelListener listener = new LowLevelListener();
 
         public Main(){
         }
@@ -30,11 +31,33 @@ namespace WFInfoCS
             }
         }
 
+        private void statusUpdate(string message, int serverity)
+        {
+            MessagingCenter.Send(this, "updateStatus", message);
+        }
+
+        public void OnKeyAction(Keys key)
+        {
+            Console.WriteLine(key);
+            statusUpdate(key.ToString(), 1);
+        }
+
 
         //getters, boring shit
         public string BuildVersion { get => buildVersion; }
         public Brush LightBlue { get => lightBlue; }
         public string HotKey { get => hotKey; set => hotKey = value; }
         public string AppPath { get => appPath; }
+    }
+    public class Status
+    {
+        public string Message { get; set; }
+        public int Serverity { get; set; }
+
+        public Status(string msg, int ser)
+        {
+            Message = msg;
+            Serverity = ser;
+        }
     }
 }

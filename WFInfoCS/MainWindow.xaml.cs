@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Xamarin.Forms;
 
 namespace WFInfoCS
 {
@@ -24,18 +25,22 @@ namespace WFInfoCS
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window{
-        Main main = new Main();
+        Main main = new Main(); //subscriber
+
         public MainWindow(){
-            try {
+        LowLevelListener listener = new LowLevelListener(); //publisher
+            MessagingCenter.Subscribe<Status>(this, "updateStatus", (e) => {ChangeStatus(e); });
+
+            try
+            {
+                LowLevelListener.KeyAction += main.OnKeyAction;
+                listener.Hook();
                 String thisprocessname = Process.GetCurrentProcess().ProcessName;
                 if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1){
                     main.AddLog("Duplicate process found");
                     this.Close();
                 }
-                //_listener = new LowLevelListener();
-                //_listener.OnKeyPressed += _listener_OnKeyPressed;
 
-                //_listener.HookKeyboard();
                 InitializeComponent();
                 Version.Text = main.BuildVersion;
                 ChangeStatus("loaded", 0);
@@ -65,9 +70,30 @@ namespace WFInfoCS
             }
         }
 
+        public void ChangeStatus(Status st)
+        {
+            Status.Text = "Status: " + st.Message;
+            switch (st.Serverity)
+            {
+                case 0://default, no problem
+                    Status.Foreground = main.LightBlue;
+                    break;
+                case 1: //severe, red text
+                    Status.Foreground = Brushes.Red;
+                    break;
+                case 2: //warning, orange text
+                    Status.Foreground = Brushes.Orange;
+                    break;
+                default: //Uncaught, big problem
+                    Status.Foreground = Brushes.Yellow;
+                    break;
+            }
+        }
+
+
 
         private void Exit(object sender, RoutedEventArgs e){
-            main.listener.unHook();
+            MessagingCenter.Unsubscribe<Main>(this, "updateStatus");
             this.Close();
         }
 

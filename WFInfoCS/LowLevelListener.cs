@@ -9,7 +9,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 
 namespace WFInfoCS
-{
+{        public delegate void KeyboardAction();
+
     class LowLevelListener
     {
         private const int WH_MOUSE_LL = 14;
@@ -20,7 +21,6 @@ namespace WFInfoCS
         private static IntPtr _hookIDMouse = IntPtr.Zero;
         private static LowLevelMouseProc _procMouse = HookCallbackM;
 
-        public event EventHandler KeyDow;
         private enum MouseMessages
         {
             WM_LBUTTONDOWN = 0x0201,
@@ -28,7 +28,8 @@ namespace WFInfoCS
             WM_MOUSEMOVE = 0x0200,
             WM_MOUSEWHEEL = 0x020A,
             WM_RBUTTONDOWN = 0x0204,
-            WM_RBUTTONUP = 0x0205
+            WM_RBUTTONUP = 0x0205,
+            WM_XBUTTONDOWN = 0x020B
         }
         [StructLayout(LayoutKind.Sequential)]
 
@@ -49,6 +50,10 @@ namespace WFInfoCS
         }
 
         public LowLevelListener()
+        {
+        }
+
+        public void Hook()
         {
             _hookIDKeyboard = SetHookKB(_procKeyboard);
             _hookIDMouse = SetHookM(_procMouse);
@@ -78,28 +83,58 @@ namespace WFInfoCS
             }
         }
 
+        public delegate void keyActionHandler(Keys key);
+        public static event keyActionHandler KeyAction;
         private static IntPtr HookCallbackKB(int nCode, IntPtr wParam, IntPtr lParam) //handels keyboard input
         {
             if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
             {
-                //int vkCode = Marshal.ReadInt32(lParam);
+                int vkCode = Marshal.ReadInt32(lParam);
                 //Console.WriteLine((Keys)vkCode);
+                OnKeyAction((Keys)vkCode);
             }
             return CallNextHookEx(_hookIDKeyboard, nCode, wParam, lParam);
         }
 
+        protected static void OnKeyAction(Keys key)
+        {
+            KeyAction?.Invoke(key);
+        }
 
         private static IntPtr HookCallbackM(int nCode, IntPtr wParam, IntPtr lParam) //handels mouse input
         {
-            if (nCode >= 0 && MouseMessages.WM_LBUTTONDOWN == (MouseMessages)wParam)
+            if (nCode >= 0)
             {
-                //MSLLHOOKSTRUCT hookStruct = (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT));
+                MSLLHOOKSTRUCT hookStruct = (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT));
+                //Console.WriteLine((MouseMessages)wParam);
+                switch ((MouseMessages)wParam)
+                {
+                    case MouseMessages.WM_MOUSEMOVE:
+                        break;
+                    case MouseMessages.WM_LBUTTONDOWN:
+                        OnKeyAction(Keys.LButton);
+                        break;
+                    case MouseMessages.WM_RBUTTONDOWN:
+                        OnKeyAction(Keys.RButton);
+                        break;
+                    case MouseMessages.WM_MOUSEWHEEL:
+                        //Should this stay implemented?
+                        break;
+                    case MouseMessages.WM_XBUTTONDOWN: //https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-xbuttondown
+                        if (hookStruct.pt.y == 1) 
+                            OnKeyAction(Keys.XButton1);
+                        else
+                            OnKeyAction(Keys.XButton2);
+                        break;
+                    default:
+                        break;
+                }
                 //Console.WriteLine(hookStruct.pt.x + ", " + hookStruct.pt.y);
+
             }
             return CallNextHookEx(_hookIDMouse, nCode, wParam, lParam);
         }
 
-  
         private delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
 
