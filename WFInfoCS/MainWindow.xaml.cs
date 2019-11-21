@@ -95,7 +95,8 @@ namespace WFInfoCS
 
         }
         private void Settings_click(object sender, RoutedEventArgs e){
-            //todo, opens new window, shows all settings
+            Settings settingsWindow = new Settings();
+            settingsWindow.Show();
             ChangeStatus("Something uncaught", -1);
         }
 

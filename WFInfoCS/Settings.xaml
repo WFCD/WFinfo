@@ -1,0 +1,35 @@
+﻿<Window x:Class="WFInfoCS.Settings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WFInfoCS"
+        mc:Ignorable="d"
+        Title="Settings" Height="120" Width="334" SizeToContent="Height" ResizeMode="NoResize" BorderBrush="#FF707070" WindowStyle="None">
+    <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="334"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="105"/>
+        </Grid.RowDefinitions>
+
+        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Grid.RowSpan="2"/>
+        <Rectangle HorizontalAlignment="Left" Height="120" Grid.RowSpan="2" Stroke="#FF646464" VerticalAlignment="Top" Width="334"/>
+
+        <Image HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" >
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform Y="0.25"/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+        <TextBlock HorizontalAlignment="Left" Margin="28,1,0,0" TextWrapping="Wrap" Text="Settings" VerticalAlignment="Center" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Foreground="#FFB1D0D9" FontSize="20" Width="277"/>
+        <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="304,0,0,104" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" Grid.RowSpan="2" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+
+    </Grid>
+</Window>

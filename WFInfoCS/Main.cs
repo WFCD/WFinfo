@@ -39,8 +39,8 @@ namespace WFInfoCS
 
         public void OnKeyAction(Keys key)
         {
-            Console.WriteLine(key);
-            statusUpdate(key.ToString(), 1);
+            //Console.WriteLine(key);
+            //statusUpdate(key.ToString(), 1);
         }
 
 
