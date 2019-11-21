@@ -17,7 +17,6 @@ namespace WFInfoCS
         public LowLevelListener listener = new LowLevelListener();
 
         public Main(){
-            listener.hook();
         }
 
         public void AddLog(string argm)
