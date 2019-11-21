@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Media;
-using Xamarin.Forms;
 
 namespace WFInfoCS
 {
@@ -31,9 +30,11 @@ namespace WFInfoCS
             }
         }
 
-        private void statusUpdate(string message, int serverity)
+        public delegate void statusHandler(string message, int serverity);
+        public event statusHandler updatedStatus;
+        public virtual void statusUpdate(string message, int serverity)
         {
-            MessagingCenter.Send(this, "updateStatus", message);
+            updatedStatus?.Invoke(message, serverity);
         }
 
         public void OnKeyAction(Keys key)

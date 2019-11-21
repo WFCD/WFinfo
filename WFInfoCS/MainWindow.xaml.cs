@@ -17,7 +17,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Xamarin.Forms;
 
 namespace WFInfoCS
 {
@@ -29,18 +28,18 @@ namespace WFInfoCS
 
         public MainWindow(){
         LowLevelListener listener = new LowLevelListener(); //publisher
-            MessagingCenter.Subscribe<Status>(this, "updateStatus", (e) => {ChangeStatus(e); });
-
+            main.updatedStatus += this.ChangeStatus;
             try
             {
-                LowLevelListener.KeyAction += main.OnKeyAction;
-                listener.Hook();
+
                 String thisprocessname = Process.GetCurrentProcess().ProcessName;
                 if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1){
                     main.AddLog("Duplicate process found");
                     this.Close();
                 }
 
+                LowLevelListener.KeyAction += main.OnKeyAction;
+                listener.Hook();
                 InitializeComponent();
                 Version.Text = main.BuildVersion;
                 ChangeStatus("loaded", 0);
@@ -70,30 +69,7 @@ namespace WFInfoCS
             }
         }
 
-        public void ChangeStatus(Status st)
-        {
-            Status.Text = "Status: " + st.Message;
-            switch (st.Serverity)
-            {
-                case 0://default, no problem
-                    Status.Foreground = main.LightBlue;
-                    break;
-                case 1: //severe, red text
-                    Status.Foreground = Brushes.Red;
-                    break;
-                case 2: //warning, orange text
-                    Status.Foreground = Brushes.Orange;
-                    break;
-                default: //Uncaught, big problem
-                    Status.Foreground = Brushes.Yellow;
-                    break;
-            }
-        }
-
-
-
         private void Exit(object sender, RoutedEventArgs e){
-            MessagingCenter.Unsubscribe<Main>(this, "updateStatus");
             this.Close();
         }
 
@@ -115,7 +91,7 @@ namespace WFInfoCS
 
         private void Gear_click(object sender, RoutedEventArgs e){
             //todo, opens new window, shows all prime items
-            ChangeStatus("This should work, big oopsie", 1);
+            ChangeStatus("This should work, big oopsie, scaling teeeeeeeest", 1);
 
         }
         private void Settings_click(object sender, RoutedEventArgs e){

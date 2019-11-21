@@ -49,7 +49,7 @@
 
         <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
         <Rectangle HorizontalAlignment="Left" Height="131" Grid.RowSpan="3" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Grid.ColumnSpan="2"/>
-        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="21" Stroke="#FF646464" VerticalAlignment="Top" Width="305" Grid.ColumnSpan="2" Grid.Row="2"/>
+        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="305" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,78,0,0" Grid.RowSpan="2"/>
 
         <Image HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" >
             <Image.RenderTransform>
@@ -69,45 +69,116 @@
             </Button.Background>
         </Button>
         <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="0,0,0,83" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" Grid.RowSpan="2" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
-        <TextBlock x:Name="Status" HorizontalAlignment="Left" Margin="1,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="Status: Loading..." VerticalAlignment="Top" Height="20" Width="302" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="16" Foreground="#FFB1D0D9"/>
-        <Button x:Name="Website" Content="" HorizontalAlignment="Center" Margin="0,0,0,57" Width="30" Click="Website_click" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
+        <Button x:Name="Website" HorizontalAlignment="Center" Margin="0,0,0,57" Width="30" Click="Website_click" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
             <Button.Background>
-                <ImageBrush ImageSource="Resources/home.png" Stretch="Uniform"/>
+                <ImageBrush ImageSource="Resources/home.png">
+                    <ImageBrush.RelativeTransform>
+                        <TransformGroup>
+                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
+                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
+                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </ImageBrush.RelativeTransform>
+                </ImageBrush>
             </Button.Background>
         </Button>
         <Button x:Name="Relics" Content="x" HorizontalAlignment="Center" Margin="0,26,0,31" Width="30" Click="Relics_click" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
             <Button.Background>
-                <ImageBrush ImageSource="Resources/Relic.png" Stretch="Uniform"/>
+                <ImageBrush ImageSource="Resources/Relic.png" Stretch="Uniform">
+                    <ImageBrush.RelativeTransform>
+                        <TransformGroup>
+                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
+                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
+                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </ImageBrush.RelativeTransform>
+                </ImageBrush>
             </Button.Background>
         </Button>
         <Button x:Name="Settings" Content="x" HorizontalAlignment="Center" Margin="0,78,0,0" Width="30" Click="Settings_click" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1">
             <Button.Background>
-                <ImageBrush ImageSource="Resources/Settings.png" Stretch="Uniform"/>
+                <ImageBrush ImageSource="Resources/Settings.png" Stretch="Uniform">
+                    <ImageBrush.RelativeTransform>
+                        <TransformGroup>
+                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
+                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
+                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </ImageBrush.RelativeTransform>
+                </ImageBrush>
             </Button.Background>
         </Button>
         <Button x:Name="Gear" Content="x" HorizontalAlignment="Center" Margin="0,52,0,5" Width="30" Click="Gear_click" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1">
             <Button.Background>
-                <ImageBrush ImageSource="Resources/gear.png" Stretch="Uniform"/>
+                <ImageBrush ImageSource="Resources/gear.png" Stretch="Uniform">
+                    <ImageBrush.RelativeTransform>
+                        <TransformGroup>
+                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
+                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
+                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </ImageBrush.RelativeTransform>
+                </ImageBrush>
             </Button.Background>
         </Button>
-        <TextBlock x:Name="Market_Data" HorizontalAlignment="Left" Margin="29,1,0,0" Grid.Row="1" TextWrapping="Wrap" Text=" Market Data: Loading..." VerticalAlignment="Top" Height="27" Width="275" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="22" Foreground="#FFB1D0D9" TextAlignment="Center"/>
-        <Button x:Name="ReloadMarket" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="29" Height="29" Foreground="{x:Null}" Click="ReloadMarketClick">
+        <Button x:Name="ReloadMarket" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="27" Height="27" Foreground="{x:Null}" Click="ReloadMarketClick">
             <Button.Background>
-                <ImageBrush ImageSource="Resources/Reload.png"/>
+                <ImageBrush ImageSource="Resources/Reload.png" Stretch="Uniform">
+                    <ImageBrush.RelativeTransform>
+                        <TransformGroup>
+                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
+                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
+                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </ImageBrush.RelativeTransform>
+                </ImageBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="ReloadDrop" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="29" Height="29" Foreground="{x:Null}" Margin="0,28,0,0" Click="ReloadDropClick">
+        <Button x:Name="ReloadDrop" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="27" Height="27" Foreground="{x:Null}" Margin="0,26,0,0" Click="ReloadDropClick">
             <Button.Background>
-                <ImageBrush ImageSource="Resources/Reload.png"/>
+                <ImageBrush ImageSource="Resources/Reload.png" Stretch="Uniform">
+                    <ImageBrush.RelativeTransform>
+                        <TransformGroup>
+                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
+                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
+                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </ImageBrush.RelativeTransform>
+                </ImageBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="ReloadWiki" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="29" Height="29" Foreground="{x:Null}" Margin="0,56,0,0" Grid.RowSpan="2" Click="ReloadWikiClick">
+        <Button x:Name="ReloadWiki" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="27" Height="27" Foreground="{x:Null}" Margin="0,52,0,0" Click="ReloadWikiClick">
             <Button.Background>
-                <ImageBrush ImageSource="Resources/Reload.png"/>
+                <ImageBrush ImageSource="Resources/Reload.png" Stretch="Uniform">
+                    <ImageBrush.RelativeTransform>
+                        <TransformGroup>
+                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
+                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
+                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </ImageBrush.RelativeTransform>
+                </ImageBrush>
             </Button.Background>
         </Button>
-        <TextBlock x:Name="Drop_Data" HorizontalAlignment="Left" Margin="29,28,0,0" Grid.Row="1" TextWrapping="Wrap" Text=" Drop Data: Loading..." VerticalAlignment="Top" Height="28" Width="275" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="22" Foreground="#FFB1D0D9" TextAlignment="Center"/>
-        <TextBlock x:Name="Wiki_Data" HorizontalAlignment="Left" Margin="29,56,0,0" Grid.Row="1" TextWrapping="Wrap" Text=" Wiki Data: Loading..." VerticalAlignment="Top" Height="28" Width="275" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="22" Foreground="#FFB1D0D9" TextAlignment="Center"/>
+        <Viewbox x:Name="Status_viewbox" HorizontalAlignment="Left" Height="25" Margin="2,79,0,0" Grid.Row="1" VerticalAlignment="Top" Width="302" Grid.RowSpan="2">
+            <TextBlock x:Name="Status" HorizontalAlignment="Left" Text="Status: Loading..." VerticalAlignment="Top" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="14" Foreground="#FFB1D0D9" LineStackingStrategy="BlockLineHeight"/>
+        </Viewbox>
+        <Viewbox x:Name="Market_data_viewbox" HorizontalAlignment="Left" Height="26" Margin="27,1,0,0" Grid.Row="1" VerticalAlignment="Top" Width="277">
+            <TextBlock x:Name="Market_Data" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="18" Foreground="#FFB1D0D9" TextAlignment="Center" Width="236" RenderTransformOrigin="0,0"><Run Text=" Market Data: Loading..."/></TextBlock>
+        </Viewbox>
+        <Viewbox x:Name="Drop_data_viewbox" HorizontalAlignment="Left" Height="26" Margin="27,27,0,0" Grid.Row="1" VerticalAlignment="Top" Width="277">
+            <TextBlock x:Name="Drop_Data" HorizontalAlignment="Left" TextWrapping="Wrap" Text=" Drop Data: Loading..." VerticalAlignment="Top" Width="288" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="22" Foreground="#FFB1D0D9" TextAlignment="Center"/>
+        </Viewbox>
+        <Viewbox x:Name="Wiki_data_viewbox" HorizontalAlignment="Left" Height="25" Margin="27,53,0,0" Grid.Row="1" VerticalAlignment="Top" Width="277">
+            <TextBlock x:Name="Wiki_Data" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="22" Foreground="#FFB1D0D9" TextAlignment="Center" Width="288"><Run Text=" Wiki Data: Loading..."/></TextBlock>
+        </Viewbox>
 
     </Grid>
 </Window>
