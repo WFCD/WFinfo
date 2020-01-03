@@ -79,6 +79,15 @@ Public Class Main
                 For i As Integer = 0 To 8
                     relicPanels(i) = New Overlay()
                 Next
+                Dim di As New DirectoryInfo(appData & "\WFInfo\debug\")
+                Dim fiArr As FileInfo() = di.GetFiles()
+                Dim fri As FileInfo
+                For Each fri In fiArr
+                    If (fri.Name.Contains(".png") And DateTime.Compare(fri.CreationTime.AddDays(2), DateTime.Now) < 0) Then
+                        addLog("File: " & fri.Name & " is older than 2 days and thus has been deleted")
+                        fri.Delete()
+                    End If
+                Next fri
                 If versionNum >= db.Get_Current_Version() Then
                     Invoke(Sub() lbStatus.Text = "Data Loaded")
                 Else
