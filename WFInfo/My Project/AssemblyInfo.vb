@@ -29,5 +29,5 @@ Imports System.Reflection
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("8.2.5.0")>
-<Assembly: AssemblyFileVersion("8.2.5.0")>
+<Assembly: AssemblyVersion("8.2.6.0")>
+<Assembly: AssemblyFileVersion("8.2.6.0")>
