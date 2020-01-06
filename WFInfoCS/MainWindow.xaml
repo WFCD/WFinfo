@@ -6,6 +6,10 @@
         xmlns:local="clr-namespace:WFInfoCS"
         mc:Ignorable="d"
         Title="WFInfo" Height="131" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070">
+    <Window.Resources>
+        <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
+        <System:Double x:Key="FontSize">18</System:Double>
+    </Window.Resources>
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="304"/>
@@ -61,7 +65,7 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <TextBlock HorizontalAlignment="Left" Margin="28,1,0,0" TextWrapping="Wrap" Text="WFInfo" VerticalAlignment="Center" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Foreground="#FFB1D0D9" FontSize="22" Height="25" Width="70"/>
+        <TextBlock HorizontalAlignment="Left" Margin="28,1,0,0" TextWrapping="Wrap" Text="WFInfo" VerticalAlignment="Center" FontFamily="{DynamicResource Roboto}" Foreground="#FFB1D0D9" FontSize="22" Height="25" Width="70"/>
         <TextBlock x:Name="Version" HorizontalAlignment="Left" Margin="104,11,0,83" TextWrapping="Wrap" Text="vX.X.X" VerticalAlignment="Center" Height="16" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="11" Width="46" Grid.RowSpan="2"/>
         <Button x:Name="minimise" Content="_" HorizontalAlignment="Left" Margin="275,0,0,0" VerticalAlignment="Top" Width="30" Height="27" Click="Minimise" Foreground="#FFB1D0D9" FontSize="16" RenderTransformOrigin="0.5,1" Grid.RowSpan="2" BorderBrush="#FF646464" Grid.ColumnSpan="2" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed">
             <Button.Background>
