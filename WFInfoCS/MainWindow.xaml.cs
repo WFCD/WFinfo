@@ -41,7 +41,7 @@ namespace WFInfoCS
                 LowLevelListener.KeyAction += main.OnKeyAction;
                 listener.Hook();
                 InitializeComponent();
-                Version.Text = main.BuildVersion;
+                Version.Content = main.BuildVersion;
                 ChangeStatus("loaded", 0);
                 main.AddLog("Sucsesfully launched");
             }
@@ -51,7 +51,7 @@ namespace WFInfoCS
             }
 
         public void ChangeStatus(string status, int serverity){
-            Status.Text = "Status: " + status;
+            Status.Content = "Status: " + status;
             switch (serverity)
             {
                 case 0://default, no problem
@@ -91,7 +91,7 @@ namespace WFInfoCS
 
         private void Gear_click(object sender, RoutedEventArgs e){
             //todo, opens new window, shows all prime items
-            ChangeStatus("This should work, big oopsie, scaling teeeeeeeest", 1);
+            ChangeStatus("This should work, big oopsie, scaling teeeeeeeeeeeeeeeeeeeest", 1);
 
         }
         private void Settings_click(object sender, RoutedEventArgs e){
