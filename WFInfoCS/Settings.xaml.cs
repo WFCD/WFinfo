@@ -1,7 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,15 +23,65 @@ namespace WFInfoCS
     /// </summary>
     public partial class Settings : Window
     {
+
+        private string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json";  //change to WFInfo after release
+        public JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
+        public bool boolWindow { get; set; }
+        public bool boolOverlay { get; set; }
+        Main main = new Main();
+
+        public delegate void statusHandler(string message, int serverity);
+        public event statusHandler updatedStatus;
+        public virtual void statusUpdate(string message, int serverity)
+        {
+            updatedStatus?.Invoke(message, serverity);
+        }
+
         public Settings()
         {
+            if (File.Exists(settingsDirectory))
+            {
+                settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json"));
+            }
+            else
+            {
+                settingsObj = JObject.Parse("{\"Display\":\"Overlay\"," +
+                    "\"ActivationKey\":\"Snapshot\"," +
+                    "\"Scaling\":100.0," +
+                    "\"Auto\":false," +
+                    "\"Debug\":false}");
+            }
+            int scaling = Convert.ToInt32(settingsObj.GetValue("Scaling"));
+
             InitializeComponent();
-            Activation_key_box.Text = "Print screen"; //toodo, set to current saved setting
-            Scaling_box.Text = "100%"; //todo, set to current saved setting
+
+            if (settingsObj.GetValue("Display").ToString() == "Window") {
+                boolWindow = true;
+            } else {
+                boolOverlay = true;
+            }
+            if (Convert.ToBoolean(settingsObj.GetValue("Auto"))){
+                Auto.IsChecked = true;
+            }
+            if (Convert.ToBoolean(settingsObj.GetValue("Debug")))
+            {
+                Debug.IsChecked = true;
+            }
+            this.DataContext = this;
+            Activation_key_box.Text = "Print Screen";
+            Scaling_box.Text = scaling.ToString() + "%";
+            Activation_key_box.Text = settingsObj.GetValue("ActivationKey").ToString();
+            scaleBar.Value = scaling;
+        }
+
+        private void save()
+        {
+            File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(settingsObj, Formatting.Indented));
         }
 
         private void Exit(object sender, RoutedEventArgs e)
         {
+            save();
             this.Close();
         }
 
@@ -38,39 +92,93 @@ namespace WFInfoCS
                 this.DragMove();
         }
 
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            // todo implement saving to settings file
-            // 1 = overlay
-            // 0 = window
-
-            Console.WriteLine(e.NewValue);
-        }
-
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            //todo allow only a single input to register as new activation key
-        }
-
-
-
         private void Window_checked(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Window checked");            //todo changes to window setting and save to file. Dummy option for aplha
+            settingsObj["Display"] = "Window";
+            save();
         }
 
         private void Overlay_checked(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Overlay checked");            //todo changes to overlay setting and save to file. Dummy option for aplha
+            settingsObj["Display"] = "Overlay";
+            save();
         }
 
         private void Debug_Clicked(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Debug clicked" + e.GetType());            //todo toggle debug and save to file. Dummy option for aplha
+            settingsObj["Debug"] = Debug.IsChecked.Value;
+            save();
         }
         private void Auto_Clicked(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Debug clicked" + e.ToString());            //todo toggle debug and save to file. Dummy option for aplha
+            settingsObj["Auto"] = Auto.IsChecked.Value;
+            save();
+        }
+
+        private void Scaling_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            settingsObj["Scaling"] = Math.Round(e.NewValue);
+            Scaling_box.Text = Math.Round(e.NewValue).ToString() + "%";
+            save();
+        }
+
+        private void ScaleLeave(object sender, RoutedEventArgs e)
+        {
+            try{
+                string input = Regex.Replace(Scaling_box.Text.ToString(), "[^0-9.]", "");
+                int value = Convert.ToInt32(input);
+                if (value < 50)
+                {
+                    value = 50;
+                }
+                else if (value > 100 || value == 0)
+                {
+                    value = 100;
+                }
+                scaleBar.Value = value;
+                settingsObj["Scaling"] = value;
+                Scaling_box.Text = value + "%";
+                save();
+            }
+            catch
+            {
+                Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
+                main.AddLog("Couldn't save scaling from text input"); //works
+                main.statusUpdate("Please enter a valid number", 1); //Doesn't work?
+            }
+            
+        }
+
+        private void ScaleDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Return)
+            {
+                Keyboard.ClearFocus();
+                ScaleLeave(sender, e);
+            }
+        }
+
+        private void scaleFocus(object sender, RoutedEventArgs e)
+        {
+            Scaling_box.Text = "";
+        }
+
+        private void ActivationDown(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void ActivationFocus(object sender, RoutedEventArgs e)
+        {
+            Activation_key_box.Text = "";
+        }
+
+        private void ActivationUp(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+            Activation_key_box.Text = e.Key.ToString();
+            settingsObj["ActivationKey"] = e.Key.ToString();
+            save();
         }
     }
 }

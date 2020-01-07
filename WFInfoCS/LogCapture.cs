@@ -19,18 +19,19 @@ namespace WFInfoCS
         private CancellationToken token;
 
         public event LogWatcherEventHandler TextChanged;
+        Main main = new Main();
 
         public LogCapture()
         {
             token = tokenSource.Token;
-            Main.AddLog("STARTING LogCapture");
+            main.AddLog("STARTING LogCapture");
             memoryMappedFile = MemoryMappedFile.CreateOrOpen("DBWIN_BUFFER", 4096L);
 
             bufferReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_BUFFER_READY", out Boolean createdBuffer);
 
             if (!createdBuffer)
             {
-                Main.AddLog("The DBWIN_BUFFER_READY event exists.");
+                main.AddLog("The DBWIN_BUFFER_READY event exists.");
                 return;
             }
 
@@ -38,7 +39,7 @@ namespace WFInfoCS
 
             if (!createdData)
             {
-                Main.AddLog("The DBWIN_DATA_READY event exists.");
+                main.AddLog("The DBWIN_DATA_READY event exists.");
                 return;
             }
 
@@ -47,7 +48,7 @@ namespace WFInfoCS
 
         private void Run()
         {
-            Process proc = parser2.GetWFProc(); // WIP
+            Process proc = null; //parser2.GetWFProc(); // WIP
 
             try
             {
@@ -62,7 +63,7 @@ namespace WFInfoCS
 
                     if ((proc == null) || (proc.HasExited))
                     {
-                        proc = parser2.GetWFProc();
+                        proc = null; //parser2.GetWFProc();
                     }
 
                     if (proc != null)
@@ -111,7 +112,7 @@ namespace WFInfoCS
         {
             tokenSource.Cancel();
             tokenSource.Dispose();
-            Main.AddLog("STOPPING LogCapture");
+            main.AddLog("STOPPING LogCapture");
         }
     }
 }

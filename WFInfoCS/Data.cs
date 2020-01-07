@@ -20,7 +20,7 @@ namespace WFInfoCS
         public JObject market_data; // Contains warframe.market ducatonator listing     {<partName>: {"ducats": <ducat_val>,"plat": <plat_val>}, ...}
         public JObject relic_data; // Contains relic_data from Warframe PC Drops        {<Era>: {"A1":{"vaulted": true,<rare1/uncommon[12]/common[123]>: <part>}, ...}, "Meso": ..., "Neo": ..., "Axi": ...}
         public JObject eqmt_data; // Contains eqmt_data from Warframe PC Drops          {<EQMT>: {"vaulted": true, "PARTS": {<NAME>:{"relic_name":<name>|"","count":<num>}, ...}},  ...}
-        public JObject name_data; //C ontains relic to market name translation          {<relic_name>: <market_name>}
+        public JObject name_data; // Contains relic to market name translation          {<relic_name>: <market_name>}
 
         private string ApplicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
         private string _marketItemsPath;
@@ -37,9 +37,10 @@ namespace WFInfoCS
         private Sheets _sheetsApi;
         private NLua.Lua _lua;
 
+        Main main = new Main(); 
         public Data()
         {
-            Main.AddLog("CREATING DATABASE");
+            main.AddLog("CREATING DATABASE");
             _marketItemsPath = ApplicationDirectory + @"\market_items.json";
             _marketDataPath = ApplicationDirectory + @"\market_data.json";
             _eqpmtDataPath = ApplicationDirectory + @"\eqmt_data.json";
@@ -54,13 +55,13 @@ namespace WFInfoCS
 
             _sheetsApi = new Sheets();
 
-            string warframePictures = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + @"\Warframe"; 
+            string warframePictures = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + @"\Warframe"; //outdated? Was old work around for user who couldn't activate the program
             Directory.CreateDirectory(warframePictures);
             _screenshotWatcher.Path = warframePictures;
             _screenshotWatcher.EnableRaisingEvents = true;
 
             _lua = new NLua.Lua();
-            if (My.Settings.Auto) // WIP
+            if (false) //My.Settings.Auto) // WIP
             {
                 Enable_LogCapture();
             }
@@ -77,7 +78,7 @@ namespace WFInfoCS
                 }
                 catch (Exception ex)
                 {
-                    Main.AddLog("FAILED TO START LogCapture");
+                    main.AddLog("FAILED TO START LogCapture");
                     // WIP - show on screen on main window that there's problem with log capture
                     Console.WriteLine(ex.ToString());
                 }
@@ -96,40 +97,40 @@ namespace WFInfoCS
 
         private void Save_JObject(JObject data)
         {
-            Main.AddLog("SAVING DEBUG JSON: debug" + save_count.ToString() + ".json");
+            main.AddLog("SAVING DEBUG JSON: debug" + save_count.ToString() + ".json");
             File.WriteAllText(Path.Combine(ApplicationDirectory + @"\debug" + save_count.ToString() + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
             save_count += 1;
         }
 
         private void Save_JArray(JArray data)
         {
-            Main.AddLog("SAVING DEBUG JSON: debug" + save_count.ToString() + ".json");
+            main.AddLog("SAVING DEBUG JSON: debug" + save_count.ToString() + ".json");
             File.WriteAllText(Path.Combine(ApplicationDirectory + @"\debug" + save_count.ToString() + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
             save_count += 1;
         }
 
         private void Save_Market()
         {
-            Main.AddLog("SAVING MARKET DATABASE");
+            main.AddLog("SAVING MARKET DATABASE");
             File.WriteAllText(_marketItemsPath, JsonConvert.SerializeObject(market_items, Formatting.Indented));
             File.WriteAllText(_marketDataPath, JsonConvert.SerializeObject(market_data, Formatting.Indented));
         }
 
         private void Save_Relics()
         {
-            Main.AddLog("SAVING RELIC DATABASE");
+            main.AddLog("SAVING RELIC DATABASE");
             File.WriteAllText(_relicDataPath, JsonConvert.SerializeObject(relic_data, Formatting.Indented));
         }
 
         private void Save_Names()
         {
-            Main.AddLog("SAVING NAME DATABASE");
+            main.AddLog("SAVING NAME DATABASE");
             File.WriteAllText(_nameDataPath, JsonConvert.SerializeObject(name_data, Formatting.Indented));
         }
 
         private void Save_Eqmt()
         {
-            Main.AddLog("SAVING EQMT DATABASE");
+            main.AddLog("SAVING EQMT DATABASE");
             File.WriteAllText(_eqpmtDataPath, JsonConvert.SerializeObject(eqmt_data, Formatting.Indented));
         }
 
@@ -144,7 +145,7 @@ namespace WFInfoCS
             Console.WriteLine(line);
             if (line.Contains("Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf"))
             {
-                Task.Factory.StartNew(Main.DoDelayWork()); // WIP
+                //Task.Factory.StartNew(Main.DoDelayWork()); // WIP
             }
         }
     }

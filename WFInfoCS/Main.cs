@@ -44,6 +44,11 @@ namespace WFInfoCS
         }
 
 
+        public void doWork()
+        {
+            // to-do start of ocr chain
+        }
+
         //getters, boring shit
         public string BuildVersion { get => buildVersion; }
         public Brush LightBlue { get => lightBlue; }

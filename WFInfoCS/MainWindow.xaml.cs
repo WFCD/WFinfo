@@ -38,7 +38,7 @@ namespace WFInfoCS
                     this.Close();
                 }
 
-                LowLevelListener.KeyAction += main.OnKeyAction;
+                LowLevelListener.KeyAction += main.OnKeyAction; 
                 listener.Hook();
                 InitializeComponent();
                 Version.Content = main.BuildVersion;
@@ -54,7 +54,7 @@ namespace WFInfoCS
             Status.Content = "Status: " + status;
             switch (serverity)
             {
-                case 0://default, no problem
+                case 0: //default, no problem
                     Status.Foreground = main.LightBlue;
                     break;
                 case 1: //severe, red text
@@ -79,9 +79,8 @@ namespace WFInfoCS
 
         private void Website_click(object sender, RoutedEventArgs e)
         {
-            //todo, link to our webiste
             ChangeStatus("Go go website", 0);
-            System.Diagnostics.Process.Start("https://wfinfo.warframestat.us/");
+            Process.Start("https://wfinfo.warframestat.us/");
         }
 
         private void Relics_click(object sender, RoutedEventArgs e){
@@ -97,7 +96,7 @@ namespace WFInfoCS
         private void Settings_click(object sender, RoutedEventArgs e){
             Settings settingsWindow = new Settings();
             settingsWindow.Show();
-            ChangeStatus("Something uncaught", -1);
+            //ChangeStatus("Something uncaught", -1);
         }
 
         private void ReloadWikiClick(object sender, RoutedEventArgs e){
