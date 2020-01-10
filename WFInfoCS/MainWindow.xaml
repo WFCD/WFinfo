@@ -102,7 +102,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="Settings" Content="x" HorizontalAlignment="Center" Margin="0,78,0,0" Width="30" Click="Settings_click" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1">
+        <Button x:Name="Settings_Button" Content="x" HorizontalAlignment="Center" Margin="0,78,0,0" Width="30" Click="Settings_click" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/Settings.png" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>

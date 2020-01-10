@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -26,11 +27,25 @@ namespace WFInfoCS
     public partial class MainWindow : Window{
         Main main = new Main(); //subscriber
 
+
         public MainWindow(){
         LowLevelListener listener = new LowLevelListener(); //publisher
             main.updatedStatus += this.ChangeStatus;
             try
             {
+                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json")){
+                    Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json"));
+                }else{
+                    Settings.settingsObj = JObject.Parse("{\"Display\":\"Overlay\"," +
+                        "\"ActivationKey\":\"Snapshot\"," +
+                        "\"Scaling\":100.0," +
+                        "\"Auto\":false," +
+                        "\"Debug\":false}");
+                }
+                Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
+                Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
+                Settings.Scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
 
                 String thisprocessname = Process.GetCurrentProcess().ProcessName;
                 if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1){
@@ -43,6 +58,7 @@ namespace WFInfoCS
                 InitializeComponent();
                 Version.Content = main.BuildVersion;
                 ChangeStatus("loaded", 0);
+
                 main.AddLog("Sucsesfully launched");
             }
             catch (Exception e){

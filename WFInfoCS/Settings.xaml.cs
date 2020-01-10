@@ -25,33 +25,19 @@ namespace WFInfoCS
     {
 
         private string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json";  //change to WFInfo after release
-        public JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
-        public bool boolWindow { get; set; }
+        public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
+        public bool boolWindow { get; set; } //Choseen for multiple booleans over a single one due to the posibility of aditional options in the future.
+        public static Key activationKey { get; set; }
         public bool boolOverlay { get; set; }
-        Main main = new Main();
+        public static bool debug { get; set; }
+        public static int Scaling { get; internal set; }
+        public static bool auto { get; internal set; }
 
-        public delegate void statusHandler(string message, int serverity);
-        public event statusHandler updatedStatus;
-        public virtual void statusUpdate(string message, int serverity)
-        {
-            updatedStatus?.Invoke(message, serverity);
-        }
+        Main main = new Main();
 
         public Settings()
         {
-            if (File.Exists(settingsDirectory))
-            {
-                settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json"));
-            }
-            else
-            {
-                settingsObj = JObject.Parse("{\"Display\":\"Overlay\"," +
-                    "\"ActivationKey\":\"Snapshot\"," +
-                    "\"Scaling\":100.0," +
-                    "\"Auto\":false," +
-                    "\"Debug\":false}");
-            }
-            int scaling = Convert.ToInt32(settingsObj.GetValue("Scaling"));
+
 
             InitializeComponent();
 
@@ -68,11 +54,13 @@ namespace WFInfoCS
                 Debug.IsChecked = true;
             }
             this.DataContext = this;
-            Activation_key_box.Text = "Print Screen";
-            Scaling_box.Text = scaling.ToString() + "%";
+            Activation_key_box.Text = "Snapshot";
+            Scaling_box.Text = Scaling.ToString() + "%";
             Activation_key_box.Text = settingsObj.GetValue("ActivationKey").ToString();
-            scaleBar.Value = scaling;
+            scaleBar.Value = Scaling;
+
         }
+
 
         private void save()
         {
@@ -95,23 +83,29 @@ namespace WFInfoCS
         private void Window_checked(object sender, RoutedEventArgs e)
         {
             settingsObj["Display"] = "Window";
+            boolWindow = true;
+            boolOverlay = false;
             save();
         }
 
         private void Overlay_checked(object sender, RoutedEventArgs e)
         {
             settingsObj["Display"] = "Overlay";
+            boolWindow = false;
+            boolOverlay = true;
             save();
         }
 
         private void Debug_Clicked(object sender, RoutedEventArgs e)
         {
             settingsObj["Debug"] = Debug.IsChecked.Value;
+            debug = Debug.IsChecked.Value;
             save();
         }
         private void Auto_Clicked(object sender, RoutedEventArgs e)
         {
             settingsObj["Auto"] = Auto.IsChecked.Value;
+            auto = Auto.IsChecked.Value;
             save();
         }
 
@@ -144,7 +138,6 @@ namespace WFInfoCS
             {
                 Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
                 main.AddLog("Couldn't save scaling from text input"); //works
-                main.statusUpdate("Please enter a valid number", 1); //Doesn't work?
             }
             
         }
@@ -176,6 +169,7 @@ namespace WFInfoCS
         private void ActivationUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
+            activationKey = e.Key;
             Activation_key_box.Text = e.Key.ToString();
             settingsObj["ActivationKey"] = e.Key.ToString();
             save();
