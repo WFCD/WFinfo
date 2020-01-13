@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -11,15 +12,33 @@ namespace WFInfoCS
     {
         private int UIscaling = Settings.Scaling;
         private int DPIscaling;
+        private static Process Warframe;
+
         //todo  implemenet Tesseract
         //      implemenet pre-prossesing
+
         internal static int findRewards(Bitmap image)
         {
-            updateCenter();
-            refreshDPIscaling();
-            refreshUiscaling();
+            Main.updatedStatus("test", 1);
+            //updateCenter();
+            //refreshDPIscaling();
+            //refreshUiscaling();
             return 0;
             //throw new NotImplementedException();
+        }
+
+        public static void verifyWarframe()
+        {
+            if(Warframe != null){return;}
+
+            foreach (Process process in Process.GetProcesses()){
+                try{
+
+                }catch{
+
+                }
+            }
+            throw new NotImplementedException();
         }
 
         private static Bitmap turnBW(Bitmap source)

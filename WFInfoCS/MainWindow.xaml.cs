@@ -30,7 +30,7 @@ namespace WFInfoCS
 
         public MainWindow(){
         LowLevelListener listener = new LowLevelListener(); //publisher
-            main.updatedStatus += this.ChangeStatus;
+            Main.updatedStatus += this.ChangeStatus;
             try
             {
                 if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json")){
@@ -49,7 +49,7 @@ namespace WFInfoCS
 
                 String thisprocessname = Process.GetCurrentProcess().ProcessName;
                 if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1){
-                    main.AddLog("Duplicate process found");
+                    Main.AddLog("Duplicate process found");
                     this.Close();
                 }
 
@@ -59,10 +59,10 @@ namespace WFInfoCS
                 Version.Content = main.BuildVersion;
                 ChangeStatus("loaded", 0);
 
-                main.AddLog("Sucsesfully launched");
+                Main.AddLog("Sucsesfully launched");
             }
             catch (Exception e){
-                main.AddLog("An error occured at MainWindow()" + e.Message);
+                Main.AddLog("An error occured at MainWindow()" + e.Message);
             }
             }
 

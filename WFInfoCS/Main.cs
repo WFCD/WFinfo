@@ -13,27 +13,27 @@ using System.Windows.Media;
 namespace WFInfoCS
 {
     class Main{
-        private string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
+        public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS"; 
         private System.Windows.Media.Brush lightBlue = new SolidColorBrush(System.Windows.Media.Color.FromRgb(177, 208, 217));
-        private string buildVersion = "v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string buildVersion = "v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
         private string hotKey = "Home";
         public Main(){
 
         }
 
-        public void AddLog(string argm)
+        public static void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
-            string path = AppPath + @"\Debug";
+            string path = appPath + @"\Debug";
             Console.WriteLine(argm);
             Directory.CreateDirectory(path);
             using (StreamWriter sw = File.AppendText(path + @"\debug.txt"))
             {
-                sw.WriteLineAsync("[" + DateTime.UtcNow + " " + BuildVersion + "] \t" + argm);
+                sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "] \t" + argm);
             }
         }
 
         public delegate void statusHandler(string message, int serverity);
-        public event statusHandler updatedStatus;
+        public static statusHandler updatedStatus;
         public virtual void statusUpdate(string message, int serverity)
         {
             updatedStatus?.Invoke(message, serverity);
@@ -48,6 +48,7 @@ namespace WFInfoCS
                     doWork(LoadScreenshot());
                     Console.WriteLine("Load");
                 }else{
+                    if (!Settings.debug) { Ocr.verifyWarframe(); }
                     doWork(CaptureScreenshot());
                     Console.WriteLine("Capture");
                 }
@@ -86,7 +87,12 @@ namespace WFInfoCS
         public void doWork(Bitmap image)
         {
             if (Settings.debug){image.Save(AppPath + @"\Debug\FullScreenShot" + 1 + ".jpg");}
-            int players = Ocr.findPlayers(image);
+            int Rewards = Ocr.findRewards(image);
+            for (int i = 0; i < Rewards; i++)
+            {
+                Bitmap reward = Ocr.getReward(i, Rewards);
+                Ocr.proces(reward);
+            }
         }
 
         //getters, boring shit

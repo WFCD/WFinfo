@@ -37,10 +37,9 @@ namespace WFInfoCS
         private Sheets _sheetsApi;
         private NLua.Lua _lua;
 
-        Main main = new Main(); 
         public Data()
         {
-            main.AddLog("CREATING DATABASE");
+            Main.AddLog("CREATING DATABASE");
             _marketItemsPath = ApplicationDirectory + @"\market_items.json";
             _marketDataPath = ApplicationDirectory + @"\market_data.json";
             _eqpmtDataPath = ApplicationDirectory + @"\eqmt_data.json";
@@ -78,7 +77,7 @@ namespace WFInfoCS
                 }
                 catch (Exception ex)
                 {
-                    main.AddLog("FAILED TO START LogCapture");
+                    Main.AddLog("FAILED TO START LogCapture");
                     // WIP - show on screen on main window that there's problem with log capture
                     Console.WriteLine(ex.ToString());
                 }
@@ -97,40 +96,40 @@ namespace WFInfoCS
 
         private void Save_JObject(JObject data)
         {
-            main.AddLog("SAVING DEBUG JSON: debug" + save_count.ToString() + ".json");
+            Main.AddLog("SAVING DEBUG JSON: debug" + save_count.ToString() + ".json");
             File.WriteAllText(Path.Combine(ApplicationDirectory + @"\debug" + save_count.ToString() + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
             save_count += 1;
         }
 
         private void Save_JArray(JArray data)
         {
-            main.AddLog("SAVING DEBUG JSON: debug" + save_count.ToString() + ".json");
+            Main.AddLog("SAVING DEBUG JSON: debug" + save_count.ToString() + ".json");
             File.WriteAllText(Path.Combine(ApplicationDirectory + @"\debug" + save_count.ToString() + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
             save_count += 1;
         }
 
         private void Save_Market()
         {
-            main.AddLog("SAVING MARKET DATABASE");
+            Main.AddLog("SAVING MARKET DATABASE");
             File.WriteAllText(_marketItemsPath, JsonConvert.SerializeObject(market_items, Formatting.Indented));
             File.WriteAllText(_marketDataPath, JsonConvert.SerializeObject(market_data, Formatting.Indented));
         }
 
         private void Save_Relics()
         {
-            main.AddLog("SAVING RELIC DATABASE");
+            Main.AddLog("SAVING RELIC DATABASE");
             File.WriteAllText(_relicDataPath, JsonConvert.SerializeObject(relic_data, Formatting.Indented));
         }
 
         private void Save_Names()
         {
-            main.AddLog("SAVING NAME DATABASE");
+            Main.AddLog("SAVING NAME DATABASE");
             File.WriteAllText(_nameDataPath, JsonConvert.SerializeObject(name_data, Formatting.Indented));
         }
 
         private void Save_Eqmt()
         {
-            main.AddLog("SAVING EQMT DATABASE");
+            Main.AddLog("SAVING EQMT DATABASE");
             File.WriteAllText(_eqpmtDataPath, JsonConvert.SerializeObject(eqmt_data, Formatting.Indented));
         }
 

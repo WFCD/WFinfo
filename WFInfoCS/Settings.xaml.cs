@@ -137,7 +137,7 @@ namespace WFInfoCS
             catch
             {
                 Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
-                main.AddLog("Couldn't save scaling from text input"); //works
+                Main.AddLog("Couldn't save scaling from text input"); //works
             }
             
         }
