@@ -36,15 +36,28 @@ namespace WFInfoCS {
 		//      implemenet pre-prossesing
 
 		internal static int findRewards(Bitmap image) {
-			doDebugDrawing(image);
+			
+			// Firstly check at the first possible possition with 4 rewards, which is at Width = 0.3097 % and Height = 0.4437 %
+			// If not found, check first possible possition with 2 rewards, which is 0.4218 %
+			// If also not found, there are 3 rewards
+			double widthPrecentFirstReward = 0.3097;
+			double widthPrecentSecondReward = 0.4218;
+			double HeightPrecentReward = 0.4437;
+			Bitmap testImage = new Bitmap(7, 7);
+			testImage = image.Clone(new Rectangle((int)(image.Width * widthPrecentFirstReward), (int)(image.Height * HeightPrecentReward), 7, 7), image.PixelFormat);
+			testImage.Save(Main.appPath + @"\Debug\testImage.png");
+
 			return 0;
 			//throw new NotImplementedException();
+		}
+		public static Boolean ColorThreshold(Color test, Color thresh, int Treshold = 10) {
+			return (Math.Abs((int)(test.R) - thresh.R) < Treshold && Math.Abs((int)(test.G) - thresh.G) < Treshold && Math.Abs((int)(test.B) - thresh.B) < Treshold);
 		}
 
 		private static void doDebugDrawing(Bitmap image) {
 			using (Graphics graphics = Graphics.FromImage(image)) {
 				graphics.DrawRectangle(new Pen(Color.Red), window);
-				graphics.DrawRectangle(new Pen(Color.Pink), center.X, center.Y, 5, 5);
+				graphics.FillRectangle(Brushes.Pink, center.X, center.Y, 5, 5);
 				image.Save( Main.appPath + @"\Debug\FullScreenShotDebug.png");
 			}
 		}
@@ -83,7 +96,7 @@ namespace WFInfoCS {
 			using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero)) {
 				dpi = (graphics.DpiX / 96); //assuming that y and x axis dpi scaling will be uniform. So only checking one value
 				TotalScaling = dpi * (Settings.Scaling / 100);
-				Main.AddLog("Scaling updated to: " + TotalScaling + ". User has a DPI scaling of: " + dpi / 96 + " And a set UI scaling of: " + Settings.Scaling + "%");
+				Main.AddLog("Scaling updated to: " + TotalScaling + ". User has a DPI scaling of: " + dpi + " And a set UI scaling of: " + Settings.Scaling + "%");
 			}
 		}
 
@@ -114,9 +127,11 @@ namespace WFInfoCS {
 				uint Fullscreen = 885981184;
 				uint Borderless = 2483027968;
 				uint styles = GetWindowLongPtr(HandleRef, GWL_style);
-				if (styles == Fullscreen) { currentStyle = WindowStyle.FULLSCREEN; Main.AddLog("Fullscreen detected"); } else if (styles == Borderless) { currentStyle = WindowStyle.BORDERLESS; Main.AddLog("Borderless detected"); } else { // windowed
+				if (styles == Fullscreen) { currentStyle = WindowStyle.FULLSCREEN; Main.AddLog("Fullscreen detected"); } //Fullscreen, don't do anything
+				else if (styles == Borderless) { currentStyle = WindowStyle.BORDERLESS; Main.AddLog("Borderless detected"); } //Borderless, don't do anything
+				else { // Windowed, adjust for thicc border
 					window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
-					Main.AddLog("Windowed detected, updated to: " + window.ToString());
+					Main.AddLog("Windowed detected, compensating to to: " + window.ToString());
 					currentStyle = WindowStyle.WINDOWED;
 				}
 				center = new Point(window.Width / 2, window.Height / 2);
