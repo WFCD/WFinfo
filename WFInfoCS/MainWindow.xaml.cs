@@ -79,7 +79,6 @@ namespace WFInfoCS {
 				ChangeStatus("loaded", 0);
 
 				Main.AddLog("Sucsesfully launched");
-
 			}
 			catch (Exception e) {
 				Main.AddLog("An error occured while loading the main window: " + e.Message);
