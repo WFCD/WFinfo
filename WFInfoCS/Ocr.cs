@@ -5,17 +5,6 @@ using System.Runtime.InteropServices;
 
 namespace WFInfoCS {
 	class Ocr {
-		[DllImport("user32.dll", SetLastError = true)]
-		static extern bool GetWindowRect(HandleRef hwnd, out Rectangle lpRect);
-
-		[DllImport("user32.dll", EntryPoint = "GetWindowLong")]
-		static extern uint GetWindowLongPtr(HandleRef hwnd, int nIndex);
-
-		[DllImport("user32.dll", SetLastError = true)]
-		static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
-
-		[DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-		private static extern IntPtr GetForegroundWindow();
 
 
 		private static double TotalScaling;
@@ -64,7 +53,7 @@ namespace WFInfoCS {
 
 		public static Boolean verifyFocus() { // Returns True if warframe is in focuse, False if not
 			uint processID = 0;
-			uint threadID = GetWindowThreadProcessId(GetForegroundWindow(), out processID);
+			uint threadID = Win32.GetWindowThreadProcessId(Win32.GetForegroundWindow(), out processID);
 			if (processID == Warframe.Id) { return true; } else {
 				Main.AddLog("Warframe is not focused");
 				Main.updatedStatus("Warframe out of focus", 2);
@@ -102,9 +91,9 @@ namespace WFInfoCS {
 
 
 		public static void updateCenter(Bitmap image = null) {
-			Rectangle temprect;
+			Win32.RECT osRect;
 
-			if (!GetWindowRect(HandleRef, out temprect)) { // get window size of warframe
+			if (!Win32.GetWindowRect(HandleRef, out osRect)) { // get window size of warframe
 				if (Settings.debug && Warframe == null) { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
 					Main.AddLog("No warframe detected, thus using center of image");
 					window = new Rectangle(0,0,image.Width,image.Height);
@@ -119,14 +108,14 @@ namespace WFInfoCS {
 			if (window.X < -20000 || window.Y < -20000) { Warframe = null; window = Rectangle.Empty; return; }
 			// if the window is in the VOID delete current process and re-set window to nothing
 
-			if (window.Width != temprect.Width || window.Height != temprect.Height) { // checks if old window size is the right size if not change it
-				window = new Rectangle (temprect.Left, temprect.Top, temprect.Width - temprect.Left, temprect.Height - temprect.Top); // gett Rectangle out of rect
+			if (window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom) { // checks if old window size is the right size if not change it
+				window = new Rectangle (osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // gett Rectangle out of rect
 				//Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
 				Main.AddLog("Window size updated to: " + window.ToString());
 				int GWL_style = -16;
 				uint Fullscreen = 885981184;
 				uint Borderless = 2483027968;
-				uint styles = GetWindowLongPtr(HandleRef, GWL_style);
+				uint styles = Win32.GetWindowLongPtr(HandleRef, GWL_style);
 				if (styles == Fullscreen) { currentStyle = WindowStyle.FULLSCREEN; Main.AddLog("Fullscreen detected"); } //Fullscreen, don't do anything
 				else if (styles == Borderless) { currentStyle = WindowStyle.BORDERLESS; Main.AddLog("Borderless detected"); } //Borderless, don't do anything
 				else { // Windowed, adjust for thicc border
