@@ -50,8 +50,17 @@ namespace WFInfoCS {
 		private Bitmap CaptureScreenshot() {
 			Bitmap image;
 			Ocr.updateCenter();
-			//todo implement actual screenshoting
-			image = LoadScreenshot();
+
+			int height = Screen.PrimaryScreen.Bounds.Height * (int)Ocr.dpi;
+			int width = Screen.PrimaryScreen.Bounds.Width * (int)Ocr.dpi;
+			Bitmap Fullscreen = new Bitmap(width, height);
+			Size FullscreenSize = new Size(Fullscreen.Width, Fullscreen.Height);
+			using (Graphics graphics = Graphics.FromImage(Fullscreen)) {
+				graphics.CopyFromScreen(Screen.PrimaryScreen.Bounds.Left, Screen.PrimaryScreen.Bounds.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
+			}
+			Fullscreen.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
+
+			image = Fullscreen;
 			return image;
 		}
 
@@ -76,6 +85,7 @@ namespace WFInfoCS {
 		}
 
 		public void doWork(Bitmap image) {
+			if (image == null) { return; }
 			//if (Settings.debug){image.Save(AppPath + @"\Debug\FullScreenShot" + DateTime.UtcNow + ".jpg");} //save image if debug is on
 			int Rewards = Ocr.findRewards(image);
 			for (int i = 0; i < Rewards; i++) {

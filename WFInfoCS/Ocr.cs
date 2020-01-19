@@ -17,6 +17,7 @@ namespace WFInfoCS {
 		[DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
 		private static extern IntPtr GetForegroundWindow();
 
+
 		private static double TotalScaling;
 		public static WindowStyle currentStyle;
 		public enum WindowStyle {
@@ -25,7 +26,7 @@ namespace WFInfoCS {
 			WINDOWED
 		}
 		public static HandleRef HandleRef { get; private set; }
-
+		public static float dpi { get; set; }
 		private static Process Warframe;
 		private static System.Drawing.Point center;
 		public static Rectangle window { get; set; }
@@ -35,9 +36,17 @@ namespace WFInfoCS {
 		//      implemenet pre-prossesing
 
 		internal static int findRewards(Bitmap image) {
-			refresScaling();
+			doDebugDrawing(image);
 			return 0;
 			//throw new NotImplementedException();
+		}
+
+		private static void doDebugDrawing(Bitmap image) {
+			using (Graphics graphics = Graphics.FromImage(image)) {
+				graphics.DrawRectangle(new Pen(Color.Red), window);
+				graphics.DrawRectangle(new Pen(Color.Pink), center.X, center.Y, 5, 5);
+				image.Save( Main.appPath + @"\Debug\FullScreenShotDebug.png");
+			}
 		}
 
 		public static Boolean verifyFocus() { // Returns True if warframe is in focuse, False if not
@@ -58,7 +67,6 @@ namespace WFInfoCS {
 					Warframe = process;
 					return true;
 				}
-
 			}
 			if (Settings.debug) { return true; } else {
 				Main.AddLog("Unable to detect Warframe in list of current active processes");
@@ -73,8 +81,8 @@ namespace WFInfoCS {
 
 		private static void refresScaling() {
 			using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero)) {
-				float dpi = graphics.DpiX; //assuming that y and x axis dpi scaling will be uniform. So only checking one value
-				TotalScaling = (dpi / 96) * (Settings.Scaling / 100);
+				dpi = (graphics.DpiX / 96); //assuming that y and x axis dpi scaling will be uniform. So only checking one value
+				TotalScaling = dpi * (Settings.Scaling / 100);
 				Main.AddLog("Scaling updated to: " + TotalScaling + ". User has a DPI scaling of: " + dpi / 96 + " And a set UI scaling of: " + Settings.Scaling + "%");
 			}
 		}
@@ -100,6 +108,7 @@ namespace WFInfoCS {
 
 			if (window.Width != temprect.Width || window.Height != temprect.Height) { // checks if old window size is the right size if not change it
 				window = temprect;
+				Console.WriteLine("Windows pulled this size from Warframe: " + temprect.ToString());
 				Main.AddLog("Window size updated to: " + window.ToString());
 				int GWL_style = -16;
 				uint Fullscreen = 885981184;
@@ -107,12 +116,13 @@ namespace WFInfoCS {
 				uint styles = GetWindowLongPtr(HandleRef, GWL_style);
 				if (styles == Fullscreen) { currentStyle = WindowStyle.FULLSCREEN; Main.AddLog("Fullscreen detected"); } else if (styles == Borderless) { currentStyle = WindowStyle.BORDERLESS; Main.AddLog("Borderless detected"); } else { // windowed
 					window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
-					Main.AddLog("Window updated to: " + window.ToString());
+					Main.AddLog("Windowed detected, updated to: " + window.ToString());
 					currentStyle = WindowStyle.WINDOWED;
-					Main.AddLog("Windowed detected");
 				}
-				center = new System.Drawing.Point(window.Width / 2, window.Height / 2);
+				center = new Point(window.Width / 2, window.Height / 2);
 			}
+			refresScaling();
+
 		}
 
 		internal static Bitmap getReward(int rewardSlot, int TotalRewards) {
