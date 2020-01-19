@@ -1,160 +1,140 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Input;
 
-namespace WFInfoCS
-{        public delegate void KeyboardAction();
+namespace WFInfoCS {
+	public delegate void KeyboardAction();
 
-    class LowLevelListener
-    {
-        private const int WH_MOUSE_LL = 14;
-        private const int WH_KEYBOARD_LL = 13;
-        private const int WM_KEYDOWN = 0x0100;
-        private static LowLevelKeyboardProc _procKeyboard = HookCallbackKB;
-        private static IntPtr _hookIDKeyboard = IntPtr.Zero;
-        private static IntPtr _hookIDMouse = IntPtr.Zero;
-        private static LowLevelMouseProc _procMouse = HookCallbackM;
+	class LowLevelListener {
+		private const int WH_MOUSE_LL = 14;
+		private const int WH_KEYBOARD_LL = 13;
+		private const int WM_KEYDOWN = 0x0100;
+		private static LowLevelKeyboardProc _procKeyboard = HookCallbackKB;
+		private static IntPtr _hookIDKeyboard = IntPtr.Zero;
+		private static IntPtr _hookIDMouse = IntPtr.Zero;
+		private static LowLevelMouseProc _procMouse = HookCallbackM;
 
-        private enum MouseMessages
-        {
-            WM_LBUTTONDOWN = 0x0201,
-            WM_LBUTTONUP = 0x0202,
-            WM_MOUSEMOVE = 0x0200,
-            WM_MOUSEWHEEL = 0x020A,
-            WM_RBUTTONDOWN = 0x0204,
-            WM_RBUTTONUP = 0x0205,
-            WM_XBUTTONDOWN = 0x020B
-        }
-        [StructLayout(LayoutKind.Sequential)]
+		private enum MouseMessages {
+			WM_LBUTTONDOWN = 0x0201,
+			WM_LBUTTONUP = 0x0202,
+			WM_MOUSEMOVE = 0x0200,
+			WM_MOUSEWHEEL = 0x020A,
+			WM_RBUTTONDOWN = 0x0204,
+			WM_RBUTTONUP = 0x0205,
+			WM_XBUTTONDOWN = 0x020B
+		}
+		[StructLayout(LayoutKind.Sequential)]
 
-        private struct POINT
-        {
-            public int x;
-            public int y;
-        }
+		private struct POINT {
+			public int x;
+			public int y;
+		}
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct MSLLHOOKSTRUCT
-        {
-            public POINT pt;
-            public uint mouseData;
-            public uint flags;
-            public uint time;
-            public IntPtr dwExtraInfo;
-        }
+		[StructLayout(LayoutKind.Sequential)]
+		private struct MSLLHOOKSTRUCT {
+			public POINT pt;
+			public uint mouseData;
+			public uint flags;
+			public uint time;
+			public IntPtr dwExtraInfo;
+		}
 
-        public LowLevelListener()
-        {
-        }
+		public LowLevelListener() {
+		}
 
-        public void Hook()
-        {
-            _hookIDKeyboard = SetHookKB(_procKeyboard);
-            _hookIDMouse = SetHookM(_procMouse);
-        }
+		public void Hook() {
+			_hookIDKeyboard = SetHookKB(_procKeyboard);
+			_hookIDMouse = SetHookM(_procMouse);
+		}
 
-        public void unHook()
-        {
-            UnhookWindowsHookEx(_hookIDKeyboard);
-            UnhookWindowsHookEx(_hookIDMouse);
-        }
+		public void unHook() {
+			UnhookWindowsHookEx(_hookIDKeyboard);
+			UnhookWindowsHookEx(_hookIDMouse);
+		}
 
-        private static IntPtr SetHookKB(LowLevelKeyboardProc proc)
-        {
-            using (Process curProcess = Process.GetCurrentProcess())
-            using (ProcessModule curModule = curProcess.MainModule)
-            {
-                return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
-            }
-        }
+		private static IntPtr SetHookKB(LowLevelKeyboardProc proc) {
+			using (Process curProcess = Process.GetCurrentProcess())
+			using (ProcessModule curModule = curProcess.MainModule) {
+				return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
+			}
+		}
 
-        private static IntPtr SetHookM(LowLevelMouseProc proc)
-        {
-            using (Process curProcess = Process.GetCurrentProcess())
-            using (ProcessModule curModule = curProcess.MainModule)
-            {
-                return SetWindowsHookEx(WH_MOUSE_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
-            }
-        }
+		private static IntPtr SetHookM(LowLevelMouseProc proc) {
+			using (Process curProcess = Process.GetCurrentProcess())
+			using (ProcessModule curModule = curProcess.MainModule) {
+				return SetWindowsHookEx(WH_MOUSE_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
+			}
+		}
 
-        public delegate void keyActionHandler(Keys key);
-        public static event keyActionHandler KeyAction;
-        private static IntPtr HookCallbackKB(int nCode, IntPtr wParam, IntPtr lParam) //handels keyboard input
-        {
-            if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
-            {
-                int vkCode = Marshal.ReadInt32(lParam);
-                //Console.WriteLine((Keys)vkCode);
-                OnKeyAction((Keys)vkCode);
-            }
-            return CallNextHookEx(_hookIDKeyboard, nCode, wParam, lParam);
-        }
+		public delegate void keyActionHandler(Keys key);
+		public static event keyActionHandler KeyAction;
+		private static IntPtr HookCallbackKB(int nCode, IntPtr wParam, IntPtr lParam) //handels keyboard input
+		{
+			if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN) {
+				int vkCode = Marshal.ReadInt32(lParam);
+				//Console.WriteLine((Keys)vkCode);
+				OnKeyAction((Keys)vkCode);
+			}
+			return CallNextHookEx(_hookIDKeyboard, nCode, wParam, lParam);
+		}
 
-        protected static void OnKeyAction(Keys key)
-        {
-            KeyAction?.Invoke(key);
-        }
+		protected static void OnKeyAction(Keys key) {
+			KeyAction?.Invoke(key);
+		}
 
-        private static IntPtr HookCallbackM(int nCode, IntPtr wParam, IntPtr lParam) //handels mouse input
-        {
-            if (nCode >= 0)
-            {
-                MSLLHOOKSTRUCT hookStruct = (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT));
-                //Console.WriteLine((MouseMessages)wParam);
-                switch ((MouseMessages)wParam)
-                {
-                    case MouseMessages.WM_MOUSEMOVE:
-                        break;
-                    case MouseMessages.WM_LBUTTONDOWN:
-                        OnKeyAction(Keys.LButton);
-                        break;
-                    case MouseMessages.WM_RBUTTONDOWN:
-                        OnKeyAction(Keys.RButton);
-                        break;
-                    case MouseMessages.WM_MOUSEWHEEL:
-                        //Should this stay implemented?
-                        break;
-                    case MouseMessages.WM_XBUTTONDOWN: //https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-xbuttondown
-                        if (hookStruct.pt.y == 1) 
-                            OnKeyAction(Keys.XButton1);
-                        else
-                            OnKeyAction(Keys.XButton2);
-                        break;
-                    default:
-                        break;
-                }
-                //Console.WriteLine(hookStruct.pt.x + ", " + hookStruct.pt.y);
+		private static IntPtr HookCallbackM(int nCode, IntPtr wParam, IntPtr lParam) //handels mouse input
+		{
+			if (nCode >= 0) {
+				MSLLHOOKSTRUCT hookStruct = (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT));
+				//Console.WriteLine((MouseMessages)wParam);
+				switch ((MouseMessages)wParam) {
+					case MouseMessages.WM_MOUSEMOVE:
+					break;
+					case MouseMessages.WM_LBUTTONDOWN:
+					OnKeyAction(Keys.LButton);
+					break;
+					case MouseMessages.WM_RBUTTONDOWN:
+					OnKeyAction(Keys.RButton);
+					break;
+					case MouseMessages.WM_MOUSEWHEEL:
+					//Should this stay implemented?
+					break;
+					case MouseMessages.WM_XBUTTONDOWN: //https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-xbuttondown
+					if (hookStruct.pt.y == 1)
+						OnKeyAction(Keys.XButton1);
+					else
+						OnKeyAction(Keys.XButton2);
+					break;
+					default:
+					break;
+				}
+				//Console.WriteLine(hookStruct.pt.x + ", " + hookStruct.pt.y);
 
-            }
-            return CallNextHookEx(_hookIDMouse, nCode, wParam, lParam);
-        }
+			}
+			return CallNextHookEx(_hookIDMouse, nCode, wParam, lParam);
+		}
 
-        private delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
-        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+		private delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
+		private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
 
 
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelMouseProc lpfn, IntPtr hMod, uint dwThreadId);
+		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelMouseProc lpfn, IntPtr hMod, uint dwThreadId);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
+		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		private static extern bool UnhookWindowsHookEx(IntPtr hhk);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode,IntPtr wParam, IntPtr lParam);
+		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
-    }
+		[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		private static extern IntPtr GetModuleHandle(string lpModuleName);
+	}
 
 }
