@@ -95,7 +95,7 @@ namespace WFInfoCS {
 				if (Settings.debug && Warframe == null) { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
 					Main.AddLog("No warframe detected, thus using center of image");
 					window = new Rectangle(0,0,image.Width,image.Height);
-					center = new System.Drawing.Point(window.Width / 2, window.Height / 2);
+					center = new Point(window.Width / 2, window.Height / 2);
 					return;
 				} else {
 					Main.AddLog("Failed to get window bounds");
@@ -107,8 +107,8 @@ namespace WFInfoCS {
 			// if the window is in the VOID delete current process and re-set window to nothing
 
 			if (window.Width != temprect.Width || window.Height != temprect.Height) { // checks if old window size is the right size if not change it
-				window = temprect;
-				Console.WriteLine("Windows pulled this size from Warframe: " + temprect.ToString());
+				window = new Rectangle (temprect.Left, temprect.Top, temprect.Width - temprect.Left, temprect.Height - temprect.Top); // gett Rectangle out of rect
+				//Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
 				Main.AddLog("Window size updated to: " + window.ToString());
 				int GWL_style = -16;
 				uint Fullscreen = 885981184;
