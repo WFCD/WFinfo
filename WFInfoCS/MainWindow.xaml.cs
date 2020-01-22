@@ -44,7 +44,7 @@ namespace WFInfoCS {
 				if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\color.json")) {
 					Settings.colorArray = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\color.json"));
 				} else {
-					Settings.colorArray = JObject.Parse("{\"rarityColor\":[\"b4876e\",\"c8c8c8\",\"d4c078\"]," +
+					Settings.colorArray = JObject.Parse("{\"rarityColor\":[\"b4876e\",\"c8c8c8\",\"e1cd8c\"]," +
 						"\"Vitruvian\":\"bda865\"," +
 						"\"Stalker\":\"961f23\"," +
 						"\"Baruk\":\"eec169\"," +

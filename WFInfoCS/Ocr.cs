@@ -19,46 +19,66 @@ namespace WFInfoCS {
 		private static Process Warframe = null;
 		private static Point center;
 		public static Rectangle window { get; set; }
-		private HandleRef handelRef;
-		private static double widthPrecentFirstReward = 0.301953125; // 773 /2560 = 0.301953125
-		private static double widthPrecentSecondReward = 0.428125; // 1096 /2560 =0.428125
-		private static double HeightPrecentReward = 0.430555555556; // 620 / 1440 = 0.430555555556
-		private static Rectangle firstRewardRectangle; //40 x 35 for rare, catches common
+		private HandleRef handelRef;                                 
+		private static double xPrecentFirstReward = 379;  
+		private static double xPrecentSecondReward = 184;  
+		private static double yPrecentReward = 75; 
+		private static Rectangle firstRewardRectangle;  
 		private static Rectangle secondRewardRectangle;
+		private static double screenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
 		//todo  implemenet Tesseract
 		//      implemenet pre-prossesing
 
 		internal static int findRewards(Bitmap image) {
-			Console.WriteLine();
 			// Firstly check at the first possible possition with 4 rewards, which is at Width = 0.3097 % and Height = 0.4437 %
 			// If not found, check first possible possition with 2 rewards, which is 0.4218 %
 			// If also not found, there are 3 rewards
-			firstRewardRectangle = new Rectangle((int)(image.Width * widthPrecentFirstReward), (int)(image.Height * HeightPrecentReward), 40, 35);
-			secondRewardRectangle = new Rectangle((int)(image.Width * widthPrecentSecondReward), (int)(image.Height * HeightPrecentReward), 40, 35);
 
-			Bitmap firstReward = new Bitmap(7, 7);
-			Bitmap secondReward = new Bitmap(7, 7);
-			firstReward = image.Clone(firstRewardRectangle, image.PixelFormat);
-			secondReward = image.Clone(secondRewardRectangle, image.PixelFormat);
-			firstReward.Save(Main.appPath + @"\Debug\testImage1.png");
-			secondReward.Save(Main.appPath + @"\Debug\testImage2.png");
+			if (image.Width / image.Height > 16 / 9) { // image is less than 16:9 aspect
+				screenScaling = image.Height / 1080 * (Settings.Scaling/100) * dpi;
+			} else {
+				screenScaling = image.Width / 1920 * (Settings.Scaling / 100) * dpi; //image is higher than 16:9 aspect
+			}
+			center = new Point(image.Width / 2, image.Height / 2);
+
+			Size gemBox = new Size((int)(40 * screenScaling), (int)(35 * screenScaling));
+
+
+			firstRewardRectangle = getAdjustedRectangle((int)(xPrecentFirstReward * screenScaling), (int)(yPrecentReward * screenScaling), gemBox);
+			secondRewardRectangle = getAdjustedRectangle((int)(xPrecentSecondReward * screenScaling), (int)(yPrecentReward * screenScaling), gemBox);
+
+			Bitmap firstReward = image.Clone(firstRewardRectangle, image.PixelFormat);
+			Bitmap secondReward = image.Clone(secondRewardRectangle, image.PixelFormat);
+
 			doDebugDrawing(image);
-			if (verrifyReward(firstReward)) { // 4 rewards
+			image.Dispose();
+			if (verrifyReward(firstReward)) { 
 				Console.WriteLine("4 rewards");
 				return 4;
-			} else if (verrifyReward(secondReward)) { // 2 rewards
+			} else if (verrifyReward(secondReward)) { 
 				Console.WriteLine("2 rewards");
 				return 2;
-			} else { // 3 rewards
+			} else { 
 				Console.WriteLine("3 rewards");
 				return 3;
 			}
 		}
 
+		private static Rectangle getAdjustedRectangle(int x, int y, Size size) { //adjust the rectangle to capture from the center of the screen instead of from origin.
+			int left = center.X - x;
+			int top = center.Y - y;
+			Console.WriteLine("Center cords: " + center.ToString());
+			Console.WriteLine("Calculated position of rectangle " +left + "," + top);
+			Console.WriteLine("pixels away from center " + x + "," + y);
+
+
+			return new Rectangle(left, top, size.Width, size.Height);
+		}
+
 		private static Boolean verrifyReward(Bitmap image) {
 			for (int x = 0; x < image.Width; x++) {
 				for (int y = 0; y < image.Height; y++) {
-					for (int color = 0; color < 2; color++) {
+					for (int color = 0; color < 3; color++) {
 						if (ColorThreshold(image.GetPixel(x, y), ColorTranslator.FromHtml("#" + Settings.colorArray["rarityColor"][color].ToString()))) {
 							Main.AddLog("Found color: " + ColorTranslator.FromHtml("#" + Settings.colorArray["rarityColor"][color].ToString()));
 							return true;
@@ -80,7 +100,7 @@ namespace WFInfoCS {
 				graphics.DrawRectangle(new Pen(Color.Red), firstRewardRectangle);
 				graphics.DrawRectangle(new Pen(Color.Red), secondRewardRectangle);
 				graphics.FillRectangle(Brushes.Pink, center.X, center.Y, 5, 5);
-				image.Save(Main.appPath + @"\Debug\FullScreenShotDebug.png");
+				image.Save(Main.appPath + @"\Debug\FullScreenShotDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png") ;
 			}
 		}
 
@@ -129,14 +149,15 @@ namespace WFInfoCS {
 		}
 
 
-		public static void updateCenter(Bitmap image = null) {
+		public static void updateWindow(Bitmap image = null) {
 			Win32.RECT osRect;
-
+			refresScaling();
 			if (!Win32.GetWindowRect(HandleRef, out osRect)) { // get window size of warframe
 				if (Settings.debug && Warframe == null) { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
 					Main.AddLog("No warframe detected, thus using center of image");
 					window = new Rectangle(0, 0, image.Width, image.Height);
 					center = new Point(window.Width / 2, window.Height / 2);
+					Console.WriteLine("Window is: " + window + " And center is: " + center);
 					return;
 				} else {
 					Main.AddLog("Failed to get window bounds");
@@ -146,7 +167,6 @@ namespace WFInfoCS {
 			}
 			if (window.X < -20000 || window.Y < -20000) { Warframe = null; window = Rectangle.Empty; return; }
 			// if the window is in the VOID delete current process and re-set window to nothing
-
 			if (window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom) { // checks if old window size is the right size if not change it
 				window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // gett Rectangle out of rect
 																														 //Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
@@ -162,17 +182,18 @@ namespace WFInfoCS {
 					Main.AddLog("Windowed detected, compensating to to: " + window.ToString());
 					currentStyle = WindowStyle.WINDOWED;
 				}
-				center = new Point(window.Width / 2, window.Height / 2);
+				//center = new Point(window.Width / 2, window.Height / 2);
 			}
-			refresScaling();
 
 		}
 
 		internal static Bitmap getReward(int rewardSlot, int TotalRewards) {
+			return null;
 			throw new NotImplementedException();
 		}
 
 		internal static void proces(Bitmap reward) {
+			return;
 			reward = turnBW(reward);
 			throw new NotImplementedException();
 		}

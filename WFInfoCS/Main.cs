@@ -35,7 +35,7 @@ namespace WFInfoCS {
 				if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift) {
 					Main.AddLog("Loading screenshot from file");
 					Main.updatedStatus("Offline testing with screenshot", 0);
-					doWork(LoadScreenshot());
+					LoadScreenshot();
 				} else {
 					if (Ocr.verifyWarframe()) {
 						if (Ocr.verifyFocus()) {
@@ -49,7 +49,7 @@ namespace WFInfoCS {
 
 		private Bitmap CaptureScreenshot() {
 			Bitmap image;
-			Ocr.updateCenter();
+			Ocr.updateWindow();
 
 			int height = Screen.PrimaryScreen.Bounds.Height * (int)Ocr.dpi;
 			int width = Screen.PrimaryScreen.Bounds.Width * (int)Ocr.dpi;
@@ -71,16 +71,28 @@ namespace WFInfoCS {
 				openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
 				openFileDialog.FilterIndex = 2;
 				openFileDialog.RestoreDirectory = true;
+				openFileDialog.Multiselect = true;
 
 				if (openFileDialog.ShowDialog() == DialogResult.OK) {
-					//Get the path of specified file
-					image = new Bitmap(openFileDialog.FileName);
-					Ocr.updateCenter(image);
-					return image;
+					foreach (string file in openFileDialog.FileNames) {
+						Console.WriteLine("Testing file: "+file.ToString());
+						try {
+							//Get the path of specified file
+							image = new Bitmap(file);
+							Ocr.updateWindow(image);
+							doWork(image);
+						}
+						catch (Exception) {
+							statusUpdate("Faild to load image", 1);
+							return null;
+						}
+
+					}
 				} else {
 					statusUpdate("Faild to load image", 1);
 					return null;
 				}
+				return null;
 			}
 		}
 
