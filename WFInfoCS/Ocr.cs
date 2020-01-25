@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 
 namespace WFInfoCS {
-	class Ocr {
+	class OCR {
 
 
 		private static double TotalScaling;
@@ -26,8 +26,33 @@ namespace WFInfoCS {
 		private static Rectangle firstRewardRectangle;  
 		private static Rectangle secondRewardRectangle;
 		private static double screenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
-		//todo  implemenet Tesseract
-		//      implemenet pre-prossesing
+											 //todo  implemenet Tesseract
+											 //      implemenet pre-prossesing
+
+
+		internal static void ProcessRewardScreen(Bitmap image = null)
+		{
+
+		}
+
+		private Bitmap CaptureScreenshot()
+		{
+			Bitmap image;
+			OCR.updateWindow();
+
+			int height = Screen.PrimaryScreen.Bounds.Height * (int)OCR.dpi;
+			int width = Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
+			Bitmap Fullscreen = new Bitmap(width, height);
+			Size FullscreenSize = new Size(Fullscreen.Width, Fullscreen.Height);
+			using (Graphics graphics = Graphics.FromImage(Fullscreen))
+			{
+				graphics.CopyFromScreen(Screen.PrimaryScreen.Bounds.Left, Screen.PrimaryScreen.Bounds.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
+			}
+			Fullscreen.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
+
+			image = Fullscreen;
+			return image;
+		}
 
 		internal static int countRewards(Bitmap image) {
 			// Firstly check at the first possible possition with 4 rewards, which is at Width = 0.3097 % and Height = 0.4437 %
@@ -41,7 +66,7 @@ namespace WFInfoCS {
 
 			center = new Point(image.Width / 2, image.Height / 2);
 
-			Size gemBox = new Size((int)(40 * screenScaling), (int)(35 * screenScaling));
+
 
 
 			firstRewardRectangle = getAdjustedRectangle((int)(xPrecentFirstReward * screenScaling), (int)(yPrecentReward * screenScaling), gemBox);

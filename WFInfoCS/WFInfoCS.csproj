@@ -122,7 +122,7 @@
     <Compile Include="LogCapture.cs" />
     <Compile Include="LowLevelListener.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Ocr.cs" />
+    <Compile Include="OCR.cs" />
     <Compile Include="Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>

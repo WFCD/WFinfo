@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -36,30 +37,13 @@ namespace WFInfoCS {
 					Main.AddLog("Loading screenshot from file");
 					Main.updatedStatus("Offline testing with screenshot", 0);
 					LoadScreenshot();
-				} else if (Ocr.verifyWarframe()) 
+				} else if (OCR.verifyWarframe())
 					//if (Ocr.verifyFocus()) 
 					//   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
 					//   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
-					doWork(CaptureScreenshot());
+					Task.Factory.StartNew(new Action(doWork));
 			}
 			//statusUpdate(key.ToString(), 0); //shows keypresses
-		}
-
-		private Bitmap CaptureScreenshot() {
-			Bitmap image;
-			Ocr.updateWindow();
-
-			int height = Screen.PrimaryScreen.Bounds.Height * (int)Ocr.dpi;
-			int width = Screen.PrimaryScreen.Bounds.Width * (int)Ocr.dpi;
-			Bitmap Fullscreen = new Bitmap(width, height);
-			Size FullscreenSize = new Size(Fullscreen.Width, Fullscreen.Height);
-			using (Graphics graphics = Graphics.FromImage(Fullscreen)) {
-				graphics.CopyFromScreen(Screen.PrimaryScreen.Bounds.Left, Screen.PrimaryScreen.Bounds.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
-			}
-			Fullscreen.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
-
-			image = Fullscreen;
-			return image;
 		}
 
 		private Bitmap LoadScreenshot() {
@@ -77,7 +61,7 @@ namespace WFInfoCS {
 						try {
 							//Get the path of specified file
 							image = new Bitmap(file);
-							Ocr.updateWindow(image);
+							OCR.updateWindow(image);
 							doWork(image);
 						}
 						catch (Exception) {
@@ -94,14 +78,9 @@ namespace WFInfoCS {
 			}
 		}
 
-		public void doWork(Bitmap image) {
-			if (image == null) { return; }
+		public void doWork() {
 			//if (Settings.debug){image.Save(AppPath + @"\Debug\FullScreenShot" + DateTime.UtcNow + ".jpg");} //save image if debug is on
-			int Rewards = Ocr.countRewards(image);
-			for (int i = 0; i < Rewards; i++) {
-				Bitmap reward = Ocr.getReward(i, Rewards);
-				Ocr.proces(reward);
-			}
+			OCR.ProcessRewardScreen();
 		}
 
 		//getters, boring shit
