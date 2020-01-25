@@ -5,7 +5,9 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Tesseract;
 
 namespace WFInfoCS
 {
@@ -71,20 +73,17 @@ namespace WFInfoCS
             WINDOWED
         }
         public static HandleRef HandleRef { get; private set; }
-        public static float dpi { get; set; }
         private static Process Warframe = null;
+        private HandleRef handelRef;
         private static Point center;
         public static Rectangle window { get; set; }
-        private HandleRef handelRef;
-        private static double xPrecentFirstReward = 379;
-        private static double xPrecentSecondReward = 184;
-        private static double yPrecentReward = 75;
-        private static Rectangle firstRewardRectangle;
-        private static Rectangle secondRewardRectangle;
+        public static float dpi { get; set; }
         private static double screenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
                                              //todo  implemenet Tesseract
                                              //      implemenet pre-prossesing
 
+        public static TesseractEngine[] engine = new TesseractEngine[5];
+        public static Regex RE = new Regex("[^a-z&//]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 
 
@@ -121,10 +120,40 @@ namespace WFInfoCS
         public static int pixFissYDisp = 43;
 
 
+        private static void initEngine()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                if (i == 0)
+                {
+                    engine[0] = new TesseractEngine("", "englimited");
+                    engine[0].DefaultPageSegMode = PageSegMode.SingleLine;
+                    engine[0].SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ/");
+                }
+                else
+                {
+                    engine[i] = new TesseractEngine("", "engbest");
+                    engine[i].DefaultPageSegMode = PageSegMode.SingleBlock;
+                    engine[i].SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&/");
+                }
+                engine[i].SetVariable("load_system_dawg", false);
+            }
+        }
+
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
+            if (engine[0] == null)
+                initEngine();
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            long start = watch.ElapsedMilliseconds;
+
             // Look at me mom, I'm doing fancy shit
             Bitmap image = file ?? CaptureScreenshot();
+
+            long end = watch.ElapsedMilliseconds;
+            Console.WriteLine("CaptureScreenshot " + (end - start) + " ms");
+            start = watch.ElapsedMilliseconds;
 
             // Get that scaling
             screenScaling = Settings.Scaling / 100 * dpi;
@@ -136,10 +165,21 @@ namespace WFInfoCS
             // Get that theme
             WFtheme active = GetTheme(image);
 
+            end = watch.ElapsedMilliseconds;
+            Console.WriteLine("Get Theme/Scaling " + (end - start) + " ms");
+            start = watch.ElapsedMilliseconds;
+
             // Get the part box and filter it
             Bitmap partBox = FilterPartNames(image, active);
-            int playerCount = countRewards(partBox);
+            List<String> players = SeparatePlayers(partBox);
+            foreach (string prnt in players)
+                Console.WriteLine(prnt);
 
+            end = watch.ElapsedMilliseconds;
+            Console.WriteLine("Filter + Count " + (end - start) + " ms");
+            start = watch.ElapsedMilliseconds;
+
+            watch.Stop();
             partBox.Save(Main.appPath + @"\Debug\PartBoxDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
             image.Save(Main.appPath + @"\Debug\FullScreenShotDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
         }
@@ -240,68 +280,117 @@ namespace WFInfoCS
             Color clr;
 
             Bitmap ret = new Bitmap(width + 10, lineHeight + 10);
-            Bitmap ret2 = new Bitmap(width + 10, lineHeight + 10);
+            //Bitmap ret2 = new Bitmap(width + 10, lineHeight + 10);
             for (int x = 0; x < ret.Width; x++)
                 for (int y = 0; y < ret.Height; y++)
                 {
                     ret.SetPixel(x, y, Color.White);
-                    ret2.SetPixel(x, y, Color.White);
+                    //ret2.SetPixel(x, y, Color.White);
                 }
 
 
-            var csv = new StringBuilder();
-            csv.Append("X,Y,R,G,B,Hue,Saturation,Brightness\n");
+            //var csv = new StringBuilder();
+            //csv.Append("X,Y,R,G,B,Hue,Saturation,Brightness\n");
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < lineHeight; y++)
                 {
                     clr = image.GetPixel(left + x, top + y);
                     if (ThemeThresholdFilter(clr, active))
                     {
-                        csv.Append((left + x) + ", " + (top + y) + ", " + clr.R + ", " + clr.G + ", " + clr.B + ", " + clr.GetHue() + ", " + clr.GetSaturation() + ", " + clr.GetBrightness() + "\n");
-                        ret.SetPixel(x + 5, y + 5, clr);
-                        ret2.SetPixel(x + 5, y + 5, Color.Black);
+                        //csv.Append((left + x) + ", " + (top + y) + ", " + clr.R + ", " + clr.G + ", " + clr.B + ", " + clr.GetHue() + ", " + clr.GetSaturation() + ", " + clr.GetBrightness() + "\n");
+                        ret.SetPixel(x + 5, y + 5, Color.Black);
+                        //ret2.SetPixel(x + 5, y + 5, clr);
                     }
                 }
-            ret2.Save(Main.appPath + @"\Debug\PartBox2Debug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
-            File.WriteAllText(Main.appPath + @"\Debug\pixels.csv", csv.ToString());
+            //ret2.Save(Main.appPath + @"\Debug\PartBox2Debug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
+            //File.WriteAllText(Main.appPath + @"\Debug\pixels.csv", csv.ToString());
             return ret;
         }
-        internal static int countRewards(Bitmap image)
+
+        internal static List<String> SeparatePlayers(Bitmap image)
         {
-            // Firstly check at the first possible possition with 4 rewards, which is at Width = 0.3097 % and Height = 0.4437 %
-            // If not found, check first possible possition with 2 rewards, which is 0.4218 %
-            // If also not found, there are 3 rewards
+            // 2d array - words with bounds (1 dimensional)
+            /*   [
+             *     [start, end, word_ind, word_ind, ...] -- horizontal start and end position of this part and the list of words with it
+             *     ...
+             *   ]
+            */
+            List<List<int>> arr2D = new List<List<int>>();
+            List<String> words = new List<string>();
+            using (Page page = engine[1].Process(image))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    Tesseract.Rect outRect;
+                    iter.Begin();
+                    do
+                    {
+                        iter.TryGetBoundingBox(PageIteratorLevel.Word, out outRect);
+                        String word = iter.GetText(PageIteratorLevel.Word);
+                        //Console.WriteLine(outRect.ToString());
+                        if (word != null)
+                        {
+                            word = RE.Replace(word, "").Trim();
+                            if (word.Length > 0)
+                            {
 
-            /*screenScaling = Settings.Scaling / 100 * dpi;
-			if (image.Width / image.Height > 16 / 9)  // image is less than 16:9 aspect
-				screenScaling *= image.Height / 1080;
-            else
-                screenScaling *= image.Width / 1920; //image is higher than 16:9 aspect
+                                bool addNew = true;
+                                int X1 = outRect.X1 - (outRect.Height / 2);
+                                int X2 = outRect.X2 + (outRect.Height / 2);
+                                for (int i = 0; i < arr2D.Count && addNew; i++)
+                                {
+                                    List<int> arr1D = arr2D[i];
+                                    if (X2 >= arr1D[0] && X1 <= arr1D[1])
+                                    {
+                                        if (X2 > arr1D[1])
+                                            arr2D[i][1] = X2;
+                                        if (X1 < arr1D[0])
+                                            arr2D[i][0] = X1;
+                                        arr2D[i].Add(words.Count);
+                                        words.Add(word);
+                                        addNew = false;
+                                    }
+                                }
+                                if (addNew)
+                                {
+                                    List<int> temp = new List<int>();
+                                    temp.Add(X1);
+                                    temp.Add(X2);
+                                    temp.Add(words.Count);
+                                    arr2D.Add(temp);
+                                    words.Add(word);
+                                }
+                            }
+                        }
 
-			center = new Point(image.Width / 2, image.Height / 2);
+                        // Giant blob of shit
+                        // Translates to:
+                        //   keep going while there's words left in the line
+                        //           or while there's lines left in the para
+                        //           or while there's paras left in the block
+                        //           or while there's blocks left 
+                    } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word) || iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine) || iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para) || iter.Next(PageIteratorLevel.Block));
+                }
+            }
+            arr2D.Sort(new arr2D_Compare());
 
+            List<String> ret = new List<string>();
+            foreach (List<int> arr1D in arr2D)
+            {
+                String plyr = "";
+                for (int i = 2; i < arr1D.Count; i++)
+                    plyr += words[arr1D[i]] + (i == arr1D.Count - 1 ? "" : " ");
+                ret.Add(plyr);
+            }
+            return ret;
+        }
 
-
-
-			firstRewardRectangle = getAdjustedRectangle((int)(xPrecentFirstReward * screenScaling), (int)(yPrecentReward * screenScaling), gemBox);
-			secondRewardRectangle = getAdjustedRectangle((int)(xPrecentSecondReward * screenScaling), (int)(yPrecentReward * screenScaling), gemBox);
-
-			Bitmap firstReward = image.Clone(firstRewardRectangle, image.PixelFormat);
-			Bitmap secondReward = image.Clone(secondRewardRectangle, image.PixelFormat);
-
-			doDebugDrawing(image);
-			image.Dispose();
-			if (verrifyReward(firstReward)) { 
-				Console.WriteLine("4 rewards");
-				return 4;
-			} else if (verrifyReward(secondReward)) { 
-				Console.WriteLine("2 rewards");
-				return 2;
-			} else { 
-				Console.WriteLine("3 rewards");
-				return 3;
-			}*/
-            return 0;
+        private class arr2D_Compare : IComparer<List<int>>
+        {
+            public int Compare(List<int> x, List<int> y)
+            {
+                return x[0].CompareTo(y[0]);
+            }
         }
 
         private static Rectangle getAdjustedRectangle(int x, int y, Size size)
@@ -335,21 +424,6 @@ namespace WFInfoCS
             }
             return false;
         }
-
-        private static void doDebugDrawing(Bitmap image)
-        {
-            using (Graphics graphics = Graphics.FromImage(image))
-            {
-                graphics.DrawRectangle(new Pen(Color.Red), new Rectangle(new Point(window.X, window.Y), new Size(window.Width - 1, window.Height - 1)));
-                graphics.DrawRectangle(new Pen(Color.Red), firstRewardRectangle);
-                graphics.DrawRectangle(new Pen(Color.Red), secondRewardRectangle);
-                graphics.FillRectangle(Brushes.Pink, center.X, center.Y, 5, 5);
-                image.Save(Main.appPath + @"\Debug\FullScreenShotDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
-            }
-        }
-
-
-
 
         internal static Bitmap CaptureScreenshot()
         {
