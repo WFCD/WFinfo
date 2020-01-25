@@ -75,7 +75,7 @@ namespace WFInfoCS {
 				LowLevelListener.KeyAction += main.OnKeyAction;
 				listener.Hook();
 				InitializeComponent();
-				Version.Content = main.BuildVersion;
+				Version.Content = Main.BuildVersion;
 				ChangeStatus("loaded", 0);
 
 				Main.AddLog("Sucsesfully launched");
