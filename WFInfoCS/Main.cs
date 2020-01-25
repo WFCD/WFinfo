@@ -41,9 +41,6 @@ namespace WFInfoCS {
 					//   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
 					//   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
 					doWork(CaptureScreenshot());
-						
-					
-				
 			}
 			//statusUpdate(key.ToString(), 0); //shows keypresses
 		}
@@ -100,7 +97,7 @@ namespace WFInfoCS {
 		public void doWork(Bitmap image) {
 			if (image == null) { return; }
 			//if (Settings.debug){image.Save(AppPath + @"\Debug\FullScreenShot" + DateTime.UtcNow + ".jpg");} //save image if debug is on
-			int Rewards = Ocr.findRewards(image);
+			int Rewards = Ocr.countRewards(image);
 			for (int i = 0; i < Rewards; i++) {
 				Bitmap reward = Ocr.getReward(i, Rewards);
 				Ocr.proces(reward);

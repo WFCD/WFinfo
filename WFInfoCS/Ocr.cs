@@ -29,16 +29,16 @@ namespace WFInfoCS {
 		//todo  implemenet Tesseract
 		//      implemenet pre-prossesing
 
-		internal static int findRewards(Bitmap image) {
+		internal static int countRewards(Bitmap image) {
 			// Firstly check at the first possible possition with 4 rewards, which is at Width = 0.3097 % and Height = 0.4437 %
 			// If not found, check first possible possition with 2 rewards, which is 0.4218 %
 			// If also not found, there are 3 rewards
+			screenScaling = (Settings.Scaling / 100) * dpi;
+			if (image.Width / image.Height > 16 / 9)  // image is less than 16:9 aspect
+				screenScaling *= image.Height / 1080;
+            else
+                screenScaling *= image.Width / 1920; //image is higher than 16:9 aspect
 
-			if (image.Width / image.Height > 16 / 9) { // image is less than 16:9 aspect
-				screenScaling = image.Height / 1080 * (Settings.Scaling/100) * dpi;
-			} else {
-				screenScaling = image.Width / 1920 * (Settings.Scaling / 100) * dpi; //image is higher than 16:9 aspect
-			}
 			center = new Point(image.Width / 2, image.Height / 2);
 
 			Size gemBox = new Size((int)(40 * screenScaling), (int)(35 * screenScaling));
