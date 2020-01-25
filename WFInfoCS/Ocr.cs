@@ -82,7 +82,14 @@ namespace WFInfoCS
                                              //todo  implemenet Tesseract
                                              //      implemenet pre-prossesing
 
-        public static TesseractEngine[] engine = new TesseractEngine[5];
+        public static TesseractEngine limitedEngine = new TesseractEngine("", "englimited")
+        {
+            DefaultPageSegMode = PageSegMode.SingleBlock
+        };
+        public static TesseractEngine bestEngine = new TesseractEngine("", "engbest")
+        {
+            DefaultPageSegMode = PageSegMode.SingleBlock
+        };
         public static Regex RE = new Regex("[^a-z&//]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 
@@ -119,31 +126,8 @@ namespace WFInfoCS
         public static int pixFissXDisp = 285;
         public static int pixFissYDisp = 43;
 
-
-        private static void initEngine()
-        {
-            for (int i = 0; i < 5; i++)
-            {
-                if (i == 0)
-                {
-                    engine[0] = new TesseractEngine("", "englimited");
-                    engine[0].DefaultPageSegMode = PageSegMode.SingleLine;
-                    engine[0].SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ/");
-                }
-                else
-                {
-                    engine[i] = new TesseractEngine("", "engbest");
-                    engine[i].DefaultPageSegMode = PageSegMode.SingleBlock;
-                    engine[i].SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&/");
-                }
-                engine[i].SetVariable("load_system_dawg", false);
-            }
-        }
-
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
-            if (engine[0] == null)
-                initEngine();
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
             long start = watch.ElapsedMilliseconds;
@@ -317,7 +301,7 @@ namespace WFInfoCS
             */
             List<List<int>> arr2D = new List<List<int>>();
             List<String> words = new List<string>();
-            using (Page page = engine[1].Process(image))
+            using (Page page = bestEngine.Process(image))
             {
                 using (var iter = page.GetIterator())
                 {
@@ -335,8 +319,8 @@ namespace WFInfoCS
                             {
 
                                 bool addNew = true;
-                                int X1 = outRect.X1 - (outRect.Height / 2);
-                                int X2 = outRect.X2 + (outRect.Height / 2);
+                                int X1 = outRect.X1 - (outRect.Height / 3);
+                                int X2 = outRect.X2 + (outRect.Height / 3);
                                 for (int i = 0; i < arr2D.Count && addNew; i++)
                                 {
                                     List<int> arr1D = arr2D[i];
