@@ -31,7 +31,7 @@ namespace WFInfoCS
 
         //TODO: DARK_LOTUS needs colors, and well, the rest need confirmations
         // Colors for the top left "profile bar"
-        public static Color[] ThemeColors = new Color[] {   Color.FromArgb(190, 169, 102),		//VITRUVIAN		
+        public static Color[] ThemePrimary = new Color[] {  Color.FromArgb(190, 169, 102),		//VITRUVIAN		
 															Color.FromArgb(153,  31,  35), 		//STALKER		
 															Color.FromArgb(238, 193, 105),  	//BARUUK		
 															Color.FromArgb( 35, 201, 245),  	//CORPUS		
@@ -44,8 +44,23 @@ namespace WFInfoCS
 															Color.FromArgb(  2, 127, 217),  	//HIGH_CONTRAST	
 															Color.FromArgb(255, 255, 255),  	//LEGACY		
 															Color.FromArgb(158, 159, 167),  	//EQUINOX		
-															Color.FromArgb(140, 119, 147) };    //DARK_LOTUS	
-	
+															Color.FromArgb(140, 119, 147) };    //DARK_LOTUS
+        
+        public static Color[] ThemeSecondary = new Color[] {Color.FromArgb(245, 227, 173),		//VITRUVIAN		
+															Color.FromArgb(255,  61,  51), 		//STALKER		
+															Color.FromArgb(236, 211, 162),  	//BARUUK		
+															Color.FromArgb(111, 229, 253),  	//CORPUS		
+															Color.FromArgb(255, 115, 230),  	//FORTUNA		
+															Color.FromArgb(255, 224, 153),  	//GRINEER		
+															Color.FromArgb(255, 241, 191),  	//LOTUS			
+															Color.FromArgb(245,  73,  93),  	//NIDUS			
+															Color.FromArgb(178, 125,   5),  	//OROKIN		
+															Color.FromArgb(  6, 106,  74),  	//TENNO			
+															Color.FromArgb(255, 255,   0),  	//HIGH_CONTRAST	
+															Color.FromArgb(232, 213,  93),  	//LEGACY		
+															Color.FromArgb(232, 227, 227),  	//EQUINOX		
+															Color.FromArgb(200, 169, 237) };    //DARK_LOTUS	
+
 
         private static double TotalScaling;
         public static WindowStyle currentStyle;
@@ -123,7 +138,7 @@ namespace WFInfoCS
 
             // Get the part box and filter it
             Bitmap partBox = FilterPartNames(image, active);
-            //int playerCount = countRewards(partBox);
+            int playerCount = countRewards(partBox);
 
             partBox.Save(Main.appPath + @"\Debug\PartBoxDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
             image.Save(Main.appPath + @"\Debug\FullScreenShotDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
@@ -141,7 +156,7 @@ namespace WFInfoCS
             int closestThresh = 999;
             WFtheme closestTheme = WFtheme.CORPUS;
             Double estimatedScaling = 0;
-            Color closestColor = ThemeColors[0];
+            Color closestColor = ThemePrimary[0];
             Color clr;
 
             using (Bitmap bmp = new Bitmap(endX - startX, endY - startY))
@@ -162,7 +177,7 @@ namespace WFInfoCS
 
                     foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
                     {
-                        Color themeColor = ThemeColors[(int)theme];
+                        Color themeColor = ThemePrimary[(int)theme];
                         int tempThresh = ColorDifference(clr, themeColor);
                         if (tempThresh < minThresh)
                         {
@@ -202,7 +217,7 @@ namespace WFInfoCS
 
         private static bool ThemeThresholdFilter(Color test, WFtheme theme)
         {
-            Color filter = ThemeColors[(int)theme];
+            Color filter = ThemePrimary[(int)theme];
 
             if (theme == WFtheme.VITRUVIAN)
                 return (Math.Abs(test.GetHue() - filter.GetHue()) < 2 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42);
