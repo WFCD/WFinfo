@@ -45,7 +45,7 @@ namespace WFInfoCS
 															Color.FromArgb(255, 255, 255),  	//LEGACY		
 															Color.FromArgb(158, 159, 167),  	//EQUINOX		
 															Color.FromArgb(140, 119, 147) };    //DARK_LOTUS
-        
+
         public static Color[] ThemeSecondary = new Color[] {Color.FromArgb(245, 227, 173),		//VITRUVIAN		
 															Color.FromArgb(255,  61,  51), 		//STALKER		
 															Color.FromArgb(236, 211, 162),  	//BARUUK		
@@ -219,9 +219,15 @@ namespace WFInfoCS
         {
             Color filter = ThemePrimary[(int)theme];
 
-            if (theme == WFtheme.VITRUVIAN)
-                return (Math.Abs(test.GetHue() - filter.GetHue()) < 2 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42);
-            return ColorThreshold(test, filter);
+            switch (theme)
+            {
+                case WFtheme.VITRUVIAN:
+                    return Math.Abs(test.GetHue() - filter.GetHue()) < 2 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
+                case WFtheme.LOTUS:
+                    return Math.Abs(test.GetHue() - filter.GetHue()) < 3 && test.GetSaturation() >= 0.65;
+                default:
+                    return ColorThreshold(test, filter);
+            }
         }
 
         private static Bitmap FilterPartNames(Bitmap image, WFtheme active)
@@ -234,12 +240,17 @@ namespace WFInfoCS
             Color clr;
 
             Bitmap ret = new Bitmap(width + 10, lineHeight + 10);
+            Bitmap ret2 = new Bitmap(width + 10, lineHeight + 10);
             for (int x = 0; x < ret.Width; x++)
                 for (int y = 0; y < ret.Height; y++)
+                {
                     ret.SetPixel(x, y, Color.White);
+                    ret2.SetPixel(x, y, Color.White);
+                }
 
 
             var csv = new StringBuilder();
+            csv.Append("X,Y,R,G,B,Hue,Saturation,Brightness\n");
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < lineHeight; y++)
                 {
@@ -247,9 +258,11 @@ namespace WFInfoCS
                     if (ThemeThresholdFilter(clr, active))
                     {
                         csv.Append((left + x) + ", " + (top + y) + ", " + clr.R + ", " + clr.G + ", " + clr.B + ", " + clr.GetHue() + ", " + clr.GetSaturation() + ", " + clr.GetBrightness() + "\n");
-                        ret.SetPixel(x + 5, y + 5, Color.Black);
+                        ret.SetPixel(x + 5, y + 5, clr);
+                        ret2.SetPixel(x + 5, y + 5, Color.Black);
                     }
                 }
+            ret2.Save(Main.appPath + @"\Debug\PartBox2Debug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
             File.WriteAllText(Main.appPath + @"\Debug\pixels.csv", csv.ToString());
             return ret;
         }
