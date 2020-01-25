@@ -224,7 +224,7 @@ namespace WFInfoCS
                 case WFtheme.VITRUVIAN:
                     return Math.Abs(test.GetHue() - filter.GetHue()) < 2 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
                 case WFtheme.LOTUS:
-                    return Math.Abs(test.GetHue() - filter.GetHue()) < 3 && test.GetSaturation() >= 0.65;
+                    return Math.Abs(test.GetHue() - filter.GetHue()) < 3 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - filter.GetBrightness()) <= 0.1;
                 default:
                     return ColorThreshold(test, filter);
             }
