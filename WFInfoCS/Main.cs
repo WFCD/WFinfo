@@ -36,13 +36,14 @@ namespace WFInfoCS {
 					Main.AddLog("Loading screenshot from file");
 					Main.updatedStatus("Offline testing with screenshot", 0);
 					LoadScreenshot();
-				} else {
-					if (Ocr.verifyWarframe()) {
-						if (Ocr.verifyFocus()) {
-							doWork(CaptureScreenshot());
-						}
-					}
-				}
+				} else if (Ocr.verifyWarframe()) 
+					//if (Ocr.verifyFocus()) 
+					//   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
+					//   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
+					doWork(CaptureScreenshot());
+						
+					
+				
 			}
 			//statusUpdate(key.ToString(), 0); //shows keypresses
 		}
