@@ -36,7 +36,7 @@ namespace WFInfoCS {
 				if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift) {
 					Main.AddLog("Loading screenshot from file");
 					Main.updatedStatus("Offline testing with screenshot", 0);
-					LoadScreenshot();
+					Task.Factory.StartNew(new Action(LoadScreenshot));
 				} else if (OCR.verifyWarframe())
 					//if (Ocr.verifyFocus()) 
 					//   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
@@ -46,8 +46,7 @@ namespace WFInfoCS {
 			//statusUpdate(key.ToString(), 0); //shows keypresses
 		}
 
-		private Bitmap LoadScreenshot() {
-			Bitmap image;
+		private void LoadScreenshot() {
 			using (OpenFileDialog openFileDialog = new OpenFileDialog()) {
 				openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
 				openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
@@ -60,21 +59,18 @@ namespace WFInfoCS {
 						Console.WriteLine("Testing file: "+file.ToString());
 						try {
 							//Get the path of specified file
-							image = new Bitmap(file);
+							Bitmap image = new Bitmap(file);
 							OCR.updateWindow(image);
-							doWork(image);
+							OCR.ProcessRewardScreen(image);
 						}
 						catch (Exception) {
 							statusUpdate("Faild to load image", 1);
-							return null;
 						}
 
 					}
 				} else {
 					statusUpdate("Faild to load image", 1);
-					return null;
 				}
-				return null;
 			}
 		}
 

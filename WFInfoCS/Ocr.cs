@@ -1,10 +1,46 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace WFInfoCS {
 	class OCR {
+		public enum WFtheme : int
+		{
+			VITRUVIAN,
+			STALKER,
+			BARUUK,
+			CORPUS,
+			FORTUNA,
+			GRINEER,
+			LOTUS,
+			NIDUS,
+			OROKIN,
+			TENNO,
+			HIGH_CONTRAST,
+			LEGACY,
+			EQUINOX,
+			DARK_LOTUS
+		}
+
+		//TODO: DARK_LOTUS needs colors, and well, the rest need confirmations
+		// Colors for the top left "profile bar"
+		public static Color[] ThemeColors = new Color[] {   Color.FromArgb(190, 169, 102),		//VITRUVIAN		
+															Color.FromArgb(153,  31,  35), 		//STALKER		
+															Color.FromArgb(238, 193, 105),  	//BARUUK		
+															Color.FromArgb( 35, 201, 245),  	//CORPUS		
+															Color.FromArgb( 57, 105, 192),  	//FORTUNA		
+															Color.FromArgb(255, 189, 102),  	//GRINEER		
+															Color.FromArgb( 36, 184, 242),  	//LOTUS			
+															Color.FromArgb(140,  38,  92),  	//NIDUS			
+															Color.FromArgb( 20,  41,  29),  	//OROKIN		
+															Color.FromArgb(  9,  78, 106),  	//TENNO			
+															Color.FromArgb(  2, 127, 217),  	//HIGH_CONTRAST	
+															Color.FromArgb(255, 255, 255),  	//LEGACY		
+															Color.FromArgb(158, 159, 167),  	//EQUINOX		
+															Color.FromArgb(140, 119, 147) };    //DARK_LOTUS	
 
 
 		private static double TotalScaling;
@@ -30,12 +66,140 @@ namespace WFInfoCS {
 											 //      implemenet pre-prossesing
 
 
-		internal static void ProcessRewardScreen(Bitmap image = null)
-		{
 
+
+		// Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
+		public static int pixRwrdWid = 972;
+		public static int pixRwrdHei = 235;
+		public static int pixRwrdYDisp = 316;
+		public static int pixRwrdLineHei = 44;
+		public static int pixRwrdLineWid = 240;
+
+		// Pixel measurement for player bars for player count
+		//   Width is same as pixRwrdWid
+		// public static int pixRareWid = pixRwrdWid;
+		//   Height is always 1px
+		// public static int pixRareHei = 1;
+		//   Box is centered horizontally
+		// public static int pixRareXDisp = ???;
+		public static int pixRareYDisp = 58;
+		public static int pixOverlayPos = 30;
+
+		public static int pixProfWid = 48;
+		public static int pixProfTotWid = 192;
+		// Height is always 1px
+		// public static int pixProfHei = 1;
+		public static int pixProfXDisp = 93;
+		public static int pixProfYDisp = 87;
+		public static Double pixProfXSpecial = 117;
+		public static Double pixProfYSpecial = 87;
+
+		// Pixel measurements for detecting reward screen
+		public static int pixFissWid = 354;
+		public static int pixFissHei = 45;
+		public static int pixFissXDisp = 285;
+		public static int pixFissYDisp = 43;
+
+
+		internal static void ProcessRewardScreen(Bitmap file = null)
+		{
+			// Look at me mom, I'm doing fancy shit
+			Bitmap image = file ?? CaptureScreenshot();
+
+			// Get that scaling
+			screenScaling = Settings.Scaling / 100 * dpi;
+			if (image.Width / image.Height > 16 / 9)  // image is less than 16:9 aspect
+				screenScaling *= image.Height / 1080;
+			else
+				screenScaling *= image.Width / 1920; //image is higher than 16:9 aspect
+
+			// Get that theme
+			WFtheme active = GetTheme(image);
+
+			// Get the part box and filter it
+			//Bitmap partBox = FilterPartNames(image, active);
+			//int playerCount = countRewards(partBox);
+
+			image.Save(Main.appPath + @"\Debug\FullScreenShotDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
 		}
 
-		private Bitmap CaptureScreenshot()
+		private static WFtheme GetTheme(Bitmap image)
+		{
+			Double scalingMod = screenScaling * 40 / Settings.Scaling;
+
+			int startX = (int)(pixProfXSpecial * scalingMod);
+			int startY = (int)(pixProfYSpecial * scalingMod);
+			int endX = (int)(pixProfXSpecial * scalingMod * 3);
+			int endY = (int)(pixProfYSpecial * scalingMod * 3);
+
+			int closestThresh = 999;
+			WFtheme closestTheme = WFtheme.CORPUS;
+			Double estimatedScaling = 0;
+			Color closestColor = ThemeColors[0];
+			Color clr;
+
+			using (Bitmap bmp = new Bitmap(endX - startX, endY - startY))
+			{
+				using (Graphics graph = Graphics.FromImage(bmp))
+					graph.CopyFromScreen(window.X + startX, window.Y + startY, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
+				for(int y = 1; y <= bmp.Height; y++)
+				{
+					int newY = bmp.Height - y;
+					int newX = (bmp.Width * newY) / bmp.Height;
+
+					clr = bmp.GetPixel(newX, newY);
+					image.SetPixel(startX + newX - 1, startY + newY, Color.Red);
+					image.SetPixel(startX + newX + 1, startY + newY, Color.Red);
+
+					int minThresh = 999;
+					WFtheme minTheme = WFtheme.CORPUS;
+
+					foreach(WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
+					{
+						Color themeColor = ThemeColors[(int)theme];
+						int tempThresh = ColorDifference(clr, themeColor);
+						if (tempThresh < minThresh)
+						{
+							minThresh = tempThresh;
+							minTheme = theme;
+						}
+					}
+					if (estimatedScaling < .5 && minThresh < 10)
+						estimatedScaling = (startX + newX) / (pixProfXSpecial * screenScaling);
+
+					if (minThresh < closestThresh)
+					{
+						closestThresh = minThresh;
+						closestTheme = minTheme;
+						closestColor = clr;
+					}
+				}
+			}
+			if (estimatedScaling > .5)
+			{
+				Main.AddLog("ESTIMATED SCALING: " + (int)(100 * estimatedScaling) + "%");
+				Main.AddLog("USER INPUT SCALING: " + Settings.Scaling + "%");
+			}
+			Main.AddLog("CLOSEST THEME(" + closestThresh + "): " + closestTheme.ToString() + " - " + closestColor.ToString());
+			return closestTheme;
+		}
+
+		private static bool ColorThreshold(Color test, Color thresh, int threshold = 10)
+		{
+			return(Math.Abs(test.R - thresh.R) < threshold) && (Math.Abs(test.G - thresh.G) < threshold) && (Math.Abs(test.B - thresh.B) < threshold);
+		}
+
+		private static int ColorDifference(Color test, Color thresh)
+		{
+			return Math.Abs(test.R - thresh.R) + Math.Abs(test.G - thresh.G) + Math.Abs(test.B - thresh.B);
+		}
+
+		private static Bitmap FilterPartNames(Bitmap image, WFtheme active)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal static Bitmap CaptureScreenshot()
 		{
 			Bitmap image;
 			OCR.updateWindow();
@@ -58,7 +222,8 @@ namespace WFInfoCS {
 			// Firstly check at the first possible possition with 4 rewards, which is at Width = 0.3097 % and Height = 0.4437 %
 			// If not found, check first possible possition with 2 rewards, which is 0.4218 %
 			// If also not found, there are 3 rewards
-			screenScaling = (Settings.Scaling / 100) * dpi;
+			
+			/*screenScaling = Settings.Scaling / 100 * dpi;
 			if (image.Width / image.Height > 16 / 9)  // image is less than 16:9 aspect
 				screenScaling *= image.Height / 1080;
             else
@@ -86,7 +251,8 @@ namespace WFInfoCS {
 			} else { 
 				Console.WriteLine("3 rewards");
 				return 3;
-			}
+			}*/
+			return 0;
 		}
 
 		private static Rectangle getAdjustedRectangle(int x, int y, Size size) { //adjust the rectangle to capture from the center of the screen instead of from origin.
@@ -113,10 +279,6 @@ namespace WFInfoCS {
 				}
 			}
 			return false;
-		}
-
-		public static Boolean ColorThreshold(Color test, Color thresh, int Treshold = 10) {
-			return (Math.Abs(test.R - thresh.R) < Treshold && Math.Abs(test.G - thresh.G) < Treshold && Math.Abs(test.B - thresh.B) < Treshold);
 		}
 
 		private static void doDebugDrawing(Bitmap image) {
@@ -167,7 +329,7 @@ namespace WFInfoCS {
 
 		private static void refresScaling() {
 			using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero)) {
-				dpi = (graphics.DpiX / 96); //assuming that y and x axis dpi scaling will be uniform. So only checking one value
+				dpi = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only checking one value
 				TotalScaling = dpi * (Settings.Scaling / 100);
 				Main.AddLog("Scaling updated to: " + TotalScaling + ". User has a DPI scaling of: " + dpi + " And a set UI scaling of: " + Settings.Scaling + "%");
 			}
