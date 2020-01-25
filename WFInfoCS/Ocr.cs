@@ -140,7 +140,7 @@ namespace WFInfoCS
             start = watch.ElapsedMilliseconds;
 
             // Get that scaling
-            screenScaling = Settings.Scaling / 100 * dpi;
+            screenScaling = dpi;
             if (image.Width / image.Height > 16 / 9)  // image is less than 16:9 aspect
                 screenScaling *= image.Height / 1080;
             else
@@ -148,6 +148,8 @@ namespace WFInfoCS
 
             // Get that theme
             WFtheme active = GetTheme(image);
+
+            screenScaling *= Settings.Scaling / 100.0;
 
             end = watch.ElapsedMilliseconds;
             Console.WriteLine("Get Theme/Scaling " + (end - start) + " ms");
@@ -170,7 +172,7 @@ namespace WFInfoCS
 
         private static WFtheme GetTheme(Bitmap image)
         {
-            Double scalingMod = screenScaling * 40 / Settings.Scaling;
+            Double scalingMod = screenScaling * 40 / 100;
 
             int startX = (int)(pixProfXSpecial * scalingMod);
             int startY = (int)(pixProfYSpecial * scalingMod);
@@ -210,7 +212,7 @@ namespace WFInfoCS
                         }
                     }
                     if (estimatedScaling < .5 && minThresh < 10)
-                        estimatedScaling = (startX + newX) / (pixProfXSpecial * screenScaling);
+                        estimatedScaling = (startX + newX) / (pixProfXSpecial);
 
                     if (minThresh < closestThresh)
                     {
@@ -224,6 +226,7 @@ namespace WFInfoCS
             {
                 Main.AddLog("ESTIMATED SCALING: " + (int)(100 * estimatedScaling) + "%");
                 Main.AddLog("USER INPUT SCALING: " + Settings.Scaling + "%");
+                Settings.Scaling = (int)(100 * estimatedScaling);
             }
             Main.AddLog("CLOSEST THEME(" + closestThresh + "): " + closestTheme.ToString() + " - " + closestColor.ToString());
             return closestTheme;
@@ -249,6 +252,9 @@ namespace WFInfoCS
                     return Math.Abs(test.GetHue() - filter.GetHue()) < 2 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
                 case WFtheme.LOTUS:
                     return Math.Abs(test.GetHue() - filter.GetHue()) < 3 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - filter.GetBrightness()) <= 0.1;
+                case WFtheme.EQUINOX:
+                    //return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.42;
+                    return ColorThreshold(test, Color.FromArgb(150, 150, 160), 15);
                 default:
                     return ColorThreshold(test, filter);
             }
@@ -264,30 +270,30 @@ namespace WFInfoCS
             Color clr;
 
             Bitmap ret = new Bitmap(width + 10, lineHeight + 10);
-            //Bitmap ret2 = new Bitmap(width + 10, lineHeight + 10);
+            Bitmap ret2 = new Bitmap(width + 10, lineHeight + 10);
             for (int x = 0; x < ret.Width; x++)
                 for (int y = 0; y < ret.Height; y++)
                 {
                     ret.SetPixel(x, y, Color.White);
-                    //ret2.SetPixel(x, y, Color.White);
+                    ret2.SetPixel(x, y, Color.White);
                 }
 
 
-            //var csv = new StringBuilder();
-            //csv.Append("X,Y,R,G,B,Hue,Saturation,Brightness\n");
+            var csv = new StringBuilder();
+            csv.Append("X,Y,R,G,B,Hue,Saturation,Brightness\n");
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < lineHeight; y++)
                 {
                     clr = image.GetPixel(left + x, top + y);
                     if (ThemeThresholdFilter(clr, active))
                     {
-                        //csv.Append((left + x) + ", " + (top + y) + ", " + clr.R + ", " + clr.G + ", " + clr.B + ", " + clr.GetHue() + ", " + clr.GetSaturation() + ", " + clr.GetBrightness() + "\n");
+                        csv.Append((left + x) + ", " + (top + y) + ", " + clr.R + ", " + clr.G + ", " + clr.B + ", " + clr.GetHue() + ", " + clr.GetSaturation() + ", " + clr.GetBrightness() + "\n");
                         ret.SetPixel(x + 5, y + 5, Color.Black);
-                        //ret2.SetPixel(x + 5, y + 5, clr);
+                        ret2.SetPixel(x + 5, y + 5, clr);
                     }
                 }
-            //ret2.Save(Main.appPath + @"\Debug\PartBox2Debug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
-            //File.WriteAllText(Main.appPath + @"\Debug\pixels.csv", csv.ToString());
+            ret2.Save(Main.appPath + @"\Debug\PartBox2Debug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
+            File.WriteAllText(Main.appPath + @"\Debug\pixels.csv", csv.ToString());
             return ret;
         }
 
@@ -315,12 +321,12 @@ namespace WFInfoCS
                         if (word != null)
                         {
                             word = RE.Replace(word, "").Trim();
-                            if (word.Length > 0)
+                            if (word.Length > 1)
                             {
 
                                 bool addNew = true;
-                                int X1 = outRect.X1 - (outRect.Height / 3);
-                                int X2 = outRect.X2 + (outRect.Height / 3);
+                                int X1 = outRect.X1 - (outRect.Height / 2);
+                                int X2 = outRect.X2 + (outRect.Height / 2);
                                 for (int i = 0; i < arr2D.Count && addNew; i++)
                                 {
                                     List<int> arr1D = arr2D[i];
@@ -364,7 +370,8 @@ namespace WFInfoCS
                 String plyr = "";
                 for (int i = 2; i < arr1D.Count; i++)
                     plyr += words[arr1D[i]] + (i == arr1D.Count - 1 ? "" : " ");
-                ret.Add(plyr);
+                if (plyr.Length > 9)
+                    ret.Add(plyr);
             }
             return ret;
         }
