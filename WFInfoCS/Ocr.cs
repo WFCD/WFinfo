@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
 
 namespace WFInfoCS
@@ -43,7 +45,7 @@ namespace WFInfoCS
 															Color.FromArgb(255, 255, 255),  	//LEGACY		
 															Color.FromArgb(158, 159, 167),  	//EQUINOX		
 															Color.FromArgb(140, 119, 147) };    //DARK_LOTUS	
-
+	
 
         private static double TotalScaling;
         public static WindowStyle currentStyle;
@@ -198,39 +200,44 @@ namespace WFInfoCS
             return Math.Abs(test.R - thresh.R) + Math.Abs(test.G - thresh.G) + Math.Abs(test.B - thresh.B);
         }
 
+        private static bool ThemeThresholdFilter(Color test, WFtheme theme)
+        {
+            Color filter = ThemeColors[(int)theme];
+
+            if (theme == WFtheme.VITRUVIAN)
+                return (Math.Abs(test.GetHue() - filter.GetHue()) < 2 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42);
+            return ColorThreshold(test, filter);
+        }
+
         private static Bitmap FilterPartNames(Bitmap image, WFtheme active)
         {
             int width = (int)(pixRwrdWid * screenScaling);
             int lineHeight = (int)(pixRwrdLineHei * screenScaling);
-            int left = center.X - (width / 2);
-            int top = center.Y - (int)(pixRareYDisp * screenScaling) + (int)(pixRwrdHei * screenScaling) - lineHeight;
+            int left = (image.Width / 2) - (width / 2);
+            int top = (image.Height / 2) - (int)(pixRwrdYDisp * screenScaling) + (int)(pixRwrdHei * screenScaling) - lineHeight;
+
+            Color clr;
 
             Bitmap ret = new Bitmap(width + 10, lineHeight + 10);
+            for (int x = 0; x < ret.Width; x++)
+                for (int y = 0; y < ret.Height; y++)
+                    ret.SetPixel(x, y, Color.White);
+
+
+            var csv = new StringBuilder();
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < lineHeight; y++)
-                    ret.SetPixel(x + 5, y + 5, image.GetPixel(left + x, top + y));
+                {
+                    clr = image.GetPixel(left + x, top + y);
+                    if (ThemeThresholdFilter(clr, active))
+                    {
+                        csv.Append((left + x) + ", " + (top + y) + ", " + clr.R + ", " + clr.G + ", " + clr.B + ", " + clr.GetHue() + ", " + clr.GetSaturation() + ", " + clr.GetBrightness() + "\n");
+                        ret.SetPixel(x + 5, y + 5, Color.Black);
+                    }
+                }
+            File.WriteAllText(Main.appPath + @"\Debug\pixels.csv", csv.ToString());
             return ret;
         }
-
-        internal static Bitmap CaptureScreenshot()
-        {
-            Bitmap image;
-            OCR.updateWindow();
-
-            int height = Screen.PrimaryScreen.Bounds.Height * (int)OCR.dpi;
-            int width = Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
-            Bitmap Fullscreen = new Bitmap(width, height);
-            Size FullscreenSize = new Size(Fullscreen.Width, Fullscreen.Height);
-            using (Graphics graphics = Graphics.FromImage(Fullscreen))
-            {
-                graphics.CopyFromScreen(Screen.PrimaryScreen.Bounds.Left, Screen.PrimaryScreen.Bounds.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
-            }
-            Fullscreen.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
-
-            image = Fullscreen;
-            return image;
-        }
-
         internal static int countRewards(Bitmap image)
         {
             // Firstly check at the first possible possition with 4 rewards, which is at Width = 0.3097 % and Height = 0.4437 %
@@ -313,6 +320,29 @@ namespace WFInfoCS
             }
         }
 
+
+
+
+        internal static Bitmap CaptureScreenshot()
+        {
+            Bitmap image;
+            OCR.updateWindow();
+
+            int height = Screen.PrimaryScreen.Bounds.Height * (int)OCR.dpi;
+            int width = Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
+            Bitmap Fullscreen = new Bitmap(width, height);
+            Size FullscreenSize = new Size(Fullscreen.Width, Fullscreen.Height);
+            using (Graphics graphics = Graphics.FromImage(Fullscreen))
+            {
+                graphics.CopyFromScreen(Screen.PrimaryScreen.Bounds.Left, Screen.PrimaryScreen.Bounds.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
+            }
+            Fullscreen.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
+
+            image = Fullscreen;
+            return image;
+        }
+
+
         public static Boolean verifyFocus()
         { // Returns True if warframe is in focuse, False if not
             uint processID = 0;
@@ -337,7 +367,7 @@ namespace WFInfoCS
 
         public static Boolean verifyWarframe()
         {
-            if (Warframe != null) { return true; }
+            if (Warframe != null && !Warframe.HasExited) { return true; }
             foreach (Process process in Process.GetProcesses())
             {
                 if (process.MainWindowTitle == "Warframe")
@@ -371,6 +401,9 @@ namespace WFInfoCS
 
         public static void updateWindow(Bitmap image = null)
         {
+            if (!verifyWarframe())
+                return;
+
             Win32.RECT osRect;
             refresScaling();
             if (!Win32.GetWindowRect(HandleRef, out osRect))
