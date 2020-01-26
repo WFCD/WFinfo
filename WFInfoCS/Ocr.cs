@@ -128,7 +128,7 @@ namespace WFInfoCS
 
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
-
+            Settings.Scaling = 100;
             var watch = System.Diagnostics.Stopwatch.StartNew();
             long start = watch.ElapsedMilliseconds;
 
@@ -226,7 +226,7 @@ namespace WFInfoCS
             {
                 Main.AddLog("ESTIMATED SCALING: " + (int)(100 * estimatedScaling) + "%");
                 Main.AddLog("USER INPUT SCALING: " + Settings.Scaling + "%");
-                Settings.Scaling = (int)(100 * estimatedScaling);
+                //Settings.Scaling = (int)(100 * estimatedScaling);
             }
             Main.AddLog("CLOSEST THEME(" + closestThresh + "): " + closestTheme.ToString() + " - " + closestColor.ToString());
             return closestTheme;
@@ -244,19 +244,25 @@ namespace WFInfoCS
 
         private static bool ThemeThresholdFilter(Color test, WFtheme theme)
         {
-            Color filter = ThemePrimary[(int)theme];
+            Color primary = ThemePrimary[(int)theme];
+            Color secondary = ThemeSecondary[(int)theme];
 
             switch (theme)
             {
                 case WFtheme.VITRUVIAN:
-                    return Math.Abs(test.GetHue() - filter.GetHue()) < 2 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
                 case WFtheme.LOTUS:
-                    return Math.Abs(test.GetHue() - filter.GetHue()) < 3 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - filter.GetBrightness()) <= 0.1;
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - primary.GetBrightness()) <= 0.1;
+                case WFtheme.OROKIN:
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() <= 0.42 && test.GetSaturation() >= 0.1)
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
+                case WFtheme.STALKER:
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetBrightness() >= 0.02;
                 case WFtheme.EQUINOX:
                     //return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.42;
                     return ColorThreshold(test, Color.FromArgb(150, 150, 160), 15);
                 default:
-                    return ColorThreshold(test, filter);
+                    return ColorThreshold(test, primary);
             }
         }
 
@@ -321,7 +327,7 @@ namespace WFInfoCS
                         if (word != null)
                         {
                             word = RE.Replace(word, "").Trim();
-                            if (word.Length > 1)
+                            if (word.Length > 0)
                             {
 
                                 bool addNew = true;
