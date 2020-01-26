@@ -150,7 +150,7 @@ namespace WFInfoCS
             // Get that theme
             WFtheme active = GetTheme(image);
 
-            screenScaling *= 90 / 100.0;
+            screenScaling *= Settings.Scaling / 100.0;
 
             end = watch.ElapsedMilliseconds;
             Console.WriteLine("Get Theme/Scaling " + (end - start) + " ms");
@@ -192,7 +192,7 @@ namespace WFInfoCS
             for (int y = 1; y <= height; y++)
             {
                 int coorY = endY - y;
-                int coorX = endX - (int)(1.0 * width * y / height) - 1;
+                int coorX = endX - (int)(1.0 * width * y / height);
 
                 clr = image.GetPixel(coorX, coorY);
                 image.SetPixel(coorX - 1, coorY, Color.White);
@@ -260,9 +260,9 @@ namespace WFInfoCS
                 case WFtheme.EQUINOX:
                     return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.52;
                 case WFtheme.NIDUS:
-                    return ColorThreshold(test, primary) || ColorThreshold(test, secondary);
+                case WFtheme.TENNO:
                 default:
-                    return ColorThreshold(test, primary);
+                    return ColorThreshold(test, primary) || ColorThreshold(test, secondary);
             }
         }
 
