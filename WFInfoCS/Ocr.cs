@@ -257,7 +257,7 @@ namespace WFInfoCS
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() <= 0.42 && test.GetSaturation() >= 0.1)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
                 case WFtheme.STALKER:
-                    return Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetBrightness() >= 0.02;
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.5;
                 case WFtheme.EQUINOX:
                     //return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.42;
                     return ColorThreshold(test, Color.FromArgb(150, 150, 160), 15);
