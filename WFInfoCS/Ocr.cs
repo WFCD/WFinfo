@@ -262,7 +262,8 @@ namespace WFInfoCS
                 case WFtheme.STALKER:
                     return Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.5;
                 case WFtheme.CORPUS:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetBrightness() >= 0.42 && test.GetSaturation() >= 0.45;
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetBrightness() >= 0.35 && test.GetSaturation() >= 0.45)
+                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 2 && test.GetBrightness() >= 0.30 && test.GetSaturation() >= 0.35);
                 case WFtheme.EQUINOX:
                     return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.52;
                 case WFtheme.DARK_LOTUS:
@@ -429,6 +430,7 @@ namespace WFInfoCS
                 graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
             }
             image.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
+            image.Save(Main.appPath + @"\Debug\FullScreenShotCopy " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
 
             return image;
         }
