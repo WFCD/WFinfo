@@ -37,7 +37,7 @@ namespace WFInfoCS {
 				if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift) {
 					Main.AddLog("Loading screenshot from file");
 					Main.updatedStatus("Offline testing with screenshot", 0);
-					Task.Factory.StartNew(new Action(LoadScreenshot));
+					LoadScreenshot();
 				} else if (OCR.verifyWarframe())
 					//if (Ocr.verifyFocus()) 
 					//   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
@@ -62,7 +62,7 @@ namespace WFInfoCS {
 							//Get the path of specified file
 							Bitmap image = new Bitmap(file);
 							OCR.updateWindow(image);
-							OCR.ProcessRewardScreen(image);
+							Task.Factory.StartNew(() => OCR.ProcessRewardScreen(image));
 						}
 						catch (Exception) {
 							statusUpdate("Faild to load image", 1);

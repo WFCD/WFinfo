@@ -141,10 +141,11 @@ namespace WFInfoCS
 
             // Get that scaling
             screenScaling = dpi;
-            if (image.Width / image.Height > 16 / 9.0)  // image is less than 16:9 aspect
+            if (image.Width * 9 > image.Height * 16)  // image is less than 16:9 aspect
                 screenScaling *= image.Height / 1080.0;
             else
                 screenScaling *= image.Width / 1920.0; //image is higher than 16:9 aspect
+
 
             // Get that theme
             WFtheme active = GetTheme(image);
@@ -178,6 +179,8 @@ namespace WFInfoCS
             int startY = (int)(pixProfYSpecial * scalingMod);
             int endX = (int)(pixProfXSpecial * scalingMod * 3);
             int endY = (int)(pixProfYSpecial * scalingMod * 3);
+            int height = endY - startY;
+            int width = endX - startX;
 
             int closestThresh = 999;
             WFtheme closestTheme = WFtheme.CORPUS;
@@ -185,50 +188,43 @@ namespace WFInfoCS
             Color closestColor = ThemePrimary[0];
             Color clr;
 
-            Console.WriteLine(startX + ", " + endX + ", " + startY + ", " + endY);
-
-            using (Bitmap bmp = new Bitmap(endX - startX, endY - startY))
+            //using (Bitmap bmp = new Bitmap(endX - startX, endY - startY))
+            for (int y = 1; y <= height; y++)
             {
-                using (Graphics graph = Graphics.FromImage(bmp))
-                    graph.CopyFromScreen(window.X + startX, window.Y + startY, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
-                for (int y = 1; y <= bmp.Height; y++)
+                int coorY = endY - y;
+                int coorX = endX - (int)(1.0 * width * y / height) - 1;
+
+                clr = image.GetPixel(coorX, coorY);
+                image.SetPixel(coorX - 1, coorY, Color.White);
+                image.SetPixel(coorX + 1, coorY, Color.White);
+
+                int minThresh = 999;
+                WFtheme minTheme = WFtheme.CORPUS;
+
+                foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
                 {
-                    int newY = bmp.Height - y;
-                    int newX = (bmp.Width * newY) / bmp.Height;
-
-                    clr = bmp.GetPixel(newX, newY);
-                    image.SetPixel(startX + newX - 1, startY + newY, Color.Red);
-                    image.SetPixel(startX + newX + 1, startY + newY, Color.Red);
-
-                    int minThresh = 999;
-                    WFtheme minTheme = WFtheme.CORPUS;
-
-                    foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
+                    Color themeColor = ThemePrimary[(int)theme];
+                    int tempThresh = ColorDifference(clr, themeColor);
+                    if (tempThresh < minThresh)
                     {
-                        Color themeColor = ThemePrimary[(int)theme];
-                        int tempThresh = ColorDifference(clr, themeColor);
-                        if (tempThresh < minThresh)
-                        {
-                            minThresh = tempThresh;
-                            minTheme = theme;
-                        }
+                        minThresh = tempThresh;
+                        minTheme = theme;
                     }
-                    if (estimatedScaling < .5 && minThresh < 10)
-                        estimatedScaling = (startX + newX) / (pixProfXSpecial);
-
-                    if (minThresh < closestThresh)
-                    {
-                        closestThresh = minThresh;
-                        closestTheme = minTheme;
-                        closestColor = clr;
-                    }
+                }
+                if (estimatedScaling < .5 && minThresh < 10)
+                    estimatedScaling = (coorX / pixProfXSpecial) / (screenScaling / dpi);
+                Console.WriteLine(clr.ToString() + " - " + minTheme.ToString());
+                if (minThresh < closestThresh)
+                {
+                    closestThresh = minThresh;
+                    closestTheme = minTheme;
+                    closestColor = clr;
                 }
             }
             if (estimatedScaling > .5)
             {
                 Main.AddLog("ESTIMATED SCALING: " + (int)(100 * estimatedScaling) + "%");
                 Main.AddLog("USER INPUT SCALING: " + Settings.Scaling + "%");
-                //Settings.Scaling = (int)(100 * estimatedScaling);
             }
             Main.AddLog("CLOSEST THEME(" + closestThresh + "): " + closestTheme.ToString() + " - " + closestColor.ToString());
             return closestTheme;
@@ -260,8 +256,9 @@ namespace WFInfoCS
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
                 case WFtheme.STALKER:
                     return Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.5;
+                case WFtheme.CORPUS:
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetBrightness() >= 0.42 && test.GetSaturation() >= 0.45;
                 case WFtheme.EQUINOX:
-                    //return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.42;
                     return ColorThreshold(test, Color.FromArgb(150, 150, 160), 15);
                 default:
                     return ColorThreshold(test, primary);
@@ -284,6 +281,10 @@ namespace WFInfoCS
                 {
                     ret.SetPixel(x, y, Color.White);
                     ret2.SetPixel(x, y, Color.White);
+                    if (x == 4 || y == 4 || x == ret.Width - 5 || y == ret.Height - 5)
+                    {
+                        image.SetPixel(left + x - 5, top + y - 5, Color.Red);
+                    }
                 }
 
 
@@ -404,15 +405,15 @@ namespace WFInfoCS
             int width = window.Width * (int)OCR.dpi;
             int height = window.Height * (int)OCR.dpi;
 
-            Bitmap Fullscreen = new Bitmap(width, height);
-            Size FullscreenSize = new Size(Fullscreen.Width, Fullscreen.Height);
-            using (Graphics graphics = Graphics.FromImage(Fullscreen))
+            Bitmap image = new Bitmap(width, height);
+            Size FullscreenSize = new Size(image.Width, image.Height);
+            using (Graphics graphics = Graphics.FromImage(image))
             {
                 graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
             }
-            Fullscreen.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
+            image.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
 
-            return Fullscreen;
+            return image;
         }
 
 
