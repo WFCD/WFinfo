@@ -546,6 +546,34 @@ namespace WFInfoCS
 
         }
 
+        // WIP - please change accordingly to new logic
+        public static void ParseFile(String filename)
+        {
+            Main.AddLog("PARSING FILE: " + filename);
+            Image debugFile = Bitmap.FromFile(filename);
+
+            window = new Rectangle(0, 0, debugFile.Width,
+                debugFile.Height);
+
+            // Get DPI Scaling
+            double dpiScaling = 1.0;
+            //GetUIScaling();
+
+            // Get Window Points
+            int horz_center = window.Width / 2;
+            int vert_center = window.Height / 2;
+            center = new Point(horz_center, vert_center);
+
+            //if (IsRelicWindow())
+            //{
+            //    ParseScreen();
+            //}
+
+            debugFile.Dispose();
+            debugFile = null;
+        }
+
+
         internal static Bitmap getReward(int rewardSlot, int TotalRewards)
         {
             return null;
