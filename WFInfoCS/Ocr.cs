@@ -269,8 +269,15 @@ namespace WFInfoCS
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 2 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
                 case WFtheme.NIDUS:
                 case WFtheme.TENNO:
+                case WFtheme.BARUUK:
+                case WFtheme.FORTUNA:
+                case WFtheme.GRINEER:
+                case WFtheme.HIGH_CONTRAST:
+                case WFtheme.LEGACY:
                 default:
-                    return ColorThreshold(test, primary) || ColorThreshold(test, secondary);
+                    // This shouldn't be ran
+                    //   Only for initial testing
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
             }
         }
 
