@@ -64,7 +64,6 @@ namespace WFInfoCS
 															Color.FromArgb(200, 169, 237) };    //DARK_LOTUS	
 
 
-        private static double TotalScaling;
         public static WindowStyle currentStyle;
         public enum WindowStyle
         {
@@ -74,13 +73,13 @@ namespace WFInfoCS
         }
         public static HandleRef HandleRef { get; private set; }
         private static Process Warframe = null;
-        private HandleRef handelRef;
+
         private static Point center;
         public static Rectangle window { get; set; }
+
         public static float dpi { get; set; }
-        private static double screenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
-                                             //todo  implemenet Tesseract
-                                             //      implemenet pre-prossesing
+        private static double ScreenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
+        private static double TotalScaling;
 
         public static TesseractEngine limitedEngine = new TesseractEngine("", "englimited")
         {
@@ -128,33 +127,30 @@ namespace WFInfoCS
 
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
-            Settings.Scaling = 100;
             var watch = System.Diagnostics.Stopwatch.StartNew();
             long start = watch.ElapsedMilliseconds;
 
             // Look at me mom, I'm doing fancy shit
             Bitmap image = file ?? CaptureScreenshot();
 
-            long end = watch.ElapsedMilliseconds;
-            Console.WriteLine("CaptureScreenshot " + (end - start) + " ms");
-            start = watch.ElapsedMilliseconds;
 
             // Get that scaling
-            screenScaling = dpi;
-            if (image.Width * 9 > image.Height * 16)  // image is less than 16:9 aspect
-                screenScaling *= image.Height / 1080.0;
+            if (file == null)
+                ScreenScaling = dpi;
             else
-                screenScaling *= image.Width / 1920.0; //image is higher than 16:9 aspect
+                ScreenScaling = 1;
+
+            if (image.Width * 9 > image.Height * 16)  // image is less than 16:9 aspect
+                ScreenScaling *= image.Height / 1080.0;
+            else
+                ScreenScaling *= image.Width / 1920.0; //image is higher than 16:9 aspect
 
 
             // Get that theme
             WFtheme active = GetTheme(image);
 
-            screenScaling *= Settings.Scaling / 100.0;
+            TotalScaling = ScreenScaling * (Settings.Scaling / 100.0);
 
-            end = watch.ElapsedMilliseconds;
-            Console.WriteLine("Get Theme/Scaling " + (end - start) + " ms");
-            start = watch.ElapsedMilliseconds;
 
             // Get the part box and filter it
             Bitmap partBox = FilterPartNames(image, active);
@@ -162,8 +158,8 @@ namespace WFInfoCS
             foreach (string prnt in players)
                 Console.WriteLine(prnt);
 
-            end = watch.ElapsedMilliseconds;
-            Console.WriteLine("Filter + Count " + (end - start) + " ms");
+            var end = watch.ElapsedMilliseconds;
+            Console.WriteLine("Completed " + (end - start) + " ms");
             start = watch.ElapsedMilliseconds;
 
             watch.Stop();
@@ -173,7 +169,8 @@ namespace WFInfoCS
 
         private static WFtheme GetTheme(Bitmap image)
         {
-            Double scalingMod = screenScaling * 0.4;
+            // Tests Scaling from 40% to 120%
+            Double scalingMod = ScreenScaling * 0.4;
 
             int startX = (int)(pixProfXSpecial * scalingMod);
             int startY = (int)(pixProfYSpecial * scalingMod);
@@ -195,8 +192,6 @@ namespace WFInfoCS
                 int coorX = endX - (int)(1.0 * width * y / height);
 
                 clr = image.GetPixel(coorX, coorY);
-                image.SetPixel(coorX - 1, coorY, Color.White);
-                image.SetPixel(coorX + 1, coorY, Color.White);
 
                 int minThresh = 999;
                 WFtheme minTheme = WFtheme.CORPUS;
@@ -211,8 +206,18 @@ namespace WFInfoCS
                         minTheme = theme;
                     }
                 }
+                if (minThresh < 10)
+                {
+                    image.SetPixel(coorX - 1, coorY, Color.White);
+                    image.SetPixel(coorX + 1, coorY, Color.White);
+                } else
+                {
+                    image.SetPixel(coorX - 1, coorY, Color.Red);
+                    image.SetPixel(coorX + 1, coorY, Color.Red);
+                }
+
                 if (estimatedScaling < .5 && minThresh < 10)
-                    estimatedScaling = (coorX / pixProfXSpecial) / (screenScaling / dpi);
+                    estimatedScaling = (coorX / pixProfXSpecial) / ScreenScaling;
                 if (minThresh < closestThresh)
                 {
                     closestThresh = minThresh;
@@ -220,11 +225,11 @@ namespace WFInfoCS
                     closestColor = clr;
                 }
             }
-            if (estimatedScaling > .5)
+            /*if (estimatedScaling > .5)
             {
                 Main.AddLog("ESTIMATED SCALING: " + (int)(100 * estimatedScaling) + "%");
                 Main.AddLog("USER INPUT SCALING: " + Settings.Scaling + "%");
-            }
+            }*/
             Main.AddLog("CLOSEST THEME(" + closestThresh + "): " + closestTheme.ToString() + " - " + closestColor.ToString());
             return closestTheme;
         }
@@ -259,6 +264,9 @@ namespace WFInfoCS
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetBrightness() >= 0.42 && test.GetSaturation() >= 0.45;
                 case WFtheme.EQUINOX:
                     return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.52;
+                case WFtheme.DARK_LOTUS:
+                    return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.42 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.20 && test.GetSaturation() >= 0.07)
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 2 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
                 case WFtheme.NIDUS:
                 case WFtheme.TENNO:
                 default:
@@ -268,10 +276,10 @@ namespace WFInfoCS
 
         private static Bitmap FilterPartNames(Bitmap image, WFtheme active)
         {
-            int width = (int)(pixRwrdWid * screenScaling);
-            int lineHeight = (int)(pixRwrdLineHei * screenScaling);
+            int width = (int)(pixRwrdWid * TotalScaling);
+            int lineHeight = (int)(pixRwrdLineHei * TotalScaling);
             int left = (image.Width / 2) - (width / 2);
-            int top = (image.Height / 2) - (int)(pixRwrdYDisp * screenScaling) + (int)(pixRwrdHei * screenScaling) - lineHeight;
+            int top = (image.Height / 2) - (int)(pixRwrdYDisp * TotalScaling) + (int)(pixRwrdHei * TotalScaling) - lineHeight;
 
             Color clr;
 
@@ -331,7 +339,7 @@ namespace WFInfoCS
                         if (word != null)
                         {
                             word = RE.Replace(word, "").Trim();
-                            if (word.Length > 0)
+                            if (word.Length > 1 || word == "&")
                             {
 
                                 bool addNew = true;
@@ -399,9 +407,7 @@ namespace WFInfoCS
             OCR.updateWindow();
 
             if (window == null)
-            {
                 window = Screen.PrimaryScreen.Bounds;
-            }
 
             int width = window.Width * (int)OCR.dpi;
             int height = window.Height * (int)OCR.dpi;
@@ -425,8 +431,7 @@ namespace WFInfoCS
             uint threadID = Win32.GetWindowThreadProcessId(Win32.GetForegroundWindow(), out processID);
             try
             {
-                if (processID == Warframe.Id || Settings.debug) { return true; }
-                else
+                if (processID == Warframe.Id || Settings.debug) { return true; } else
                 {
                     Main.AddLog("Warframe is not focused");
                     Main.updatedStatus("Warframe is out of focus", 2);
@@ -471,6 +476,17 @@ namespace WFInfoCS
 
         public static void updateWindow(Bitmap image = null)
         {
+            if (image != null)
+            {
+                int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
+                int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)OCR.dpi;
+                window = new Rectangle(0, 0, width, height);
+                center = new Point(window.Width / 2, window.Height / 2);
+                //Console.WriteLine("Window is: " + window + " And center is: " + center);
+                return;
+            }
+
+
             if (!verifyWarframe())
                 return;
 
@@ -480,17 +496,16 @@ namespace WFInfoCS
             { // get window size of warframe
                 if (Settings.debug)
                 { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
-                    Main.AddLog("No warframe detected, thus using center of image");
-                    int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
-                    int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)OCR.dpi;
+                    Main.AddLog("No warframe detected, thus using center of screen");
+                    int width = Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
+                    int height = Screen.PrimaryScreen.Bounds.Height * (int)OCR.dpi;
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
-                    Console.WriteLine("Window is: " + window + " And center is: " + center);
+                    //Console.WriteLine("Window is: " + window + " And center is: " + center);
                     return;
-                }
-                else
+                } else
                 {
-                    Console.WriteLine("Window is: " + window + " And center is: " + center);
+                    //Console.WriteLine("Window is: " + window + " And center is: " + center);
                     Main.AddLog("Failed to get window bounds");
                     Main.updatedStatus("Failed to get window bounds", 1);
                     return;
