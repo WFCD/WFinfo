@@ -150,7 +150,7 @@ namespace WFInfoCS
             // Get that theme
             WFtheme active = GetTheme(image);
 
-            screenScaling *= Settings.Scaling / 100.0;
+            screenScaling *= 90 / 100.0;
 
             end = watch.ElapsedMilliseconds;
             Console.WriteLine("Get Theme/Scaling " + (end - start) + " ms");
@@ -213,7 +213,6 @@ namespace WFInfoCS
                 }
                 if (estimatedScaling < .5 && minThresh < 10)
                     estimatedScaling = (coorX / pixProfXSpecial) / (screenScaling / dpi);
-                Console.WriteLine(clr.ToString() + " - " + minTheme.ToString());
                 if (minThresh < closestThresh)
                 {
                     closestThresh = minThresh;
@@ -259,7 +258,9 @@ namespace WFInfoCS
                 case WFtheme.CORPUS:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetBrightness() >= 0.42 && test.GetSaturation() >= 0.45;
                 case WFtheme.EQUINOX:
-                    return ColorThreshold(test, Color.FromArgb(150, 150, 160), 15);
+                    return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.52;
+                case WFtheme.NIDUS:
+                    return ColorThreshold(test, primary) || ColorThreshold(test, secondary);
                 default:
                     return ColorThreshold(test, primary);
             }
@@ -522,27 +523,8 @@ namespace WFInfoCS
         public static void ParseFile(String filename)
         {
             Main.AddLog("PARSING FILE: " + filename);
-            Image debugFile = Bitmap.FromFile(filename);
-
-            window = new Rectangle(0, 0, debugFile.Width,
-                debugFile.Height);
-
-            // Get DPI Scaling
-            double dpiScaling = 1.0;
-            //GetUIScaling();
-
-            // Get Window Points
-            int horz_center = window.Width / 2;
-            int vert_center = window.Height / 2;
-            center = new Point(horz_center, vert_center);
-
-            //if (IsRelicWindow())
-            //{
-            //    ParseScreen();
-            //}
-
-            debugFile.Dispose();
-            debugFile = null;
+            Bitmap debugFile = new Bitmap(filename);
+            ProcessRewardScreen(debugFile);
         }
     }
 }
