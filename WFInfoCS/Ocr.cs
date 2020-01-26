@@ -269,12 +269,13 @@ namespace WFInfoCS
                     return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.42 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.20 && test.GetSaturation() >= 0.07)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 2 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
                 case WFtheme.FORTUNA:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 3) && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.20 ;
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 3) && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.20;
+                case WFtheme.HIGH_CONTRAST:
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.25; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
                 case WFtheme.NIDUS:
                 case WFtheme.TENNO:
                 case WFtheme.BARUUK:
                 case WFtheme.GRINEER:
-                case WFtheme.HIGH_CONTRAST:
                 case WFtheme.LEGACY:
                 default:
                     // This shouldn't be ran
