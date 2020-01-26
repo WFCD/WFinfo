@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Text.RegularExpressions;
 
 namespace WFInfoCS {
 	class Main {
 		public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
 		private System.Windows.Media.Brush lightBlue = new SolidColorBrush(System.Windows.Media.Color.FromRgb(177, 208, 217));
-		public static string buildVersion = "v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
+		public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 		public Main() {
 
 		}
@@ -80,9 +81,32 @@ namespace WFInfoCS {
 		}
 
 		//getters, boring shit
-		public string BuildVersion { get => buildVersion; }
+		public static string BuildVersion { get => buildVersion; }
 		public System.Windows.Media.Brush LightBlue { get => lightBlue; }
 		public string AppPath { get => appPath; }
+
+		public static int VersionToInteger(string vers)
+		{
+			string[] versParts = Regex.Replace(vers, "[^0-9.]+", "").Split('.');
+			if (versParts.Length == 3)
+			{
+				int ret = 0;
+				for (int i = 0; i < versParts.Length; i++)
+				{
+					if (versParts[i].Length == 0)
+					{
+						return -1;
+					}
+
+					ret += Convert.ToInt32(Int32.Parse(versParts[i]) * Math.Pow(100, 2 - i));
+				}
+			}
+
+			return -1;
+		}
+
+		// Glob
+        public static System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("en");
 	}
 	public class Status {
 		public string Message { get; set; }
@@ -93,4 +117,5 @@ namespace WFInfoCS {
 			Serverity = ser;
 		}
 	}
+
 }
