@@ -5,7 +5,9 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Tesseract;
 
 namespace WFInfoCS
 {
@@ -71,20 +73,24 @@ namespace WFInfoCS
             WINDOWED
         }
         public static HandleRef HandleRef { get; private set; }
-        public static float dpi { get; set; }
         private static Process Warframe = null;
+        private HandleRef handelRef;
         private static Point center;
         public static Rectangle window { get; set; }
-        private HandleRef handelRef;
-        private static double xPrecentFirstReward = 379;
-        private static double xPrecentSecondReward = 184;
-        private static double yPrecentReward = 75;
-        private static Rectangle firstRewardRectangle;
-        private static Rectangle secondRewardRectangle;
+        public static float dpi { get; set; }
         private static double screenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
                                              //todo  implemenet Tesseract
                                              //      implemenet pre-prossesing
 
+        public static TesseractEngine limitedEngine = new TesseractEngine("", "englimited")
+        {
+            DefaultPageSegMode = PageSegMode.SingleBlock
+        };
+        public static TesseractEngine bestEngine = new TesseractEngine("", "engbest")
+        {
+            DefaultPageSegMode = PageSegMode.SingleBlock
+        };
+        public static Regex RE = new Regex("[^a-z&//]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 
 
@@ -120,14 +126,21 @@ namespace WFInfoCS
         public static int pixFissXDisp = 285;
         public static int pixFissYDisp = 43;
 
-
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
+            Settings.Scaling = 100;
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            long start = watch.ElapsedMilliseconds;
+
             // Look at me mom, I'm doing fancy shit
             Bitmap image = file ?? CaptureScreenshot();
 
+            long end = watch.ElapsedMilliseconds;
+            Console.WriteLine("CaptureScreenshot " + (end - start) + " ms");
+            start = watch.ElapsedMilliseconds;
+
             // Get that scaling
-            screenScaling = Settings.Scaling / 100 * dpi;
+            screenScaling = dpi;
             if (image.Width / image.Height > 16 / 9)  // image is less than 16:9 aspect
                 screenScaling *= image.Height / 1080;
             else
@@ -136,17 +149,30 @@ namespace WFInfoCS
             // Get that theme
             WFtheme active = GetTheme(image);
 
+            screenScaling *= Settings.Scaling / 100.0;
+
+            end = watch.ElapsedMilliseconds;
+            Console.WriteLine("Get Theme/Scaling " + (end - start) + " ms");
+            start = watch.ElapsedMilliseconds;
+
             // Get the part box and filter it
             Bitmap partBox = FilterPartNames(image, active);
-            int playerCount = countRewards(partBox);
+            List<String> players = SeparatePlayers(partBox);
+            foreach (string prnt in players)
+                Console.WriteLine(prnt);
 
+            end = watch.ElapsedMilliseconds;
+            Console.WriteLine("Filter + Count " + (end - start) + " ms");
+            start = watch.ElapsedMilliseconds;
+
+            watch.Stop();
             partBox.Save(Main.appPath + @"\Debug\PartBoxDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
             image.Save(Main.appPath + @"\Debug\FullScreenShotDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
         }
 
         private static WFtheme GetTheme(Bitmap image)
         {
-            Double scalingMod = screenScaling * 40 / Settings.Scaling;
+            Double scalingMod = screenScaling * 40 / 100;
 
             int startX = (int)(pixProfXSpecial * scalingMod);
             int startY = (int)(pixProfYSpecial * scalingMod);
@@ -186,7 +212,7 @@ namespace WFInfoCS
                         }
                     }
                     if (estimatedScaling < .5 && minThresh < 10)
-                        estimatedScaling = (startX + newX) / (pixProfXSpecial * screenScaling);
+                        estimatedScaling = (startX + newX) / (pixProfXSpecial);
 
                     if (minThresh < closestThresh)
                     {
@@ -200,6 +226,7 @@ namespace WFInfoCS
             {
                 Main.AddLog("ESTIMATED SCALING: " + (int)(100 * estimatedScaling) + "%");
                 Main.AddLog("USER INPUT SCALING: " + Settings.Scaling + "%");
+                //Settings.Scaling = (int)(100 * estimatedScaling);
             }
             Main.AddLog("CLOSEST THEME(" + closestThresh + "): " + closestTheme.ToString() + " - " + closestColor.ToString());
             return closestTheme;
@@ -217,16 +244,25 @@ namespace WFInfoCS
 
         private static bool ThemeThresholdFilter(Color test, WFtheme theme)
         {
-            Color filter = ThemePrimary[(int)theme];
+            Color primary = ThemePrimary[(int)theme];
+            Color secondary = ThemeSecondary[(int)theme];
 
             switch (theme)
             {
                 case WFtheme.VITRUVIAN:
-                    return Math.Abs(test.GetHue() - filter.GetHue()) < 2 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
                 case WFtheme.LOTUS:
-                    return Math.Abs(test.GetHue() - filter.GetHue()) < 3 && test.GetSaturation() >= 0.65;
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - primary.GetBrightness()) <= 0.1;
+                case WFtheme.OROKIN:
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() <= 0.42 && test.GetSaturation() >= 0.1)
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
+                case WFtheme.STALKER:
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.5;
+                case WFtheme.EQUINOX:
+                    //return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.42;
+                    return ColorThreshold(test, Color.FromArgb(150, 150, 160), 15);
                 default:
-                    return ColorThreshold(test, filter);
+                    return ColorThreshold(test, primary);
             }
         }
 
@@ -258,50 +294,100 @@ namespace WFInfoCS
                     if (ThemeThresholdFilter(clr, active))
                     {
                         csv.Append((left + x) + ", " + (top + y) + ", " + clr.R + ", " + clr.G + ", " + clr.B + ", " + clr.GetHue() + ", " + clr.GetSaturation() + ", " + clr.GetBrightness() + "\n");
-                        ret.SetPixel(x + 5, y + 5, clr);
-                        ret2.SetPixel(x + 5, y + 5, Color.Black);
+                        ret.SetPixel(x + 5, y + 5, Color.Black);
+                        ret2.SetPixel(x + 5, y + 5, clr);
                     }
                 }
             ret2.Save(Main.appPath + @"\Debug\PartBox2Debug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
             File.WriteAllText(Main.appPath + @"\Debug\pixels.csv", csv.ToString());
             return ret;
         }
-        internal static int countRewards(Bitmap image)
+
+        internal static List<String> SeparatePlayers(Bitmap image)
         {
-            // Firstly check at the first possible possition with 4 rewards, which is at Width = 0.3097 % and Height = 0.4437 %
-            // If not found, check first possible possition with 2 rewards, which is 0.4218 %
-            // If also not found, there are 3 rewards
+            // 2d array - words with bounds (1 dimensional)
+            /*   [
+             *     [start, end, word_ind, word_ind, ...] -- horizontal start and end position of this part and the list of words with it
+             *     ...
+             *   ]
+            */
+            List<List<int>> arr2D = new List<List<int>>();
+            List<String> words = new List<string>();
+            using (Page page = bestEngine.Process(image))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    Tesseract.Rect outRect;
+                    iter.Begin();
+                    do
+                    {
+                        iter.TryGetBoundingBox(PageIteratorLevel.Word, out outRect);
+                        String word = iter.GetText(PageIteratorLevel.Word);
+                        //Console.WriteLine(outRect.ToString());
+                        if (word != null)
+                        {
+                            word = RE.Replace(word, "").Trim();
+                            if (word.Length > 0)
+                            {
 
-            /*screenScaling = Settings.Scaling / 100 * dpi;
-			if (image.Width / image.Height > 16 / 9)  // image is less than 16:9 aspect
-				screenScaling *= image.Height / 1080;
-            else
-                screenScaling *= image.Width / 1920; //image is higher than 16:9 aspect
+                                bool addNew = true;
+                                int X1 = outRect.X1 - (outRect.Height / 2);
+                                int X2 = outRect.X2 + (outRect.Height / 2);
+                                for (int i = 0; i < arr2D.Count && addNew; i++)
+                                {
+                                    List<int> arr1D = arr2D[i];
+                                    if (X2 >= arr1D[0] && X1 <= arr1D[1])
+                                    {
+                                        if (X2 > arr1D[1])
+                                            arr2D[i][1] = X2;
+                                        if (X1 < arr1D[0])
+                                            arr2D[i][0] = X1;
+                                        arr2D[i].Add(words.Count);
+                                        words.Add(word);
+                                        addNew = false;
+                                    }
+                                }
+                                if (addNew)
+                                {
+                                    List<int> temp = new List<int>();
+                                    temp.Add(X1);
+                                    temp.Add(X2);
+                                    temp.Add(words.Count);
+                                    arr2D.Add(temp);
+                                    words.Add(word);
+                                }
+                            }
+                        }
 
-			center = new Point(image.Width / 2, image.Height / 2);
+                        // Giant blob of shit
+                        // Translates to:
+                        //   keep going while there's words left in the line
+                        //           or while there's lines left in the para
+                        //           or while there's paras left in the block
+                        //           or while there's blocks left 
+                    } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word) || iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine) || iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para) || iter.Next(PageIteratorLevel.Block));
+                }
+            }
+            arr2D.Sort(new arr2D_Compare());
 
+            List<String> ret = new List<string>();
+            foreach (List<int> arr1D in arr2D)
+            {
+                String plyr = "";
+                for (int i = 2; i < arr1D.Count; i++)
+                    plyr += words[arr1D[i]] + (i == arr1D.Count - 1 ? "" : " ");
+                if (plyr.Length > 9)
+                    ret.Add(plyr);
+            }
+            return ret;
+        }
 
-
-
-			firstRewardRectangle = getAdjustedRectangle((int)(xPrecentFirstReward * screenScaling), (int)(yPrecentReward * screenScaling), gemBox);
-			secondRewardRectangle = getAdjustedRectangle((int)(xPrecentSecondReward * screenScaling), (int)(yPrecentReward * screenScaling), gemBox);
-
-			Bitmap firstReward = image.Clone(firstRewardRectangle, image.PixelFormat);
-			Bitmap secondReward = image.Clone(secondRewardRectangle, image.PixelFormat);
-
-			doDebugDrawing(image);
-			image.Dispose();
-			if (verrifyReward(firstReward)) { 
-				Console.WriteLine("4 rewards");
-				return 4;
-			} else if (verrifyReward(secondReward)) { 
-				Console.WriteLine("2 rewards");
-				return 2;
-			} else { 
-				Console.WriteLine("3 rewards");
-				return 3;
-			}*/
-            return 0;
+        private class arr2D_Compare : IComparer<List<int>>
+        {
+            public int Compare(List<int> x, List<int> y)
+            {
+                return x[0].CompareTo(y[0]);
+            }
         }
 
         private static Rectangle getAdjustedRectangle(int x, int y, Size size)
@@ -335,21 +421,6 @@ namespace WFInfoCS
             }
             return false;
         }
-
-        private static void doDebugDrawing(Bitmap image)
-        {
-            using (Graphics graphics = Graphics.FromImage(image))
-            {
-                graphics.DrawRectangle(new Pen(Color.Red), new Rectangle(new Point(window.X, window.Y), new Size(window.Width - 1, window.Height - 1)));
-                graphics.DrawRectangle(new Pen(Color.Red), firstRewardRectangle);
-                graphics.DrawRectangle(new Pen(Color.Red), secondRewardRectangle);
-                graphics.FillRectangle(Brushes.Pink, center.X, center.Y, 5, 5);
-                image.Save(Main.appPath + @"\Debug\FullScreenShotDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
-            }
-        }
-
-
-
 
         internal static Bitmap CaptureScreenshot()
         {
