@@ -17,7 +17,7 @@ namespace WFInfoCS
 
 	class Data
 	{
-		public Dictionary<string, string> market_items =
+		public Dictionary<string, string> marketItems =
 			new Dictionary<string, string>(); // Warframe.market item listing           {<id>: "<name>|<url_name>", ...}
 		public JObject market_data; // Contains warframe.market ducatonator listing     {<partName>: {"ducats": <ducat_val>,"plat": <plat_val>}, ...}
 		public JObject relic_data; // Contains relic_data from Warframe PC Drops        {<Era>: {"A1":{"vaulted": true,<rare1/uncommon[12]/common[123]>: <part>}, ...}, "Meso": ..., "Neo": ..., "Axi": ...}
@@ -25,33 +25,33 @@ namespace WFInfoCS
 		public JObject name_data; // Contains relic to market name translation          {<relic_name>: <market_name>}
 
 		private string ApplicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
-		private string _marketItemsPath;
-		private string _marketDataPath;
-		private string _eqpmtDataPath;
-		private string _relicDataPath;
-		private string _nameDataPath;
+		private string marketItemsPath;
+		private string marketDataPath;
+		private string eqmtDataPath;
+		private string relicDataPath;
+		private string nameDataPath;
 
 		private string officialItemStateUrl = "https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html";
 		private string weaponRequirementWikiURL = "https://warframe.fandom.com/wiki/Special:Export/Module:Weapons/data";
 
-		private int save_count = 0;
+		private int saveCount = 0;
 		WebClient WebClient;
-		private FileSystemWatcher _screenshotWatcher = new FileSystemWatcher();
-		private LogCapture _EElogWatcher;
+		private FileSystemWatcher screenshotWatcher = new FileSystemWatcher();
+		private LogCapture EElogWatcher;
 		private string githubVersion;
 
-		private Sheets _sheetsApi;
-		private NLua.Lua _lua;
-		private string _currentDirectory = Directory.GetCurrentDirectory();
+		private Sheets sheetsApi;
+		private NLua.Lua lua;
+		private string currentDirectory = Directory.GetCurrentDirectory();
 
 		public Data()
 		{
 			Main.AddLog("CREATING DATABASE");
-			_marketItemsPath = ApplicationDirectory + @"\market_items.json";
-			_marketDataPath = ApplicationDirectory + @"\market_data.json";
-			_eqpmtDataPath = ApplicationDirectory + @"\eqmt_data.json";
-			_relicDataPath = ApplicationDirectory + @"\relic_data.json";
-			_nameDataPath = ApplicationDirectory + @"\name_data.json";
+			marketItemsPath = ApplicationDirectory + @"\market_items.json";
+			marketDataPath = ApplicationDirectory + @"\market_data.json";
+			eqmtDataPath = ApplicationDirectory + @"\eqmt_data.json";
+			relicDataPath = ApplicationDirectory + @"\relic_data.json";
+			nameDataPath = ApplicationDirectory + @"\name_data.json";
 
 			Directory.CreateDirectory(ApplicationDirectory);
 
@@ -59,14 +59,14 @@ namespace WFInfoCS
 			WebClient.Headers.Add("platform", "pc");
 			WebClient.Headers.Add("language", "en");
 
-			_sheetsApi = new Sheets();
+			sheetsApi = new Sheets();
 
 			string warframePictures = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + @"\Warframe"; //outdated? Was old work around for user who couldn't activate the program
 			Directory.CreateDirectory(warframePictures);
-			_screenshotWatcher.Path = warframePictures;
-			_screenshotWatcher.EnableRaisingEvents = true;
+			screenshotWatcher.Path = warframePictures;
+			screenshotWatcher.EnableRaisingEvents = true;
 
-			_lua = new NLua.Lua();
+			lua = new NLua.Lua();
 			if (false) //My.Settings.Auto) // WIP
 			{
 				Enable_LogCapture();
@@ -75,12 +75,12 @@ namespace WFInfoCS
 
 		private void Enable_LogCapture()
 		{
-			if (_EElogWatcher == null)
+			if (EElogWatcher == null)
 			{
 				try
 				{
-					_EElogWatcher = new LogCapture();
-					_EElogWatcher.TextChanged += log_Changed;
+					EElogWatcher = new LogCapture();
+					EElogWatcher.TextChanged += log_Changed;
 				}
 				catch (Exception ex)
 				{
@@ -93,51 +93,51 @@ namespace WFInfoCS
 
 		private void Disable_LogCapture()
 		{
-			if (_EElogWatcher != null)
+			if (EElogWatcher != null)
 			{
-				_EElogWatcher.TextChanged -= log_Changed;
-				_EElogWatcher.Dispose();
-				_EElogWatcher = null;
+				EElogWatcher.TextChanged -= log_Changed;
+				EElogWatcher.Dispose();
+				EElogWatcher = null;
 			}
 		}
 
 		private void Save_JObject(JObject data)
 		{
-			Main.AddLog("SAVING DEBUG JSON: debug" + save_count.ToString() + ".json");
-			File.WriteAllText(Path.Combine(ApplicationDirectory + @"\debug" + save_count.ToString() + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
-			save_count += 1;
+			Main.AddLog("SAVING DEBUG JSON: debug" + saveCount.ToString() + ".json");
+			File.WriteAllText(Path.Combine(ApplicationDirectory + @"\debug" + saveCount.ToString() + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
+			saveCount += 1;
 		}
 
 		private void Save_JArray(JArray data)
 		{
-			Main.AddLog("SAVING DEBUG JSON: debug" + save_count.ToString() + ".json");
-			File.WriteAllText(Path.Combine(ApplicationDirectory + @"\debug" + save_count.ToString() + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
-			save_count += 1;
+			Main.AddLog("SAVING DEBUG JSON: debug" + saveCount.ToString() + ".json");
+			File.WriteAllText(Path.Combine(ApplicationDirectory + @"\debug" + saveCount.ToString() + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
+			saveCount += 1;
 		}
 
 		private void Save_Market()
 		{
 			Main.AddLog("SAVING MARKET DATABASE");
-			File.WriteAllText(_marketItemsPath, JsonConvert.SerializeObject(market_items, Formatting.Indented));
-			File.WriteAllText(_marketDataPath, JsonConvert.SerializeObject(market_data, Formatting.Indented));
+			File.WriteAllText(marketItemsPath, JsonConvert.SerializeObject(marketItems, Formatting.Indented));
+			File.WriteAllText(marketDataPath, JsonConvert.SerializeObject(market_data, Formatting.Indented));
 		}
 
 		private void Save_Relics()
 		{
 			Main.AddLog("SAVING RELIC DATABASE");
-			File.WriteAllText(_relicDataPath, JsonConvert.SerializeObject(relic_data, Formatting.Indented));
+			File.WriteAllText(relicDataPath, JsonConvert.SerializeObject(relic_data, Formatting.Indented));
 		}
 
 		private void Save_Names()
 		{
 			Main.AddLog("SAVING NAME DATABASE");
-			File.WriteAllText(_nameDataPath, JsonConvert.SerializeObject(name_data, Formatting.Indented));
+			File.WriteAllText(nameDataPath, JsonConvert.SerializeObject(name_data, Formatting.Indented));
 		}
 
 		private void Save_Eqmt()
 		{
 			Main.AddLog("SAVING EQMT DATABASE");
-			File.WriteAllText(_eqpmtDataPath, JsonConvert.SerializeObject(eqmt_data, Formatting.Indented));
+			File.WriteAllText(eqmtDataPath, JsonConvert.SerializeObject(eqmt_data, Formatting.Indented));
 		}
 
 		private int Get_Current_Version()
@@ -159,17 +159,17 @@ namespace WFInfoCS
 			HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
 			HttpWebResponse response = (HttpWebResponse)req.GetResponse();
 			string resUri = response.ResponseUri.AbsoluteUri;
-			Console.WriteLine("Downloading to " + _currentDirectory + "/WFinfo" + githubVersion + ".exe");
+			Console.WriteLine("Downloading to " + currentDirectory + "/WFinfo" + githubVersion + ".exe");
 			try
 			{
-				WebClient.DownloadFile(resUri, _currentDirectory + "/WFInfonew.exe");
-				FileStream fs = File.Create(_currentDirectory + "/update.bat");
+				WebClient.DownloadFile(resUri, currentDirectory + "/WFInfonew.exe");
+				FileStream fs = File.Create(currentDirectory + "/update.bat");
 				byte[] info = new UTF8Encoding(true).GetBytes(
 					"timeout 2" + Environment.NewLine + "del WFInfo.exe" + Environment.NewLine + "rename WFInfonew.exe WFInfo.exe" +
 					Environment.NewLine + "start WFInfo.exe");
 				fs.Write(info, 0, info.Length);
 				fs.Close();
-				Process.Start(_currentDirectory + "/update.bat");
+				Process.Start(currentDirectory + "/update.bat");
 				Application.Current.Shutdown();
 			}
 			catch (Exception ex)
@@ -180,15 +180,15 @@ namespace WFInfoCS
 
 		private Boolean Load_Items(Boolean force = false)
 		{
-			if (!force && File.Exists(_marketItemsPath))
+			if (!force && File.Exists(marketItemsPath))
 			{
-				if (market_items == null)
+				if (marketItems == null)
 				{
-					market_items = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(_marketItemsPath));
+					marketItems = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(marketItemsPath));
 				}
 
 				string version;
-				if (market_items.TryGetValue("version", out version) && market_items["version"] == Main.buildVersion)
+				if (marketItems.TryGetValue("version", out version) && marketItems["version"] == Main.buildVersion)
 				{
 					Main.AddLog("ITEM DATABASE: GOOD");
 					return false;
@@ -196,30 +196,30 @@ namespace WFInfoCS
 			}
 
 			Main.AddLog("ITEM DATABASE: LOADING NEW");
-			market_items = new Dictionary<string, string>();
+			marketItems = new Dictionary<string, string>();
 
-			var sheet = _sheetsApi.GetSheet("items!A:C");
+			var sheet = sheetsApi.GetSheet("items!A:C");
 			foreach (var row in sheet)
 			{
 				string name = row[1].ToString();
 				if (name.Contains("Prime "))
 				{
-					market_items[row[0].ToString()] = name + "|" + row[2].ToString();
+					marketItems[row[0].ToString()] = name + "|" + row[2].ToString();
 				}
 			}
 
-			market_items["version"] = Main.BuildVersion;
+			marketItems["version"] = Main.BuildVersion;
 			Main.AddLog("ITEM DATABASE: GOOD");
 			return true;
 		}
 
 		private Boolean Load_Market(Boolean force = false)
 		{
-			if (!force && File.Exists(_marketDataPath))
+			if (!force && File.Exists(marketDataPath))
 			{
 				if (market_data == null)
 				{
-					market_data = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(_marketDataPath));
+					market_data = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(marketDataPath));
 				}
 
 				JToken version;
@@ -238,7 +238,7 @@ namespace WFInfoCS
 			Main.AddLog("PLAT DATABASE: LOADING NEW");
 			market_data = new JObject();
 
-			var sheet = _sheetsApi.GetSheet("prices!A:I");
+			var sheet = sheetsApi.GetSheet("prices!A:I");
 			foreach (var row in sheet)
 			{
 				string name = row[0].ToString();
@@ -298,7 +298,7 @@ namespace WFInfoCS
 			foreach (var elem in market_temp["payload"]["previous_day"])
 			{
 				string item_name = "";
-				if (!market_items.TryGetValue(elem["item"].ToObject<string>(), out item_name))
+				if (!marketItems.TryGetValue(elem["item"].ToObject<string>(), out item_name))
 				{
 					Main.AddLog("UNKNOWN MARKET ID: " + elem["item"].ToObject<String>());
 				}
@@ -453,9 +453,9 @@ namespace WFInfoCS
             WebRequest request;
 			if (eqmt_data == null)
             {
-                if (!File.Exists(_eqpmtDataPath))
+                if (!File.Exists(eqmtDataPath))
                 {
-                    eqmt_data = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(_eqpmtDataPath));
+                    eqmt_data = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath));
                 }
                 else
                 {
@@ -463,7 +463,7 @@ namespace WFInfoCS
                 }
             }
 
-			if ((!force) && File.Exists(_relicDataPath) && File.Exists(_eqpmtDataPath) && eqmt_data.TryGetValue("version", out temp) && eqmt_data["version"].ToObject<string>() == Main.BuildVersion)
+			if ((!force) && File.Exists(relicDataPath) && File.Exists(eqmtDataPath) && eqmt_data.TryGetValue("version", out temp) && eqmt_data["version"].ToObject<string>() == Main.BuildVersion)
             {
 				request = WebRequest.Create(officialItemStateUrl);
                 request.Method = "HEAD";
@@ -474,13 +474,13 @@ namespace WFInfoCS
 
                     if (relic_data == null)
                     {
-                        relic_data = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(_relicDataPath));
+                        relic_data = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(relicDataPath));
                     }
 
                     if (name_data == null)
                     {
                         name_data =
-                            JsonConvert.DeserializeObject<JObject>(File.ReadAllText(_nameDataPath));
+                            JsonConvert.DeserializeObject<JObject>(File.ReadAllText(nameDataPath));
                     }
 
 					if ((relic_data.TryGetValue("timestamp", out temp)) && eqmt_data.TryGetValue("timestamp", out temp) && eqmt_data["timestamp"].ToObject<String>() == relic_data["timestamp"].ToObject<String>() && last_modified < relic_data["timestamp"].ToObject<DateTime>())
@@ -753,8 +753,8 @@ namespace WFInfoCS
             data = Regex.Replace(data, "&quot;", "\"");
             data = Regex.Replace(data, "&amp;", "&");
 
-            NLua.LuaTable tempLua = (LuaTable)((LuaTable)_lua.DoString("return " + data)[0])["Weapons"];
-            Dictionary<Object, Object> dataDict = _lua.GetTableDict(tempLua);
+            NLua.LuaTable tempLua = (LuaTable)((LuaTable)lua.DoString("return " + data)[0])["Weapons"];
+            Dictionary<Object, Object> dataDict = lua.GetTableDict(tempLua);
 
             JToken temp_out;
 
@@ -819,7 +819,7 @@ namespace WFInfoCS
             Boolean save_market = Load_Items();
             JToken temp_out;
 
-            foreach (var elem in market_items)
+            foreach (var elem in marketItems)
             {
                 if (elem.Key != "version")
                 {
@@ -868,7 +868,7 @@ namespace WFInfoCS
             Load_Market(true);
 
             JToken temp_out;
-            foreach (var elem in market_items)
+            foreach (var elem in marketItems)
             {
                 if (elem.Key != "version")
                 {
