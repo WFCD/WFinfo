@@ -141,10 +141,10 @@ namespace WFInfoCS
 
             // Get that scaling
             screenScaling = dpi;
-            if (image.Width / image.Height > 16 / 9)  // image is less than 16:9 aspect
-                screenScaling *= image.Height / 1080;
+            if (image.Width / image.Height > 16 / 9.0)  // image is less than 16:9 aspect
+                screenScaling *= image.Height / 1080.0;
             else
-                screenScaling *= image.Width / 1920; //image is higher than 16:9 aspect
+                screenScaling *= image.Width / 1920.0; //image is higher than 16:9 aspect
 
             // Get that theme
             WFtheme active = GetTheme(image);
@@ -172,7 +172,7 @@ namespace WFInfoCS
 
         private static WFtheme GetTheme(Bitmap image)
         {
-            Double scalingMod = screenScaling * 40 / 100;
+            Double scalingMod = screenScaling * 0.4;
 
             int startX = (int)(pixProfXSpecial * scalingMod);
             int startY = (int)(pixProfYSpecial * scalingMod);
@@ -184,6 +184,8 @@ namespace WFInfoCS
             Double estimatedScaling = 0;
             Color closestColor = ThemePrimary[0];
             Color clr;
+
+            Console.WriteLine(startX + ", " + endX + ", " + startY + ", " + endY);
 
             using (Bitmap bmp = new Bitmap(endX - startX, endY - startY))
             {
@@ -390,56 +392,29 @@ namespace WFInfoCS
             }
         }
 
-        private static Rectangle getAdjustedRectangle(int x, int y, Size size)
-        { //adjust the rectangle to capture from the center of the screen instead of from origin.
-            int left = center.X - x;
-            int top = center.Y - y;
-            Console.WriteLine("Center cords: " + center.ToString());
-            Console.WriteLine("Calculated position of rectangle " + left + "," + top);
-            Console.WriteLine("pixels away from center " + x + "," + y);
-
-
-            return new Rectangle(left, top, size.Width, size.Height);
-        }
-
-        private static Boolean verrifyReward(Bitmap image)
-        {
-            for (int x = 0; x < image.Width; x++)
-            {
-                for (int y = 0; y < image.Height; y++)
-                {
-                    for (int color = 0; color < 3; color++)
-                    {
-                        if (ColorThreshold(image.GetPixel(x, y), ColorTranslator.FromHtml("#" + Settings.colorArray["rarityColor"][color].ToString())))
-                        {
-                            Main.AddLog("Found color: " + ColorTranslator.FromHtml("#" + Settings.colorArray["rarityColor"][color].ToString()));
-                            return true;
-                        }
-
-                    }
-                }
-            }
-            return false;
-        }
-
         internal static Bitmap CaptureScreenshot()
         {
-            Bitmap image;
             OCR.updateWindow();
 
-            int height = Screen.PrimaryScreen.Bounds.Height * (int)OCR.dpi;
-            int width = Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
+            if (window == null)
+            {
+                window = Screen.PrimaryScreen.Bounds;
+            }
+
+            int width = window.Width * (int)OCR.dpi;
+            int height = window.Height * (int)OCR.dpi;
+
             Bitmap Fullscreen = new Bitmap(width, height);
             Size FullscreenSize = new Size(Fullscreen.Width, Fullscreen.Height);
             using (Graphics graphics = Graphics.FromImage(Fullscreen))
             {
-                graphics.CopyFromScreen(Screen.PrimaryScreen.Bounds.Left, Screen.PrimaryScreen.Bounds.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
+                graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
             }
             Fullscreen.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
 
-            image = Fullscreen;
-            return image;
+            return Fullscreen;
         }
+
 
 
         public static Boolean verifyFocus()
@@ -482,21 +457,15 @@ namespace WFInfoCS
 
         }
 
-        private static Bitmap turnBW(Bitmap source)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void refresScaling()
+        private static void refreshScaling()
         {
             using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
             {
                 dpi = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only checking one value
-                TotalScaling = dpi * (Settings.Scaling / 100);
+                TotalScaling = dpi * (Settings.Scaling / 100.0);
                 Main.AddLog("Scaling updated to: " + TotalScaling + ". User has a DPI scaling of: " + dpi + " And a set UI scaling of: " + Settings.Scaling + "%");
             }
         }
-
 
         public static void updateWindow(Bitmap image = null)
         {
@@ -504,19 +473,22 @@ namespace WFInfoCS
                 return;
 
             Win32.RECT osRect;
-            refresScaling();
+            refreshScaling();
             if (!Win32.GetWindowRect(HandleRef, out osRect))
             { // get window size of warframe
-                if (Settings.debug && Warframe == null)
+                if (Settings.debug)
                 { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
                     Main.AddLog("No warframe detected, thus using center of image");
-                    window = new Rectangle(0, 0, image.Width, image.Height);
+                    int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
+                    int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)OCR.dpi;
+                    window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
                     Console.WriteLine("Window is: " + window + " And center is: " + center);
                     return;
                 }
                 else
                 {
+                    Console.WriteLine("Window is: " + window + " And center is: " + center);
                     Main.AddLog("Failed to get window bounds");
                     Main.updatedStatus("Failed to get window bounds", 1);
                     return;
@@ -541,22 +513,8 @@ namespace WFInfoCS
                     Main.AddLog("Windowed detected, compensating to to: " + window.ToString());
                     currentStyle = WindowStyle.WINDOWED;
                 }
-                //center = new Point(window.Width / 2, window.Height / 2);
+                center = new Point(window.Width / 2, window.Height / 2);
             }
-
-        }
-
-        internal static Bitmap getReward(int rewardSlot, int TotalRewards)
-        {
-            return null;
-            throw new NotImplementedException();
-        }
-
-        internal static void proces(Bitmap reward)
-        {
-            return;
-            reward = turnBW(reward);
-            throw new NotImplementedException();
         }
     }
 }
