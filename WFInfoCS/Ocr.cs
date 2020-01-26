@@ -273,11 +273,13 @@ namespace WFInfoCS
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 3) && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.20;
                 case WFtheme.HIGH_CONTRAST:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.25; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
+                case WFtheme.LEGACY:
+                    return (test.GetBrightness() >= 0.75 && test.GetSaturation() <= 0.2)
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
                 case WFtheme.NIDUS:
                 case WFtheme.TENNO:
                 case WFtheme.BARUUK:
                 case WFtheme.GRINEER:
-                case WFtheme.LEGACY:
                 default:
                     // This shouldn't be ran
                     //   Only for initial testing
@@ -430,7 +432,6 @@ namespace WFInfoCS
                 graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
             }
             image.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
-            image.Save(Main.appPath + @"\Debug\FullScreenShotCopy " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
 
             return image;
         }
