@@ -5,19 +5,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Mime;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Documents;
-using System.Windows.Forms;
-using System.Windows.Media.Animation;
-using Google.Apis.Auth.OAuth2;
-using Microsoft.Win32;
 using Newtonsoft.Json;
 using NLua;
-using Xamarin.Forms.PlatformConfiguration;
 using Application = System.Windows.Application;
 
 namespace WFInfoCS
