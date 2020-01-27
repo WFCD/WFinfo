@@ -277,6 +277,8 @@ namespace WFInfoCS
                     return (test.GetBrightness() >= 0.75 && test.GetSaturation() <= 0.2)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
                 case WFtheme.NIDUS:
+                    return (Math.Abs(test.GetHue() - (primary.GetHue() + 7.5)) < 8 && test.GetSaturation() >= 0.31)
+                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetSaturation() >= 0.55);
                 case WFtheme.TENNO:
                 case WFtheme.BARUUK:
                 case WFtheme.GRINEER:
@@ -318,7 +320,7 @@ namespace WFInfoCS
                     clr = image.GetPixel(left + x, top + y);
                     if (ThemeThresholdFilter(clr, active))
                     {
-                        csv.Append((left + x) + ", " + (top + y) + ", " + clr.R + ", " + clr.G + ", " + clr.B + ", " + clr.GetHue() + ", " + clr.GetSaturation() + ", " + clr.GetBrightness() + "\n");
+                        csv.Append(x + ", " + y + ", " + clr.R + ", " + clr.G + ", " + clr.B + ", " + clr.GetHue() + ", " + clr.GetSaturation() + ", " + clr.GetBrightness() + "\n");
                         ret.SetPixel(x + 5, y + 5, Color.Black);
                         ret2.SetPixel(x + 5, y + 5, clr);
                     }
@@ -352,7 +354,7 @@ namespace WFInfoCS
                         if (word != null)
                         {
                             word = RE.Replace(word, "").Trim();
-                            if (word.Length > 1 || word == "&")
+                            if (word.Length > 0)
                             {
 
                                 bool addNew = true;
