@@ -282,7 +282,10 @@ namespace WFInfoCS
                 case WFtheme.TENNO:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.3 && test.GetBrightness() <= 0.6;
                 case WFtheme.BARUUK:
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 1.2) && test.GetSaturation() > 0.25 && test.GetBrightness() > 0.5;
                 case WFtheme.GRINEER:
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() > 0.3)
+                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() > 0.55);
                 default:
                     // This shouldn't be ran
                     //   Only for initial testing
@@ -379,7 +382,8 @@ namespace WFInfoCS
                             word = RE.Replace(word, "").Trim();
                             if (word.Length > 0)
                             {
-
+                                int topOrBot = outRect.Y1 > (outRect.Height * 3 / 4) ? 0 : 1;
+                                Console.WriteLine(word + " " + outRect.ToString());
                                 for (int i = 0; i < allLocs.Length; i++)
                                 {
                                     int bot = allLocs[i] - subsubwid;
@@ -397,6 +401,7 @@ namespace WFInfoCS
                                 temp.Add(outRect.X1);
                                 temp.Add(outRect.X2);
                                 temp.Add(words.Count);
+                                temp.Add(topOrBot);
                                 arr2D.Add(temp);
                                 words.Add(word);
                             }
@@ -428,7 +433,8 @@ namespace WFInfoCS
             else
                 left -= wid;
 
-            String currPart = "";
+            string currPartTop = "";
+            string currPartBot = "";
 
             int ind = 0;
             for (; ind < arr2D.Count && arr2D[ind][0] < left; ind++) ;
@@ -436,15 +442,19 @@ namespace WFInfoCS
 
             for (; ind < arr2D.Count; ind++)
             {
-                if(arr2D[ind][0] >= left + wid)
+                if (arr2D[ind][0] >= left + wid)
                 {
                     left += wid;
-                    ret.Add(currPart);
-                    currPart = "";
+                    ret.Add((currPartTop.Trim() + " " + currPartBot.Trim()).Trim());
+                    currPartTop = "";
+                    currPartBot = "";
                 }
-                currPart += words[arr2D[ind][2]] + " ";
+                if (arr2D[ind][3] == 1)
+                    currPartTop += words[arr2D[ind][2]] + " ";
+                else
+                    currPartBot += words[arr2D[ind][2]] + " ";
             }
-            ret.Add(currPart);
+            ret.Add((currPartTop.Trim() + " " + currPartBot.Trim()).Trim());
             return ret;
         }
 
