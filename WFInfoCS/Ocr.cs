@@ -260,7 +260,8 @@ namespace WFInfoCS
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() <= 0.42 && test.GetSaturation() >= 0.1)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
                 case WFtheme.STALKER:
-                    return Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.5;
+                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetSaturation() >= 0.5)
+                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 2 && test.GetSaturation() >= 0.65)) && test.GetBrightness() >= 0.25;
                 case WFtheme.CORPUS:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 && test.GetBrightness() >= 0.35 && test.GetSaturation() >= 0.45)
                          || (Math.Abs(test.GetHue() - secondary.GetHue()) < 2 && test.GetBrightness() >= 0.30 && test.GetSaturation() >= 0.35);
@@ -383,7 +384,6 @@ namespace WFInfoCS
                             if (word.Length > 0)
                             {
                                 int topOrBot = outRect.Y1 > (outRect.Height * 3 / 4) ? 0 : 1;
-                                Console.WriteLine(word + " " + outRect.ToString());
                                 for (int i = 0; i < allLocs.Length; i++)
                                 {
                                     int bot = allLocs[i] - subsubwid;
