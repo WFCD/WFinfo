@@ -280,6 +280,7 @@ namespace WFInfoCS
                     return (Math.Abs(test.GetHue() - (primary.GetHue() + 7.5)) < 8 && test.GetSaturation() >= 0.31)
                     || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetSaturation() >= 0.55);
                 case WFtheme.TENNO:
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.3 && test.GetBrightness() <= 0.6;
                 case WFtheme.BARUUK:
                 case WFtheme.GRINEER:
                 default:
@@ -330,8 +331,30 @@ namespace WFInfoCS
             return ret;
         }
 
-        internal static List<String> SeparatePlayers(Bitmap image)
+        internal static List<string> SeparatePlayers(Bitmap image)
         {
+
+            // Values to determine whether there's an even or odd number of players
+            int hei = (int)(pixRwrdLineHei / 2 * TotalScaling);
+            int wid = image.Width / 4;
+            int subwid = wid / 2;
+            int subsubwid = subwid / 4;
+
+            // 3 player values
+            //  left  mid  right
+            int mid = image.Width / 2;
+            int left = mid - wid;
+            int right = mid + wid;
+
+            // list of centers for each potential set of text
+            //   alternates between even locations and odd locations
+            int[] allLocs = new int[] { left - subwid, left, left + subwid, mid, right - subwid, right, right + subwid };
+
+            // Point system to determine if the player count is even or odd
+            //    At the end of the calc, whichever has more wins
+            int oddCount = 0;
+            int evenCount = 0;
+
             // 2d array - words with bounds (1 dimensional)
             /*   [
              *     [start, end, word_ind, word_ind, ...] -- horizontal start and end position of this part and the list of words with it
@@ -339,7 +362,7 @@ namespace WFInfoCS
              *   ]
             */
             List<List<int>> arr2D = new List<List<int>>();
-            List<String> words = new List<string>();
+            List<string> words = new List<string>();
             using (Page page = bestEngine.Process(image))
             {
                 using (var iter = page.GetIterator())
@@ -357,32 +380,25 @@ namespace WFInfoCS
                             if (word.Length > 0)
                             {
 
-                                bool addNew = true;
-                                int X1 = outRect.X1 - (outRect.Height / 2);
-                                int X2 = outRect.X2 + (outRect.Height / 2);
-                                for (int i = 0; i < arr2D.Count && addNew; i++)
+                                for (int i = 0; i < allLocs.Length; i++)
                                 {
-                                    List<int> arr1D = arr2D[i];
-                                    if (X2 >= arr1D[0] && X1 <= arr1D[1])
+                                    int bot = allLocs[i] - subsubwid;
+                                    int top = allLocs[i] + subsubwid;
+                                    if (bot <= outRect.X2 && top >= outRect.X1)
                                     {
-                                        if (X2 > arr1D[1])
-                                            arr2D[i][1] = X2;
-                                        if (X1 < arr1D[0])
-                                            arr2D[i][0] = X1;
-                                        arr2D[i].Add(words.Count);
-                                        words.Add(word);
-                                        addNew = false;
+                                        if ((i & 1) == 0)
+                                            evenCount++;
+                                        else
+                                            oddCount++;
+                                        break;
                                     }
                                 }
-                                if (addNew)
-                                {
-                                    List<int> temp = new List<int>();
-                                    temp.Add(X1);
-                                    temp.Add(X2);
-                                    temp.Add(words.Count);
-                                    arr2D.Add(temp);
-                                    words.Add(word);
-                                }
+                                List<int> temp = new List<int>();
+                                temp.Add(outRect.X1);
+                                temp.Add(outRect.X2);
+                                temp.Add(words.Count);
+                                arr2D.Add(temp);
+                                words.Add(word);
                             }
                         }
 
@@ -397,15 +413,38 @@ namespace WFInfoCS
             }
             arr2D.Sort(new arr2D_Compare());
 
-            List<String> ret = new List<string>();
-            foreach (List<int> arr1D in arr2D)
+            List<string> ret = new List<string>();
+
+            // time to group text together
+            // get left side of part text area
+            //    and width of text area
+            //    group all text within
+            //    go to the next one
+
+            // position the left correctly based on part boxes
+            Console.WriteLine("Odds (" + oddCount + ") vs Evens (" + evenCount + ")");
+            if (oddCount > evenCount)
+                left -= subwid;
+            else
+                left -= wid;
+
+            String currPart = "";
+
+            int ind = 0;
+            for (; ind < arr2D.Count && arr2D[ind][0] < left; ind++) ;
+
+
+            for (; ind < arr2D.Count; ind++)
             {
-                String plyr = "";
-                for (int i = 2; i < arr1D.Count; i++)
-                    plyr += words[arr1D[i]] + (i == arr1D.Count - 1 ? "" : " ");
-                if (plyr.Length > 9)
-                    ret.Add(plyr);
+                if(arr2D[ind][0] >= left + wid)
+                {
+                    left += wid;
+                    ret.Add(currPart);
+                    currPart = "";
+                }
+                currPart += words[arr2D[ind][2]] + " ";
             }
+            ret.Add(currPart);
             return ret;
         }
 
