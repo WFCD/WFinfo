@@ -12,15 +12,31 @@ namespace WFInfoCS
 {
     class Main
     {
+        public static Main INSTANCE;
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
         private System.Windows.Media.Brush lightBlue = new SolidColorBrush(System.Windows.Media.Color.FromRgb(177, 208, 217));
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public Data db;
+        public static Data db;
         
         public Main()
         {
+            INSTANCE = this;
             db = new Data();
+            Task.Factory.StartNew(new Action(ThreadedDataLoad));
+        }
+
+        public static void ThreadedDataLoad()
+        {
             db.Update();
+            RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + db.market_data["timestamp"].ToString().Substring(5, 11); });
+            RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: "+ db.eqmt_data["timestamp"].ToString().Substring(5, 11); });
+            RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + db.eqmt_data["rqmts_timestamp"].ToString().Substring(5, 11); });
+            statusUpdate("Databases Loaded", 0);
+        }
+
+        public static void RunOnUIThread(Action act)
+        {
+            MainWindow.INSTANCE.Dispatcher.Invoke(act);
         }
 
         public static void AddLog(string argm)
@@ -34,11 +50,9 @@ namespace WFInfoCS
             }
         }
 
-        public delegate void statusHandler(string message, int serverity);
-        public static statusHandler updatedStatus;
-        public virtual void statusUpdate(string message, int serverity)
+        public static void statusUpdate(string message, int serverity)
         {
-            updatedStatus?.Invoke(message, serverity);
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, serverity); });
         }
 
         public void OnKeyAction(Keys key)
@@ -48,7 +62,7 @@ namespace WFInfoCS
                 if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
                     Main.AddLog("Loading screenshot from file");
-                    Main.updatedStatus("Offline testing with screenshot", 0);
+                    Main.statusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
                 } else if (OCR.verifyWarframe())
                     //if (Ocr.verifyFocus()) 

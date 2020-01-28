@@ -498,7 +498,7 @@ namespace WFInfoCS
                 if (processID == Warframe.Id || Settings.debug) { return true; } else
                 {
                     Main.AddLog("Warframe is not focused");
-                    Main.updatedStatus("Warframe is out of focus", 2);
+                    Main.statusUpdate("Warframe is out of focus", 2);
                     return false;
                 }
             }
@@ -523,7 +523,7 @@ namespace WFInfoCS
                 }
             }
             Main.AddLog("Unable to detect Warframe in list of current active processes");
-            Main.updatedStatus("Unable to detect Warframe process", 1);
+            Main.statusUpdate("Unable to detect Warframe process", 1);
             return false;
 
         }
@@ -571,7 +571,7 @@ namespace WFInfoCS
                 {
                     //Console.WriteLine("Window is: " + window + " And center is: " + center);
                     Main.AddLog("Failed to get window bounds");
-                    Main.updatedStatus("Failed to get window bounds", 1);
+                    Main.statusUpdate("Failed to get window bounds", 1);
                     return;
                 }
             }

@@ -176,13 +176,13 @@
             <Label x:Name="Status" Content="Status: Loading...&#xD;&#xA;" Background="{x:Null}" Foreground="#FFB1D0D9" FontSize="14" Height="29"/>
         </Viewbox>
         <Viewbox x:Name="Market_data_viewbox" HorizontalAlignment="Left" Height="26" Margin="27,1,0,0" Grid.Row="1" VerticalAlignment="Top" Width="277">
-            <Label Content="Market Data: Loading..." Width="300" FontFamily="{DynamicResource Roboto}" Background="{x:Null}" Foreground="#FFB1D0D9" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" Height="28" Padding="5,2,5,5" FontSize="18"/>
+            <Label x:Name="Market_Data" Content="Market Data: Loading..." Width="300" FontFamily="{DynamicResource Roboto}" Background="{x:Null}" Foreground="#FFB1D0D9" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" Height="28" Padding="5,2,5,5" FontSize="18"/>
         </Viewbox>
         <Viewbox x:Name="Drop_data_viewbox" HorizontalAlignment="Left" Height="26" Margin="27,27,0,0" Grid.Row="1" VerticalAlignment="Top" Width="277">
-            <Label Content="Drop Data: Loading..." Width="300" FontFamily="{DynamicResource Roboto}" Background="{x:Null}" Foreground="#FFB1D0D9" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" Height="28" Padding="5,2,5,5" FontSize="18"/>
+            <Label x:Name="Drop_Data" Content="Drop Data: Loading..." Width="300" FontFamily="{DynamicResource Roboto}" Background="{x:Null}" Foreground="#FFB1D0D9" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" Height="28" Padding="5,2,5,5" FontSize="18"/>
         </Viewbox>
         <Viewbox x:Name="Wiki_data_viewbox" HorizontalAlignment="Left" Height="25" Margin="27,53,0,0" Grid.Row="1" VerticalAlignment="Top" Width="277">
-            <Label Content="Wiki Data: Loading..." Width="312" FontFamily="{DynamicResource Roboto}" Background="{x:Null}" Foreground="#FFB1D0D9" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" Height="28" Padding="5,2,5,5" FontSize="18"/>
+            <Label x:Name="Wiki_Data" Content="Wiki Data: Loading..." Width="312" FontFamily="{DynamicResource Roboto}" Background="{x:Null}" Foreground="#FFB1D0D9" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" Height="28" Padding="5,2,5,5" FontSize="18"/>
         </Viewbox>
 
     </Grid>

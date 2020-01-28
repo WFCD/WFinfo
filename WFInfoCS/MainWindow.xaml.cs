@@ -26,11 +26,11 @@ namespace WFInfoCS {
 	/// </summary>
 	public partial class MainWindow : Window {
 		Main main = new Main(); //subscriber
-
+		public static MainWindow INSTANCE;
 
 		public MainWindow() {
+			INSTANCE = this;
 			LowLevelListener listener = new LowLevelListener(); //publisher
-			Main.updatedStatus += this.ChangeStatus;
 			try {
 				if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json")) {
 					Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json"));
@@ -76,7 +76,6 @@ namespace WFInfoCS {
 				listener.Hook();
 				InitializeComponent();
 				Version.Content = Main.BuildVersion;
-				ChangeStatus("loaded", 0);
 
 				Main.AddLog("Sucsesfully launched");
 			}
@@ -86,6 +85,7 @@ namespace WFInfoCS {
 		}
 
 		public void ChangeStatus(string status, int serverity) {
+			Console.WriteLine(status);
 			Status.Content = "Status: " + status;
 			switch (serverity) {
 				case 0: //default, no problem

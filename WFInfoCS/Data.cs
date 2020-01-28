@@ -297,15 +297,16 @@ namespace WFInfoCS
                     WebClient.DownloadString("https://api.warframe.market/v1/tools/ducats"));
             foreach (var elem in market_temp["payload"]["previous_day"])
             {
-                string item_name = "";
-                if (!marketItems.TryGetValue(elem["item"].ToObject<string>(), out item_name))
+                string item_name;
+                if (!marketItems.TryGetValue(elem["item"].ToString(), out item_name))
                 {
                     Main.AddLog("UNKNOWN MARKET ID: " + elem["item"].ToObject<String>());
                 } else
                 {
+
                     item_name = item_name.Split('|')[0];
                     JToken temp;
-                    if (!market_data.TryGetValue("item_name", out temp))
+                    if (!market_data.TryGetValue(item_name, out temp))
                     {
                         Main.AddLog("MISSING ITEM IN market_data:" + item_name);
                     }
