@@ -149,7 +149,7 @@ namespace WFInfoCS
             // Get that theme
             WFtheme active = GetTheme(image);
 
-            TotalScaling = ScreenScaling * (Settings.Scaling / 100.0);
+            TotalScaling = ScreenScaling * (Settings.scaling / 100.0);
 
 
             // Get the part box and filter it
@@ -397,11 +397,12 @@ namespace WFInfoCS
                                         break;
                                     }
                                 }
-                                List<int> temp = new List<int>();
-                                temp.Add(outRect.X1);
-                                temp.Add(outRect.X2);
-                                temp.Add(words.Count);
-                                temp.Add(topOrBot);
+                                List<int> temp = new List<int> {
+                                    outRect.X1,
+                                    outRect.X2,
+                                    words.Count,
+                                    topOrBot
+                                };
                                 arr2D.Add(temp);
                                 words.Add(word);
                             }
@@ -498,7 +499,7 @@ namespace WFInfoCS
                 if (processID == Warframe.Id || Settings.debug) { return true; } else
                 {
                     Main.AddLog("Warframe is not focused");
-                    Main.statusUpdate("Warframe is out of focus", 2);
+                    Main.StatusUpdate("Warframe is out of focus", 2);
                     return false;
                 }
             }
@@ -523,7 +524,7 @@ namespace WFInfoCS
                 }
             }
             Main.AddLog("Unable to detect Warframe in list of current active processes");
-            Main.statusUpdate("Unable to detect Warframe process", 1);
+            Main.StatusUpdate("Unable to detect Warframe process", 1);
             return false;
 
         }
@@ -533,8 +534,8 @@ namespace WFInfoCS
             using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
             {
                 dpi = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only checking one value
-                TotalScaling = dpi * (Settings.Scaling / 100.0);
-                Main.AddLog("Scaling updated to: " + TotalScaling + ". User has a DPI scaling of: " + dpi + " And a set UI scaling of: " + Settings.Scaling + "%");
+                TotalScaling = dpi * (Settings.scaling / 100.0);
+                Main.AddLog("Scaling updated to: " + TotalScaling + ". User has a DPI scaling of: " + dpi + " And a set UI scaling of: " + Settings.scaling + "%");
             }
         }
 
@@ -571,7 +572,7 @@ namespace WFInfoCS
                 {
                     //Console.WriteLine("Window is: " + window + " And center is: " + center);
                     Main.AddLog("Failed to get window bounds");
-                    Main.statusUpdate("Failed to get window bounds", 1);
+                    Main.StatusUpdate("Failed to get window bounds", 1);
                     return;
                 }
             }

@@ -10,12 +10,12 @@ namespace WFInfoCS {
 		private const int WH_MOUSE_LL = 14;
 		private const int WH_KEYBOARD_LL = 13;
 		private const int WM_KEYDOWN = 0x0100;
-		private static LowLevelKeyboardProc _procKeyboard = HookCallbackKB;
+		private static readonly LowLevelKeyboardProc _procKeyboard = HookCallbackKB;
 		private static IntPtr _hookIDKeyboard = IntPtr.Zero;
 		private static IntPtr _hookIDMouse = IntPtr.Zero;
-		private static LowLevelMouseProc _procMouse = HookCallbackM;
+		private static readonly LowLevelMouseProc _procMouse = HookCallbackM;
 
-		private enum MouseMessages {
+		private enum mouseMessages {
 			WM_LBUTTONDOWN = 0x0201,
 			WM_LBUTTONUP = 0x0202,
 			WM_MOUSEMOVE = 0x0200,
@@ -26,14 +26,14 @@ namespace WFInfoCS {
 		}
 		[StructLayout(LayoutKind.Sequential)]
 
-		private struct POINT {
+		private struct point {
 			public int x;
 			public int y;
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		private struct MSLLHOOKSTRUCT {
-			public POINT pt;
+		private struct msslHookStructure {
+			public point pt;
 			public uint mouseData;
 			public uint flags;
 			public uint time;
@@ -48,7 +48,7 @@ namespace WFInfoCS {
 			_hookIDMouse = SetHookM(_procMouse);
 		}
 
-		public void unHook() {
+		public void UnHook() {
 			UnhookWindowsHookEx(_hookIDKeyboard);
 			UnhookWindowsHookEx(_hookIDMouse);
 		}
@@ -86,21 +86,21 @@ namespace WFInfoCS {
 		private static IntPtr HookCallbackM(int nCode, IntPtr wParam, IntPtr lParam) //handels mouse input
 		{
 			if (nCode >= 0) {
-				MSLLHOOKSTRUCT hookStruct = (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT));
+				msslHookStructure hookStruct = (msslHookStructure)Marshal.PtrToStructure(lParam, typeof(msslHookStructure));
 				//Console.WriteLine((MouseMessages)wParam);
-				switch ((MouseMessages)wParam) {
-					case MouseMessages.WM_MOUSEMOVE:
+				switch ((mouseMessages)wParam) {
+					case mouseMessages.WM_MOUSEMOVE:
 					break;
-					case MouseMessages.WM_LBUTTONDOWN:
+					case mouseMessages.WM_LBUTTONDOWN:
 					OnKeyAction(Keys.LButton);
 					break;
-					case MouseMessages.WM_RBUTTONDOWN:
+					case mouseMessages.WM_RBUTTONDOWN:
 					OnKeyAction(Keys.RButton);
 					break;
-					case MouseMessages.WM_MOUSEWHEEL:
+					case mouseMessages.WM_MOUSEWHEEL:
 					//Should this stay implemented?
 					break;
-					case MouseMessages.WM_XBUTTONDOWN: //https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-xbuttondown
+					case mouseMessages.WM_XBUTTONDOWN: //https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-xbuttondown
 					if (hookStruct.pt.y == 1)
 						OnKeyAction(Keys.XButton1);
 					else

@@ -10,10 +10,10 @@ namespace WFInfoCS {
 	public delegate void LogWatcherEventHandler(object sender, String text);
 
 	class LogCapture : IDisposable {
-		private MemoryMappedFile memoryMappedFile;
-		private EventWaitHandle bufferReadyEvent;
-		private EventWaitHandle dataReadyEvent;
-		CancellationTokenSource tokenSource = new CancellationTokenSource();
+		private readonly MemoryMappedFile memoryMappedFile;
+		private readonly EventWaitHandle bufferReadyEvent;
+		private readonly EventWaitHandle dataReadyEvent;
+		readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 		private CancellationToken token;
 
 		public event LogWatcherEventHandler TextChanged;

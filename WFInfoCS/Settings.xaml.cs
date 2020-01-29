@@ -12,25 +12,24 @@ namespace WFInfoCS {
 	/// </summary>
 	public partial class Settings : Window {
 
-		private string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json";  //change to WFInfo after release
+		private readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json";  //change to WFInfo after release
 		public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
-		public bool boolWindow { get; set; } //Choseen for multiple booleans over a single one due to the posibility of aditional options in the future.
+		public bool isWindowSelected { get; set; } //Choseen for multiple booleans over a single one due to the posibility of aditional options in the future.
 		public static Key activationKey { get; set; }
-		public bool boolOverlay { get; set; }
+		public bool isOverlaySelected { get; set; }
 		public static bool debug { get; set; }
-		public static int Scaling { get; internal set; }
+		public static int scaling { get; internal set; }
 		public static bool auto { get; internal set; }
 
 
 		public Settings() {
 
-
 			InitializeComponent();
 
 			if (settingsObj.GetValue("Display").ToString() == "Window") {
-				boolWindow = true;
+				isWindowSelected = true;
 			} else {
-				boolOverlay = true;
+				isOverlaySelected = true;
 			}
 			if (Convert.ToBoolean(settingsObj.GetValue("Auto"))) {
 				Auto.IsChecked = true;
@@ -40,9 +39,9 @@ namespace WFInfoCS {
 			}
 			this.DataContext = this;
 			Activation_key_box.Text = "Snapshot";
-			Scaling_box.Text = Scaling.ToString() + "%";
+			Scaling_box.Text = scaling.ToString() + "%";
 			Activation_key_box.Text = settingsObj.GetValue("ActivationKey").ToString();
-			scaleBar.Value = Scaling;
+			scaleBar.Value = scaling;
 
 		}
 
@@ -64,15 +63,15 @@ namespace WFInfoCS {
 
 		private void Window_checked(object sender, RoutedEventArgs e) {
 			settingsObj["Display"] = "Window";
-			boolWindow = true;
-			boolOverlay = false;
+			isWindowSelected = true;
+			isOverlaySelected = false;
 			save();
 		}
 
 		private void Overlay_checked(object sender, RoutedEventArgs e) {
 			settingsObj["Display"] = "Overlay";
-			boolWindow = false;
-			boolOverlay = true;
+			isWindowSelected = false;
+			isOverlaySelected = true;
 			save();
 		}
 

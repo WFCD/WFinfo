@@ -14,7 +14,6 @@ namespace WFInfoCS
     {
         public static Main INSTANCE;
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
-        private System.Windows.Media.Brush lightBlue = new SolidColorBrush(System.Windows.Media.Color.FromRgb(177, 208, 217));
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static Data db;
         
@@ -28,10 +27,10 @@ namespace WFInfoCS
         public static void ThreadedDataLoad()
         {
             db.Update();
-            RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + db.market_data["timestamp"].ToString().Substring(5, 11); });
-            RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: "+ db.eqmt_data["timestamp"].ToString().Substring(5, 11); });
-            RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + db.eqmt_data["rqmts_timestamp"].ToString().Substring(5, 11); });
-            statusUpdate("Databases Loaded", 0);
+            RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + db.marketData["timestamp"].ToString().Substring(5, 11); });
+            RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: "+ db.equipmentData["timestamp"].ToString().Substring(5, 11); });
+            RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + db.equipmentData["rqmts_timestamp"].ToString().Substring(5, 11); });
+            StatusUpdate("Databases Loaded", 0);
         }
 
         public static void RunOnUIThread(Action act)
@@ -50,7 +49,7 @@ namespace WFInfoCS
             }
         }
 
-        public static void statusUpdate(string message, int serverity)
+        public static void StatusUpdate(string message, int serverity)
         {
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, serverity); });
         }
@@ -62,13 +61,13 @@ namespace WFInfoCS
                 if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
                     Main.AddLog("Loading screenshot from file");
-                    Main.statusUpdate("Offline testing with screenshot", 0);
+                    Main.StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
                 } else if (OCR.verifyWarframe())
                     //if (Ocr.verifyFocus()) 
                     //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
                     //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
-                    Task.Factory.StartNew(new Action(doWork));
+                    Task.Factory.StartNew(new Action(DoWork));
             }
             //statusUpdate(key.ToString(), 0); //shows keypresses
         }
@@ -97,18 +96,18 @@ namespace WFInfoCS
                         }
                         catch (Exception)
                         {
-                            statusUpdate("Faild to load image", 1);
+                            StatusUpdate("Faild to load image", 1);
                         }
 
                     }
                 } else
                 {
-                    statusUpdate("Faild to load image", 1);
+                    StatusUpdate("Faild to load image", 1);
                 }
             }
         }
 
-        public void doWork()
+        public void DoWork()
         {
             //if (Settings.debug){image.Save(AppPath + @"\Debug\FullScreenShot" + DateTime.UtcNow + ".jpg");} //save image if debug is on
             OCR.ProcessRewardScreen();
@@ -116,7 +115,6 @@ namespace WFInfoCS
 
         //getters, boring shit
         public static string BuildVersion { get => buildVersion; }
-        public System.Windows.Media.Brush LightBlue { get => lightBlue; }
         public string AppPath { get => appPath; }
 
         public static int VersionToInteger(string vers)

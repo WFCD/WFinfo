@@ -1,31 +1,18 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace WFInfoCS {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
 	public partial class MainWindow : Window {
-		Main main = new Main(); //subscriber
+		readonly Main main = new Main(); //subscriber
 		public static MainWindow INSTANCE;
 
 		public MainWindow() {
@@ -44,12 +31,12 @@ namespace WFInfoCS {
 				Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
 				Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
 				Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
-				Settings.Scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
+				Settings.scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
 
 				String thisprocessname = Process.GetCurrentProcess().ProcessName;
 				if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1) {
 					Main.AddLog("Duplicate process found");
-					this.Close();
+					Close();
 				}
 
 				LowLevelListener.KeyAction += main.OnKeyAction;
@@ -69,7 +56,7 @@ namespace WFInfoCS {
 			Status.Content = "Status: " + status;
 			switch (serverity) {
 				case 0: //default, no problem
-				Status.Foreground = main.LightBlue;
+				Status.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
 				break;
 				case 1: //severe, red text
 				Status.Foreground = Brushes.Red;
@@ -106,15 +93,15 @@ namespace WFInfoCS {
 			ChangeStatus("Equipment not implemented", 2);
 			Overlay test = new Overlay();
 			test.Show();
-			
+
 		}
 		private void Settings_click(object sender, RoutedEventArgs e) {
 			Settings settingsWindow = new Settings();
 			settingsWindow.Show();
-			//ChangeStatus("Something uncaught", -1);
 		}
 
 		private void ReloadWikiClick(object sender, RoutedEventArgs e) {
+			
 			//todo reloads wiki data
 		}
 
