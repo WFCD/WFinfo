@@ -22,7 +22,6 @@ namespace WFInfoCS {
 		public static int Scaling { get; internal set; }
 		public static bool auto { get; internal set; }
 
-		Main main = new Main();
 
 		public Settings() {
 

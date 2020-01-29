@@ -123,8 +123,8 @@ namespace WFInfoCS {
 
 		private void Gear_click(object sender, RoutedEventArgs e) {
 			//todo, opens new window, shows all prime items
-			ChangeStatus("This should work, big oopsie, scaling teeeeeeeeeeeeeeeeeeeest", 1);
-
+			ChangeStatus("Equipment not implemented", 2);
+			
 		}
 		private void Settings_click(object sender, RoutedEventArgs e) {
 			Settings settingsWindow = new Settings();
