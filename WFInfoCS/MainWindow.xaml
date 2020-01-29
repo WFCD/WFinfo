@@ -74,7 +74,7 @@
             </Button.Background>
         </Button>
         <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="0,0,0,83" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" Grid.RowSpan="2" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
-        <Button x:Name="Website" HorizontalAlignment="Center" Margin="0,0,0,57" Width="30" Click="Website_click" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
+        <Button x:Name="Website" HorizontalAlignment="Center" Margin="0,0,0,57" Width="30" Click="websiteClick" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/home.png">
                     <ImageBrush.RelativeTransform>
@@ -88,7 +88,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="Relics" Content="x" HorizontalAlignment="Center" Margin="0,26,0,31" Width="30" Click="Relics_click" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
+        <Button x:Name="Relics" Content="x" HorizontalAlignment="Center" Margin="0,26,0,31" Width="30" Click="relicsClick" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/Relic.png" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>
@@ -116,7 +116,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="Gear" Content="x" HorizontalAlignment="Center" Margin="0,52,0,5" Width="30" Click="Gear_click" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1">
+        <Button x:Name="Gear" Content="x" HorizontalAlignment="Center" Margin="0,52,0,5" Width="30" Click="equipmentClick" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/gear.png" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>

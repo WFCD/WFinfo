@@ -7,9 +7,9 @@ using System.Collections.Generic;
 
 namespace WFInfoCS {
 	internal class Sheets {
-		private GoogleCredential Cred;
-		private string SheetID = "1uAbqfwBYrcqlWCJad4juankmu9-_UqzBmd7XtrrrwkM";
-		private SheetsService service;
+		private readonly GoogleCredential Cred;
+		private readonly string SheetID = "1uAbqfwBYrcqlWCJad4juankmu9-_UqzBmd7XtrrrwkM";
+		private readonly SheetsService service;
 
 		public Sheets() {
 			Cred = GoogleCredential.FromJson(Properties.Resources.google_creds).CreateScoped(SheetsService.Scope.SpreadsheetsReadonly);

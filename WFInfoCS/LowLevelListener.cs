@@ -73,7 +73,6 @@ namespace WFInfoCS {
 		{
 			if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN) {
 				int vkCode = Marshal.ReadInt32(lParam);
-				//Console.WriteLine((Keys)vkCode);
 				OnKeyAction((Keys)vkCode);
 			}
 			return CallNextHookEx(_hookIDKeyboard, nCode, wParam, lParam);
@@ -87,7 +86,6 @@ namespace WFInfoCS {
 		{
 			if (nCode >= 0) {
 				msslHookStructure hookStruct = (msslHookStructure)Marshal.PtrToStructure(lParam, typeof(msslHookStructure));
-				//Console.WriteLine((MouseMessages)wParam);
 				switch ((mouseMessages)wParam) {
 					case mouseMessages.WM_MOUSEMOVE:
 					break;
@@ -109,8 +107,6 @@ namespace WFInfoCS {
 					default:
 					break;
 				}
-				//Console.WriteLine(hookStruct.pt.x + ", " + hookStruct.pt.y);
-
 			}
 			return CallNextHookEx(_hookIDMouse, nCode, wParam, lParam);
 		}

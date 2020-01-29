@@ -38,7 +38,7 @@ namespace WFInfoCS {
 				Debug.IsChecked = true;
 			}
 			this.DataContext = this;
-			Activation_key_box.Text = "Snapshot";
+			//Activation_key_box.Text = "Snapshot";
 			Scaling_box.Text = scaling.ToString() + "%";
 			Activation_key_box.Text = settingsObj.GetValue("ActivationKey").ToString();
 			scaleBar.Value = scaling;
@@ -46,50 +46,50 @@ namespace WFInfoCS {
 		}
 
 
-		private void save() {
+		private void Save() {
 			File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(settingsObj, Formatting.Indented));
 		}
 
 		private void Exit(object sender, RoutedEventArgs e) {
-			save();
-			this.Close();
+			Save();
+			Close();
 		}
 
 		// Allows the draging of the window
 		private new void MouseDown(object sender, MouseButtonEventArgs e) {
 			if (e.ChangedButton == MouseButton.Left)
-				this.DragMove();
+				DragMove();
 		}
 
-		private void Window_checked(object sender, RoutedEventArgs e) {
+		private void WindowChecked(object sender, RoutedEventArgs e) {
 			settingsObj["Display"] = "Window";
 			isWindowSelected = true;
 			isOverlaySelected = false;
-			save();
+			Save();
 		}
 
-		private void Overlay_checked(object sender, RoutedEventArgs e) {
+		private void OverlayChecked(object sender, RoutedEventArgs e) {
 			settingsObj["Display"] = "Overlay";
 			isWindowSelected = false;
 			isOverlaySelected = true;
-			save();
+			Save();
 		}
 
-		private void Debug_Clicked(object sender, RoutedEventArgs e) {
+		private void DebugClicked(object sender, RoutedEventArgs e) {
 			settingsObj["Debug"] = Debug.IsChecked.Value;
 			debug = Debug.IsChecked.Value;
-			save();
+			Save();
 		}
-		private void Auto_Clicked(object sender, RoutedEventArgs e) {
+		private void AutoClicked(object sender, RoutedEventArgs e) {
 			settingsObj["Auto"] = Auto.IsChecked.Value;
 			auto = Auto.IsChecked.Value;
-			save();
+			Save();
 		}
 
-		private void Scaling_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+		private void ScalingValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
 			settingsObj["Scaling"] = Math.Round(e.NewValue);
 			Scaling_box.Text = Math.Round(e.NewValue).ToString() + "%";
-			save();
+			Save();
 		}
 
 		private void ScaleLeave(object sender, RoutedEventArgs e) {
@@ -104,11 +104,11 @@ namespace WFInfoCS {
 				scaleBar.Value = value;
 				settingsObj["Scaling"] = value;
 				Scaling_box.Text = value + "%";
-				save();
+				Save();
 			}
 			catch {
 				Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
-				Main.AddLog("Couldn't save scaling from text input"); //works
+				Main.AddLog("Couldn't save scaling from text input"); //works don't ask me how
 			}
 
 		}
@@ -137,7 +137,7 @@ namespace WFInfoCS {
 			activationKey = e.Key;
 			Activation_key_box.Text = e.Key.ToString();
 			settingsObj["ActivationKey"] = e.Key.ToString();
-			save();
+			Save();
 		}
 	}
 }

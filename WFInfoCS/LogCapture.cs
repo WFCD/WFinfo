@@ -20,7 +20,7 @@ namespace WFInfoCS {
 
 		public LogCapture() {
 			token = tokenSource.Token;
-			Main.AddLog("STARTING LogCapture");
+			Main.AddLog("Starting LogCapture");
 			memoryMappedFile = MemoryMappedFile.CreateOrOpen("DBWIN_BUFFER", 4096L);
 
 			bufferReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_BUFFER_READY", out Boolean createdBuffer);
@@ -44,10 +44,10 @@ namespace WFInfoCS {
 			Process proc = null; //parser2.GetWFProc(); // WIP
 
 			try {
-				TimeSpan Timeout = TimeSpan.FromSeconds(1.0);
+				TimeSpan timeout = TimeSpan.FromSeconds(1.0);
 				bufferReadyEvent.Set();
 				while (!token.IsCancellationRequested) {
-					if (!dataReadyEvent.WaitOne(Timeout)) {
+					if (!dataReadyEvent.WaitOne(timeout)) {
 						continue;
 					}
 
@@ -62,7 +62,7 @@ namespace WFInfoCS {
 								if (processId == proc.Id) {
 									var chars = reader.ReadChars(4092);
 									var index = Array.IndexOf(chars, "\0");
-									var message = new String(chars, 0, index);
+									var message = new string(chars, 0, index);
 									TextChanged(this, message.Trim());
 								}
 							}
@@ -71,7 +71,7 @@ namespace WFInfoCS {
 				}
 			}
 			catch (Exception ex) {
-				Console.WriteLine(ex.ToString());
+				Main.AddLog(ex.ToString());
 			}
 			finally {
 				if (memoryMappedFile != null) {
@@ -91,7 +91,7 @@ namespace WFInfoCS {
 		public void Dispose() {
 			tokenSource.Cancel();
 			tokenSource.Dispose();
-			Main.AddLog("STOPPING LogCapture");
+			Main.AddLog("Stoping LogCapture");
 		}
 	}
 }

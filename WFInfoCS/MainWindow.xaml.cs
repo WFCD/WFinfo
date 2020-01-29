@@ -75,21 +75,21 @@ namespace WFInfoCS {
 		}
 
 		private void Minimise(object sender, RoutedEventArgs e) {
-			this.WindowState = WindowState.Minimized;
+			WindowState = WindowState.Minimized;
 		}
 
-		private void Website_click(object sender, RoutedEventArgs e) {
+		private void websiteClick(object sender, RoutedEventArgs e) {
 			ChangeStatus("Go go website", 0);
 			Process.Start("https://wfinfo.warframestat.us/");
 		}
 
-		private void Relics_click(object sender, RoutedEventArgs e) {
+		private void relicsClick(object sender, RoutedEventArgs e) {
 			//todo, open new window, showing all relics
 			ChangeStatus("Relics not implemented", 2);
 		}
 
-		private void Gear_click(object sender, RoutedEventArgs e) {
-			//todo, opens new window, shows all prime items
+		private void equipmentClick(object sender, RoutedEventArgs e) {
+			//todo, opens current wip overlay 
 			ChangeStatus("Equipment not implemented", 2);
 			Overlay test = new Overlay();
 			test.Show();
