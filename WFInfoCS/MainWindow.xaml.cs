@@ -124,6 +124,8 @@ namespace WFInfoCS {
 		private void Gear_click(object sender, RoutedEventArgs e) {
 			//todo, opens new window, shows all prime items
 			ChangeStatus("Equipment not implemented", 2);
+			Overlay test = new Overlay();
+			test.Show();
 			
 		}
 		private void Settings_click(object sender, RoutedEventArgs e) {
