@@ -41,26 +41,6 @@ namespace WFInfoCS {
 						"\"Auto\":false," +
 						"\"Debug\":false}");
 				}
-				if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\color.json")) {
-					Settings.colorArray = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\color.json"));
-				} else {
-					Settings.colorArray = JObject.Parse("{\"rarityColor\":[\"b4876e\",\"c8c8c8\",\"e1cd8c\"]," +
-						"\"Vitruvian\":\"bda865\"," +
-						"\"Stalker\":\"961f23\"," +
-						"\"Baruk\":\"eec169\"," +
-						"\"Corpus\":\"23c8f5\"," +
-						"\"Fortuna\":\"3969c0\"," +
-						"\"Grineer\":\"ffbd66\"," +
-						"\"Lotus\":\"24b8f2\"," +
-						"\"Nidus\":\"8c265c\"," +
-						"\"Orokin\":\"14291d\"," +
-						"\"Tenno\":\"094e6a\"," +
-						"\"High contrast\":\"027fd9\"," +
-						"\"Legacy\":\"ffffff\"," +
-						"\"Equinox\":\"9e9fa7\"}");
-					File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\color.json", JsonConvert.SerializeObject(Settings.colorArray, Formatting.Indented));
-
-				}
 				Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
 				Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
 				Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");

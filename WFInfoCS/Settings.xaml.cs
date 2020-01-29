@@ -14,7 +14,6 @@ namespace WFInfoCS {
 
 		private string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json";  //change to WFInfo after release
 		public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
-		public static JObject colorArray;
 		public bool boolWindow { get; set; } //Choseen for multiple booleans over a single one due to the posibility of aditional options in the future.
 		public static Key activationKey { get; set; }
 		public bool boolOverlay { get; set; }
