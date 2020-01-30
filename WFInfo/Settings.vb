@@ -21,8 +21,8 @@ Public Class Settings
             btnHkey1.Text = My.Settings.HKey1Text
         End If
     End Sub
-	
-	Private Sub btnHkey1_MouseUp(sender as Object, e as MouseEventArgs) Handles btnHkey1.MouseUp
+
+    Private Sub btnHkey1_MouseUp(sender as Object, e as MouseEventArgs) Handles btnHkey1.MouseUp
         If key1Tog And (e.Button = MouseButtons.XButton1 Or e.Button = MouseButtons.XButton2) Then
             key1Tog = False
             HKey1 = e.Button
