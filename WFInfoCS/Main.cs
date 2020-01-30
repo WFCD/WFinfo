@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -83,21 +84,24 @@ namespace WFInfoCS
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    foreach (string file in openFileDialog.FileNames)
+                    new Thread(() =>
                     {
-                        Console.WriteLine("Testing file: " + file.ToString());
-                        try
+                        foreach (string file in openFileDialog.FileNames)
                         {
-                            //Get the path of specified file
-                            Bitmap image = new Bitmap(file);
-                            OCR.updateWindow(image);
-                            OCR.ProcessRewardScreen(image);
+                            Console.WriteLine("Testing file: " + file.ToString());
+                            try
+                            {
+                                //Get the path of specified file
+                                Bitmap image = new Bitmap(file);
+                                OCR.updateWindow(image);
+                                OCR.ProcessRewardScreen(image);
+                            }
+                            catch (Exception)
+                            {
+                                StatusUpdate("Faild to load image", 1);
+                            }
                         }
-                        catch (Exception)
-                        {
-                            StatusUpdate("Faild to load image", 1);
-                        }
-                    }
+                    }).Start();
                 }
                 else
                 {
