@@ -85,7 +85,7 @@ Public Class Main
                     Invoke(Sub() lbStatus.Text = "New Version Available")
                     Invoke(Sub() lbStatus.ForeColor = Color.FromArgb(0, 125, 255))
                     Try
-                        db.download("https://github.com/WFCD/WFinfo/releases/latest/download/WFInfo.exe")
+                        'db.download("https://github.com/WFCD/WFinfo/releases/latest/download/WFInfo.exe")
                         Invoke(Sub() lbStatus.Text = "New Version downloaded, " & db.githubVersion)
                     Catch ex As Exception
                         Invoke(Sub() lbStatus.Text = "Could not auto-update please manually download")

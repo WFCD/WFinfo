@@ -1072,6 +1072,7 @@ namespace WFInfoCS
         public string GetPartName(string name, out int low)
         { // Checks the Levenshtein Distance of a string and returns the index in Names() of the closest part
             string lowest = null;
+            string lowest_unfiltered = null;
             low = 9999;
             foreach (KeyValuePair<string, JToken> prop in nameData)
             {
@@ -1080,11 +1081,12 @@ namespace WFInfoCS
                 {
                     low = val;
                     lowest = prop.Value.ToObject<string>();
+                    lowest_unfiltered = prop.Key;
                 }
             }
 
 
-            Main.AddLog("FOUND PART: \"" + lowest + "\" from \"" + name + "\""); 
+            Main.AddLog("FOUND PART: \"" + lowest_unfiltered + "\" from \"" + name + "\""); 
             return lowest;
         }
 

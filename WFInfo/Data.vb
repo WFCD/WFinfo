@@ -135,8 +135,8 @@ Class Data
             Dim info As Byte() = New Text.UTF8Encoding(True).GetBytes("timeout 2" & vbNewLine & "del WFInfo.exe" & vbNewLine & "rename WFInfonew.exe WFInfo.exe" & vbNewLine & "start WFInfo.exe")
             fs.Write(info, 0, info.Length)
             fs.Close()
-            Process.Start(My.Application.Info.DirectoryPath & "/update.bat")
-            Application.Exit()
+            'Process.Start(My.Application.Info.DirectoryPath & "/update.bat")
+            'Application.Exit()
         Catch ex As Exception
 
         End Try

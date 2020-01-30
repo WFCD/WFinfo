@@ -5,17 +5,32 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfoCS"
         mc:Ignorable="d"
-        Title="Overlay" Height="256" Width="256" WindowStyle="None" AllowsTransparency="True" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" IsTabStop="False" Focusable="False">
+        Title="Overlay" Height="141" Width="243" WindowStyle="None" AllowsTransparency="True" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" IsTabStop="False" Focusable="False">
     <Window.Background>
         <ImageBrush ImageSource="Resources/background.jpg"/>
     </Window.Background>
     <Grid>
-        <Label Name="Part_Name" Content="Loki Prime Chassis" HorizontalAlignment="Center" Margin="77,57,72,0" VerticalAlignment="Top" Foreground="#FFB1D0D9"/>
-        <Label x:Name="Part_Name_Copy" Content="XX sold last 48hrs" HorizontalAlignment="Center" Margin="0,128,0,0" VerticalAlignment="Top" Foreground="#FFB1D0D9"/>
-        <Label x:Name="Part_Name_Copy1" Content="14.5" HorizontalAlignment="Center" Margin="76,88,148,0" VerticalAlignment="Top" Foreground="#FFB1D0D9"/>
-        <Label x:Name="Part_Name_Copy2" Content="14.5" HorizontalAlignment="Center" Margin="152,88,72,0" VerticalAlignment="Top" Foreground="#FFB1D0D9"/>
-        <Image HorizontalAlignment="Left" Height="12" Margin="140,95.5,0,0" VerticalAlignment="Top" Width="12" Source="Resources/ducat_w.gif"/>
-        <Image HorizontalAlignment="Left" Height="12" Margin="64,96,0,0" VerticalAlignment="Top" Width="12" Source="Resources/plat.gif"/>
+        <Viewbox x:Name="Part_Margin" Margin="0,39,0,82" HorizontalAlignment="Center">
+            <TextBlock x:Name="Part_Text" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Carrier Prime Cerebrum"/>
+        </Viewbox>
+        <Viewbox x:Name="Volume_Margin" Margin="0,104,0,17" >
+            <TextBlock x:Name="Volume_Text" Text="XX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        </Viewbox>
+        <Viewbox x:Name="Plat_Margin" Margin="76,77,0,43" HorizontalAlignment="Left">
+            <TextBlock x:Name="Plat_Text" Text="14.5" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        </Viewbox>
+        <Viewbox x:Name="Ducat_Margin" Margin="164,77,0,43" HorizontalAlignment="Left">
+            <TextBlock x:Name="Ducat_Text" Text="14.5" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        </Viewbox>
+        <Viewbox x:Name="Vaulted_Margin" Margin="0,15,23,110" HorizontalAlignment="Right" >
+            <TextBlock x:Name="Vaulted_Text" Text="VAULTED" Foreground="#FF828C96" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        </Viewbox>
+        <Viewbox x:Name="Owned_Margin" Margin="23,15,0,110" HorizontalAlignment="Left" >
+            <TextBlock x:Name="Owned_Text" Text="1/2 OWNED" Foreground="#FF828C96" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        </Viewbox>
+        
 
+        <Image x:Name="Ducat_IMG" HorizontalAlignment="Left" Height="20" Margin="138,0,0,44" VerticalAlignment="Bottom" Width="20" Source="Resources/ducat_w.gif"/>
+        <Image x:Name="Plat_IMG" HorizontalAlignment="Left" Margin="50,0,0,44" Width="20" Source="Resources/plat.gif" Height="20" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>

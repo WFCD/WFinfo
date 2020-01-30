@@ -156,9 +156,26 @@ namespace WFInfoCS
             // Get the part box and filter it
             Bitmap partBox = FilterPartNames(image, active);
             List<string> players = SeparatePlayers(partBox);
-            foreach (string part in players)
+            int i = 0;
+            foreach(string part in players)
             {
-                string correctName = Main.dataBase.GetPartName(part, out _);
+                if (part.Length > 10)
+                {
+                    string correctName = Main.dataBase.GetPartName(part, out _);
+                    JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
+                    string plat = job["plat"].ToObject<string>();
+                    string ducats = job["ducats"].ToObject<string>();
+                    string volume = job["volume"].ToObject<string>();
+
+                    Main.RunOnUIThread(() =>
+                    {
+                        Main.overlays[i].LoadTextData(correctName, plat, ducats, volume);
+                        Main.overlays[i].Resize(200);
+                        Main.overlays[i].Display(100 + 250*i, 200);
+                    });
+
+                }
+                i++;
             }
 
 
@@ -214,8 +231,7 @@ namespace WFInfoCS
                 {
                     image.SetPixel(coorX - 1, coorY, Color.White);
                     image.SetPixel(coorX + 1, coorY, Color.White);
-                }
-                else
+                } else
                 {
                     image.SetPixel(coorX - 1, coorY, Color.Red);
                     image.SetPixel(coorX + 1, coorY, Color.Red);
@@ -563,8 +579,7 @@ namespace WFInfoCS
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
                     return;
-                }
-                else
+                } else
                 {
                     Main.AddLog("Failed to get window bounds");
                     Main.StatusUpdate("Failed to get window bounds", 1);

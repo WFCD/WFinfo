@@ -30,6 +30,7 @@ Public Class AlphaOverlay
 
         Dim font As New Font(privateFonts.Families(0), CInt(14 * parser2.uiScaling))
         Dim smol As New Font(privateFonts.Families(0), CInt(11 * parser2.uiScaling))
+
         Dim strFormat As New StringFormat()
         strFormat.Alignment = StringAlignment.Center
         Dim flipFormat As New StringFormat()
@@ -98,14 +99,20 @@ Public Class AlphaOverlay
                 brushie.InterpolationColors = blender
                 brushie.CenterPoint = New PointF(wid / 2, hei / 2)
 
+                Console.WriteLine("TOTAL SIZE: " & wid & ", " & hei)
+                Console.WriteLine("FONT SIZE: " & oneLine)
+                Console.WriteLine("SMOL SIZE: " & smolWid)
                 g.FillRectangle(brushie, 0, 0, wid, hei)
                 'g.DrawRectangle(New Pen(Glob.rareBrush), New Rectangle(pad, pad, wid - pad * 2, hei - pad * 2))
 
-                If valuted Then
-                    g.DrawString("VAULTED", smol, topBrush, wid - pad * 1.5, pad * 0.75, flipFormat)
-                End If
+
+
+                Console.WriteLine("VAULTED AT: " & (wid - pad * 1.5) & ", " & (pad * 0.75))
+                g.DrawString("VAULTED", smol, topBrush, wid - pad * 1.5, pad * 0.75, flipFormat)
+                Console.WriteLine("OWNED AT: " & (pad * 1.5) & ", " & (pad * 0.75))
                 g.DrawString(owned, smol, topBrush, pad * 1.5, pad * 0.75)
 
+                Console.WriteLine("PART NAME AT: " & layout.ToString())
                 g.DrawString(partName, font, Glob.textBrush, layout, strFormat)
                 layout.Y += textSep * 1.5
 
@@ -114,16 +121,21 @@ Public Class AlphaOverlay
                 Dim tempDim As Single = oneLine * 0.8
                 Dim platX As Single = wid / 3 - platWid / 2 + 1
 
+                Console.WriteLine("PLAT IMAGE AT: " & platX & ", " & imgY & " - " & tempDim & "px by " & tempDim & "px")
                 g.DrawImage(My.Resources.plat, platX, imgY, tempDim, tempDim)
+                Console.WriteLine("PLAT AT: " & (platX + tempDim + 1) & ", " & layout.Y)
                 g.DrawString(job("plat").ToString(), font, textBrush, platX + tempDim + 1, layout.Y)
 
                 Dim ducatX As Single = 2 * wid / 3 - platWid / 2 + 1
+                Console.WriteLine("DUCAT IMAGE AT: " & ducatX & ", " & imgY & " - " & tempDim & "px by " & tempDim & "px")
                 g.DrawImage(My.Resources.ducat_w, ducatX, imgY, tempDim, tempDim)
+                Console.WriteLine("DUCATS AT: " & (ducatX + tempDim + 1) & ", " & layout.Y)
                 g.DrawString(job("ducats").ToString(), font, textBrush, ducatX + tempDim + 1, layout.Y)
 
 
                 'g.DrawString(job("plat"), font, Glob.textBrush, layout, strFormat)
                 layout.Y += oneLine
+                Console.WriteLine("VOLUME TEXT AT: " & layout.ToString())
                 g.DrawString(volumeTxt, font, Glob.textBrush, layout, strFormat)
 
             End Using
