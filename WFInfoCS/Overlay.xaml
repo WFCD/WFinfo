@@ -11,7 +11,7 @@
     </Window.Background>
     <Grid>
         <Viewbox x:Name="partMargin" Margin="0,39,0,82" HorizontalAlignment="Center">
-            <TextBlock x:Name="Part_Text" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Part name"/>
+            <TextBlock x:Name="partText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Part name"/>
         </Viewbox>
         <Viewbox x:Name="volumeMargin" Margin="0,104,0,17" >
             <TextBlock x:Name="volumeText" Text="XX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>

@@ -40,20 +40,21 @@ namespace WFInfoCS
             InitializeComponent();
         }
 
-        public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted)
+        public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned)
         {
-            Part_Text.Text = name;
+            partText.Text = name;
             platText.Text = plat;
             ducatText.Text = ducats;
             volumeText.Text = volume + " sold last 48hrs";
             if (vaulted) {vaultedMargin.Visibility = Visibility.Visible;}
+            ownedText.Text = owned + " owned";
         }
 
         public void Resize(int wid)
         {
             double scale = wid / window_wid;
-            this.Width = wid;
-            this.Height = scale * window_hei;
+            Width = wid;
+            Height = scale * window_hei;
 
             Thickness margin;
 
@@ -122,9 +123,9 @@ namespace WFInfoCS
 
         public void Display(int x, int y)
         {
-            this.Left = x;
-            this.Top = y;
-            this.Show();
+            Left = x;
+            Top = y;
+            Show();
         }
     }
 }

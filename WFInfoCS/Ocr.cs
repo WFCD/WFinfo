@@ -158,14 +158,15 @@ namespace WFInfoCS {
 					string ducats = job["ducats"].ToObject<string>();
 					string volume = job["volume"].ToObject<string>();
 					bool vaulted = Main.dataBase.IsPartVaulted(correctName);
+					string partsOwned = Main.dataBase.PartsOwned(correctName);
 					int startX = center.X - (int)(center.X / 2 / (ScreenScaling/TotalScaling));
 					int displayHeight = (int)(center.Y - 20 * TotalScaling);
 					if (players.Count == 3) { startX += image.Width / 8; }
 					Console.WriteLine("Total scaling is: " + TotalScaling + " Screen scaling is: " + ScreenScaling);
 					Main.RunOnUIThread(() => {
-						Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, false);
+						Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
 						Main.overlays[partNumber].Resize((int)(230 * TotalScaling));
-						Main.overlays[partNumber].Display(startX + (int)(243.75 * TotalScaling) * partNumber, displayHeight); //center.X - 630 + 325 * i,center.Y - 20
+						Main.overlays[partNumber].Display(startX + (int)(243.75 * TotalScaling) * partNumber, displayHeight); 
 
 					});
 
