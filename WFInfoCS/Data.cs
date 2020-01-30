@@ -908,7 +908,7 @@ namespace WFInfoCS
         public bool IsPartVaulted(string name)
         {
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
-            return equipmentData[eqmt][name]["vaulted"].ToObject<Boolean>();
+            return equipmentData[eqmt]["parts"][name]["vaulted"].ToObject<bool>();
         }
 
         public string PartsOwned(string name)
