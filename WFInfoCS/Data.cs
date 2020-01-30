@@ -963,50 +963,34 @@ namespace WFInfoCS
             // Levenshtein Distance determines how many character changes it takes to form a known result
             // For example: Nuvo Prime is closer to Nova Prime (2) then Ash Prime (4)
             // For more info see: https://en.wikipedia.org/wiki/Levenshtein_distance
-            s = s.Replace("*", "").ToLower();
-            t = t.Replace("*", "").ToLower();
+            s = s.ToLower();
+            t = t.ToLower();
             int n = s.Length;
             int m = t.Length;
             int[,] d = new int[n + 1, m + 1];
 
             if (n == 0)
-            {
                 return m;
-            }
 
             if (m == 0)
-            {
                 return n;
-            }
 
 
             for (int i = 0; i < n; i++)
-            {
                 d[i, 0] = i;
-            }
 
             for (int j = 0; j < m; j++)
-            {
                 d[0, j] = j;
-            }
 
-            for (int i = 1; i < n; i++)
-            {
-                for (int j = 1; j < m; j++)
+            for (int i = 1; i <= n; i++)
+                for (int j = 1; j <= m; j++)
                 {
-                    int cost;
+                    int cost = 1;
                     if (t[j - 1] == s[i - 1])
-                    {
                         cost = 0;
-                    }
-                    else
-                    {
-                        cost = 1;
-                    }
 
                     d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1), d[i - 1, j - 1] + cost);
                 }
-            }
 
             return d[n, m];
         }
@@ -1085,10 +1069,10 @@ namespace WFInfoCS
             return num;
         }
 
-        public string GetPartName(string name)
+        public string GetPartName(string name, out int low)
         { // Checks the Levenshtein Distance of a string and returns the index in Names() of the closest part
             string lowest = null;
-            int low = 9999;
+            low = 9999;
             foreach (KeyValuePair<string, JToken> prop in nameData)
             {
                 int val = LevenshteinDistance(prop.Key, name);
@@ -1099,7 +1083,8 @@ namespace WFInfoCS
                 }
             }
 
-            Main.AddLog("Found part: " + lowest + Environment.NewLine + Environment.NewLine + " from: " + name);
+
+            Main.AddLog("FOUND PART: \"" + lowest + "\" from \"" + name + "\""); 
             return lowest;
         }
 

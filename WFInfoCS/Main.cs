@@ -84,7 +84,7 @@ namespace WFInfoCS
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    new Thread(() =>
+                    Task.Factory.StartNew(() =>
                     {
                         foreach (string file in openFileDialog.FileNames)
                         {
@@ -101,7 +101,7 @@ namespace WFInfoCS
                                 StatusUpdate("Faild to load image", 1);
                             }
                         }
-                    }).Start();
+                    });
                 }
                 else
                 {

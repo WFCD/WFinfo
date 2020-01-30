@@ -158,8 +158,7 @@ namespace WFInfoCS
             List<string> players = SeparatePlayers(partBox);
             foreach (string part in players)
             {
-                Console.WriteLine(part);
-                Console.WriteLine(Main.dataBase.marketData.GetValue(part));
+                string correctName = Main.dataBase.GetPartName(part, out _);
             }
 
 
