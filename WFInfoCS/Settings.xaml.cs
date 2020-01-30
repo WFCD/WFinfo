@@ -26,6 +26,7 @@ namespace WFInfoCS
 
         public Settings()
         {
+            int tempscaling = scaling; // initializing the window will default the scale bar to 100% and thus activating scalebarchange which will set it to the default value. 
 
             InitializeComponent();
 
@@ -46,10 +47,11 @@ namespace WFInfoCS
                 Debug.IsChecked = true;
             }
             this.DataContext = this;
+            Console.WriteLine("Scaling in main is: " + scaling);
             //Activation_key_box.Text = "Snapshot";
-            Scaling_box.Text = scaling.ToString() + "%";
+            Scaling_box.Text = tempscaling.ToString() + "%";
             Activation_key_box.Text = settingsObj.GetValue("ActivationKey").ToString();
-            scaleBar.Value = scaling;
+            scaleBar.Value = tempscaling;
 
         }
 
@@ -104,7 +106,9 @@ namespace WFInfoCS
         private void ScalingValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             settingsObj["Scaling"] = Math.Round(e.NewValue);
+            scaling = (int)Math.Round(e.NewValue);
             Scaling_box.Text = Math.Round(e.NewValue).ToString() + "%";
+            Console.WriteLine("Scaling is now: " + settingsObj["Scaling"]);
             Save();
         }
 
