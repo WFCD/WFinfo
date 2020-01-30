@@ -37,7 +37,7 @@ namespace WFInfoCS
         private readonly Lua lua;
         private string githubVersion;
 
-        private readonly FileSystemWatcher screenshotWatcher = new FileSystemWatcher();
+        //private readonly FileSystemWatcher screenshotWatcher = new FileSystemWatcher();
         private LogCapture EElogWatcher;
         private readonly string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -59,10 +59,10 @@ namespace WFInfoCS
 
             sheetsApi = new Sheets();
 
-            string warframePictures = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + @"\Warframe"; //outdated? Was old work around for user who couldn't activate the program
-            Directory.CreateDirectory(warframePictures);
-            screenshotWatcher.Path = warframePictures;
-            screenshotWatcher.EnableRaisingEvents = true;
+            //string warframePictures = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + @"\Warframe"; //outdated? Was old work around for user who couldn't activate the program
+            //Directory.CreateDirectory(warframePictures);
+            //screenshotWatcher.Path = warframePictures;
+            //screenshotWatcher.EnableRaisingEvents = true;
 
             lua = new NLua.Lua();
             //if (false) //My.Settings.Auto) // WIP
@@ -1086,7 +1086,7 @@ namespace WFInfoCS
             }
 
 
-            Main.AddLog("FOUND PART: \"" + lowest_unfiltered + "\" from \"" + name + "\""); 
+            Main.AddLog("FOUND PART: \"" + lowest_unfiltered + "\" from \"" + name + "\"");
             return lowest;
         }
 
@@ -1192,21 +1192,21 @@ namespace WFInfoCS
             return lowest;
         }
 
-        private Boolean waiting = false;
-        private void WatcherCreated(Object sender, FileSystemEventArgs e)
-        {
-            waiting = true;
-        }
+        //private Boolean waiting = false;
+        //private void WatcherCreated(Object sender, FileSystemEventArgs e)
+        //{
+        //    waiting = true;
+        //}
 
-        private void WatcherChanged(Object sender, FileSystemEventArgs e)
-        {
-            if (waiting)
-            {
-                waiting = false;
-                Thread.Sleep(500);
-                OCR.ParseFile(e.FullPath);
-            }
-        }
+        //private void WatcherChanged(Object sender, FileSystemEventArgs e)
+        //{
+        //    if (waiting)
+        //    {
+        //        waiting = false;
+        //        Thread.Sleep(500);
+        //        OCR.ParseFile(e.FullPath);
+        //    }
+        //}
         ///
         ///
         /// WIP - the rest code is TBD

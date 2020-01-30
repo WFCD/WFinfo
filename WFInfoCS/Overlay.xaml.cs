@@ -46,7 +46,7 @@ namespace WFInfoCS
             platText.Text = plat;
             ducatText.Text = ducats;
             volumeText.Text = volume + " sold last 48hrs";
-            if (vaulted) {vaultedMargin.Visibility = Visibility.Visible;}
+            if (vaulted) { vaultedMargin.Visibility = Visibility.Visible; }
             ownedText.Text = owned + " owned";
         }
 
@@ -70,7 +70,7 @@ namespace WFInfoCS
             margin.Bottom = cornerMarginBottom * scale;
             margin.Right = cornerMarginSide * scale;
             vaultedMargin.Margin = margin;
-            vaultedText.FontSize = smallFont *  scale;
+            vaultedText.FontSize = smallFont * scale;
 
             // Owned_Text
             margin = ownedMargin.Margin;

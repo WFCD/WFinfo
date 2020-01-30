@@ -119,18 +119,17 @@ namespace WFInfoCS
 
         private void ReloadWikiClick(object sender, RoutedEventArgs e)
         {
-
-            //todo reloads wiki data
+            Main.dataBase.ForceWikiUpdate();
         }
 
         private void ReloadDropClick(object sender, RoutedEventArgs e)
         {
-            //todo reloads de's data
+            Main.dataBase.ForceEquipmentUpdate();
         }
 
         private void ReloadMarketClick(object sender, RoutedEventArgs e)
         {
-            //todo reloads warframe.market data
+            Main.dataBase.ForceMarketUpdate();
         }
 
         // Allows the draging of the window
