@@ -421,7 +421,7 @@ namespace WFInfoCS
             };
         }
 
-        private Boolean LoadDropData(Boolean force = false)
+        private bool LoadDropData(bool force = false)
         {
             Main.AddLog("Loading drop database");
             WebRequest request;
@@ -704,7 +704,7 @@ namespace WFInfoCS
             }
         }
 
-        private Boolean LoadEquipmentRequirements(Boolean force = false)
+        private bool LoadEquipmentRequirements(bool force = false)
         {
             // Load wiki data on prime eqmt requirements
             // Mainly weapons
@@ -861,7 +861,7 @@ namespace WFInfoCS
             SaveMarket();
         }
 
-        public void ForceEqmtUpdate()
+        public void ForceEquipmentUpdate()
         {
             Main.AddLog("Forcing equipment update");
             LoadDropData(true);
@@ -905,7 +905,7 @@ namespace WFInfoCS
             return sellers;
         }
 
-        public Boolean IsPartVaulted(string name)
+        public bool IsPartVaulted(string name)
         {
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
             return equipmentData[eqmt][name]["vaulted"].ToObject<Boolean>();

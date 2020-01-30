@@ -14,21 +14,21 @@ namespace WFInfoCS
         public static Main INSTANCE;
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static Data db;
+        public static Data dataBase;
 
         public Main()
         {
             INSTANCE = this;
-            db = new Data();
+            dataBase = new Data();
             Task.Factory.StartNew(new Action(ThreadedDataLoad));
         }
 
         public static void ThreadedDataLoad()
         {
-            db.Update();
-            RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + db.marketData["timestamp"].ToString().Substring(5, 11); });
-            RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: " + db.equipmentData["timestamp"].ToString().Substring(5, 11); });
-            RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + db.equipmentData["rqmts_timestamp"].ToString().Substring(5, 11); });
+            dataBase.Update();
+            RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + dataBase.marketData["timestamp"].ToString().Substring(5, 11); });
+            RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: " + dataBase.equipmentData["timestamp"].ToString().Substring(5, 11); });
+            RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + dataBase.equipmentData["rqmts_timestamp"].ToString().Substring(5, 11); });
             StatusUpdate("Databases Loaded", 0);
         }
 
@@ -91,7 +91,7 @@ namespace WFInfoCS
                             //Get the path of specified file
                             Bitmap image = new Bitmap(file);
                             OCR.updateWindow(image);
-                            Task.Factory.StartNew(() => OCR.ProcessRewardScreen(image));
+                            OCR.ProcessRewardScreen(image);
                         }
                         catch (Exception)
                         {

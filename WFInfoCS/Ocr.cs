@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -127,7 +128,7 @@ namespace WFInfoCS
 
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+            var watch = Stopwatch.StartNew();
             long start = watch.ElapsedMilliseconds;
 
             // Look at me mom, I'm doing fancy shit
@@ -154,9 +155,13 @@ namespace WFInfoCS
 
             // Get the part box and filter it
             Bitmap partBox = FilterPartNames(image, active);
-            List<String> players = SeparatePlayers(partBox);
-            foreach (string prnt in players)
-                Console.WriteLine(prnt);
+            List<string> players = SeparatePlayers(partBox);
+            foreach (string part in players)
+            {
+                Console.WriteLine(part);
+                Console.WriteLine(Main.dataBase.marketData.GetValue(part));
+            }
+
 
             var end = watch.ElapsedMilliseconds;
             Console.WriteLine("Completed " + (end - start) + " ms");
@@ -590,7 +595,7 @@ namespace WFInfoCS
             }
         }
 
-        // WIP - please change accordingly to new logic
+        // WIP - please change accordingly to new logic Should be canned? Old system
         public static void ParseFile(string filename)
         {
             Main.AddLog("Parsing file: " + filename);
