@@ -16,13 +16,14 @@ namespace WFInfoCS
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static Data dataBase;
-
+        public static Window window;
         public static Overlay[] overlays;
 
         public Main()
         {
             INSTANCE = this;
             overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
+            window = new Window();
             dataBase = new Data();
             Task.Factory.StartNew(new Action(ThreadedDataLoad));
         }
@@ -89,20 +90,20 @@ namespace WFInfoCS
                 {
                     Task.Factory.StartNew(() =>
                     {
-                        foreach (string file in openFileDialog.FileNames)
+                        try {
+                            foreach (string file in openFileDialog.FileNames)
                         {
                             Console.WriteLine("Testing file: " + file.ToString());
-                            try
-                            {
+                            
                                 //Get the path of specified file
                                 Bitmap image = new Bitmap(file);
                                 OCR.updateWindow(image);
                                 OCR.ProcessRewardScreen(image);
                             }
-                            catch (Exception)
-                            {
-                                StatusUpdate("Faild to load image", 1);
-                            }
+
+                        }
+                        catch (Exception) {
+                            StatusUpdate("Faild to load image", 1);
                         }
                     });
                 }

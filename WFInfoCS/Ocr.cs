@@ -173,10 +173,13 @@ namespace WFInfoCS
                     if (players.Count == 3) { startX += image.Width / 8; }
                     Main.RunOnUIThread(() =>
                     {
-                        Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
-                        Main.overlays[partNumber].Resize((int)(230 * TotalScaling));
-                        Main.overlays[partNumber].Display(startX + (int)(243.75 * TotalScaling) * partNumber, displayHeight);
-
+                        if (Settings.isOverlaySelected) {
+                            Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
+                            Main.overlays[partNumber].Resize((int)(230 * TotalScaling));
+                            Main.overlays[partNumber].Display(startX + (int)(243.75 * TotalScaling) * partNumber, displayHeight);
+                        } else {
+                            Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
+                        }
                     });
 
                 }

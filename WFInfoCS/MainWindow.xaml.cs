@@ -12,7 +12,7 @@ namespace WFInfoCS
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
         readonly Main main = new Main(); //subscriber
         public static MainWindow INSTANCE;
@@ -40,7 +40,7 @@ namespace WFInfoCS
                 Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
                 Settings.scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
 
-                String thisprocessname = Process.GetCurrentProcess().ProcessName;
+                string thisprocessname = Process.GetCurrentProcess().ProcessName;
                 if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
                 {
                     Main.AddLog("Duplicate process found");

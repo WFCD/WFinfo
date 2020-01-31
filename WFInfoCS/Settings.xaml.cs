@@ -11,14 +11,14 @@ namespace WFInfoCS
     /// <summary>
     /// Interaction logic for Settings.xaml
     /// </summary>
-    public partial class Settings : Window
+    public partial class Settings : System.Windows.Window
     {
 
         private readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json";  //change to WFInfo after release
         public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
         public bool isWindowSelected { get; set; } //Choseen for multiple booleans over a single one due to the posibility of aditional options in the future.
         public static Key activationKey { get; set; }
-        public bool isOverlaySelected { get; set; }
+        public static bool isOverlaySelected { get; set; }
         public static bool debug { get; set; }
         public static int scaling { get; internal set; }
         public static bool auto { get; internal set; }
