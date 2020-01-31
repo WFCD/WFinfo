@@ -13,15 +13,15 @@
         <System:Double x:Key="fontSize">22</System:Double>
         <FontFamily x:Key="font">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
     </Window.Resources>
-    <Grid Background="#FF1B1B1B" x:Name="Title_bar" MouseDown="MouseDown">
-        <Grid Margin="0,0,0,230">
+    <Grid Background="#FF1B1B1B" x:Name="mainWindow" MouseDown="MouseDown">
+        <Grid x:Name="Titlebar" Margin="0,0,0,230">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="21*"/>
                 <ColumnDefinition Width="179*"/>
             </Grid.ColumnDefinitions>
             <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="1000" Grid.ColumnSpan="2" Margin="0,0,0,-27"/>
 
-            <Label Content="Rewards" HorizontalAlignment="Left" Margin="25,-5,0,-30" VerticalAlignment="Top" Foreground="#FFB1D0D9" Height="35" Width="85" FontFamily="{DynamicResource font}" FontSize="{DynamicResource fontSize}" Grid.ColumnSpan="2"/>
+            <Label Content="Rewards" HorizontalAlignment="Left" Margin="25,-5,0,-30" VerticalAlignment="Top" Foreground="#FFB1D0D9" Height="35" Width="135" FontFamily="{DynamicResource font}" FontSize="{DynamicResource fontSize}" Grid.ColumnSpan="2"/>
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" Source="Resources/WFLogo.png" Margin="0,0,0,-26" >
                 <Image.RenderTransform>
                     <TransformGroup>
@@ -32,121 +32,89 @@
                     </TransformGroup>
                 </Image.RenderTransform>
             </Image>
+            <Button x:Name="exit" Content="X" HorizontalAlignment="Right" FontWeight="Bold" VerticalAlignment="Top"  Width="30" Background="{x:Null}" Foreground="#FFB1D0D9" Height="27" Click="Exit" FontSize="20" MinWidth="2" RenderTransformOrigin="0.5,0.319" Padding="-1" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Grid.Column="1" Margin="0,0,0,-27"/>
 
         </Grid>
         <Grid x:Name="FirstReward" HorizontalAlignment="Left" Height="180" Margin="0,27,0,0" VerticalAlignment="Top" Width="250">
             <Rectangle HorizontalAlignment="Left" Height="181" Stroke="#FF646464" VerticalAlignment="Top" Width="251" Margin="0,-1,-1,0"/>
-            <Viewbox x:Name="firstOwnedMargin" Margin="10,10,0,139" HorizontalAlignment="Left" Width="135" Height="25">
+            <Viewbox x:Name="firstOwnedMargin" Margin="10,7,0,148" HorizontalAlignment="Left" Width="135" Height="25">
                 <TextBlock x:Name="firstOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
             </Viewbox>
-            <Viewbox x:Name="firstVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,10,10,137"  >
+            <Viewbox x:Name="firstVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,8,10,147"  >
                 <TextBlock x:Name="firstVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
             </Viewbox>
-            <TextBlock x:Name="firstPartText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Part name" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="15,43,10,72" Width="225" FontSize="24" Height="65"/>
+            <TextBlock x:Name="firstPartText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Part name" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="15,38,10,77" Width="225" FontSize="24" Height="65"/>
 
             <Viewbox x:Name="firstPartName" HorizontalAlignment="Center" Margin="0,45,0,0" VerticalAlignment="Top" Width="auto" Height="60">
             </Viewbox>
-            <Viewbox x:Name="firstPlatMargin" Margin="10,110,0,40" HorizontalAlignment="Left" Width="100" Height="25">
-                <TextBlock x:Name="firstPlatText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Width="65"><Run Text=" "/><InlineUIContainer>
-                        <Image x:Name="platImage" Margin="0,3,0,0" HorizontalAlignment="Left" Width="10" Source="Resources/plat.gif" Height="10" VerticalAlignment="Center" />
-
-                    </InlineUIContainer><Run Text=" platinum"/></TextBlock>
-            </Viewbox>
-            <Viewbox x:Name="firstDucatMargin" HorizontalAlignment="Right" Margin="10,110,10,40" Width="100" Height="25">
-                <TextBlock x:Name="firstDucatText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Width="67" HorizontalAlignment="Left"><Run Text=" "/><InlineUIContainer>
-                        <Image x:Name="firstDucatImage" Margin="0,3,0,0" HorizontalAlignment="Left" Width="10" Source="Resources/ducat_w.gif" Height="10" VerticalAlignment="Center" />
-
-                    </InlineUIContainer><Run Text=" ducats"/></TextBlock>
-            </Viewbox>
             <Viewbox x:Name="firstVolumeMargin"  Margin="0,138,0,10" Height="25" Width="auto" >
-                <TextBlock x:Name="firstVolumeText" Text="XX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="Auto"/>
+                <TextBlock x:Name="firstVolumeText" Text="XXX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="Auto"/>
             </Viewbox>
+            <TextBlock x:Name="firstPlatText" HorizontalAlignment="Left" Margin="76,108,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="20" Height="27" RenderTransformOrigin="0.609,0.865"><Run BaselineAlignment="Center" Text="999"/></TextBlock>
+            <TextBlock x:Name="firstDucatText" HorizontalAlignment="Left" Margin="180,108,0,45" TextWrapping="Wrap" TextAlignment="Justify" Foreground="#FFB1D0D9" FontSize="20" Height="27" RenderTransformOrigin="0.609,0.865"><Run BaselineAlignment="Center" Text="999"/></TextBlock>
+            <Image x:Name="platImage" HorizontalAlignment="Left" Width="30" Source="Resources/plat.gif" Height="26" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.556" Margin="45,108,0,46" />
+            <Image x:Name="firstDucatImage" HorizontalAlignment="Left" Width="27" Source="Resources/ducat_w.gif" Height="26" VerticalAlignment="Center" Margin="148,108,0,46" />
 
         </Grid>
-        <Grid x:Name="FirstReward_Copy" HorizontalAlignment="Left" Height="180" Margin="250,27,0,0" VerticalAlignment="Top" Width="250">
+        <Grid x:Name="secondReward" HorizontalAlignment="Left" Height="180" Margin="250,27,0,0" VerticalAlignment="Top" Width="250">
             <Rectangle HorizontalAlignment="Left" Height="181" Stroke="#FF646464" VerticalAlignment="Top" Width="251" Margin="0,-1,-1,0"/>
-            <Viewbox x:Name="secondOwnedMargin" Margin="10,10,0,139" HorizontalAlignment="Left" Width="135" Height="25">
+            <Viewbox x:Name="secondOwnedMargin" Margin="10,7,0,148" HorizontalAlignment="Left" Width="135" Height="25">
                 <TextBlock x:Name="secondOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
             </Viewbox>
-            <Viewbox x:Name="secondVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,10,10,137"  >
+            <Viewbox x:Name="secondVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,8,10,147"  >
                 <TextBlock x:Name="secondVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
             </Viewbox>
-            <Viewbox x:Name="secondPartName" HorizontalAlignment="Center" Margin="0,45,0,0" VerticalAlignment="Top" Width="auto" Height="60">
-                <TextBlock x:Name="secondPartText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Part name" FontSize="22" HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap"/>
-            </Viewbox>
-            <Viewbox x:Name="secondPlatMargin" Margin="10,110,0,40" HorizontalAlignment="Left" Width="100" Height="25">
-                <TextBlock x:Name="secondPlatText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Width="65"><Run Text=" "/><InlineUIContainer>
-                        <Image x:Name="secondImage" Margin="0,3,0,0" HorizontalAlignment="Left" Width="10" Source="Resources/plat.gif" Height="10" VerticalAlignment="Center" />
+            <TextBlock x:Name="secondPartText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Part name" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="15,38,10,77" Width="225" FontSize="24" Height="65"/>
 
-                    </InlineUIContainer><Run Text=" platinum"/></TextBlock>
-            </Viewbox>
-            <Viewbox x:Name="secondDucatMargin" HorizontalAlignment="Right" Margin="10,110,10,40" Width="100" Height="25">
-                <TextBlock x:Name="secondDucatText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Width="67" HorizontalAlignment="Left"><Run Text=" "/><InlineUIContainer>
-                        <Image x:Name="secondDucatImage" Margin="0,3,0,0" HorizontalAlignment="Left" Width="10" Source="Resources/ducat_w.gif" Height="10" VerticalAlignment="Center" />
-
-                    </InlineUIContainer><Run Text=" ducats"/></TextBlock>
-            </Viewbox>
+            <Viewbox x:Name="secondPartName" HorizontalAlignment="Center" Margin="0,45,0,0" VerticalAlignment="Top" Width="auto" Height="60"/>
             <Viewbox x:Name="secondVolumeMargin"  Margin="0,138,0,10" Height="25" Width="auto" >
-                <TextBlock x:Name="secondVolumeText" Text="XX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="Auto"/>
+                <TextBlock x:Name="secondVolumeText" Text="XXX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="Auto"/>
             </Viewbox>
+            <TextBlock x:Name="secondPlatText" HorizontalAlignment="Left" Margin="76,108,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="20" Height="27" RenderTransformOrigin="0.609,0.865"><Run BaselineAlignment="Center" Text="999"/></TextBlock>
+            <TextBlock x:Name="secondDucatText" HorizontalAlignment="Left" Margin="180,108,0,45" TextWrapping="Wrap" TextAlignment="Justify" Foreground="#FFB1D0D9" FontSize="20" Height="27" RenderTransformOrigin="0.609,0.865"><Run BaselineAlignment="Center" Text="999"/></TextBlock>
+            <Image x:Name="platImage1" HorizontalAlignment="Left" Width="30" Source="Resources/plat.gif" Height="26" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.556" Margin="45,108,0,46" />
+            <Image x:Name="firstDucatImage1" HorizontalAlignment="Left" Width="27" Source="Resources/ducat_w.gif" Height="26" VerticalAlignment="Center" Margin="148,108,0,46" />
 
         </Grid>
-        <Grid x:Name="thirdReward" HorizontalAlignment="Left" Height="180" Margin="500,27,0,0" VerticalAlignment="Top" Width="250">
+        <Grid x:Name="thirdReward" HorizontalAlignment="Left" Height="180" Margin="500,27,0,-3" VerticalAlignment="Top" Width="250">
             <Rectangle HorizontalAlignment="Left" Height="181" Stroke="#FF646464" VerticalAlignment="Top" Width="251" Margin="0,-1,-1,0"/>
-            <Viewbox x:Name="thirdOwnedMargin" Margin="10,10,0,139" HorizontalAlignment="Left" Width="135" Height="25">
+            <Viewbox x:Name="thirdOwnedMargin" Margin="10,7,0,148" HorizontalAlignment="Left" Width="135" Height="25">
                 <TextBlock x:Name="thirdOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
             </Viewbox>
-            <Viewbox x:Name="thirdVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,10,10,137"  >
+            <Viewbox x:Name="thirdVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,8,10,147"  >
                 <TextBlock x:Name="thirdVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
             </Viewbox>
-            <Viewbox x:Name="thirdPartName" HorizontalAlignment="Center" Margin="0,45,0,0" VerticalAlignment="Top" Width="auto" Height="60">
-                <TextBlock x:Name="thirdPartText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Part name" FontSize="22" HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap"/>
-            </Viewbox>
-            <Viewbox x:Name="thirdPlatMargin" Margin="10,110,0,40" HorizontalAlignment="Left" Width="100" Height="25">
-                <TextBlock x:Name="thirdPlatText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Width="65"><Run Text=" "/><InlineUIContainer>
-                        <Image x:Name="thirdImage" Margin="0,3,0,0" HorizontalAlignment="Left" Width="10" Source="Resources/plat.gif" Height="10" VerticalAlignment="Center" />
+            <TextBlock x:Name="thirdPartText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Part name" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="15,38,10,77" Width="225" FontSize="24" Height="65"/>
 
-                    </InlineUIContainer><Run Text=" platinum"/></TextBlock>
-            </Viewbox>
-            <Viewbox x:Name="thirdDucatMargin" HorizontalAlignment="Right" Margin="10,110,10,40" Width="100" Height="25">
-                <TextBlock x:Name="thirdDucatText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Width="67" HorizontalAlignment="Left"><Run Text=" "/><InlineUIContainer>
-                        <Image x:Name="thirdDucatImage" Margin="0,3,0,0" HorizontalAlignment="Left" Width="10" Source="Resources/ducat_w.gif" Height="10" VerticalAlignment="Center" />
-
-                    </InlineUIContainer><Run Text=" ducats"/></TextBlock>
-            </Viewbox>
+            <Viewbox x:Name="thirdPartName" HorizontalAlignment="Center" Margin="0,45,0,0" VerticalAlignment="Top" Width="auto" Height="60"/>
             <Viewbox x:Name="thirdVolumeMargin"  Margin="0,138,0,10" Height="25" Width="auto" >
-                <TextBlock x:Name="thirdVolumeText" Text="XX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="Auto"/>
+                <TextBlock x:Name="thirdVolumeText" Text="XXX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="Auto"/>
             </Viewbox>
+            <TextBlock x:Name="thirdPlatText" HorizontalAlignment="Left" Margin="76,108,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="20" Height="27" RenderTransformOrigin="0.609,0.865"><Run BaselineAlignment="Center" Text="999"/></TextBlock>
+            <TextBlock x:Name="thirdDucatText" HorizontalAlignment="Left" Margin="180,108,0,45" TextWrapping="Wrap" TextAlignment="Justify" Foreground="#FFB1D0D9" FontSize="20" Height="27" RenderTransformOrigin="0.609,0.865"><Run BaselineAlignment="Center" Text="999"/></TextBlock>
+            <Image x:Name="platImage3" HorizontalAlignment="Left" Width="30" Source="Resources/plat.gif" Height="26" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.556" Margin="45,108,0,46" />
+            <Image x:Name="firstDucatImage3" HorizontalAlignment="Left" Width="27" Source="Resources/ducat_w.gif" Height="26" VerticalAlignment="Center" Margin="148,108,0,46" />
 
         </Grid>
         <Grid x:Name="fourthReward" HorizontalAlignment="Left" Height="180" Margin="750,27,0,0" VerticalAlignment="Top" Width="250">
             <Rectangle HorizontalAlignment="Left" Height="181" Stroke="#FF646464" VerticalAlignment="Top" Width="250" Margin="0,-1,0,0"/>
-            <Viewbox x:Name="fourthOwnedMargin" Margin="10,10,0,139" HorizontalAlignment="Left" Width="135" Height="25">
+            <Viewbox x:Name="fourthOwnedMargin" Margin="10,7,0,148" HorizontalAlignment="Left" Width="135" Height="25">
                 <TextBlock x:Name="fourthOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
             </Viewbox>
-            <Viewbox x:Name="fourthVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,10,10,137"  >
+            <Viewbox x:Name="fourthVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,8,10,147"  >
                 <TextBlock x:Name="fourthVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
             </Viewbox>
-            <Viewbox x:Name="fourthPartName" HorizontalAlignment="Center" Margin="0,45,0,0" VerticalAlignment="Top" Width="auto" Height="60">
-                <TextBlock x:Name="fourthPartText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Part name" FontSize="22" HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap"/>
-            </Viewbox>
-            <Viewbox x:Name="fourthPlatMargin" Margin="10,110,0,40" HorizontalAlignment="Left" Width="100" Height="25">
-                <TextBlock x:Name="fourthPlatText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Width="65"><Run Text=" "/><InlineUIContainer>
-                        <Image x:Name="platImage3" Margin="0,3,0,0" HorizontalAlignment="Left" Width="10" Source="Resources/plat.gif" Height="10" VerticalAlignment="Center" />
+            <TextBlock x:Name="fourthPartText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Text="Part name" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="15,38,10,77" Width="225" FontSize="24" Height="65"/>
 
-                    </InlineUIContainer><Run Text=" platinum"/></TextBlock>
-            </Viewbox>
-            <Viewbox x:Name="fourthDucatMargin" HorizontalAlignment="Right" Margin="10,110,10,40" Width="100" Height="25">
-                <TextBlock x:Name="fourthDucatText" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Width="67" HorizontalAlignment="Left"><Run Text=" "/><InlineUIContainer>
-                        <Image x:Name="fourthDucatImage" Margin="0,3,0,0" HorizontalAlignment="Left" Width="10" Source="Resources/ducat_w.gif" Height="10" VerticalAlignment="Center" />
-
-                    </InlineUIContainer><Run Text=" ducats"/></TextBlock>
-            </Viewbox>
+            <Viewbox x:Name="fourthPartName" HorizontalAlignment="Center" Margin="0,45,0,0" VerticalAlignment="Top" Width="auto" Height="60"/>
             <Viewbox x:Name="fourthVolumeMargin"  Margin="0,138,0,10" Height="25" Width="auto" >
-                <TextBlock x:Name="fourthVolumeText" Text="XX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="Auto"/>
+                <TextBlock x:Name="fourthVolumeText" Text="XXX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="Auto"/>
             </Viewbox>
+            <TextBlock x:Name="fourthPlatText" HorizontalAlignment="Left" Margin="76,108,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="20" Height="27" RenderTransformOrigin="0.609,0.865"><Run BaselineAlignment="Center" Text="999"/></TextBlock>
+            <TextBlock x:Name="fourthDucatText" HorizontalAlignment="Left" Margin="180,108,0,45" TextWrapping="Wrap" TextAlignment="Justify" Foreground="#FFB1D0D9" FontSize="20" Height="27" RenderTransformOrigin="0.609,0.865"><Run BaselineAlignment="Center" Text="999"/></TextBlock>
+            <Image x:Name="platImage2" HorizontalAlignment="Left" Width="30" Source="Resources/plat.gif" Height="26" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.556" Margin="45,108,0,46" />
+            <Image x:Name="firstDucatImage2" HorizontalAlignment="Left" Width="27" Source="Resources/ducat_w.gif" Height="26" VerticalAlignment="Center" Margin="148,108,0,46" />
 
         </Grid>
-        <Button x:Name="exit" Content="X" HorizontalAlignment="Right" FontWeight="Bold" VerticalAlignment="Top"  Width="30" Background="{x:Null}" Foreground="#FFB1D0D9" Height="27" Click="Exit" FontSize="20" MinWidth="2" RenderTransformOrigin="0.5,0.319" Padding="-1" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
     </Grid>
 </Window>

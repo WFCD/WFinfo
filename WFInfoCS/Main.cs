@@ -90,11 +90,12 @@ namespace WFInfoCS
                 {
                     Task.Factory.StartNew(() =>
                     {
-                        try {
-                            foreach (string file in openFileDialog.FileNames)
+                        try
                         {
-                            Console.WriteLine("Testing file: " + file.ToString());
-                            
+                            foreach (string file in openFileDialog.FileNames)
+                            {
+                                Console.WriteLine("Testing file: " + file.ToString());
+
                                 //Get the path of specified file
                                 Bitmap image = new Bitmap(file);
                                 OCR.updateWindow(image);
@@ -102,7 +103,8 @@ namespace WFInfoCS
                             }
 
                         }
-                        catch (Exception) {
+                        catch (Exception)
+                        {
                             StatusUpdate("Faild to load image", 1);
                         }
                     });
