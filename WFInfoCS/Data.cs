@@ -278,8 +278,7 @@ namespace WFInfoCS
                 if (!marketItems.TryGetValue(elem["item"].ToString(), out string item_name))
                 {
                     Main.AddLog("Unknwon market id: " + elem["item"].ToObject<string>());
-                }
-                else
+                } else
                 {
 
                     item_name = item_name.Split('|')[0];
@@ -291,8 +290,7 @@ namespace WFInfoCS
                     if (item_name.Contains(" Set"))
                     {
                         LoadItems(true);
-                    }
-                    else
+                    } else
                     {
                         marketData[item_name]["ducats"] = elem["ducats"];
                     }
@@ -334,12 +332,10 @@ namespace WFInfoCS
                                 if (rarity.Key.Contains("rare"))
                                 {
                                     marketData[name]["ducats"] = 100;
-                                }
-                                else if (rarity.Key.Contains("un"))
+                                } else if (rarity.Key.Contains("un"))
                                 {
                                     marketData[name]["ducats"] = 45;
-                                }
-                                else
+                                } else
                                 {
                                     marketData[name]["ducats"] = 15;
                                 }
@@ -371,8 +367,7 @@ namespace WFInfoCS
                 if (marketData.TryGetValue(kvp.Key, out JToken temp))
                 {
                     ret += count * temp["plat"].ToObject<double>();
-                }
-                else if (equipmentData.TryGetValue(kvp.Key, out temp))
+                } else if (equipmentData.TryGetValue(kvp.Key, out temp))
                 {
                     // Need to confirm that this adjusted logic won't cause recursive bomb
                     double plat = GetSetPlat(temp.ToObject<JObject>());
@@ -408,8 +403,7 @@ namespace WFInfoCS
             if (!ducats.TryGetValue("ducats", out JToken temp))
             {
                 ducat = "0";
-            }
-            else
+            } else
             {
                 ducat = temp.ToObject<string>();
             }
@@ -430,8 +424,7 @@ namespace WFInfoCS
                 if (File.Exists(eqmtDataPath))
                 {
                     equipmentData = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath));
-                }
-                else
+                } else
                 {
                     equipmentData = new JObject();
                 }
@@ -499,7 +492,7 @@ namespace WFInfoCS
                 rowEnd = dropData.IndexOf("</tr>", index);
                 string rowContent = dropData.Substring(index, rowEnd - index);
 
-                if (rowContent.Contains("Relic") && rowContent.Contains("Intact"))
+                if (rowContent.Contains("Relic") && rowContent.Contains("Intact") && !rowContent.Contains("Requiem"))
                 {
                     rowContent = Regex.Replace(rowContent, "<[^>]+>|\\([^\\)]+\\)", "");
                     string[] split = rowContent.Split(' ');
@@ -531,13 +524,11 @@ namespace WFInfoCS
                             if (name.Contains("Kubrow"))
                             {
                                 name = name.Replace("Kubrow ", "");
-                            }
-                            else
+                            } else
                             {
                                 name = name.Replace("Prime", "Prime Collar");
                             }
-                        }
-                        else if (!name.Contains("Prime Blueprint") && !name.Contains("Forma"))
+                        } else if (!name.Contains("Prime Blueprint") && !name.Contains("Forma"))
                         {
                             name = name.Replace(" Blueprint", "");
                         }
@@ -545,13 +536,11 @@ namespace WFInfoCS
                         if (split[1].Contains("2."))
                         {
                             relicData[era][relic]["rare1"] = name;
-                        }
-                        else if (split[1].Contains("11"))
+                        } else if (split[1].Contains("11"))
                         {
                             relicData[era][relic]["uncommon" + numberOfUncommon.ToString()] = name;
                             numberOfUncommon += 1;
-                        }
-                        else
+                        } else
                         {
                             relicData[era][relic]["common" + numberOfCommon.ToString()] = name;
                             numberOfCommon += 1;
@@ -587,12 +576,10 @@ namespace WFInfoCS
                             if (name.Contains("Harness"))
                             {
                                 equipmentData[prime]["type"] = "Archwing";
-                            }
-                            else if (name.Contains("Chassis"))
+                            } else if (name.Contains("Chassis"))
                             {
                                 equipmentData[prime]["type"] = "Warframe";
-                            }
-                            else if (name.Contains("Carapace") || name.Contains("Collar Blueprint"))
+                            } else if (name.Contains("Carapace") || name.Contains("Collar Blueprint"))
                             {
                                 equipmentData[prime]["type"] = "Companion";
                             }
@@ -695,8 +682,7 @@ namespace WFInfoCS
                     if (equipmentData.TryGetValue(eqmt, out JToken temp))
                     {
                         equipmentData[eqmt]["parts"][str]["vaulted"] = false;
-                    }
-                    else
+                    } else
                     {
                         Console.WriteLine("Cannot find: " + eqmt + " in equipmentData");
                     }
@@ -757,8 +743,7 @@ namespace WFInfoCS
                                     break;
                                 }
                             }
-                        }
-                        else if (part["Type"].ToString() == "Weapon" && part["Name"].ToString().Contains("Prime"))
+                        } else if (part["Type"].ToString() == "Weapon" && part["Name"].ToString().Contains("Prime"))
                         {
                             if (!temp.ContainsKey(part["Name"].ToString()))
                             {
@@ -830,8 +815,7 @@ namespace WFInfoCS
             if (saveMarket || saveDrop)
             {
                 Main.AddLog("Databases needed updates");
-            }
-            else
+            } else
             {
                 Main.AddLog("Databases did not need updates");
             }
@@ -907,12 +891,16 @@ namespace WFInfoCS
 
         public bool IsPartVaulted(string name)
         {
+            if (name.IndexOf("Prime") < 0)
+                return false;
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
             return equipmentData[eqmt]["parts"][name]["vaulted"].ToObject<bool>();
         }
 
         public string PartsOwned(string name)
         {
+            if (name.IndexOf("Prime") < 0)
+                return "";
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
             return equipmentData[eqmt]["parts"][name]["owned"].ToString() + "/" + equipmentData[eqmt]["parts"][name]["count"].ToString();
         }
@@ -939,7 +927,7 @@ namespace WFInfoCS
 
         readonly char[,] ReplacementList = null;
 
-        private int GetDifference(char c1, char c2)
+        public int GetDifference(char c1, char c2)
         {
             if (c1 == c2 || c1 == '?' || c2 == '?')
             {
@@ -958,7 +946,7 @@ namespace WFInfoCS
             return 1;
         }
 
-        private int LevenshteinDistance(string s, string t)
+        public int LevenshteinDistance(string s, string t)
         {
             // Levenshtein Distance determines how many character changes it takes to form a known result
             // For example: Nuvo Prime is closer to Nova Prime (2) then Ash Prime (4)
@@ -969,33 +957,23 @@ namespace WFInfoCS
             int m = t.Length;
             int[,] d = new int[n + 1, m + 1];
 
-            if (n == 0)
-                return m;
+            if (n == 0 || m == 0)
+                return n + m;
 
-            if (m == 0)
-                return n;
-
-
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i <= n; i++)
                 d[i, 0] = i;
 
-            for (int j = 0; j < m; j++)
+            for (int j = 0; j <= m; j++)
                 d[0, j] = j;
 
             for (int i = 1; i <= n; i++)
                 for (int j = 1; j <= m; j++)
-                {
-                    int cost = 1;
-                    if (t[j - 1] == s[i - 1])
-                        cost = 0;
-
-                    d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1), d[i - 1, j - 1] + cost);
-                }
+                    d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1), d[i - 1, j - 1] + (t[j - 1] == s[i - 1] ? 0 : 1));
 
             return d[n, m];
         }
 
-        private int LevenshteinDistanceSecond(string str1, string str2, int limit = -1)
+        public int LevenshteinDistanceSecond(string str1, string str2, int limit = -1)
         {
             int num;
             Boolean maxY;
@@ -1060,8 +1038,7 @@ namespace WFInfoCS
                 } while (!(maxX && maxY));
 
                 num = d[n, m] - 1;
-            }
-            else
+            } else
             {
                 num = n + m;
             }

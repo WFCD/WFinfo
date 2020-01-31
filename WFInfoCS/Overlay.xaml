@@ -16,7 +16,7 @@
         <Viewbox x:Name="volumeMargin" Margin="0,104,0,17" >
             <TextBlock x:Name="volumeText" Text="XX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
         </Viewbox>
-        <Viewbox x:Name="platMargin" Margin="76,77,0,43" HorizontalAlignment="Left">
+        <Viewbox x:Name="platMargin" Margin="77,77,0,43" HorizontalAlignment="Left">
             <TextBlock x:Name="platText" Text="Plat" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
         </Viewbox>
         <Viewbox x:Name="ducatMargin" Margin="164,77,0,43" HorizontalAlignment="Left">

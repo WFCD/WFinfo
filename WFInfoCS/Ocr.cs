@@ -178,8 +178,7 @@ namespace WFInfoCS
                             Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                             Main.overlays[partNumber].Resize((int)(230 * TotalScaling));
                             Main.overlays[partNumber].Display(startX + (int)(243.75 * TotalScaling) * partNumber, displayHeight);
-                        }
-                        else
+                        } else
                         {
                             Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
                         }
@@ -242,8 +241,7 @@ namespace WFInfoCS
                 {
                     image.SetPixel(coorX - 1, coorY, Color.White);
                     image.SetPixel(coorX + 1, coorY, Color.White);
-                }
-                else
+                } else
                 {
                     image.SetPixel(coorX - 1, coorY, Color.Red);
                     image.SetPixel(coorX + 1, coorY, Color.Red);
@@ -504,8 +502,11 @@ namespace WFInfoCS
         {
             OCR.updateWindow();
 
-            if (window == null)
+            if (window == null || window.Width <= 400)
+            {
                 window = Screen.PrimaryScreen.Bounds;
+                center = new Point(window.Width / 2, window.Height / 2);
+            }
 
             int width = window.Width * (int)OCR.dpi;
             int height = window.Height * (int)OCR.dpi;
@@ -549,8 +550,11 @@ namespace WFInfoCS
                     return true;
                 }
             }
-            Main.AddLog("Unable to detect Warframe in list of current active processes");
-            Main.StatusUpdate("Unable to detect Warframe process", 1);
+            if(!Settings.debug)
+            {
+                Main.AddLog("Unable to detect Warframe in list of current active processes");
+                Main.StatusUpdate("Unable to detect Warframe process", 1);
+            }
             return false;
 
         }
@@ -567,6 +571,7 @@ namespace WFInfoCS
 
         public static void updateWindow(Bitmap image = null)
         {
+            refreshScaling();
             if (image != null)
             {
                 int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
@@ -580,7 +585,6 @@ namespace WFInfoCS
             if (!verifyWarframe())
                 return;
 
-            refreshScaling();
             if (!Win32.GetWindowRect(HandleRef, out Win32.r osRect))
             { // get window size of warframe
                 if (Settings.debug)
@@ -591,8 +595,7 @@ namespace WFInfoCS
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
                     return;
-                }
-                else
+                } else
                 {
                     Main.AddLog("Failed to get window bounds");
                     Main.StatusUpdate("Failed to get window bounds", 1);

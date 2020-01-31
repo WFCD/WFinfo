@@ -22,8 +22,8 @@ namespace WFInfoCS
                     firstPlatText.Text = plat;
                     firstDucatText.Text = ducats;
                     firstVolumeText.Text = volume + " sold last 48hrs";
-                    if (vaulted) { firstVaultedMargin.Visibility = Visibility.Visible; }
-                    firstOwnedText.Text = owned + " owned";
+                    firstVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
+                    firstOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
                     Width = 251;
                     break;
 
@@ -32,9 +32,9 @@ namespace WFInfoCS
                     secondPlatText.Text = plat;
                     secondDucatText.Text = ducats;
                     secondVolumeText.Text = volume + " sold last 48hrs";
-                    if (vaulted) { secondVaultedMargin.Visibility = Visibility.Visible; }
-                    secondOwnedText.Text = owned + " owned";
-                    Width = 502;
+                    secondVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
+                    secondOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
+                    Width = 501;
                     break;
 
                 case 2:
@@ -42,9 +42,9 @@ namespace WFInfoCS
                     thirdPlatText.Text = plat;
                     thirdDucatText.Text = ducats;
                     thirdVolumeText.Text = volume + " sold last 48hrs";
-                    if (vaulted) { thirdVaultedMargin.Visibility = Visibility.Visible; }
-                    thirdOwnedText.Text = owned + " owned";
-                    Width = 753;
+                    thirdVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
+                    thirdOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
+                    Width = 751;
                     break;
 
                 case 3:
@@ -52,8 +52,8 @@ namespace WFInfoCS
                     fourthPlatText.Text = plat;
                     fourthDucatText.Text = ducats;
                     fourthVolumeText.Text = volume + " sold last 48hrs";
-                    if (vaulted) { fourthVaultedMargin.Visibility = Visibility.Visible; }
-                    fourthOwnedText.Text = owned + " owned";
+                    fourthVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
+                    fourthOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
                     Width = 1000;
                     break;
 
@@ -65,7 +65,7 @@ namespace WFInfoCS
         }
         private void Exit(object sender, RoutedEventArgs e)
         {
-            Close();
+            Hide();
         }
         // Allows the draging of the window
         private new void MouseDown(object sender, MouseButtonEventArgs e)
