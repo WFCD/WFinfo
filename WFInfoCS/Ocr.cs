@@ -183,7 +183,8 @@ namespace WFInfoCS
                             Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                             Main.overlays[partNumber].Resize(overWid);
                             Main.overlays[partNumber].Display(startX + partBox.Width / 4 * partNumber, startY);
-                        } else
+                        }
+                        else
                         {
                             Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
                         }
@@ -246,7 +247,8 @@ namespace WFInfoCS
                 {
                     image.SetPixel(coorX - 1, coorY, Color.White);
                     image.SetPixel(coorX + 1, coorY, Color.White);
-                } else
+                }
+                else
                 {
                     image.SetPixel(coorX - 1, coorY, Color.Red);
                     image.SetPixel(coorX + 1, coorY, Color.Red);
@@ -555,7 +557,7 @@ namespace WFInfoCS
                     return true;
                 }
             }
-            if(!Settings.debug)
+            if (!Settings.debug)
             {
                 Main.AddLog("Unable to detect Warframe in list of current active processes");
                 Main.StatusUpdate("Unable to detect Warframe process", 1);
@@ -600,7 +602,8 @@ namespace WFInfoCS
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
                     return;
-                } else
+                }
+                else
                 {
                     Main.AddLog("Failed to get window bounds");
                     Main.StatusUpdate("Failed to get window bounds", 1);

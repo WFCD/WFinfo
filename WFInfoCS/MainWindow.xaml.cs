@@ -26,7 +26,8 @@ namespace WFInfoCS
                 if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json"))
                 {
                     Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json"));
-                } else
+                }
+                else
                 {
                     Settings.settingsObj = JObject.Parse("{\"Display\":\"Overlay\"," +
                         "\"ActivationKey\":\"Snapshot\"," +
@@ -111,8 +112,8 @@ namespace WFInfoCS
 
         private void Settings_click(object sender, RoutedEventArgs e)
         {
-            Settings settingsWindow = new Settings();
-            settingsWindow.Show();
+            Main.settingsWindow.populate();
+            Main.settingsWindow.Show();
         }
 
         private void ReloadWikiClick(object sender, RoutedEventArgs e)

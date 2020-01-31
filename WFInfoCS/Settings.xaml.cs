@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
@@ -26,10 +26,12 @@ namespace WFInfoCS
 
         public Settings()
         {
-            int tempscaling = scaling; // initializing the window will default the scale bar to 100% and thus activating scalebarchange which will set it to the default value. 
-
             InitializeComponent();
 
+        }
+
+        public void populate()
+        {
             if (settingsObj.GetValue("Display").ToString() == "Window")
             {
                 isWindowSelected = true;
@@ -48,13 +50,9 @@ namespace WFInfoCS
             }
             this.DataContext = this;
             //Activation_key_box.Text = "Snapshot";
-            Scaling_box.Text = tempscaling.ToString() + "%";
+            Scaling_box.Text = scaling.ToString() + "%";
             Activation_key_box.Text = settingsObj.GetValue("ActivationKey").ToString();
-            scaleBar.Value = tempscaling;
-
         }
-
-
         private void Save()
         {
             File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(settingsObj, Formatting.Indented));
@@ -63,7 +61,7 @@ namespace WFInfoCS
         private void Exit(object sender, RoutedEventArgs e)
         {
             Save();
-            Close();
+            Hide();
         }
 
         // Allows the draging of the window
@@ -102,13 +100,6 @@ namespace WFInfoCS
             Save();
         }
 
-        private void ScalingValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            settingsObj["Scaling"] = Math.Round(e.NewValue);
-            scaling = (int)Math.Round(e.NewValue);
-            Scaling_box.Text = Math.Round(e.NewValue).ToString() + "%";
-            Save();
-        }
 
         private void ScaleLeave(object sender, RoutedEventArgs e)
         {
@@ -124,7 +115,6 @@ namespace WFInfoCS
                 {
                     value = 100;
                 }
-                scaleBar.Value = value;
                 settingsObj["Scaling"] = value;
                 Scaling_box.Text = value + "%";
                 Save();
