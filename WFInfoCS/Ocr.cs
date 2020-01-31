@@ -95,7 +95,7 @@ namespace WFInfoCS
 
 
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
-        public static int pixRwrdWid = 972;
+        public static int pixRwrdWid = 968;
         public static int pixRwrdHei = 235;
         public static int pixRwrdYDisp = 316;
         public static int pixRwrdLineHei = 44;
@@ -156,6 +156,13 @@ namespace WFInfoCS
             // Get the part box and filter it
             Bitmap partBox = FilterPartNames(image, active);
             List<string> players = SeparatePlayers(partBox);
+
+            int startX = center.X - partBox.Width / 2 + (int)(partBox.Width * 0.004);
+            if (players.Count == 3) { startX += partBox.Width / 8; }
+            int overWid = (int)(partBox.Width / 4.1);
+            int startY = (int)(center.Y - 20 * TotalScaling);
+
+
             int partNumber = 0;
             foreach (string part in players)
             {
@@ -168,16 +175,14 @@ namespace WFInfoCS
                     string volume = job["volume"].ToObject<string>();
                     bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                     string partsOwned = Main.dataBase.PartsOwned(correctName);
-                    int startX = center.X - (int)(center.X / 2 / (ScreenScaling / TotalScaling));
-                    int displayHeight = (int)(center.Y - 20 * TotalScaling);
-                    if (players.Count == 3) { startX += image.Width / 8; }
+
                     Main.RunOnUIThread(() =>
                     {
                         if (Settings.isOverlaySelected)
                         {
                             Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
-                            Main.overlays[partNumber].Resize((int)(230 * TotalScaling));
-                            Main.overlays[partNumber].Display(startX + (int)(243.75 * TotalScaling) * partNumber, displayHeight);
+                            Main.overlays[partNumber].Resize(overWid);
+                            Main.overlays[partNumber].Display(startX + partBox.Width / 4 * partNumber, startY);
                         } else
                         {
                             Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);

@@ -38,6 +38,7 @@ namespace WFInfoCS
                 Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
                 Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
                 Settings.scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
+                Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
 
                 string thisprocessname = Process.GetCurrentProcess().ProcessName;
                 if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
