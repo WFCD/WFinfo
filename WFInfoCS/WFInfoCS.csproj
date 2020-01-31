@@ -129,6 +129,12 @@
     <Compile Include="Overlay.xaml.cs">
       <DependentUpon>Overlay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EquipmentWindow.cs">
+      <DependentUpon>EquipmentWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="RelicsWindow.cs">
+      <DependentUpon>RelicsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
@@ -151,6 +157,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Overlay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EquipmentWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="RelicsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

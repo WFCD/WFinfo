@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Drawing;
 using System.IO;
@@ -18,6 +18,9 @@ namespace WFInfoCS
         public static Data dataBase;
         public static Window window;
         public static Overlay[] overlays;
+        public static RelicsWindow relicWindow;
+        public static EquipmentWindow equipmentWindow;
+        public static Settings settingsWindow;
 
         public Main()
         {
@@ -25,6 +28,9 @@ namespace WFInfoCS
             overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
             window = new Window();
             dataBase = new Data();
+            relicWindow = new RelicsWindow();
+            equipmentWindow = new EquipmentWindow();
+            settingsWindow = new Settings();
             Task.Factory.StartNew(new Action(ThreadedDataLoad));
         }
 

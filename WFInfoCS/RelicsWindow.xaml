@@ -1,0 +1,34 @@
+﻿<Window x:Class="WFInfoCS.RelicsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WFInfoCS"
+        mc:Ignorable="d"
+        Title="Settings" Height="250" Width="334" WindowStyle="None" ResizeMode="NoResize">
+    <Window.Resources>
+        <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
+        <FontFamily x:Key="font">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
+    </Window.Resources>
+    <Grid MouseDown="MouseDown">
+        <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
+        <Grid HorizontalAlignment="Left" Height="27" VerticalAlignment="Top" Width="335" Margin="0,0,-1,0">
+            <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Grid.RowSpan="2"/>
+
+            <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
+            <Label Content="Relics" Background="{x:Null}" Padding="-1" Foreground="#FFB1D0D9" FontFamily="Roboto" FontSize="22" Margin="30,-1,30,4"/>
+            <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="304,0,0,0" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+
+        </Grid>
+        <Grid x:Name="ListGrid" HorizontalAlignment="Left" Height="222" VerticalAlignment="Top" Width="332" Margin="1,27,0,0">
+            <ListView HorizontalAlignment="Left" Height="225" VerticalAlignment="Top" Width="334" Margin="-1,-2,-1,-1" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Grid>
+
+    </Grid>
+</Window>

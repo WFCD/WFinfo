@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -99,13 +99,13 @@ namespace WFInfoCS
 
         private void relicsClick(object sender, RoutedEventArgs e)
         {
-            //todo, open new window, showing all relics
+            Main.relicWindow.populate();
             ChangeStatus("Relics not implemented", 2);
         }
 
         private void equipmentClick(object sender, RoutedEventArgs e)
         {
-            //todo, opens current wip overlay 
+            Main.equipmentWindow.populate();
             ChangeStatus("Equipment not implemented", 2);
         }
 
