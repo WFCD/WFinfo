@@ -67,6 +67,7 @@ namespace WFInfoCS
         // Allows the draging of the window
         private new void MouseDown(object sender, MouseButtonEventArgs e)
         {
+            Keyboard.Focus(hidden);
             if (e.ChangedButton == MouseButton.Left)
                 DragMove();
         }

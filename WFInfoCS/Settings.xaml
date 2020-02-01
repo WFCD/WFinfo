@@ -36,7 +36,9 @@
             <Rectangle x:Name="First_window2" Stroke="#FF646464" Height="39" VerticalAlignment="Top" Margin="0,-1,0,0"/>
             <Label Content="Activation key" Margin="24,3,0,0" Foreground="#FFB1D0D9" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="126" FontFamily="{DynamicResource Roboto}" Padding="5,5,5,0"/>
             <TextBox x:Name="Activation_key_box" ToolTip="Key to activate the program" Margin="190,5,24,5" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Foreground="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" FontFamily="{DynamicResource Roboto}" KeyDown="ActivationDown" Cursor="Arrow" GotFocus="ActivationFocus" KeyUp="ActivationUp" LostFocus="ActivationLost"/>
-            <TextBlock x:Name="hidden" HorizontalAlignment="Left" Margin="26,35,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Visibility="Collapsed"/>
+            <TextBlock x:Name="hidden" Focusable="True" Visibility="Visible" IsEnabled="True" HorizontalAlignment="Left" Margin="333,101,0,-64" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="1" Width="1" RenderTransformOrigin="0.5,0.5" >
+
+            </TextBlock>
         </Grid>
         <Grid x:Name="Scalling_setting" HorizontalAlignment="Left" Height="36" VerticalAlignment="Top" Width="334" Margin="0,122,0,0">
             <Rectangle x:Name="First_window1" Stroke="#FF646464" Margin="0,0,0,-1"/>
