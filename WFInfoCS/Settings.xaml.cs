@@ -27,11 +27,12 @@ namespace WFInfoCS
         public Settings()
         {
             InitializeComponent();
-
         }
 
         public void populate()
         {
+            int tempscaling = scaling; // initializing the window will default the scale bar to 100% and thus activating scalebarchange which will set it to the default value. 
+            scaleBar.Value = tempscaling;
             if (settingsObj.GetValue("Display").ToString() == "Window")
             {
                 isWindowSelected = true;
@@ -50,7 +51,7 @@ namespace WFInfoCS
             }
             this.DataContext = this;
             //Activation_key_box.Text = "Snapshot";
-            Scaling_box.Text = scaling.ToString() + "%";
+            Scaling_box.Text = tempscaling.ToString() + "%";
             Activation_key_box.Text = settingsObj.GetValue("ActivationKey").ToString();
         }
         private void Save()
@@ -161,8 +162,18 @@ namespace WFInfoCS
             Save();
         }
 
-        private void ActivationLost(object sender, RoutedEventArgs e) {
+        private void ActivationLost(object sender, RoutedEventArgs e)
+        {
             Activation_key_box.Text = activationKey.ToString();
         }
+
+        private void ScalingValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            settingsObj["Scaling"] = Math.Round(e.NewValue);
+            scaling = (int)Math.Round(e.NewValue);
+            Scaling_box.Text = Math.Round(e.NewValue).ToString() + "%";
+            Save();
+        }
+
     }
 }
