@@ -159,5 +159,9 @@ namespace WFInfoCS
             settingsObj["ActivationKey"] = e.Key.ToString();
             Save();
         }
+
+        private void ActivationLost(object sender, RoutedEventArgs e) {
+            Activation_key_box.Text = activationKey.ToString();
+        }
     }
 }
