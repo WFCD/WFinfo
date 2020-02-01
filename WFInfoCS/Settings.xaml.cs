@@ -16,10 +16,9 @@ namespace WFInfoCS
 
         private readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json";  //change to WFInfo after release
         public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
-        public bool isWindowSelected { get; set; } //Choseen for multiple booleans over a single one due to the posibility of aditional options in the future.
-        public static Key activationKey { get; set; }
-        public static bool isOverlaySelected { get; set; }
-        public static bool debug { get; set; }
+        public static Key activationKey;
+        public static bool isOverlaySelected;
+        public static bool debug;
         public static int scaling { get; internal set; }
         public static bool auto { get; internal set; }
 
@@ -27,33 +26,30 @@ namespace WFInfoCS
         public Settings()
         {
             InitializeComponent();
+
         }
 
         public void populate()
         {
-            int tempscaling = scaling; // initializing the window will default the scale bar to 100% and thus activating scalebarchange which will set it to the default value. 
-            scaleBar.Value = tempscaling;
-            if (settingsObj.GetValue("Display").ToString() == "Window")
-            {
-                isWindowSelected = true;
-            }
-            else
-            {
-                isOverlaySelected = true;
-            }
-            if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
-            {
-                Auto.IsChecked = true;
-            }
-            if (Convert.ToBoolean(settingsObj.GetValue("Debug")))
-            {
-                Debug.IsChecked = true;
-            }
             this.DataContext = this;
+
+            scaleBar.Value = scaling;
+            if (settingsObj.GetValue("Display").ToString() == "Overlay")
+                OverlayRadio.IsChecked = true;
+            else
+                WindowRadio.IsChecked = true;
+
+            if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
+                Auto.IsChecked = true;
+
+            if (Convert.ToBoolean(settingsObj.GetValue("Debug")))
+                Debug.IsChecked = true;
+
             //Activation_key_box.Text = "Snapshot";
-            Scaling_box.Text = tempscaling.ToString() + "%";
+            Scaling_box.Text = scaling.ToString() + "%";
             Activation_key_box.Text = settingsObj.GetValue("ActivationKey").ToString();
         }
+
         private void Save()
         {
             File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(settingsObj, Formatting.Indented));
@@ -76,7 +72,6 @@ namespace WFInfoCS
         private void WindowChecked(object sender, RoutedEventArgs e)
         {
             settingsObj["Display"] = "Window";
-            isWindowSelected = true;
             isOverlaySelected = false;
             Save();
         }
@@ -84,7 +79,6 @@ namespace WFInfoCS
         private void OverlayChecked(object sender, RoutedEventArgs e)
         {
             settingsObj["Display"] = "Overlay";
-            isWindowSelected = false;
             isOverlaySelected = true;
             Save();
         }
@@ -95,6 +89,7 @@ namespace WFInfoCS
             debug = Debug.IsChecked.Value;
             Save();
         }
+
         private void AutoClicked(object sender, RoutedEventArgs e)
         {
             settingsObj["Auto"] = Auto.IsChecked.Value;
@@ -102,24 +97,38 @@ namespace WFInfoCS
             Save();
         }
 
+        private void ScalingValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (IsLoaded)
+            {
+                int newVal = (int)Math.Round(e.NewValue);
+                scaleBar.Value = newVal;
+                settingsObj["Scaling"] = newVal;
+                scaling = newVal;
+                Scaling_box.Text = newVal.ToString() + "%";
+                Save();
+            }
+        }
 
         private void ScaleLeave(object sender, RoutedEventArgs e)
         {
             try
             {
-                string input = Regex.Replace(Scaling_box.Text.ToString(), "[^0-9.]", "");
-                int value = Convert.ToInt32(input);
-                if (value < 50)
+                string input = Regex.Replace(Scaling_box.Text.ToString(), "[^0-9]", "");
+                if (input.Length > 0)
                 {
-                    value = 50;
-                }
-                else if (value > 100 || value == 0)
-                {
-                    value = 100;
-                }
-                settingsObj["Scaling"] = value;
-                Scaling_box.Text = value + "%";
-                Save();
+                    int value = Convert.ToInt32(input);
+                    if (value < 50)
+                        value = 50;
+                    else if (value > 100)
+                        value = 100;
+
+                    settingsObj["Scaling"] = value;
+                    scaleBar.Value = value;
+                    Scaling_box.Text = value + "%";
+                    Save();
+                } else
+                    Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
             }
             catch
             {
@@ -133,8 +142,9 @@ namespace WFInfoCS
         {
             if (e.Key == Key.Return)
             {
-                Keyboard.ClearFocus();
-                ScaleLeave(sender, e);
+                //Keyboard.ClearFocus();
+                //ScaleLeave(sender, e);
+                this.scaleBar.Focus();
             }
         }
 
@@ -166,14 +176,5 @@ namespace WFInfoCS
         {
             Activation_key_box.Text = activationKey.ToString();
         }
-
-        private void ScalingValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            settingsObj["Scaling"] = Math.Round(e.NewValue);
-            scaling = (int)Math.Round(e.NewValue);
-            Scaling_box.Text = Math.Round(e.NewValue).ToString() + "%";
-            Save();
-        }
-
     }
 }

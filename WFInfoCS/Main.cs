@@ -73,8 +73,7 @@ namespace WFInfoCS
                     Main.AddLog("Loading screenshot from file");
                     Main.StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                }
-                else if (Settings.debug || OCR.verifyWarframe())
+                } else if (Settings.debug || OCR.verifyWarframe())
                     //if (Ocr.verifyFocus()) 
                     //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
                     //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
@@ -114,8 +113,7 @@ namespace WFInfoCS
                             StatusUpdate("Faild to load image", 1);
                         }
                     });
-                }
-                else
+                } else
                 {
                     StatusUpdate("Faild to load image", 1);
                 }
@@ -147,8 +145,8 @@ namespace WFInfoCS
 
     public class Status
     {
-        public string message { get; set; }
-        public int serverity { get; set; }
+        public string message;
+        public int serverity;
 
         public Status(string msg, int ser)
         {
