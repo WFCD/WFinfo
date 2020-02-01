@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace WFInfoCS
 {
@@ -35,8 +37,14 @@ namespace WFInfoCS
         public static double mediumFont = 17.0;
         public static double smallFont = 14.0;
 
+
+        private DispatcherTimer hider = new DispatcherTimer();
+
         public Overlay()
         {
+            hider.Interval = TimeSpan.FromSeconds(10);
+            hider.Tick += HideOverlay;
+
             InitializeComponent();
         }
 
@@ -46,8 +54,14 @@ namespace WFInfoCS
             platText.Text = plat;
             ducatText.Text = ducats;
             volumeText.Text = volume + " sold last 48hrs";
-            if (vaulted) { vaultedMargin.Visibility = Visibility.Visible; }
-            ownedText.Text = owned + " owned";
+            if (vaulted)
+                vaultedMargin.Visibility = Visibility.Visible;
+            else
+                vaultedMargin.Visibility = Visibility.Hidden;
+            if (owned.Length > 0)
+                ownedText.Text = owned + " OWNED";
+            else
+                ownedText.Text = "";
         }
 
         public void Resize(int wid)
@@ -121,11 +135,20 @@ namespace WFInfoCS
             ducatImage.Width = ducatImage.Height;
         }
 
-        public void Display(int x, int y)
+        public void Display(int x, int y, int wait = 10000)
         {
+            hider.Stop();
+            hider.Interval = TimeSpan.FromMilliseconds(wait);
             Left = x;
             Top = y;
             Show();
+            hider.Start();
+        }
+
+        public void HideOverlay(object sender, EventArgs e)
+        {
+            hider.Stop();
+            Hide();
         }
     }
 }

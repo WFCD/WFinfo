@@ -40,7 +40,30 @@ namespace WFInfoCS
             RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + dataBase.marketData["timestamp"].ToString().Substring(5, 11); });
             RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: " + dataBase.equipmentData["timestamp"].ToString().Substring(5, 11); });
             RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + dataBase.equipmentData["rqmts_timestamp"].ToString().Substring(5, 11); });
-            StatusUpdate("Databases Loaded", 0);
+            InitializeOverlays();
+            StatusUpdate("WFInfo Initialization Complete", 0);
+        }
+
+        public static void InitializeOverlays()
+        {
+            double scaling = 1.0;
+            Point center = new Point(Screen.PrimaryScreen.Bounds.Width / 2, Screen.PrimaryScreen.Bounds.Height / 2);
+
+            if (Screen.PrimaryScreen.Bounds.Width * 9 > Screen.PrimaryScreen.Bounds.Height * 16)  // image is less than 16:9 aspect
+                scaling *= Screen.PrimaryScreen.Bounds.Height / 1080.0;
+            else
+                scaling *= Screen.PrimaryScreen.Bounds.Width / 1920.0; //image is higher than 16:9 aspect
+            //Initialize Overlays
+            RunOnUIThread(() =>
+            {
+                for (int i = 0; i < overlays.Length; i++)
+                {
+                    //Screen.PrimaryScreen.Bounds
+                    Main.overlays[i].LoadTextData("Loading Overlay...", "N/A", "N/A", "N/A", true, "N/A");
+                    Main.overlays[i].Resize((int)(240 * scaling));
+                    Main.overlays[i].Display(center.X + (int)(250 * scaling) * (i - 2) + (int)(10 * scaling), center.Y, 100);
+                }
+            });
         }
 
         public static void RunOnUIThread(Action act)
@@ -51,7 +74,7 @@ namespace WFInfoCS
         public static void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
             string path = appPath + @"\Debug";
-            Console.WriteLine(argm);
+            //Console.WriteLine(argm);
             Directory.CreateDirectory(path);
             using (StreamWriter sw = File.AppendText(path + @"\debug.txt"))
             {

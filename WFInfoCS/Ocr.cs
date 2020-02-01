@@ -412,7 +412,7 @@ namespace WFInfoCS
                     do
                     {
                         iter.TryGetBoundingBox(PageIteratorLevel.Word, out outRect);
-                        String word = iter.GetText(PageIteratorLevel.Word);
+                        string word = iter.GetText(PageIteratorLevel.Word);
                         //Console.WriteLine(outRect.ToString());
                         if (word != null)
                         {
