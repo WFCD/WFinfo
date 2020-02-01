@@ -59,9 +59,9 @@ namespace WFInfoCS
                 for (int i = 0; i < overlays.Length; i++)
                 {
                     //Screen.PrimaryScreen.Bounds
-                    Main.overlays[i].LoadTextData("Loading Overlay...", "N/A", "N/A", "N/A", true, "N/A");
+                    Main.overlays[i].LoadTextData("Loading...", "N/A", "N/A", "N/A", true, "N/A");
                     Main.overlays[i].Resize((int)(240 * scaling));
-                    Main.overlays[i].Display(center.X + (int)(250 * scaling) * (i - 2) + (int)(10 * scaling), center.Y, 100);
+                    Main.overlays[i].Display(center.X + (int)(250 * scaling) * (i - 2) + (int)(10 * scaling), center.Y, 1000);
                 }
             });
         }
