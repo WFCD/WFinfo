@@ -132,34 +132,59 @@ namespace WFInfoCS
         public static int pixFissXDisp = 285;
         public static int pixFissYDisp = 43;
 
+
+        private static bool ERROR_DETECTED = false;
+        private static bool PROCESSING_ACTIVE = false;
+
+        private static Bitmap BIG_SHOT;
+        private static Bitmap PART_SHOT;
+        private static Bitmap PART_SHOT_FILTERED;
+
+
+
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
+            if(PROCESSING_ACTIVE)
+            {
+                Main.StatusUpdate("Already Processing Reward Screen", 2);
+                return;
+            }
+
+            Main.AddLog("------------------------------------------------------------------------------------------------------------");
+            Main.AddLog("Triggered Reward Screen Processing");
+            Main.AddLog("------------------------------------------------------------------------------------------------------------");
+
+            Main.StatusUpdate("Processing...", 0);
+
             var watch = Stopwatch.StartNew();
             long start = watch.ElapsedMilliseconds;
 
             // Look at me mom, I'm doing fancy shit
-            Bitmap image = file ?? CaptureScreenshot();
+            BIG_SHOT = file ?? CaptureScreenshot();
 
 
-            if (image.Width * 9 > image.Height * 16)  // image is less than 16:9 aspect
-                Screen_Scaling = image.Height / 1080.0;
+            if (BIG_SHOT.Width * 9 > BIG_SHOT.Height * 16)  // image is less than 16:9 aspect
+                Screen_Scaling = BIG_SHOT.Height / 1080.0;
             else
-                Screen_Scaling = image.Width / 1920.0; //image is higher than 16:9 aspect
-
-
-            // Get that theme
-            WFtheme active = GetTheme(image);
+                Screen_Scaling = BIG_SHOT.Width / 1920.0; //image is higher than 16:9 aspect
 
             UI_Scaling = Settings.scaling / 100.0;
 
+            Main.AddLog("Scaling values: Screen_Scaling = " + (Screen_Scaling * 100).ToString("F2") + "%, DPI_Scaling = " + (DPI_Scaling * 100).ToString("F2") + "%, UI_Scaling = " + (UI_Scaling * 100).ToString("F0") + "%");
+
+
+            // Get that theme
+            WFtheme active = GetTheme(BIG_SHOT);
+
+
 
             // Get the part box and filter it
-            Bitmap partBox = FilterPartNames(image, active);
-            List<string> players = SeparatePlayers(partBox);
+            PART_SHOT_FILTERED = FilterPartNames(BIG_SHOT, active);
+            List<string> players = SeparatePlayers(PART_SHOT_FILTERED);
 
-            int startX = center.X - partBox.Width / 2 + (int)(partBox.Width * 0.004);
-            if (players.Count == 3 && players[0].Length > 0) { startX += partBox.Width / 8; }
-            int overWid = (int)(partBox.Width / (4.1 * DPI_Scaling));
+            int startX = center.X - PART_SHOT_FILTERED.Width / 2 + (int)(PART_SHOT_FILTERED.Width * 0.004);
+            if (players.Count == 3 && players[0].Length > 0) { startX += PART_SHOT_FILTERED.Width / 8; }
+            int overWid = (int)(PART_SHOT_FILTERED.Width / (4.1 * DPI_Scaling));
             int startY = (int)(center.Y / DPI_Scaling - 20 * Screen_Scaling * UI_Scaling);
 
 
@@ -182,7 +207,7 @@ namespace WFInfoCS
                         {
                             Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                             Main.overlays[partNumber].Resize(overWid);
-                            Main.overlays[partNumber].Display((int)((startX + partBox.Width / 4 * partNumber) / DPI_Scaling), startY);
+                            Main.overlays[partNumber].Display((int)((startX + PART_SHOT_FILTERED.Width / 4 * partNumber) / DPI_Scaling), startY);
                         } else
                         {
                             Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
@@ -195,12 +220,24 @@ namespace WFInfoCS
 
 
             var end = watch.ElapsedMilliseconds;
-            Console.WriteLine("Completed " + (end - start) + " ms");
-            start = watch.ElapsedMilliseconds;
-
+            Main.AddLog("Total Processing Time " + (end - start) + " ms");
             watch.Stop();
-            partBox.Save(Main.appPath + @"\Debug\PartBoxDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
-            image.Save(Main.appPath + @"\Debug\FullScreenShotDebug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
+
+            Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
+
+            BIG_SHOT.Save(Main.appPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
+            PART_SHOT.Save(Main.appPath + @"\Debug\PartBox " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
+            PART_SHOT_FILTERED.Save(Main.appPath + @"\Debug\PartBoxFilter " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
+
+
+            BIG_SHOT.Dispose();
+            BIG_SHOT = null;
+            PART_SHOT.Dispose();
+            PART_SHOT = null;
+            PART_SHOT_FILTERED.Dispose();
+            PART_SHOT_FILTERED = null;
+
+            ERROR_DETECTED = false;
         }
 
         private static WFtheme GetTheme(Bitmap image)
@@ -242,15 +279,6 @@ namespace WFInfoCS
                         minTheme = theme;
                     }
                 }
-                if (minThresh < 10)
-                {
-                    image.SetPixel(coorX - 1, coorY, Color.White);
-                    image.SetPixel(coorX + 1, coorY, Color.White);
-                } else
-                {
-                    image.SetPixel(coorX - 1, coorY, Color.Red);
-                    image.SetPixel(coorX + 1, coorY, Color.Red);
-                }
 
                 if (estimatedScaling < .5 && minThresh < 10)
                     estimatedScaling = (coorX / pixProfXSpecial) / Screen_Scaling;
@@ -266,7 +294,7 @@ namespace WFInfoCS
                 Main.AddLog("ESTIMATED SCALING: " + (int)(100 * estimatedScaling) + "%");
                 Main.AddLog("USER INPUT SCALING: " + Settings.Scaling + "%");
             }*/
-            Main.AddLog("CLOSEST THEME(" + closestThresh + "): " + closestTheme.ToString() + " - " + closestColor.ToString());
+            Main.AddLog("CLOSEST THEME(" + closestThresh + "): " + closestTheme.ToString() + " - (" + closestColor.R + "," + closestColor.G + "," + closestColor.B + ")");
             return closestTheme;
         }
 
@@ -337,38 +365,30 @@ namespace WFInfoCS
             int left = (image.Width / 2) - (width / 2);
             int top = (image.Height / 2) - (int)(pixRwrdYDisp * Screen_Scaling * UI_Scaling) + (int)(pixRwrdHei * Screen_Scaling * UI_Scaling) - lineHeight;
 
-            Color clr;
+            PART_SHOT_FILTERED = new Bitmap(width + 10, lineHeight + 10);
+            PART_SHOT = new Bitmap(width + 10, lineHeight + 10);
 
-            Bitmap ret = new Bitmap(width + 10, lineHeight + 10);
-            Bitmap ret2 = new Bitmap(width + 10, lineHeight + 10);
-            for (int x = 0; x < ret.Width; x++)
-                for (int y = 0; y < ret.Height; y++)
+            for (int x = 0; x < PART_SHOT_FILTERED.Width; x++)
+                for (int y = 0; y < PART_SHOT_FILTERED.Height; y++)
                 {
-                    ret.SetPixel(x, y, Color.White);
-                    ret2.SetPixel(x, y, Color.White);
-                    if (x == 4 || y == 4 || x == ret.Width - 5 || y == ret.Height - 5)
-                    {
-                        image.SetPixel(left + x - 5, top + y - 5, Color.Red);
-                    }
+                    PART_SHOT_FILTERED.SetPixel(x, y, Color.White);
+                    PART_SHOT.SetPixel(x, y, Color.White);
                 }
 
 
-            var csv = new StringBuilder();
-            csv.Append("X,Y,R,G,B,Hue,Saturation,Brightness\n");
+            Color clr;
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < lineHeight; y++)
                 {
                     clr = image.GetPixel(left + x, top + y);
                     if (ThemeThresholdFilter(clr, active))
                     {
-                        csv.Append(x + ", " + y + ", " + clr.R + ", " + clr.G + ", " + clr.B + ", " + clr.GetHue() + ", " + clr.GetSaturation() + ", " + clr.GetBrightness() + "\n");
-                        ret.SetPixel(x + 5, y + 5, Color.Black);
-                        ret2.SetPixel(x + 5, y + 5, clr);
+                        PART_SHOT_FILTERED.SetPixel(x + 5, y + 5, Color.Black);
+                        PART_SHOT.SetPixel(x + 5, y + 5, clr);
                     }
                 }
-            ret2.Save(Main.appPath + @"\Debug\PartBox2Debug " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
-            File.WriteAllText(Main.appPath + @"\Debug\pixels.csv", csv.ToString());
-            return ret;
+
+            return PART_SHOT_FILTERED;
         }
 
         internal static List<string> SeparatePlayers(Bitmap image)
@@ -464,7 +484,6 @@ namespace WFInfoCS
             //    go to the next one
 
             // position the left correctly based on part boxes
-            Console.WriteLine("Odds (" + oddCount + ") vs Evens (" + evenCount + ")");
             if (oddCount > evenCount)
                 left -= subwid;
             else
@@ -492,6 +511,10 @@ namespace WFInfoCS
                     currPartBot += words[arr2D[ind][2]] + " ";
             }
             ret.Add((currPartTop.Trim() + " " + currPartBot.Trim()).Trim());
+
+
+            Console.WriteLine((ret[0].Length == 0 ? ret.Count - 1 : ret.Count) + " Players Found -- Odds (" + oddCount + ") vs Evens (" + evenCount + ")");
+
             return ret;
         }
 
@@ -505,24 +528,21 @@ namespace WFInfoCS
 
         internal static Bitmap CaptureScreenshot()
         {
-            OCR.updateWindow();
+            updateWindow();
 
-            if (window == null || window.Width <= 400)
+            if (window == null)
             {
                 window = Screen.PrimaryScreen.Bounds;
                 center = new Point(window.Width / 2, window.Height / 2);
             }
 
-            int width = window.Width * (int)OCR.DPI_Scaling;
-            int height = window.Height * (int)OCR.DPI_Scaling;
+            int width = window.Width * (int)DPI_Scaling;
+            int height = window.Height * (int)DPI_Scaling;
 
             Bitmap image = new Bitmap(width, height);
             Size FullscreenSize = new Size(image.Width, image.Height);
             using (Graphics graphics = Graphics.FromImage(image))
-            {
                 graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
-            }
-            image.Save(Main.appPath + @"\Debug\Fullscreenshot.png");
 
             return image;
         }
@@ -567,10 +587,7 @@ namespace WFInfoCS
         private static void refreshScaling()
         {
             using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
-            {
                 DPI_Scaling = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only need to check one value
-                Main.AddLog("Scaling updated to: " + (Screen_Scaling * UI_Scaling * DPI_Scaling) + ". User has a DPI scaling of: " + DPI_Scaling + " and a set UI scaling of: " + Settings.scaling + "%");
-            }
         }
 
         public static void updateWindow(Bitmap image = null)
@@ -578,8 +595,8 @@ namespace WFInfoCS
             refreshScaling();
             if (image != null)
             {
-                int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)OCR.DPI_Scaling;
-                int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)OCR.DPI_Scaling;
+                int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)DPI_Scaling;
+                int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)DPI_Scaling;
                 window = new Rectangle(0, 0, width, height);
                 center = new Point(window.Width / 2, window.Height / 2);
                 return;
@@ -594,8 +611,8 @@ namespace WFInfoCS
                 if (Settings.debug)
                 { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
                     Main.AddLog("No warframe detected, thus using center of screen");
-                    int width = Screen.PrimaryScreen.Bounds.Width * (int)OCR.DPI_Scaling;
-                    int height = Screen.PrimaryScreen.Bounds.Height * (int)OCR.DPI_Scaling;
+                    int width = Screen.PrimaryScreen.Bounds.Width * (int)DPI_Scaling;
+                    int height = Screen.PrimaryScreen.Bounds.Height * (int)DPI_Scaling;
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
                     return;
@@ -606,24 +623,38 @@ namespace WFInfoCS
                     return;
                 }
             }
-            if (window.X < -20000 || window.Y < -20000) { Warframe = null; window = Rectangle.Empty; return; }
-            // if the window is in the VOID delete current process and re-set window to nothing
-            if (window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
+
+            if (osRect.Left < -20000 || osRect.Top < -20000)
+            { // if the window is in the VOID delete current process and re-set window to nothing
+                Warframe = null;
+                window = Rectangle.Empty;
+            } else if (window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
             { // checks if old window size is the right size if not change it
-                window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // gett Rectangle out of rect
-                                                                                                                         //Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
-                Main.AddLog("Window size updated to: " + window.ToString());
+                window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
+                                                                                                                         // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
+                Main.AddLog("Window size detected: " + window.ToString());
                 int GWL_style = -16;
-                uint Fullscreen = 885981184;
-                uint Borderless = 2483027968;
+                uint WS_BORDER = 0x00800000;
+                uint WS_POPUP = 0x80000000;
+
+
                 uint styles = Win32.GetWindowLongPtr(HandleRef, GWL_style);
-                if (styles == Fullscreen) { currentStyle = WindowStyle.FULLSCREEN; Main.AddLog("Fullscreen detected"); } //Fullscreen, don't do anything
-                else if (styles == Borderless) { currentStyle = WindowStyle.BORDERLESS; Main.AddLog("Borderless detected"); } //Borderless, don't do anything
-                else
-                { // Windowed, adjust for thicc border
+                if ((styles & WS_POPUP) != 0)
+                {
+                    // Borderless, don't do anything
+                    currentStyle = WindowStyle.BORDERLESS;
+                    Main.AddLog("Borderless detected (0x" + styles.ToString("X8") + ")");
+                } else if ((styles & WS_BORDER) != 0)
+                {
+                    // Windowed, adjust for thicc border
                     window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
-                    Main.AddLog("Windowed detected, compensating to to: " + window.ToString());
+                    Main.AddLog("Windowed detected (0x" + styles.ToString("X8") + "), adjusting window to: " + window.ToString());
                     currentStyle = WindowStyle.WINDOWED;
+                } else
+                {
+                    // Assume Fullscreen, don't do anything
+                    Main.AddLog("Fullscreen detected (0x" + styles.ToString("X8") + ")");
+                    currentStyle = WindowStyle.FULLSCREEN;
                 }
                 center = new Point(window.Width / 2, window.Height / 2);
             }

@@ -40,7 +40,7 @@ namespace WFInfoCS
             RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + dataBase.marketData["timestamp"].ToString().Substring(5, 11); });
             RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: " + dataBase.equipmentData["timestamp"].ToString().Substring(5, 11); });
             RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + dataBase.equipmentData["rqmts_timestamp"].ToString().Substring(5, 11); });
-            InitializeOverlays();
+            //InitializeOverlays();
             StatusUpdate("WFInfo Initialization Complete", 0);
         }
 
@@ -59,9 +59,9 @@ namespace WFInfoCS
                 for (int i = 0; i < overlays.Length; i++)
                 {
                     //Screen.PrimaryScreen.Bounds
-                    Main.overlays[i].LoadTextData("Loading...", "N/A", "N/A", "N/A", true, "N/A");
-                    Main.overlays[i].Resize((int)(240 * scaling));
-                    Main.overlays[i].Display(center.X + (int)(250 * scaling) * (i - 2) + (int)(10 * scaling), center.Y, 1000);
+                    overlays[i].LoadTextData("Loading...", "N/A", "N/A", "N/A", true, "N/A");
+                    overlays[i].Resize((int)(240 * scaling));
+                    overlays[i].Display(center.X + (int)(250 * scaling) * (i - 2) + (int)(10 * scaling), center.Y, 1000);
                 }
             });
         }
@@ -74,7 +74,7 @@ namespace WFInfoCS
         public static void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
             string path = appPath + @"\Debug";
-            //Console.WriteLine(argm);
+            Console.WriteLine(argm);
             Directory.CreateDirectory(path);
             using (StreamWriter sw = File.AppendText(path + @"\debug.txt"))
             {
@@ -93,8 +93,8 @@ namespace WFInfoCS
             { //check if user pressed activation key
                 if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
-                    Main.AddLog("Loading screenshot from file");
-                    Main.StatusUpdate("Offline testing with screenshot", 0);
+                    AddLog("Loading screenshot from file");
+                    StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
                 } else if (Settings.debug || OCR.verifyWarframe())
                     //if (Ocr.verifyFocus()) 

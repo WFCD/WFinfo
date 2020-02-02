@@ -83,7 +83,7 @@ namespace WFInfoCS
 
         private void Exit(object sender, RoutedEventArgs e)
         {
-            App.Current.Shutdown();
+            Application.Current.Shutdown();
         }
 
         private void Minimise(object sender, RoutedEventArgs e)
