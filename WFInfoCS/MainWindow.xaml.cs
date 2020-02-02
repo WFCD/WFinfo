@@ -14,12 +14,13 @@ namespace WFInfoCS
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
-        readonly Main main = new Main(); //subscriber
+        readonly Main main; //subscriber
         public static MainWindow INSTANCE;
 
         public MainWindow()
         {
             INSTANCE = this;
+            main = new Main();
             LowLevelListener listener = new LowLevelListener(); //publisher
             try
             {
@@ -51,8 +52,6 @@ namespace WFInfoCS
                 listener.Hook();
                 InitializeComponent();
                 Version.Content = Main.BuildVersion;
-
-                Main.AddLog("Sucsesfully launched");
             }
             catch (Exception e)
             {

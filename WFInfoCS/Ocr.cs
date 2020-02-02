@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -144,15 +145,13 @@ namespace WFInfoCS
 
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
-            if(PROCESSING_ACTIVE)
+            if (PROCESSING_ACTIVE)
             {
                 Main.StatusUpdate("Already Processing Reward Screen", 2);
                 return;
             }
-
-            Main.AddLog("------------------------------------------------------------------------------------------------------------");
-            Main.AddLog("Triggered Reward Screen Processing");
-            Main.AddLog("------------------------------------------------------------------------------------------------------------");
+            PROCESSING_ACTIVE = true;
+            Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
 
             Main.StatusUpdate("Processing...", 0);
 
@@ -220,15 +219,34 @@ namespace WFInfoCS
 
 
             var end = watch.ElapsedMilliseconds;
-            Main.AddLog("Total Processing Time " + (end - start) + " ms");
+            Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
+
             watch.Stop();
 
             Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
-            BIG_SHOT.Save(Main.appPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
-            PART_SHOT.Save(Main.appPath + @"\Debug\PartBox " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
-            PART_SHOT_FILTERED.Save(Main.appPath + @"\Debug\PartBoxFilter " + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".png");
+            FileInfo[] files = new DirectoryInfo(Main.appPath + @"\Debug\").GetFiles("FullScreenShot *").OrderBy(f => f.CreationTime).ToArray();
+            for (int i = 0; i < files.Length - 4; i++)
+                files[i].Delete();
+            files = new DirectoryInfo(Main.appPath + @"\Debug\").GetFiles("PartBox *").OrderBy(f => f.CreationTime).ToArray();
+            for (int i = 0; i < files.Length - 4; i++)
+                files[i].Delete();
+            files = new DirectoryInfo(Main.appPath + @"\Debug\").GetFiles("PartBoxFilter *").OrderBy(f => f.CreationTime).ToArray();
+            for (int i = 0; i < files.Length - 4; i++)
+                files[i].Delete();
 
+            string next = "0000";
+            if (files.Length > 0)
+            {
+                next = files[files.Length - 1].Name;
+                Console.WriteLine(next);
+                Console.WriteLine((Convert.ToInt32(next.Substring(next.Length - 8, 4)) + 1) % 10000);
+                next = ((Convert.ToInt32(next.Substring(next.Length - 8, 4)) + 1) % 10000).ToString("D4");
+            }
+            Console.WriteLine(next);
+            BIG_SHOT.Save(Main.appPath + @"\Debug\FullScreenShot " + next + ".png");
+            PART_SHOT.Save(Main.appPath + @"\Debug\PartBox " + next + ".png");
+            PART_SHOT_FILTERED.Save(Main.appPath + @"\Debug\PartBoxFilter " + next + ".png");
 
             BIG_SHOT.Dispose();
             BIG_SHOT = null;
@@ -238,6 +256,7 @@ namespace WFInfoCS
             PART_SHOT_FILTERED = null;
 
             ERROR_DETECTED = false;
+            PROCESSING_ACTIVE = false;
         }
 
         private static WFtheme GetTheme(Bitmap image)
@@ -370,10 +389,7 @@ namespace WFInfoCS
 
             for (int x = 0; x < PART_SHOT_FILTERED.Width; x++)
                 for (int y = 0; y < PART_SHOT_FILTERED.Height; y++)
-                {
                     PART_SHOT_FILTERED.SetPixel(x, y, Color.White);
-                    PART_SHOT.SetPixel(x, y, Color.White);
-                }
 
 
             Color clr;
@@ -381,11 +397,10 @@ namespace WFInfoCS
                 for (int y = 0; y < lineHeight; y++)
                 {
                     clr = image.GetPixel(left + x, top + y);
+                    PART_SHOT.SetPixel(x + 5, y + 5, clr);
+
                     if (ThemeThresholdFilter(clr, active))
-                    {
                         PART_SHOT_FILTERED.SetPixel(x + 5, y + 5, Color.Black);
-                        PART_SHOT.SetPixel(x + 5, y + 5, clr);
-                    }
                 }
 
             return PART_SHOT_FILTERED;

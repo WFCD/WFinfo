@@ -25,6 +25,8 @@ namespace WFInfoCS
         public Main()
         {
             INSTANCE = this;
+            StartMessage();
+
             overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
             window = new Window();
             dataBase = new Data();
@@ -42,6 +44,7 @@ namespace WFInfoCS
             RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + dataBase.equipmentData["rqmts_timestamp"].ToString().Substring(5, 11); });
             //InitializeOverlays();
             StatusUpdate("WFInfo Initialization Complete", 0);
+            Main.AddLog("WFInfo has launched successfully");
         }
 
         public static void InitializeOverlays()
@@ -71,15 +74,23 @@ namespace WFInfoCS
             MainWindow.INSTANCE.Dispatcher.Invoke(act);
         }
 
+        public static void StartMessage()
+        {
+            Directory.CreateDirectory(appPath);
+            using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+            {
+                sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
+                sw.WriteLineAsync("   STARTING WFINFO " + buildVersion + " at " + DateTime.UtcNow);
+                sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
+            }
+        }
+
         public static void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
-            string path = appPath + @"\Debug";
             Console.WriteLine(argm);
-            Directory.CreateDirectory(path);
-            using (StreamWriter sw = File.AppendText(path + @"\debug.txt"))
-            {
-                sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "] \t" + argm);
-            }
+            Directory.CreateDirectory(appPath);
+            using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+                sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
         }
 
         public static void StatusUpdate(string message, int serverity)

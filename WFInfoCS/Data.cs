@@ -43,7 +43,7 @@ namespace WFInfoCS
 
         public Data()
         {
-            Main.AddLog("Creating database");
+            Main.AddLog("Initializing Databases");
             marketItemsPath = applicationDirectory + @"\market_items.json";
             marketDataPath = applicationDirectory + @"\market_data.json";
             eqmtDataPath = applicationDirectory + @"\eqmt_data.json";
@@ -110,29 +110,9 @@ namespace WFInfoCS
             File.WriteAllText(Path.Combine(applicationDirectory + @"\debug" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
         }
 
-        private void SaveMarket()
+        private void SaveDatabase(string path, object db)
         {
-            Main.AddLog("Saving market database");
-            File.WriteAllText(marketItemsPath, JsonConvert.SerializeObject(marketItems, Formatting.Indented));
-            File.WriteAllText(marketDataPath, JsonConvert.SerializeObject(marketData, Formatting.Indented));
-        }
-
-        private void SaveRelics()
-        {
-            Main.AddLog("Saving relic database");
-            File.WriteAllText(relicDataPath, JsonConvert.SerializeObject(relicData, Formatting.Indented));
-        }
-
-        private void SaveNames()
-        {
-            Main.AddLog("Saving name database");
-            File.WriteAllText(nameDataPath, JsonConvert.SerializeObject(nameData, Formatting.Indented));
-        }
-
-        private void SaveEquipment()
-        {
-            Main.AddLog("Saving equipment database");
-            File.WriteAllText(eqmtDataPath, JsonConvert.SerializeObject(equipmentData, Formatting.Indented));
+            File.WriteAllText(path, JsonConvert.SerializeObject(db, Formatting.Indented));
         }
 
         public int GetGithubVersion()
@@ -174,23 +154,8 @@ namespace WFInfoCS
             }
         }
 
-        private bool LoadItems(bool force = false)
+        private bool LoadItems()
         {
-            if (!force && File.Exists(marketItemsPath))
-            {
-                if (marketItems == null)
-                {
-                    marketItems = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(marketItemsPath));
-                }
-
-                if (marketItems.TryGetValue("version", out _) && marketItems["version"] == Main.buildVersion)
-                {
-                    Main.AddLog("Item database is good");
-                    return false;
-                }
-            }
-
-            Main.AddLog("Item databse is loading new items");
             marketItems = new Dictionary<string, string>();
 
             IList<IList<object>> sheet = sheetsApi.GetSheet("items!A:C");
@@ -204,7 +169,7 @@ namespace WFInfoCS
             }
 
             marketItems["version"] = Main.BuildVersion;
-            Main.AddLog("Item database is good");
+            Main.AddLog("Item database has been downloaded");
             return true;
         }
 
@@ -223,13 +188,12 @@ namespace WFInfoCS
                     DateTime dayAgo = DateTime.Now.AddDays(-1);
                     if (timestamp > dayAgo)
                     {
-                        Main.AddLog("Platinum database is good");
+                        Main.AddLog("Plat database is up to date");
                         return false;
                     }
                 }
             }
 
-            Main.AddLog("Platinum databse is loading new items");
             marketData = new JObject();
 
             IList<IList<object>> sheet = sheetsApi.GetSheet("prices!A:I");
@@ -257,7 +221,7 @@ namespace WFInfoCS
             marketData["timestamp"] = DateTime.Now.ToString("R");
             marketData["version"] = Main.BuildVersion;
 
-            Main.AddLog("Platinum database is good");
+            Main.AddLog("Plat database has been downloaded");
             LoadDucats();
             if (force && relicData != null)
             {
@@ -269,7 +233,6 @@ namespace WFInfoCS
 
         private void LoadDucats()
         {
-            Main.AddLog("Ducat database is loading new items");
             JObject market_temp =
                 JsonConvert.DeserializeObject<JObject>(
                     WebClient.DownloadString("https://api.warframe.market/v1/tools/ducats"));
@@ -278,8 +241,7 @@ namespace WFInfoCS
                 if (!marketItems.TryGetValue(elem["item"].ToString(), out string item_name))
                 {
                     Main.AddLog("Unknwon market id: " + elem["item"].ToObject<string>());
-                }
-                else
+                } else
                 {
 
                     item_name = item_name.Split('|')[0];
@@ -288,18 +250,12 @@ namespace WFInfoCS
                         Main.AddLog("Missing item in MarketData: " + item_name);
                     }
 
-                    if (item_name.Contains(" Set"))
-                    {
-                        LoadItems(true);
-                    }
-                    else
-                    {
+                    if (!item_name.Contains(" Set"))
                         marketData[item_name]["ducats"] = elem["ducats"];
-                    }
                 }
             }
 
-            Main.AddLog("Ducat database is good");
+            Main.AddLog("Ducat database has been downloaded");
         }
 
         public void CheckDucats()
@@ -334,12 +290,10 @@ namespace WFInfoCS
                                 if (rarity.Key.Contains("rare"))
                                 {
                                     marketData[name]["ducats"] = 100;
-                                }
-                                else if (rarity.Key.Contains("un"))
+                                } else if (rarity.Key.Contains("un"))
                                 {
                                     marketData[name]["ducats"] = 45;
-                                }
-                                else
+                                } else
                                 {
                                     marketData[name]["ducats"] = 15;
                                 }
@@ -371,8 +325,7 @@ namespace WFInfoCS
                 if (marketData.TryGetValue(kvp.Key, out JToken temp))
                 {
                     ret += count * temp["plat"].ToObject<double>();
-                }
-                else if (equipmentData.TryGetValue(kvp.Key, out temp))
+                } else if (equipmentData.TryGetValue(kvp.Key, out temp))
                 {
                     // Need to confirm that this adjusted logic won't cause recursive bomb
                     double plat = GetSetPlat(temp.ToObject<JObject>());
@@ -381,7 +334,8 @@ namespace WFInfoCS
                         { "ducats", 0 },
                         { "plat", plat },
                     };
-                    SaveMarket();
+                    SaveDatabase(marketItemsPath, marketItems);
+                    SaveDatabase(marketDataPath, marketData);
 
                     ret += count * plat;
                 }
@@ -408,8 +362,7 @@ namespace WFInfoCS
             if (!ducats.TryGetValue("ducats", out JToken temp))
             {
                 ducat = "0";
-            }
-            else
+            } else
             {
                 ducat = temp.ToObject<string>();
             }
@@ -423,15 +376,13 @@ namespace WFInfoCS
 
         private bool LoadDropData(bool force = false)
         {
-            Main.AddLog("Loading drop database");
             WebRequest request;
             if (equipmentData == null)
             {
                 if (File.Exists(eqmtDataPath))
                 {
                     equipmentData = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath));
-                }
-                else
+                } else
                 {
                     equipmentData = new JObject();
                 }
@@ -460,12 +411,12 @@ namespace WFInfoCS
 
                     if (relicData.TryGetValue("timestamp", out temp) && equipmentData.TryGetValue("timestamp", out temp) && equipmentData["timestamp"].ToObject<string>() == relicData["timestamp"].ToObject<string>() && lastModified < relicData["timestamp"].ToObject<DateTime>())
                     {
+                        Main.AddLog("Drop database is up to date");
                         return false;
                     }
                 }
             }
 
-            Main.AddLog("Loading new drop database");
 
             relicData = new JObject();
             nameData = new JObject();
@@ -531,13 +482,11 @@ namespace WFInfoCS
                             if (name.Contains("Kubrow"))
                             {
                                 name = name.Replace("Kubrow ", "");
-                            }
-                            else
+                            } else
                             {
                                 name = name.Replace("Prime", "Prime Collar");
                             }
-                        }
-                        else if (!name.Contains("Prime Blueprint") && !name.Contains("Forma"))
+                        } else if (!name.Contains("Prime Blueprint") && !name.Contains("Forma"))
                         {
                             name = name.Replace(" Blueprint", "");
                         }
@@ -545,13 +494,11 @@ namespace WFInfoCS
                         if (split[1].Contains("2."))
                         {
                             relicData[era][relic]["rare1"] = name;
-                        }
-                        else if (split[1].Contains("11"))
+                        } else if (split[1].Contains("11"))
                         {
                             relicData[era][relic]["uncommon" + numberOfUncommon.ToString()] = name;
                             numberOfUncommon += 1;
-                        }
-                        else
+                        } else
                         {
                             relicData[era][relic]["common" + numberOfCommon.ToString()] = name;
                             numberOfCommon += 1;
@@ -587,12 +534,10 @@ namespace WFInfoCS
                             if (name.Contains("Harness"))
                             {
                                 equipmentData[prime]["type"] = "Archwing";
-                            }
-                            else if (name.Contains("Chassis"))
+                            } else if (name.Contains("Chassis"))
                             {
                                 equipmentData[prime]["type"] = "Warframe";
-                            }
-                            else if (name.Contains("Carapace") || name.Contains("Collar Blueprint"))
+                            } else if (name.Contains("Carapace") || name.Contains("Collar Blueprint"))
                             {
                                 equipmentData[prime]["type"] = "Companion";
                             }
@@ -643,6 +588,7 @@ namespace WFInfoCS
 
             GetSetValueStatus();
             equipmentData["version"] = Main.BuildVersion;
+            Main.AddLog("Drop database has been downloaded");
             return true;
         }
 
@@ -695,8 +641,7 @@ namespace WFInfoCS
                     if (equipmentData.TryGetValue(eqmt, out JToken temp))
                     {
                         equipmentData[eqmt]["parts"][str]["vaulted"] = false;
-                    }
-                    else
+                    } else
                     {
                         Console.WriteLine("Cannot find: " + eqmt + " in equipmentData");
                     }
@@ -716,12 +661,11 @@ namespace WFInfoCS
                 DateTime dayAgo = DateTime.Now.AddDays(-1);
                 if (timestamp > dayAgo)
                 {
-                    Main.AddLog("Wiki database is good");
+                    Main.AddLog("Wiki database is up to date");
                     return false;
                 }
             }
 
-            Main.AddLog("Loading new wiki database");
             string data = WebClient.DownloadString(weaponRequirementWikiURL);
             int start = data.IndexOf("<timestamp>") + 11;
             int last = data.IndexOf("<", start);
@@ -757,8 +701,7 @@ namespace WFInfoCS
                                     break;
                                 }
                             }
-                        }
-                        else if (part["Type"].ToString() == "Weapon" && part["Name"].ToString().Contains("Prime"))
+                        } else if (part["Type"].ToString() == "Weapon" && part["Name"].ToString().Contains("Prime"))
                         {
                             if (!temp.ContainsKey(part["Name"].ToString()))
                             {
@@ -789,12 +732,13 @@ namespace WFInfoCS
                 }
             }
 
+            Main.AddLog("Wiki database has been downloaded");
             return true;
         }
 
         public bool Update()
         {
-            Main.AddLog("Updating databaes");
+            Main.AddLog("Checking for Updates to Databases");
             bool saveMarket = LoadItems() | LoadMarket();
 
             foreach (KeyValuePair<string, string> elem in marketItems)
@@ -816,24 +760,16 @@ namespace WFInfoCS
             saveDrop = LoadEquipmentRequirements(saveDrop);
             if (saveDrop)
             {
-                SaveEquipment();
-                SaveRelics();
-                SaveNames();
+                SaveDatabase(eqmtDataPath, equipmentData);
+                SaveDatabase(relicDataPath, relicData);
+                SaveDatabase(nameDataPath, nameData);
             }
 
             if (saveMarket || saveDrop)
             {
                 CheckDucats();
-                SaveMarket();
-            }
-
-            if (saveMarket || saveDrop)
-            {
-                Main.AddLog("Databases needed updates");
-            }
-            else
-            {
-                Main.AddLog("Databases did not need updates");
+                SaveDatabase(marketItemsPath, marketItems);
+                SaveDatabase(marketDataPath, marketData);
             }
 
             return saveMarket || saveDrop;
@@ -842,7 +778,7 @@ namespace WFInfoCS
         public void ForceMarketUpdate()
         {
             Main.AddLog("Forcing market update");
-            LoadItems(true);
+            LoadItems();
             LoadMarket(true);
 
             foreach (KeyValuePair<string, string> elem in marketItems)
@@ -858,7 +794,8 @@ namespace WFInfoCS
                     }
                 }
             }
-            SaveMarket();
+            SaveDatabase(marketItemsPath, marketItems);
+            SaveDatabase(marketDataPath, marketData);
         }
 
         public void ForceEquipmentUpdate()
@@ -866,16 +803,16 @@ namespace WFInfoCS
             Main.AddLog("Forcing equipment update");
             LoadDropData(true);
             LoadEquipmentRequirements(true);
-            SaveEquipment();
-            SaveRelics();
-            SaveNames();
+            SaveDatabase(eqmtDataPath, equipmentData);
+            SaveDatabase(relicDataPath, relicData);
+            SaveDatabase(nameDataPath, nameData);
         }
 
         public void ForceWikiUpdate()
         {
             Main.AddLog("Forcing wiki update");
             LoadEquipmentRequirements(true);
-            SaveEquipment();
+            SaveDatabase(eqmtDataPath, equipmentData);
         }
 
         public JArray GetPlatLive(string itemUrl)
@@ -1054,8 +991,7 @@ namespace WFInfoCS
                 } while (!(maxX && maxY));
 
                 num = d[n, m] - 1;
-            }
-            else
+            } else
             {
                 num = n + m;
             }
