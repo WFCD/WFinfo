@@ -182,7 +182,7 @@ namespace WFInfoCS
                         {
                             Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                             Main.overlays[partNumber].Resize(overWid);
-                            Main.overlays[partNumber].Display(startX + partBox.Width / 4 * partNumber, startY);
+                            Main.overlays[partNumber].Display((int)((startX + partBox.Width / 4 * partNumber) / dpi), (int)(startY / dpi));
                         } else
                         {
                             Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
