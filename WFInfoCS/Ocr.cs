@@ -78,9 +78,15 @@ namespace WFInfoCS
         private static Point center;
         public static Rectangle window;
 
-        public static float dpi;
-        private static double ScreenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
-        private static double TotalScaling;
+        //public static float dpi;
+        //private static double ScreenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
+        //private static double TotalScaling;
+
+        public static double DPI_Scaling;
+        public static double UI_Scaling;
+        public static double Screen_Scaling;
+
+
 
         public static TesseractEngine limitedEngine = new TesseractEngine("", "englimited")
         {
@@ -135,22 +141,16 @@ namespace WFInfoCS
             Bitmap image = file ?? CaptureScreenshot();
 
 
-            // Get that scaling
-            if (file == null)
-                ScreenScaling = dpi;
-            else
-                ScreenScaling = 1;
-
             if (image.Width * 9 > image.Height * 16)  // image is less than 16:9 aspect
-                ScreenScaling *= image.Height / 1080.0;
+                Screen_Scaling = image.Height / 1080.0;
             else
-                ScreenScaling *= image.Width / 1920.0; //image is higher than 16:9 aspect
+                Screen_Scaling = image.Width / 1920.0; //image is higher than 16:9 aspect
 
 
             // Get that theme
             WFtheme active = GetTheme(image);
 
-            TotalScaling = ScreenScaling * (Settings.scaling / 100.0);
+            UI_Scaling = Settings.scaling / 100.0;
 
 
             // Get the part box and filter it
@@ -159,8 +159,8 @@ namespace WFInfoCS
 
             int startX = center.X - partBox.Width / 2 + (int)(partBox.Width * 0.004);
             if (players.Count == 3 && players[0].Length > 0) { startX += partBox.Width / 8; }
-            int overWid = (int)(partBox.Width / (4.1 * dpi));
-            int startY = (int)((center.Y - 20 * TotalScaling) / dpi);
+            int overWid = (int)(partBox.Width / (4.1 * DPI_Scaling));
+            int startY = (int)(center.Y / DPI_Scaling - 20 * Screen_Scaling * UI_Scaling);
 
 
             int partNumber = 0;
@@ -182,7 +182,7 @@ namespace WFInfoCS
                         {
                             Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                             Main.overlays[partNumber].Resize(overWid);
-                            Main.overlays[partNumber].Display((int)((startX + partBox.Width / 4 * partNumber) / dpi), startY);
+                            Main.overlays[partNumber].Display((int)((startX + partBox.Width / 4 * partNumber) / DPI_Scaling), startY);
                         } else
                         {
                             Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
@@ -206,7 +206,7 @@ namespace WFInfoCS
         private static WFtheme GetTheme(Bitmap image)
         {
             // Tests Scaling from 40% to 120%
-            double scalingMod = ScreenScaling * 0.4;
+            double scalingMod = Screen_Scaling * 0.4;
 
             int startX = (int)(pixProfXSpecial * scalingMod);
             int startY = (int)(pixProfYSpecial * scalingMod);
@@ -253,7 +253,7 @@ namespace WFInfoCS
                 }
 
                 if (estimatedScaling < .5 && minThresh < 10)
-                    estimatedScaling = (coorX / pixProfXSpecial) / ScreenScaling;
+                    estimatedScaling = (coorX / pixProfXSpecial) / Screen_Scaling;
                 if (minThresh < closestThresh)
                 {
                     closestThresh = minThresh;
@@ -332,10 +332,10 @@ namespace WFInfoCS
 
         private static Bitmap FilterPartNames(Bitmap image, WFtheme active)
         {
-            int width = (int)(pixRwrdWid * TotalScaling);
-            int lineHeight = (int)(pixRwrdLineHei * TotalScaling);
+            int width = (int)(pixRwrdWid * Screen_Scaling * UI_Scaling);
+            int lineHeight = (int)(pixRwrdLineHei * Screen_Scaling * UI_Scaling);
             int left = (image.Width / 2) - (width / 2);
-            int top = (image.Height / 2) - (int)(pixRwrdYDisp * TotalScaling) + (int)(pixRwrdHei * TotalScaling) - lineHeight;
+            int top = (image.Height / 2) - (int)(pixRwrdYDisp * Screen_Scaling * UI_Scaling) + (int)(pixRwrdHei * Screen_Scaling * UI_Scaling) - lineHeight;
 
             Color clr;
 
@@ -375,7 +375,7 @@ namespace WFInfoCS
         {
 
             // Values to determine whether there's an even or odd number of players
-            int hei = (int)(pixRwrdLineHei / 2 * TotalScaling);
+            int hei = (int)(pixRwrdLineHei * Screen_Scaling * UI_Scaling / 2);
             int wid = image.Width / 4;
             int subwid = wid / 2;
             int subsubwid = subwid / 4;
@@ -513,8 +513,8 @@ namespace WFInfoCS
                 center = new Point(window.Width / 2, window.Height / 2);
             }
 
-            int width = window.Width * (int)OCR.dpi;
-            int height = window.Height * (int)OCR.dpi;
+            int width = window.Width * (int)OCR.DPI_Scaling;
+            int height = window.Height * (int)OCR.DPI_Scaling;
 
             Bitmap image = new Bitmap(width, height);
             Size FullscreenSize = new Size(image.Width, image.Height);
@@ -568,9 +568,8 @@ namespace WFInfoCS
         {
             using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
             {
-                dpi = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only need to check one value
-                TotalScaling = dpi * (Settings.scaling / 100.0);
-                Main.AddLog("Scaling updated to: " + TotalScaling + ". User has a DPI scaling of: " + dpi + " and a set UI scaling of: " + Settings.scaling + "%");
+                DPI_Scaling = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only need to check one value
+                Main.AddLog("Scaling updated to: " + (Screen_Scaling * UI_Scaling * DPI_Scaling) + ". User has a DPI scaling of: " + DPI_Scaling + " and a set UI scaling of: " + Settings.scaling + "%");
             }
         }
 
@@ -579,8 +578,8 @@ namespace WFInfoCS
             refreshScaling();
             if (image != null)
             {
-                int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
-                int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)OCR.dpi;
+                int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)OCR.DPI_Scaling;
+                int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)OCR.DPI_Scaling;
                 window = new Rectangle(0, 0, width, height);
                 center = new Point(window.Width / 2, window.Height / 2);
                 return;
@@ -595,8 +594,8 @@ namespace WFInfoCS
                 if (Settings.debug)
                 { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
                     Main.AddLog("No warframe detected, thus using center of screen");
-                    int width = Screen.PrimaryScreen.Bounds.Width * (int)OCR.dpi;
-                    int height = Screen.PrimaryScreen.Bounds.Height * (int)OCR.dpi;
+                    int width = Screen.PrimaryScreen.Bounds.Width * (int)OCR.DPI_Scaling;
+                    int height = Screen.PrimaryScreen.Bounds.Height * (int)OCR.DPI_Scaling;
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
                     return;
