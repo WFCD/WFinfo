@@ -235,18 +235,9 @@ namespace WFInfoCS
             for (int i = 0; i < files.Length - 4; i++)
                 files[i].Delete();
 
-            string next = "0000";
-            if (files.Length > 0)
-            {
-                next = files[files.Length - 1].Name;
-                Console.WriteLine(next);
-                Console.WriteLine((Convert.ToInt32(next.Substring(next.Length - 8, 4)) + 1) % 10000);
-                next = ((Convert.ToInt32(next.Substring(next.Length - 8, 4)) + 1) % 10000).ToString("D4");
-            }
-            Console.WriteLine(next);
-            BIG_SHOT.Save(Main.appPath + @"\Debug\FullScreenShot " + next + ".png");
-            PART_SHOT.Save(Main.appPath + @"\Debug\PartBox " + next + ".png");
-            PART_SHOT_FILTERED.Save(Main.appPath + @"\Debug\PartBoxFilter " + next + ".png");
+            BIG_SHOT.Save(Main.appPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd-HHmm") + ".png");
+            PART_SHOT.Save(Main.appPath + @"\Debug\PartBox " + DateTime.UtcNow.ToString("yyyy-MM-dd-HHmm") + ".png");
+            PART_SHOT_FILTERED.Save(Main.appPath + @"\Debug\PartBoxFilter " + DateTime.UtcNow.ToString("yyyy-MM-dd-HHmm") + ".png");
 
             BIG_SHOT.Dispose();
             BIG_SHOT = null;
