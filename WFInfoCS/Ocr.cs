@@ -159,8 +159,8 @@ namespace WFInfoCS
 
             int startX = center.X - partBox.Width / 2 + (int)(partBox.Width * 0.004);
             if (players.Count == 3 && players[0].Length > 0) { startX += partBox.Width / 8; }
-            int overWid = (int)(partBox.Width / 4.1);
-            int startY = (int)(center.Y - 20 * TotalScaling);
+            int overWid = (int)(partBox.Width / (4.1 * dpi));
+            int startY = (int)((center.Y - 20 * TotalScaling) / dpi);
 
 
             int partNumber = 0;
@@ -182,7 +182,7 @@ namespace WFInfoCS
                         {
                             Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                             Main.overlays[partNumber].Resize(overWid);
-                            Main.overlays[partNumber].Display((int)((startX + partBox.Width / 4 * partNumber) / dpi), (int)(startY / dpi));
+                            Main.overlays[partNumber].Display((int)((startX + partBox.Width / 4 * partNumber) / dpi), startY);
                         } else
                         {
                             Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
