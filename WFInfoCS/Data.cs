@@ -723,6 +723,7 @@ namespace WFInfoCS
                 }
             }
 
+            Main.AddLog("Item requirements database has been downloaded");
             return true;
         }
 
