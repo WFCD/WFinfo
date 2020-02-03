@@ -1008,7 +1008,7 @@ namespace WFInfoCS
             }
 
 
-            Main.AddLog("FOUND PART: \"" + lowest_unfiltered + "\" from \"" + name + "\"");
+            Main.AddLog("Found part: \"" + lowest_unfiltered + "\" from \"" + name + "\"");
             return lowest;
         }
 

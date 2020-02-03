@@ -137,9 +137,9 @@ namespace WFInfoCS
         private static bool ERROR_DETECTED = false;
         private static bool PROCESSING_ACTIVE = false;
 
-        private static Bitmap BIG_SHOT;
-        private static Bitmap PART_SHOT;
-        private static Bitmap PART_SHOT_FILTERED;
+        private static Bitmap bigScreenshot;
+        private static Bitmap partialScreenshot;
+        private static Bitmap partialScreenshotFiltered;
 
 
 
@@ -159,13 +159,12 @@ namespace WFInfoCS
             long start = watch.ElapsedMilliseconds;
 
             // Look at me mom, I'm doing fancy shit
-            BIG_SHOT = file ?? CaptureScreenshot();
+            bigScreenshot = file ?? CaptureScreenshot();
 
-
-            if (BIG_SHOT.Width * 9 > BIG_SHOT.Height * 16)  // image is less than 16:9 aspect
-                Screen_Scaling = BIG_SHOT.Height / 1080.0;
+            if (bigScreenshot.Width * 9 > bigScreenshot.Height * 16)  // image is less than 16:9 aspect
+                Screen_Scaling = bigScreenshot.Height / 1080.0;
             else
-                Screen_Scaling = BIG_SHOT.Width / 1920.0; //image is higher than 16:9 aspect
+                Screen_Scaling = bigScreenshot.Width / 1920.0; //image is higher than 16:9 aspect
 
             UI_Scaling = Settings.scaling / 100.0;
 
@@ -173,17 +172,15 @@ namespace WFInfoCS
 
 
             // Get that theme
-            WFtheme active = GetTheme(BIG_SHOT);
-
+            WFtheme active = GetTheme(bigScreenshot);
 
 
             // Get the part box and filter it
-            PART_SHOT_FILTERED = FilterPartNames(BIG_SHOT, active);
-            List<string> players = SeparatePlayers(PART_SHOT_FILTERED);
-
-            int startX = center.X - PART_SHOT_FILTERED.Width / 2 + (int)(PART_SHOT_FILTERED.Width * 0.004);
-            if (players.Count == 3 && players[0].Length > 0) { startX += PART_SHOT_FILTERED.Width / 8; }
-            int overWid = (int)(PART_SHOT_FILTERED.Width / (4.1 * DPI_Scaling));
+            partialScreenshotFiltered = FilterPartNames(bigScreenshot, active);
+            List<string> players = SeparatePlayers(partialScreenshotFiltered);
+            int startX = center.X - partialScreenshotFiltered.Width / 2 + (int)(partialScreenshotFiltered.Width * 0.004);
+            if (players.Count == 3 && players[0].Length > 0) { startX += partialScreenshotFiltered.Width / 8; }
+            int overWid = (int)(partialScreenshotFiltered.Width / (4.1 * DPI_Scaling));
             int startY = (int)(center.Y / DPI_Scaling - 20 * Screen_Scaling * UI_Scaling);
 
 
@@ -206,7 +203,7 @@ namespace WFInfoCS
                         {
                             Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                             Main.overlays[partNumber].Resize(overWid);
-                            Main.overlays[partNumber].Display((int)((startX + PART_SHOT_FILTERED.Width / 4 * partNumber) / DPI_Scaling), startY);
+                            Main.overlays[partNumber].Display((int)((startX + partialScreenshotFiltered.Width / 4 * partNumber) / DPI_Scaling), startY);
                         }
                         else
                         {
@@ -236,16 +233,16 @@ namespace WFInfoCS
             for (int i = 0; i < files.Length - 4; i++)
                 files[i].Delete();
 
-            BIG_SHOT.Save(Main.appPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
-            PART_SHOT.Save(Main.appPath + @"\Debug\PartBox " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
-            PART_SHOT_FILTERED.Save(Main.appPath + @"\Debug\PartBoxFilter " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
+            bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
+            partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
+            partialScreenshotFiltered.Save(Main.appPath + @"\Debug\PartBoxFilter " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
 
-            BIG_SHOT.Dispose();
-            BIG_SHOT = null;
-            PART_SHOT.Dispose();
-            PART_SHOT = null;
-            PART_SHOT_FILTERED.Dispose();
-            PART_SHOT_FILTERED = null;
+            bigScreenshot.Dispose();
+            bigScreenshot = null;
+            partialScreenshot.Dispose();
+            partialScreenshot = null;
+            partialScreenshotFiltered.Dispose();
+            partialScreenshotFiltered = null;
 
             ERROR_DETECTED = false;
             PROCESSING_ACTIVE = false;
@@ -376,12 +373,12 @@ namespace WFInfoCS
             int left = (image.Width / 2) - (width / 2);
             int top = (image.Height / 2) - (int)(pixRwrdYDisp * Screen_Scaling * UI_Scaling) + (int)(pixRwrdHei * Screen_Scaling * UI_Scaling) - lineHeight;
 
-            PART_SHOT_FILTERED = new Bitmap(width + 10, lineHeight + 10);
-            PART_SHOT = new Bitmap(width + 10, lineHeight + 10);
+            partialScreenshotFiltered = new Bitmap(width + 10, lineHeight + 10);
+            partialScreenshot = new Bitmap(width + 10, lineHeight + 10);
 
-            for (int x = 0; x < PART_SHOT_FILTERED.Width; x++)
-                for (int y = 0; y < PART_SHOT_FILTERED.Height; y++)
-                    PART_SHOT_FILTERED.SetPixel(x, y, Color.White);
+            for (int x = 0; x < partialScreenshotFiltered.Width; x++)
+                for (int y = 0; y < partialScreenshotFiltered.Height; y++)
+                    partialScreenshotFiltered.SetPixel(x, y, Color.White);
 
 
             Color clr;
@@ -389,13 +386,13 @@ namespace WFInfoCS
                 for (int y = 0; y < lineHeight; y++)
                 {
                     clr = image.GetPixel(left + x, top + y);
-                    PART_SHOT.SetPixel(x + 5, y + 5, clr);
+                    partialScreenshot.SetPixel(x + 5, y + 5, clr);
 
                     if (ThemeThresholdFilter(clr, active))
-                        PART_SHOT_FILTERED.SetPixel(x + 5, y + 5, Color.Black);
+                        partialScreenshotFiltered.SetPixel(x + 5, y + 5, Color.Black);
                 }
 
-            return PART_SHOT_FILTERED;
+            return partialScreenshotFiltered;
         }
 
         internal static List<string> SeparatePlayers(Bitmap image)
