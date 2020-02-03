@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NLua;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,10 +30,11 @@ namespace WFInfoCS
         private readonly string nameDataPath;
 
         private readonly string officialLootTable = "https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html";
-        private readonly string weaponRequirementWikiURL = "https://warframe.fandom.com/wiki/Special:Export/Module:Weapons/data";
+        private readonly string itemComponentsURL =
+            "https://raw.githubusercontent.com/WFCD/warframe-items/development/data/json/All.json";
+
         readonly WebClient WebClient;
         private readonly Sheets sheetsApi;
-        private readonly Lua lua;
         private string githubVersion;
 
         //private readonly FileSystemWatcher screenshotWatcher = new FileSystemWatcher();
@@ -64,7 +64,6 @@ namespace WFInfoCS
             //screenshotWatcher.Path = warframePictures;
             //screenshotWatcher.EnableRaisingEvents = true;
 
-            lua = new NLua.Lua();
             //if (false) //My.Settings.Auto) // WIP
             //{
             //    EnableLogcapture();
@@ -241,7 +240,8 @@ namespace WFInfoCS
                 if (!marketItems.TryGetValue(elem["item"].ToString(), out string item_name))
                 {
                     Main.AddLog("Unknwon market id: " + elem["item"].ToObject<string>());
-                } else
+                }
+                else
                 {
 
                     item_name = item_name.Split('|')[0];
@@ -290,10 +290,12 @@ namespace WFInfoCS
                                 if (rarity.Key.Contains("rare"))
                                 {
                                     marketData[name]["ducats"] = 100;
-                                } else if (rarity.Key.Contains("un"))
+                                }
+                                else if (rarity.Key.Contains("un"))
                                 {
                                     marketData[name]["ducats"] = 45;
-                                } else
+                                }
+                                else
                                 {
                                     marketData[name]["ducats"] = 15;
                                 }
@@ -308,40 +310,6 @@ namespace WFInfoCS
                     }
                 }
             }
-        }
-
-        private double GetSetPlat(JObject job, bool unowned = false)
-        {
-            double ret = 0;
-            foreach (KeyValuePair<string, JToken> kvp in job["parts"].ToObject<JObject>())
-            {
-                int count = kvp.Value["count"].ToObject<int>();
-                int owned = kvp.Value["owned"].ToObject<int>();
-                if (unowned)
-                {
-                    count -= owned;
-                }
-
-                if (marketData.TryGetValue(kvp.Key, out JToken temp))
-                {
-                    ret += count * temp["plat"].ToObject<double>();
-                } else if (equipmentData.TryGetValue(kvp.Key, out temp))
-                {
-                    // Need to confirm that this adjusted logic won't cause recursive bomb
-                    double plat = GetSetPlat(temp.ToObject<JObject>());
-                    marketData[kvp.Key] = new JObject
-                    {
-                        { "ducats", 0 },
-                        { "plat", plat },
-                    };
-                    SaveDatabase(marketItemsPath, marketItems);
-                    SaveDatabase(marketDataPath, marketData);
-
-                    ret += count * plat;
-                }
-            }
-
-            return ret;
         }
 
         private void LoadMarketItem(string item_name, string url)
@@ -362,7 +330,8 @@ namespace WFInfoCS
             if (!ducats.TryGetValue("ducats", out JToken temp))
             {
                 ducat = "0";
-            } else
+            }
+            else
             {
                 ducat = temp.ToObject<string>();
             }
@@ -382,7 +351,8 @@ namespace WFInfoCS
                 if (File.Exists(eqmtDataPath))
                 {
                     equipmentData = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath));
-                } else
+                }
+                else
                 {
                     equipmentData = new JObject();
                 }
@@ -482,11 +452,13 @@ namespace WFInfoCS
                             if (name.Contains("Kubrow"))
                             {
                                 name = name.Replace("Kubrow ", "");
-                            } else
+                            }
+                            else
                             {
                                 name = name.Replace("Prime", "Prime Collar");
                             }
-                        } else if (!name.Contains("Prime Blueprint") && !name.Contains("Forma"))
+                        }
+                        else if (!name.Contains("Prime Blueprint") && !name.Contains("Forma"))
                         {
                             name = name.Replace(" Blueprint", "");
                         }
@@ -494,11 +466,13 @@ namespace WFInfoCS
                         if (split[1].Contains("2."))
                         {
                             relicData[era][relic]["rare1"] = name;
-                        } else if (split[1].Contains("11"))
+                        }
+                        else if (split[1].Contains("11"))
                         {
                             relicData[era][relic]["uncommon" + numberOfUncommon.ToString()] = name;
                             numberOfUncommon += 1;
-                        } else
+                        }
+                        else
                         {
                             relicData[era][relic]["common" + numberOfCommon.ToString()] = name;
                             numberOfCommon += 1;
@@ -534,10 +508,12 @@ namespace WFInfoCS
                             if (name.Contains("Harness"))
                             {
                                 equipmentData[prime]["type"] = "Archwing";
-                            } else if (name.Contains("Chassis"))
+                            }
+                            else if (name.Contains("Chassis"))
                             {
                                 equipmentData[prime]["type"] = "Warframe";
-                            } else if (name.Contains("Carapace") || name.Contains("Collar Blueprint"))
+                            }
+                            else if (name.Contains("Carapace") || name.Contains("Collar Blueprint"))
                             {
                                 equipmentData[prime]["type"] = "Companion";
                             }
@@ -641,7 +617,8 @@ namespace WFInfoCS
                     if (equipmentData.TryGetValue(eqmt, out JToken temp))
                     {
                         equipmentData[eqmt]["parts"][str]["vaulted"] = false;
-                    } else
+                    }
+                    else
                     {
                         Console.WriteLine("Cannot find: " + eqmt + " in equipmentData");
                     }
@@ -649,90 +626,93 @@ namespace WFInfoCS
             }
         }
 
-        private bool LoadEquipmentRequirements(bool force = false)
+        public bool LoadEquipmentRequirements(bool force = false)
         {
             // Load wiki data on prime eqmt requirements
             // Mainly weapons
-            // WIP - perhaps should be rewritten to use warframe-items Github jsons
+            // Do we need to document force method?
 
-            if (!force)
+            string data = WebClient.DownloadString(itemComponentsURL);
+            JArray allItemsInWarframe = JsonConvert.DeserializeObject<JArray>(data);
+            foreach (JObject item in allItemsInWarframe)
             {
-                DateTime timestamp = equipmentData["rqmts_timestamp"].ToObject<DateTime>();
-                DateTime dayAgo = DateTime.Now.AddDays(-1);
-                if (timestamp > dayAgo)
+                if (item.ContainsKey("tags") && item["tags"].ToObject<List<String>>().Contains("Prime") && item.ContainsKey("components"))
                 {
-                    Main.AddLog("Wiki database is up to date");
-                    return false;
-                }
-            }
+                    bool vaulted;
 
-            string data = WebClient.DownloadString(weaponRequirementWikiURL);
-            int start = data.IndexOf("<timestamp>") + 11;
-            int last = data.IndexOf("<", start);
-            equipmentData["rqmts_timestamp"] = DateTime.Now.ToString("R");
-            data = data.Substring(data.IndexOf("{", data.IndexOf("<text")));
-            data = data.Substring(0, data.LastIndexOf("}") + 1);
-            data = Regex.Replace(data, "&quot;", "\"");
-            data = Regex.Replace(data, "&amp;", "&");
-
-            LuaTable tempLua = (LuaTable)((LuaTable)lua.DoString("return " + data)[0])["Weapons"];
-            Dictionary<Object, Object> dataDict = lua.GetTableDict(tempLua);
-
-
-            foreach (KeyValuePair<string, JToken> keyValuePair in equipmentData)
-            {
-                if (!keyValuePair.Key.Contains("timestamp") && dataDict.ContainsKey(keyValuePair.Key))
-                {
-                    equipmentData[keyValuePair.Key]["type"] = JToken.FromObject(((LuaTable)tempLua[keyValuePair.Key])["Type"]);
-                    Dictionary<string, int> temp = new Dictionary<string, int>();
-                    // I just want to say I'm sorry
-
-                    foreach (LuaTable part in ((LuaTable)((LuaTable)((LuaTable)tempLua[keyValuePair.Key])["Cost"])["Parts"]).Values)
+                    if (item["tags"].ToObject<List<String>>().Contains("Vaulted"))
                     {
-                        if ((string)part["Type"] == "PrimePart")
-                        {
+                        vaulted = true;
+                    }
+                    else
+                    {
+                        vaulted = false;
+                    }
 
-                            foreach (KeyValuePair<string, JToken> relicPart in (JObject)keyValuePair.Value["parts"])
-                            {
-                                if (relicPart.Key.Contains(part["Name"].ToString()))
-                                {
-                                    equipmentData[keyValuePair.Key]["parts"][relicPart.Key]["count"] =
-                                        JToken.FromObject(part["Count"]);
-                                    break;
-                                }
-                            }
-                        } else if (part["Type"].ToString() == "Weapon" && part["Name"].ToString().Contains("Prime"))
+                    JObject requirements = new JObject();
+                    foreach (var jToken in item["components"].ToObject<JArray>())
+                    {
+                        var component = (JObject)jToken;
+                        if (component["description"].ToObject<String>() == "A prime weapon-crafting component." || component["name"].ToObject<String>() == "Blueprint")
                         {
-                            if (!temp.ContainsKey(part["Name"].ToString()))
+                            // If main item is vaulted, assuming that its requirements are also vaulted since there's no information about vaults of requirements in API
+                            // How will it behave with items like "aklex" that have non-vaulted components and vaulted main recipe? Not sure
+                            string fullName = item["name"].ToObject<String>() + " " + component["name"].ToObject<String>();
+                            requirements[fullName] = new JObject
                             {
-                                temp[part["Name"].ToString()] = 0;
-                            }
-
-                            temp[part["Name"].ToString()] += Convert.ToInt32(part["Count"]);
+                                {"count", component["itemCount"].ToObject<Int32>()},
+                                {"owned", 0},
+                                {"vaulted", vaulted}
+                            };
                         }
-
-                        if (temp.Count() > 0)
+                        // Make sure its not Resource - it seem to have type specified
+                        else if (component.ContainsKey("type"))
                         {
-                            foreach (KeyValuePair<string, int> entry in temp)
+                            // This is complex item, lets find its details
+                            JToken searchResult = allItemsInWarframe.First(x =>
+                                x["name"].ToObject<String>() == component["name"].ToObject<String>());
+                            if (searchResult != null)
                             {
-                                JObject job = equipmentData[keyValuePair.Key]["parts"].ToObject<JObject>();
-                                if (!job.TryGetValue(entry.Key, out JToken tempOut))
+                                if (requirements.ContainsKey(component["name"].ToObject<String>()))
                                 {
-                                    equipmentData[keyValuePair.Key]["parts"][entry.Key] = new JObject
+                                    // Need additional copy of item
+                                    JToken subItem = requirements[component["name"].ToObject<String>()];
+                                    subItem["count"] = subItem["count"].ToObject<Int32>() + 1;
+                                }
+                                else
+                                {
+                                    bool subVaulted;
+
+                                    if (searchResult.ToObject<JObject>()["tags"].ToObject<List<String>>().Contains("Vaulted"))
                                     {
+                                        subVaulted = true;
+                                    }
+                                    else
+                                    {
+                                        subVaulted = false;
+                                    }
+
+                                    requirements[component["name"].ToObject<String>()] = new JObject
+                                    {
+                                        {"count", component["itemCount"].ToObject<Int32>()},
                                         {"owned", 0},
-                                        {"vaulted", false}
+                                        {"vaulted", subVaulted}
                                     };
                                 }
-                                equipmentData[keyValuePair.Key]["parts"][entry.Key]["count"] = entry.Value;
                             }
                         }
                     }
 
+                    equipmentData[item["name"].ToObject<String>()] = new JObject
+                    {
+                        {"parts", requirements},
+                        {"type", item["category"].ToObject<String>()},
+                        {"vaulted", vaulted}
+                    };
+
                 }
             }
 
-            Main.AddLog("Wiki database has been downloaded");
             return true;
         }
 
@@ -991,7 +971,8 @@ namespace WFInfoCS
                 } while (!(maxX && maxY));
 
                 num = d[n, m] - 1;
-            } else
+            }
+            else
             {
                 num = n + m;
             }
