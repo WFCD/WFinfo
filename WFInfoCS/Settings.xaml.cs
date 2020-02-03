@@ -127,7 +127,8 @@ namespace WFInfoCS
                     scaleBar.Value = value;
                     Scaling_box.Text = value + "%";
                     Save();
-                } else
+                }
+                else
                     Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
             }
             catch

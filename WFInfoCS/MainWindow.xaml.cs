@@ -27,7 +27,8 @@ namespace WFInfoCS
                 if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json"))
                 {
                     Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json"));
-                } else
+                }
+                else
                 {
                     Settings.settingsObj = JObject.Parse("{\"Display\":\"Overlay\"," +
                         "\"ActivationKey\":\"Snapshot\"," +
