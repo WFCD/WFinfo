@@ -626,12 +626,22 @@ namespace WFInfoCS
             }
         }
 
-        public bool LoadEquipmentRequirements(bool force = false)
+        private bool LoadEquipmentRequirements(bool force = false)
         {
             // Load wiki data on prime eqmt requirements
             // Mainly weapons
-            // Do we need to document force method?
+            if (!force)
+            {
+                DateTime timestamp = equipmentData["rqmts_timestamp"].ToObject<DateTime>();
+                DateTime dayAgo = DateTime.Now.AddDays(-1);
+                if (timestamp > dayAgo)
+                {
+                    Main.AddLog("Wiki database is up to date");
+                    return false;
+                }
+            }
 
+            equipmentData["rqmts_timestamp"] = DateTime.Now.ToString("R");
             string data = WebClient.DownloadString(itemComponentsURL);
             JArray allItemsInWarframe = JsonConvert.DeserializeObject<JArray>(data);
             foreach (JObject item in allItemsInWarframe)
