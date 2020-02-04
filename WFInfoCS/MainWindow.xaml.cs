@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -52,7 +53,7 @@ namespace WFInfoCS
                 LowLevelListener.KeyAction += main.OnKeyAction;
                 listener.Hook();
                 InitializeComponent();
-                Version.Content = Main.BuildVersion;
+                Version.Content = "v" + Main.BuildVersion + "-beta";
             }
             catch (Exception e)
             {
@@ -96,19 +97,19 @@ namespace WFInfoCS
 
         private void websiteClick(object sender, RoutedEventArgs e)
         {
-            ChangeStatus("Go go website", 0);
+            //ChangeStatus("Go go website", 0);
             Process.Start("https://wfinfo.warframestat.us/");
         }
 
         private void relicsClick(object sender, RoutedEventArgs e)
         {
-            Main.relicWindow.populate();
+            //Main.relicWindow.populate();
             ChangeStatus("Relics not implemented", 2);
         }
 
         private void equipmentClick(object sender, RoutedEventArgs e)
         {
-            Main.equipmentWindow.populate();
+            //Main.equipmentWindow.populate();
             ChangeStatus("Equipment not implemented", 2);
         }
 
@@ -118,19 +119,32 @@ namespace WFInfoCS
             Main.settingsWindow.Show();
         }
 
-        private void ReloadWikiClick(object sender, RoutedEventArgs e)
+        private void ReloadMarketClick(object sender, RoutedEventArgs e)
         {
-            Main.dataBase.ForceWikiUpdate();
+            ReloadDrop.IsEnabled = false;
+            ReloadWiki.IsEnabled = false;
+            ReloadMarket.IsEnabled = false;
+            Market_Data.Content = "Market Data: Loading...";
+            Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
         }
 
         private void ReloadDropClick(object sender, RoutedEventArgs e)
         {
-            Main.dataBase.ForceEquipmentUpdate();
+            ReloadDrop.IsEnabled = false;
+            ReloadWiki.IsEnabled = false;
+            ReloadMarket.IsEnabled = false;
+            Drop_Data.Content = "Drop Data: Loading...";
+            Wiki_Data.Content = "Wiki Data: Loading...";
+            Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
         }
 
-        private void ReloadMarketClick(object sender, RoutedEventArgs e)
+        private void ReloadWikiClick(object sender, RoutedEventArgs e)
         {
-            Main.dataBase.ForceMarketUpdate();
+            ReloadDrop.IsEnabled = false;
+            ReloadWiki.IsEnabled = false;
+            ReloadMarket.IsEnabled = false;
+            Wiki_Data.Content = "Wiki Data: Loading...";
+            Task.Factory.StartNew(Main.dataBase.ForceWikiUpdate);
         }
 
         // Allows the draging of the window

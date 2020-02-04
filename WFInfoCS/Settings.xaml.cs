@@ -41,8 +41,8 @@ namespace WFInfoCS
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
                 Auto.IsChecked = true;
 
-            if (Convert.ToBoolean(settingsObj.GetValue("Debug")))
-                Debug.IsChecked = true;
+            //if (Convert.ToBoolean(settingsObj.GetValue("Debug")))
+            //    Debug.IsChecked = true;
 
             //Activation_key_box.Text = "Snapshot";
             Scaling_box.Text = scaling.ToString() + "%";
@@ -82,13 +82,13 @@ namespace WFInfoCS
             isOverlaySelected = true;
             Save();
         }
-
+        /*
         private void DebugClicked(object sender, RoutedEventArgs e)
         {
             settingsObj["Debug"] = Debug.IsChecked.Value;
             debug = Debug.IsChecked.Value;
             Save();
-        }
+        }*/
 
         private void AutoClicked(object sender, RoutedEventArgs e)
         {

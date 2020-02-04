@@ -223,6 +223,8 @@ namespace WFInfoCS
 
             Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
+            Directory.CreateDirectory(Main.appPath + @"\Debug");
+
             string[] files = Directory.GetFiles(Main.appPath + @"\Debug\", "FullScreenShot *");
             for (int i = 0; i < files.Length - 4; i++)
                 File.Delete(files[i]);
