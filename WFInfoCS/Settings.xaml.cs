@@ -26,12 +26,11 @@ namespace WFInfoCS
         public Settings()
         {
             InitializeComponent();
-
         }
 
         public void populate()
         {
-            this.DataContext = this;
+            DataContext = this;
 
             scaleBar.Value = scaling;
             if (settingsObj.GetValue("Display").ToString() == "Overlay")
@@ -48,6 +47,7 @@ namespace WFInfoCS
             //Activation_key_box.Text = "Snapshot";
             Scaling_box.Text = scaling.ToString() + "%";
             Activation_key_box.Text = settingsObj.GetValue("ActivationKey").ToString();
+            Focus();
         }
 
         private void Save()
@@ -55,7 +55,7 @@ namespace WFInfoCS
             File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(settingsObj, Formatting.Indented));
         }
 
-        private void Exit(object sender, RoutedEventArgs e)
+        private void Hide(object sender, RoutedEventArgs e)
         {
             Save();
             Hide();

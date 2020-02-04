@@ -83,6 +83,9 @@ namespace WFInfoCS
 
         private void Exit(object sender, RoutedEventArgs e)
         {
+            Main.relicWindow.Close();
+            Main.equipmentWindow.Close();
+            Main.settingsWindow.Close();
             Application.Current.Shutdown();
         }
 

@@ -22,7 +22,7 @@
 
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="27" RenderTransformOrigin="-1.263,-0.625" Source="Resources/WFLogo.png" Margin="1,0,0,0" />
             <Label Content="Settings" Margin="30,0,0,0" Background="{x:Null}" Padding="-1" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" FontSize="22" Height="26" VerticalAlignment="Top" HorizontalAlignment="Left" Width="274"/>
-            <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="304,0,1,0" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="27" VerticalAlignment="Top"/>
+            <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="304,0,1,0" Width="30" Click="Hide" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="27" VerticalAlignment="Top"/>
         </Grid>
         <Grid x:Name="Display_setting" HorizontalAlignment="Left" Height="59" VerticalAlignment="Top" Width="334" Grid.RowSpan="2" Margin="0,26,0,0">
             <Rectangle x:Name="First_window" Stroke="#FF646464"/>

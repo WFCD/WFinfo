@@ -17,7 +17,7 @@
 
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
             <Label Content="Equipment" Background="{x:Null}" Padding="-1" Foreground="#FFB1D0D9" FontFamily="Roboto" FontSize="22" Margin="30,-1,30,4"/>
-            <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="304,0,0,0" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+            <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="304,0,0,0" Width="30" Click="Hide" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
 
         </Grid>
         <Grid x:Name="ListGrid" HorizontalAlignment="Left" Height="222" VerticalAlignment="Top" Width="332" Margin="1,27,0,0">

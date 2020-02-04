@@ -24,7 +24,7 @@ namespace WFInfoCS
             InitializeComponent();
         }
 
-        private void Exit(object sender, RoutedEventArgs e)
+        private void Hide(object sender, RoutedEventArgs e)
         {
             Hide();
         }
@@ -32,6 +32,8 @@ namespace WFInfoCS
         public void populate()
         { //todo implement populating the listview
             Show();
+            Focus();
+
         }
 
         // Allows the draging of the window
