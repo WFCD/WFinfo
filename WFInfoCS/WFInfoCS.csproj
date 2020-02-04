@@ -196,7 +196,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <Content Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\ducat_w.gif" />
@@ -288,16 +288,19 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\background.jpg" />
-    <Content Include="x64\liblept1760.dll">
+    <Content Include="lib\x64\liblept1760.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\libtesseract400.dll">
+    <Content Include="lib\x64\libtesseract400.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x86\liblept1760.dll">
+    <Content Include="lib\x86\liblept1760.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x86\libtesseract400.dll">
+    <Content Include="lib\x86\libtesseract400.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\Tesseract.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -305,21 +308,16 @@
   <Target Name="EmbedReferencedAssemblies" AfterTargets="ResolveAssemblyReferences">
     <ItemGroup>
       <!-- get list of assemblies marked as CopyToLocal -->
-      <FilesToEmbed Include="@(ReferenceCopyLocalPaths)" 
-                    Condition="('%(ReferenceCopyLocalPaths.Extension)' == '.dll' Or '%(ReferenceCopyLocalPaths.Extension)' == '.pdb') And '%(Filename)'!='MixedModeAssemblyA' And '%(Filename)'!='MixedModeAssemblyB'" />
-      <FilesToExclude Include="@(ReferenceCopyLocalPaths)" 
-                    Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.xml'" />
-
+      <FilesToEmbed Include="@(ReferenceCopyLocalPaths)" Condition="('%(ReferenceCopyLocalPaths.Extension)' == '.dll' Or '%(ReferenceCopyLocalPaths.Extension)' == '.pdb')" />
+      <FilesToExclude Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.xml'" />
       <!-- add these assemblies to the list of embedded resources -->
       <EmbeddedResource Include="@(FilesToEmbed)">
         <LogicalName>%(FilesToEmbed.DestinationSubDirectory)%(FilesToEmbed.Filename)%(FilesToEmbed.Extension)</LogicalName>
       </EmbeddedResource>
-
       <!-- no need to copy the assemblies locally anymore -->
       <ReferenceCopyLocalPaths Remove="@(FilesToEmbed)" />
       <ReferenceCopyLocalPaths Remove="@(FilesToExclude)" />
     </ItemGroup>
-
     <Message Importance="high" Text="Embedding: @(FilesToEmbed->'%(Filename)%(Extension)', ', ')" />
   </Target>
 </Project>
