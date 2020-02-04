@@ -223,15 +223,17 @@ namespace WFInfoCS
 
             Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
-            FileInfo[] files = new DirectoryInfo(Main.appPath + @"\Debug\").GetFiles("FullScreenShot *").OrderBy(f => f.CreationTime).ToArray();
+            string[] files = Directory.GetFiles(Main.appPath + @"\Debug\", "FullScreenShot *");
             for (int i = 0; i < files.Length - 4; i++)
-                files[i].Delete();
-            files = new DirectoryInfo(Main.appPath + @"\Debug\").GetFiles("PartBox *").OrderBy(f => f.CreationTime).ToArray();
+                File.Delete(files[i]);
+
+            files = Directory.GetFiles(Main.appPath + @"\Debug\", "PartBox *");
             for (int i = 0; i < files.Length - 4; i++)
-                files[i].Delete();
-            files = new DirectoryInfo(Main.appPath + @"\Debug\").GetFiles("PartBoxFilter *").OrderBy(f => f.CreationTime).ToArray();
+                File.Delete(files[i]);
+
+            files = Directory.GetFiles(Main.appPath + @"\Debug\", "PartBoxFilter *");
             for (int i = 0; i < files.Length - 4; i++)
-                files[i].Delete();
+                File.Delete(files[i]);
 
             bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
             partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
