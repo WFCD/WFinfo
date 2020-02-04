@@ -126,6 +126,7 @@ namespace WFInfoCS
             ReloadWiki.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
             Market_Data.Content = "Market Data: Loading...";
+            Main.StatusUpdate("Market data force reloading", 0);
             Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
         }
 
@@ -136,6 +137,7 @@ namespace WFInfoCS
             ReloadMarket.IsEnabled = false;
             Drop_Data.Content = "Drop Data: Loading...";
             Wiki_Data.Content = "Wiki Data: Loading...";
+            Main.StatusUpdate("Drop data force reloading", 0);
             Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
         }
 
@@ -145,6 +147,7 @@ namespace WFInfoCS
             ReloadWiki.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
             Wiki_Data.Content = "Wiki Data: Loading...";
+            Main.StatusUpdate("Wiki data force reloading", 0);
             Task.Factory.StartNew(Main.dataBase.ForceWikiUpdate);
         }
 

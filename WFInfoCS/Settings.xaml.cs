@@ -143,9 +143,7 @@ namespace WFInfoCS
         {
             if (e.Key == Key.Return)
             {
-                //Keyboard.ClearFocus();
-                //ScaleLeave(sender, e);
-                this.scaleBar.Focus();
+                scaleBar.Focus();
             }
         }
 
@@ -170,6 +168,7 @@ namespace WFInfoCS
             activationKey = e.Key;
             Activation_key_box.Text = e.Key.ToString();
             settingsObj["ActivationKey"] = e.Key.ToString();
+            hidden.Focus();
             Save();
         }
 
