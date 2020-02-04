@@ -57,7 +57,7 @@
     <ApplicationIcon>WFLogo.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>WFInfoCS.App</StartupObject>
+    <StartupObject>WFInfoCS.CustonEntrypoint</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Google.Apis, Version=1.43.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
@@ -106,6 +106,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CustomEntrypoint.cs" />
     <Compile Include="LogCapture.cs" />
     <Compile Include="LowLevelListener.cs" />
     <Compile Include="Main.cs" />
@@ -287,18 +288,25 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\background.jpg" />
-    <Content Include="x64\liblept1760.dll">
+    <Content Include="lib\x64\liblept1760.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\libtesseract400.dll">
+    <Content Include="lib\x64\libtesseract400.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x86\liblept1760.dll">
+    <Content Include="lib\x86\liblept1760.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x86\libtesseract400.dll">
+    <Content Include="lib\x86\libtesseract400.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterResolveReferences">
+  <ItemGroup>
+    <EmbeddedResource Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.dll'">
+      <LogicalName>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(ReferenceCopyLocalPaths.Filename)%(ReferenceCopyLocalPaths.Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+</Target>
 </Project>
