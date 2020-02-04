@@ -36,6 +36,7 @@ namespace WFInfoCS
                         "\"Scaling\":100.0," +
                         "\"Auto\":false," +
                         "\"Debug\":false}");
+                    Settings.Save();
                 }
                 Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
                 Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");

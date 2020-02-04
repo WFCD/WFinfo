@@ -136,6 +136,7 @@ namespace WFInfoCS
 
         private static bool ERROR_DETECTED = false;
         private static bool PROCESSING_ACTIVE = false;
+        private static readonly int NUM_SAVED_IMGS = 10;
 
         private static Bitmap bigScreenshot;
         private static Bitmap partialScreenshot;
@@ -204,8 +205,7 @@ namespace WFInfoCS
                             Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                             Main.overlays[partNumber].Resize(overWid);
                             Main.overlays[partNumber].Display((int)((startX + partialScreenshotFiltered.Width / 4 * partNumber) / DPI_Scaling), startY);
-                        }
-                        else
+                        } else
                         {
                             Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
                         }
@@ -225,21 +225,21 @@ namespace WFInfoCS
 
             Directory.CreateDirectory(Main.appPath + @"\Debug");
 
-            string[] files = Directory.GetFiles(Main.appPath + @"\Debug\", "FullScreenShot *");
-            for (int i = 0; i < files.Length - 4; i++)
-                File.Delete(files[i]);
-
-            files = Directory.GetFiles(Main.appPath + @"\Debug\", "PartBox *");
-            for (int i = 0; i < files.Length - 4; i++)
-                File.Delete(files[i]);
-
-            files = Directory.GetFiles(Main.appPath + @"\Debug\", "PartBoxFilter *");
-            for (int i = 0; i < files.Length - 4; i++)
-                File.Delete(files[i]);
-
             bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
             partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
             partialScreenshotFiltered.Save(Main.appPath + @"\Debug\PartBoxFilter " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
+
+            string[] files = Directory.GetFiles(Main.appPath + @"\Debug\", "FullScreenShot *");
+            for (int i = 0; i < files.Length - NUM_SAVED_IMGS; i++)
+                File.Delete(files[i]);
+
+            files = Directory.GetFiles(Main.appPath + @"\Debug\", "PartBox *");
+            for (int i = 0; i < files.Length - NUM_SAVED_IMGS; i++)
+                File.Delete(files[i]);
+
+            files = Directory.GetFiles(Main.appPath + @"\Debug\", "PartBoxFilter *");
+            for (int i = 0; i < files.Length - NUM_SAVED_IMGS; i++)
+                File.Delete(files[i]);
 
             bigScreenshot.Dispose();
             bigScreenshot = null;
@@ -624,8 +624,7 @@ namespace WFInfoCS
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
                     return;
-                }
-                else
+                } else
                 {
                     Main.AddLog("Failed to get window bounds");
                     Main.StatusUpdate("Failed to get window bounds", 1);
@@ -637,8 +636,7 @@ namespace WFInfoCS
             { // if the window is in the VOID delete current process and re-set window to nothing
                 Warframe = null;
                 window = Rectangle.Empty;
-            }
-            else if (window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
+            } else if (window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
             { // checks if old window size is the right size if not change it
                 window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
                                                                                                                          // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
@@ -654,15 +652,13 @@ namespace WFInfoCS
                     // Borderless, don't do anything
                     currentStyle = WindowStyle.BORDERLESS;
                     Main.AddLog("Borderless detected (0x" + styles.ToString("X8") + ")");
-                }
-                else if ((styles & WS_BORDER) != 0)
+                } else if ((styles & WS_BORDER) != 0)
                 {
                     // Windowed, adjust for thicc border
                     window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
                     Main.AddLog("Windowed detected (0x" + styles.ToString("X8") + "), adjusting window to: " + window.ToString());
                     currentStyle = WindowStyle.WINDOWED;
-                }
-                else
+                } else
                 {
                     // Assume Fullscreen, don't do anything
                     Main.AddLog("Fullscreen detected (0x" + styles.ToString("X8") + ")");

@@ -14,7 +14,7 @@ namespace WFInfoCS
     public partial class Settings : System.Windows.Window
     {
 
-        private readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json";  //change to WFInfo after release
+        private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json";  //change to WFInfo after release
         public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
         public static Key activationKey;
         public static bool isOverlaySelected;
@@ -50,7 +50,7 @@ namespace WFInfoCS
             Focus();
         }
 
-        private void Save()
+        public static void Save()
         {
             File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(settingsObj, Formatting.Indented));
         }
