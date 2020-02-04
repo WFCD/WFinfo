@@ -14,7 +14,7 @@ namespace WFInfoCS
     {
         public static Main INSTANCE;
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
-        public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string buildVersion;
         public static Data dataBase;
         public static Window window;
         public static Overlay[] overlays;
@@ -26,7 +26,8 @@ namespace WFInfoCS
         {
             INSTANCE = this;
             StartMessage();
-
+            buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
             overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
             window = new Window();
             dataBase = new Data();
@@ -42,31 +43,8 @@ namespace WFInfoCS
             RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + dataBase.marketData["timestamp"].ToString().Substring(5, 11); });
             RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: " + dataBase.equipmentData["timestamp"].ToString().Substring(5, 11); });
             RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + dataBase.equipmentData["rqmts_timestamp"].ToString().Substring(5, 11); });
-            //InitializeOverlays();
             StatusUpdate("WFInfo Initialization Complete", 0);
             Main.AddLog("WFInfo has launched successfully");
-        }
-
-        public static void InitializeOverlays()
-        {
-            double scaling = 1.0;
-            Point center = new Point(Screen.PrimaryScreen.Bounds.Width / 2, Screen.PrimaryScreen.Bounds.Height / 2);
-
-            if (Screen.PrimaryScreen.Bounds.Width * 9 > Screen.PrimaryScreen.Bounds.Height * 16)  // image is less than 16:9 aspect
-                scaling *= Screen.PrimaryScreen.Bounds.Height / 1080.0;
-            else
-                scaling *= Screen.PrimaryScreen.Bounds.Width / 1920.0; //image is higher than 16:9 aspect
-            //Initialize Overlays
-            RunOnUIThread(() =>
-            {
-                for (int i = 0; i < overlays.Length; i++)
-                {
-                    //Screen.PrimaryScreen.Bounds
-                    overlays[i].LoadTextData("Loading...", "N/A", "N/A", "N/A", true, "N/A");
-                    overlays[i].Resize((int)(240 * scaling));
-                    overlays[i].Display(center.X + (int)(250 * scaling) * (i - 2) + (int)(10 * scaling), center.Y, 1000);
-                }
-            });
         }
 
         public static void RunOnUIThread(Action act)

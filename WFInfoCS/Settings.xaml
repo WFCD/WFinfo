@@ -54,11 +54,9 @@
         </Grid>
         <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Height="28" VerticalAlignment="Bottom">
             <Rectangle x:Name="First_window3" Stroke="#FF646464" Margin="0,-1,0,0"/>
-            <Viewbox Margin="49,3,0,4" HorizontalAlignment="Left" >
-                <CheckBox x:Name="Debug" ToolTip="Dev tool, allows testing of program without running warframe" Content="Offline testing" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" Click="DebugClicked" FontFamily="{DynamicResource Roboto}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            </Viewbox>
-            <Viewbox Margin="0,3,50,4" HorizontalAlignment="Right" >
-                <CheckBox x:Name="Auto" Content="Auto" ToolTip="Disabled, Automatically detects when the relic screen is visable." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" Click="AutoClicked" FontFamily="{DynamicResource Roboto}"/>
+            <Viewbox Margin="49,3,0,4" HorizontalAlignment="Left" />
+            <Viewbox Margin="0,3,0,5" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                <CheckBox x:Name="Auto" Content="Auto" ToolTip="Disabled, Automatically detects when the relic screen is visable." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FF718489" Click="AutoClicked" FontFamily="{DynamicResource Roboto}" IsEnabled="False"/>
             </Viewbox>
 
 
