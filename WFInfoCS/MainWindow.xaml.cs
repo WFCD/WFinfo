@@ -22,6 +22,7 @@ namespace WFInfoCS
         {
             INSTANCE = this;
             main = new Main();
+
             LowLevelListener listener = new LowLevelListener(); //publisher
             try
             {
@@ -31,7 +32,6 @@ namespace WFInfoCS
 
                 } else
                 {
-                    //Settings.settingsObj = JObject.Parse("{\"Display\":\"Overlay\",\"ActivationKey\":\"Snapshot\",\"Scaling\":100.0,\"Auto\":false,\"Debug\":false}");
                     Settings.settingsObj = new JObject();
                 }
                 if (!Settings.settingsObj.TryGetValue("Display", out _))
@@ -66,6 +66,7 @@ namespace WFInfoCS
                 listener.Hook();
                 InitializeComponent();
                 Version.Content = "v" + Main.BuildVersion + "-beta";
+
             }
             catch (Exception e)
             {
@@ -115,18 +116,20 @@ namespace WFInfoCS
 
         private void relicsClick(object sender, RoutedEventArgs e)
         {
-            //Main.relicWindow.populate();
-            ChangeStatus("Relics not implemented", 2);
+            if (Main.relicWindow == null) { ChangeStatus("Relic window not yet loaded in", 2); return; }
+            Main.relicWindow.populate();
         }
 
         private void equipmentClick(object sender, RoutedEventArgs e)
         {
+            if (Main.equipmentWindow == null) { ChangeStatus("Equipment window not yet loaded in", 2); return; }
             //Main.equipmentWindow.populate();
             ChangeStatus("Equipment not implemented", 2);
         }
 
         private void Settings_click(object sender, RoutedEventArgs e)
         {
+            if (Main.settingsWindow == null) { ChangeStatus("Settings window not yet loaded in", 2); return; }
             Main.settingsWindow.populate();
             Main.settingsWindow.Show();
         }

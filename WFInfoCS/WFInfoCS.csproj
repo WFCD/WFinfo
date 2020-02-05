@@ -197,6 +197,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
+    <Resource Include="Resources\Axi.png" />
+    <Resource Include="Resources\Lith.png" />
+    <Resource Include="Resources\Meso.png" />
+    <Resource Include="Resources\Neo.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\ducat_w.gif" />
