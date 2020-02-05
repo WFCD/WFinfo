@@ -14,25 +14,25 @@
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox x:Name="vaulted" Content="Show Vaulted" ToolTip="Show vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="39,-1,0,-1" RenderTransformOrigin="0.5,0.5" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="107" FontSize="14"/>
-            <Button Content="+" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="-1,-1,0,-1" Width="20" Background="{x:Null}"/>
-            <Button Content="-" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="18,-1,0,-1" Width="20" Background="{x:Null}"/>
-            <TextBox Margin="192,-1,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="Filter terms" Background="#FF141414" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="14" Foreground="#FF646464" BorderBrush="{x:Null}" SelectionBrush="{x:Null}"/>
+            <CheckBox x:Name="vaulted" Content="Show Vaulted" ToolTip="Show vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="39,-1,0,-1" RenderTransformOrigin="0.5,0.5" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="107" FontSize="14" Click="VaultedClick"/>
+            <Button Content="+" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="-1,-1,0,-1" Width="20" Background="{x:Null}" Click="Add"/>
+            <Button Content="-" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="18,-1,0,-1" Width="20" Background="{x:Null}" Click="Subtract"/>
+            <TextBox x:Name="textBox" Margin="192,-1,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="Filter terms" Background="#FF141414" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="14" Foreground="#FF646464" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" GotFocus="TextBoxFocus" TextChanged="TextboxTextChanged"/>
             <Rectangle Stroke="#FF646464" Margin="149,-1,-1,-1"/>
             <Label Content=" Filter:" HorizontalAlignment="Left" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="150,-1,0,-1" Padding="0" VerticalContentAlignment="Center" Width="42" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}"/>
 
         </Grid>
         <Grid Height="18" VerticalAlignment="Top" Margin="1,46,1,0">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="2" />
-            <Rectangle Stroke="#FF646464" Margin="121,-1,-1,-1" Grid.RowSpan="2"/>
-            <Label Content=" Equipment groups" HorizontalAlignment="Left" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Padding="0" VerticalContentAlignment="Center" Width="119" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="2" Margin="0,-1,0,0"/>
-            <ComboBox Margin="176,-1,-1,-1" Grid.RowSpan="2"/>
-            <Label Content="Sort by:" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="124,-1,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="2" HorizontalAlignment="Left" Width="50"/>
+            <Rectangle Stroke="#FF646464" Margin="122,-1,-1,-1" Grid.RowSpan="2"/>
+            <Button Content=" Equipment groups" HorizontalAlignment="Left" VerticalAlignment="Top"  FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Foreground="#FFB1D0D9" Width="125" Height="20" Margin="-1,-1,0,-1" Grid.RowSpan="2" Background="#FF0F0F0F" FontSize="14" Click="ComboButton"/>
+            <ComboBox x:Name="comboBox" Margin="184,-1,-1,-1" Grid.RowSpan="2" Background="#FF0F0F0F" Foreground="#FFAFD0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" MouseDown="ComboboxMouseDown">
+                <ComboBoxItem IsSelected="True">Name</ComboBoxItem>
+                <ComboBoxItem>Cost</ComboBoxItem>
+                <ComboBoxItem>Unowned</ComboBoxItem>
+                <ComboBoxItem>Set cost</ComboBoxItem>
+            </ComboBox>
+            <Label Content="Sort by:" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="129,-1,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="2" HorizontalAlignment="Left" Width="50"/>
 
         </Grid>
         <Grid Height="27" VerticalAlignment="Top">
@@ -41,16 +41,16 @@
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
             <Viewbox HorizontalAlignment="Left" Height="27" Width="210" Margin="30,0,0,0" VerticalAlignment="Center">
                 <Label Content="Equipment" Background="{x:Null}" Foreground="#FFB1D0D9" FontFamily="Roboto" FontSize="22" Padding="0" VerticalContentAlignment="Center" Height="30" Width="205">
-                    
+
                 </Label>
             </Viewbox>
             <Button x:Name="exit" Content="x" Click="Hide" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" HorizontalAlignment="Right" Width="29"/>
 
         </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
-            <TreeView x:Name="treeView1" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
-            <TreeView x:Name="treeView2" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
-            <TreeView x:Name="treeView3" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
+            <TreeView x:Name="groupedByCollection" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
+            <TreeView x:Name="groupedByAll" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
+            <TreeView x:Name="Search" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
         </Grid>
 
     </Grid>

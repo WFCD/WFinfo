@@ -14,25 +14,39 @@
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox x:Name="vaulted" Content="Show Vaulted" ToolTip="Show vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="39,-1,0,-1" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" Width="105" FontSize="14"/>
-            <Button Content="+" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="-1,-1,0,-1" Width="20" Background="{x:Null}"/>
-            <Button Content="-" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="18,-1,0,-1" Width="20" Background="{x:Null}"/>
-            <TextBox Margin="184,-1,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Padding="0" Text="Filter terms" TextChanged="TextBox_TextChanged" Background="#FF141414" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="14" Foreground="#FF646464" BorderBrush="{x:Null}" SelectionBrush="{x:Null}"/>
+            <CheckBox x:Name="vaulted" Content="Show Vaulted" ToolTip="Show vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="39,-1,0,-1" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" Width="105" FontSize="14" Click="VaultedClick"/>
+            <Button Content="+" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="-1,-1,0,-1" Width="20" Background="{x:Null}" Click="Add"/>
+            <Button Content="-" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="18,-1,0,-1" Width="20" Background="{x:Null}" Click="Subtract"/>
+            <TextBox x:Name="textBox" Margin="184,-1,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Padding="0" Text="Filter terms" TextChanged="TextboxTextChanged" Background="#FF141414" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="14" Foreground="#FF646464" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" GotFocus="TextBoxFocus"/>
             <Rectangle Stroke="#FF646464" Margin="144,-1,-1,-1"/>
             <Label Content=" Filter:" HorizontalAlignment="Left" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="145,0,0,0" Padding="0" VerticalContentAlignment="Center" Width="44" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}"/>
 
         </Grid>
         <Grid Height="18" VerticalAlignment="Top" Margin="1,46,1,0">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
 
-            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="2" />
-            <Rectangle Stroke="#FF646464" Margin="68,-1,-1,-1" Grid.RowSpan="2"/>
-            <Label Content=" Relic eras" HorizontalAlignment="Left" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Padding="0" VerticalContentAlignment="Center" Width="67" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="2" Margin="0,-1,0,0"/>
-            <ComboBox Margin="129,-1,0,-1" Grid.RowSpan="2"/>
-            <Label Content="Sort by:" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="73,-1,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="2" HorizontalAlignment="Left" Width="51"/>
+
+            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="3" />
+            <Rectangle Stroke="#FF646464" Margin="69,-1,-1,-1" Grid.RowSpan="3"/>
+            <Button x:Name="relicComboButton" Content="Relic era" HorizontalAlignment="Left" VerticalAlignment="Top" Width="71" Height="20" Margin="-1,-1,0,-1" Background="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="14" Click="ComboButton"/>
+            <ComboBox  x:Name="comboBox" Margin="129,-1,0,-1" Grid.RowSpan="3" Background="#FF0F0F0F" Foreground="#FFAFD0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"  MouseDown="ComboboxMouseDown">
+                <ComboBox.ItemContainerStyle>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="#FF0F0F0F"/>
+                        <Setter Property="BorderBrush" Value="#FF0F0F0F"/>
+                    </Style>
+                </ComboBox.ItemContainerStyle>
+                <ComboBox.Style>
+                    <Style TargetType="ComboBox">
+                        <Setter Property="Background" Value="#FF0F0F0F"/>
+                    </Style>
+                </ComboBox.Style>
+                <ComboBoxItem IsSelected="True">Name</ComboBoxItem>
+                <ComboBoxItem>Average intact plat</ComboBoxItem>
+                <ComboBoxItem>Average radiant plat</ComboBoxItem>
+                <ComboBoxItem>Difference (radiant-intact)</ComboBoxItem>
+
+            </ComboBox>
+            <Label Content="Sort by:" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="73,-1,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="3" HorizontalAlignment="Left" Width="51"/>
 
         </Grid>
         <Grid Height="27" VerticalAlignment="Top">
@@ -44,9 +58,9 @@
 
         </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
-            <TreeView x:Name="treeView1" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
-            <TreeView x:Name="treeView2" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
-            <TreeView x:Name="treeView3" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
+            <TreeView x:Name="groupedByCollection" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
+            <TreeView x:Name="groupedByAll" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
+            <TreeView x:Name="Search" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
         </Grid>
 
     </Grid>
