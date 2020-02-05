@@ -14,10 +14,10 @@
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox x:Name="vaulted" Content="Show Vaulted" ToolTipService.ShowOnDisabled="true" ToolTip="Disabled, Automatically detects when the relic screen is visable." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" Click="AutoClicked" FontFamily="{DynamicResource Roboto}" IsEnabled="False" Margin="39,-1,191,-1" RenderTransformOrigin="0.5,0.5" Height="20" VerticalAlignment="Bottom"/>
+            <CheckBox x:Name="vaulted" Content="Show Vaulted" ToolTip="Show vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="39,-1,191,-1" RenderTransformOrigin="0.5,0.5" Height="20" VerticalAlignment="Bottom"/>
             <Button Content="+" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="-1,-1,0,-1" Width="20" Background="{x:Null}"/>
             <Button Content="-" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="18,-1,0,-1" Width="20" Background="{x:Null}"/>
-            <TextBox Margin="180,-2,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="Filter terms" TextChanged="TextBox_TextChanged" Background="#FF141414" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="18" Foreground="#FF646464" BorderBrush="{x:Null}"/>
+            <TextBox Margin="180,-2,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="Filter terms" Background="#FF141414" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="18" Foreground="#FF646464" BorderBrush="{x:Null}"/>
             <Rectangle Stroke="#FF646464" Margin="141,-1,-1,-1"/>
             <Label Content=" Filter:" HorizontalAlignment="Left" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="142,-1,0,-1" Padding="0" VerticalContentAlignment="Center" Width="37" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}"/>
 
