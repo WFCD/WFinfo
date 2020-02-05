@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfoCS"
         mc:Ignorable="d"
-        Title="Settings" Height="190" Width="270" WindowStyle="None" ResizeMode="NoResize">
+        Title="Settings" Height="114" Width="300" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MinWidth="300" MinHeight="110">
     <Window.Resources>
         <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
         <FontFamily x:Key="font">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
@@ -14,12 +14,12 @@
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox x:Name="vaulted" Content="Show Vaulted" ToolTip="Show vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="39,-1,127,-1" RenderTransformOrigin="0.5,0.5"/>
+            <CheckBox x:Name="vaulted" Content="Show Vaulted" ToolTip="Show vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="39,-1,0,-1" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" Width="105" FontSize="14"/>
             <Button Content="+" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="-1,-1,0,-1" Width="20" Background="{x:Null}"/>
             <Button Content="-" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="18,-1,0,-1" Width="20" Background="{x:Null}"/>
-            <TextBox Margin="180,-2,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="Filter terms" TextChanged="TextBox_TextChanged" Background="#FF141414" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="18" Foreground="#FF646464" BorderBrush="{x:Null}"/>
-            <Rectangle Stroke="#FF646464" Margin="141,-1,-1,-1"/>
-            <Label Content=" Filter:" HorizontalAlignment="Left" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="142,0,0,0" Padding="0" VerticalContentAlignment="Center" Width="37" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}"/>
+            <TextBox Margin="184,-1,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Padding="0" Text="Filter terms" TextChanged="TextBox_TextChanged" Background="#FF141414" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="14" Foreground="#FF646464" BorderBrush="{x:Null}" SelectionBrush="{x:Null}"/>
+            <Rectangle Stroke="#FF646464" Margin="144,-1,-1,-1"/>
+            <Label Content=" Filter:" HorizontalAlignment="Left" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="145,0,0,0" Padding="0" VerticalContentAlignment="Center" Width="44" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}"/>
 
         </Grid>
         <Grid Height="18" VerticalAlignment="Top" Margin="1,46,1,0">
@@ -29,10 +29,10 @@
             </Grid.RowDefinitions>
 
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="2" />
-            <Rectangle Stroke="#FF646464" Margin="64,-1,-1,-1" Grid.RowSpan="2"/>
-            <Label Content=" Relic eras" HorizontalAlignment="Left" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Padding="0" VerticalContentAlignment="Center" Width="64" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="2" Margin="0,-1,0,0"/>
-            <ComboBox Margin="116,-1,-1,-1" Grid.RowSpan="2"/>
-            <Label Content="Sort by:" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="70,-1,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="2" HorizontalAlignment="Left" Width="45"/>
+            <Rectangle Stroke="#FF646464" Margin="68,-1,-1,-1" Grid.RowSpan="2"/>
+            <Label Content=" Relic eras" HorizontalAlignment="Left" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Padding="0" VerticalContentAlignment="Center" Width="67" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="2" Margin="0,-1,0,0"/>
+            <ComboBox Margin="129,-1,0,-1" Grid.RowSpan="2"/>
+            <Label Content="Sort by:" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Margin="73,-1,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="2" HorizontalAlignment="Left" Width="51"/>
 
         </Grid>
         <Grid Height="27" VerticalAlignment="Top">

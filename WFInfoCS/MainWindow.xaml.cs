@@ -123,7 +123,7 @@ namespace WFInfoCS
         private void equipmentClick(object sender, RoutedEventArgs e)
         {
             if (Main.equipmentWindow == null) { ChangeStatus("Equipment window not yet loaded in", 2); return; }
-            //Main.equipmentWindow.populate();
+            Main.equipmentWindow.populate();
             ChangeStatus("Equipment not implemented", 2);
         }
 
