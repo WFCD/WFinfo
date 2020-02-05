@@ -13,7 +13,7 @@ namespace WFInfoCS
     class Main
     {
         public static Main INSTANCE;
-        public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
+        public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion;
         public static Data dataBase;
         public static Window window;

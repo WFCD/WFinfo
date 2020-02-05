@@ -22,7 +22,7 @@ namespace WFInfoCS
         public JObject equipmentData; // Contains equipmentData from Warframe PC Drops          {<EQMT>: {"vaulted": true, "PARTS": {<NAME>:{"relic_name":<name>|"","count":<num>}, ...}},  ...}
         public JObject nameData; // Contains relic to market name translation          {<relic_name>: <market_name>}
 
-        private readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS";
+        private readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         private readonly string marketItemsPath;
         private readonly string marketDataPath;
         private readonly string eqmtDataPath;
@@ -473,9 +473,14 @@ namespace WFInfoCS
                         string prime = name;
                         if (prime.IndexOf("Prime") != -1)
                         {
+                            bool display = name.IndexOf("Akstiletto") != -1;
+                            if (display)
+                                Console.WriteLine(name);
                             prime = prime.Substring(0, prime.IndexOf("Prime") + 5);
                             if (!equipmentData.TryGetValue(prime, out _))
                             {
+                                if (display)
+                                    Console.WriteLine("COULDN'T FIND: " + prime);
                                 equipmentData[prime] = new JObject
                                 {
                                     {"parts", new JObject()},
@@ -488,6 +493,8 @@ namespace WFInfoCS
 
                             if (!job.TryGetValue(name, out _))
                             {
+                                if (display)
+                                    Console.WriteLine("COULDN'T FIND PART: " + name);
                                 job = new JObject
                                 {
                                     {"count", 1},
@@ -647,7 +654,18 @@ namespace WFInfoCS
                         vaulted = false;
                     }
 
-                    JObject requirements = new JObject();
+                    if (!equipmentData.TryGetValue(item["name"].ToObject<String>(), out _))
+                    {
+                        equipmentData[item["name"].ToObject<String>()] = new JObject
+                        {
+                            {"parts", new JObject()},
+                            {"type", item["category"].ToObject<String>()},
+                            {"vaulted", vaulted}
+                        };
+                    }
+
+
+                    JObject requirements = equipmentData[item["name"].ToObject<string>()]["parts"].ToObject<JObject>();
                     foreach (var jToken in item["components"].ToObject<JArray>())
                     {
                         var component = (JObject)jToken;
@@ -656,12 +674,19 @@ namespace WFInfoCS
                             // If main item is vaulted, assuming that its requirements are also vaulted since there's no information about vaults of requirements in API
                             // How will it behave with items like "aklex" that have non-vaulted components and vaulted main recipe? Not sure
                             string fullName = item["name"].ToObject<String>() + " " + component["name"].ToObject<String>();
-                            requirements[fullName] = new JObject
+                            if (!requirements.TryGetValue(fullName, out _))
                             {
-                                {"count", component["itemCount"].ToObject<Int32>()},
-                                {"owned", 0},
-                                {"vaulted", vaulted}
-                            };
+                                requirements[fullName] = new JObject
+                                {
+                                    {"count", component["itemCount"].ToObject<Int32>()},
+                                    {"owned", 0},
+                                    {"vaulted", vaulted}
+                                };
+                            } else
+                            {
+                                requirements[fullName]["count"] = component["itemCount"].ToObject<Int32>();
+                                requirements[fullName]["vaulted"] = vaulted;
+                            }
                         }
                         // Make sure its not Resource - it seem to have type specified
                         else if (component.ContainsKey("type"))
@@ -678,33 +703,25 @@ namespace WFInfoCS
                                     subItem["count"] = subItem["count"].ToObject<Int32>() + 1;
                                 } else
                                 {
-                                    bool subVaulted;
+                                    bool subVaulted = searchResult.ToObject<JObject>()["tags"].ToObject<List<String>>().Contains("Vaulted");
 
-                                    if (searchResult.ToObject<JObject>()["tags"].ToObject<List<String>>().Contains("Vaulted"))
+                                    if (!requirements.TryGetValue(component["name"].ToObject<String>(), out _))
                                     {
-                                        subVaulted = true;
+                                        requirements[component["name"].ToObject<String>()] = new JObject
+                                        {
+                                            {"count", component["itemCount"].ToObject<Int32>()},
+                                            {"owned", 0},
+                                            {"vaulted", subVaulted}
+                                        };
                                     } else
                                     {
-                                        subVaulted = false;
+                                        requirements[component["name"].ToObject<String>()]["count"] = component["itemCount"].ToObject<Int32>();
+                                        requirements[component["name"].ToObject<String>()]["vaulted"] = subVaulted;
                                     }
-
-                                    requirements[component["name"].ToObject<String>()] = new JObject
-                                    {
-                                        {"count", component["itemCount"].ToObject<Int32>()},
-                                        {"owned", 0},
-                                        {"vaulted", subVaulted}
-                                    };
                                 }
                             }
                         }
                     }
-
-                    equipmentData[item["name"].ToObject<String>()] = new JObject
-                    {
-                        {"parts", requirements},
-                        {"type", item["category"].ToObject<String>()},
-                        {"vaulted", vaulted}
-                    };
 
                 }
             }

@@ -14,7 +14,7 @@ namespace WFInfoCS
     public partial class Settings : System.Windows.Window
     {
 
-        private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json";  //change to WFInfo after release
+        private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
         public static Key activationKey;
         public static bool isOverlaySelected;

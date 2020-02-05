@@ -25,24 +25,35 @@ namespace WFInfoCS
             LowLevelListener listener = new LowLevelListener(); //publisher
             try
             {
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json"))
+                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"))
                 {
-                    Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfoCS\settings.json"));
-                }
-                else
+                    Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
+
+                } else
                 {
-                    Settings.settingsObj = JObject.Parse("{\"Display\":\"Overlay\"," +
-                        "\"ActivationKey\":\"Snapshot\"," +
-                        "\"Scaling\":100.0," +
-                        "\"Auto\":false," +
-                        "\"Debug\":false}");
-                    Settings.Save();
+                    //Settings.settingsObj = JObject.Parse("{\"Display\":\"Overlay\",\"ActivationKey\":\"Snapshot\",\"Scaling\":100.0,\"Auto\":false,\"Debug\":false}");
+                    Settings.settingsObj = new JObject();
                 }
-                Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
-                Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
-                Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
-                Settings.scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
+                if (!Settings.settingsObj.TryGetValue("Display", out _))
+                    Settings.settingsObj["Display"] = "Overlay";
                 Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
+
+                if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
+                    Settings.settingsObj["ActivationKey"] = "Snapshot";
+                Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+
+                if (!Settings.settingsObj.TryGetValue("Debug", out _))
+                    Settings.settingsObj["Debug"] = false;
+                Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
+
+                if (!Settings.settingsObj.TryGetValue("Auto", out _))
+                    Settings.settingsObj["Auto"] = false;
+                Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
+
+                if (!Settings.settingsObj.TryGetValue("Scaling", out _))
+                    Settings.settingsObj["Scaling"] = 100.0;
+                Settings.scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
+                Settings.Save();
 
                 string thisprocessname = Process.GetCurrentProcess().ProcessName;
                 if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
