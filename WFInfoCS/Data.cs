@@ -265,12 +265,12 @@ namespace WFInfoCS
 
             foreach (KeyValuePair<string, JToken> elem in marketData)
             {
-                if (elem.Key.Contains("Prime"))
+                if (elem.Key.Contains("Prime") && !elem.Key.Contains("Set"))
                 {
                     job = elem.Value.ToObject<JObject>();
                     if (job["ducats"].ToObject<int>() == 0)
                     {
-                        Console.WriteLine("A null value was found for: " + elem.Key);
+                        Console.WriteLine("A null ducat value was found for: " + elem.Key + " in CheckDucats()");
                         needDucats.Add(elem.Key);
                     }
                 }
