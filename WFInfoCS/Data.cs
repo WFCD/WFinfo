@@ -793,7 +793,7 @@ namespace WFInfoCS
             Main.RunOnUIThread(() =>
             {
                 MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + marketData["timestamp"].ToString().Substring(5, 11);
-
+                Main.StatusUpdate("Market data reloaded", 0);
                 MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
                 MainWindow.INSTANCE.ReloadWiki.IsEnabled = true;
                 MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
@@ -812,6 +812,7 @@ namespace WFInfoCS
             {
                 MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: " + equipmentData["timestamp"].ToString().Substring(5, 11);
                 MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + equipmentData["rqmts_timestamp"].ToString().Substring(5, 11);
+                Main.StatusUpdate("Drop data reloaded", 0);
 
                 MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
                 MainWindow.INSTANCE.ReloadWiki.IsEnabled = true;
@@ -827,6 +828,7 @@ namespace WFInfoCS
             Main.RunOnUIThread(() =>
             {
                 MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + equipmentData["rqmts_timestamp"].ToString().Substring(5, 11);
+                Main.StatusUpdate("Wiki data reloaded", 0);
 
                 MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
                 MainWindow.INSTANCE.ReloadWiki.IsEnabled = true;
