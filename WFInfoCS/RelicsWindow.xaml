@@ -29,7 +29,7 @@
             </Setter>
         </Style>
         <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#FF141414"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Red"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightColorKey}" Color="Red"/>
         <SolidColorBrush x:Key="ComboBox.Static.Background" Color="#FF0F0F0F"/>
         <SolidColorBrush x:Key="ComboBox.Static.Border" Color="#646464"/>
         <SolidColorBrush x:Key="ComboBox.Static." Color="#FF0F0F0F"/>
@@ -39,8 +39,8 @@
         <SolidColorBrush x:Key="ComboBox.Static.Editable.Button.Border" Color="Transparent"/>
         <SolidColorBrush x:Key="ComboBox.MouseOver.Glyph" Color="#FF000000"/>
         <LinearGradientBrush x:Key="ComboBox.MouseOver.Background" EndPoint="0,1" StartPoint="0,0">
-            <GradientStop Color="#FFECF4FC" Offset="0.0"/>
-            <GradientStop Color="#FFDCECFC" Offset="1.0"/>
+            <GradientStop Color="#FF0F0F0F" Offset="0.0"/>
+            <GradientStop Color="#FF0F0F0F" Offset="1.0"/>
         </LinearGradientBrush>
         <SolidColorBrush x:Key="ComboBox.MouseOver.Border" Color="#FF7EB4EA"/>
         <SolidColorBrush x:Key="ComboBox.MouseOver.Editable.Background" Color="#FFFFFFFF"/>
