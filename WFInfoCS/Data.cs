@@ -241,7 +241,8 @@ namespace WFInfoCS
                 if (!marketItems.TryGetValue(elem["item"].ToString(), out string item_name))
                 {
                     Main.AddLog("Unknwon market id: " + elem["item"].ToObject<string>());
-                } else
+                }
+                else
                 {
 
                     item_name = item_name.Split('|')[0];
@@ -290,10 +291,12 @@ namespace WFInfoCS
                                 if (rarity.Key.Contains("rare"))
                                 {
                                     marketData[name]["ducats"] = 100;
-                                } else if (rarity.Key.Contains("un"))
+                                }
+                                else if (rarity.Key.Contains("un"))
                                 {
                                     marketData[name]["ducats"] = 45;
-                                } else
+                                }
+                                else
                                 {
                                     marketData[name]["ducats"] = 15;
                                 }
@@ -328,7 +331,8 @@ namespace WFInfoCS
             if (!ducats.TryGetValue("ducats", out JToken temp))
             {
                 ducat = "0";
-            } else
+            }
+            else
             {
                 ducat = temp.ToObject<string>();
             }
@@ -348,7 +352,8 @@ namespace WFInfoCS
                 if (File.Exists(eqmtDataPath))
                 {
                     equipmentData = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath));
-                } else
+                }
+                else
                 {
                     equipmentData = new JObject();
                 }
@@ -448,11 +453,13 @@ namespace WFInfoCS
                             if (name.Contains("Kubrow"))
                             {
                                 name = name.Replace("Kubrow ", "");
-                            } else
+                            }
+                            else
                             {
                                 name = name.Replace("Prime", "Prime Collar");
                             }
-                        } else if (!name.Contains("Prime Blueprint") && !name.Contains("Forma"))
+                        }
+                        else if (!name.Contains("Prime Blueprint") && !name.Contains("Forma"))
                         {
                             name = name.Replace(" Blueprint", "");
                         }
@@ -460,11 +467,13 @@ namespace WFInfoCS
                         if (split[1].Contains("2."))
                         {
                             relicData[era][relic]["rare1"] = name;
-                        } else if (split[1].Contains("11"))
+                        }
+                        else if (split[1].Contains("11"))
                         {
                             relicData[era][relic]["uncommon" + numberOfUncommon.ToString()] = name;
                             numberOfUncommon += 1;
-                        } else
+                        }
+                        else
                         {
                             relicData[era][relic]["common" + numberOfCommon.ToString()] = name;
                             numberOfCommon += 1;
@@ -507,10 +516,12 @@ namespace WFInfoCS
                             if (name.Contains("Harness"))
                             {
                                 equipmentData[prime]["type"] = "Archwing";
-                            } else if (name.Contains("Chassis"))
+                            }
+                            else if (name.Contains("Chassis"))
                             {
                                 equipmentData[prime]["type"] = "Warframe";
-                            } else if (name.Contains("Carapace") || name.Contains("Collar Blueprint"))
+                            }
+                            else if (name.Contains("Carapace") || name.Contains("Collar Blueprint"))
                             {
                                 equipmentData[prime]["type"] = "Companion";
                             }
@@ -614,7 +625,8 @@ namespace WFInfoCS
                     if (equipmentData.TryGetValue(eqmt, out JToken temp))
                     {
                         equipmentData[eqmt]["parts"][str]["vaulted"] = false;
-                    } else
+                    }
+                    else
                     {
                         Console.WriteLine("Cannot find: " + eqmt + " in equipmentData");
                     }
@@ -649,7 +661,8 @@ namespace WFInfoCS
                     if (item["tags"].ToObject<List<String>>().Contains("Vaulted"))
                     {
                         vaulted = true;
-                    } else
+                    }
+                    else
                     {
                         vaulted = false;
                     }
@@ -682,7 +695,8 @@ namespace WFInfoCS
                                     {"owned", 0},
                                     {"vaulted", vaulted}
                                 };
-                            } else
+                            }
+                            else
                             {
                                 requirements[fullName]["count"] = component["itemCount"].ToObject<Int32>();
                                 requirements[fullName]["vaulted"] = vaulted;
@@ -701,7 +715,8 @@ namespace WFInfoCS
                                     // Need additional copy of item
                                     JToken subItem = requirements[component["name"].ToObject<String>()];
                                     subItem["count"] = subItem["count"].ToObject<Int32>() + 1;
-                                } else
+                                }
+                                else
                                 {
                                     bool subVaulted = searchResult.ToObject<JObject>()["tags"].ToObject<List<String>>().Contains("Vaulted");
 
@@ -713,7 +728,8 @@ namespace WFInfoCS
                                             {"owned", 0},
                                             {"vaulted", subVaulted}
                                         };
-                                    } else
+                                    }
+                                    else
                                     {
                                         requirements[component["name"].ToObject<String>()]["count"] = component["itemCount"].ToObject<Int32>();
                                         requirements[component["name"].ToObject<String>()]["vaulted"] = subVaulted;
@@ -1012,7 +1028,8 @@ namespace WFInfoCS
                 } while (!(maxX && maxY));
 
                 num = d[n, m] - 1;
-            } else
+            }
+            else
             {
                 num = n + m;
             }
