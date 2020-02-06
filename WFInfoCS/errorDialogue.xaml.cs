@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO.Compression;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 
@@ -10,7 +12,7 @@ namespace WFInfoCS {
 	public partial class ErrorDialogue : System.Windows.Window {
 
 		string startPath = Main.appPath + @"\debug";
-		string zipPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\WFInfoError.zip";
+		string zipPath = Main.appPath + @"\generatedZip";
 		public ErrorDialogue() {
 			InitializeComponent();
 			Show();
@@ -18,8 +20,18 @@ namespace WFInfoCS {
 		}
 
 		private void YesClick(object sender, RoutedEventArgs e) {
-			ZipFile.CreateFromDirectory(startPath, zipPath);
+			if (!Directory.Exists(zipPath)) {
+				_ = Directory.CreateDirectory(zipPath);
+			}
+			try {
+				ZipFile.CreateFromDirectory(startPath, zipPath + @"\WFInfoError" + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".zip");
+			}
+			catch (Exception) {
+
+				throw;
+			}
 			OCR.errorDetected = false;
+			Process.Start(Main.appPath + @"\generatedZip");
 			Close();
 		}
 
