@@ -1,0 +1,26 @@
+﻿<Window x:Class="WFInfoCS.ErrorDialogue"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WFInfoCS"
+        mc:Ignorable="d"
+        Title="errorDialogue" Height="130" Width="300" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+    <Window.Resources>
+        <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
+    </Window.Resources>
+    <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
+
+        <Rectangle Stroke="#FF707070"/>
+        <Rectangle HorizontalAlignment="Left" Height="25" Stroke="#FF646464" VerticalAlignment="Top" Width="300" Fill="#FF0F0F0F"/>
+        <Viewbox Margin="1,23,1,65" >
+            <Label x:Name="errorText" Content="Something Unexpected Happened" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        </Viewbox>
+        <TextBlock Margin="25,65,25,0" TextWrapping="Wrap" Text="Would you like to create a zip containing debug info on desktop?" TextAlignment="Center" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        <Button Content="Yes" HorizontalAlignment="Left" Margin="75,100,0,0" VerticalAlignment="Top" Width="55" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Background="#FF0F0F0F" Click="YesClick"/>
+        <Button Content="No" Margin="170,100,75,0" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Background="#FF0F0F0F" Click="NoClick"/>
+        <Image HorizontalAlignment="Left" Height="23" VerticalAlignment="Center" Width="24" Source="Resources/WFLogo.png" Margin="1,0,0,107" >
+        </Image>
+        <TextBlock Text="WFinfo" Margin="26,3,0,106" TextAlignment="Left" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" FontSize="16" Height="21" Width="49"/>
+    </Grid>
+</Window>

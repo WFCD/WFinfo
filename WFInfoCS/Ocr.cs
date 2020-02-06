@@ -126,8 +126,7 @@ namespace WFInfoCS {
 		public static int pixelFissureYDispaly = 43;
 
 
-		private static bool errorDetected = false;
-		private static string errrorText = null;
+		public static bool errorDetected = false;
 		private static bool processingActive = false;
 		private static readonly int NUMBER_SAVED_IMAGES = 10;
 
@@ -203,11 +202,15 @@ namespace WFInfoCS {
 				Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
 				Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 				errorDetected = false;
+
 			} else {
 				errorDetected = true;
-				errrorText = "Couldn't find any rewards to display";
 				Main.AddLog(("----  Partial Processing Time, coudln't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
 				Main.StatusUpdate("Couldn't find any rewards to display", 2);
+				Main.RunOnUIThread(() => {
+					Main.SpawnErrorPopup();
+				});
+
 			}
 			watch.Stop();
 
@@ -236,6 +239,7 @@ namespace WFInfoCS {
 			partialScreenshotFiltered.Dispose();
 			partialScreenshotFiltered = null;
 			processingActive = false;
+
 		}
 
 		private static WFtheme GetTheme(Bitmap image) {
