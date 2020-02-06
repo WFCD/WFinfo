@@ -66,7 +66,7 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <TextBlock Text="WFinfo" Margin="36,4,0,2" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" FontSize="16"/>
+        <TextBlock Text="WFinfo" Margin="36,4,0,2" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" FontSize="16" FontWeight="Bold"/>
         <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" Margin="89,3,0,0" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="11" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
         <Button x:Name="minimise" Content="_" HorizontalAlignment="Left" Margin="275,0,0,0" VerticalAlignment="Top" Width="30" Height="27" Click="Minimise" Foreground="#FFB1D0D9" FontSize="16" RenderTransformOrigin="0.5,1" Grid.RowSpan="2" BorderBrush="#FF646464" Grid.ColumnSpan="2" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed">
             <Button.Background>
