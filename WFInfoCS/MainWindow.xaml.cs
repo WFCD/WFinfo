@@ -76,7 +76,7 @@ namespace WFInfoCS
 
         public void ChangeStatus(string status, int serverity)
         {
-            Console.WriteLine(status);
+            Console.WriteLine("Status message: " + status);
             Status.Content = "Status: " + status;
             switch (serverity)
             {
