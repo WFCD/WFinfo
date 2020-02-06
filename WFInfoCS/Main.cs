@@ -45,6 +45,9 @@ namespace WFInfoCS
             RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + dataBase.equipmentData["rqmts_timestamp"].ToString().Substring(5, 11); });
             StatusUpdate("WFInfo Initialization Complete", 0);
             AddLog("WFInfo has launched successfully");
+            if ((bool)Settings.settingsObj["Auto"]) {
+                dataBase.EnableLogcapture();
+            }
         }
 
         public static void RunOnUIThread(Action act)

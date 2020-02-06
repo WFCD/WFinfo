@@ -72,7 +72,7 @@ namespace WFInfoCS
             WINDOWED
         }
         public static HandleRef HandleRef { get; private set; }
-        private static Process Warframe = null;
+        public static Process Warframe = null;
 
         private static Point center;
         public static Rectangle window;

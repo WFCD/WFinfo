@@ -47,7 +47,6 @@ namespace WFInfoCS
 
         private void Run()
         {
-            Process proc = null; //parser2.GetWFProc(); // WIP
 
             try
             {
@@ -60,28 +59,29 @@ namespace WFInfoCS
                         continue;
                     }
 
-                    if ((proc == null) || (proc.HasExited))
+                    if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
                     {
-                        proc = null; //parser2.GetWFProc();
+                        OCR.verifyWarframe();
                     }
 
-                    if (proc != null)
+                    if (OCR.Warframe != null)
                     {
                         using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
                         {
                             using (BinaryReader reader = new BinaryReader(stream, Encoding.Default))
                             {
                                 uint processId = reader.ReadUInt32();
-                                if (processId == proc.Id)
+                                if (processId == OCR.Warframe.Id)
                                 {
                                     char[] chars = reader.ReadChars(4092);
-                                    int index = Array.IndexOf(chars, "\0");
+                                    int index = Array.IndexOf(chars, '\0');
                                     string message = new string(chars, 0, index);
                                     TextChanged(this, message.Trim());
                                 }
                             }
                         }
                     }
+                bufferReadyEvent.Set();
                 }
             }
             catch (Exception ex)

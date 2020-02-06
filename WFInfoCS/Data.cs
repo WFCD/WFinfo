@@ -9,6 +9,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Application = System.Windows.Application;
 
 namespace WFInfoCS
@@ -63,14 +64,9 @@ namespace WFInfoCS
             //Directory.CreateDirectory(warframePictures);
             //screenshotWatcher.Path = warframePictures;
             //screenshotWatcher.EnableRaisingEvents = true;
-
-            //if (false) //My.Settings.Auto) // WIP
-            //{
-            //    EnableLogcapture();
-            //}
         }
 
-        private void EnableLogcapture()
+        public void EnableLogcapture()
         {
             if (EElogWatcher == null)
             {
@@ -87,7 +83,7 @@ namespace WFInfoCS
             }
         }
 
-        private void DisableLogCapture()
+        public void DisableLogCapture()
         {
             if (EElogWatcher != null)
             {
@@ -95,18 +91,6 @@ namespace WFInfoCS
                 EElogWatcher.Dispose();
                 EElogWatcher = null;
             }
-        }
-
-        private void SaveJObject(JObject data)
-        {
-            Main.AddLog("Saving debug JSON: debug" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".json");
-            File.WriteAllText(Path.Combine(applicationDirectory + @"\debug" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
-        }
-
-        private void SaveJArray(JArray data)
-        {
-            Main.AddLog("Saving debug JSON: debug" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".json");
-            File.WriteAllText(Path.Combine(applicationDirectory + @"\debug" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + ".json"), JsonConvert.SerializeObject(data, Formatting.Indented));
         }
 
         private void SaveDatabase(string path, object db)
@@ -1186,7 +1170,8 @@ namespace WFInfoCS
             Console.WriteLine(line);
             if (line.Contains("Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf"))
             {
-                //Task.Factory.StartNew(Main.DoDelayWork()); // WIP
+                Console.WriteLine("Found relics");
+                Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
             }
         }
     }
