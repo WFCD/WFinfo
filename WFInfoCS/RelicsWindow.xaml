@@ -8,8 +8,6 @@
         mc:Ignorable="d"
         Title="Settings" Height="114" Width="382" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="382" MinWidth="382" MinHeight="110" Loaded="WindowLoaded">
     <Window.Resources>
-        <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
-        <FontFamily x:Key="font">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
         <Style x:Key="ControlStyle1" TargetType="{x:Type Control}">
             <Setter Property="Template">
                 <Setter.Value>

@@ -6,9 +6,6 @@
         xmlns:local="clr-namespace:WFInfoCS"
         mc:Ignorable="d"
         Title="errorDialogue" Height="130" Width="300" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
-    <Window.Resources>
-        <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
-    </Window.Resources>
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
 
         <Rectangle Stroke="#FF707070"/>

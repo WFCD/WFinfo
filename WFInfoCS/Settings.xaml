@@ -9,7 +9,6 @@
         mc:Ignorable="d" 
         Title="Settings" Height="245" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
-        <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">

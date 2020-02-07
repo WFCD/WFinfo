@@ -8,10 +8,8 @@
         mc:Ignorable="d"
         Title="Settings" Height="207" Width="1000" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
-        <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
         <System:Double x:Key="FontSize">18</System:Double>
         <System:Double x:Key="fontSize">22</System:Double>
-        <FontFamily x:Key="font">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
     </Window.Resources>
     <Grid Background="#FF1B1B1B" x:Name="mainWindow" MouseDown="MouseDown">
         <Grid x:Name="Titlebar" Margin="0,0,0,230">
@@ -21,7 +19,7 @@
             </Grid.ColumnDefinitions>
             <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="1000" Grid.ColumnSpan="2" Margin="0,0,0,-27"/>
 
-            <Label Content="Rewards" HorizontalAlignment="Left" Margin="25,-5,0,-30" VerticalAlignment="Top" Foreground="#FFB1D0D9" Height="35" Width="135" FontFamily="{DynamicResource font}" FontSize="{DynamicResource fontSize}" Grid.ColumnSpan="2"/>
+            <Label Content="Rewards" HorizontalAlignment="Left" Margin="25,-5,0,-30" VerticalAlignment="Top" Foreground="#FFB1D0D9" Height="35" Width="135" FontFamily="{DynamicResource Roboto}" FontSize="{DynamicResource fontSize}" Grid.ColumnSpan="2"/>
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" Source="Resources/WFLogo.png" Margin="0,0,0,-26" >
                 <Image.RenderTransform>
                     <TransformGroup>
