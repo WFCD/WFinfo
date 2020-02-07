@@ -1,0 +1,137 @@
+PROCEDURE:
+Load Interface/ProjectionsCountdown AND Interface/ProjectionRewardChoice
+LOAD Overlay/OverlayBackground
+SHOW rewards
+
+
+EXAMPLES
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+854.794 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+854.796 Script [Info]: Initialize timer true	5
+854.796 Sys [Info]: Created /Lotus/Interface/ProjectionRewardChoice.swf
+
+859.797 Script [Info]: Countdown timer expired
+859.797 Script [Info]: Relic timer closed
+859.797 Script [Info]: Pause countdown done
+859.798 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+
+859.832 Script [Info]: Relic rewards initialized
+859.832 Sys [Info]: Created /Lotus/Interface/Backgrounds/Overlay/OverlayBackground.swf
+
+860.258 Script [Info]: Relic timer closed
+860.258 Script [Info]: Got rewards
+860.258 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+860.258 Sys [Info]: Found 8 items to load (0ms) [Heap: 1,015,631,776/1,065,877,504 Footprint: 1,655,758,848 Handles: 811]
+860.260 Script [Info]: Initialize timer nil	15
+860.275 Sys [Info]: Finished load of Flyweight batch [0.00s and 0 frames at 0 ms/frame avg, 0 ms/update peak, 0.00s IO wait], 3 item(s)
+860.275 Sys [Info]: Resource load completed (3 root types) in one pass and 0.0s (I/O ~= 0.0%, inherited 4 of 8)
+860.275 Sys [Info]: Frames issuing: 0, frames loading: 0, frames retiring: 0
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+520.249 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+520.251 Script [Info]: Initialize timer true	5
+520.251 Sys [Info]: Created /Lotus/Interface/ProjectionRewardChoice.swf
+
+525.250 Script [Info]: Countdown timer expired
+525.250 Script [Info]: Relic timer closed
+525.250 Script [Info]: Pause countdown done
+525.251 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+
+525.266 Script [Info]: Relic rewards initialized
+525.266 Sys [Info]: Created /Lotus/Interface/Backgrounds/Overlay/OverlayBackground.swf
+
+525.419 Script [Info]: _PlayersChanged. 4 member(s) left
+
+525.422 Script [Info]: Relic timer closed
+525.422 Script [Info]: Got rewards
+525.423 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+525.423 Sys [Info]: Found 13 items to load (0ms) [Heap: 1,014,875,328/1,034,944,512 Footprint: 1,616,355,328 Handles: 811]
+525.426 Script [Info]: Initialize timer nil	15
+525.434 Sys [Info]: Finished load of Flyweight batch [0.00s and 0 frames at 0 ms/frame avg, 0 ms/update peak, 0.00s IO wait], 3 item(s)
+525.434 Sys [Info]: Resource load completed (4 root types) in one pass and 0.0s (I/O ~= 0.0%, inherited 6 of 13)
+525.434 Sys [Info]: Frames issuing: 0, frames loading: 0, frames retiring: 0
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4799.093 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+4799.095 Sys [Info]: Created /Lotus/Interface/ProjectionRewardChoice.swf
+
+4799.123 Script [Info]: Relic rewards initialized
+4799.123 Sys [Info]: Created /Lotus/Interface/Backgrounds/Overlay/OverlayBackground.swf
+
+4799.266 Script [Info]: _PlayersChanged. 4 member(s) left
+4799.292 Script [Info]: Combat -> idle
+
+4800.793 Script [Info]: Relic timer closed
+4800.793 Script [Info]: Got rewards
+4800.793 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+4800.793 Sys [Info]: Found 9 items to load (0ms) [Heap: 1,298,610,496/1,327,693,824 Footprint: 2,181,083,136 Handles: 811]
+4800.795 Script [Info]: Initialize timer nil	15
+4800.798 Sys [Info]: Finished load of Flyweight batch [0.00s and 0 frames at 0 ms/frame avg, 0 ms/update peak, 0.00s IO wait], 2 item(s)
+4800.798 Sys [Info]: Resource load completed (3 root types) in one pass and 0.0s (I/O ~= 0.0%, inherited 5 of 9)
+4800.798 Sys [Info]: Frames issuing: 0, frames loading: 0, frames retiring: 0
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+6397.222 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+6397.224 Sys [Info]: Created /Lotus/Interface/ProjectionRewardChoice.swf
+
+6397.227 Script [Info]: Relic rewards initialized
+6397.227 Sys [Info]: Created /Lotus/Interface/Backgrounds/Overlay/OverlayBackground.swf
+
+6397.393 Script [Info]: _PlayersChanged. 4 member(s) left
+
+6397.583 Script [Info]: Relic timer closed
+6397.583 Script [Info]: Got rewards
+6397.583 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+6397.583 Sys [Info]: Found 10 items to load (0ms) [Heap: 1,236,719,392/1,327,235,072 Footprint: 2,078,171,136 Handles: 826]
+6397.586 Script [Info]: Initialize timer nil	15
+6397.615 Sys [Info]: Finished load of Flyweight batch [0.00s and 0 frames at 0 ms/frame avg, 0 ms/update peak, 0.00s IO wait], 2 item(s)
+6397.615 Sys [Info]: Resource load completed (4 root types) in one pass and 0.0s (I/O ~= 0.0%, inherited 5 of 10)
+6397.615 Sys [Info]: Frames issuing: 0, frames loading: 0, frames retiring: 0
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+8333.783 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+8333.785 Sys [Info]: Created /Lotus/Interface/ProjectionRewardChoice.swf
+
+8333.791 Script [Info]: Relic rewards initialized
+8333.792 Sys [Info]: Created /Lotus/Interface/Backgrounds/Overlay/OverlayBackground.swf
+
+8333.877 Script [Info]: Relic timer closed
+8333.877 Script [Info]: Got rewards
+8333.877 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+8333.877 Sys [Info]: Found 10 items to load (0ms) [Heap: 1,178,607,424/1,319,632,896 Footprint: 2,064,498,688 Handles: 874]
+8333.879 Script [Info]: Initialize timer nil	15
+8333.892 Sys [Info]: Finished load of Flyweight batch [0.00s and 0 frames at 0 ms/frame avg, 0 ms/update peak, 0.00s IO wait], 2 item(s)
+8333.892 Sys [Info]: Resource load completed (3 root types) in one pass and 0.0s (I/O ~= 0.0%, inherited 5 of 10)
+8333.892 Sys [Info]: Frames issuing: 0, frames loading: 0, frames retiring: 0
+8333.948 Script [Info]: _PlayersChanged. 4 member(s) left
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+12853.282 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+12853.284 Sys [Info]: Created /Lotus/Interface/ProjectionRewardChoice.swf
+
+12853.296 Script [Info]: Relic rewards initialized
+12853.296 Sys [Info]: Created /Lotus/Interface/Backgrounds/Overlay/OverlayBackground.swf
+
+12853.450 Script [Info]: _PlayersChanged. 4 member(s) left
+
+12853.764 Script [Info]: Relic timer closed
+12853.764 Script [Info]: Got rewards
+12853.765 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+12853.765 Sys [Info]: Found 8 items to load (0ms) [Heap: 1,165,989,664/1,318,256,640 Footprint: 2,049,720,320 Handles: 852]
+12853.768 Script [Info]: Initialize timer nil	15
+12853.795 Sys [Info]: Finished load of Flyweight batch [0.00s and 0 frames at 0 ms/frame avg, 0 ms/update peak, 0.00s IO wait], 3 item(s)
+12853.795 Sys [Info]: Resource load completed (4 root types) in one pass and 0.0s (I/O ~= 0.0%, inherited 4 of 8)
+12853.795 Sys [Info]: Frames issuing: 0, frames loading: 0, frames retiring: 0
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+13227.665 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+13227.668 Sys [Info]: Created /Lotus/Interface/ProjectionRewardChoice.swf
+
+13227.679 Script [Info]: Relic rewards initialized
+13227.679 Sys [Info]: Created /Lotus/Interface/Backgrounds/Overlay/OverlayBackground.swf
+
+13227.850 Script [Info]: _PlayersChanged. 4 member(s) left
+
+13228.014 Script [Info]: Relic timer closed
+13228.014 Script [Info]: Got rewards
+13228.015 Sys [Info]: Created /Lotus/Interface/ProjectionsCountdown.swf
+13228.015 Sys [Info]: Found 9 items to load (0ms) [Heap: 1,114,093,248/1,315,635,200 Footprint: 2,072,850,432 Handles: 835]
+13228.018 Script [Info]: Initialize timer nil	15
+13228.045 Sys [Info]: Finished load of Flyweight batch [0.00s and 0 frames at 0 ms/frame avg, 0 ms/update peak, 0.00s IO wait], 3 item(s)
+13228.045 Sys [Info]: Resource load completed (4 root types) in one pass and 0.0s (I/O ~= 0.0%, inherited 4 of 9)
+13228.045 Sys [Info]: Frames issuing: 0, frames loading: 0, frames retiring: 0
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------

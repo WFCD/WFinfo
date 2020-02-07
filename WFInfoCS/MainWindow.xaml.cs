@@ -51,6 +51,10 @@ namespace WFInfoCS
                     Settings.settingsObj["Auto"] = false;
                 Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
 
+                if (!Settings.settingsObj.TryGetValue("AutoDelay", out _))
+                    Settings.settingsObj["AutoDelay"] = 250L;
+                Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");
+
                 if (!Settings.settingsObj.TryGetValue("Scaling", out _))
                     Settings.settingsObj["Scaling"] = 100.0;
                 Settings.scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));

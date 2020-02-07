@@ -28,7 +28,8 @@ namespace WFInfoCS
             HIGH_CONTRAST,
             LEGACY,
             EQUINOX,
-            DARK_LOTUS
+            DARK_LOTUS,
+            UNKNOWN = -1
         }
 
         //TODO: DARK_LOTUS needs colors, and well, the rest need confirmations
@@ -74,7 +75,7 @@ namespace WFInfoCS
         public static HandleRef HandleRef { get; private set; }
         public static Process Warframe = null;
 
-        private static Point center;
+        public static Point center;
         public static Rectangle window;
 
         //public static float dpi;
@@ -160,18 +161,11 @@ namespace WFInfoCS
             // Look at me mom, I'm doing fancy shit
             bigScreenshot = file ?? CaptureScreenshot();
 
-            if (bigScreenshot.Width * 9 > bigScreenshot.Height * 16)  // image is less than 16:9 aspect
-                screenScaling = bigScreenshot.Height / 1080.0;
-            else
-                screenScaling = bigScreenshot.Width / 1920.0; //image is higher than 16:9 aspect
-
-            uiScaling = Settings.scaling / 100.0;
-
             Main.AddLog("Scaling values: Screen_Scaling = " + (screenScaling * 100).ToString("F2") + "%, DPI_Scaling = " + (dpiScaling * 100).ToString("F2") + "%, UI_Scaling = " + (uiScaling * 100).ToString("F0") + "%");
 
 
             // Get that theme
-            WFtheme active = GetTheme(bigScreenshot);
+            WFtheme active = GetTheme(out _, bigScreenshot);
 
 
             // Get the part box and filter it
@@ -203,8 +197,7 @@ namespace WFInfoCS
                                 Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                                 Main.overlays[partNumber].Resize(overWid);
                                 Main.overlays[partNumber].Display((int)((startX + partialScreenshotFiltered.Width / 4 * partNumber) / dpiScaling), startY);
-                            }
-                            else
+                            } else
                             {
                                 Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
                             }
@@ -218,8 +211,7 @@ namespace WFInfoCS
                 Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
                 errorDetected = false;
 
-            }
-            else
+            } else
             {
                 errorDetected = true;
                 Main.AddLog(("----  Partial Processing Time, coudln't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
@@ -260,7 +252,7 @@ namespace WFInfoCS
 
         }
 
-        private static WFtheme GetTheme(Bitmap image)
+        public static WFtheme GetTheme(out int closestThresh, Bitmap image = null)
         {
             // Tests Scaling from 40% to 120%
             double scalingMod = screenScaling * 0.4;
@@ -269,10 +261,20 @@ namespace WFInfoCS
             int startY = (int)(pixelProfileYSpecial * scalingMod);
             int endX = (int)(pixelProfileXSpecial * scalingMod * 3);
             int endY = (int)(pixelProfileYSpecial * scalingMod * 3);
-            int height = endY - startY;
             int width = endX - startX;
+            int height = endY - startY;
 
-            int closestThresh = 999;
+            if (image == null)
+            {
+                image = new Bitmap(endX, endY);
+                Size FullscreenSize = new Size(width, height);
+                using (Graphics graphics = Graphics.FromImage(image))
+                    graphics.CopyFromScreen(startX, startY, startX, startY, FullscreenSize, CopyPixelOperation.SourceCopy);
+                image.Save(Main.appPath + @"\Debug\TESTSHOT " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
+            }
+
+
+            closestThresh = 999;
             WFtheme closestTheme = WFtheme.CORPUS;
             double estimatedScaling = 0;
             Color closestColor = ThemePrimary[0];
@@ -291,12 +293,15 @@ namespace WFInfoCS
 
                 foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
                 {
-                    Color themeColor = ThemePrimary[(int)theme];
-                    int tempThresh = ColorDifference(clr, themeColor);
-                    if (tempThresh < minThresh)
+                    if (theme != WFtheme.UNKNOWN)
                     {
-                        minThresh = tempThresh;
-                        minTheme = theme;
+                        Color themeColor = ThemePrimary[(int)theme];
+                        int tempThresh = ColorDifference(clr, themeColor);
+                        if (tempThresh < minThresh)
+                        {
+                            minThresh = tempThresh;
+                            minTheme = theme;
+                        }
                     }
                 }
 
@@ -606,21 +611,28 @@ namespace WFInfoCS
 
         }
 
-        private static void refreshScaling()
+        private static void refreshDPIScaling()
         {
             using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
                 dpiScaling = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only need to check one value
+
+            uiScaling = Settings.scaling / 100.0;
         }
 
         public static void updateWindow(Bitmap image = null)
         {
-            refreshScaling();
+            refreshDPIScaling();
             if (image != null)
             {
                 int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)dpiScaling;
                 int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
                 window = new Rectangle(0, 0, width, height);
                 center = new Point(window.Width / 2, window.Height / 2);
+
+                if (window.Width * 9 > window.Height * 16)  // image is less than 16:9 aspect
+                    screenScaling = window.Height / 1080.0;
+                else
+                    screenScaling = window.Width / 1920.0; //image is higher than 16:9 aspect
                 return;
             }
 
@@ -637,9 +649,12 @@ namespace WFInfoCS
                     int height = Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
+                    if (window.Width * 9 > window.Height * 16)  // image is less than 16:9 aspect
+                        screenScaling = window.Height / 1080.0;
+                    else
+                        screenScaling = window.Width / 1920.0; //image is higher than 16:9 aspect
                     return;
-                }
-                else
+                } else
                 {
                     Main.AddLog("Failed to get window bounds");
                     Main.StatusUpdate("Failed to get window bounds", 1);
@@ -651,8 +666,7 @@ namespace WFInfoCS
             { // if the window is in the VOID delete current process and re-set window to nothing
                 Warframe = null;
                 window = Rectangle.Empty;
-            }
-            else if (window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
+            } else if (window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
             { // checks if old window size is the right size if not change it
                 window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
                                                                                                                          // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
@@ -668,21 +682,23 @@ namespace WFInfoCS
                     // Borderless, don't do anything
                     currentStyle = WindowStyle.BORDERLESS;
                     Main.AddLog("Borderless detected (0x" + styles.ToString("X8") + ")");
-                }
-                else if ((styles & WS_BORDER) != 0)
+                } else if ((styles & WS_BORDER) != 0)
                 {
                     // Windowed, adjust for thicc border
                     window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
                     Main.AddLog("Windowed detected (0x" + styles.ToString("X8") + "), adjusting window to: " + window.ToString());
                     currentStyle = WindowStyle.WINDOWED;
-                }
-                else
+                } else
                 {
                     // Assume Fullscreen, don't do anything
                     Main.AddLog("Fullscreen detected (0x" + styles.ToString("X8") + ")");
                     currentStyle = WindowStyle.FULLSCREEN;
                 }
                 center = new Point(window.Width / 2, window.Height / 2);
+                if (window.Width * 9 > window.Height * 16)  // image is less than 16:9 aspect
+                    screenScaling = window.Height / 1080.0;
+                else
+                    screenScaling = window.Width / 1920.0; //image is higher than 16:9 aspect
             }
         }
 
