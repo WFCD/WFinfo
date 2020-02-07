@@ -8,7 +8,6 @@
         mc:Ignorable="d"
         Title="WFInfo" Height="131" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070">
     <Window.Resources>
-        <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
@@ -18,8 +17,8 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="26"/>
-            <RowDefinition Height="84"/>
-            <RowDefinition Height="21"/>
+            <RowDefinition Height="79"/>
+            <RowDefinition Height="26"/>
         </Grid.RowDefinitions>
         <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,0,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
             <Rectangle.RenderTransform>
@@ -66,14 +65,14 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <TextBlock Text="WFinfo" Margin="36,4,0,2" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" FontSize="16" FontWeight="Bold"/>
-        <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" Margin="89,3,0,0" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="11" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        <TextBlock Text="WFInfo" Margin="36,4,0,2" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontSize="16" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto Medium" Height="20"/>
+        <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="93,3,0,2" Foreground="#FFB1D0D9" FontSize="11" FontWeight="Bold" Width="182" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto Medium" Height="21"/>
         <Button x:Name="minimise" Content="_" HorizontalAlignment="Left" Margin="275,0,0,0" VerticalAlignment="Top" Width="30" Height="27" Click="Minimise" Foreground="#FFB1D0D9" FontSize="16" RenderTransformOrigin="0.5,1" Grid.RowSpan="2" BorderBrush="#FF646464" Grid.ColumnSpan="2" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed">
             <Button.Background>
                 <ImageBrush/>
             </Button.Background>
         </Button>
-        <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="0,0,0,83" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" Grid.RowSpan="2" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="0,0,0,1" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
         <Button x:Name="Website" ToolTip="Opens WFinfo website" HorizontalAlignment="Center" Margin="0,0,0,57" Width="30" Click="websiteClick" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/home.png">
@@ -172,17 +171,17 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Viewbox x:Name="Status_viewbox" HorizontalAlignment="Left" Height="25" Margin="2,79,0,0" Grid.Row="1" VerticalAlignment="Top" Width="302" Grid.RowSpan="2">
+        <Viewbox x:Name="Status_viewbox" HorizontalAlignment="Left" Height="25" Margin="2,0,0,0" Grid.Row="2" VerticalAlignment="Top" Width="302">
             <Label x:Name="Status" Content="Status: Loading...&#xD;&#xA;" Background="{x:Null}" Foreground="#FFB1D0D9" FontSize="14" Height="29"/>
         </Viewbox>
-        <Viewbox x:Name="Market_data_viewbox" HorizontalAlignment="Left" Height="26" Margin="60,2,0,0" Grid.Row="1" VerticalAlignment="Top" Width="244">
-            <Label x:Name="Market_Data" Content="Market Data: Loading..." FontFamily="{DynamicResource Roboto}" Background="{x:Null}" Foreground="#FFB1D0D9" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Padding="5,2,5,5" FontSize="24"/>
+        <Viewbox x:Name="Market_data_viewbox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="51,2,0,51" Grid.Row="1" Width="254">
+            <Label x:Name="Market_Data" Content="Market Data: Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontSize="24" FontFamily="/WFInfoCS;component/Resources/RobotoMono/#Roboto Mono"/>
         </Viewbox>
-        <Viewbox x:Name="Drop_data_viewbox" HorizontalAlignment="Left" Height="26" Margin="75.5,27,0,0" Grid.Row="1" VerticalAlignment="Top" Width="229">
-            <Label x:Name="Drop_Data" Content="Drop Data: Loading..." FontFamily="{DynamicResource Roboto}" Background="{x:Null}" Foreground="#FFB1D0D9" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Padding="5,2,5,5" FontSize="24"/>
+        <Viewbox x:Name="Drop_data_viewbox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="70,27,0,26" Grid.Row="1" Width="234">
+            <Label x:Name="Drop_Data" Content="Drop Data: Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontSize="24" FontFamily="/WFInfoCS;component/Resources/RobotoMono/#Roboto Mono"/>
         </Viewbox>
-        <Viewbox x:Name="Wiki_data_viewbox" HorizontalAlignment="Left" Height="26" Margin="81,52,0,0" Grid.Row="1" VerticalAlignment="Top" Width="224" Grid.ColumnSpan="2">
-            <Label x:Name="Wiki_Data" Content="Wiki Data: Loading..." FontFamily="{DynamicResource Roboto}" Background="{x:Null}" Foreground="#FFB1D0D9" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Padding="5,2,5,5" FontSize="24"/>
+        <Viewbox x:Name="Wiki_data_viewbox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="70,52,0,1" Grid.Row="1" Width="234">
+            <Label x:Name="Wiki_Data" Content="Wiki Data: Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontSize="24" FontFamily="/WFInfoCS;component/Resources/RobotoMono/#Roboto Mono"/>
         </Viewbox>
 
     </Grid>

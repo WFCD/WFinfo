@@ -195,8 +195,34 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Resources\RobotoCondensed-Bold.ttf" />
-    <None Include="Resources\RobotoCondensed-Regular.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-Black.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-BlackItalic.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-Bold.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-BoldItalic.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-Italic.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-Light.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-LightItalic.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-Medium.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-MediumItalic.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-Regular.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-Thin.ttf" />
+    <Resource Include="Resources\Roboto\Roboto-ThinItalic.ttf" />
+    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-Bold.ttf" />
+    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-BoldItalic.ttf" />
+    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-Italic.ttf" />
+    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-Light.ttf" />
+    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-LightItalic.ttf" />
+    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-Regular.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Bold.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-BoldItalic.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Italic.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Light.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-LightItalic.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Medium.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-MediumItalic.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Regular.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Thin.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-ThinItalic.ttf" />
     <None Include="tessdata\engbest.traineddata">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
