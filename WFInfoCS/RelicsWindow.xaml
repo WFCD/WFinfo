@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WFInfoCS"
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" x:Class="WFInfoCS.RelicsWindow"
         mc:Ignorable="d"
-        Title="Settings" Height="114" Width="382" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="382" MinWidth="382" MinHeight="110" Loaded="WindowLoaded">
+        Title="Settings" Height="200" Width="450" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="450" MinWidth="450" MinHeight="200" Loaded="WindowLoaded">
     <Window.Resources>
         <Style x:Key="ControlStyle1" TargetType="{x:Type Control}">
             <Setter Property="Template">
@@ -27,7 +27,6 @@
             </Setter>
         </Style>
         <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#FF141414"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightColorKey}" Color="Red"/>
         <SolidColorBrush x:Key="ComboBox.Static.Background" Color="#FF0F0F0F"/>
         <SolidColorBrush x:Key="ComboBox.Static.Border" Color="#646464"/>
         <SolidColorBrush x:Key="ComboBox.Static." Color="#FF0F0F0F"/>
@@ -291,6 +290,51 @@
             <Setter Property="BorderBrush" Value="#FF0F0F0F"/>
             <Setter Property="Foreground" Value="#b1d0d9" />
         </Style>
+        <SolidColorBrush x:Key="ListBorder" Color="#828790"/>
+
+        <Style x:Key="TreeViewStyle1" TargetType="{x:Type TreeView}">
+            <Setter Property="Background" Value="#FF0F0F0F"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TreeView}">
+                        <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
+                            <ScrollViewer x:Name="_tv_scrollviewer_" Background="{TemplateBinding Background}" CanContentScroll="false" Focusable="false" HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Background" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="VirtualizingPanel.IsVirtualizing" Value="true">
+                                <Setter Property="CanContentScroll" TargetName="_tv_scrollviewer_" Value="true"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="VirtualizingPanel.IsVirtualizing" Value="true">
+                    <Setter Property="ItemsPanel">
+                        <Setter.Value>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel/>
+                            </ItemsPanelTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
     </Window.Resources>
     <Grid MouseDown="MouseDown">
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
@@ -331,27 +375,45 @@
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
 
 
-            <TreeView x:Name="groupedByCollection" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9">
+
+            <TreeView x:Name="groupedByCollection" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" Style="{DynamicResource TreeViewStyle1}">
                 <TreeView.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#0f0f0f" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#0f0f0f"/>
                     <Style TargetType="{x:Type TreeViewItem}">
                         <Setter Property="HeaderTemplate" >
                             <Setter.Value>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <Image Width="20" Margin="3" Source="Resources\Axi.png"/>
-                                        <TextBlock VerticalAlignment="Center" Text="relic name" Padding="3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                        <TextBlock VerticalAlignment="Center" Text="vaulted" Padding="3" Foreground="#506464" FontFamily="Roboto"/>
-
-                                        <TextBlock VerticalAlignment="Center" Text="INT" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                        <Image Width="14" Margin="1" Source="Resources\plat.gif"/>
-                                        <TextBlock VerticalAlignment="Center" Text=":" Padding="0,0,2,0" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                        <TextBlock VerticalAlignment="Center" Text="999" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-
-                                        <TextBlock VerticalAlignment="Center" Text="RAD" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                        <Image Width="14" Margin="1" Source="Resources\plat.gif"/>
-                                        <TextBlock VerticalAlignment="Center" Text=":" Padding="0,0,2,0" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                        <TextBlock VerticalAlignment="Center" Text="999" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                        <TextBlock VerticalAlignment="Center" Text="(+99)" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                        <StackPanel Orientation="Horizontal" Width="199">
+                                            <Image Width="30"  Source="Resources\Axi.png" HorizontalAlignment="Right"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock VerticalAlignment="Center" Text="{Binding}" Padding="3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                                <TextBlock VerticalAlignment="Center" Text="vaulted" Padding="3" Foreground="#506464" FontFamily="Roboto"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Visibility="Visible">
+                                            <TextBlock VerticalAlignment="Center" Text="INT" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                            <Image Width="14" Margin="1" Source="Resources\plat.gif"/>
+                                            <TextBlock VerticalAlignment="Center" Text=":" Padding="0,0,2,0" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                            <TextBlock VerticalAlignment="Center" Text="999" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Visibility="Visible">
+                                            <TextBlock VerticalAlignment="Center" Text="RAD" Padding="10,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                            <Image Width="14" Margin="1" Source="Resources\plat.gif"/>
+                                            <TextBlock VerticalAlignment="Center" Text=":" Padding="0,0,2,0" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                            <TextBlock VerticalAlignment="Center" Text="999" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                            <TextBlock VerticalAlignment="Center" Text="(+99)" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Visibility="Collapsed">
+                                            <TextBlock VerticalAlignment="Center" Text="plat" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                            <Image Width="14" Margin="1" Source="Resources\plat.gif"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Visibility="Collapsed">
+                                            <TextBlock VerticalAlignment="Center" Text="ducat" Padding="10,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                            <Image Width="14" Margin="1" Source="Resources\ducat_w.gif"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </DataTemplate>
                             </Setter.Value>
