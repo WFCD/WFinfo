@@ -123,6 +123,8 @@ namespace WFInfoCS
         {
             if (Main.relicWindow == null) { ChangeStatus("Relic window not yet loaded in", 2); return; }
             Main.relicWindow.populate();
+            Main.relicWindow.Show();
+            Main.relicWindow.Focus();
         }
 
         private void equipmentClick(object sender, RoutedEventArgs e)

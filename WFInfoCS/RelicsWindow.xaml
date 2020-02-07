@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WFInfoCS"
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" x:Class="WFInfoCS.RelicsWindow"
         mc:Ignorable="d"
-        Title="Settings" Height="114" Width="300" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MinWidth="300" MinHeight="110">
+        Title="Settings" Height="114" Width="382" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="382" MinWidth="382" MinHeight="110" Loaded="WindowLoaded">
     <Window.Resources>
         <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
         <FontFamily x:Key="font">/WFInfoCS;component/Resources/#Roboto Condensed</FontFamily>
@@ -331,9 +331,38 @@
 
         </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
-            <TreeView x:Name="groupedByCollection" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
-            <TreeView x:Name="groupedByAll" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
-            <TreeView x:Name="Search" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9"/>
+
+
+            <TreeView x:Name="groupedByCollection" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9">
+                <TreeView.Resources>
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <Setter Property="HeaderTemplate" >
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Width="20" Margin="3" Source="Resources\Axi.png"/>
+                                        <TextBlock VerticalAlignment="Center" Text="relic name" Padding="3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                        <TextBlock VerticalAlignment="Center" Text="vaulted" Padding="3" Foreground="#506464" FontFamily="Roboto"/>
+
+                                        <TextBlock VerticalAlignment="Center" Text="INT" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                        <Image Width="14" Margin="1" Source="Resources\plat.gif"/>
+                                        <TextBlock VerticalAlignment="Center" Text=":" Padding="0,0,2,0" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                        <TextBlock VerticalAlignment="Center" Text="999" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+
+                                        <TextBlock VerticalAlignment="Center" Text="RAD" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                        <Image Width="14" Margin="1" Source="Resources\plat.gif"/>
+                                        <TextBlock VerticalAlignment="Center" Text=":" Padding="0,0,2,0" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                        <TextBlock VerticalAlignment="Center" Text="999" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                        <TextBlock VerticalAlignment="Center" Text="(+99)" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TreeView.Resources>
+            </TreeView>
+            <TreeView x:Name="groupedByAll" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" Visibility="Hidden"/>
+            <TreeView x:Name="Search" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" Visibility="Hidden"/>
         </Grid>
 
     </Grid>

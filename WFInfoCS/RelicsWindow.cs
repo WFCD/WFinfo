@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace WFInfoCS
@@ -21,8 +23,6 @@ namespace WFInfoCS
 
         public void populate()
         { //todo implement populating the listview
-            Show();
-            Focus();
         }
 
         // Allows the draging of the window
@@ -74,9 +74,40 @@ namespace WFInfoCS
         private void Subtract(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("Subtract was clicked");
-
             //todo remove 1 owned of the current selected tree view item
         }
 
-    }
+        private void WindowLoaded(object sender, RoutedEventArgs e) { // triggers when the window is first loaded, populates all the listviews once.
+
+            #region Populate grouped collection
+
+            var lithHead = new TreeViewItem { Header = "Lith" };
+            var mesoHead = new TreeViewItem { Header = "Meso" };
+            var neoHead = new TreeViewItem { Header = "Neo" };
+            var axiHead = new TreeViewItem { Header = "Axi" };
+            groupedByCollection.Items.Add(lithHead);
+            groupedByCollection.Items.Add(mesoHead);
+            groupedByCollection.Items.Add(neoHead);
+            groupedByCollection.Items.Add(axiHead);
+
+            foreach (TreeViewItem head in groupedByCollection.Items) {
+                foreach (JProperty relic in Main.dataBase.relicData[head.Header.ToString()]) {
+                    TreeViewItem relicItem = new TreeViewItem { Header = relic.Name };
+                    JObject primeItems = (JObject)Main.dataBase.relicData[head.Header.ToString()][relic.Name];
+                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["common1"] });
+                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["common2"] });
+                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["common3"] });
+                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["uncommon1"] });
+                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["uncommon2"] });
+                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["rare1"] });
+                    head.Items.Add(relicItem);
+                }
+            }
+
+
+            
+
+            #endregion
+        }
+	}
 }
