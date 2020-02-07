@@ -595,7 +595,7 @@ Class Data
         Dim start As Integer = data.IndexOf("<timestamp>") + 11
         Dim last As Integer = data.IndexOf("<", start)
         eqmt_data("rqmts_timestamp") = Date.Now.ToString("R")
-        data = data.Substring(data.IndexOf("{", data.IndexOf("<text")))
+        data = data.Substring(data.IndexOf("local WeaponData =" & vbLf & "{", data.IndexOf("<text"))).Replace("local WeaponData =" & vbLf, "")
         data = data.Substring(0, data.LastIndexOf("}") + 1)
         data = Regex.Replace(data, "&quot;", """")
         data = Regex.Replace(data, "&amp;", "&")
