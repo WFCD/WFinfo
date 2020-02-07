@@ -10,7 +10,7 @@ Imports System.Reflection
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("")>
 <Assembly: AssemblyProduct("WFInfo")>
-<Assembly: AssemblyCopyright("Copyright ©  2019")>
+<Assembly: AssemblyCopyright("Copyright ©  2020")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
@@ -29,5 +29,5 @@ Imports System.Reflection
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("8.2.6.0")>
-<Assembly: AssemblyFileVersion("8.2.6.0")>
+<Assembly: AssemblyVersion("8.2.7.0")>
+<Assembly: AssemblyFileVersion("8.2.7.0")>
