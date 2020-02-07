@@ -65,8 +65,8 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <TextBlock Text="WFInfo" Margin="36,4,0,2" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontSize="16" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto Medium" Height="20"/>
-        <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="93,3,0,2" Foreground="#FFB1D0D9" FontSize="11" FontWeight="Bold" Width="182" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto Medium" Height="21"/>
+        <TextBlock Text="WFInfo" Margin="36,4,0,2" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontSize="16" FontFamily="{DynamicResource Roboto}" Height="20" FontWeight="Bold"/>
+        <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="91,3,0,2" Foreground="#FFB1D0D9" FontSize="11" FontWeight="Bold" Width="182" FontFamily="{DynamicResource Roboto}" Height="21"/>
         <Button x:Name="minimise" Content="_" HorizontalAlignment="Left" Margin="275,0,0,0" VerticalAlignment="Top" Width="30" Height="27" Click="Minimise" Foreground="#FFB1D0D9" FontSize="16" RenderTransformOrigin="0.5,1" Grid.RowSpan="2" BorderBrush="#FF646464" Grid.ColumnSpan="2" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed">
             <Button.Background>
                 <ImageBrush/>

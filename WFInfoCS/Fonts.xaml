@@ -1,0 +1,8 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:WFInfoCS">
+    <FontFamily x:Key="Roboto_Condensed">/WFInfoCS;component/Resources/RobotoCondensed/#Roboto Condensed</FontFamily>
+    <FontFamily x:Key="Roboto_Mono">/WFInfoCS;component/Resources/RobotoMono/#Roboto Mono</FontFamily>
+    <FontFamily x:Key="Roboto">/WFInfoCS;component/Resources/Roboto/#Roboto</FontFamily>
+
+</ResourceDictionary>
