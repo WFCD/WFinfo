@@ -171,7 +171,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Viewbox x:Name="Status_viewbox" HorizontalAlignment="Left" Height="25" Margin="2,0,0,0" Grid.Row="2" VerticalAlignment="Top" Width="302">
+        <Viewbox x:Name="Status_viewbox" HorizontalAlignment="Left" Height="25" Margin="2,0,0,0" Grid.Row="2" VerticalAlignment="Top">
             <Label x:Name="Status" Content="Status: Loading...&#xD;&#xA;" Background="{x:Null}" Foreground="#FFB1D0D9" FontSize="14" Height="29"/>
         </Viewbox>
         <Viewbox x:Name="Market_data_viewbox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="42.3,3,0,49" Grid.Row="1" Height="28">

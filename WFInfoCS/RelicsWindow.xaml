@@ -336,6 +336,7 @@
         </Style>
         
     </Window.Resources>
+    
     <Grid MouseDown="MouseDown">
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
@@ -373,48 +374,43 @@
 
         </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
-
-
-
             <TreeView x:Name="groupedByCollection" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" Style="{DynamicResource TreeViewStyle1}">
                 <TreeView.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#0f0f0f" />
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#0f0f0f"/>
-                    <Style TargetType="{x:Type TreeViewItem}">
+                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource WFInfo_TreeViewItem}" >
                         <Setter Property="HeaderTemplate" >
                             <Setter.Value>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <StackPanel Orientation="Horizontal" Width="199">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
                                             <Image Width="30"  Source="Resources\Axi.png" HorizontalAlignment="Right"/>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock VerticalAlignment="Center" Text="{Binding}" Padding="3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                                <TextBlock VerticalAlignment="Center" Text="vaulted" Padding="3" Foreground="#506464" FontFamily="Roboto"/>
-                                            </StackPanel>
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding}" Padding="3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                            <TextBlock VerticalAlignment="Center" Text="vaulted" Padding="3" Foreground="#506464" FontFamily="Roboto"/>
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Visibility="Visible">
+
+                                        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="0">
                                             <TextBlock VerticalAlignment="Center" Text="INT" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                            <Image Width="14" Margin="1" Source="Resources\plat.gif"/>
+                                            <Image Width="14" Source="Resources\plat.gif"/>
                                             <TextBlock VerticalAlignment="Center" Text=":" Padding="0,0,2,0" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
                                             <TextBlock VerticalAlignment="Center" Text="999" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Visibility="Visible">
+
+                                        <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="0">
                                             <TextBlock VerticalAlignment="Center" Text="RAD" Padding="10,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                            <Image Width="14" Margin="1" Source="Resources\plat.gif"/>
+                                            <Image Width="14" Source="Resources\plat.gif"/>
                                             <TextBlock VerticalAlignment="Center" Text=":" Padding="0,0,2,0" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
                                             <TextBlock VerticalAlignment="Center" Text="999" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
                                             <TextBlock VerticalAlignment="Center" Text="(+99)" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Visibility="Collapsed">
-                                            <TextBlock VerticalAlignment="Center" Text="plat" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                            <Image Width="14" Margin="1" Source="Resources\plat.gif"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Visibility="Collapsed">
-                                            <TextBlock VerticalAlignment="Center" Text="ducat" Padding="10,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                            <Image Width="14" Margin="1" Source="Resources\ducat_w.gif"/>
-                                        </StackPanel>
-                                    </StackPanel>
+                                    </Grid>
                                 </DataTemplate>
                             </Setter.Value>
                         </Setter>
