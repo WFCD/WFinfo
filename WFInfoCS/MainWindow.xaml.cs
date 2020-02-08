@@ -121,15 +121,14 @@ namespace WFInfoCS
 
         private void relicsClick(object sender, RoutedEventArgs e)
         {
-            if (Main.relicWindow == null) { ChangeStatus("Relic window not yet loaded in", 2); return; }
-            Main.relicWindow.populate();
+            if (Main.dataBase.relicData == null) { ChangeStatus("Relic data not yet loaded in", 2); return; }
             Main.relicWindow.Show();
             Main.relicWindow.Focus();
         }
 
         private void equipmentClick(object sender, RoutedEventArgs e)
         {
-            if (Main.equipmentWindow == null) { ChangeStatus("Equipment window not yet loaded in", 2); return; }
+            if (Main.dataBase.equipmentData == null) { ChangeStatus("Equipment data not yet loaded in", 2); return; }
             Main.equipmentWindow.populate();
             ChangeStatus("Equipment not implemented", 2);
         }

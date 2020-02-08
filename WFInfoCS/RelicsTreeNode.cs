@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -78,8 +78,17 @@ namespace WFInfoCS
             set { SetField(ref _vaulted, value); }
         }
 
+        public void HideItem() {
+            Grid_Shown = "Collapsed";
+        }
+
+        public void ShowItem() {
+            Grid_Shown = "Visible";
+        }
         public void SetSilent()
         {
+            Grid_Shown = "Visible";
+
             Col1_Text1 = "";
             Col1_Text2 = "";
             Col1_Img1 = null;
@@ -114,6 +123,7 @@ namespace WFInfoCS
                 }
             }
             bonus = radiant - intact;
+            Grid_Shown = "Visible";
 
             Col1_Text1 = "INT";
             Col1_Text2 = ": " + intact.ToString("F1");
@@ -178,6 +188,13 @@ namespace WFInfoCS
         {
             get { return _col1_img1; }
             private set { SetField(ref _col1_img1, value); }
+        }
+
+        private string _grid_shown = "Visable";
+
+        public string Grid_Shown {
+            get { return _grid_shown; }
+            private set { SetField(ref _grid_shown, value); }
         }
 
         private string _col1_img1_shown = "Visible";
