@@ -122,6 +122,7 @@
     <Compile Include="EquipmentWindow.cs">
       <DependentUpon>EquipmentWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RelicsTreeNode.cs" />
     <Compile Include="RelicsWindow.cs">
       <DependentUpon>RelicsWindow.xaml</DependentUpon>
     </Compile>

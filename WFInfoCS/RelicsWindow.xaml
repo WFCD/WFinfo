@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WFInfoCS"
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" x:Class="WFInfoCS.RelicsWindow"
         mc:Ignorable="d"
-        Title="Settings" Height="200" Width="450" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="450" MinWidth="450" MinHeight="200" Loaded="WindowLoaded">
+        Title="Settings" Height="400" Width="450" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="450" MinWidth="450" MinHeight="200" Loaded="WindowLoaded">
     <Window.Resources>
         <Style x:Key="ControlStyle1" TargetType="{x:Type Control}">
             <Setter Property="Template">
@@ -334,9 +334,9 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        
+
     </Window.Resources>
-    
+
     <Grid MouseDown="MouseDown">
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
@@ -375,46 +375,41 @@
         </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
             <TreeView x:Name="groupedByCollection" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" Style="{DynamicResource TreeViewStyle1}">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="115" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Padding="3" Foreground="{Binding Name_Color}" FontFamily="Roboto"/>
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Padding="3" Foreground="#506464" FontFamily="Roboto"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="0">
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Col1_Text1}" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                <Image Width="14" Source="{Binding Col1_Img1}" Visibility="{Binding Col1_Img1_Shown}"/>
+                                <!--<Image Width="14" Source="Resources\plat.gif"/> -->
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Col1_Text2}" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="0">
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Col2_Text1}" Padding="10,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                                <Image Width="14" Source="{Binding Col2_Img1}" Visibility="{Binding Col2_Img1_Shown}"/>
+                                <!--<Image Width="14" Source="Resources\plat.gif"/> -->
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Col2_Text2}" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
+                            </StackPanel>
+                        </Grid>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
                 <TreeView.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#0f0f0f" />
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#0f0f0f"/>
-                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource WFInfo_TreeViewItem}" >
-                        <Setter Property="HeaderTemplate" >
-                            <Setter.Value>
-                                <DataTemplate>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                                            <Image Width="30"  Source="Resources\Axi.png" HorizontalAlignment="Right"/>
-                                            <TextBlock VerticalAlignment="Center" Text="{Binding}" Padding="3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                            <TextBlock VerticalAlignment="Center" Text="vaulted" Padding="3" Foreground="#506464" FontFamily="Roboto"/>
-                                        </StackPanel>
-
-                                        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="0">
-                                            <TextBlock VerticalAlignment="Center" Text="INT" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                            <Image Width="14" Source="Resources\plat.gif"/>
-                                            <TextBlock VerticalAlignment="Center" Text=":" Padding="0,0,2,0" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                            <TextBlock VerticalAlignment="Center" Text="999" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                        </StackPanel>
-
-                                        <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="0">
-                                            <TextBlock VerticalAlignment="Center" Text="RAD" Padding="10,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                            <Image Width="14" Source="Resources\plat.gif"/>
-                                            <TextBlock VerticalAlignment="Center" Text=":" Padding="0,0,2,0" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                            <TextBlock VerticalAlignment="Center" Text="999" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                            <TextBlock VerticalAlignment="Center" Text="(+99)" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </DataTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
+                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource WFInfo_TreeViewItem}" />
                 </TreeView.Resources>
             </TreeView>
             <TreeView x:Name="groupedByAll" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" Visibility="Hidden"/>

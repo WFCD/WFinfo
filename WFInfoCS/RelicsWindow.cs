@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,6 +12,9 @@ namespace WFInfoCS
     /// </summary>
     public partial class RelicsWindow : System.Windows.Window
     {
+        public List<RelicsTreeNode> RelicNodes { get; set; }
+
+
         public RelicsWindow()
         {
             InitializeComponent();
@@ -77,37 +81,46 @@ namespace WFInfoCS
             //todo remove 1 owned of the current selected tree view item
         }
 
-        private void WindowLoaded(object sender, RoutedEventArgs e) { // triggers when the window is first loaded, populates all the listviews once.
+        private void WindowLoaded(object sender, RoutedEventArgs e)
+        { // triggers when the window is first loaded, populates all the listviews once.
 
             #region Populate grouped collection
 
-            var lithHead = new TreeViewItem { Header = "Lith" };
-            var mesoHead = new TreeViewItem { Header = "Meso" };
-            var neoHead = new TreeViewItem { Header = "Neo" };
-            var axiHead = new TreeViewItem { Header = "Axi" };
-            groupedByCollection.Items.Add(lithHead);
-            groupedByCollection.Items.Add(mesoHead);
-            groupedByCollection.Items.Add(neoHead);
-            groupedByCollection.Items.Add(axiHead);
+            RelicNodes = new List<RelicsTreeNode>();
 
-            foreach (TreeViewItem head in groupedByCollection.Items) {
-                foreach (JProperty relic in Main.dataBase.relicData[head.Header.ToString()]) {
-                    TreeViewItem relicItem = new TreeViewItem { Header = relic.Name };
-                    JObject primeItems = (JObject)Main.dataBase.relicData[head.Header.ToString()][relic.Name];
-                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["common1"] });
-                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["common2"] });
-                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["common3"] });
-                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["uncommon1"] });
-                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["uncommon2"] });
-                    relicItem.Items.Add(new TreeViewItem { Header = primeItems["rare1"] });
-                    head.Items.Add(relicItem);
+            RelicsTreeNode lith = new RelicsTreeNode("Lith", "");
+            RelicsTreeNode meso = new RelicsTreeNode("Meso", "");
+            RelicsTreeNode neo = new RelicsTreeNode("Neo", "");
+            RelicsTreeNode axi = new RelicsTreeNode("Axi", "");
+            RelicNodes.AddRange(new[] { lith, meso, neo, axi });
+
+            foreach (RelicsTreeNode head in RelicNodes)
+            {
+                head.SetSilent();
+                foreach (JProperty prop in Main.dataBase.relicData[head.Name])
+                {
+                    JObject primeItems = (JObject)Main.dataBase.relicData[head.Name][prop.Name];
+                    string vaulted = primeItems["vaulted"].ToObject<bool>() ? "vaulted" : "";
+                    RelicsTreeNode relic = new RelicsTreeNode(prop.Name, vaulted);
+                    foreach (KeyValuePair<string, JToken> kvp in primeItems)
+                    {
+                        if (kvp.Key != "vaulted" && Main.dataBase.marketData.TryGetValue(kvp.Value.ToString(), out JToken marketValues))
+                        {
+                            RelicsTreeNode part = new RelicsTreeNode(kvp.Value.ToString(), "");
+                            part.SetPartText(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), kvp.Key);
+                            relic.Children.Add(part);
+                        }
+                    }
+                    relic.SetRelicText();
+                    head.Children.Add(relic);
                 }
+                groupedByCollection.Items.Add(head);
             }
-
-
-            
-
-            #endregion
         }
-	}
+
+
+
+
+        #endregion
+    }
 }
