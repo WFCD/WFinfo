@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -32,6 +32,7 @@ namespace WFInfoCS {
 		private void VaultedClick(object sender, RoutedEventArgs e) {
 
 			if ((bool)vaulted.IsChecked) {
+				Console.WriteLine("Hide vaulted");
 				foreach (RelicsTreeNode item in groupedByAll.Items) {
 					if (item.Vaulted == "vaulted") {
 						item.HideItem();
@@ -48,20 +49,17 @@ namespace WFInfoCS {
 					}
 				}
 			} else {
+				Console.WriteLine("Show vaulted");
 				foreach (RelicsTreeNode item in groupedByAll.Items) {
-					if (item.Vaulted == "vaulted") {
-						item.ShowItem();
-					}
+					item.ShowItem();
 				}
 				foreach (RelicsTreeNode item in groupedByCollection.Items) {
-					if (item.Vaulted == "vaulted") {
-						item.ShowItem();
-					}
+					item.ShowItem();
+
 				}
 				foreach (RelicsTreeNode item in Search.Items) {
-					if (item.Vaulted == "vaulted") {
-						item.HideItem();
-					}
+					item.HideItem();
+
 				}
 			}
 		}
@@ -74,7 +72,7 @@ namespace WFInfoCS {
 				groupedByCollection.Visibility = Visibility.Hidden;
 				foreach (RelicsTreeNode item in Search.Items) {
 					item.HideItem();
-					foreach (var child in item.Children) { 
+					foreach (var child in item.Children) {
 						if (child.Name.Contains(textBox.Text)) { // if there was text found show item.
 							item.ShowItem();
 						}
@@ -100,11 +98,13 @@ namespace WFInfoCS {
 				showAllRelicsNext = false;
 				groupedByCollection.Visibility = Visibility.Hidden;
 				groupedByAll.Visibility = Visibility.Visible;
+				Search.Visibility = Visibility.Hidden;
 			} else {
 				relicComboButton.Content = "Relic era";
 				showAllRelicsNext = true;
 				groupedByCollection.Visibility = Visibility.Visible;
 				groupedByAll.Visibility = Visibility.Hidden;
+				Search.Visibility = Visibility.Hidden;
 			}
 		}
 
@@ -138,7 +138,7 @@ namespace WFInfoCS {
 				}
 				groupedByCollection.Items.Add(head);
 			}
-			
+
 		}
 
 		#endregion
