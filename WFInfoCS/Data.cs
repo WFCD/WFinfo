@@ -1161,34 +1161,34 @@ namespace WFInfoCS
                 }
 
                 if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
+                    autoThread = Task.Factory.StartNew(AutoTriggered);
+            }
+        }
+
+        public static void AutoTriggered()
+        {
+            var watch = Stopwatch.StartNew();
+            long stop = watch.ElapsedMilliseconds + 5000;
+            long wait = watch.ElapsedMilliseconds;
+
+            OCR.updateWindow();
+            int diff;
+
+            while (watch.ElapsedMilliseconds < stop)
+            {
+                if (watch.ElapsedMilliseconds > wait)
                 {
-                    autoThread = Task.Factory.StartNew(() =>
+                    wait += Settings.autoDelay;
+                    diff = OCR.GetThemeThreshold();
+                    if (diff < 5)
                     {
-                        var watch = Stopwatch.StartNew();
-                        long stop = watch.ElapsedMilliseconds + 5000;
-                        long wait = watch.ElapsedMilliseconds;
-
-                        OCR.updateWindow();
-                        int diff;
-
-                        while (watch.ElapsedMilliseconds < stop)
-                        {
-                            if (watch.ElapsedMilliseconds > wait)
-                            {
-                                wait += Settings.autoDelay;
-                                OCR.GetTheme(out diff);
-                                if (diff < 5)
-                                {
-                                    while (watch.ElapsedMilliseconds < wait) ;
-                                    OCR.ProcessRewardScreen();
-                                    break;
-                                }
-                            }
-                        }
-                        watch.Stop();
-                    });
+                        while (watch.ElapsedMilliseconds < wait) ;
+                        OCR.ProcessRewardScreen();
+                        break;
+                    }
                 }
             }
+            watch.Stop();
         }
     }
 }

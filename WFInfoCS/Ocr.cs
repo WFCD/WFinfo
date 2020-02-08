@@ -82,8 +82,11 @@ namespace WFInfoCS
         //private static double ScreenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
         //private static double TotalScaling;
 
+        // DPI - Only used to display on screen or to get the "actual" screen bounds
         public static double dpiScaling;
+        // UI - Scaling used in Warframe
         public static double uiScaling;
+        // Screen / Resolution Scaling - Used to adjust pixel values to each person's monitor
         public static double screenScaling;
 
 
@@ -117,20 +120,17 @@ namespace WFInfoCS
         public static int pixleRareYDisplay = 58;
         public static int pixleOverlayPossition = 30;
 
-        public static int pixelProfileWidth = 48;
-        public static int pixleProfileTotalWidth = 192;
-        // Height is always 1px
-        // public static int pixProfHei = 1;
-        public static int pixelProfileXDisplay = 93;
-        public static int pixleProfileYDisplay = 87;
-        public static double pixelProfileXSpecial = 117;
-        public static double pixelProfileYSpecial = 87;
+        // Pixel measurement for profile bars ( for theme detection )
+        public static int pixelProfileXDisplay = 97;
+        public static int pixelProfileYDisplay = 86;
+        public static int pixelProfileWidth = 184;
+        public static int pixelProfileHeight = 1;
 
-        // Pixel measurements for detecting reward screen
-        public static int pixelFissureWidth = 354;
-        public static int pixelFissurHeight = 45;
-        public static int pixelFissureXDisplay = 285;
-        public static int pixelFissureYDispaly = 43;
+        // Pixel measurements for the "VOID FISSURE / REWARDS"
+        public static int pixelFissureWidth = 377;
+        public static int pixelFissureHeight = 37;
+        public static int pixelFissureXDisplay = 238; // Removed 50 pixels to assist with 2 player theme detection
+        public static int pixelFissureYDisplay = 47;
 
 
         public static bool errorDetected = false;
@@ -159,15 +159,14 @@ namespace WFInfoCS
             long start = watch.ElapsedMilliseconds;
 
             // Look at me mom, I'm doing fancy shit
-            bigScreenshot = file ?? CaptureScreenshot();
-
             Main.AddLog("Scaling values: Screen_Scaling = " + (screenScaling * 100).ToString("F2") + "%, DPI_Scaling = " + (dpiScaling * 100).ToString("F2") + "%, UI_Scaling = " + (uiScaling * 100).ToString("F0") + "%");
 
 
             // Get that theme
-            WFtheme active = GetTheme(out _, bigScreenshot);
+            WFtheme active = GetThemeWeighted(out _, file);
 
 
+            bigScreenshot = file ?? CaptureScreenshot();
             // Get the part box and filter it
             partialScreenshotFiltered = FilterPartNames(bigScreenshot, active);
             List<string> players = SeparatePlayers(partialScreenshotFiltered);
@@ -252,76 +251,128 @@ namespace WFInfoCS
 
         }
 
-        public static WFtheme GetTheme(out int closestThresh, Bitmap image = null)
+        public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
-            // Tests Scaling from 40% to 120%
-            double scalingMod = screenScaling * 0.4;
+            int profileX = (int)(pixelProfileXDisplay * screenScaling * uiScaling);
+            int profileY = (int)(pixelProfileYDisplay * screenScaling * uiScaling);
+            int profileWid = (int)(pixelProfileWidth * screenScaling * uiScaling);
 
-            int startX = (int)(pixelProfileXSpecial * scalingMod);
-            int startY = (int)(pixelProfileYSpecial * scalingMod);
-            int endX = (int)(pixelProfileXSpecial * scalingMod * 3);
-            int endY = (int)(pixelProfileYSpecial * scalingMod * 3);
-            int width = endX - startX;
-            int height = endY - startY;
+            int fissureX = (int)(pixelFissureXDisplay * screenScaling * uiScaling);
+            int fissureY = (int)(pixelFissureYDisplay * screenScaling * uiScaling);
+            int fissureWid = (int)(pixelFissureWidth * screenScaling * uiScaling);
+            int fissureHei = (int)(pixelFissureHeight * screenScaling * uiScaling);
+
 
             if (image == null)
             {
-                image = new Bitmap(endX, endY);
-                Size FullscreenSize = new Size(width, height);
+                image = new Bitmap(fissureX + fissureWid + 1, profileY + 1);
+
+                Size profileSize = new Size(profileWid, 1);
+                Size fissureSize = new Size(fissureWid, fissureHei);
                 using (Graphics graphics = Graphics.FromImage(image))
-                    graphics.CopyFromScreen(startX, startY, startX, startY, FullscreenSize, CopyPixelOperation.SourceCopy);
+                {
+                    graphics.CopyFromScreen(profileX, profileY, profileX, profileY, profileSize, CopyPixelOperation.SourceCopy);
+                    graphics.CopyFromScreen(fissureX, fissureY, fissureX, fissureY, fissureSize, CopyPixelOperation.SourceCopy);
+                }
                 image.Save(Main.appPath + @"\Debug\TESTSHOT " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
             }
 
+            double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            int closest = 0;
 
-            closestThresh = 999;
-            WFtheme closestTheme = WFtheme.CORPUS;
-            double estimatedScaling = 0;
-            Color closestColor = ThemePrimary[0];
-            Color clr;
+            int coorX = fissureX;
+            int coorY = fissureY + (fissureHei / 2);
+            int endX = fissureX + fissureWid;
 
-            //using (Bitmap bmp = new Bitmap(endX - startX, endY - startY))
-            for (int y = 1; y <= height; y++)
+            for (; coorX < endX; coorX++)
             {
-                int coorY = endY - y;
-                int coorX = endX - (int)(1.0 * width * y / height);
+                closest = (int)GetClosestTheme(image.GetPixel(coorX, coorY), out int thresh);
+                weights[closest] += 1.0 / (1 + thresh);
+            }
 
-                clr = image.GetPixel(coorX, coorY);
+            coorX = profileX;
+            coorY = profileY;
+            endX = profileX + profileWid;
 
-                int minThresh = 999;
-                WFtheme minTheme = WFtheme.CORPUS;
+            for (; coorX < endX; coorX++)
+            {
+                closest = (int)GetClosestTheme(image.GetPixel(coorX, coorY), out int thresh);
+                weights[closest] += 1.0 / (1 + thresh);
+            }
 
-                foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
+            closest = 0;
+            for (int i = 1; i < weights.Length; i++)
+            {
+                if (weights[closest] < weights[i])
+                    closest = i;
+            }
+
+            WFtheme ret = ((WFtheme)closest);
+            Main.AddLog("HIGHEST WEIGHTED THEME(" + weights[closest].ToString("F2") + "): " + ret.ToString());
+            closestThresh = weights[closest];
+            return ret;
+        }
+
+        public static int GetThemeThreshold(Bitmap image = null)
+        {
+            int fissureX = (int)(pixelFissureXDisplay * screenScaling * uiScaling);
+            int fissureY = (int)(pixelFissureYDisplay * screenScaling * uiScaling);
+            int fissureWid = (int)(pixelFissureWidth * screenScaling * uiScaling);
+            int fissureHei = (int)(pixelFissureHeight * screenScaling * uiScaling);
+
+
+            if (image == null)
+            {
+                image = new Bitmap(fissureX + fissureWid, fissureY + fissureHei);
+
+                Size fissureSize = new Size(fissureWid, fissureHei);
+                using (Graphics graphics = Graphics.FromImage(image))
+                    graphics.CopyFromScreen(fissureX, fissureY, fissureX, fissureY, fissureSize, CopyPixelOperation.SourceCopy);
+                //image.Save(Main.appPath + @"\Debug\TESTSHOT " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
+            }
+
+            int closest = 999;
+            WFtheme theme = WFtheme.UNKNOWN;
+
+            int coorY = fissureY + (fissureHei / 2);
+            int endX = fissureX + fissureWid;
+
+            for (int coorX = fissureX; coorX < endX; coorX++)
+            {
+                WFtheme temp = GetClosestTheme(image.GetPixel(coorX, coorY), out int thresh);
+                if (thresh < closest)
                 {
-                    if (theme != WFtheme.UNKNOWN)
-                    {
-                        Color themeColor = ThemePrimary[(int)theme];
-                        int tempThresh = ColorDifference(clr, themeColor);
-                        if (tempThresh < minThresh)
-                        {
-                            minThresh = tempThresh;
-                            minTheme = theme;
-                        }
-                    }
-                }
-
-                if (estimatedScaling < .5 && minThresh < 10)
-                    estimatedScaling = (coorX / pixelProfileXSpecial) / screenScaling;
-                if (minThresh < closestThresh)
-                {
-                    closestThresh = minThresh;
-                    closestTheme = minTheme;
-                    closestColor = clr;
+                    theme = temp;
+                    closest = thresh;
                 }
             }
-            /*if (estimatedScaling > .5)
-            {
-                Main.AddLog("ESTIMATED SCALING: " + (int)(100 * estimatedScaling) + "%");
-                Main.AddLog("USER INPUT SCALING: " + Settings.Scaling + "%");
-            }*/
-            Main.AddLog("CLOSEST THEME(" + closestThresh + "): " + closestTheme.ToString() + " - (" + closestColor.R + "," + closestColor.G + "," + closestColor.B + ")");
-            return closestTheme;
+
+            Main.AddLog("CLOSEST THEME(" + closest + "): " + theme.ToString());
+            return closest;
         }
+
+        private static WFtheme GetClosestTheme(Color clr, out int threshold)
+        {
+
+            threshold = 999;
+            WFtheme minTheme = WFtheme.CORPUS;
+
+            foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
+            {
+                if (theme != WFtheme.UNKNOWN)
+                {
+                    Color themeColor = ThemePrimary[(int)theme];
+                    int tempThresh = ColorDifference(clr, themeColor);
+                    if (tempThresh < threshold)
+                    {
+                        threshold = tempThresh;
+                        minTheme = theme;
+                    }
+                }
+            }
+            return minTheme;
+        }
+
 
         private static bool ColorThreshold(Color test, Color thresh, int threshold = 10)
         {
