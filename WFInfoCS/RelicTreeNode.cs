@@ -46,14 +46,13 @@ namespace WFInfoCS
         public static Brush UNCOMMON_COLOR = new SolidColorBrush(Color.FromRgb(192, 192, 192));
         public static Brush COMMON_COLOR = new SolidColorBrush(Color.FromRgb(205, 127, 50));
 
-
         public RelicTreeNode(string name, string vaulted)
         {
             Name = name;
             Vaulted = vaulted;
 
+            ChildrenFiltered = new List<RelicTreeNode>();
             Children = new List<RelicTreeNode>();
-            ChildrenList = new List<RelicTreeNode>();
         }
 
         public bool topLevel = false;
@@ -91,15 +90,6 @@ namespace WFInfoCS
             return Vaulted.Length == 0;
         }
 
-        public void HideItem()
-        {
-            Grid_Shown = "Collapsed";
-        }
-
-        public void ShowItem()
-        {
-            Grid_Shown = "Visible";
-        }
         public void SetSilent()
         {
             Grid_Shown = "Visible";
@@ -119,7 +109,6 @@ namespace WFInfoCS
         {
             double intact = 0;
             double radiant = 0;
-            double bonus = 0;
 
             foreach (RelicTreeNode node in Children)
             {
@@ -137,7 +126,8 @@ namespace WFInfoCS
                     radiant += 0.1667 * node._plat;
                 }
             }
-            bonus = radiant - intact;
+
+            double bonus = radiant - intact;
             Grid_Shown = "Visible";
 
             Col1_Text1 = "INT";
@@ -185,22 +175,22 @@ namespace WFInfoCS
 
         public void ResetFilter()
         {
-            foreach (RelicTreeNode node in ChildrenList)
+            foreach (RelicTreeNode node in Children)
                 node.ResetFilter();
 
-            Children = ChildrenList;
+            ChildrenFiltered = Children;
         }
 
         public void FilterOutVaulted(bool additionalFilter = false)
         {
             List<RelicTreeNode> temp = new List<RelicTreeNode>();
-            List<RelicTreeNode> filterList = additionalFilter ? Children : ChildrenList;
+            List<RelicTreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
 
             foreach (RelicTreeNode node in filterList)
                 if (node.IsVaulted())
                     temp.Add(node);
 
-            Children = temp;
+            ChildrenFiltered = temp;
         }
 
         public string GetFullName()
@@ -219,12 +209,12 @@ namespace WFInfoCS
         {
             string prnt = Name + ": ";
             RelicTreeNode temp = Parent;
-            while(temp != null)
+            while (temp != null)
             {
                 prnt = temp.Name + "/" + prnt;
                 temp = temp.Parent;
             }
-            foreach(KeyValuePair<string,bool> kvp in matchedText)
+            foreach (KeyValuePair<string, bool> kvp in matchedText)
             {
                 prnt += kvp.Key + "(" + kvp.Value + ") ";
             }
@@ -234,7 +224,7 @@ namespace WFInfoCS
         public bool FilterSearchText(bool removeLeaves, bool additionalFilter = false, Dictionary<string, bool> matchedText = null)
         {
             Dictionary<string, bool> matchedTextCopy = new Dictionary<string, bool>();
-            List<RelicTreeNode> filterList = additionalFilter ? Children : ChildrenList;
+            List<RelicTreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
 
             bool done = true;
             foreach (string text in RelicsWindow.searchText)
@@ -246,7 +236,7 @@ namespace WFInfoCS
             }
             if (done)
             {
-                Children = filterList;
+                ChildrenFiltered = filterList;
                 return true;
             }
 
@@ -261,7 +251,7 @@ namespace WFInfoCS
                 }
             }
 
-            Children = (filterList.Count > 0 && filterList[0].Children.Count > 0) || removeLeaves ? temp : filterList;
+            ChildrenFiltered = (filterList.Count > 0 && filterList[0].ChildrenFiltered.Count > 0) || removeLeaves ? temp : filterList;
             return foundOne;
         }
 
@@ -269,7 +259,7 @@ namespace WFInfoCS
         public bool Filter(FilterFunc func, bool additionalFilter = false, bool applyToAllLevels = true)
         {
             List<RelicTreeNode> temp = new List<RelicTreeNode>();
-            List<RelicTreeNode> filterList = additionalFilter ? Children : ChildrenList;
+            List<RelicTreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
 
 
             foreach (RelicTreeNode node in filterList)
@@ -281,7 +271,7 @@ namespace WFInfoCS
                     node.Filter(func, additionalFilter, applyToAllLevels, checkKids);
             }
 
-            Children = temp;
+            ChildrenFiltered = temp;
         }
         */
 
@@ -359,6 +349,13 @@ namespace WFInfoCS
             set { SetField(ref _isExpanded, value); }
         }
 
+        private List<RelicTreeNode> _childrenFiltered;
+        public List<RelicTreeNode> ChildrenFiltered
+        {
+            get { return _childrenFiltered; }
+            private set { SetField(ref _childrenFiltered, value); }
+        }
+
         private List<RelicTreeNode> _children;
         public List<RelicTreeNode> Children
         {
@@ -366,18 +363,11 @@ namespace WFInfoCS
             private set { SetField(ref _children, value); }
         }
 
-        private List<RelicTreeNode> _childrenList;
-        public List<RelicTreeNode> ChildrenList
-        {
-            get { return _childrenList; }
-            private set { SetField(ref _childrenList, value); }
-        }
-
         public RelicTreeNode Parent;
         public void AddChild(RelicTreeNode kid)
         {
             kid.Parent = this;
-            ChildrenList.Add(kid);
+            Children.Add(kid);
         }
 
         public override string ToString()

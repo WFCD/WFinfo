@@ -374,7 +374,7 @@
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
             <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}">
                         <Grid Visibility="{Binding Grid_Shown}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
