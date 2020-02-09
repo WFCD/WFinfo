@@ -13,10 +13,10 @@ namespace WFInfoCS
     /// </summary>
     public partial class RelicsWindow : System.Windows.Window
     {
-
+        private bool searchActive = false;
         private bool showAllRelics = false;
         public static List<RelicTreeNode> RelicNodes { get; set; }
-
+        public static string[] searchText;
 
         public RelicsWindow()
         {
@@ -35,84 +35,112 @@ namespace WFInfoCS
                 DragMove();
         }
 
+        private void RefreshVisibleRelics()
+        {
+            int index = 0;
+            if (showAllRelics)
+            {
+                foreach (RelicTreeNode era in RelicNodes)
+                {
+                    foreach (RelicTreeNode relic in era.Children)
+                    {
+                        int curr = RelicTree.Items.IndexOf(relic);
+
+                        if (curr == -1)
+                            RelicTree.Items.Insert(index, relic);
+                        else if(curr != index)
+                            for (;curr > index; curr--)
+                                RelicTree.Items.RemoveAt(index);
+
+                        index++;
+                    }
+                }
+                while (index < RelicTree.Items.Count)
+                    RelicTree.Items.RemoveAt(index);
+            } else
+            {
+                foreach (RelicTreeNode era in RelicNodes)
+                {
+                    int curr = RelicTree.Items.IndexOf(era);
+                    if (era.Children.Count == 0)
+                    {
+                        if (curr != -1)
+                            RelicTree.Items.RemoveAt(curr);
+                    } else
+                    {
+                        if (curr == -1)
+                            RelicTree.Items.Insert(index, era);
+
+                        index++;
+                    }
+                }
+            }
+
+        }
+
+        private void ReapplyFilters()
+        {
+
+            foreach (RelicTreeNode era in RelicNodes)
+                era.ResetFilter();
+
+            if ((bool)vaulted.IsChecked)
+                foreach (RelicTreeNode era in RelicNodes)
+                    era.FilterOutVaulted(true);
+
+            if (searchText != null && searchText.Length != 0)
+                foreach (RelicTreeNode era in RelicNodes)
+                    era.FilterSearchText(false, true);
+
+            RefreshVisibleRelics();
+        }
+
         private void VaultedClick(object sender, RoutedEventArgs e)
         {
             if ((bool)vaulted.IsChecked)
             {
                 foreach (RelicTreeNode era in RelicNodes)
-                    era.Filter(RelicTreeNode.FilterOutVaulted);
+                    era.FilterOutVaulted(true);
 
-                if (showAllRelics)
-                {
-                    for (int i = 0; i < RelicTree.Items.Count;)
-                    {
-                        RelicTreeNode relic = (RelicTreeNode)RelicTree.Items.GetItemAt(i);
-                        if (!RelicTreeNode.FilterOutVaulted(relic))
-                            RelicTree.Items.Remove(relic);
-                        else
-                            i++;
-                    }
-                }
+                RefreshVisibleRelics();
             } else
-            {
-                foreach (RelicTreeNode era in RelicNodes)
-                    era.ResetFilter();
-
-                if (showAllRelics)
-                {
-                    int prev = 0;
-                    foreach (RelicTreeNode era in RelicNodes)
-                    {
-                        foreach (RelicTreeNode relic in era.ChildrenList)
-                        {
-                            if (RelicTree.Items.IndexOf(relic) == -1)
-                                RelicTree.Items.Insert(prev, relic);
-
-                            prev = RelicTree.Items.IndexOf(relic) + 1;
-                        }
-                    }
-                }
-            }
-
+                ReapplyFilters();
         }
 
         private void TextboxTextChanged(object sender, TextChangedEventArgs e)
         {
+            searchActive = textBox.Text.Length > 0 && textBox.Text != "Filter Terms";
+            Console.WriteLine("TextboxTextChanged: " + textBox.Text);
             if (textBox.IsLoaded)
             {
-                Console.WriteLine(textBox.Text);
-                //Search.Visibility = Visibility.Visible;
-                //groupedByAll.Visibility = Visibility.Hidden;
-                //groupedByCollection.Visibility = Visibility.Hidden;
-                /*foreach (RelicTreeNode item in Search.Items)
+                if (searchActive || (searchText != null && searchText.Length > 0))
                 {
-                    item.HideItem();
-                    foreach (var child in item.Children)
-                    {
-                        if (child.Name.Contains(textBox.Text))
-                        { // if there was text found show item.
-                            item.ShowItem();
-                        }
-                    }
-                    if (item.Name.Contains(textBox.Text))
-                    { // if there was text found show item.
-                        item.ShowItem();
-                    }
-                }*/
+                    if (searchActive)
+                        searchText = textBox.Text.Split(' ');
+                    else
+                        searchText = null;
+                    ReapplyFilters();
+                }
             }
         }
 
-        private void ComboboxMouseDown(object sender, MouseButtonEventArgs e)
+        private void SortBoxChanged(object sender, SelectionChangedEventArgs e)
         {
-            Console.WriteLine(comboBox.Text); // compare this to the known results
+            // 0 - Name
+            // 1 - Average intact plat
+            // 2 - Average radiant plat
+            // 3 - Difference (radiant-intact)
+
+            Console.WriteLine(SortBox.SelectedIndex);
         }
 
         private void TextBoxFocus(object sender, RoutedEventArgs e)
         {
-            textBox.Clear();
+            if (!searchActive)
+                textBox.Clear();
         }
 
-        private void ComboButton(object sender, RoutedEventArgs e)
+        private void ToggleShowAllRelics(object sender, RoutedEventArgs e)
         {
             showAllRelics = !showAllRelics;
             RelicTree.Items.Clear();
@@ -165,20 +193,19 @@ namespace WFInfoCS
                         {
                             RelicTreeNode part = new RelicTreeNode(kvp.Value.ToString(), "");
                             part.SetPartText(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), kvp.Key);
-                            relic.ChildrenList.Add(part);
+                            relic.AddChild(part);
                         }
                     }
                     relic.SetRelicText();
-                    head.ChildrenList.Add(relic);
+                    head.AddChild(relic);
                     //groupedByAll.Items.Add(relic);
                     //Search.Items.Add(relic);
                 }
                 head.ResetFilter();
-                head.Filter(RelicTreeNode.FilterOutVaulted);
+                head.FilterOutVaulted();
                 RelicTree.Items.Add(head);
             }
             #endregion
         }
-
     }
 }

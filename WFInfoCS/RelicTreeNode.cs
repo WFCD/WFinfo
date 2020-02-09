@@ -86,6 +86,11 @@ namespace WFInfoCS
             set { SetField(ref _vaulted, value); }
         }
 
+        public bool IsVaulted()
+        {
+            return Vaulted.Length == 0;
+        }
+
         public void HideItem()
         {
             Grid_Shown = "Collapsed";
@@ -186,26 +191,99 @@ namespace WFInfoCS
             Children = ChildrenList;
         }
 
-        public delegate bool FilterFunc(RelicTreeNode x);
-        public static bool FilterOutVaulted(RelicTreeNode x)
-        {
-            return x.Vaulted.Length == 0;
-        }
-
-        public void Filter(FilterFunc func)
+        public void FilterOutVaulted(bool additionalFilter = false)
         {
             List<RelicTreeNode> temp = new List<RelicTreeNode>();
-            foreach (RelicTreeNode node in ChildrenList)
+            List<RelicTreeNode> filterList = additionalFilter ? Children : ChildrenList;
+
+            foreach (RelicTreeNode node in filterList)
+                if (node.IsVaulted())
+                    temp.Add(node);
+
+            Children = temp;
+        }
+
+        public string GetFullName()
+        {
+            string prnt = Name;
+            RelicTreeNode temp = Parent;
+            while (temp != null)
             {
-                if (func(node))
+                prnt = temp.Name + "/" + prnt;
+                temp = temp.Parent;
+            }
+            return prnt;
+        }
+
+        private void ConsolePrintBullshit(Dictionary<string, bool> matchedText)
+        {
+            string prnt = Name + ": ";
+            RelicTreeNode temp = Parent;
+            while(temp != null)
+            {
+                prnt = temp.Name + "/" + prnt;
+                temp = temp.Parent;
+            }
+            foreach(KeyValuePair<string,bool> kvp in matchedText)
+            {
+                prnt += kvp.Key + "(" + kvp.Value + ") ";
+            }
+            Console.WriteLine(prnt);
+        }
+
+        public bool FilterSearchText(bool removeLeaves, bool additionalFilter = false, Dictionary<string, bool> matchedText = null)
+        {
+            Dictionary<string, bool> matchedTextCopy = new Dictionary<string, bool>();
+            List<RelicTreeNode> filterList = additionalFilter ? Children : ChildrenList;
+
+            bool done = true;
+            foreach (string text in RelicsWindow.searchText)
+            {
+                bool tempVal = (matchedText != null && matchedText[text]) || Name.ToLower().Contains(text.ToLower());
+
+                matchedTextCopy[text] = tempVal;
+                done = done && tempVal;
+            }
+            if (done)
+            {
+                Children = filterList;
+                return true;
+            }
+
+            bool foundOne = false;
+            List<RelicTreeNode> temp = new List<RelicTreeNode>();
+            foreach (RelicTreeNode node in filterList)
+            {
+                if (node.FilterSearchText(removeLeaves, additionalFilter, matchedTextCopy))
                 {
                     temp.Add(node);
-                    node.Filter(func);
+                    foundOne = true;
                 }
+            }
+
+            Children = (filterList.Count > 0 && filterList[0].Children.Count > 0) || removeLeaves ? temp : filterList;
+            return foundOne;
+        }
+
+        /*
+        public bool Filter(FilterFunc func, bool additionalFilter = false, bool applyToAllLevels = true)
+        {
+            List<RelicTreeNode> temp = new List<RelicTreeNode>();
+            List<RelicTreeNode> filterList = additionalFilter ? Children : ChildrenList;
+
+
+            foreach (RelicTreeNode node in filterList)
+            {
+                bool funcResult = func(node, additionalFilter, checkKids);
+                if (funcResult)
+                    temp.Add(node);
+                if (applyToAllLevels && (!checkKids || (checkKids && !funcResult)))
+                    node.Filter(func, additionalFilter, applyToAllLevels, checkKids);
             }
 
             Children = temp;
         }
+        */
 
 
         private string _col1_text1 = "INT";
@@ -286,6 +364,13 @@ namespace WFInfoCS
         {
             get { return _childrenList; }
             private set { SetField(ref _childrenList, value); }
+        }
+
+        public RelicTreeNode Parent;
+        public void AddChild(RelicTreeNode kid)
+        {
+            kid.Parent = this;
+            ChildrenList.Add(kid);
         }
 
         public override string ToString()
