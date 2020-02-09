@@ -81,7 +81,7 @@ namespace WFInfoCS
                             }
                         }
                     }
-                bufferReadyEvent.Set();
+                    bufferReadyEvent.Set();
                 }
             }
             catch (Exception ex)

@@ -42,14 +42,14 @@ namespace WFInfoCS
             {
                 foreach (RelicTreeNode era in RelicNodes)
                 {
-                    foreach (RelicTreeNode relic in era.Children)
+                    foreach (RelicTreeNode relic in era.ChildrenFiltered)
                     {
                         int curr = RelicTree.Items.IndexOf(relic);
 
                         if (curr == -1)
                             RelicTree.Items.Insert(index, relic);
-                        else if(curr != index)
-                            for (;curr > index; curr--)
+                        else if (curr != index)
+                            for (; curr > index; curr--)
                                 RelicTree.Items.RemoveAt(index);
 
                         index++;
@@ -62,7 +62,7 @@ namespace WFInfoCS
                 foreach (RelicTreeNode era in RelicNodes)
                 {
                     int curr = RelicTree.Items.IndexOf(era);
-                    if (era.Children.Count == 0)
+                    if (era.ChildrenFiltered.Count == 0)
                     {
                         if (curr != -1)
                             RelicTree.Items.RemoveAt(curr);
@@ -148,10 +148,10 @@ namespace WFInfoCS
                 relicComboButton.Content = "All Relics";
                 foreach (RelicTreeNode era in RelicNodes)
                 {
-                    foreach (RelicTreeNode relic in era.ChildrenList)
+                    foreach (RelicTreeNode relic in era.Children)
                         relic.topLevel = true;
 
-                    foreach (RelicTreeNode relic in era.Children)
+                    foreach (RelicTreeNode relic in era.ChildrenFiltered)
                         RelicTree.Items.Add(relic);
                 }
             } else
@@ -160,7 +160,7 @@ namespace WFInfoCS
                 foreach (RelicTreeNode era in RelicNodes)
                 {
                     RelicTree.Items.Add(era);
-                    foreach (RelicTreeNode relic in era.ChildrenList)
+                    foreach (RelicTreeNode relic in era.Children)
                         relic.topLevel = false;
                 }
             }
