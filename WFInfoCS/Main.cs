@@ -40,14 +40,21 @@ namespace WFInfoCS
         public static void ThreadedDataLoad()
         {
             dataBase.Update();
+            //RelicsWindow.LoadNodesOnThread();
             RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + dataBase.marketData["timestamp"].ToString().Substring(5, 11); });
             RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: " + dataBase.equipmentData["timestamp"].ToString().Substring(5, 11); });
             RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + dataBase.equipmentData["rqmts_timestamp"].ToString().Substring(5, 11); });
             StatusUpdate("WFInfo Initialization Complete", 0);
             AddLog("WFInfo has launched successfully");
-            if ((bool)Settings.settingsObj["Auto"]) {
+            if ((bool)Settings.settingsObj["Auto"])
+            {
                 dataBase.EnableLogcapture();
             }
+        }
+
+        public static T CreateOnUIThread<T>(Func<T> act)
+        {
+            return MainWindow.INSTANCE.Dispatcher.Invoke(act);
         }
 
         public static void RunOnUIThread(Action act)
@@ -88,8 +95,7 @@ namespace WFInfoCS
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                }
-                else if (Settings.debug || OCR.verifyWarframe())
+                } else if (Settings.debug || OCR.VerifyWarframe())
                 {
                     //if (Ocr.verifyFocus()) 
                     //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
@@ -127,7 +133,7 @@ namespace WFInfoCS
 
                                 //Get the path of specified file
                                 Bitmap image = new Bitmap(file);
-                                OCR.updateWindow(image);
+                                OCR.UpdateWindow(image);
                                 OCR.ProcessRewardScreen(image);
                             }
 
@@ -137,8 +143,7 @@ namespace WFInfoCS
                             StatusUpdate("Faild to load image", 1);
                         }
                     });
-                }
-                else
+                } else
                 {
                     StatusUpdate("Faild to load image", 1);
                 }

@@ -38,23 +38,22 @@ namespace WFInfoCS
         }
     }
 
-
-
-    public class RelicsTreeNode : INPC
+    public class RelicTreeNode : INPC
     {
         public static ImageSource PLAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/plat.gif");
         public static ImageSource DUCAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ducat_w.gif");
-        public static Brush RARE_COLOR = new SolidColorBrush(Color.FromRgb(255,215,0));
-        public static Brush UNCOMMON_COLOR = new SolidColorBrush(Color.FromRgb(192,192,192));
-        public static Brush COMMON_COLOR = new SolidColorBrush(Color.FromRgb(205,127,50));
+        public static Brush RARE_COLOR = new SolidColorBrush(Color.FromRgb(255, 215, 0));
+        public static Brush UNCOMMON_COLOR = new SolidColorBrush(Color.FromRgb(192, 192, 192));
+        public static Brush COMMON_COLOR = new SolidColorBrush(Color.FromRgb(205, 127, 50));
 
 
-        public RelicsTreeNode(string name, string vaulted)
+        public RelicTreeNode(string name, string vaulted)
         {
             Name = name;
             Vaulted = vaulted;
 
-            Children = new List<RelicsTreeNode>();
+            Children = new List<RelicTreeNode>();
+            ChildrenList = new List<RelicTreeNode>();
         }
 
         private string _name;
@@ -64,7 +63,7 @@ namespace WFInfoCS
             set { SetField(ref _name, value); }
         }
 
-        private Brush _color = new SolidColorBrush(Color.FromRgb(177,208,217));
+        private Brush _color = new SolidColorBrush(Color.FromRgb(177, 208, 217));
         public Brush Name_Color
         {
             get { return _color; }
@@ -78,11 +77,13 @@ namespace WFInfoCS
             set { SetField(ref _vaulted, value); }
         }
 
-        public void HideItem() {
+        public void HideItem()
+        {
             Grid_Shown = "Collapsed";
         }
 
-        public void ShowItem() {
+        public void ShowItem()
+        {
             Grid_Shown = "Visible";
         }
         public void SetSilent()
@@ -106,7 +107,7 @@ namespace WFInfoCS
             double radiant = 0;
             double bonus = 0;
 
-            foreach (RelicsTreeNode node in Children)
+            foreach (RelicTreeNode node in Children)
             {
                 if (node.Name_Color == RARE_COLOR)
                 {
@@ -168,6 +169,34 @@ namespace WFInfoCS
             Col2_Img1_Shown = "Visible";
         }
 
+        public void ResetFilter()
+        {
+            foreach (RelicTreeNode node in ChildrenList)
+                node.ResetFilter();
+
+            Children = ChildrenList;
+        }
+
+        public delegate bool FilterFunc(RelicTreeNode x);
+        public static bool FilterOutVaulted(RelicTreeNode x)
+        {
+            return x.Vaulted.Length == 0;
+        }
+
+
+        public void Filter(FilterFunc func)
+        {
+            List<RelicTreeNode> temp = new List<RelicTreeNode>();
+            foreach (RelicTreeNode node in ChildrenList)
+                if (func(node))
+                {
+                    temp.Add(node);
+                    node.Filter(func);
+                }
+
+            Children = temp;
+        }
+
 
         private string _col1_text1 = "INT";
         public string Col1_Text1
@@ -190,9 +219,9 @@ namespace WFInfoCS
             private set { SetField(ref _col1_img1, value); }
         }
 
-        private string _grid_shown = "Visable";
-
-        public string Grid_Shown {
+        private string _grid_shown = "Visible";
+        public string Grid_Shown
+        {
             get { return _grid_shown; }
             private set { SetField(ref _grid_shown, value); }
         }
@@ -235,11 +264,18 @@ namespace WFInfoCS
         public double _plat = 0;
         public int _ducat = 0;
 
-        private List<RelicsTreeNode> _children;
-        public List<RelicsTreeNode> Children
+        private List<RelicTreeNode> _children;
+        public List<RelicTreeNode> Children
         {
             get { return _children; }
             private set { SetField(ref _children, value); }
+        }
+
+        private List<RelicTreeNode> _childrenList;
+        public List<RelicTreeNode> ChildrenList
+        {
+            get { return _childrenList; }
+            private set { SetField(ref _childrenList, value); }
         }
 
         public override string ToString()

@@ -61,7 +61,7 @@ namespace WFInfoCS
 
                     if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
                     {
-                        OCR.verifyWarframe();
+                        OCR.VerifyWarframe();
                     }
 
                     if (OCR.Warframe != null)

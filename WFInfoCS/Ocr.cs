@@ -605,7 +605,7 @@ namespace WFInfoCS
 
         internal static Bitmap CaptureScreenshot()
         {
-            updateWindow();
+            UpdateWindow();
 
             if (window == null)
             {
@@ -640,7 +640,7 @@ namespace WFInfoCS
         //	}
         //}
 
-        public static bool verifyWarframe()
+        public static bool VerifyWarframe()
         {
             if (Warframe != null && !Warframe.HasExited) { return true; }
             foreach (Process process in Process.GetProcesses())
@@ -662,7 +662,7 @@ namespace WFInfoCS
 
         }
 
-        private static void refreshDPIScaling()
+        private static void RefreshDPIScaling()
         {
             using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
                 dpiScaling = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only need to check one value
@@ -670,9 +670,9 @@ namespace WFInfoCS
             uiScaling = Settings.scaling / 100.0;
         }
 
-        public static void updateWindow(Bitmap image = null)
+        public static void UpdateWindow(Bitmap image = null)
         {
-            refreshDPIScaling();
+            RefreshDPIScaling();
             if (image != null)
             {
                 int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)dpiScaling;
@@ -688,7 +688,7 @@ namespace WFInfoCS
             }
 
 
-            if (!verifyWarframe())
+            if (!VerifyWarframe())
                 return;
 
             if (!Win32.GetWindowRect(HandleRef, out Win32.r osRect))

@@ -1171,7 +1171,7 @@ namespace WFInfoCS
             long stop = watch.ElapsedMilliseconds + 5000;
             long wait = watch.ElapsedMilliseconds;
 
-            OCR.updateWindow();
+            OCR.UpdateWindow();
             int diff;
 
             while (watch.ElapsedMilliseconds < stop)
