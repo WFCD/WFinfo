@@ -457,14 +457,9 @@ namespace WFInfoCS
                         string prime = name;
                         if (prime.IndexOf("Prime") != -1)
                         {
-                            bool display = name.IndexOf("Akstiletto") != -1;
-                            if (display)
-                                Console.WriteLine(name);
                             prime = prime.Substring(0, prime.IndexOf("Prime") + 5);
                             if (!equipmentData.TryGetValue(prime, out _))
                             {
-                                if (display)
-                                    Console.WriteLine("COULDN'T FIND: " + prime);
                                 equipmentData[prime] = new JObject
                                 {
                                     {"parts", new JObject()},
@@ -477,8 +472,6 @@ namespace WFInfoCS
 
                             if (!job.TryGetValue(name, out _))
                             {
-                                if (display)
-                                    Console.WriteLine("COULDN'T FIND PART: " + name);
                                 job = new JObject
                                 {
                                     {"count", 1},

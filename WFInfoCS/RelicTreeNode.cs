@@ -197,8 +197,6 @@ namespace WFInfoCS
             List<RelicTreeNode> temp = new List<RelicTreeNode>();
             foreach (RelicTreeNode node in ChildrenList)
             {
-                if(Name == "Lith")
-                    Console.WriteLine(Name + " " + node.Name + " - " + func(node));
                 if (func(node))
                 {
                     temp.Add(node);

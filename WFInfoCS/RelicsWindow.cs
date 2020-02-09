@@ -39,33 +39,39 @@ namespace WFInfoCS
         {
             if ((bool)vaulted.IsChecked)
             {
-                for (int i = 0; i < RelicTree.Items.Count; i++)
-                {
-                    RelicTreeNode relic = (RelicTreeNode)RelicTree.Items.GetItemAt(i);
-                    if (!RelicTreeNode.FilterOutVaulted(relic))
-                    {
-                        RelicTree.Items.Remove(relic);
-                        i--;
-                    } else
-                        relic.Filter(RelicTreeNode.FilterOutVaulted);
-                }
-            } else if (showAllRelics)
-            {
-                int prev = 0;
                 foreach (RelicTreeNode era in RelicNodes)
-                {
-                    foreach (RelicTreeNode relic in era.ChildrenList)
-                    {
-                        if (RelicTree.Items.IndexOf(relic) == -1)
-                            RelicTree.Items.Insert(prev, relic);
+                    era.Filter(RelicTreeNode.FilterOutVaulted);
 
-                        prev = RelicTree.Items.IndexOf(relic) + 1;
+                if (showAllRelics)
+                {
+                    for (int i = 0; i < RelicTree.Items.Count;)
+                    {
+                        RelicTreeNode relic = (RelicTreeNode)RelicTree.Items.GetItemAt(i);
+                        if (!RelicTreeNode.FilterOutVaulted(relic))
+                            RelicTree.Items.Remove(relic);
+                        else
+                            i++;
                     }
                 }
             } else
             {
                 foreach (RelicTreeNode era in RelicNodes)
                     era.ResetFilter();
+
+                if (showAllRelics)
+                {
+                    int prev = 0;
+                    foreach (RelicTreeNode era in RelicNodes)
+                    {
+                        foreach (RelicTreeNode relic in era.ChildrenList)
+                        {
+                            if (RelicTree.Items.IndexOf(relic) == -1)
+                                RelicTree.Items.Insert(prev, relic);
+
+                            prev = RelicTree.Items.IndexOf(relic) + 1;
+                        }
+                    }
+                }
             }
 
         }
@@ -109,20 +115,21 @@ namespace WFInfoCS
         private void ComboButton(object sender, RoutedEventArgs e)
         {
             showAllRelics = !showAllRelics;
+            RelicTree.Items.Clear();
             if (showAllRelics)
             {
                 relicComboButton.Content = "All Relics";
-                RelicTree.Items.Clear();
                 foreach (RelicTreeNode era in RelicNodes)
+                {
                     foreach (RelicTreeNode relic in era.ChildrenList)
-                    {
                         relic.topLevel = true;
+
+                    foreach (RelicTreeNode relic in era.Children)
                         RelicTree.Items.Add(relic);
-                    }
+                }
             } else
             {
                 relicComboButton.Content = "Relic Eras";
-                RelicTree.Items.Clear();
                 foreach (RelicTreeNode era in RelicNodes)
                 {
                     RelicTree.Items.Add(era);
@@ -130,45 +137,6 @@ namespace WFInfoCS
                         relic.topLevel = false;
                 }
             }
-        }
-
-        public static void LoadNodesOnThread()
-        {
-            RelicNodes = new List<RelicTreeNode>();
-
-            RelicNodes.Add(Main.CreateOnUIThread(() => { return new RelicTreeNode("Lith", ""); }));
-            RelicNodes.Add(Main.CreateOnUIThread(() => { return new RelicTreeNode("Meso", ""); }));
-            RelicNodes.Add(Main.CreateOnUIThread(() => { return new RelicTreeNode("Neo", ""); }));
-            RelicNodes.Add(Main.CreateOnUIThread(() => { return new RelicTreeNode("Axi", ""); }));
-            foreach (RelicTreeNode head in RelicNodes)
-            {
-                head.SetSilent();
-                foreach (JProperty prop in Main.dataBase.relicData[head.Name])
-                {
-                    JObject primeItems = (JObject)Main.dataBase.relicData[head.Name][prop.Name];
-                    string vaulted = primeItems["vaulted"].ToObject<bool>() ? "vaulted" : "";
-
-                    RelicTreeNode relic = Main.CreateOnUIThread(() => { return new RelicTreeNode(prop.Name, vaulted); });
-                    head.ChildrenList.Add(relic);
-                    foreach (KeyValuePair<string, JToken> kvp in primeItems)
-                    {
-                        if (kvp.Key != "vaulted" && Main.dataBase.marketData.TryGetValue(kvp.Value.ToString(), out JToken marketValues))
-                        {
-                            RelicTreeNode part = Main.CreateOnUIThread(() => { return new RelicTreeNode(kvp.Value.ToString(), ""); });
-                            part.SetPartText(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), kvp.Key);
-                            relic.ChildrenList.Add(part);
-                        }
-                    }
-                    relic.SetRelicText();
-                    head.ChildrenList.Add(relic);
-                    //Main.RunOnUIThread(() => { Main.relicWindow.groupedByAll.Items.Add(relic); });
-                    //Main.RunOnUIThread(() => { Main.relicWindow.Search.Items.Add(relic); });
-
-                }
-                head.ResetFilter();
-                Main.RunOnUIThread(() => { Main.relicWindow.RelicTree.Items.Add(head); });
-            }
-
         }
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
@@ -206,6 +174,7 @@ namespace WFInfoCS
                     //Search.Items.Add(relic);
                 }
                 head.ResetFilter();
+                head.Filter(RelicTreeNode.FilterOutVaulted);
                 RelicTree.Items.Add(head);
             }
             #endregion
