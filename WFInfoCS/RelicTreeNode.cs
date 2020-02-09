@@ -352,6 +352,13 @@ namespace WFInfoCS
         public double _plat = 0;
         public int _ducat = 0;
 
+        private bool _isExpanded = false;
+        public bool IsExpanded
+        {
+            get { return _isExpanded; }
+            set { SetField(ref _isExpanded, value); }
+        }
+
         private List<RelicTreeNode> _children;
         public List<RelicTreeNode> Children
         {

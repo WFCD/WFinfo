@@ -110,7 +110,6 @@ namespace WFInfoCS
         private void TextboxTextChanged(object sender, TextChangedEventArgs e)
         {
             searchActive = textBox.Text.Length > 0 && textBox.Text != "Filter Terms";
-            Console.WriteLine("TextboxTextChanged: " + textBox.Text);
             if (textBox.IsLoaded)
             {
                 if (searchActive || (searchText != null && searchText.Length > 0))

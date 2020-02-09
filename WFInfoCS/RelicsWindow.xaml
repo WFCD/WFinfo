@@ -407,7 +407,9 @@
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrush}" Color="Red"/>
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Red" />
                     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="Red"/>
-                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource WFInfo_TreeViewItem}" />
+                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource WFInfo_TreeViewItem}">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    </Style>
                 </TreeView.Resources>
             </TreeView>
         </Grid>
