@@ -56,10 +56,19 @@ namespace WFInfoCS
             ChildrenList = new List<RelicTreeNode>();
         }
 
+        public bool topLevel = false;
+
+        private string _era;
+        public string Era
+        {
+            get { return _era; }
+            set { SetField(ref _era, value); }
+        }
+
         private string _name;
         public string Name
         {
-            get { return _name; }
+            get { return topLevel ? _era + " " + _name : _name; }
             set { SetField(ref _name, value); }
         }
 
@@ -183,16 +192,19 @@ namespace WFInfoCS
             return x.Vaulted.Length == 0;
         }
 
-
         public void Filter(FilterFunc func)
         {
             List<RelicTreeNode> temp = new List<RelicTreeNode>();
             foreach (RelicTreeNode node in ChildrenList)
+            {
+                if(Name == "Lith")
+                    Console.WriteLine(Name + " " + node.Name + " - " + func(node));
                 if (func(node))
                 {
                     temp.Add(node);
                     node.Filter(func);
                 }
+            }
 
             Children = temp;
         }
@@ -280,7 +292,7 @@ namespace WFInfoCS
 
         public override string ToString()
         {
-            return Name;
+            return Era + " " + Name;
         }
 
     }

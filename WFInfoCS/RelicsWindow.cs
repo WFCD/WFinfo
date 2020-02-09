@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,7 +14,7 @@ namespace WFInfoCS
     public partial class RelicsWindow : System.Windows.Window
     {
 
-        private bool showAllRelicsNext = true;
+        private bool showAllRelics = false;
         public static List<RelicTreeNode> RelicNodes { get; set; }
 
 
@@ -36,65 +37,35 @@ namespace WFInfoCS
 
         private void VaultedClick(object sender, RoutedEventArgs e)
         {
-            /*
             if ((bool)vaulted.IsChecked)
             {
-                Console.WriteLine("Hide vaulted");
-                foreach (RelicsTreeNode item in groupedByAll.Items)
+                for (int i = 0; i < RelicTree.Items.Count; i++)
                 {
-                    if (item.Vaulted == "vaulted")
+                    RelicTreeNode relic = (RelicTreeNode)RelicTree.Items.GetItemAt(i);
+                    if (!RelicTreeNode.FilterOutVaulted(relic))
                     {
-                        item.HideItem();
-                    }
+                        RelicTree.Items.Remove(relic);
+                        i--;
+                    } else
+                        relic.Filter(RelicTreeNode.FilterOutVaulted);
                 }
-                foreach (RelicsTreeNode item in groupedByCollection.Items)
+            } else if (showAllRelics)
+            {
+                int prev = 0;
+                foreach (RelicTreeNode era in RelicNodes)
                 {
-                    if (item.Vaulted == "vaulted")
+                    foreach (RelicTreeNode relic in era.ChildrenList)
                     {
-                        item.HideItem();
-                    }
-                }
-                foreach (RelicsTreeNode item in Search.Items)
-                {
-                    if (item.Vaulted == "vaulted")
-                    {
-                        item.HideItem();
+                        if (RelicTree.Items.IndexOf(relic) == -1)
+                            RelicTree.Items.Insert(prev, relic);
+
+                        prev = RelicTree.Items.IndexOf(relic) + 1;
                     }
                 }
             } else
             {
-                Console.WriteLine("Show vaulted");
-                foreach (RelicsTreeNode item in groupedByAll.Items)
-                {
-                    item.ShowItem();
-                }
-                foreach (RelicsTreeNode item in groupedByCollection.Items)
-                {
-                    item.ShowItem();
-
-                }
-                foreach (RelicsTreeNode item in Search.Items)
-                {
-                    item.HideItem();
-
-                }
-            }*/
-
-
-            if ((bool)vaulted.IsChecked)
-            {
-                foreach (RelicTreeNode era in groupedByCollection.Items)
-                    era.Filter(RelicTreeNode.FilterOutVaulted);
-
-                foreach (RelicTreeNode relic in groupedByAll.Items)
-                    relic.Filter(RelicTreeNode.FilterOutVaulted);
-            } else
-            {
-                foreach (RelicTreeNode era in groupedByCollection.Items)
+                foreach (RelicTreeNode era in RelicNodes)
                     era.ResetFilter();
-
-                foreach (RelicTreeNode relic in groupedByAll.Items)
-                    relic.ResetFilter();
             }
 
         }
@@ -104,10 +75,10 @@ namespace WFInfoCS
             if (textBox.IsLoaded)
             {
                 Console.WriteLine(textBox.Text);
-                Search.Visibility = Visibility.Visible;
-                groupedByAll.Visibility = Visibility.Hidden;
-                groupedByCollection.Visibility = Visibility.Hidden;
-                foreach (RelicTreeNode item in Search.Items)
+                //Search.Visibility = Visibility.Visible;
+                //groupedByAll.Visibility = Visibility.Hidden;
+                //groupedByCollection.Visibility = Visibility.Hidden;
+                /*foreach (RelicTreeNode item in Search.Items)
                 {
                     item.HideItem();
                     foreach (var child in item.Children)
@@ -121,7 +92,7 @@ namespace WFInfoCS
                     { // if there was text found show item.
                         item.ShowItem();
                     }
-                }
+                }*/
             }
         }
 
@@ -137,20 +108,27 @@ namespace WFInfoCS
 
         private void ComboButton(object sender, RoutedEventArgs e)
         {
-            if (showAllRelicsNext)
+            showAllRelics = !showAllRelics;
+            if (showAllRelics)
             {
-                relicComboButton.Content = "All relics";
-                showAllRelicsNext = false;
-                groupedByCollection.Visibility = Visibility.Hidden;
-                groupedByAll.Visibility = Visibility.Visible;
-                Search.Visibility = Visibility.Hidden;
+                relicComboButton.Content = "All Relics";
+                RelicTree.Items.Clear();
+                foreach (RelicTreeNode era in RelicNodes)
+                    foreach (RelicTreeNode relic in era.ChildrenList)
+                    {
+                        relic.topLevel = true;
+                        RelicTree.Items.Add(relic);
+                    }
             } else
             {
-                relicComboButton.Content = "Relic era";
-                showAllRelicsNext = true;
-                groupedByCollection.Visibility = Visibility.Visible;
-                groupedByAll.Visibility = Visibility.Hidden;
-                Search.Visibility = Visibility.Hidden;
+                relicComboButton.Content = "Relic Eras";
+                RelicTree.Items.Clear();
+                foreach (RelicTreeNode era in RelicNodes)
+                {
+                    RelicTree.Items.Add(era);
+                    foreach (RelicTreeNode relic in era.ChildrenList)
+                        relic.topLevel = false;
+                }
             }
         }
 
@@ -183,12 +161,12 @@ namespace WFInfoCS
                     }
                     relic.SetRelicText();
                     head.ChildrenList.Add(relic);
-                    Main.RunOnUIThread(() => { Main.relicWindow.groupedByAll.Items.Add(relic); });
-                    Main.RunOnUIThread(() => { Main.relicWindow.Search.Items.Add(relic); });
+                    //Main.RunOnUIThread(() => { Main.relicWindow.groupedByAll.Items.Add(relic); });
+                    //Main.RunOnUIThread(() => { Main.relicWindow.Search.Items.Add(relic); });
 
                 }
                 head.ResetFilter();
-                Main.RunOnUIThread(() => { Main.relicWindow.groupedByCollection.Items.Add(head); });
+                Main.RunOnUIThread(() => { Main.relicWindow.RelicTree.Items.Add(head); });
             }
 
         }
@@ -212,6 +190,7 @@ namespace WFInfoCS
                     JObject primeItems = (JObject)Main.dataBase.relicData[head.Name][prop.Name];
                     string vaulted = primeItems["vaulted"].ToObject<bool>() ? "vaulted" : "";
                     RelicTreeNode relic = new RelicTreeNode(prop.Name, vaulted);
+                    relic.Era = head.Name;
                     foreach (KeyValuePair<string, JToken> kvp in primeItems)
                     {
                         if (kvp.Key != "vaulted" && Main.dataBase.marketData.TryGetValue(kvp.Value.ToString(), out JToken marketValues))
@@ -223,11 +202,11 @@ namespace WFInfoCS
                     }
                     relic.SetRelicText();
                     head.ChildrenList.Add(relic);
-                    groupedByAll.Items.Add(relic);
-                    Search.Items.Add(relic);
+                    //groupedByAll.Items.Add(relic);
+                    //Search.Items.Add(relic);
                 }
                 head.ResetFilter();
-                groupedByCollection.Items.Add(head);
+                RelicTree.Items.Add(head);
             }
             #endregion
         }
