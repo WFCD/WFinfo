@@ -178,19 +178,16 @@ namespace WFInfoCS
             foreach (RelicTreeNode node in Children)
                 node.ResetFilter();
 
+            // This doesn't work, maybe i made mistake
+            //Children.AsParallel().ForAll(node => node.ResetFilter());
+
             ChildrenFiltered = Children;
         }
 
         public void FilterOutVaulted(bool additionalFilter = false)
         {
-            List<RelicTreeNode> temp = new List<RelicTreeNode>();
             List<RelicTreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
-
-            foreach (RelicTreeNode node in filterList)
-                if (node.IsVaulted())
-                    temp.Add(node);
-
-            ChildrenFiltered = temp;
+            ChildrenFiltered = filterList.AsParallel().Where(node => node.IsVaulted()).ToList();
         }
 
         public string GetFullName()
