@@ -383,7 +383,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Padding="3" Foreground="{Binding Name_Color}" FontFamily="Roboto"/>
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Padding="3" Foreground="{Binding NameBrush}" FontFamily="Roboto"/>
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Padding="3" Foreground="#506464" FontFamily="Roboto"/>
                             </StackPanel>
 

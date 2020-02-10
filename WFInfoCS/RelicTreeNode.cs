@@ -40,11 +40,14 @@ namespace WFInfoCS
 
     public class RelicTreeNode : INPC
     {
-        private ImageSource PLAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/plat.gif");
-        private ImageSource DUCAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ducat_w.gif");
-        private Brush RARE_COLOR = new SolidColorBrush(Color.FromRgb(255, 215, 0));
-        private Brush UNCOMMON_COLOR = new SolidColorBrush(Color.FromRgb(192, 192, 192));
-        private Brush COMMON_COLOR = new SolidColorBrush(Color.FromRgb(205, 127, 50));
+        private static ImageSource PLAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/plat.gif");
+        private static ImageSource DUCAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ducat_w.gif");
+        private static Color RARE_COLOR = Color.FromRgb(255, 215, 0);
+        private static Color UNCOMMON_COLOR = Color.FromRgb(192, 192, 192);
+        private static Color COMMON_COLOR = Color.FromRgb(205, 127, 50);
+        private static Brush RARE_BRUSH = new SolidColorBrush(RARE_COLOR);
+        private static Brush UNCOMMON_BRUSH = new SolidColorBrush(UNCOMMON_COLOR);
+        private static Brush COMMON_BRUSH = new SolidColorBrush(COMMON_COLOR);
 
         public RelicTreeNode(string name, string vaulted)
         {
@@ -64,6 +67,13 @@ namespace WFInfoCS
             set { SetField(ref _era, value); }
         }
 
+        private int _eraNum = -1;
+        public int EraNum
+        {
+            get { return _eraNum; }
+            set { SetField(ref _eraNum, value); }
+        }
+
         private string _name;
         public string Name
         {
@@ -71,8 +81,15 @@ namespace WFInfoCS
             set { SetField(ref _name, value); }
         }
 
-        private Brush _color = new SolidColorBrush(Color.FromRgb(177, 208, 217));
-        public Brush Name_Color
+        private Brush _colorBrush = new SolidColorBrush(Color.FromRgb(177, 208, 217));
+        public Brush NameBrush
+        {
+            get { return _colorBrush; }
+            set { SetField(ref _colorBrush, value); }
+        }
+
+        private Color _color = Color.FromRgb(177, 208, 217);
+        public Color NameColor
         {
             get { return _color; }
             set { SetField(ref _color, value); }
@@ -107,40 +124,40 @@ namespace WFInfoCS
 
         public void SetRelicText()
         {
-            double intact = 0;
-            double radiant = 0;
+            _intact = 0;
+            _radiant = 0;
 
             foreach (RelicTreeNode node in Children)
             {
-                if (node.Name_Color == RARE_COLOR)
+                if (node.NameColor == RARE_COLOR)
                 {
-                    intact += 0.02 * node._plat;
-                    radiant += 0.1 * node._plat;
-                } else if (node.Name_Color == UNCOMMON_COLOR)
+                    _intact += 0.02 * node._plat;
+                    _radiant += 0.1 * node._plat;
+                } else if (node.NameColor == UNCOMMON_COLOR)
                 {
-                    intact += 0.11 * node._plat;
-                    radiant += 0.2 * node._plat;
+                    _intact += 0.11 * node._plat;
+                    _radiant += 0.2 * node._plat;
                 } else
                 {
-                    intact += 0.2533 * node._plat;
-                    radiant += 0.1667 * node._plat;
+                    _intact += 0.2533 * node._plat;
+                    _radiant += 0.1667 * node._plat;
                 }
             }
 
-            double bonus = radiant - intact;
+            _bonus = _radiant - _intact;
             Grid_Shown = "Visible";
 
             Col1_Text1 = "INT";
-            Col1_Text2 = ": " + intact.ToString("F1");
+            Col1_Text2 = ": " + _intact.ToString("F1");
 
             Col1_Img1 = PLAT_SRC;
             Col1_Img1_Shown = "Visible";
 
             Col2_Text1 = "RAD";
-            Col2_Text2 = ": " + radiant.ToString("F1") + "(";
-            if (bonus >= 0)
+            Col2_Text2 = ": " + _radiant.ToString("F1") + "(";
+            if (_bonus >= 0)
                 Col2_Text2 += "+";
-            Col2_Text2 += bonus.ToString("F1") + ")";
+            Col2_Text2 += _bonus.ToString("F1") + ")";
 
             Col2_Img1 = PLAT_SRC;
             Col2_Img1_Shown = "Visible";
@@ -152,11 +169,18 @@ namespace WFInfoCS
             _ducat = ducat;
 
             if (rarity.Contains("rare"))
-                Name_Color = RARE_COLOR;
-            else if (rarity.Contains("uncomm"))
-                Name_Color = UNCOMMON_COLOR;
-            else
-                Name_Color = COMMON_COLOR;
+            {
+                NameColor = RARE_COLOR;
+                NameBrush = RARE_BRUSH;
+            } else if (rarity.Contains("uncomm"))
+            {
+                NameColor = UNCOMMON_COLOR;
+                NameBrush = UNCOMMON_BRUSH;
+            } else
+            {
+                NameColor = COMMON_COLOR;
+                NameBrush = COMMON_BRUSH;
+            }
 
             Col1_Text1 = "  PLAT";
             if (plat < 100)
@@ -223,7 +247,6 @@ namespace WFInfoCS
             Dictionary<string, bool> matchedTextCopy = new Dictionary<string, bool>();
 
             bool done = true;
-            // Check if current element name matches
             foreach (string text in RelicsWindow.searchText)
             {
                 bool tempVal = (matchedText != null && matchedText[text]) || Name.ToLower().Contains(text.ToLower());
@@ -238,9 +261,8 @@ namespace WFInfoCS
                 return true;
             }
 
-            // Find matching subelements in parallel
             List<RelicTreeNode> temp = new List<RelicTreeNode>();
-            foreach (var node in filterList)
+            foreach (RelicTreeNode node in filterList)
             {
                 if (node.FilterSearchText(removeLeaves, additionalFilter, matchedTextCopy))
                 {
@@ -252,26 +274,44 @@ namespace WFInfoCS
             return temp.Count > 0;
         }
 
-        /*
-        public bool Filter(FilterFunc func, bool additionalFilter = false, bool applyToAllLevels = true)
+        internal void Sort(int index, int depth = 0)
         {
-            List<RelicTreeNode> temp = new List<RelicTreeNode>();
-            List<RelicTreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
-
-
-            foreach (RelicTreeNode node in filterList)
+            foreach (RelicTreeNode node in Children)
+                node.Sort(index, depth + 1);
+            if (Children.Count > 0)
             {
-                bool funcResult = func(node, additionalFilter, checkKids);
-                if (funcResult)
-                    temp.Add(node);
-                if (applyToAllLevels && (!checkKids || (checkKids && !funcResult)))
-                    node.Filter(func, additionalFilter, applyToAllLevels, checkKids);
+                if (depth == 0)   // Relics
+                {
+                    switch (index)
+                    {
+                        // 0 - Name
+                        // 1 - Average intact plat
+                        // 2 - Average radiant plat
+                        // 3 - Difference (radiant-intact)
+                        case 1:
+                            Children = Children.AsParallel().OrderByDescending(p => p._intact).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._intact).ToList();
+                            break;
+                        case 2:
+                            Children = Children.AsParallel().OrderByDescending(p => p._radiant).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._radiant).ToList();
+                            break;
+                        case 3:
+                            Children = Children.AsParallel().OrderByDescending(p => p._bonus).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._bonus).ToList();
+                            break;
+                        default:
+                            Children = Children.AsParallel().OrderBy(p => p.Name).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Name).ToList();
+                            break;
+                    }
+                } else            // Parts
+                {
+                    Children = Children.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
+                    ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
+                }
             }
-
-            ChildrenFiltered = temp;
         }
-        */
-
 
         private string _col1_text1 = "INT";
         public string Col1_Text1
@@ -338,6 +378,9 @@ namespace WFInfoCS
 
         public double _plat = 0;
         public int _ducat = 0;
+        public double _intact = 0;
+        public double _radiant = 0;
+        public double _bonus = 0;
 
         private bool _isExpanded = false;
         public bool IsExpanded

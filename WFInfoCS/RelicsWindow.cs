@@ -131,12 +131,23 @@ namespace WFInfoCS
             // 3 - Difference (radiant-intact)
 
             Console.WriteLine(SortBox.SelectedIndex);
+            if (IsLoaded)
+            {
+                foreach (RelicTreeNode era in RelicNodes)
+                    era.Sort(SortBox.SelectedIndex);
+                if(showAllRelics)
+                {
+                    //RelicTree.Items.SortDescriptions
+                }
+            }
         }
 
         private void TextBoxFocus(object sender, RoutedEventArgs e)
         {
             if (!searchActive)
+            {
                 textBox.Clear();
+            }
         }
 
         private void ToggleShowAllRelics(object sender, RoutedEventArgs e)
@@ -177,8 +188,10 @@ namespace WFInfoCS
             RelicTreeNode neo = new RelicTreeNode("Neo", "");
             RelicTreeNode axi = new RelicTreeNode("Axi", "");
             RelicNodes.AddRange(new[] { lith, meso, neo, axi });
+            int eraNum = 0;
             foreach (RelicTreeNode head in RelicNodes)
             {
+                head.EraNum = eraNum++;
                 head.SetSilent();
                 foreach (JProperty prop in Main.dataBase.relicData[head.Name])
                 {
