@@ -8,9 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using Application = System.Windows.Application;
 
 namespace WFInfoCS
 {
@@ -38,9 +36,7 @@ namespace WFInfoCS
         private readonly Sheets sheetsApi;
         private string githubVersion;
 
-        //private readonly FileSystemWatcher screenshotWatcher = new FileSystemWatcher();
         private LogCapture EElogWatcher;
-        private readonly string currentDirectory = Directory.GetCurrentDirectory();
 
         public Data()
         {
@@ -59,11 +55,6 @@ namespace WFInfoCS
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             sheetsApi = new Sheets();
-
-            //string warframePictures = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + @"\Warframe"; //outdated? Was old work around for user who couldn't activate the program
-            //Directory.CreateDirectory(warframePictures);
-            //screenshotWatcher.Path = warframePictures;
-            //screenshotWatcher.EnableRaisingEvents = true;
         }
 
         public void EnableLogcapture()
@@ -77,7 +68,7 @@ namespace WFInfoCS
                 }
                 catch (Exception ex)
                 {
-                    Main.AddLog("Failed to start logcapture, exception: " + ex.ToString());
+                    Main.AddLog("Failed to start logcapture, exception: " + ex);
                     Main.StatusUpdate("Failed to start capturing log", 1);
                 }
             }
@@ -813,32 +804,33 @@ namespace WFInfoCS
             });
         }
 
-        public JArray GetPlatLive(string itemUrl)
-        {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            JObject stats = JsonConvert.DeserializeObject<JObject>(
-                WebClient.DownloadString("https://api.warframe.market/v1/items/" + itemUrl + "/orders"));
-            stopWatch.Stop();
-            Console.WriteLine("Time taken to download all listings: " + stopWatch.ElapsedMilliseconds + "ms");
+        // There's no current use for it now
+        //public JArray GetPlatLive(string itemUrl)
+        //{
+        //    Stopwatch stopWatch = new Stopwatch();
+        //    stopWatch.Start();
+        //    JObject stats = JsonConvert.DeserializeObject<JObject>(
+        //        WebClient.DownloadString("https://api.warframe.market/v1/items/" + itemUrl + "/orders"));
+        //    stopWatch.Stop();
+        //    Console.WriteLine("Time taken to download all listings: " + stopWatch.ElapsedMilliseconds + "ms");
 
-            stopWatch.Start();
-            JArray sellers = new JArray();
-            foreach (JToken listing in stats["payload"]["orders"])
-            {
-                if (listing["order_type"].ToObject<string>() == "buy" ||
-                    listing["user"]["status"].ToObject<string>() == "offline")
-                {
-                    continue;
-                }
+        //    stopWatch.Start();
+        //    JArray sellers = new JArray();
+        //    foreach (JToken listing in stats["payload"]["orders"])
+        //    {
+        //        if (listing["order_type"].ToObject<string>() == "buy" ||
+        //            listing["user"]["status"].ToObject<string>() == "offline")
+        //        {
+        //            continue;
+        //        }
 
-                sellers.Add(listing);
-            }
-            stopWatch.Stop();
-            Console.WriteLine("Time taken to process sell and online listings: " + stopWatch.ElapsedMilliseconds + "ms");
-            Console.WriteLine(sellers);
-            return sellers;
-        }
+        //        sellers.Add(listing);
+        //    }
+        //    stopWatch.Stop();
+        //    Console.WriteLine("Time taken to process sell and online listings: " + stopWatch.ElapsedMilliseconds + "ms");
+        //    Console.WriteLine(sellers);
+        //    return sellers;
+        //}
 
         public bool IsPartVaulted(string name)
         {

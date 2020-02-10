@@ -176,12 +176,12 @@ namespace WFInfoCS
     public class Status
     {
         public string message;
-        public int serverity;
+        public int severity;
 
         public Status(string msg, int ser)
         {
             message = msg;
-            serverity = ser;
+            severity = ser;
         }
     }
 
