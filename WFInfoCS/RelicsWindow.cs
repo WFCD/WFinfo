@@ -57,6 +57,8 @@ namespace WFInfoCS
                 }
                 while (index < RelicTree.Items.Count)
                     RelicTree.Items.RemoveAt(index);
+
+                RelicTree.Items.Refresh();
             } else
             {
                 foreach (RelicTreeNode era in RelicNodes)
@@ -137,7 +139,24 @@ namespace WFInfoCS
                     era.Sort(SortBox.SelectedIndex);
                 if(showAllRelics)
                 {
-                    //RelicTree.Items.SortDescriptions
+                    RelicTree.Items.SortDescriptions.Clear();
+                    RelicTree.Items.IsLiveSorting = true;
+                    switch (SortBox.SelectedIndex)
+                    {
+                        case 1:
+                            RelicTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Intact_Val", System.ComponentModel.ListSortDirection.Descending));
+                            break;
+                        case 2:
+                            RelicTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Radiant_Val", System.ComponentModel.ListSortDirection.Descending));
+                            break;
+                        case 3:
+                            RelicTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
+                            break;
+                        default:
+                            RelicTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Name_Sort", System.ComponentModel.ListSortDirection.Ascending));
+                            break;
+                    }
+
                 }
             }
         }
@@ -165,8 +184,10 @@ namespace WFInfoCS
                     foreach (RelicTreeNode relic in era.ChildrenFiltered)
                         RelicTree.Items.Add(relic);
                 }
+                SortBoxChanged(null, null);
             } else
             {
+                RelicTree.Items.SortDescriptions.Clear();
                 relicComboButton.Content = "Relic Eras";
                 foreach (RelicTreeNode era in RelicNodes)
                 {

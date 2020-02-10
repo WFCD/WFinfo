@@ -85,6 +85,11 @@ namespace WFInfoCS
             get { return topLevel ? _era + " " + _name : _name; }
             set { SetField(ref _name, value); }
         }
+        public string Name_Sort
+        {
+            get { return Parent.EraNum + _era + " " + _name; }
+            set { SetField(ref _name, value); }
+        }
 
         private Brush _colorBrush = new SolidColorBrush(Color.FromRgb(177, 208, 217));
         public Brush NameBrush
@@ -319,7 +324,7 @@ namespace WFInfoCS
                             break;
                         default:
                             Children = Children.AsParallel().OrderBy(p => p.Name).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Name).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Name).ToList();
                             break;
                     }
                 } else            // Parts
@@ -395,9 +400,27 @@ namespace WFInfoCS
 
         public double _plat = 0;
         public int _ducat = 0;
+
         public double _intact = 0;
+        public double Intact_Val
+        {
+            get { return _intact; }
+            set { SetField(ref _intact, value); }
+        }
+
         public double _radiant = 0;
+        public double Radiant_Val
+        {
+            get { return _radiant; }
+            set { SetField(ref _radiant, value); }
+        }
+
         public double _bonus = 0;
+        public double Bonus_Val
+        {
+            get { return _bonus; }
+            set { SetField(ref _bonus, value); }
+        }
 
         private bool _isExpanded = false;
         public bool IsExpanded
