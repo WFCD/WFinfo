@@ -40,11 +40,11 @@ namespace WFInfoCS
 
     public class RelicTreeNode : INPC
     {
-        public static ImageSource PLAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/plat.gif");
-        public static ImageSource DUCAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ducat_w.gif");
-        public static Brush RARE_COLOR = new SolidColorBrush(Color.FromRgb(255, 215, 0));
-        public static Brush UNCOMMON_COLOR = new SolidColorBrush(Color.FromRgb(192, 192, 192));
-        public static Brush COMMON_COLOR = new SolidColorBrush(Color.FromRgb(205, 127, 50));
+        private ImageSource PLAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/plat.gif");
+        private ImageSource DUCAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ducat_w.gif");
+        private Brush RARE_COLOR = new SolidColorBrush(Color.FromRgb(255, 215, 0));
+        private Brush UNCOMMON_COLOR = new SolidColorBrush(Color.FromRgb(192, 192, 192));
+        private Brush COMMON_COLOR = new SolidColorBrush(Color.FromRgb(205, 127, 50));
 
         public RelicTreeNode(string name, string vaulted)
         {
@@ -221,35 +221,35 @@ namespace WFInfoCS
         public bool FilterSearchText(bool removeLeaves, bool additionalFilter = false, Dictionary<string, bool> matchedText = null)
         {
             Dictionary<string, bool> matchedTextCopy = new Dictionary<string, bool>();
-            List<RelicTreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
 
             bool done = true;
+            // Check if current element name matches
             foreach (string text in RelicsWindow.searchText)
             {
                 bool tempVal = (matchedText != null && matchedText[text]) || Name.ToLower().Contains(text.ToLower());
-
                 matchedTextCopy[text] = tempVal;
                 done = done && tempVal;
             }
+
+            List<RelicTreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
             if (done)
             {
                 ChildrenFiltered = filterList;
                 return true;
             }
 
-            bool foundOne = false;
+            // Find matching subelements in parallel
             List<RelicTreeNode> temp = new List<RelicTreeNode>();
-            foreach (RelicTreeNode node in filterList)
+            foreach (var node in filterList)
             {
                 if (node.FilterSearchText(removeLeaves, additionalFilter, matchedTextCopy))
                 {
                     temp.Add(node);
-                    foundOne = true;
                 }
             }
 
             ChildrenFiltered = (filterList.Count > 0 && filterList[0].ChildrenFiltered.Count > 0) || removeLeaves ? temp : filterList;
-            return foundOne;
+            return temp.Count > 0;
         }
 
         /*
