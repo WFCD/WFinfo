@@ -6,18 +6,19 @@
         xmlns:local="clr-namespace:WFInfoCS"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="WFInfoCS.MainWindow"
         mc:Ignorable="d"
-        Title="WFInfo" Height="131" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070">
+        Title="WFInfo" Height="131" Width="310" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="304"/>
+            <ColumnDefinition Width="280"/>
             <ColumnDefinition Width="30"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="26"/>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="45.654"/>
+            <RowDefinition Height="34.346"/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
         <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,0,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
@@ -30,7 +31,7 @@
                 </TransformGroup>
             </Rectangle.RenderTransform>
         </Rectangle>
-        <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,28,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
+        <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,28,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True" Grid.RowSpan="2">
             <Rectangle.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleY="-1"/>
@@ -40,7 +41,7 @@
                 </TransformGroup>
             </Rectangle.RenderTransform>
         </Rectangle>
-        <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,56,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.RowSpan="2" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
+        <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,10.346,0,0" Grid.Row="2" RenderTransformOrigin="0.5,0.5" Grid.RowSpan="2" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
             <Rectangle.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleY="-1"/>
@@ -51,9 +52,9 @@
             </Rectangle.RenderTransform>
         </Rectangle>
 
-        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
-        <Rectangle HorizontalAlignment="Left" Height="131" Grid.RowSpan="3" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Grid.ColumnSpan="2"/>
-        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="305" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,78,0,0" Grid.RowSpan="2"/>
+        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="310" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
+        <Rectangle HorizontalAlignment="Left" Height="131" Grid.RowSpan="4" Stroke="#FF646464" VerticalAlignment="Top" Width="310" Grid.ColumnSpan="2"/>
+        <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="310" Grid.ColumnSpan="2" Grid.Row="2" Margin="0,32.346,0,0" Grid.RowSpan="2"/>
 
         <Image HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" >
             <Image.RenderTransform>
@@ -65,15 +66,15 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <TextBlock Text="WFInfo" Margin="36,4,0,2" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" Height="20" FontWeight="Bold" Width="51"/>
+        <TextBlock Text="WFInfo" Margin="38,4,0,7" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" Height="15" FontWeight="Bold" Width="51"/>
         <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="91,3,0,2" Foreground="#FFB1D0D9" FontSize="11" FontWeight="Bold" Width="182" FontFamily="{DynamicResource Roboto}" Height="21"/>
-        <Button x:Name="minimise" Content="_" HorizontalAlignment="Left" Margin="275,0,0,0" VerticalAlignment="Top" Width="30" Height="26" Click="Minimise" Foreground="#FFB1D0D9" FontSize="16" RenderTransformOrigin="0.5,1" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed">
+        <Button x:Name="minimise" Content="_" HorizontalAlignment="Left" Margin="0,-1,0,0" VerticalAlignment="Top" Width="30" Height="26" Click="Minimise" Foreground="#FFB1D0D9" FontSize="16" RenderTransformOrigin="0.5,1" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Grid.Column="1">
             <Button.Background>
                 <ImageBrush/>
             </Button.Background>
         </Button>
         <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="0,0,0,0" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
-        <Button x:Name="Website" ToolTip="Opens WFinfo website" HorizontalAlignment="Center" Margin="0,0,0,54" Width="30" Click="websiteClick" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
+        <Button x:Name="Website" ToolTip="Opens WFinfo website" HorizontalAlignment="Center" Margin="0,0,0,19.654" Width="30" Click="websiteClick" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/home.png">
                     <ImageBrush.RelativeTransform>
@@ -87,7 +88,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="Relics" Content="x" ToolTip="Relics, search for what relic you need to use" HorizontalAlignment="Center" Margin="0,26,0,28" Width="30" Click="relicsClick" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
+        <Button x:Name="Relics" Content="x" ToolTip="Relics, search for what relic you need to use" HorizontalAlignment="Center" Margin="0,26,0,28" Width="30" Click="relicsClick" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}" Grid.RowSpan="2">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/Relic.png" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>
@@ -101,7 +102,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="Settings_Button" Content="x" ToolTip="settings" HorizontalAlignment="Left" Margin="0,78,0,0" Width="30" Click="Settings_click" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1">
+        <Button x:Name="Settings_Button" Content="x" ToolTip="settings" HorizontalAlignment="Left" Margin="0,32.346,0,0.333" Width="30" Click="Settings_click" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="2" Grid.RowSpan="2" Grid.Column="1">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/Settings.png" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>
@@ -115,7 +116,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="Gear" Content="x" HorizontalAlignment="Center" ToolTip="Equpiment, see which items you own" Margin="0,52,0,2" Width="30" Click="equipmentClick" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1">
+        <Button x:Name="Gear" Content="x" HorizontalAlignment="Center" ToolTip="Equpiment, see which items you own" Margin="0,6.346,0,2" Width="30" Click="equipmentClick" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="2">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/gear.png" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>
@@ -143,7 +144,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="ReloadDrop" Content="Button" ToolTip="Reloads drop data" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="27" Height="27" Foreground="{x:Null}" Margin="0,26,0,0" Click="ReloadDropClick">
+        <Button x:Name="ReloadDrop" Content="Button" ToolTip="Reloads drop data" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="27" Height="27" Foreground="{x:Null}" Margin="0,26,0,0" Click="ReloadDropClick" Grid.RowSpan="2">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/Reload.png" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>
@@ -157,7 +158,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Button x:Name="ReloadWiki" ToolTip="Reloads wiki data" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="27" Height="27" Foreground="{x:Null}" Margin="0,52,0,0" Click="ReloadWikiClick">
+        <Button x:Name="ReloadWiki" ToolTip="Reloads wiki data" Content="Button" HorizontalAlignment="Left" Grid.Row="2" VerticalAlignment="Top" Width="27" Height="27" Foreground="{x:Null}" Margin="0,6.346,0,0" Click="ReloadWikiClick">
             <Button.Background>
                 <ImageBrush ImageSource="Resources/Reload.png" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>
@@ -171,17 +172,17 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Viewbox x:Name="Status_viewbox" HorizontalAlignment="Left" Height="25" Margin="2,0,0,0" Grid.Row="2" VerticalAlignment="Top">
+        <Viewbox x:Name="Status_viewbox" HorizontalAlignment="Left" Height="25" Margin="2,0,0,0" Grid.Row="3" VerticalAlignment="Top">
             <Label x:Name="Status" Content="Status: Loading...&#xD;&#xA;" Background="{x:Null}" Foreground="#FFB1D0D9" FontSize="14" Height="29"/>
         </Viewbox>
-        <Viewbox x:Name="Market_data_viewbox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="42.3,3,0,49" Grid.Row="1" Height="28">
-            <Label x:Name="Market_Data" Content="Market Data: Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/RobotoMono/#Roboto Mono"/>
+        <Viewbox x:Name="Market_data_viewbox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="61,4,0,15.654" Grid.Row="1" Height="26">
+            <Label x:Name="Market_Data" Content="Market Data: Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto"/>
         </Viewbox>
-        <Viewbox x:Name="Drop_data_viewbox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="60,26,0,26" Grid.Row="1" Height="28">
-            <Label x:Name="Drop_Data" Content="Drop Data: Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/RobotoMono/#Roboto Mono"/>
+        <Viewbox x:Name="Drop_data_viewbox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="75,28,0,28" Grid.Row="1" Height="26" Grid.RowSpan="2">
+            <Label x:Name="Drop_Data" Content="Drop Data: Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto"/>
         </Viewbox>
-        <Viewbox x:Name="Wiki_data_viewbox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="60,49,0,3" Grid.Row="1" Height="28">
-            <Label x:Name="Wiki_Data" Content="Wiki Data: Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/RobotoMono/#Roboto Mono"/>
+        <Viewbox x:Name="Wiki_data_viewbox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="78,4.346,0,4" Grid.Row="2" Height="26">
+            <Label x:Name="Wiki_Data" Content="Wiki Data: Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" Opacity="15"/>
         </Viewbox>
 
     </Grid>

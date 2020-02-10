@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace WFInfoCS
@@ -40,6 +38,13 @@ namespace WFInfoCS
 
     public class RelicTreeNode : INPC
     {
+        private const double INTACT_CHANCE_RARE = 0.02;
+        private const double RADIANT_CHANCE_RARE = 0.1;
+        private const double INTACT_CHANCE_UNCOMMON = 0.11;
+        private const double RADIANT_CHANCE_UNCOMMON = 0.2;
+        private const double INTACT_CHANCE_COMMON = 0.2533;
+        private const double RADIANT_CHANCE_COMMON = 0.1667;
+
         private static ImageSource PLAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/plat.gif");
         private static ImageSource DUCAT_SRC = (ImageSource)new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ducat_w.gif");
         private static Color RARE_COLOR = Color.FromRgb(255, 215, 0);
@@ -131,30 +136,30 @@ namespace WFInfoCS
             {
                 if (node.NameColor == RARE_COLOR)
                 {
-                    _intact += 0.02 * node._plat;
-                    _radiant += 0.1 * node._plat;
+                    _intact += INTACT_CHANCE_RARE * node._plat;
+                    _radiant += RADIANT_CHANCE_RARE * node._plat;
                 } else if (node.NameColor == UNCOMMON_COLOR)
                 {
-                    _intact += 0.11 * node._plat;
-                    _radiant += 0.2 * node._plat;
+                    _intact += INTACT_CHANCE_UNCOMMON * node._plat;
+                    _radiant += RADIANT_CHANCE_UNCOMMON * node._plat;
                 } else
                 {
-                    _intact += 0.2533 * node._plat;
-                    _radiant += 0.1667 * node._plat;
+                    _intact += INTACT_CHANCE_COMMON * node._plat;
+                    _radiant += RADIANT_CHANCE_COMMON * node._plat;
                 }
             }
 
             _bonus = _radiant - _intact;
             Grid_Shown = "Visible";
 
-            Col1_Text1 = "INT";
-            Col1_Text2 = ": " + _intact.ToString("F1");
+            Col1_Text1 = "INT ";
+            Col1_Text2 = " " + _intact.ToString("F1");
 
             Col1_Img1 = PLAT_SRC;
             Col1_Img1_Shown = "Visible";
 
-            Col2_Text1 = "RAD";
-            Col2_Text2 = ": " + _radiant.ToString("F1") + "(";
+            Col2_Text1 = "RAD ";
+            Col2_Text2 = " " + _radiant.ToString("F1") + " (";
             if (_bonus >= 0)
                 Col2_Text2 += "+";
             Col2_Text2 += _bonus.ToString("F1") + ")";
@@ -165,9 +170,6 @@ namespace WFInfoCS
 
         public void SetPartText(double plat, int ducat, string rarity)
         {
-            _plat = plat;
-            _ducat = ducat;
-
             if (rarity.Contains("rare"))
             {
                 NameColor = RARE_COLOR;
@@ -182,19 +184,34 @@ namespace WFInfoCS
                 NameBrush = COMMON_BRUSH;
             }
 
-            Col1_Text1 = "  PLAT";
-            if (plat < 100)
-                Col1_Text2 = ": " + plat.ToString("F1");
-            else
-                Col1_Text2 = ": " + plat.ToString("F0");
+            if (Name != "Forma Blueprint")
+            {
+                _plat = plat;
+                _ducat = ducat;
 
-            Col1_Img1 = PLAT_SRC;
-            Col1_Img1_Shown = "Visible";
+                Col1_Text1 = "       ";
+                if (plat < 100)
+                    Col1_Text2 = " " + plat.ToString("F1");
+                else
+                    Col1_Text2 = " " + plat.ToString("F0");
 
-            Col2_Text1 = "  DUCAT";
-            Col2_Text2 = ": " + ducat.ToString();
-            Col2_Img1 = DUCAT_SRC;
-            Col2_Img1_Shown = "Visible";
+                Col1_Img1 = PLAT_SRC;
+                Col1_Img1_Shown = "Visible";
+
+                Col2_Text1 = "         ";
+                Col2_Text2 = " " + ducat.ToString();
+                Col2_Img1 = DUCAT_SRC;
+                Col2_Img1_Shown = "Visible";
+            } else
+            {
+                Col1_Img1 = null;
+                Col1_Text1 = "";
+                Col1_Text2 = "";
+
+                Col2_Img1 = null;
+                Col2_Text1 = "";
+                Col2_Text2 = "";
+            }
         }
 
         public void ResetFilter()
