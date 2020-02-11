@@ -69,7 +69,7 @@ namespace WFInfoCS
                 LowLevelListener.KeyAction += main.OnKeyAction;
                 listener.Hook();
                 InitializeComponent();
-                Version.Content = "v" + Main.BuildVersion + "-beta2";
+                Version.Content = "v" + Main.BuildVersion + "-beta3";
 
             }
             catch (Exception e)
@@ -81,7 +81,7 @@ namespace WFInfoCS
         public void ChangeStatus(string status, int serverity)
         {
             Console.WriteLine("Status message: " + status);
-            Status.Content = "Status: " + status;
+            Status.Content = status;
             switch (serverity)
             {
                 case 0: //default, no problem

@@ -760,7 +760,7 @@ namespace WFInfoCS
             SaveDatabase(marketDataPath, marketData);
             Main.RunOnUIThread(() =>
             {
-                MainWindow.INSTANCE.Market_Data.Content = "Market Data: " + marketData["timestamp"].ToString().Substring(5, 11);
+                MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToString().Substring(5, 11);
                 Main.StatusUpdate("Market data reloaded", 0);
                 MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
                 MainWindow.INSTANCE.ReloadWiki.IsEnabled = true;
@@ -778,8 +778,8 @@ namespace WFInfoCS
             SaveDatabase(nameDataPath, nameData);
             Main.RunOnUIThread(() =>
             {
-                MainWindow.INSTANCE.Drop_Data.Content = "Drop Data: " + equipmentData["timestamp"].ToString().Substring(5, 11);
-                MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + equipmentData["rqmts_timestamp"].ToString().Substring(5, 11);
+                MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToString().Substring(5, 11);
+                MainWindow.INSTANCE.Wiki_Data.Content = equipmentData["rqmts_timestamp"].ToString().Substring(5, 11);
                 Main.StatusUpdate("Drop data reloaded", 0);
 
                 MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
@@ -795,7 +795,7 @@ namespace WFInfoCS
             SaveDatabase(eqmtDataPath, equipmentData);
             Main.RunOnUIThread(() =>
             {
-                MainWindow.INSTANCE.Wiki_Data.Content = "Wiki Data: " + equipmentData["rqmts_timestamp"].ToString().Substring(5, 11);
+                MainWindow.INSTANCE.Wiki_Data.Content = equipmentData["rqmts_timestamp"].ToString().Substring(5, 11);
                 Main.StatusUpdate("Wiki data reloaded", 0);
 
                 MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
