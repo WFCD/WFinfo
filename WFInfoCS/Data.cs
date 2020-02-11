@@ -599,13 +599,12 @@ namespace WFInfoCS
             // Mainly weapons
             if (!force)
             {
-                DateTime timestamp = equipmentData["rqmts_timestamp"].ToObject<DateTime>();
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(itemComponentsStatusURL);
                 request.Method = "HEAD";
                 request.UserAgent = "WFInfo";
                 if (equipmentData.ContainsKey("rqmts_timestamp") && equipmentData["rqmts_timestamp"] != null)
                 {
-                    request.IfModifiedSince = timestamp;
+                    request.IfModifiedSince = equipmentData["rqmts_timestamp"].ToObject<DateTime>();
                 }
 
                 try
