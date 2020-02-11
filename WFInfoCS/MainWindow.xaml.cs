@@ -167,7 +167,7 @@ namespace WFInfoCS
             ReloadMarket.IsEnabled = false;
             Wiki_Data.Content = "Wiki Data: Loading...";
             Main.StatusUpdate("Wiki data force reloading", 0);
-            Task.Factory.StartNew(Main.dataBase.ForceWikiUpdate);
+            Task.Factory.StartNew(Main.dataBase.ForceItemDbUpdate);
         }
 
         // Allows the draging of the window

@@ -29,8 +29,11 @@ namespace WFInfoCS
         private readonly string nameDataPath;
 
         private readonly string officialLootTable = "https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html";
+
         private readonly string itemComponentsURL =
             "https://raw.githubusercontent.com/WFCD/warframe-items/development/data/json/All.json";
+        private readonly string itemComponentsStatusURL =
+            "https://api.github.com/repos/WFCD/warframe-items/commits/development?path=data%2Fjson%2FAll.json";
 
         readonly WebClient WebClient;
         private readonly Sheets sheetsApi;
@@ -592,20 +595,37 @@ namespace WFInfoCS
 
         private bool LoadEquipmentRequirements(bool force = false)
         {
-            // Load wiki data on prime eqmt requirements
+            // Load item data on prime eqmt requirements
             // Mainly weapons
             if (!force)
             {
                 DateTime timestamp = equipmentData["rqmts_timestamp"].ToObject<DateTime>();
-                DateTime dayAgo = DateTime.Now.AddDays(-1);
-                if (timestamp > dayAgo)
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(itemComponentsStatusURL);
+                request.Method = "HEAD";
+                request.UserAgent = "WFInfo";
+                if (equipmentData.ContainsKey("rqmts_timestamp") && equipmentData["rqmts_timestamp"] != null)
                 {
-                    Main.AddLog("Wiki database is up to date");
-                    return false;
+                    request.IfModifiedSince = timestamp;
+                }
+
+                try
+                {
+                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                    equipmentData["rqmts_timestamp"] = response.LastModified;
+                }
+                catch (WebException we)
+                {
+                    var response = we.Response as HttpWebResponse;
+                    if (response.StatusCode == HttpStatusCode.NotModified)
+                    {
+                        Main.AddLog("Requirements database is up to date");
+                        return false;
+                    } else
+                    {
+                        throw we;
+                    }
                 }
             }
-
-            equipmentData["rqmts_timestamp"] = DateTime.Now.ToString("R");
             string data = WebClient.DownloadString(itemComponentsURL);
             JArray allItemsInWarframe = JsonConvert.DeserializeObject<JArray>(data);
             foreach (JObject item in allItemsInWarframe)
@@ -779,7 +799,7 @@ namespace WFInfoCS
             Main.RunOnUIThread(() =>
             {
                 MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToString().Substring(5, 11);
-                MainWindow.INSTANCE.Wiki_Data.Content = equipmentData["rqmts_timestamp"].ToString().Substring(5, 11);
+                MainWindow.INSTANCE.Wiki_Data.Content = equipmentData["rqmts_timestamp"].ToObject<DateTime>().ToString("R").Substring(5, 11);
                 Main.StatusUpdate("Drop data reloaded", 0);
 
                 MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
@@ -788,15 +808,15 @@ namespace WFInfoCS
             });
         }
 
-        public void ForceWikiUpdate()
+        public void ForceItemDbUpdate()
         {
             Main.AddLog("Forcing wiki update");
             LoadEquipmentRequirements(true);
             SaveDatabase(eqmtDataPath, equipmentData);
             Main.RunOnUIThread(() =>
             {
-                MainWindow.INSTANCE.Wiki_Data.Content = equipmentData["rqmts_timestamp"].ToString().Substring(5, 11);
-                Main.StatusUpdate("Wiki data reloaded", 0);
+                MainWindow.INSTANCE.Wiki_Data.Content = equipmentData["rqmts_timestamp"].ToObject<DateTime>().ToString("R").Substring(5, 11);
+                Main.StatusUpdate("Item data reloaded", 0);
 
                 MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
                 MainWindow.INSTANCE.ReloadWiki.IsEnabled = true;

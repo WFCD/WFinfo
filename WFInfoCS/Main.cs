@@ -43,7 +43,7 @@ namespace WFInfoCS
             //RelicsWindow.LoadNodesOnThread();
             RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = dataBase.marketData["timestamp"].ToString().Substring(5, 11); });
             RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = dataBase.equipmentData["timestamp"].ToString().Substring(5, 11); });
-            RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = dataBase.equipmentData["rqmts_timestamp"].ToString().Substring(5, 11); });
+            RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = dataBase.equipmentData["rqmts_timestamp"].ToObject<DateTime>().ToString("R").Substring(5, 11); });
             StatusUpdate("WFInfo Initialization Complete", 0);
             AddLog("WFInfo has launched successfully");
             if ((bool)Settings.settingsObj["Auto"])
