@@ -137,7 +137,7 @@ namespace WFInfoCS
             {
                 foreach (RelicTreeNode era in RelicNodes)
                     era.Sort(SortBox.SelectedIndex);
-                if(showAllRelics)
+                if (showAllRelics)
                 {
                     RelicTree.Items.SortDescriptions.Clear();
                     RelicTree.Items.IsLiveSorting = true;
