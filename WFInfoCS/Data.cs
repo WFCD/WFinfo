@@ -27,7 +27,9 @@ namespace WFInfoCS
         private readonly string eqmtDataPath;
         private readonly string relicDataPath;
         private readonly string nameDataPath;
+        private readonly string debugDataPath;
 
+        private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
         private readonly string officialLootTable = "https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html";
 
         private readonly string itemComponentsURL =
@@ -49,6 +51,7 @@ namespace WFInfoCS
             eqmtDataPath = applicationDirectory + @"\eqmt_data.json";
             relicDataPath = applicationDirectory + @"\relic_data.json";
             nameDataPath = applicationDirectory + @"\name_data.json";
+            debugDataPath = applicationDirectory + @"\debug_data.json";
 
             Directory.CreateDirectory(applicationDirectory);
 
@@ -132,6 +135,14 @@ namespace WFInfoCS
             }
         }*/
 
+        private void TestDownloadGoogleDrive()
+        {
+            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
+            SaveDatabase(debugDataPath, allFiltered);
+
+        }
+
+        // Load item list from Sheets
         private bool LoadItems()
         {
             marketItems = new Dictionary<string, string>();
@@ -151,6 +162,7 @@ namespace WFInfoCS
             return true;
         }
 
+        // Load market data from Sheets
         private bool LoadMarket(bool force = false)
         {
             if (!force && File.Exists(marketDataPath))
@@ -218,7 +230,7 @@ namespace WFInfoCS
             {
                 if (!marketItems.TryGetValue(elem["item"].ToString(), out string item_name))
                 {
-                    Main.AddLog("Unknwon market id: " + elem["item"].ToObject<string>());
+                    Main.AddLog("Unknown market id: " + elem["item"].ToObject<string>());
                 } else
                 {
 
@@ -605,23 +617,23 @@ namespace WFInfoCS
                 if (equipmentData.ContainsKey("rqmts_timestamp") && equipmentData["rqmts_timestamp"] != null)
                 {
                     request.IfModifiedSince = equipmentData["rqmts_timestamp"].ToObject<DateTime>();
-                }
-
-                try
-                {
-                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                    equipmentData["rqmts_timestamp"] = response.LastModified;
-                }
-                catch (WebException we)
-                {
-                    var response = we.Response as HttpWebResponse;
-                    if (response.StatusCode == HttpStatusCode.NotModified)
+                    try
                     {
-                        Main.AddLog("Requirements database is up to date");
-                        return false;
-                    } else
+                        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                        equipmentData["rqmts_timestamp"] = response.LastModified;
+                    }
+                    catch (WebException we)
                     {
-                        throw we;
+                        var response = we.Response as HttpWebResponse;
+                        if (response.StatusCode == HttpStatusCode.NotModified)
+                        {
+                            Main.AddLog("Requirements database is up to date");
+                            return false;
+                        } else
+                        {
+                            // ah, a comrade
+                            throw we;
+                        }
                     }
                 }
             }
@@ -736,9 +748,16 @@ namespace WFInfoCS
                     }
                 }
             }
+            Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToString().Substring(5, 11); });
 
             Boolean saveDrop = LoadDropData();
+            Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToString().Substring(5, 11); });
+
             saveDrop = LoadEquipmentRequirements(saveDrop);
+
+            Console.WriteLine(equipmentData["rqmts_timestamp"]);
+            Main.RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = equipmentData["rqmts_timestamp"].ToObject<DateTime>().ToString("R").Substring(5, 11); });
+
             if (saveDrop)
             {
                 SaveDatabase(eqmtDataPath, equipmentData);
