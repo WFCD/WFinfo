@@ -724,7 +724,7 @@ namespace WFInfoCS
 
                 }
             }
-
+            equipmentData["rqmts_timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssK");
             Main.AddLog("Item requirements database has been downloaded");
             return true;
         }
