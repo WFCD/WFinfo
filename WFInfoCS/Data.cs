@@ -257,6 +257,7 @@ namespace WFInfoCS
             relicData = new JObject();
             relicData["timestamp"] = DateTime.Parse(allFiltered["timestamp"].ToString()).ToString("R");
             nameData = new JObject();
+            nameData["Forma Blueprint"] = "Forma Blueprint";
 
             foreach (KeyValuePair<string, JToken> era in allFiltered["relics"].ToObject<JObject>())
             {
