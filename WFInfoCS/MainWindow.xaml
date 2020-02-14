@@ -9,53 +9,38 @@
         Title="WFInfo" Height="130" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
+        <Style x:Key="Label_Button" TargetType="Label">
+            <Setter Property="Label.Background" Value="Transparent"/>
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="Label.IsMouseOver" Value="True"/>
+                        <Condition Property="Label.IsEnabled" Value="True"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Label.Background" Value="#FF1B1B1B"/>
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="270"/>
-            <ColumnDefinition Width="30"/>
+            <ColumnDefinition Width="27"/>
+            <ColumnDefinition Width="244"/>
+            <ColumnDefinition Width="29"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="26"/>
             <RowDefinition Height="78"/>
             <RowDefinition Height="26"/>
         </Grid.RowDefinitions>
-        <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,0,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
-            <Rectangle.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform ScaleY="-1"/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform/>
-                </TransformGroup>
-            </Rectangle.RenderTransform>
-        </Rectangle>
-        <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,28,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
-            <Rectangle.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform ScaleY="-1"/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform/>
-                </TransformGroup>
-            </Rectangle.RenderTransform>
-        </Rectangle>
-        <Rectangle HorizontalAlignment="Left" Height="29" Stroke="#FF646464" VerticalAlignment="Top" Width="277" Margin="28,56,0,0" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Grid.RowSpan="2" Grid.ColumnSpan="2" Visibility="Hidden" d:IsHidden="True">
-            <Rectangle.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform ScaleY="-1"/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform/>
-                </TransformGroup>
-            </Rectangle.RenderTransform>
-        </Rectangle>
 
-        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Grid.ColumnSpan="2" Margin="0,0,0,0"/>
-        <Rectangle Grid.RowSpan="3" Stroke="#FF646464" Grid.ColumnSpan="2" Margin="0,0,0,0"/>
-        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Grid.ColumnSpan="2" Margin="0,0,0,0" Grid.Row="2"/>
+        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Grid.ColumnSpan="3" Margin="0,0,0,0"/>
+        <Rectangle Grid.RowSpan="3" Stroke="#FF646464" Grid.ColumnSpan="3" Margin="0,0,0,0"/>
+        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Grid.ColumnSpan="2" Margin="0,0,-1,0" Grid.Row="2"/>
+        <Rectangle Grid.Row="1"     Stroke="#FF646464" Margin="0,-1,-1,-1"/>
+        <Rectangle Grid.RowSpan="2" Stroke="#FF646464" Margin="0,-1,0,0" Grid.Row="1" Grid.Column="2"/>
 
-        <Image HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" >
+        <Image HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" Grid.ColumnSpan="2" >
             <Image.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -65,120 +50,162 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <TextBlock Text="WFInfo" Margin="38,4,0,7" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" Height="15" FontWeight="Bold" Width="51"/>
-        <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="91,3,0,2" Foreground="#FFB1D0D9" FontSize="11" FontWeight="Bold" Width="182" FontFamily="{DynamicResource Roboto}" Height="21"/>
-        <Button x:Name="minimise" Content="_" HorizontalAlignment="Right" Margin="0,0,-1,0" VerticalAlignment="Top" Width="30" Height="26" Click="Minimise" Foreground="#FFB1D0D9" FontSize="16" RenderTransformOrigin="0.5,1" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed">
-            <Button.Background>
-                <ImageBrush/>
-            </Button.Background>
-        </Button>
-        <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="0,0,0,0" Width="30" Click="Exit" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
-        <Button x:Name="Website" ToolTip="Opens WFinfo website" HorizontalAlignment="Center" Margin="0,0,0,52" Width="30" Click="websiteClick" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
-            <Button.Background>
-                <ImageBrush ImageSource="Resources/home.png">
-                    <ImageBrush.RelativeTransform>
-                        <TransformGroup>
-                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
-                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
-                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </ImageBrush.RelativeTransform>
-                </ImageBrush>
-            </Button.Background>
-        </Button>
-        <Button x:Name="Relics" Content="x" ToolTip="Relics, search for what relic you need to use" HorizontalAlignment="Center" Margin="0,26,0,26" Width="30" Click="relicsClick" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Foreground="{x:Null}">
-            <Button.Background>
-                <ImageBrush ImageSource="Resources/Relic.png" Stretch="Uniform">
-                    <ImageBrush.RelativeTransform>
-                        <TransformGroup>
-                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
-                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
-                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </ImageBrush.RelativeTransform>
-                </ImageBrush>
-            </Button.Background>
-        </Button>
-        <Button x:Name="Settings_Button" Content="x" ToolTip="settings" HorizontalAlignment="Left" Margin="0,78,0,0" Width="30" Click="Settings_click" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1">
-            <Button.Background>
-                <ImageBrush ImageSource="Resources/Settings.png" Stretch="Uniform">
-                    <ImageBrush.RelativeTransform>
-                        <TransformGroup>
-                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
-                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
-                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </ImageBrush.RelativeTransform>
-                </ImageBrush>
-            </Button.Background>
-        </Button>
-        <Button x:Name="Gear" Content="x" HorizontalAlignment="Center" ToolTip="Equpiment, see which items you own" Margin="0,52,0,0" Width="30" Click="equipmentClick" Foreground="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" Grid.Column="1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Grid.Row="1">
-            <Button.Background>
-                <ImageBrush ImageSource="Resources/gear.png" Stretch="Uniform">
-                    <ImageBrush.RelativeTransform>
-                        <TransformGroup>
-                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
-                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
-                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </ImageBrush.RelativeTransform>
-                </ImageBrush>
-            </Button.Background>
-        </Button>
-        <Button x:Name="ReloadMarket" ToolTip="Reloads market data" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="27" Height="27" Foreground="{x:Null}" Click="ReloadMarketClick">
-            <Button.Background>
-                <ImageBrush ImageSource="Resources/Reload.png" Stretch="Uniform">
-                    <ImageBrush.RelativeTransform>
-                        <TransformGroup>
-                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
-                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
-                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </ImageBrush.RelativeTransform>
-                </ImageBrush>
-            </Button.Background>
-        </Button>
-        <Button x:Name="ReloadDrop" Content="Button" ToolTip="Reloads drop data" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="27" Height="27" Foreground="{x:Null}" Margin="0,26,0,0" Click="ReloadDropClick">
-            <Button.Background>
-                <ImageBrush ImageSource="Resources/Reload.png" Stretch="Uniform">
-                    <ImageBrush.RelativeTransform>
-                        <TransformGroup>
-                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
-                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
-                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </ImageBrush.RelativeTransform>
-                </ImageBrush>
-            </Button.Background>
-        </Button>
-        <Button x:Name="ReloadWiki" ToolTip="Reloads wiki data" Content="Button" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="27" Height="27" Foreground="{x:Null}" Margin="0,52,0,0" Click="ReloadWikiClick">
-            <Button.Background>
-                <ImageBrush ImageSource="Resources/Reload.png" Stretch="Uniform">
-                    <ImageBrush.RelativeTransform>
-                        <TransformGroup>
-                            <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.9" ScaleY="0.9"/>
-                            <SkewTransform CenterY="0.5" CenterX="0.5"/>
-                            <RotateTransform CenterY="0.5" CenterX="0.5"/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </ImageBrush.RelativeTransform>
-                </ImageBrush>
-            </Button.Background>
-        </Button>
-        <Label x:Name="Status_Label" Content="Status:" Background="{x:Null}" Foreground="#FFB1D0D9" FontSize="11" Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Left" FontWeight="Bold"/>
-        <Label x:Name="Status" Content="Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" FontSize="11" HorizontalAlignment="Left" Margin="38,0,0,0" Grid.Row="2" VerticalAlignment="Top"/>
-        <Label x:Name="Market_Data_Label" Content="Market Data:" Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="0,4,119,0"  Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-        <Label x:Name="Market_Data"       Content="Loading..."   Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="144,4,0,0"  Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-        <Label x:Name="Drop_Data_Label"   Content="Parts Data:"   Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="0,28,119,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-        <Label x:Name="Drop_Data"         Content="Loading..."   Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="144,28,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-        <Label x:Name="Wiki_Data_Label"   Content="Wiki Data:"   Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="0,52,119,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="Hidden"/>
-        <Label x:Name="Wiki_Data"         Content="Loading..."   Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="144,52,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Hidden"/>
+        <TextBlock Text="WFInfo" Margin="11,4,0,7" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#FFB1D0D9" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" Height="15" FontWeight="Bold" Width="51" Grid.Column="1"/>
+        <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="64,3,0,2" Foreground="#FFB1D0D9" FontSize="11" FontWeight="Bold" Width="182" FontFamily="{DynamicResource Roboto}" Height="21" Grid.Column="1" Grid.ColumnSpan="2"/>
+        <Label x:Name="minimise" MouseLeftButtonDown="Minimise" Content="_" FontSize="16" Foreground="#FFB1D0D9" BorderBrush="#FF646464" BorderThickness="1" FontFamily="{DynamicResource Roboto}" Grid.Column="1" Margin="216,0,-1,0" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource Label_Button}"/>
+        <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" FontSize="16" Foreground="#FFB1D0D9" BorderBrush="#FF646464" BorderThickness="1" FontFamily="{DynamicResource Roboto}" Grid.Column="2" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontWeight="Bold" Style="{StaticResource Label_Button}"/>
+        <Label x:Name="Website" ToolTip="Opens WFinfo website" MouseLeftButtonDown="websiteClick" Margin="0,0,0,52" Grid.Column="2" Grid.Row="1" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+            <Label.Style>
+                <Style>
+                    <Setter Property="Label.Content">
+                        <Setter.Value>
+                            <Image Source="Resources/home.png" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Label.IsMouseOver" Value="True"/>
+                                <Condition Property="Label.IsEnabled" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Label.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/home_h.png" Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
+        <Label x:Name="Relics" ToolTip="Relics, search for what relic you need to use" MouseLeftButtonDown="relicsClick" Margin="0,26,0,26" Grid.Column="2" Grid.Row="1" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+            <Label.Style>
+                <Style>
+                    <Setter Property="Label.Content">
+                        <Setter.Value>
+                            <Image Source="Resources/Relic.png" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Label.IsMouseOver" Value="True"/>
+                                <Condition Property="Label.IsEnabled" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Label.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/Relic_h.png" Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
+        <Label x:Name="Gear" ToolTip="Equpiment, see which items you own" MouseLeftButtonDown="equipmentClick" Grid.Row="1" Grid.Column="2"  Margin="0,52,0,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+            <Label.Style>
+                <Style>
+                    <Setter Property="Label.Content">
+                        <Setter.Value>
+                            <Image Source="Resources/gear.png" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Label.IsMouseOver" Value="True"/>
+                                <Condition Property="Label.IsEnabled" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Label.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/gear_h.png" Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
+        <Label x:Name="Settings_Button" ToolTip="Settings" MouseLeftButtonDown="Settings_click" Grid.Row="2" Grid.Column="2" Margin="0,0,0,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+            <Label.Style>
+                <Style>
+                    <Setter Property="Label.Content">
+                        <Setter.Value>
+                            <Image Source="Resources/Settings.png" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Label.IsMouseOver" Value="True"/>
+                                <Condition Property="Label.IsEnabled" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Label.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/Settings_h.png" Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
+        <Label x:Name="ReloadMarket" ToolTip="Reloads market data" Grid.Row="1" Foreground="{x:Null}" MouseLeftButtonDown="ReloadMarketClick" Margin="0,12,0,39" Padding="3">
+            <Label.Style>
+                <Style>
+                    <Setter Property="Label.Content">
+                        <Setter.Value>
+                            <Image Source="Resources/Reload.png" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Label.IsMouseOver" Value="True"/>
+                                <Condition Property="Label.IsEnabled" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Label.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/Reload_h.png" Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
+        <Label x:Name="ReloadDrop" ToolTip="Reloads prime data" Grid.Row="1" Foreground="{x:Null}" MouseLeftButtonDown="ReloadDropClick" Margin="0,39,0,12" Padding="3">
+            <Label.Style>
+                <Style>
+                    <Setter Property="Label.Content">
+                        <Setter.Value>
+                            <Image Source="Resources/Reload.png" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Label.IsMouseOver" Value="True"/>
+                                <Condition Property="Label.IsEnabled" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Label.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/Reload_h.png" Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
+        <Label x:Name="Status_Label" Content="Status:" Background="{x:Null}" Foreground="#FFB1D0D9" FontSize="11" Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Left" FontWeight="Bold" Grid.ColumnSpan="2" Height="25" Width="45"/>
+        <Label x:Name="Status" Content="Loading..." Background="{x:Null}" Foreground="#FFB1D0D9" FontSize="11" HorizontalAlignment="Left" Margin="11,0,0,0" Grid.Row="2" VerticalAlignment="Top" Grid.Column="1" Height="25" Width="233"/>
+        <Label x:Name="Market_Data_Label" Content="Market Data:" Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="0,13,122,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1" Height="26" Width="101"/>
+        <Label x:Name="Market_Data"       Content="Loading..."   Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="117,13,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Column="1" Height="26" Width="127"/>
+        <Label x:Name="Drop_Data_Label"   Content="Prime Data:"  Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="0,40,122,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1" Height="26" Width="93"/>
+        <Label x:Name="Drop_Data"         Content="Loading..."   Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="117,40,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Column="1" Height="26" Width="127"/>
+        <Label x:Name="Wiki_Data_Label"   Content="Wiki Data:"   Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="0,52,122,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="Hidden" Grid.Column="1" Height="26" Width="81"/>
+        <Label x:Name="Wiki_Data"         Content="Loading..."   Background="{x:Null}" Foreground="#FFB1D0D9" Padding="5,2,5,5" FontFamily="/WFInfoCS;component/Resources/Roboto/#Roboto" FontSize="16" Margin="117,52,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Hidden" Grid.Column="1" Height="26" Width="80"/>
 
 
     </Grid>

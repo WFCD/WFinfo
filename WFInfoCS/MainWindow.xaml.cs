@@ -146,9 +146,8 @@ namespace WFInfoCS
         private void ReloadMarketClick(object sender, RoutedEventArgs e)
         {
             ReloadDrop.IsEnabled = false;
-            ReloadWiki.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
-            Market_Data.Content = "Market Data: Loading...";
+            Market_Data.Content = "Loading...";
             Main.StatusUpdate("Market data force reloading", 0);
             Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
         }
@@ -156,22 +155,10 @@ namespace WFInfoCS
         private void ReloadDropClick(object sender, RoutedEventArgs e)
         {
             ReloadDrop.IsEnabled = false;
-            ReloadWiki.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
-            Drop_Data.Content = "Drop Data: Loading...";
-            Wiki_Data.Content = "Wiki Data: Loading...";
+            Drop_Data.Content = "Loading...";
             Main.StatusUpdate("Drop data force reloading", 0);
             Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
-        }
-
-        private void ReloadWikiClick(object sender, RoutedEventArgs e)
-        {
-            ReloadDrop.IsEnabled = false;
-            ReloadWiki.IsEnabled = false;
-            ReloadMarket.IsEnabled = false;
-            Wiki_Data.Content = "Wiki Data: Loading...";
-            Main.StatusUpdate("Wiki data force reloading", 0);
-            Task.Factory.StartNew(Main.dataBase.ForceItemDbUpdate);
         }
 
         // Allows the draging of the window

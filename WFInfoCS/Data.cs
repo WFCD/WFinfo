@@ -240,7 +240,7 @@ namespace WFInfoCS
             };
         }
 
-        private bool LoadEqmtData(bool force = false)
+        private bool LoadEqmtData()
         {
             if (equipmentData == null)
                 equipmentData = File.Exists(eqmtDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath)) : new JObject();
@@ -442,7 +442,6 @@ namespace WFInfoCS
                 MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToString().Substring(5, 11);
                 Main.StatusUpdate("Market data reloaded", 0);
                 MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
-                MainWindow.INSTANCE.ReloadWiki.IsEnabled = true;
                 MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
             });
         }
@@ -450,34 +449,16 @@ namespace WFInfoCS
         public void ForceEquipmentUpdate()
         {
             Main.AddLog("Forcing equipment update");
-            LoadEqmtData(true);
+            LoadEqmtData();
             SaveDatabase(eqmtDataPath, equipmentData);
             SaveDatabase(relicDataPath, relicData);
             SaveDatabase(nameDataPath, nameData);
             Main.RunOnUIThread(() =>
             {
                 MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToString().Substring(5, 11);
-                MainWindow.INSTANCE.Wiki_Data.Content = equipmentData["rqmts_timestamp"].ToObject<DateTime>().ToString("R").Substring(5, 11);
-                Main.StatusUpdate("Drop data reloaded", 0);
+                Main.StatusUpdate("Equipment data reloaded", 0);
 
                 MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
-                MainWindow.INSTANCE.ReloadWiki.IsEnabled = true;
-                MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
-            });
-        }
-
-        public void ForceItemDbUpdate()
-        {
-            Main.AddLog("Forcing wiki update");
-            //LoadEquipmentRequirements(true);
-            SaveDatabase(eqmtDataPath, equipmentData);
-            Main.RunOnUIThread(() =>
-            {
-                MainWindow.INSTANCE.Wiki_Data.Content = equipmentData["rqmts_timestamp"].ToObject<DateTime>().ToString("R").Substring(5, 11);
-                Main.StatusUpdate("Item data reloaded", 0);
-
-                MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
-                MainWindow.INSTANCE.ReloadWiki.IsEnabled = true;
                 MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
             });
         }
