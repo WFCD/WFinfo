@@ -30,12 +30,6 @@ namespace WFInfoCS
         private readonly string debugDataPath;
 
         private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
-        private readonly string officialLootTable = "https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html";
-
-        private readonly string itemComponentsURL =
-            "https://raw.githubusercontent.com/WFCD/warframe-items/development/data/json/All.json";
-        private readonly string itemComponentsStatusURL =
-            "https://api.github.com/repos/WFCD/warframe-items/commits/development?path=data%2Fjson%2FAll.json";
 
         readonly WebClient WebClient;
         private readonly Sheets sheetsApi;
@@ -212,92 +206,8 @@ namespace WFInfoCS
             marketData["version"] = Main.BuildVersion;
 
             Main.AddLog("Plat database has been downloaded");
-            LoadDucats();
-            if (force && relicData != null)
-            {
-                CheckDucats();
-            }
 
             return true;
-        }
-
-        private void LoadDucats()
-        {
-            JObject market_temp =
-                JsonConvert.DeserializeObject<JObject>(
-                    WebClient.DownloadString("https://api.warframe.market/v1/tools/ducats"));
-            foreach (JToken elem in market_temp["payload"]["previous_day"])
-            {
-                if (!marketItems.TryGetValue(elem["item"].ToString(), out string item_name))
-                {
-                    Main.AddLog("Unknown market id: " + elem["item"].ToObject<string>());
-                } else
-                {
-
-                    item_name = item_name.Split('|')[0];
-                    if (!marketData.TryGetValue(item_name, out _))
-                    {
-                        Main.AddLog("Missing item in MarketData: " + item_name);
-                    }
-
-                    if (!item_name.Contains(" Set"))
-                        marketData[item_name]["ducats"] = elem["ducats"];
-                }
-            }
-
-            Main.AddLog("Ducat database has been downloaded");
-        }
-
-        public void CheckDucats()
-        {
-            JObject job;
-            List<string> needDucats = new List<string>();
-
-            foreach (KeyValuePair<string, JToken> elem in marketData)
-            {
-                if (elem.Key.Contains("Prime") && !elem.Key.Contains("Set"))
-                {
-                    job = elem.Value.ToObject<JObject>();
-                    if (job["ducats"].ToObject<int>() == 0)
-                    {
-                        Console.WriteLine("A null ducat value was found for: " + elem.Key + " in CheckDucats()");
-                        needDucats.Add(elem.Key);
-                    }
-                }
-            }
-
-            foreach (KeyValuePair<string, JToken> era in relicData)
-            {
-                if (era.Key.Length < 5)
-                {
-                    foreach (KeyValuePair<string, JToken> relic in era.Value.ToObject<JObject>())
-                    {
-                        foreach (KeyValuePair<string, JToken> rarity in relic.Value.ToObject<JObject>())
-                        {
-                            string name = rarity.Value.ToObject<string>();
-                            if (needDucats.Contains(name))
-                            {
-                                if (rarity.Key.Contains("rare"))
-                                {
-                                    marketData[name]["ducats"] = 100;
-                                } else if (rarity.Key.Contains("un"))
-                                {
-                                    marketData[name]["ducats"] = 45;
-                                } else
-                                {
-                                    marketData[name]["ducats"] = 15;
-                                }
-
-                                needDucats.Remove(name);
-                                if (needDucats.Count == 0)
-                                {
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         private void LoadMarketItem(string item_name, string url)
@@ -330,220 +240,80 @@ namespace WFInfoCS
             };
         }
 
-        private bool LoadDropData(bool force = false)
+        private bool LoadEqmtData(bool force = false)
         {
-            WebRequest request;
             if (equipmentData == null)
-            {
-                if (File.Exists(eqmtDataPath))
-                {
-                    equipmentData = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath));
-                } else
-                {
-                    equipmentData = new JObject();
-                }
-            }
-
-            // Temp variable for using with TryGetValue
-            if ((!force) && File.Exists(relicDataPath) && File.Exists(eqmtDataPath) && equipmentData.TryGetValue("version", out JToken temp) && equipmentData["version"].ToObject<string>() == Main.BuildVersion)
-            {
-                request = WebRequest.Create(officialLootTable);
-                request.Method = "HEAD";
-                using (WebResponse resp = request.GetResponse())
-                {
-                    // Move last_mod back one hour, so that it doesn't equal timestamp
-                    DateTime lastModified = DateTime.Parse(resp.Headers.Get("Last-Modified")).AddHours(-1);
-
-                    if (relicData == null)
-                    {
-                        relicData = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(relicDataPath));
-                    }
-
-                    if (nameData == null)
-                    {
-                        nameData =
-                            JsonConvert.DeserializeObject<JObject>(File.ReadAllText(nameDataPath));
-                    }
-
-                    if (relicData.TryGetValue("timestamp", out temp) && equipmentData.TryGetValue("timestamp", out temp) && equipmentData["timestamp"].ToObject<string>() == relicData["timestamp"].ToObject<string>() && lastModified < relicData["timestamp"].ToObject<DateTime>())
-                    {
-                        Main.AddLog("Drop database is up to date");
-                        return false;
-                    }
-                }
-            }
+                equipmentData = File.Exists(eqmtDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath)) : new JObject();
 
 
+
+            // fill in equipmentData (NO OVERWRITE)
+            // fill in nameData
+            // fill in relicData
+
+            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
+
+            equipmentData["timestamp"] = DateTime.Parse(allFiltered["timestamp"].ToString()).ToString("R");
             relicData = new JObject();
+            relicData["timestamp"] = DateTime.Parse(allFiltered["timestamp"].ToString()).ToString("R");
             nameData = new JObject();
 
-            string dropData;
-            request = WebRequest.Create(officialLootTable);
-            using (WebResponse response = request.GetResponse())
+            foreach (KeyValuePair<string, JToken> era in allFiltered["relics"].ToObject<JObject>())
             {
-                relicData["timestamp"] = response.Headers.Get("Last-Modified");
-                equipmentData["timestamp"] = response.Headers.Get("Last-Modified");
-
-                using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
+                relicData[era.Key] = new JObject();
+                foreach (KeyValuePair<string, JToken> relic in era.Value.ToObject<JObject>())
                 {
-                    dropData = reader.ReadToEnd();
+                    relicData[era.Key][relic.Key] = relic.Value;
                 }
             }
 
-            // Load Relic Info
-            // Get table start + end locations
-            // There's a bit of rocket science involved. Perhaps we should consider using native HTML parsing libraries like people use XML?
-            int first = dropData.IndexOf("id=\"relicRewards\"");
-            first = dropData.IndexOf("<table>", first);
-            int last = dropData.IndexOf("</table>", first);
-
-            // Loop through each row
-            // Get start > while not at end > get last > parse > get start > goto while
-            int index = dropData.IndexOf("<tr>", first);
-            int rowEnd = 0;
-            while (index < last && index != -1)
+            foreach (KeyValuePair<string, JToken> prime in allFiltered["eqmt"].ToObject<JObject>())
             {
-                rowEnd = dropData.IndexOf("</tr>", index);
-                string rowContent = dropData.Substring(index, rowEnd - index);
 
-                if (rowContent.Contains("Relic") && rowContent.Contains("Intact") && !rowContent.Contains("Requiem"))
+                if(!equipmentData.TryGetValue(prime.Key,out _))
+                    equipmentData[prime.Key] = new JObject();
+                equipmentData[prime.Key]["vaulted"] = prime.Value["vaulted"];
+                equipmentData[prime.Key]["type"] = prime.Value["type"];
+
+                if (!equipmentData[prime.Key].ToObject<JObject>().TryGetValue("parts", out _))
+                    equipmentData[prime.Key]["parts"] = new JObject();
+
+
+                foreach (KeyValuePair<string, JToken> part in prime.Value["parts"].ToObject<JObject>())
                 {
-                    rowContent = Regex.Replace(rowContent, "<[^>]+>|\\([^\\)]+\\)", "");
-                    string[] split = rowContent.Split(' ');
-                    string era = split[0];
-                    string relic = split[1];
-                    if (!relicData.TryGetValue(era, out _))
-                    {
-                        relicData[era] = new JObject();
-                    }
+                    if (!equipmentData[prime.Key]["parts"].ToObject<JObject>().TryGetValue(part.Key, out _))
+                        equipmentData[prime.Key]["parts"][part.Key] = new JObject();
+                    if (!equipmentData[prime.Key]["parts"][part.Key].ToObject<JObject>().TryGetValue("owned", out _))
+                        equipmentData[prime.Key]["parts"][part.Key]["owned"] = 0;
+                    equipmentData[prime.Key]["parts"][part.Key]["vaulted"] = prime.Value["vaulted"];
+                    equipmentData[prime.Key]["parts"][part.Key]["count"] = prime.Value["count"];
 
-                    // Will check if not vaulted in future
-                    relicData[era][relic] = new JObject
-                    {
-                        {"vaulted", true}
-                    };
 
-                    int numberOfCommon = 1;
-                    int numberOfUncommon = 1;
-                    index = dropData.IndexOf("<tr", rowEnd);
-                    rowEnd = dropData.IndexOf("</tr>", index);
-                    rowContent = dropData.Substring(index, rowEnd - index);
-                    while (!rowContent.Contains("blank-row"))
+                    string gameName = part.Key;
+                    string marketName = part.Key;
+                    if (prime.Value["type"].ToString() == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")))
                     {
-                        rowContent = rowContent.Replace("<tr><td>", "").Replace("</td>", "").Replace("td>", "");
-                        split = rowContent.Split('<');
-                        string name = split[0];
-                        if (name.Contains("Kavasa"))
+                        gameName += " Blueprint";
+                    } else if (prime.Value["type"].ToString() == "Warframe" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
+                    {
+                        gameName += " Blueprint";
+                    } else if(prime.Key.Contains("Collar"))
+                    {
+                        if(marketName.Contains("Kubrow"))
                         {
-                            if (name.Contains("Kubrow"))
-                            {
-                                name = name.Replace("Kubrow ", "");
-                            } else
-                            {
-                                name = name.Replace("Prime", "Prime Collar");
-                            }
-                        } else if (!name.Contains("Prime Blueprint") && !name.Contains("Forma"))
-                        {
-                            name = name.Replace(" Blueprint", "");
-                        }
-
-                        if (split[1].Contains("2."))
-                        {
-                            relicData[era][relic]["rare1"] = name;
-                        } else if (split[1].Contains("11"))
-                        {
-                            relicData[era][relic]["uncommon" + numberOfUncommon.ToString()] = name;
-                            numberOfUncommon += 1;
+                            marketName = marketName.Replace(" Kubrow", "");
                         } else
                         {
-                            relicData[era][relic]["common" + numberOfCommon.ToString()] = name;
-                            numberOfCommon += 1;
+                            marketName = marketName.Replace("Prime", "Prime Collar");
                         }
-
-                        string prime = name;
-                        if (prime.IndexOf("Prime") != -1)
-                        {
-                            prime = prime.Substring(0, prime.IndexOf("Prime") + 5);
-                            if (!equipmentData.TryGetValue(prime, out _))
-                            {
-                                equipmentData[prime] = new JObject
-                                {
-                                    {"parts", new JObject()},
-                                    {"type", ""},
-                                    {"vaulted", true}
-                                };
-                            }
-
-                            JObject job = equipmentData[prime]["parts"].ToObject<JObject>();
-
-                            if (!job.TryGetValue(name, out _))
-                            {
-                                job = new JObject
-                                {
-                                    {"count", 1},
-                                    {"owned", 0},
-                                    {"vaulted", true}
-                                };
-                                equipmentData[prime]["parts"][name] = job;
-                            }
-
-                            if (name.Contains("Harness"))
-                            {
-                                equipmentData[prime]["type"] = "Archwing";
-                            } else if (name.Contains("Chassis"))
-                            {
-                                equipmentData[prime]["type"] = "Warframe";
-                            } else if (name.Contains("Carapace") || name.Contains("Collar Blueprint"))
-                            {
-                                equipmentData[prime]["type"] = "Companion";
-                            }
-                        }
-
-                        if (!nameData.ContainsKey(split[0]))
-                        {
-                            nameData[split[0]] = name;
-                        }
-
-                        index = dropData.IndexOf("<tr", rowEnd);
-                        rowEnd = dropData.IndexOf("</tr>", index);
-                        rowContent = dropData.Substring(index, rowEnd - index);
                     }
-                }
 
-                index = dropData.IndexOf("<tr>", rowEnd);
+                    nameData[gameName] = marketName;
+                    marketData[marketName]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString());
+                }
             }
 
-            MarkAllEquipmentVaulted();
 
-            // Find NOT Vauled Relics in Missions
-            last = dropData.IndexOf("id=\"relicRewards\"");
-            index = dropData.IndexOf("<tr>");
-            while (index < last && index != -1)
-            {
-                rowEnd = dropData.IndexOf("</tr>", index);
-                string result = dropData.Substring(index, rowEnd - index);
-                index = result.IndexOf("Relic");
-                if (index != -1)
-                {
-                    result = result.Substring(0, index - 1);
-                    index = result.LastIndexOf(">") + 1;
-                    result = result.Substring(index);
-                    string[] split = result.Split(' ');
-                    string era = split[0];
-                    string relic = split[1];
-
-                    if (relicData.TryGetValue(era, out _))
-                    {
-                        relicData[era][relic]["vaulted"] = false;
-                        MarkEquipmentUnvaulted(era, relic);
-                    }
-                }
-
-                index = dropData.IndexOf("<tr>", rowEnd);
-            }
-
-            GetSetValueStatus();
-            equipmentData["version"] = Main.BuildVersion;
             Main.AddLog("Drop database has been downloaded");
             return true;
         }
@@ -563,7 +333,7 @@ namespace WFInfoCS
             }
         }
 
-        private void GetSetValueStatus()
+        private void GetSetVaultStatus()
         {
             foreach (KeyValuePair<string, JToken> keyValuePair in equipmentData)
             {
@@ -605,130 +375,6 @@ namespace WFInfoCS
             }
         }
 
-        private bool LoadEquipmentRequirements(bool force = false)
-        {
-            // Load item data on prime eqmt requirements
-            // Mainly weapons
-            if (!force)
-            {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(itemComponentsStatusURL);
-                request.Method = "HEAD";
-                request.UserAgent = "WFInfo";
-                if (equipmentData.ContainsKey("rqmts_timestamp") && equipmentData["rqmts_timestamp"] != null)
-                {
-                    request.IfModifiedSince = equipmentData["rqmts_timestamp"].ToObject<DateTime>();
-                    try
-                    {
-                        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                        equipmentData["rqmts_timestamp"] = response.LastModified;
-                    }
-                    catch (WebException we)
-                    {
-                        var response = we.Response as HttpWebResponse;
-                        if (response.StatusCode == HttpStatusCode.NotModified)
-                        {
-                            Main.AddLog("Requirements database is up to date");
-                            return false;
-                        } else
-                        {
-                            // ah, a comrade
-                            throw we;
-                        }
-                    }
-                }
-            }
-            string data = WebClient.DownloadString(itemComponentsURL);
-            JArray allItemsInWarframe = JsonConvert.DeserializeObject<JArray>(data);
-            foreach (JObject item in allItemsInWarframe)
-            {
-                if (item.ContainsKey("tags") && item["tags"].ToObject<List<String>>().Contains("Prime") && item.ContainsKey("components"))
-                {
-                    bool vaulted;
-
-                    if (item["tags"].ToObject<List<String>>().Contains("Vaulted"))
-                    {
-                        vaulted = true;
-                    } else
-                    {
-                        vaulted = false;
-                    }
-
-                    if (!equipmentData.TryGetValue(item["name"].ToObject<String>(), out _))
-                    {
-                        equipmentData[item["name"].ToObject<String>()] = new JObject
-                        {
-                            {"parts", new JObject()},
-                            {"type", item["category"].ToObject<String>()},
-                            {"vaulted", vaulted}
-                        };
-                    }
-
-
-                    JObject requirements = equipmentData[item["name"].ToObject<string>()]["parts"].ToObject<JObject>();
-                    foreach (var jToken in item["components"].ToObject<JArray>())
-                    {
-                        var component = (JObject)jToken;
-                        if (component["description"].ToObject<String>() == "A prime weapon-crafting component." || component["name"].ToObject<String>() == "Blueprint")
-                        {
-                            // If main item is vaulted, assuming that its requirements are also vaulted since there's no information about vaults of requirements in API
-                            // How will it behave with items like "aklex" that have non-vaulted components and vaulted main recipe? Not sure
-                            string fullName = item["name"].ToObject<String>() + " " + component["name"].ToObject<String>();
-                            if (!requirements.TryGetValue(fullName, out _))
-                            {
-                                requirements[fullName] = new JObject
-                                {
-                                    {"count", component["itemCount"].ToObject<Int32>()},
-                                    {"owned", 0},
-                                    {"vaulted", vaulted}
-                                };
-                            } else
-                            {
-                                requirements[fullName]["count"] = component["itemCount"].ToObject<Int32>();
-                                requirements[fullName]["vaulted"] = vaulted;
-                            }
-                        }
-                        // Make sure its not Resource - it seem to have type specified
-                        else if (component.ContainsKey("type"))
-                        {
-                            // This is complex item, lets find its details
-                            JToken searchResult = allItemsInWarframe.First(x =>
-                                x["name"].ToObject<String>() == component["name"].ToObject<String>());
-                            if (searchResult != null)
-                            {
-                                if (requirements.ContainsKey(component["name"].ToObject<String>()))
-                                {
-                                    // Need additional copy of item
-                                    JToken subItem = requirements[component["name"].ToObject<String>()];
-                                    subItem["count"] = subItem["count"].ToObject<Int32>() + 1;
-                                } else
-                                {
-                                    bool subVaulted = searchResult.ToObject<JObject>()["tags"].ToObject<List<String>>().Contains("Vaulted");
-
-                                    if (!requirements.TryGetValue(component["name"].ToObject<String>(), out _))
-                                    {
-                                        requirements[component["name"].ToObject<String>()] = new JObject
-                                        {
-                                            {"count", component["itemCount"].ToObject<Int32>()},
-                                            {"owned", 0},
-                                            {"vaulted", subVaulted}
-                                        };
-                                    } else
-                                    {
-                                        requirements[component["name"].ToObject<String>()]["count"] = component["itemCount"].ToObject<Int32>();
-                                        requirements[component["name"].ToObject<String>()]["vaulted"] = subVaulted;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            equipmentData["rqmts_timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssK");
-            Main.AddLog("Item requirements database has been downloaded");
-            return true;
-        }
-
         public bool Update()
         {
             Main.AddLog("Checking for Updates to Databases");
@@ -750,13 +396,8 @@ namespace WFInfoCS
             }
             Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToString().Substring(5, 11); });
 
-            Boolean saveDrop = LoadDropData();
+            Boolean saveDrop = LoadEqmtData();
             Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToString().Substring(5, 11); });
-
-            saveDrop = LoadEquipmentRequirements(saveDrop);
-
-            Console.WriteLine(equipmentData["rqmts_timestamp"]);
-            Main.RunOnUIThread(() => { MainWindow.INSTANCE.Wiki_Data.Content = equipmentData["rqmts_timestamp"].ToObject<DateTime>().ToString("R").Substring(5, 11); });
 
             if (saveDrop)
             {
@@ -767,7 +408,6 @@ namespace WFInfoCS
 
             if (saveMarket || saveDrop)
             {
-                CheckDucats();
                 SaveDatabase(marketItemsPath, marketItems);
                 SaveDatabase(marketDataPath, marketData);
             }
@@ -809,8 +449,7 @@ namespace WFInfoCS
         public void ForceEquipmentUpdate()
         {
             Main.AddLog("Forcing equipment update");
-            LoadDropData(true);
-            LoadEquipmentRequirements(true);
+            LoadEqmtData(true);
             SaveDatabase(eqmtDataPath, equipmentData);
             SaveDatabase(relicDataPath, relicData);
             SaveDatabase(nameDataPath, nameData);
@@ -829,7 +468,7 @@ namespace WFInfoCS
         public void ForceItemDbUpdate()
         {
             Main.AddLog("Forcing wiki update");
-            LoadEquipmentRequirements(true);
+            //LoadEquipmentRequirements(true);
             SaveDatabase(eqmtDataPath, equipmentData);
             Main.RunOnUIThread(() =>
             {

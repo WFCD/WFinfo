@@ -132,7 +132,6 @@ namespace WFInfoCS
             // 2 - Average radiant plat
             // 3 - Difference (radiant-intact)
 
-            Console.WriteLine(SortBox.SelectedIndex);
             if (IsLoaded)
             {
                 foreach (RelicTreeNode era in RelicNodes)

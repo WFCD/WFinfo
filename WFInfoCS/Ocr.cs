@@ -136,7 +136,6 @@ namespace WFInfoCS
 
         public static bool errorDetected = false;
         private static bool processingActive = false;
-        private static readonly int NUMBER_SAVED_IMAGES = 10;
 
         private static Bitmap bigScreenshot;
         private static Bitmap partialScreenshot;
