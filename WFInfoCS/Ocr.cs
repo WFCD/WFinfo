@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -229,17 +230,9 @@ namespace WFInfoCS
             partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
             partialScreenshotFiltered.Save(Main.appPath + @"\Debug\PartBoxFilter " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
 
-            string[] files = Directory.GetFiles(Main.appPath + @"\Debug\", "FullScreenShot *");
-            for (int i = 0; i < files.Length - NUMBER_SAVED_IMAGES; i++)
-                File.Delete(files[i]);
-
-            files = Directory.GetFiles(Main.appPath + @"\Debug\", "PartBox *");
-            for (int i = 0; i < files.Length - NUMBER_SAVED_IMAGES; i++)
-                File.Delete(files[i]);
-
-            files = Directory.GetFiles(Main.appPath + @"\Debug\", "PartBoxFilter *");
-            for (int i = 0; i < files.Length - NUMBER_SAVED_IMAGES; i++)
-                File.Delete(files[i]);
+            (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
+                .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
+                .ToList().ForEach(f => f.Delete());
 
             bigScreenshot.Dispose();
             bigScreenshot = null;

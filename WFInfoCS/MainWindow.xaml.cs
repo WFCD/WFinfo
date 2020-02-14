@@ -57,6 +57,10 @@ namespace WFInfoCS
                 if (!Settings.settingsObj.TryGetValue("Scaling", out _))
                     Settings.settingsObj["Scaling"] = 100.0;
                 Settings.scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
+
+                if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
+                    Settings.settingsObj["ImageRetentionTime"] = 12;
+                Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"));
                 Settings.Save();
 
                 string thisprocessname = Process.GetCurrentProcess().ProcessName;
@@ -69,7 +73,7 @@ namespace WFInfoCS
                 LowLevelListener.KeyAction += main.OnKeyAction;
                 listener.Hook();
                 InitializeComponent();
-                Version.Content = "v" + Main.BuildVersion + "-beta3";
+                Version.Content = "v" + Main.BuildVersion + "-beta4";
 
             }
             catch (Exception e)

@@ -20,6 +20,7 @@ namespace WFInfoCS
         public static bool isOverlaySelected;
         public static bool debug;
         public static long autoDelay;
+        public static int imageRetentionTime;
 
         public static int scaling { get; internal set; }
         public static bool auto { get; internal set; }
