@@ -10,10 +10,8 @@
 
         <Rectangle Stroke="#FF707070"/>
         <Rectangle HorizontalAlignment="Left" Height="25" Stroke="#FF646464" VerticalAlignment="Top" Width="300" Fill="#FF0F0F0F"/>
-        <Viewbox Margin="1,23,1,65" >
-            <Label x:Name="errorText" Content="Something Unexpected Happened" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
-        </Viewbox>
-        <TextBlock Margin="20,65,20,0" TextWrapping="Wrap" Text="Would you like to create a zip containing debug info for the developers? Please send it to them on discord" TextAlignment="Center" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed"/>
+        <Label x:Name="errorText" Content="Something Unexpected Happened" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="30" Margin="1,25,0,0" Width="298" FontSize="18"/>
+        <TextBlock Margin="15,55,10,0" TextWrapping="Wrap" Text="Would you like to create a zip containing debug info for the developers? Please send it to them on discord" TextAlignment="Center" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Height="53"/>
         <Button Content="Yes" HorizontalAlignment="Left" Margin="75,100,0,0" VerticalAlignment="Top" Width="55" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Background="#FF0F0F0F" Click="YesClick"/>
         <Button Content="No" Margin="170,100,75,0" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Background="#FF0F0F0F" Click="NoClick"/>
         <Image HorizontalAlignment="Left" Height="23" VerticalAlignment="Center" Width="24" Source="Resources/WFLogo.png" Margin="1,0,0,107" >
