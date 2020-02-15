@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Media;
 
 namespace WFInfoCS
@@ -54,6 +55,13 @@ namespace WFInfoCS
         private static Brush UNCOMMON_BRUSH = new SolidColorBrush(UNCOMMON_COLOR);
         private static Brush COMMON_BRUSH = new SolidColorBrush(COMMON_COLOR);
 
+        private static Color BACK_D_COLOR = Color.FromRgb(22, 22, 22);
+        private static Color BACK_COLOR = Color.FromRgb(27, 27, 27);
+        private static Color BACK_U_COLOR = Color.FromRgb(32, 32, 32);
+        public static Brush BACK_D_BRUSH = new SolidColorBrush(BACK_D_COLOR);
+        public static Brush BACK_BRUSH = new SolidColorBrush(BACK_COLOR);
+        public static Brush BACK_U_BRUSH = new SolidColorBrush(BACK_U_COLOR);
+
         public RelicTreeNode(string name, string vaulted)
         {
             Name = name;
@@ -61,6 +69,7 @@ namespace WFInfoCS
 
             ChildrenFiltered = new List<RelicTreeNode>();
             Children = new List<RelicTreeNode>();
+            SetSilent();
         }
 
         public bool topLevel = false;
@@ -105,6 +114,41 @@ namespace WFInfoCS
             set { SetField(ref _color, value); }
         }
 
+        private Brush _backcolor = BACK_BRUSH;
+        public Brush Background_Color
+        {
+            get { return _backcolor; }
+            set { SetField(ref _backcolor, value); }
+        }
+
+        private Thickness _col1margin = new Thickness(0, 0, 18, 0);
+        public Thickness Col1_Margin1
+        {
+            get { return _col1margin; }
+            set { SetField(ref _col1margin, value); }
+        }
+
+        private Thickness _col1margin2 = new Thickness(0, 0, 0, 0);
+        public Thickness Col1_Margin2
+        {
+            get { return _col1margin2; }
+            set { SetField(ref _col1margin2, value); }
+        }
+
+        private Thickness _col2margin = new Thickness(0, 0, 18, 0);
+        public Thickness Col2_Margin1
+        {
+            get { return _col2margin; }
+            set { SetField(ref _col2margin, value); }
+        }
+
+        private Thickness _col2margin2 = new Thickness(0, 0, 0, 0);
+        public Thickness Col2_Margin2
+        {
+            get { return _col2margin2; }
+            set { SetField(ref _col2margin2, value); }
+        }
+
         private string _vaulted;
         public string Vaulted
         {
@@ -128,6 +172,7 @@ namespace WFInfoCS
 
             Col2_Text1 = "";
             Col2_Text2 = "";
+            Col2_Text3 = "";
             Col2_Img1 = null;
             Col2_Img1_Shown = "Hidden";
         }
@@ -157,17 +202,19 @@ namespace WFInfoCS
             _bonus = _radiant - _intact;
             Grid_Shown = "Visible";
 
-            Col1_Text1 = "INT ";
-            Col1_Text2 = " " + _intact.ToString("F1");
+            Col1_Text1 = "INT:";
+            Col1_Text2 = _intact.ToString("F1");
 
             Col1_Img1 = PLAT_SRC;
             Col1_Img1_Shown = "Visible";
 
-            Col2_Text1 = "RAD ";
-            Col2_Text2 = " " + _radiant.ToString("F1") + " (";
-            if (_bonus >= 0)
-                Col2_Text2 += "+";
-            Col2_Text2 += _bonus.ToString("F1") + ")";
+            Col2_Text1 = "RAD:";
+            Col2_Text2 = _radiant.ToString("F1");
+            int tempBonus = (int)(_bonus * 10);
+            Col2_Text3 = "(";
+            if (tempBonus >= 0)
+                Col2_Text3 += "+";
+            Col2_Text3 += (tempBonus/10.0).ToString("F1") + ")";
 
             Col2_Img1 = PLAT_SRC;
             Col2_Img1_Shown = "Visible";
@@ -194,19 +241,24 @@ namespace WFInfoCS
                 _plat = plat;
                 _ducat = ducat;
 
-                Col1_Text1 = "       ";
+                Col1_Text1 = "";
                 if (plat < 100)
-                    Col1_Text2 = " " + plat.ToString("F1");
+                    Col1_Text2 = plat.ToString("F1");
                 else
-                    Col1_Text2 = " " + plat.ToString("F0");
+                    Col1_Text2 = plat.ToString("F0");
 
                 Col1_Img1 = PLAT_SRC;
                 Col1_Img1_Shown = "Visible";
+                Col1_Margin1 = new Thickness(0, 0, 38, 0);
+                Col1_Margin2 = new Thickness(0, 0, 20, 0);
 
-                Col2_Text1 = "         ";
-                Col2_Text2 = " " + ducat.ToString();
+                Col2_Text1 = "";
+                Col2_Text2 = "";
+                Col2_Text3 = ducat.ToString();
                 Col2_Img1 = DUCAT_SRC;
                 Col2_Img1_Shown = "Visible";
+                Col2_Margin1 = new Thickness(0, 0, 78, 0);
+                Col2_Margin2 = new Thickness(0, 0, 60, 0);
             } else
             {
                 Col1_Img1 = null;
@@ -234,6 +286,20 @@ namespace WFInfoCS
         {
             List<RelicTreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
             ChildrenFiltered = filterList.AsParallel().Where(node => node.IsVaulted()).ToList();
+        }
+
+        public void RecolorChildren()
+        {
+            bool i = false;
+            foreach (RelicTreeNode child in ChildrenFiltered)
+            {
+                i = !i;
+                if (i)
+                    child.Background_Color = BACK_D_BRUSH;
+                else
+                    child.Background_Color = BACK_U_BRUSH;
+            }
+            Console.WriteLine("RECOLOR CHILDREN");
         }
 
         public string GetFullName()
@@ -335,14 +401,14 @@ namespace WFInfoCS
             }
         }
 
-        private string _col1_text1 = "INT";
+        private string _col1_text1 = "INT:";
         public string Col1_Text1
         {
             get { return _col1_text1; }
             private set { SetField(ref _col1_text1, value); }
         }
 
-        private string _col1_text2 = ": 4.4";
+        private string _col1_text2 = "4.4";
         public string Col1_Text2
         {
             get { return _col1_text2; }
@@ -370,18 +436,25 @@ namespace WFInfoCS
             private set { SetField(ref _col1_img1_shown, value); }
         }
 
-        private string _col2_text1 = "RAD";
+        private string _col2_text1 = "RAD:";
         public string Col2_Text1
         {
             get { return _col2_text1; }
             private set { SetField(ref _col2_text1, value); }
         }
 
-        private string _col2_text2 = ": 9.9 (+5.5)";
+        private string _col2_text2 = "9.9";
         public string Col2_Text2
         {
             get { return _col2_text2; }
             private set { SetField(ref _col2_text2, value); }
+        }
+
+        private string _col2_text3 = "(+5.5)";
+        public string Col2_Text3
+        {
+            get { return _col2_text3; }
+            private set { SetField(ref _col2_text3, value); }
         }
 
         private ImageSource _col2_img1 = null;

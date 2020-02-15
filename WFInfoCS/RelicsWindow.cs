@@ -58,6 +58,16 @@ namespace WFInfoCS
                 while (index < RelicTree.Items.Count)
                     RelicTree.Items.RemoveAt(index);
 
+                bool i = false;
+                foreach (RelicTreeNode relic in RelicTree.Items)
+                {
+                    i = !i;
+                    if (i)
+                        relic.Background_Color = RelicTreeNode.BACK_D_BRUSH;
+                    else
+                        relic.Background_Color = RelicTreeNode.BACK_U_BRUSH;
+                }
+
                 RelicTree.Items.Refresh();
             } else
             {
@@ -75,6 +85,7 @@ namespace WFInfoCS
 
                         index++;
                     }
+                    era.RecolorChildren();
                 }
             }
 
@@ -135,7 +146,10 @@ namespace WFInfoCS
             if (IsLoaded)
             {
                 foreach (RelicTreeNode era in RelicNodes)
+                {
                     era.Sort(SortBox.SelectedIndex);
+                    era.RecolorChildren();
+                }
                 if (showAllRelics)
                 {
                     RelicTree.Items.SortDescriptions.Clear();
@@ -155,7 +169,15 @@ namespace WFInfoCS
                             RelicTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Name_Sort", System.ComponentModel.ListSortDirection.Ascending));
                             break;
                     }
-
+                    bool i = false;
+                    foreach (RelicTreeNode relic in RelicTree.Items)
+                    {
+                        i = !i;
+                        if (i)
+                            relic.Background_Color = RelicTreeNode.BACK_D_BRUSH;
+                        else
+                            relic.Background_Color = RelicTreeNode.BACK_U_BRUSH;
+                    }
                 }
             }
         }
@@ -193,6 +215,7 @@ namespace WFInfoCS
                     RelicTree.Items.Add(era);
                     foreach (RelicTreeNode relic in era.Children)
                         relic.topLevel = false;
+                    era.RecolorChildren();
                 }
             }
         }
@@ -212,7 +235,6 @@ namespace WFInfoCS
             foreach (RelicTreeNode head in RelicNodes)
             {
                 head.EraNum = eraNum++;
-                head.SetSilent();
                 foreach (JProperty prop in Main.dataBase.relicData[head.Name])
                 {
                     JObject primeItems = (JObject)Main.dataBase.relicData[head.Name][prop.Name];
@@ -235,6 +257,7 @@ namespace WFInfoCS
                 }
                 head.ResetFilter();
                 head.FilterOutVaulted();
+                head.RecolorChildren();
                 RelicTree.Items.Add(head);
             }
             #endregion
