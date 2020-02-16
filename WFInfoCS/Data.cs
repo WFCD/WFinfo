@@ -312,7 +312,7 @@ namespace WFInfoCS
                         if (prime.Value["type"].ToString() == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")))
                         {
                             gameName += " Blueprint";
-                        } else if (prime.Value["type"].ToString() == "Warframe" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
+                        } else if (prime.Value["type"].ToString() == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
                         {
                             gameName += " Blueprint";
                         }
