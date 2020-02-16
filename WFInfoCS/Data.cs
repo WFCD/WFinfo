@@ -239,7 +239,7 @@ namespace WFInfoCS
             };
         }
 
-        private bool LoadEqmtData()
+        private bool LoadEqmtData(bool force = false)
         {
             if (equipmentData == null)
                 equipmentData = File.Exists(eqmtDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath)) : new JObject();
@@ -259,7 +259,7 @@ namespace WFInfoCS
             DateTime filteredDate = allFiltered["timestamp"].ToObject<DateTime>().ToLocalTime().AddHours(-1);
             DateTime eqmtDate = equipmentData.TryGetValue("timestamp", out _) ? equipmentData["timestamp"].ToObject<DateTime>() : filteredDate;
 
-            if (eqmtDate.CompareTo(filteredDate) <= 0)
+            if (!false || eqmtDate.CompareTo(filteredDate) <= 0)
             {
                 filteredDate = filteredDate.AddHours(1);
 
@@ -461,7 +461,7 @@ namespace WFInfoCS
         public void ForceEquipmentUpdate()
         {
             Main.AddLog("Forcing equipment update");
-            LoadEqmtData();
+            LoadEqmtData(true);
             SaveDatabase(eqmtDataPath, equipmentData);
             SaveDatabase(relicDataPath, relicData);
             SaveDatabase(nameDataPath, nameData);
