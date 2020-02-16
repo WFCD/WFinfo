@@ -103,7 +103,7 @@ namespace WFInfoCS
 
             if (searchText != null && searchText.Length != 0)
                 foreach (RelicTreeNode era in RelicNodes)
-                    era.FilterSearchText(false, true);
+                    era.FilterSearchText(searchText, false, true);
 
             RefreshVisibleRelics();
         }
@@ -185,9 +185,7 @@ namespace WFInfoCS
         private void TextBoxFocus(object sender, RoutedEventArgs e)
         {
             if (!searchActive)
-            {
                 textBox.Clear();
-            }
         }
 
         private void ToggleShowAllRelics(object sender, RoutedEventArgs e)

@@ -7,7 +7,7 @@
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" 
         xmlns:local="clr-namespace:WFInfoCS"
         x:Class="WFInfoCS.EquipmentWindow"
-        Title="Equipment" Height="400" Width="500" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MinWidth="500" MaxWidth="500" MinHeight="110">
+        Title="Equipment" Height="400" Width="400" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MinWidth="400" MaxWidth="400" MinHeight="110">
     <Window.Resources>
         
     </Window.Resources>
@@ -15,7 +15,7 @@
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox x:Name="vaulted" Content="Show Vaulted" ToolTip="Show vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="39,-1,0,-1" RenderTransformOrigin="0.5,0.5" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="107" FontSize="14" Click="VaultedClick"/>
+            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Hide vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="39,-1,0,-1" RenderTransformOrigin="0.5,0.5" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="107" FontSize="14" Click="VaultedClick" IsChecked="True"/>
             <Button Content="+" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="-1,-1,0,-1" Width="20" Background="{x:Null}" Click="Add"/>
             <Button Content="-" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="18,-1,0,-1" Width="20" Background="{x:Null}" Click="Subtract"/>
             <TextBox x:Name="textBox" Margin="192,-1,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="Filter terms" Background="#FF141414" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" FontSize="14" Foreground="#FF646464" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" GotFocus="TextBoxFocus" TextChanged="TextboxTextChanged"/>
@@ -26,8 +26,8 @@
         <Grid Height="18" VerticalAlignment="Top" Margin="1,46,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="2" />
             <Rectangle Stroke="#FF646464" Margin="122,-1,-1,-1" Grid.RowSpan="2"/>
-            <Button Content=" Equipment groups" HorizontalAlignment="Left" VerticalAlignment="Top"  FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Foreground="#FFB1D0D9" Width="125" Height="20" Margin="-1,-1,0,-1" Grid.RowSpan="2" Background="#FF0F0F0F" FontSize="14" Click="ComboButton"/>
-            <ComboBox x:Name="comboBox" Margin="184,-1,-1,-1" Grid.RowSpan="2" Background="#FF0F0F0F" Foreground="#FFAFD0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" MouseDown="ComboboxMouseDown" Style="{DynamicResource ComboBoxStyle1}">
+            <Button x:Name="eqmtComboButton" Content="Equipment Groups" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" Foreground="#FFB1D0D9" Width="125" Height="20" Margin="-1,-1,0,-1" Grid.RowSpan="2" Background="#FF0F0F0F" FontSize="14" Click="ToggleShowAllEqmt"/>
+            <ComboBox x:Name="SortBox" Margin="184,-1,-1,-1" Grid.RowSpan="2" Background="#FF0F0F0F" Foreground="#FFAFD0D9" FontFamily="/WFInfoCS;component/Resources/#Roboto Condensed" SelectionChanged="SortBoxChanged" Style="{DynamicResource ComboBoxStyle1}">
                 <ComboBoxItem IsSelected="True" Content="Name"/>
                 <ComboBoxItem Content="Cost"/>
                 <ComboBoxItem Content="Unowned"/>
@@ -47,32 +47,54 @@
 
         </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
-            <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
+            <TreeView x:Name="EqmtTree" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}" >
-                        <Grid Visibility="{Binding Grid_Shown}">
+                        <HierarchicalDataTemplate.Resources>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="FontSize" Value="13" />
+                                <Setter Property="FontFamily" Value="Roboto" />
+                                <Setter Property="Foreground" Value="#FFB1D0D9" />
+                                <Setter Property="Padding" Value="0,2,0,0" />
+                            </Style>
+                        </HierarchicalDataTemplate.Resources>
+                        <Grid Visibility="{Binding Grid_Shown}" Background="{Binding Background_Color}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="100" />
-                                <ColumnDefinition Width="115" />
+                                <ColumnDefinition Width="70" />
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Padding="3" Foreground="{Binding NameBrush}" FontFamily="Roboto"/>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Padding="3" Foreground="#506464" FontFamily="Roboto"/>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Background="Transparent">
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Foreground="{Binding NameBrush}"/>
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Foreground="#506464" Padding="5,2,0,0" FontWeight="Normal" />
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="0">
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Col1_Text1}" Padding="20,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                <Image Width="14" Source="{Binding Col1_Img1}" Visibility="{Binding Col1_Img1_Shown}"/>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Col1_Text2}" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                            </StackPanel>
+                            <Grid Grid.Column="1" Margin="5,0,5,0" Background="Transparent">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="0">
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Col2_Text1}" Padding="10,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                                <Image Width="14" Source="{Binding Col2_Img1}" Visibility="{Binding Col2_Img1_Shown}"/>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Col2_Text2}" Padding="0,3,0,3" Foreground="#FFB1D0D9" FontFamily="Roboto"/>
-                            </StackPanel>
+                                <TextBlock HorizontalAlignment="Left"  Grid.Column="0" Text="{Binding Col1_Text1}" Foreground="{Binding NameBrush}" />
+                                <TextBlock HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin1}" Text="{Binding Col1_Text2}" Foreground="{Binding NameBrush}" />
+                                <Image HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin2}" Width="14" Source="{Binding Col1_Img1}" Visibility="{Binding Col1_Img1_Shown}"/>
+                            </Grid>
+
+                            <Grid Grid.Column="2" Margin="5,0,5,0" Background="Transparent">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock HorizontalAlignment="Left"  Grid.Column="0" Text="{Binding Col2_Text1}" Foreground="{Binding NameBrush}" />
+                                <TextBlock HorizontalAlignment="Right" Grid.Column="2" Text="{Binding Col2_Text2}" Foreground="{Binding NameBrush}" Margin="0,0,5,0"/>
+                                <TextBlock HorizontalAlignment="Right" Grid.Column="3" Margin="{Binding Col2_Margin1}" Text="{Binding Col2_Text3}" Foreground="{Binding NameBrush}" />
+                                <Image HorizontalAlignment="Right" Grid.Column="3" Margin="{Binding Col2_Margin2}" Width="14" Source="{Binding Col2_Img1}" Visibility="{Binding Col2_Img1_Shown}"/>
+                            </Grid>
                         </Grid>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>

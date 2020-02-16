@@ -133,7 +133,6 @@ namespace WFInfoCS
         {
             if (Main.dataBase.equipmentData == null) { ChangeStatus("Equipment data not yet loaded in", 2); return; }
             Main.equipmentWindow.populate();
-            ChangeStatus("Equipment not implemented", 2);
         }
 
         private void Settings_click(object sender, RoutedEventArgs e)

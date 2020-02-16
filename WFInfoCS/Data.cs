@@ -280,7 +280,6 @@ namespace WFInfoCS
 
                 foreach (KeyValuePair<string, JToken> prime in allFiltered["eqmt"].ToObject<JObject>())
                 {
-
                     if (!equipmentData.TryGetValue(prime.Key, out _))
                         equipmentData[prime.Key] = new JObject();
                     equipmentData[prime.Key]["vaulted"] = prime.Value["vaulted"];

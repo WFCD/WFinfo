@@ -214,10 +214,50 @@ namespace WFInfoCS
             Col2_Text3 = "(";
             if (tempBonus >= 0)
                 Col2_Text3 += "+";
-            Col2_Text3 += (tempBonus/10.0).ToString("F1") + ")";
+            Col2_Text3 += (tempBonus / 10.0).ToString("F1") + ")";
 
             Col2_Img1 = PLAT_SRC;
             Col2_Img1_Shown = "Visible";
+        }
+
+        public void GetSetInfo()
+        {
+            Grid_Shown = "Visible";
+            foreach(RelicTreeNode kid in Children)
+            {
+                _plat += kid._plat;
+                _owned += kid._owned;
+                _count += kid._count;
+            }
+
+
+            Col1_Text1 = _owned + "/" + _count;
+            Col1_Text2 = _plat.ToString("F1");
+
+            Col1_Img1 = PLAT_SRC;
+            Col1_Img1_Shown = "Visible";
+        }
+
+        public void SetPrimePart(double plat, int ducat, int owned, int count)
+        {
+            _plat = plat;
+            _ducat = ducat;
+            _owned = owned;
+            _count = count;
+
+            Col1_Text1 = owned + "/" + count;
+            Col1_Text2 = _plat.ToString("F1");
+
+            Col1_Img1 = PLAT_SRC;
+            Col1_Img1_Shown = "Visible";
+
+            Col2_Text1 = "";
+            Col2_Text2 = "";
+            Col2_Text3 = ducat.ToString();
+            Col2_Img1 = DUCAT_SRC;
+            Col2_Img1_Shown = "Visible";
+            Col2_Margin1 = new Thickness(0, 0, 28, 0);
+            Col2_Margin2 = new Thickness(0, 0, 10, 0);
         }
 
         public void SetPartText(double plat, int ducat, string rarity)
@@ -230,7 +270,7 @@ namespace WFInfoCS
             {
                 NameColor = UNCOMMON_COLOR;
                 NameBrush = UNCOMMON_BRUSH;
-            } else
+            } else if (rarity.Contains("comm"))
             {
                 NameColor = COMMON_COLOR;
                 NameBrush = COMMON_BRUSH;
@@ -242,10 +282,7 @@ namespace WFInfoCS
                 _ducat = ducat;
 
                 Col1_Text1 = "";
-                if (plat < 100)
-                    Col1_Text2 = plat.ToString("F1");
-                else
-                    Col1_Text2 = plat.ToString("F0");
+                Col1_Text2 = _plat.ToString("F1");
 
                 Col1_Img1 = PLAT_SRC;
                 Col1_Img1_Shown = "Visible";
@@ -299,7 +336,6 @@ namespace WFInfoCS
                 else
                     child.Background_Color = BACK_U_BRUSH;
             }
-            Console.WriteLine("RECOLOR CHILDREN");
         }
 
         public string GetFullName()
@@ -330,12 +366,12 @@ namespace WFInfoCS
             Console.WriteLine(prnt);
         }
 
-        public bool FilterSearchText(bool removeLeaves, bool additionalFilter = false, Dictionary<string, bool> matchedText = null)
+        public bool FilterSearchText(string[] searchText, bool removeLeaves, bool additionalFilter = false, Dictionary<string, bool> matchedText = null)
         {
             Dictionary<string, bool> matchedTextCopy = new Dictionary<string, bool>();
 
             bool done = true;
-            foreach (string text in RelicsWindow.searchText)
+            foreach (string text in searchText)
             {
                 bool tempVal = (matchedText != null && matchedText[text]) || Name.ToLower().Contains(text.ToLower());
                 matchedTextCopy[text] = tempVal;
@@ -352,7 +388,7 @@ namespace WFInfoCS
             List<RelicTreeNode> temp = new List<RelicTreeNode>();
             foreach (RelicTreeNode node in filterList)
             {
-                if (node.FilterSearchText(removeLeaves, additionalFilter, matchedTextCopy))
+                if (node.FilterSearchText(searchText, removeLeaves, additionalFilter, matchedTextCopy))
                 {
                     temp.Add(node);
                 }
@@ -473,6 +509,8 @@ namespace WFInfoCS
 
         public double _plat = 0;
         public int _ducat = 0;
+        public int _owned = 0;
+        public int _count = 0;
 
         public double _intact = 0;
         public double Intact_Val
