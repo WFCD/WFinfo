@@ -67,8 +67,6 @@ namespace WFInfoCS
                     else
                         relic.Background_Color = RelicTreeNode.BACK_U_BRUSH;
                 }
-
-                RelicTree.Items.Refresh();
             } else
             {
                 foreach (RelicTreeNode era in RelicNodes)
@@ -88,7 +86,7 @@ namespace WFInfoCS
                     era.RecolorChildren();
                 }
             }
-
+            RelicTree.Items.Refresh();
         }
 
         private void ReapplyFilters()

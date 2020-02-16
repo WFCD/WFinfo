@@ -73,7 +73,7 @@ namespace WFInfoCS
                 LowLevelListener.KeyAction += main.OnKeyAction;
                 listener.Hook();
                 InitializeComponent();
-                Version.Content = "v" + Main.BuildVersion + "-beta4";
+                Version.Content = "v" + Main.BuildVersion + "-beta5";
 
             }
             catch (Exception e)

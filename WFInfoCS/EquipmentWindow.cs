@@ -59,15 +59,33 @@ namespace WFInfoCS
                     RelicTreeNode primeNode = new RelicTreeNode(primeName, prime.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "");
                     foreach (KeyValuePair<string, JToken> primePart in prime.Value["parts"].ToObject<JObject>())
                     {
-                        string partName = primePart.Key.Substring(primePart.Key.IndexOf("Prime") + 6);
+                        string partName = primePart.Key;
+                        if (primePart.Key.IndexOf("Prime") + 6 < primePart.Key.Length)
+                            partName = partName.Substring(primePart.Key.IndexOf("Prime") + 6);
+
                         if (partName.Contains("Kubrow"))
                             partName = partName.Substring(partName.IndexOf(" Blueprint") + 1);
                         RelicTreeNode partNode = new RelicTreeNode(partName, primePart.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "");
                         if (Main.dataBase.marketData.TryGetValue(primePart.Key.ToString(), out JToken marketValues))
+                            partNode.SetPrimePart(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
+                        else if (Main.dataBase.equipmentData.TryGetValue(primePart.Key, out JToken job))
                         {
-                            partNode.SetPrimePart(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(),0,1);
-                            Console.WriteLine(primePart.Key + ": " + partNode._ducat + "P - " + marketValues["ducats"] + "D");
-                        }
+                            double plat = 0.0;
+                            foreach (KeyValuePair<string, JToken> subPartPart in job["parts"].ToObject<JObject>())
+                            {
+                                if (Main.dataBase.marketData.TryGetValue(subPartPart.Key.ToString(), out JToken subMarketValues))
+                                {
+                                    int temp = subPartPart.Value["count"].ToObject<int>();
+                                    plat += temp * subMarketValues["plat"].ToObject<double>();
+                                }
+                            }
+
+
+
+                            partNode.SetPrimeEqmt(plat, primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
+                        } else
+                            Console.WriteLine(primePart.Key + " has no marketValues?");
+
                         primeNode.AddChild(partNode);
                     }
                     primeNode.GetSetInfo();
@@ -243,7 +261,6 @@ namespace WFInfoCS
                 while (index < EqmtTree.Items.Count)
                     EqmtTree.Items.RemoveAt(index);
 
-                /*
                 bool i = false;
                 foreach (RelicTreeNode prime in EqmtTree.Items)
                 {
@@ -252,7 +269,7 @@ namespace WFInfoCS
                         prime.Background_Color = RelicTreeNode.BACK_D_BRUSH;
                     else
                         prime.Background_Color = RelicTreeNode.BACK_U_BRUSH;
-                }*/
+                }
             } else
             {
                 foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)

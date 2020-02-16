@@ -225,7 +225,7 @@ namespace WFInfoCS
             Grid_Shown = "Visible";
             foreach(RelicTreeNode kid in Children)
             {
-                _plat += kid._plat;
+                _plat += kid._plat * kid._count;
                 _owned += kid._owned;
                 _count += kid._count;
             }
@@ -236,6 +236,25 @@ namespace WFInfoCS
 
             Col1_Img1 = PLAT_SRC;
             Col1_Img1_Shown = "Visible";
+        }
+
+        internal void SetPrimeEqmt(double plat, int owned, int count)
+        {
+            _plat = plat;
+            _owned = owned;
+            _count = count;
+
+            Col1_Text1 = owned + "/" + count;
+            Col1_Text2 = _plat.ToString("F1");
+
+            Col1_Img1 = PLAT_SRC;
+            Col1_Img1_Shown = "Visible";
+
+            Col2_Text1 = "";
+            Col2_Text2 = "";
+            Col2_Text3 = "";
+            Col2_Img1 = null;
+            Col2_Img1_Shown = "Hidden";
         }
 
         public void SetPrimePart(double plat, int ducat, int owned, int count)

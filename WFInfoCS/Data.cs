@@ -257,7 +257,7 @@ namespace WFInfoCS
             JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
 
             DateTime filteredDate = allFiltered["timestamp"].ToObject<DateTime>().ToLocalTime().AddHours(-1);
-            DateTime eqmtDate = equipmentData.TryGetValue("timestamp",out _) ? equipmentData["timestamp"].ToObject<DateTime>() : filteredDate;
+            DateTime eqmtDate = equipmentData.TryGetValue("timestamp", out _) ? equipmentData["timestamp"].ToObject<DateTime>() : filteredDate;
 
             if (eqmtDate.CompareTo(filteredDate) <= 0)
             {
@@ -280,46 +280,46 @@ namespace WFInfoCS
 
                 foreach (KeyValuePair<string, JToken> prime in allFiltered["eqmt"].ToObject<JObject>())
                 {
-                    if (!equipmentData.TryGetValue(prime.Key, out _))
-                        equipmentData[prime.Key] = new JObject();
-                    equipmentData[prime.Key]["vaulted"] = prime.Value["vaulted"];
-                    equipmentData[prime.Key]["type"] = prime.Value["type"];
+                    string primeName = prime.Key.Substring(0, prime.Key.IndexOf("Prime") + 5);
+                    if (!equipmentData.TryGetValue(primeName, out _))
+                        equipmentData[primeName] = new JObject();
+                    equipmentData[primeName]["vaulted"] = prime.Value["vaulted"];
+                    equipmentData[primeName]["type"] = prime.Value["type"];
 
-                    if (!equipmentData[prime.Key].ToObject<JObject>().TryGetValue("parts", out _))
-                        equipmentData[prime.Key]["parts"] = new JObject();
+                    if (!equipmentData[primeName].ToObject<JObject>().TryGetValue("parts", out _))
+                        equipmentData[primeName]["parts"] = new JObject();
 
 
                     foreach (KeyValuePair<string, JToken> part in prime.Value["parts"].ToObject<JObject>())
                     {
-                        if (!equipmentData[prime.Key]["parts"].ToObject<JObject>().TryGetValue(part.Key, out _))
-                            equipmentData[prime.Key]["parts"][part.Key] = new JObject();
-                        if (!equipmentData[prime.Key]["parts"][part.Key].ToObject<JObject>().TryGetValue("owned", out _))
-                            equipmentData[prime.Key]["parts"][part.Key]["owned"] = 0;
-                        equipmentData[prime.Key]["parts"][part.Key]["vaulted"] = prime.Value["vaulted"];
-                        equipmentData[prime.Key]["parts"][part.Key]["count"] = prime.Value["count"];
+                        string partName = part.Key;
+                        if (prime.Key.Contains("Collar"))
+                        {
+                            if (partName.Contains("Kubrow"))
+                                partName = partName.Replace(" Kubrow", "");
+                            else
+                                partName = partName.Replace("Prime", "Prime Collar");
+                        }
+                        if (!equipmentData[primeName]["parts"].ToObject<JObject>().TryGetValue(partName, out _))
+                            equipmentData[primeName]["parts"][partName] = new JObject();
+                        if (!equipmentData[primeName]["parts"][partName].ToObject<JObject>().TryGetValue("owned", out _))
+                            equipmentData[primeName]["parts"][partName]["owned"] = 0;
+                        equipmentData[primeName]["parts"][partName]["vaulted"] = part.Value["vaulted"];
+                        equipmentData[primeName]["parts"][partName]["count"] = part.Value["count"];
 
 
                         string gameName = part.Key;
-                        string marketName = part.Key;
                         if (prime.Value["type"].ToString() == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")))
                         {
                             gameName += " Blueprint";
                         } else if (prime.Value["type"].ToString() == "Warframe" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
                         {
                             gameName += " Blueprint";
-                        } else if (prime.Key.Contains("Collar"))
-                        {
-                            if (marketName.Contains("Kubrow"))
-                            {
-                                marketName = marketName.Replace(" Kubrow", "");
-                            } else
-                            {
-                                marketName = marketName.Replace("Prime", "Prime Collar");
-                            }
                         }
 
-                        nameData[gameName] = marketName;
-                        marketData[marketName]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString());
+                        nameData[gameName] = partName;
+                        if (marketData.TryGetValue(partName, out _))
+                            marketData[partName]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString());
                     }
                 }
 
