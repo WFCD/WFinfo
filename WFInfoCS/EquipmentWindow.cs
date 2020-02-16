@@ -20,9 +20,10 @@ namespace WFInfoCS
     /// </summary>
     public partial class EquipmentWindow : System.Windows.Window
     {
+        private List<string> types = new List<string>() { "Warframes", "Primary", "Secondary", "Melee", "Archwing", "Companion" };
         private Dictionary<string, RelicTreeNode> primeTypes;
         private bool searchActive = false;
-        private bool showAllRelics = false;
+        private bool showAllEqmt = false;
         public static string[] searchText;
 
         public EquipmentWindow()
@@ -53,6 +54,9 @@ namespace WFInfoCS
                     if (!primeTypes.ContainsKey(primeType))
                     {
                         RelicTreeNode newType = new RelicTreeNode(primeType, "");
+                        if (!types.Contains(primeType))
+                            types.Add(primeType);
+                        newType.SortNum = types.IndexOf(primeType);
                         primeTypes[primeType] = newType;
                     }
                     RelicTreeNode type = primeTypes[primeType];
@@ -93,13 +97,14 @@ namespace WFInfoCS
                 }
             }
 
-            foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
+            foreach (string typeName in types)
             {
-                primeType.Value.ResetFilter();
-                primeType.Value.FilterOutVaulted();
-                EqmtTree.Items.Add(primeType.Value);
-                RefreshVisibleRelics();
+                RelicTreeNode primeType = primeTypes[typeName];
+                primeType.ResetFilter();
+                primeType.FilterOutVaulted();
+                EqmtTree.Items.Add(primeType);
             }
+            RefreshVisibleRelics();
 
             Show();
             Focus();
@@ -115,39 +120,37 @@ namespace WFInfoCS
 
         private void SortBoxChanged(object sender, SelectionChangedEventArgs e)
         {
-            // 0 - Name
-            // 1 - Average intact plat
-            // 2 - Average radiant plat
-            // 3 - Difference (radiant-intact)
+            /*   < ComboBoxItem Content = "Name" />
+                 < ComboBoxItem Content = "Cost" />
+                 < ComboBoxItem Content = "Unowned" />
+                 < ComboBoxItem Content = "Set cost" />*/
 
             if (IsLoaded)
             {
+                EqmtTree.Items.SortDescriptions.Clear();
                 foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
                 {
-                    primeType.Value.Sort(SortBox.SelectedIndex);
+                    primeType.Value.Sort(SortBox.SelectedIndex, false);
                     primeType.Value.RecolorChildren();
                 }
-                if (showAllRelics)
+                if (showAllEqmt)
                 {
-                    EqmtTree.Items.SortDescriptions.Clear();
                     EqmtTree.Items.IsLiveSorting = true;
                     switch (SortBox.SelectedIndex)
                     {
                         case 1:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Intact_Val", System.ComponentModel.ListSortDirection.Descending));
+                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Plat_Val", System.ComponentModel.ListSortDirection.Descending));
                             break;
                         case 2:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Radiant_Val", System.ComponentModel.ListSortDirection.Descending));
+                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Diff_Val", System.ComponentModel.ListSortDirection.Descending));
                             break;
-                        case 3:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
-                            break;
+                        //case 3:
+                        //    EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
+                        //    break;
                         default:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Name_Sort", System.ComponentModel.ListSortDirection.Ascending));
+                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("EqmtName_Sort", System.ComponentModel.ListSortDirection.Ascending));
                             break;
                     }
-
-                    /*
                     bool i = false;
                     foreach (RelicTreeNode prime in EqmtTree.Items)
                     {
@@ -156,7 +159,7 @@ namespace WFInfoCS
                             prime.Background_Color = RelicTreeNode.BACK_D_BRUSH;
                         else
                             prime.Background_Color = RelicTreeNode.BACK_U_BRUSH;
-                    }*/
+                    }
                 }
             }
         }
@@ -197,31 +200,9 @@ namespace WFInfoCS
 
         private void ToggleShowAllEqmt(object sender, RoutedEventArgs e)
         {
-            showAllRelics = !showAllRelics;
+            showAllEqmt = !showAllEqmt;
             EqmtTree.Items.Clear();
-            if (showAllRelics)
-            {
-                eqmtComboButton.Content = "All Equipment";
-                foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
-                {
-                    foreach (RelicTreeNode prime in primeType.Value.Children)
-                        prime.topLevel = true;
-
-                    foreach (RelicTreeNode prime in primeType.Value.ChildrenFiltered)
-                        EqmtTree.Items.Add(prime);
-                }
-                SortBoxChanged(null, null);
-            } else
-            {
-                EqmtTree.Items.SortDescriptions.Clear();
-                eqmtComboButton.Content = "Equipment Groups";
-                foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
-                {
-                    EqmtTree.Items.Add(primeType.Value);
-                    foreach (RelicTreeNode prime in primeType.Value.Children)
-                        prime.topLevel = false;
-                }
-            }
+            RefreshVisibleRelics();
         }
 
         private void Add(object sender, RoutedEventArgs e)
@@ -241,52 +222,51 @@ namespace WFInfoCS
         private void RefreshVisibleRelics()
         {
             int index = 0;
-            if (showAllRelics)
+            if (showAllEqmt)
             {
-                foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
+                List<RelicTreeNode> activeNodes = new List<RelicTreeNode>();
+                foreach (string typeName in types)
                 {
-                    foreach (RelicTreeNode prime in primeType.Value.ChildrenFiltered)
+                    RelicTreeNode primeType = primeTypes[typeName];
+                    foreach (RelicTreeNode eqmt in primeType.ChildrenFiltered)
+                        activeNodes.Add(eqmt);
+                }
+
+
+                for (index = 0; index < EqmtTree.Items.Count;)
+                {
+                    RelicTreeNode eqmt = (RelicTreeNode)EqmtTree.Items.GetItemAt(index);
+                    if (!activeNodes.Contains(eqmt))
+                        EqmtTree.Items.RemoveAt(index);
+                    else
                     {
-                        int curr = EqmtTree.Items.IndexOf(prime);
-
-                        if (curr == -1)
-                            EqmtTree.Items.Insert(index, prime);
-                        else if (curr != index)
-                            for (; curr > index; curr--)
-                                EqmtTree.Items.RemoveAt(index);
-
+                        activeNodes.Remove(eqmt);
                         index++;
                     }
                 }
-                while (index < EqmtTree.Items.Count)
-                    EqmtTree.Items.RemoveAt(index);
 
-                bool i = false;
-                foreach (RelicTreeNode prime in EqmtTree.Items)
-                {
-                    i = !i;
-                    if (i)
-                        prime.Background_Color = RelicTreeNode.BACK_D_BRUSH;
-                    else
-                        prime.Background_Color = RelicTreeNode.BACK_U_BRUSH;
-                }
+                foreach (RelicTreeNode eqmt in activeNodes)
+                    EqmtTree.Items.Add(eqmt);
+
+                SortBoxChanged(null, null);
             } else
             {
-                foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
+                foreach (string typeName in types)
                 {
-                    int curr = EqmtTree.Items.IndexOf(primeType.Value);
-                    if (primeType.Value.ChildrenFiltered.Count == 0)
+                    RelicTreeNode primeType = primeTypes[typeName];
+                    int curr = EqmtTree.Items.IndexOf(primeType);
+                    if (primeType.ChildrenFiltered.Count == 0)
                     {
                         if (curr != -1)
                             EqmtTree.Items.RemoveAt(curr);
                     } else
                     {
                         if (curr == -1)
-                            EqmtTree.Items.Insert(index, primeType.Value);
+                            EqmtTree.Items.Insert(index, primeType);
 
                         index++;
                     }
-                    primeType.Value.RecolorChildren();
+                    primeType.RecolorChildren();
                 }
             }
             EqmtTree.Items.Refresh();

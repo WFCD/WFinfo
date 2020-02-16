@@ -40,33 +40,28 @@ namespace WFInfoCS
             int index = 0;
             if (showAllRelics)
             {
+                List<RelicTreeNode> activeNodes = new List<RelicTreeNode>();
                 foreach (RelicTreeNode era in RelicNodes)
-                {
                     foreach (RelicTreeNode relic in era.ChildrenFiltered)
+                        activeNodes.Add(relic);
+
+
+                for (index = 0; index < RelicTree.Items.Count;)
+                {
+                    RelicTreeNode relic = (RelicTreeNode)RelicTree.Items.GetItemAt(index);
+                    if (!activeNodes.Contains(relic))
+                        RelicTree.Items.RemoveAt(index);
+                    else
                     {
-                        int curr = RelicTree.Items.IndexOf(relic);
-
-                        if (curr == -1)
-                            RelicTree.Items.Insert(index, relic);
-                        else if (curr != index)
-                            for (; curr > index; curr--)
-                                RelicTree.Items.RemoveAt(index);
-
+                        activeNodes.Remove(relic);
                         index++;
                     }
                 }
-                while (index < RelicTree.Items.Count)
-                    RelicTree.Items.RemoveAt(index);
 
-                bool i = false;
-                foreach (RelicTreeNode relic in RelicTree.Items)
-                {
-                    i = !i;
-                    if (i)
-                        relic.Background_Color = RelicTreeNode.BACK_D_BRUSH;
-                    else
-                        relic.Background_Color = RelicTreeNode.BACK_U_BRUSH;
-                }
+                foreach (RelicTreeNode relic in activeNodes)
+                    RelicTree.Items.Add(relic);
+
+                SortBoxChanged(null, null);
             } else
             {
                 foreach (RelicTreeNode era in RelicNodes)
@@ -190,30 +185,7 @@ namespace WFInfoCS
         {
             showAllRelics = !showAllRelics;
             RelicTree.Items.Clear();
-            if (showAllRelics)
-            {
-                relicComboButton.Content = "All Relics";
-                foreach (RelicTreeNode era in RelicNodes)
-                {
-                    foreach (RelicTreeNode relic in era.Children)
-                        relic.topLevel = true;
-
-                    foreach (RelicTreeNode relic in era.ChildrenFiltered)
-                        RelicTree.Items.Add(relic);
-                }
-                SortBoxChanged(null, null);
-            } else
-            {
-                RelicTree.Items.SortDescriptions.Clear();
-                relicComboButton.Content = "Relic Eras";
-                foreach (RelicTreeNode era in RelicNodes)
-                {
-                    RelicTree.Items.Add(era);
-                    foreach (RelicTreeNode relic in era.Children)
-                        relic.topLevel = false;
-                    era.RecolorChildren();
-                }
-            }
+            RefreshVisibleRelics();
         }
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
@@ -230,7 +202,7 @@ namespace WFInfoCS
             int eraNum = 0;
             foreach (RelicTreeNode head in RelicNodes)
             {
-                head.EraNum = eraNum++;
+                head.SortNum = eraNum++;
                 foreach (JProperty prop in Main.dataBase.relicData[head.Name])
                 {
                     JObject primeItems = (JObject)Main.dataBase.relicData[head.Name][prop.Name];

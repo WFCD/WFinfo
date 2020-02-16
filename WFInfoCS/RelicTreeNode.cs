@@ -81,11 +81,11 @@ namespace WFInfoCS
             set { SetField(ref _era, value); }
         }
 
-        private int _eraNum = -1;
-        public int EraNum
+        private int _sortNum = -1;
+        public int SortNum
         {
-            get { return _eraNum; }
-            set { SetField(ref _eraNum, value); }
+            get { return _sortNum; }
+            set { SetField(ref _sortNum, value); }
         }
 
         private string _name;
@@ -96,7 +96,12 @@ namespace WFInfoCS
         }
         public string Name_Sort
         {
-            get { return Parent.EraNum + _era + " " + _name; }
+            get { return Parent.SortNum + _era + " " + _name; }
+            set { SetField(ref _name, value); }
+        }
+        public string EqmtName_Sort
+        {
+            get { return SortNum + _name; }
             set { SetField(ref _name, value); }
         }
 
@@ -223,7 +228,7 @@ namespace WFInfoCS
         public void GetSetInfo()
         {
             Grid_Shown = "Visible";
-            foreach(RelicTreeNode kid in Children)
+            foreach (RelicTreeNode kid in Children)
             {
                 _plat += kid._plat * kid._count;
                 _owned += kid._owned;
@@ -417,41 +422,70 @@ namespace WFInfoCS
             return temp.Count > 0;
         }
 
-        internal void Sort(int index, int depth = 0)
+        internal void Sort(int index, bool isRelics = true, int depth = 0)
         {
             foreach (RelicTreeNode node in Children)
-                node.Sort(index, depth + 1);
+                node.Sort(index, isRelics, depth + 1);
             if (Children.Count > 0)
             {
-                if (depth == 0)   // Relics
+                if (isRelics)
+                {
+                    if (depth == 0)   // Relics
+                    {
+                        switch (index)
+                        {
+                            // 0 - Name
+                            // 1 - Average intact plat
+                            // 2 - Average radiant plat
+                            // 3 - Difference (radiant-intact)
+                            case 1:
+                                Children = Children.AsParallel().OrderByDescending(p => p._intact).ToList();
+                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._intact).ToList();
+                                break;
+                            case 2:
+                                Children = Children.AsParallel().OrderByDescending(p => p._radiant).ToList();
+                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._radiant).ToList();
+                                break;
+                            case 3:
+                                Children = Children.AsParallel().OrderByDescending(p => p._bonus).ToList();
+                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._bonus).ToList();
+                                break;
+                            default:
+                                Children = Children.AsParallel().OrderBy(p => p.Name).ToList();
+                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Name).ToList();
+                                break;
+                        }
+                    } else            // Parts
+                    {
+                        Children = Children.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
+                        ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
+                    }
+                } else
                 {
                     switch (index)
                     {
                         // 0 - Name
-                        // 1 - Average intact plat
-                        // 2 - Average radiant plat
-                        // 3 - Difference (radiant-intact)
+                        // 1 - Plat
+                        // 2 - Unowned
+                        // 3 - N/A
+
                         case 1:
-                            Children = Children.AsParallel().OrderByDescending(p => p._intact).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._intact).ToList();
+                            Children = Children.AsParallel().OrderByDescending(p => p.Plat_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Plat_Val).ToList();
                             break;
                         case 2:
-                            Children = Children.AsParallel().OrderByDescending(p => p._radiant).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._radiant).ToList();
+                            Children = Children.AsParallel().OrderByDescending(p => p.Diff_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Diff_Val).ToList();
                             break;
-                        case 3:
-                            Children = Children.AsParallel().OrderByDescending(p => p._bonus).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._bonus).ToList();
-                            break;
+                        //case 3:
+                        //    Children = Children.AsParallel().OrderByDescending(p => p._bonus).ToList();
+                        //    ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._bonus).ToList();
+                        //    break;
                         default:
                             Children = Children.AsParallel().OrderBy(p => p.Name).ToList();
                             ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Name).ToList();
                             break;
                     }
-                } else            // Parts
-                {
-                    Children = Children.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
-                    ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
                 }
             }
         }
@@ -527,9 +561,36 @@ namespace WFInfoCS
         }
 
         public double _plat = 0;
+        public double Plat_Val
+        {
+            get { return _plat; }
+            set { SetField(ref _plat, value); }
+        }
+
         public int _ducat = 0;
+        public int Ducat_Val
+        {
+            get { return _ducat; }
+            set { SetField(ref _ducat, value); }
+        }
+
         public int _owned = 0;
+        public int Owned_Val
+        {
+            get { return _owned; }
+            set { SetField(ref _owned, value); }
+        }
+
         public int _count = 0;
+        public int Count_Val
+        {
+            get { return _owned; }
+            set { SetField(ref _owned, value); }
+        }
+        public int Diff_Val
+        {
+            get { return _owned - _count; }
+        }
 
         public double _intact = 0;
         public double Intact_Val
