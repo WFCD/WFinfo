@@ -77,7 +77,56 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock HorizontalAlignment="Left"  Grid.Column="0" Text="{Binding Col1_Text1}" Foreground="{Binding NameBrush}" />
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0" Margin="-13,0,0,0">
+                                    <StackPanel.Style>
+                                        <Style>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Col1_Text1.Length}" Value="0">
+                                                    <Setter Property="StackPanel.IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <Label Content="＋" Foreground="#506464" FontSize="13" Padding="0">
+                                        <Label.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding IncrementPart}" />
+                                        </Label.InputBindings>
+                                        <Label.Style>
+                                            <Style>
+                                                <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                            <Condition  Binding="{Binding Children.Count}" Value="0" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Label.Style>
+                                    </Label>
+                                    <TextBlock x:Name="OwnedTextBlock" Text="{Binding Col1_Text1}" Foreground="{Binding NameBrush}" />
+                                    <Label Content="－" Foreground="#506464" FontSize="13" Padding="0">
+                                        <Label.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding DecrementPart}" />
+                                        </Label.InputBindings>
+                                        <Label.Style>
+                                            <Style>
+                                                <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                            <Condition  Binding="{Binding Children.Count}" Value="0" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Label.Style>
+                                    </Label>
+                                </StackPanel>
                                 <TextBlock HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin1}" Text="{Binding Col1_Text2}" Foreground="{Binding NameBrush}" />
                                 <Image HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin2}" Width="14" Source="{Binding Col1_Img1}" Visibility="{Binding Col1_Img1_Shown}"/>
                             </Grid>

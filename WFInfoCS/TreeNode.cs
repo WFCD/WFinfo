@@ -1,9 +1,11 @@
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace WFInfoCS
@@ -37,7 +39,30 @@ namespace WFInfoCS
         }
     }
 
-    public class RelicTreeNode : INPC
+    public class SimpleCommand : System.Windows.Input.ICommand
+    {
+        public SimpleCommand(Action action)
+        {
+            this.Action = action;
+        }
+
+        public Action Action { get; set; }
+
+        public bool CanExecute(object parameter)
+        {
+            return (this.Action != null);
+        }
+
+        public event EventHandler CanExecuteChanged;
+
+        public void Execute(object parameter)
+        {
+            if (this.Action != null)
+                this.Action();
+        }
+    }
+
+    public class TreeNode : INPC
     {
         private const double INTACT_CHANCE_RARE = 0.02;
         private const double RADIANT_CHANCE_RARE = 0.1;
@@ -62,13 +87,13 @@ namespace WFInfoCS
         public static Brush BACK_BRUSH = new SolidColorBrush(BACK_COLOR);
         public static Brush BACK_U_BRUSH = new SolidColorBrush(BACK_U_COLOR);
 
-        public RelicTreeNode(string name, string vaulted)
+        public TreeNode(string name, string vaulted)
         {
             Name = name;
             Vaulted = vaulted;
 
-            ChildrenFiltered = new List<RelicTreeNode>();
-            Children = new List<RelicTreeNode>();
+            ChildrenFiltered = new List<TreeNode>();
+            Children = new List<TreeNode>();
             SetSilent();
         }
 
@@ -187,7 +212,7 @@ namespace WFInfoCS
             _intact = 0;
             _radiant = 0;
 
-            foreach (RelicTreeNode node in Children)
+            foreach (TreeNode node in Children)
             {
                 if (node.NameColor == RARE_COLOR)
                 {
@@ -228,7 +253,7 @@ namespace WFInfoCS
         public void GetSetInfo()
         {
             Grid_Shown = "Visible";
-            foreach (RelicTreeNode kid in Children)
+            foreach (TreeNode kid in Children)
             {
                 _plat += kid._plat * kid._count;
                 _owned += kid._owned;
@@ -334,7 +359,7 @@ namespace WFInfoCS
 
         public void ResetFilter()
         {
-            foreach (RelicTreeNode node in Children)
+            foreach (TreeNode node in Children)
                 node.ResetFilter();
 
             // This doesn't work, maybe i made mistake
@@ -345,14 +370,14 @@ namespace WFInfoCS
 
         public void FilterOutVaulted(bool additionalFilter = false)
         {
-            List<RelicTreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
+            List<TreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
             ChildrenFiltered = filterList.AsParallel().Where(node => node.IsVaulted()).ToList();
         }
 
         public void RecolorChildren()
         {
             bool i = false;
-            foreach (RelicTreeNode child in ChildrenFiltered)
+            foreach (TreeNode child in ChildrenFiltered)
             {
                 i = !i;
                 if (i)
@@ -365,7 +390,7 @@ namespace WFInfoCS
         public string GetFullName()
         {
             string prnt = Name;
-            RelicTreeNode temp = Parent;
+            TreeNode temp = Parent;
             while (temp != null)
             {
                 prnt = temp.Name + "/" + prnt;
@@ -377,7 +402,7 @@ namespace WFInfoCS
         private void ConsolePrintBullshit(Dictionary<string, bool> matchedText)
         {
             string prnt = Name + ": ";
-            RelicTreeNode temp = Parent;
+            TreeNode temp = Parent;
             while (temp != null)
             {
                 prnt = temp.Name + "/" + prnt;
@@ -402,15 +427,15 @@ namespace WFInfoCS
                 done = done && tempVal;
             }
 
-            List<RelicTreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
+            List<TreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
             if (done)
             {
                 ChildrenFiltered = filterList;
                 return true;
             }
 
-            List<RelicTreeNode> temp = new List<RelicTreeNode>();
-            foreach (RelicTreeNode node in filterList)
+            List<TreeNode> temp = new List<TreeNode>();
+            foreach (TreeNode node in filterList)
             {
                 if (node.FilterSearchText(searchText, removeLeaves, additionalFilter, matchedTextCopy))
                 {
@@ -424,7 +449,7 @@ namespace WFInfoCS
 
         internal void Sort(int index, bool isRelics = true, int depth = 0)
         {
-            foreach (RelicTreeNode node in Children)
+            foreach (TreeNode node in Children)
                 node.Sort(index, isRelics, depth + 1);
             if (Children.Count > 0)
             {
@@ -474,8 +499,8 @@ namespace WFInfoCS
                             ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Plat_Val).ToList();
                             break;
                         case 2:
-                            Children = Children.AsParallel().OrderByDescending(p => p.Diff_Val).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Diff_Val).ToList();
+                            Children = Children.AsParallel().OrderBy(p => p.Count_Val).OrderBy(p => p.Diff_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Count_Val).OrderBy(p => p.Diff_Val).ToList();
                             break;
                         //case 3:
                         //    Children = Children.AsParallel().OrderByDescending(p => p._bonus).ToList();
@@ -584,8 +609,8 @@ namespace WFInfoCS
         public int _count = 0;
         public int Count_Val
         {
-            get { return _owned; }
-            set { SetField(ref _owned, value); }
+            get { return _count; }
+            set { SetField(ref _count, value); }
         }
         public int Diff_Val
         {
@@ -620,22 +645,22 @@ namespace WFInfoCS
             set { SetField(ref _isExpanded, value); }
         }
 
-        private List<RelicTreeNode> _childrenFiltered;
-        public List<RelicTreeNode> ChildrenFiltered
+        private List<TreeNode> _childrenFiltered;
+        public List<TreeNode> ChildrenFiltered
         {
             get { return _childrenFiltered; }
             private set { SetField(ref _childrenFiltered, value); }
         }
 
-        private List<RelicTreeNode> _children;
-        public List<RelicTreeNode> Children
+        private List<TreeNode> _children;
+        public List<TreeNode> Children
         {
             get { return _children; }
             private set { SetField(ref _children, value); }
         }
 
-        public RelicTreeNode Parent;
-        public void AddChild(RelicTreeNode kid)
+        public TreeNode Parent;
+        public void AddChild(TreeNode kid)
         {
             kid.Parent = this;
             Children.Add(kid);
@@ -646,5 +671,71 @@ namespace WFInfoCS
             return Era + " " + Name;
         }
 
+        private ICommand _decrement;
+        public ICommand DecrementPart
+        {
+            get { return _decrement; }
+            private set { SetField(ref _decrement, value); }
+        }
+
+        private ICommand _increment;
+        public ICommand IncrementPart
+        {
+            get { return _increment; }
+            private set { SetField(ref _increment, value); }
+        }
+
+        private string dataRef;
+
+        public void MakeClickable(string eqmtRef)
+        {
+            dataRef = eqmtRef;
+            DecrementPart = new SimpleCommand(DecrementPartFunc);
+            IncrementPart = new SimpleCommand(IncrementPartFunc);
+        }
+
+        public void DecrementPartFunc()
+        {
+            Console.WriteLine("Decrementing " + GetFullName());
+            if (Parent.dataRef != null)
+            {
+                JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
+                int owned = job["owned"].ToObject<int>();
+                if (owned > 0)
+                {
+
+                    job["owned"] = owned - 1;
+                    Main.dataBase.SaveEquipmentJSONs();
+
+                    this.Owned_Val--;
+                    Parent.Owned_Val--;
+                    Col1_Text1 = Owned_Val + "/" + Count_Val;
+                    Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
+                    EquipmentWindow.INSTANCE.SortBoxChanged(null, null);
+                }
+            }
+        }
+
+        public void IncrementPartFunc()
+        {
+            Console.WriteLine("Incrementing " + GetFullName());
+            if (Parent.dataRef != null)
+            {
+                JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
+                int count = job["count"].ToObject<int>();
+                int owned = job["owned"].ToObject<int>();
+                if (owned < count)
+                {
+                    job["owned"] = owned + 1;
+                    Main.dataBase.SaveEquipmentJSONs();
+
+                    this.Owned_Val++;
+                    Parent.Owned_Val++;
+                    Col1_Text1 = Owned_Val + "/" + Count_Val;
+                    Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
+                    EquipmentWindow.INSTANCE.SortBoxChanged(null, null);
+                }
+            }
+        }
     }
 }

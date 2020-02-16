@@ -21,14 +21,16 @@ namespace WFInfoCS
     public partial class EquipmentWindow : System.Windows.Window
     {
         private List<string> types = new List<string>() { "Warframes", "Primary", "Secondary", "Melee", "Archwing", "Companion" };
-        private Dictionary<string, RelicTreeNode> primeTypes;
+        private Dictionary<string, TreeNode> primeTypes;
         private bool searchActive = false;
         private bool showAllEqmt = false;
         public static string[] searchText;
+        public static EquipmentWindow INSTANCE;
 
         public EquipmentWindow()
         {
             InitializeComponent();
+            INSTANCE = this;
         }
 
         private void Hide(object sender, RoutedEventArgs e)
@@ -39,7 +41,7 @@ namespace WFInfoCS
         public void populate()
         { //todo implement populating the listview
 
-            primeTypes = new Dictionary<string, RelicTreeNode>();
+            primeTypes = new Dictionary<string, TreeNode>();
             foreach (KeyValuePair<string, JToken> prime in Main.dataBase.equipmentData)
             {
                 if (prime.Key.Contains("Prime"))
@@ -53,14 +55,15 @@ namespace WFInfoCS
 
                     if (!primeTypes.ContainsKey(primeType))
                     {
-                        RelicTreeNode newType = new RelicTreeNode(primeType, "");
+                        TreeNode newType = new TreeNode(primeType, "");
                         if (!types.Contains(primeType))
                             types.Add(primeType);
                         newType.SortNum = types.IndexOf(primeType);
                         primeTypes[primeType] = newType;
                     }
-                    RelicTreeNode type = primeTypes[primeType];
-                    RelicTreeNode primeNode = new RelicTreeNode(primeName, prime.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "");
+                    TreeNode type = primeTypes[primeType];
+                    TreeNode primeNode = new TreeNode(primeName, prime.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "");
+                    primeNode.MakeClickable(prime.Key);
                     foreach (KeyValuePair<string, JToken> primePart in prime.Value["parts"].ToObject<JObject>())
                     {
                         string partName = primePart.Key;
@@ -69,7 +72,8 @@ namespace WFInfoCS
 
                         if (partName.Contains("Kubrow"))
                             partName = partName.Substring(partName.IndexOf(" Blueprint") + 1);
-                        RelicTreeNode partNode = new RelicTreeNode(partName, primePart.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "");
+                        TreeNode partNode = new TreeNode(partName, primePart.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "");
+                        partNode.MakeClickable(primePart.Key);
                         if (Main.dataBase.marketData.TryGetValue(primePart.Key.ToString(), out JToken marketValues))
                             partNode.SetPrimePart(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
                         else if (Main.dataBase.equipmentData.TryGetValue(primePart.Key, out JToken job))
@@ -99,7 +103,7 @@ namespace WFInfoCS
 
             foreach (string typeName in types)
             {
-                RelicTreeNode primeType = primeTypes[typeName];
+                TreeNode primeType = primeTypes[typeName];
                 primeType.ResetFilter();
                 primeType.FilterOutVaulted();
                 EqmtTree.Items.Add(primeType);
@@ -118,7 +122,7 @@ namespace WFInfoCS
                 DragMove();
         }
 
-        private void SortBoxChanged(object sender, SelectionChangedEventArgs e)
+        public void SortBoxChanged(object sender, SelectionChangedEventArgs e)
         {
             /*   < ComboBoxItem Content = "Name" />
                  < ComboBoxItem Content = "Cost" />
@@ -128,7 +132,7 @@ namespace WFInfoCS
             if (IsLoaded)
             {
                 EqmtTree.Items.SortDescriptions.Clear();
-                foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
+                foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
                 {
                     primeType.Value.Sort(SortBox.SelectedIndex, false);
                     primeType.Value.RecolorChildren();
@@ -142,7 +146,8 @@ namespace WFInfoCS
                             EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Plat_Val", System.ComponentModel.ListSortDirection.Descending));
                             break;
                         case 2:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Diff_Val", System.ComponentModel.ListSortDirection.Descending));
+                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Diff_Val", System.ComponentModel.ListSortDirection.Ascending));
+                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Count_Val", System.ComponentModel.ListSortDirection.Ascending));
                             break;
                         //case 3:
                         //    EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
@@ -152,13 +157,13 @@ namespace WFInfoCS
                             break;
                     }
                     bool i = false;
-                    foreach (RelicTreeNode prime in EqmtTree.Items)
+                    foreach (TreeNode prime in EqmtTree.Items)
                     {
                         i = !i;
                         if (i)
-                            prime.Background_Color = RelicTreeNode.BACK_D_BRUSH;
+                            prime.Background_Color = TreeNode.BACK_D_BRUSH;
                         else
-                            prime.Background_Color = RelicTreeNode.BACK_U_BRUSH;
+                            prime.Background_Color = TreeNode.BACK_U_BRUSH;
                     }
                 }
             }
@@ -168,7 +173,7 @@ namespace WFInfoCS
         {
             if ((bool)vaulted.IsChecked)
             {
-                foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
+                foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
                     primeType.Value.FilterOutVaulted(true);
 
                 RefreshVisibleRelics();
@@ -224,18 +229,18 @@ namespace WFInfoCS
             int index = 0;
             if (showAllEqmt)
             {
-                List<RelicTreeNode> activeNodes = new List<RelicTreeNode>();
+                List<TreeNode> activeNodes = new List<TreeNode>();
                 foreach (string typeName in types)
                 {
-                    RelicTreeNode primeType = primeTypes[typeName];
-                    foreach (RelicTreeNode eqmt in primeType.ChildrenFiltered)
+                    TreeNode primeType = primeTypes[typeName];
+                    foreach (TreeNode eqmt in primeType.ChildrenFiltered)
                         activeNodes.Add(eqmt);
                 }
 
 
                 for (index = 0; index < EqmtTree.Items.Count;)
                 {
-                    RelicTreeNode eqmt = (RelicTreeNode)EqmtTree.Items.GetItemAt(index);
+                    TreeNode eqmt = (TreeNode)EqmtTree.Items.GetItemAt(index);
                     if (!activeNodes.Contains(eqmt))
                         EqmtTree.Items.RemoveAt(index);
                     else
@@ -245,7 +250,7 @@ namespace WFInfoCS
                     }
                 }
 
-                foreach (RelicTreeNode eqmt in activeNodes)
+                foreach (TreeNode eqmt in activeNodes)
                     EqmtTree.Items.Add(eqmt);
 
                 SortBoxChanged(null, null);
@@ -253,7 +258,7 @@ namespace WFInfoCS
             {
                 foreach (string typeName in types)
                 {
-                    RelicTreeNode primeType = primeTypes[typeName];
+                    TreeNode primeType = primeTypes[typeName];
                     int curr = EqmtTree.Items.IndexOf(primeType);
                     if (primeType.ChildrenFiltered.Count == 0)
                     {
@@ -274,15 +279,15 @@ namespace WFInfoCS
 
         private void ReapplyFilters()
         {
-            foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
+            foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
                 primeType.Value.ResetFilter();
 
             if ((bool)vaulted.IsChecked)
-                foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
+                foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
                     primeType.Value.FilterOutVaulted(true);
 
             if (searchText != null && searchText.Length != 0)
-                foreach (KeyValuePair<string, RelicTreeNode> primeType in primeTypes)
+                foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
                     primeType.Value.FilterSearchText(searchText, false, true);
 
             RefreshVisibleRelics();

@@ -15,7 +15,7 @@ namespace WFInfoCS
     {
         private bool searchActive = false;
         private bool showAllRelics = false;
-        public static List<RelicTreeNode> RelicNodes { get; set; }
+        public static List<TreeNode> RelicNodes { get; set; }
         public static string[] searchText;
 
         public RelicsWindow()
@@ -40,15 +40,15 @@ namespace WFInfoCS
             int index = 0;
             if (showAllRelics)
             {
-                List<RelicTreeNode> activeNodes = new List<RelicTreeNode>();
-                foreach (RelicTreeNode era in RelicNodes)
-                    foreach (RelicTreeNode relic in era.ChildrenFiltered)
+                List<TreeNode> activeNodes = new List<TreeNode>();
+                foreach (TreeNode era in RelicNodes)
+                    foreach (TreeNode relic in era.ChildrenFiltered)
                         activeNodes.Add(relic);
 
 
                 for (index = 0; index < RelicTree.Items.Count;)
                 {
-                    RelicTreeNode relic = (RelicTreeNode)RelicTree.Items.GetItemAt(index);
+                    TreeNode relic = (TreeNode)RelicTree.Items.GetItemAt(index);
                     if (!activeNodes.Contains(relic))
                         RelicTree.Items.RemoveAt(index);
                     else
@@ -58,13 +58,13 @@ namespace WFInfoCS
                     }
                 }
 
-                foreach (RelicTreeNode relic in activeNodes)
+                foreach (TreeNode relic in activeNodes)
                     RelicTree.Items.Add(relic);
 
                 SortBoxChanged(null, null);
             } else
             {
-                foreach (RelicTreeNode era in RelicNodes)
+                foreach (TreeNode era in RelicNodes)
                 {
                     int curr = RelicTree.Items.IndexOf(era);
                     if (era.ChildrenFiltered.Count == 0)
@@ -87,15 +87,15 @@ namespace WFInfoCS
         private void ReapplyFilters()
         {
 
-            foreach (RelicTreeNode era in RelicNodes)
+            foreach (TreeNode era in RelicNodes)
                 era.ResetFilter();
 
             if ((bool)vaulted.IsChecked)
-                foreach (RelicTreeNode era in RelicNodes)
+                foreach (TreeNode era in RelicNodes)
                     era.FilterOutVaulted(true);
 
             if (searchText != null && searchText.Length != 0)
-                foreach (RelicTreeNode era in RelicNodes)
+                foreach (TreeNode era in RelicNodes)
                     era.FilterSearchText(searchText, false, true);
 
             RefreshVisibleRelics();
@@ -105,7 +105,7 @@ namespace WFInfoCS
         {
             if ((bool)vaulted.IsChecked)
             {
-                foreach (RelicTreeNode era in RelicNodes)
+                foreach (TreeNode era in RelicNodes)
                     era.FilterOutVaulted(true);
 
                 RefreshVisibleRelics();
@@ -138,7 +138,7 @@ namespace WFInfoCS
 
             if (IsLoaded)
             {
-                foreach (RelicTreeNode era in RelicNodes)
+                foreach (TreeNode era in RelicNodes)
                 {
                     era.Sort(SortBox.SelectedIndex);
                     era.RecolorChildren();
@@ -163,13 +163,13 @@ namespace WFInfoCS
                             break;
                     }
                     bool i = false;
-                    foreach (RelicTreeNode relic in RelicTree.Items)
+                    foreach (TreeNode relic in RelicTree.Items)
                     {
                         i = !i;
                         if (i)
-                            relic.Background_Color = RelicTreeNode.BACK_D_BRUSH;
+                            relic.Background_Color = TreeNode.BACK_D_BRUSH;
                         else
-                            relic.Background_Color = RelicTreeNode.BACK_U_BRUSH;
+                            relic.Background_Color = TreeNode.BACK_U_BRUSH;
                     }
                 }
             }
@@ -192,28 +192,28 @@ namespace WFInfoCS
         { // triggers when the window is first loaded, populates all the listviews once.
 
             #region Populate grouped collection
-            RelicNodes = new List<RelicTreeNode>();
+            RelicNodes = new List<TreeNode>();
 
-            RelicTreeNode lith = new RelicTreeNode("Lith", "");
-            RelicTreeNode meso = new RelicTreeNode("Meso", "");
-            RelicTreeNode neo = new RelicTreeNode("Neo", "");
-            RelicTreeNode axi = new RelicTreeNode("Axi", "");
+            TreeNode lith = new TreeNode("Lith", "");
+            TreeNode meso = new TreeNode("Meso", "");
+            TreeNode neo = new TreeNode("Neo", "");
+            TreeNode axi = new TreeNode("Axi", "");
             RelicNodes.AddRange(new[] { lith, meso, neo, axi });
             int eraNum = 0;
-            foreach (RelicTreeNode head in RelicNodes)
+            foreach (TreeNode head in RelicNodes)
             {
                 head.SortNum = eraNum++;
                 foreach (JProperty prop in Main.dataBase.relicData[head.Name])
                 {
                     JObject primeItems = (JObject)Main.dataBase.relicData[head.Name][prop.Name];
                     string vaulted = primeItems["vaulted"].ToObject<bool>() ? "vaulted" : "";
-                    RelicTreeNode relic = new RelicTreeNode(prop.Name, vaulted);
+                    TreeNode relic = new TreeNode(prop.Name, vaulted);
                     relic.Era = head.Name;
                     foreach (KeyValuePair<string, JToken> kvp in primeItems)
                     {
                         if (kvp.Key != "vaulted" && Main.dataBase.marketData.TryGetValue(kvp.Value.ToString(), out JToken marketValues))
                         {
-                            RelicTreeNode part = new RelicTreeNode(kvp.Value.ToString(), "");
+                            TreeNode part = new TreeNode(kvp.Value.ToString(), "");
                             part.SetPartText(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), kvp.Key);
                             relic.AddChild(part);
                         }

@@ -414,9 +414,7 @@ namespace WFInfoCS
 
             if (saveDrop)
             {
-                SaveDatabase(eqmtDataPath, equipmentData);
-                SaveDatabase(relicDataPath, relicData);
-                SaveDatabase(nameDataPath, nameData);
+                SaveEquipmentJSONs();
             }
 
             if (saveMarket || saveDrop)
@@ -458,13 +456,18 @@ namespace WFInfoCS
             });
         }
 
+        public void SaveEquipmentJSONs()
+        {
+            SaveDatabase(eqmtDataPath, equipmentData);
+            SaveDatabase(relicDataPath, relicData);
+            SaveDatabase(nameDataPath, nameData);
+        }
+
         public void ForceEquipmentUpdate()
         {
             Main.AddLog("Forcing equipment update");
             LoadEqmtData(true);
-            SaveDatabase(eqmtDataPath, equipmentData);
-            SaveDatabase(relicDataPath, relicData);
-            SaveDatabase(nameDataPath, nameData);
+            SaveEquipmentJSONs();
             Main.RunOnUIThread(() =>
             {
                 MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm");
