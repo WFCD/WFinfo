@@ -259,7 +259,7 @@ namespace WFInfoCS
             DateTime filteredDate = allFiltered["timestamp"].ToObject<DateTime>().ToLocalTime().AddHours(-1);
             DateTime eqmtDate = equipmentData.TryGetValue("timestamp", out _) ? equipmentData["timestamp"].ToObject<DateTime>() : filteredDate;
 
-            if (!false || eqmtDate.CompareTo(filteredDate) <= 0)
+            if (force || eqmtDate.CompareTo(filteredDate) <= 0)
             {
                 filteredDate = filteredDate.AddHours(1);
 
