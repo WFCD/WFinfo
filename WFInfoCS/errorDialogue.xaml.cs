@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Ionic.Zip;
+using System;
 using System.Diagnostics;
-using System.IO.Compression;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -13,7 +13,7 @@ namespace WFInfoCS
     public partial class ErrorDialogue : System.Windows.Window
     {
 
-        string startPath = Main.appPath + @"\debug";
+        string startPath = Main.appPath + @"\Debug";
         string zipPath = Main.appPath + @"\generatedZip";
         public ErrorDialogue()
         {
@@ -22,21 +22,34 @@ namespace WFInfoCS
             Focus();
         }
 
-        private void YesClick(object sender, RoutedEventArgs e)
+        public void YesClick(object sender, RoutedEventArgs e)
         {
             if (!Directory.Exists(zipPath))
             {
                 _ = Directory.CreateDirectory(zipPath);
             }
+            var fullZipPath = zipPath + @"\WFInfoError" + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".zip";
+            if (File.Exists(startPath + @"\debug.log")) File.Delete(startPath + @"\debug.log");
+            File.Copy(startPath + @"\..\debug.log", startPath + @"\debug.log");
+            int segmentsCreated;
             try
             {
-                ZipFile.CreateFromDirectory(startPath, zipPath + @"\WFInfoError" + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".zip");
-            }
-            catch (Exception)
-            {
+                using (ZipFile zip = new ZipFile())
+                {
+                    zip.AddDirectory(startPath);
+                    zip.Comment = "This zip was created at " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
+                    zip.MaxOutputSegmentSize64 = 8000 * 1024; // 8m segments
+                    zip.Save(zipPath + @"\WFInfoError.zip");
 
+                    segmentsCreated = zip.NumberOfSegmentsForMostRecentSave;
+                }
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog("Unable to zip due to: " + ex.ToString());
                 throw;
             }
+
             OCR.errorDetected = false;
             Process.Start(Main.appPath + @"\generatedZip");
             Close();

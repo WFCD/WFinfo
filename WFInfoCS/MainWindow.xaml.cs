@@ -30,7 +30,8 @@ namespace WFInfoCS
                 {
                     Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
 
-                } else
+                }
+                else
                 {
                     Settings.settingsObj = new JObject();
                 }

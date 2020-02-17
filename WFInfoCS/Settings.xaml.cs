@@ -103,14 +103,16 @@ namespace WFInfoCS
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
                     Main.dataBase.EnableLogcapture();
-                } else
+                }
+                else
                 {
                     settingsObj["Auto"] = false;
                     auto = false;
                     autoCheckbox.IsChecked = false;
                     Main.dataBase.DisableLogCapture();
                 }
-            } else
+            }
+            else
             {
                 settingsObj["Auto"] = false;
                 auto = false;
@@ -149,7 +151,8 @@ namespace WFInfoCS
                     scaleBar.Value = value;
                     Scaling_box.Text = value + "%";
                     Save();
-                } else
+                }
+                else
                     Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
             }
             catch
@@ -196,6 +199,11 @@ namespace WFInfoCS
         private void ActivationLost(object sender, RoutedEventArgs e)
         {
             Activation_key_box.Text = activationKey.ToString();
+        }
+
+        private void ClickCreateDebug(object sender, RoutedEventArgs e)
+        {
+            Main.SpawnErrorPopup();
         }
     }
 }

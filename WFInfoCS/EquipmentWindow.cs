@@ -91,7 +91,8 @@ namespace WFInfoCS
 
 
                             partNode.SetPrimeEqmt(plat, primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
-                        } else
+                        }
+                        else
                             Console.WriteLine(primePart.Key + " has no marketValues?");
 
                         primeNode.AddChild(partNode);
@@ -177,7 +178,8 @@ namespace WFInfoCS
                     primeType.Value.FilterOutVaulted(true);
 
                 RefreshVisibleRelics();
-            } else
+            }
+            else
                 ReapplyFilters();
         }
 
@@ -254,7 +256,8 @@ namespace WFInfoCS
                     EqmtTree.Items.Add(eqmt);
 
                 SortBoxChanged(null, null);
-            } else
+            }
+            else
             {
                 foreach (string typeName in types)
                 {
@@ -264,7 +267,8 @@ namespace WFInfoCS
                     {
                         if (curr != -1)
                             EqmtTree.Items.RemoveAt(curr);
-                    } else
+                    }
+                    else
                     {
                         if (curr == -1)
                             EqmtTree.Items.Insert(index, primeType);
@@ -293,7 +297,8 @@ namespace WFInfoCS
             RefreshVisibleRelics();
         }
 
-        private void WindowLoaded(object sender, RoutedEventArgs e) {
+        private void WindowLoaded(object sender, RoutedEventArgs e)
+        {
             populate();
         }
     }

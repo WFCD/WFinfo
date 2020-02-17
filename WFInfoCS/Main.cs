@@ -92,7 +92,8 @@ namespace WFInfoCS
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                } else if (Settings.debug || OCR.VerifyWarframe())
+                }
+                else if (Settings.debug || OCR.VerifyWarframe())
                 {
                     //if (Ocr.verifyFocus()) 
                     //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
@@ -140,7 +141,8 @@ namespace WFInfoCS
                             StatusUpdate("Faild to load image", 1);
                         }
                     });
-                } else
+                }
+                else
                 {
                     StatusUpdate("Faild to load image", 1);
                 }
