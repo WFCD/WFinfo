@@ -59,14 +59,12 @@ namespace WFInfoCS
                 throw;
             }
 
-            OCR.errorDetected = false;
             Process.Start(Main.appPath + @"\generatedZip");
             Close();
         }
 
         private void NoClick(object sender, RoutedEventArgs e)
         {
-            OCR.errorDetected = false;
             Close();
         }
 

@@ -319,9 +319,11 @@ namespace WFInfoCS
                             gameName += " Blueprint";
                         }
 
-                        nameData[gameName] = partName;
                         if (marketData.TryGetValue(partName, out _))
+                        {
+                            nameData[gameName] = partName;
                             marketData[partName]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString());
+                        }
                     }
                 }
 

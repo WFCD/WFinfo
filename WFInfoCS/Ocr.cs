@@ -134,7 +134,6 @@ namespace WFInfoCS
         public static int pixelFissureYDisplay = 47;
 
 
-        public static bool errorDetected = false;
         private static bool processingActive = false;
 
         private static Bitmap bigScreenshot;
@@ -150,99 +149,102 @@ namespace WFInfoCS
                 return;
             }
             processingActive = true;
-            Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
-
             Main.StatusUpdate("Processing...", 0);
-            DateTime time = DateTime.UtcNow;
-            string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
-
-            var watch = Stopwatch.StartNew();
-            long start = watch.ElapsedMilliseconds;
-
-            // Look at me mom, I'm doing fancy shit
-            Main.AddLog("Scaling values: Screen_Scaling = " + (screenScaling * 100).ToString("F2") + "%, DPI_Scaling = " + (dpiScaling * 100).ToString("F2") + "%, UI_Scaling = " + (uiScaling * 100).ToString("F0") + "%");
-
-
-            // Get that theme
-            WFtheme active = GetThemeWeighted(out _, file);
-
-
-            bigScreenshot = file ?? CaptureScreenshot();
-            // Get the part box and filter it
-            partialScreenshotFiltered = FilterPartNames(bigScreenshot, active);
-
-            Directory.CreateDirectory(Main.appPath + @"\Debug");
-
-            bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + timestamp + ".png");
-            partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + timestamp + ".png");
-            partialScreenshotFiltered.Save(Main.appPath + @"\Debug\PartBoxFilter " + timestamp + ".png");
-
-            List<string> players = SeparatePlayers(partialScreenshotFiltered);
-            if (players != null)
+            Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
+            try
             {
-                int startX = center.X - partialScreenshotFiltered.Width / 2 + (int)(partialScreenshotFiltered.Width * 0.004);
-                if (players.Count == 3 && players[0].Length > 0) { startX += partialScreenshotFiltered.Width / 8; }
-                int overWid = (int)(partialScreenshotFiltered.Width / (4.1 * dpiScaling));
-                int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScaling);
-                int partNumber = 0;
-                foreach (string part in players)
+                DateTime time = DateTime.UtcNow;
+                string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
+
+                var watch = Stopwatch.StartNew();
+                long start = watch.ElapsedMilliseconds;
+
+                // Look at me mom, I'm doing fancy shit
+                Main.AddLog("Scaling values: Screen_Scaling = " + (screenScaling * 100).ToString("F2") + "%, DPI_Scaling = " + (dpiScaling * 100).ToString("F2") + "%, UI_Scaling = " + (uiScaling * 100).ToString("F0") + "%");
+
+
+                // Get that theme
+                WFtheme active = GetThemeWeighted(out _, file);
+
+
+                bigScreenshot = file ?? CaptureScreenshot();
+                // Get the part box and filter it
+                partialScreenshotFiltered = FilterPartNames(bigScreenshot, active);
+
+                Directory.CreateDirectory(Main.appPath + @"\Debug");
+
+                bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + timestamp + ".png");
+                partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + timestamp + ".png");
+                partialScreenshotFiltered.Save(Main.appPath + @"\Debug\PartBoxFilter " + timestamp + ".png");
+
+                List<string> players = SeparatePlayers(partialScreenshotFiltered);
+                if (players != null)
                 {
-                    if (part.Length > 10)
+                    int startX = center.X - partialScreenshotFiltered.Width / 2 + (int)(partialScreenshotFiltered.Width * 0.004);
+                    if (players.Count == 3 && players[0].Length > 0) { startX += partialScreenshotFiltered.Width / 8; }
+                    int overWid = (int)(partialScreenshotFiltered.Width / (4.1 * dpiScaling));
+                    int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScaling);
+                    int partNumber = 0;
+                    foreach (string part in players)
                     {
-                        string correctName = Main.dataBase.GetPartName(part, out _);
-                        JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
-                        string plat = job["plat"].ToObject<string>();
-                        string ducats = job["ducats"].ToObject<string>();
-                        string volume = job["volume"].ToObject<string>();
-                        bool vaulted = Main.dataBase.IsPartVaulted(correctName);
-                        string partsOwned = Main.dataBase.PartsOwned(correctName);
-
-                        Main.RunOnUIThread(() =>
+                        if (part.Length > 10)
                         {
-                            if (Settings.isOverlaySelected)
-                            {
-                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
-                                Main.overlays[partNumber].Resize(overWid);
-                                Main.overlays[partNumber].Display((int)((startX + partialScreenshotFiltered.Width / 4 * partNumber) / dpiScaling), startY);
-                            }
-                            else
-                            {
-                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
-                            }
-                        });
+                            string correctName = Main.dataBase.GetPartName(part, out _);
+                            JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
+                            string plat = job["plat"].ToObject<string>();
+                            string ducats = job["ducats"].ToObject<string>();
+                            string volume = job["volume"].ToObject<string>();
+                            bool vaulted = Main.dataBase.IsPartVaulted(correctName);
+                            string partsOwned = Main.dataBase.PartsOwned(correctName);
 
+                            Main.RunOnUIThread(() =>
+                            {
+                                if (Settings.isOverlaySelected)
+                                {
+                                    Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
+                                    Main.overlays[partNumber].Resize(overWid);
+                                    Main.overlays[partNumber].Display((int)((startX + partialScreenshotFiltered.Width / 4 * partNumber) / dpiScaling), startY);
+                                } else
+                                {
+                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
+                                }
+                            });
+
+                        }
+                        partNumber++;
                     }
-                    partNumber++;
-                }
-                var end = watch.ElapsedMilliseconds;
-                Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
-                Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
-                errorDetected = false;
+                    var end = watch.ElapsedMilliseconds;
+                    Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
+                    Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
-            }
-            else
-            {
-                errorDetected = true;
-                Main.AddLog(("----  Partial Processing Time, coudln't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
-                Main.StatusUpdate("Couldn't find any rewards to display", 2);
-                Main.RunOnUIThread(() =>
+                } else
                 {
-                    Main.SpawnErrorPopup(time);
-                });
+                    Main.AddLog(("----  Partial Processing Time, coudln't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
+                    Main.StatusUpdate("Couldn't find any rewards to display", 2);
+                    Main.RunOnUIThread(() =>
+                    {
+                        Main.SpawnErrorPopup(time);
+                    });
 
+                }
+                watch.Stop();
+
+                (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
+                    .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
+                    .ToList().ForEach(f => f.Delete());
+
+                bigScreenshot.Dispose();
+                bigScreenshot = null;
+                partialScreenshot.Dispose();
+                partialScreenshot = null;
+                partialScreenshotFiltered.Dispose();
+                partialScreenshotFiltered = null;
             }
-            watch.Stop();
-
-            (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
-                .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
-                .ToList().ForEach(f => f.Delete());
-
-            bigScreenshot.Dispose();
-            bigScreenshot = null;
-            partialScreenshot.Dispose();
-            partialScreenshot = null;
-            partialScreenshotFiltered.Dispose();
-            partialScreenshotFiltered = null;
+            catch(Exception ex)
+            {
+                Main.AddLog(ex.ToString());
+                Main.StatusUpdate("ERROR OCCURED DURING PROCESSING", 1);
+            }
             processingActive = false;
 
         }
