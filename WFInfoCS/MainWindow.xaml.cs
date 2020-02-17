@@ -194,7 +194,6 @@ namespace WFInfoCS
 
         private void OnLocationChanged(object sender, EventArgs e)
         {
-            Console.WriteLine("COORDS: " + Left + ", " + Top);
             Settings.mainWindowLocation = new Point(Left, Top);
             Settings.settingsObj["MainWindowLocation_X"] = Left;
             Settings.settingsObj["MainWindowLocation_Y"] = Top;

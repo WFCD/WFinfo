@@ -109,8 +109,8 @@ namespace WFInfoCS
                 primeType.FilterOutVaulted();
                 EqmtTree.Items.Add(primeType);
             }
+            SortBoxChanged(null, null);
             RefreshVisibleRelics();
-
             Show();
             Focus();
 
@@ -125,10 +125,6 @@ namespace WFInfoCS
 
         public void SortBoxChanged(object sender, SelectionChangedEventArgs e)
         {
-            /*   < ComboBoxItem Content = "Name" />
-                 < ComboBoxItem Content = "Cost" />
-                 < ComboBoxItem Content = "Unowned" />
-                 < ComboBoxItem Content = "Set cost" />*/
 
             if (IsLoaded)
             {
@@ -148,7 +144,6 @@ namespace WFInfoCS
                             break;
                         case 2:
                             EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Diff_Val", System.ComponentModel.ListSortDirection.Ascending));
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Count_Val", System.ComponentModel.ListSortDirection.Ascending));
                             break;
                         //case 3:
                         //    EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
@@ -245,7 +240,7 @@ namespace WFInfoCS
                     TreeNode eqmt = (TreeNode)EqmtTree.Items.GetItemAt(index);
                     if (!activeNodes.Contains(eqmt))
                         EqmtTree.Items.RemoveAt(index);
-                    else
+                     else
                     {
                         activeNodes.Remove(eqmt);
                         index++;

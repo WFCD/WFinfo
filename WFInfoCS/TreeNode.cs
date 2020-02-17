@@ -218,13 +218,11 @@ namespace WFInfoCS
                 {
                     _intact += INTACT_CHANCE_RARE * node._plat;
                     _radiant += RADIANT_CHANCE_RARE * node._plat;
-                }
-                else if (node.NameColor == UNCOMMON_COLOR)
+                } else if (node.NameColor == UNCOMMON_COLOR)
                 {
                     _intact += INTACT_CHANCE_UNCOMMON * node._plat;
                     _radiant += RADIANT_CHANCE_UNCOMMON * node._plat;
-                }
-                else
+                } else
                 {
                     _intact += INTACT_CHANCE_COMMON * node._plat;
                     _radiant += RADIANT_CHANCE_COMMON * node._plat;
@@ -257,11 +255,11 @@ namespace WFInfoCS
             Grid_Shown = "Visible";
             foreach (TreeNode kid in Children)
             {
-                _plat += kid._plat * kid._count;
-                _owned += kid._owned;
-                _count += kid._count;
+                Plat_Val += kid.Plat_Val * kid.Count_Val;
+                Owned_Val += kid.Owned_Val;
+                Count_Val += kid.Count_Val;
             }
-
+            Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
 
             Col1_Text1 = _owned + "/" + _count;
             Col1_Text2 = _plat.ToString("F1");
@@ -272,9 +270,10 @@ namespace WFInfoCS
 
         internal void SetPrimeEqmt(double plat, int owned, int count)
         {
-            _plat = plat;
-            _owned = owned;
-            _count = count;
+            Plat_Val = plat;
+            Owned_Val = owned;
+            Count_Val = count;
+            Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
 
             Col1_Text1 = owned + "/" + count;
             Col1_Text2 = _plat.ToString("F1");
@@ -291,19 +290,7 @@ namespace WFInfoCS
 
         public void SetPrimePart(double plat, int ducat, int owned, int count)
         {
-            _plat = plat;
-            _ducat = ducat;
-            _owned = owned;
-            _count = count;
-
-            Col1_Text1 = owned + "/" + count;
-            Col1_Text2 = _plat.ToString("F1");
-
-            Col1_Img1 = PLAT_SRC;
-            Col1_Img1_Shown = "Visible";
-
-            Col2_Text1 = "";
-            Col2_Text2 = "";
+            SetPrimeEqmt(plat, owned, count);
             Col2_Text3 = ducat.ToString();
             Col2_Img1 = DUCAT_SRC;
             Col2_Img1_Shown = "Visible";
@@ -317,13 +304,11 @@ namespace WFInfoCS
             {
                 NameColor = RARE_COLOR;
                 NameBrush = RARE_BRUSH;
-            }
-            else if (rarity.Contains("uncomm"))
+            } else if (rarity.Contains("uncomm"))
             {
                 NameColor = UNCOMMON_COLOR;
                 NameBrush = UNCOMMON_BRUSH;
-            }
-            else if (rarity.Contains("comm"))
+            } else if (rarity.Contains("comm"))
             {
                 NameColor = COMMON_COLOR;
                 NameBrush = COMMON_BRUSH;
@@ -349,8 +334,7 @@ namespace WFInfoCS
                 Col2_Img1_Shown = "Visible";
                 Col2_Margin1 = new Thickness(0, 0, 78, 0);
                 Col2_Margin2 = new Thickness(0, 0, 60, 0);
-            }
-            else
+            } else
             {
                 Col1_Img1 = null;
                 Col1_Text1 = "";
@@ -485,14 +469,12 @@ namespace WFInfoCS
                                 ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Name).ToList();
                                 break;
                         }
-                    }
-                    else            // Parts
+                    } else            // Parts
                     {
                         Children = Children.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
                         ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
                     }
-                }
-                else
+                } else
                 {
                     switch (index)
                     {
@@ -506,8 +488,8 @@ namespace WFInfoCS
                             ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Plat_Val).ToList();
                             break;
                         case 2:
-                            Children = Children.AsParallel().OrderBy(p => p.Count_Val).OrderBy(p => p.Diff_Val).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Count_Val).OrderBy(p => p.Diff_Val).ToList();
+                            Children = Children.AsParallel().OrderBy(p => p.Owned_Val).OrderBy(p => p.Diff_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Owned_Val).OrderBy(p => p.Diff_Val).ToList();
                             break;
                         //case 3:
                         //    Children = Children.AsParallel().OrderByDescending(p => p._bonus).ToList();
@@ -613,15 +595,17 @@ namespace WFInfoCS
             set { SetField(ref _owned, value); }
         }
 
-        public int _count = 0;
-        public int Count_Val
+        public double _count = 0;
+        public double Count_Val
         {
             get { return _count; }
             set { SetField(ref _count, value); }
         }
-        public int Diff_Val
+        public double _diff = 0;
+        public double Diff_Val
         {
-            get { return _owned - _count; }
+            get { return _diff; }
+            set { SetField(ref _diff, value); }
         }
 
         public double _intact = 0;
@@ -716,9 +700,11 @@ namespace WFInfoCS
 
                     this.Owned_Val--;
                     Parent.Owned_Val--;
+                    Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
+                    Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
                     Col1_Text1 = Owned_Val + "/" + Count_Val;
                     Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
-                    EquipmentWindow.INSTANCE.SortBoxChanged(null, null);
+                    EquipmentWindow.INSTANCE.SortBoxChanged(null,null);
                 }
             }
         }
@@ -738,6 +724,8 @@ namespace WFInfoCS
 
                     this.Owned_Val++;
                     Parent.Owned_Val++;
+                    Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
+                    Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
                     Col1_Text1 = Owned_Val + "/" + Count_Val;
                     Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
                     EquipmentWindow.INSTANCE.SortBoxChanged(null, null);
