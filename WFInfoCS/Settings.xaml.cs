@@ -204,7 +204,7 @@ namespace WFInfoCS
 
         private void ClickCreateDebug(object sender, RoutedEventArgs e)
         {
-            Main.SpawnErrorPopup();
+            Main.SpawnErrorPopup(DateTime.UtcNow, 1800);
         }
     }
 }

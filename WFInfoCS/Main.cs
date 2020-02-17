@@ -104,9 +104,10 @@ namespace WFInfoCS
 
         }
 
-        public static void SpawnErrorPopup()
+        // timestamp is the time to look for, and gap is the threshold of seconds different
+        public static void SpawnErrorPopup(DateTime timeStamp, int gap = 30)
         {
-            popup = new ErrorDialogue();
+            popup = new ErrorDialogue(timeStamp, gap);
         }
 
         private void LoadScreenshot()

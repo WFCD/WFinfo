@@ -142,7 +142,6 @@ namespace WFInfoCS
         private static Bitmap partialScreenshotFiltered;
 
 
-
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
             if (processingActive)
@@ -154,6 +153,8 @@ namespace WFInfoCS
             Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
 
             Main.StatusUpdate("Processing...", 0);
+            DateTime time = DateTime.UtcNow;
+            string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
 
             var watch = Stopwatch.StartNew();
             long start = watch.ElapsedMilliseconds;
@@ -169,6 +170,13 @@ namespace WFInfoCS
             bigScreenshot = file ?? CaptureScreenshot();
             // Get the part box and filter it
             partialScreenshotFiltered = FilterPartNames(bigScreenshot, active);
+
+            Directory.CreateDirectory(Main.appPath + @"\Debug");
+
+            bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + timestamp + ".png");
+            partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + timestamp + ".png");
+            partialScreenshotFiltered.Save(Main.appPath + @"\Debug\PartBoxFilter " + timestamp + ".png");
+
             List<string> players = SeparatePlayers(partialScreenshotFiltered);
             if (players != null)
             {
@@ -219,17 +227,11 @@ namespace WFInfoCS
                 Main.StatusUpdate("Couldn't find any rewards to display", 2);
                 Main.RunOnUIThread(() =>
                 {
-                    Main.SpawnErrorPopup();
+                    Main.SpawnErrorPopup(time);
                 });
 
             }
             watch.Stop();
-
-            Directory.CreateDirectory(Main.appPath + @"\Debug");
-
-            bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
-            partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
-            partialScreenshotFiltered.Save(Main.appPath + @"\Debug\PartBoxFilter " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
 
             (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
                 .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
@@ -268,7 +270,6 @@ namespace WFInfoCS
                     graphics.CopyFromScreen(profileX, profileY, profileX, profileY, profileSize, CopyPixelOperation.SourceCopy);
                     graphics.CopyFromScreen(fissureX, fissureY, fissureX, fissureY, fissureSize, CopyPixelOperation.SourceCopy);
                 }
-                image.Save(Main.appPath + @"\Debug\TESTSHOT " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
             }
 
             double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };

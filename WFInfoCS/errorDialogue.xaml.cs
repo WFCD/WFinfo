@@ -1,7 +1,9 @@
 ﻿using Ionic.Zip;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -15,8 +17,15 @@ namespace WFInfoCS
 
         string startPath = Main.appPath + @"\Debug";
         string zipPath = Main.appPath + @"\generatedZip";
-        public ErrorDialogue()
+
+        private int distance;
+        private DateTime closest;
+
+        public ErrorDialogue(DateTime timeStamp, int gap)
         {
+            distance = gap;
+            closest = timeStamp;
+
             InitializeComponent();
             Show();
             Focus();
@@ -24,24 +33,24 @@ namespace WFInfoCS
 
         public void YesClick(object sender, RoutedEventArgs e)
         {
-            if (!Directory.Exists(zipPath))
-            {
-                _ = Directory.CreateDirectory(zipPath);
-            }
-            var fullZipPath = zipPath + @"\WFInfoError" + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".zip";
-            if (File.Exists(startPath + @"\debug.log")) File.Delete(startPath + @"\debug.log");
-            File.Copy(startPath + @"\..\debug.log", startPath + @"\debug.log");
-            int segmentsCreated;
+            Directory.CreateDirectory(zipPath);
+
+            List<FileInfo> files = (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
+                .Where(f => f.CreationTimeUtc > closest.AddSeconds(-1 * distance))
+                .Where(f => f.CreationTimeUtc < closest.AddSeconds(distance))
+                .ToList();
+
+            var fullZipPath = zipPath + @"\WFInfoError" + closest.ToString("yyyy-MM-dd HH-mm-ssff") + ".zip";
             try
             {
                 using (ZipFile zip = new ZipFile())
                 {
-                    zip.AddDirectory(startPath);
-                    zip.Comment = "This zip was created at " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
+                    foreach (FileInfo file in files)
+                        zip.AddFile(file.FullName,"");
+                    zip.AddFile(startPath + @"\..\debug.log", "");
+                    zip.Comment = "This zip was created at " + closest.ToString("yyyy-MM-dd HH-mm-ssff");
                     zip.MaxOutputSegmentSize64 = 8000 * 1024; // 8m segments
-                    zip.Save(zipPath + @"\WFInfoError.zip");
-
-                    segmentsCreated = zip.NumberOfSegmentsForMostRecentSave;
+                    zip.Save(fullZipPath);
                 }
             }
             catch (Exception ex)
