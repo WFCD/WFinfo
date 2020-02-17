@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WFInfoCS"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="WFInfoCS.MainWindow"
         mc:Ignorable="d"
-        Title="WFInfo" Height="130" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070">
+        Title="WFInfo" Height="130" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
         <Style x:Key="Label_Button" TargetType="Label">

@@ -17,6 +17,7 @@ namespace WFInfoCS
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
         public static Key activationKey;
+        public static Point mainWindowLocation;
         public static bool isOverlaySelected;
         public static bool debug;
         public static long autoDelay;

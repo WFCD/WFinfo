@@ -38,6 +38,12 @@ namespace WFInfoCS
                     Settings.settingsObj["Display"] = "Overlay";
                 Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
 
+                if (!Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
+                    Settings.settingsObj["MainWindowLocation_X"] = 300;
+                if (!Settings.settingsObj.TryGetValue("MainWindowLocation_Y", out _))
+                    Settings.settingsObj["MainWindowLocation_Y"] = 300;
+                Settings.mainWindowLocation = new Point(Settings.settingsObj.GetValue("MainWindowLocation_X").ToObject<Int32>(), Settings.settingsObj.GetValue("MainWindowLocation_Y").ToObject<Int32>());
+
                 if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
                     Settings.settingsObj["ActivationKey"] = "Snapshot";
                 Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
@@ -75,6 +81,22 @@ namespace WFInfoCS
                 InitializeComponent();
                 Version.Content = "v" + Main.BuildVersion + "-beta5";
 
+                this.Left = 300;
+                this.Top = 300;
+
+                System.Drawing.Rectangle winBounds = new System.Drawing.Rectangle(Convert.ToInt32(Settings.mainWindowLocation.X), Convert.ToInt32(Settings.mainWindowLocation.Y), Convert.ToInt32(Width), Convert.ToInt32(Height));
+                foreach (System.Windows.Forms.Screen scr in System.Windows.Forms.Screen.AllScreens)
+                {
+                    if (scr.Bounds.Contains(winBounds))
+                    {
+                        this.Left = Settings.mainWindowLocation.X;
+                        this.Top = Settings.mainWindowLocation.Y;
+                        break;
+                    }
+                }
+                Settings.settingsObj["MainWindowLocation_X"] = Left;
+                Settings.settingsObj["MainWindowLocation_Y"] = Top;
+                Settings.Save();
             }
             catch (Exception e)
             {
@@ -139,6 +161,8 @@ namespace WFInfoCS
         {
             if (Main.settingsWindow == null) { ChangeStatus("Settings window not yet loaded in", 2); return; }
             Main.settingsWindow.populate();
+            Main.settingsWindow.Left = Left + 320;
+            Main.settingsWindow.Top = Top;
             Main.settingsWindow.Show();
         }
 
@@ -165,6 +189,15 @@ namespace WFInfoCS
         {
             if (e.ChangedButton == MouseButton.Left)
                 DragMove();
+        }
+
+        private void OnLocationChanged(object sender, EventArgs e)
+        {
+            Console.WriteLine("COORDS: " + Left + ", " + Top);
+            Settings.mainWindowLocation = new Point(Left, Top);
+            Settings.settingsObj["MainWindowLocation_X"] = Left;
+            Settings.settingsObj["MainWindowLocation_Y"] = Top;
+            Settings.Save();
         }
     }
 }
