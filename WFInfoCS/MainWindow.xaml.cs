@@ -132,7 +132,7 @@ namespace WFInfoCS
         private void equipmentClick(object sender, RoutedEventArgs e)
         {
             if (Main.dataBase.equipmentData == null) { ChangeStatus("Equipment data not yet loaded in", 2); return; }
-            Main.equipmentWindow.populate();
+            Main.equipmentWindow.Show();
         }
 
         private void Settings_click(object sender, RoutedEventArgs e)
