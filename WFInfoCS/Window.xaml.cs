@@ -14,6 +14,7 @@ namespace WFInfoCS
         }
         public void loadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, int partNumber)
         {
+            Top = MainWindow.INSTANCE.Top + 150;
             Show();
             switch (partNumber)
             {
@@ -62,6 +63,7 @@ namespace WFInfoCS
                     Main.StatusUpdate("something went wrong while displaying: " + name + " in window", 1);
                     break;
             }
+            Left = MainWindow.INSTANCE.Left + 150 - (Width / 2);
         }
         private void Exit(object sender, RoutedEventArgs e)
         {
