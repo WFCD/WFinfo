@@ -7,7 +7,7 @@
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" 
         xmlns:local="clr-namespace:WFInfoCS"
         x:Class="WFInfoCS.EquipmentWindow"
-        Title="Equipment" Height="400" Width="400" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MinWidth="400" MaxWidth="400" MinHeight="110">
+        Title="Equipment" Height="400" Width="400" WindowStyle="None" AllowsTransparency="True" Loaded="WindowLoaded" ResizeMode="CanResizeWithGrip" MinWidth="400" MaxWidth="400" MinHeight="110">
     <Window.Resources>
         
     </Window.Resources>

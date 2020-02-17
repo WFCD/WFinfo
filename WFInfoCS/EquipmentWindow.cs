@@ -292,5 +292,9 @@ namespace WFInfoCS
 
             RefreshVisibleRelics();
         }
+
+        private void WindowLoaded(object sender, RoutedEventArgs e) {
+            populate();
+        }
     }
 }
