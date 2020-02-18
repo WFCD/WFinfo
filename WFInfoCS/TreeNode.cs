@@ -121,7 +121,7 @@ namespace WFInfoCS
         }
         public string Name_Sort
         {
-            get { return Parent.SortNum + _era + " " + _name; }
+            get { return Parent != null ? Parent.SortNum + _era + " " + _name : SortNum + _name; }
             set { SetField(ref _name, value); }
         }
         public string EqmtName_Sort
