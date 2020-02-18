@@ -201,6 +201,9 @@ namespace WFInfoCS
         private void ToggleShowAllEqmt(object sender, RoutedEventArgs e)
         {
             showAllEqmt = !showAllEqmt;
+            foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
+                foreach (TreeNode kid in primeType.Value.Children)
+                    kid.topLevel = showAllEqmt;
             EqmtTree.Items.Clear();
             RefreshVisibleRelics();
         }

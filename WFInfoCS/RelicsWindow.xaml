@@ -102,6 +102,7 @@
                     <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
                     <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource WFInfo_TreeViewItem}">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        <Setter Property="Visibility" Value="{Binding IsVisible}" />
                     </Style>
                 </TreeView.Resources>
             </TreeView>

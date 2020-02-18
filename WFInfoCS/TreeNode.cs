@@ -636,15 +636,9 @@ namespace WFInfoCS
             set { SetField(ref _bonus, value); }
         }
 
-        private Visibility _isCollapsed = Visibility.Collapsed;
-        public Visibility IsCollapsed
+        public Visibility IsVisible
         {
-            get { return _isCollapsed; }
-            set
-            {
-                SetField(ref _isCollapsed, value);
-                SetField(ref _isExpanded, value == Visibility.Visible);
-            }
+            get { return (Parent == null || Parent.IsExpanded || topLevel) ? Visibility.Visible : Visibility.Collapsed; }
         }
 
 
@@ -654,8 +648,9 @@ namespace WFInfoCS
             get { return _isExpanded; }
             set
             {
-                SetField(ref _isCollapsed, value ? Visibility.Visible : Visibility.Collapsed);
                 SetField(ref _isExpanded, value);
+                foreach (TreeNode kid in Children)
+                    kid.RaisePropertyChanged("IsVisible");
             }
         }
 
