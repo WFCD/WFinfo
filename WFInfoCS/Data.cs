@@ -227,8 +227,7 @@ namespace WFInfoCS
             if (!ducats.TryGetValue("ducats", out JToken temp))
             {
                 ducat = "0";
-            }
-            else
+            } else
             {
                 ducat = temp.ToObject<string>();
             }
@@ -313,8 +312,7 @@ namespace WFInfoCS
                         if (prime.Value["type"].ToString() == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")))
                         {
                             gameName += " Blueprint";
-                        }
-                        else if (prime.Value["type"].ToString() == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
+                        } else if (prime.Value["type"].ToString() == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
                         {
                             gameName += " Blueprint";
                         }
@@ -384,8 +382,7 @@ namespace WFInfoCS
                     if (equipmentData.TryGetValue(eqmt, out JToken temp))
                     {
                         equipmentData[eqmt]["parts"][str]["vaulted"] = false;
-                    }
-                    else
+                    } else
                     {
                         Console.WriteLine("Cannot find: " + eqmt + " in equipmentData");
                     }
@@ -568,7 +565,7 @@ namespace WFInfoCS
             return 1;
         }
 
-        public int LevenshteinDistance(string s, string t)
+        public static int LevenshteinDistance(string s, string t)
         {
             // Levenshtein Distance determines how many character changes it takes to form a known result
             // For example: Nuvo Prime is closer to Nova Prime (2) then Ash Prime (4)
@@ -582,15 +579,37 @@ namespace WFInfoCS
             if (n == 0 || m == 0)
                 return n + m;
 
-            for (int i = 0; i <= n; i++)
-                d[i, 0] = i;
+            d[0, 0] = 0;
 
-            for (int j = 0; j <= m; j++)
-                d[0, j] = j;
+            int count = 0;
+            for (int i = 1; i <= n; i++)
+                d[i, 0] = (s[i - 1] == ' ' ? count : count++);
+
+            count = 0;
+            for (int j = 1; j <= m; j++)
+                d[0, j] = (t[j - 1] == ' ' ? count : count++);
 
             for (int i = 1; i <= n; i++)
                 for (int j = 1; j <= m; j++)
-                    d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1), d[i - 1, j - 1] + ((t[j - 1] == s[i - 1] || t[j - 1] == ' ' || s[i - 1] == ' ') ? 0 : 1));
+                {
+                    // deletion of s
+                    int opt1 = d[i - 1, j];
+                    if (s[i - 1] != ' ')
+                        opt1++;
+
+                    // deletion of t
+                    int opt2 = d[i, j - 1];
+                    if (t[j - 1] != ' ')
+                        opt2++;
+
+                    // swapping s to t
+                    int opt3 = d[i - 1, j - 1];
+                    if (t[j - 1] != s[i - 1])
+                        opt3++;
+                    d[i, j] = Math.Min(Math.Min(opt1, opt2), opt3);
+                }
+
+
 
             return d[n, m];
         }
@@ -660,8 +679,7 @@ namespace WFInfoCS
                 } while (!(maxX && maxY));
 
                 num = d[n, m] - 1;
-            }
-            else
+            } else
             {
                 num = n + m;
             }
