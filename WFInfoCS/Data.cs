@@ -583,11 +583,11 @@ namespace WFInfoCS
 
             int count = 0;
             for (int i = 1; i <= n; i++)
-                d[i, 0] = (s[i - 1] == ' ' ? count : count++);
+                d[i, 0] = (s[i - 1] == ' ' ? count : ++count);
 
             count = 0;
             for (int j = 1; j <= m; j++)
-                d[0, j] = (t[j - 1] == ' ' ? count : count++);
+                d[0, j] = (t[j - 1] == ' ' ? count : ++count);
 
             for (int i = 1; i <= n; i++)
                 for (int j = 1; j <= m; j++)
