@@ -187,6 +187,10 @@ namespace WFInfoCS
         private void ToggleShowAllRelics(object sender, RoutedEventArgs e)
         {
             showAllRelics = !showAllRelics;
+            foreach(TreeNode era in RelicNodes)
+                foreach (TreeNode relic in era.Children)
+                    relic.topLevel = showAllRelics;
+
             RelicTree.Items.Clear();
             RefreshVisibleRelics();
         }
