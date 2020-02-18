@@ -91,8 +91,7 @@ namespace WFInfoCS
 
 
                             partNode.SetPrimeEqmt(plat, primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
-                        }
-                        else
+                        } else
                             Console.WriteLine(primePart.Key + " has no marketValues?");
 
                         primeNode.AddChild(partNode);
@@ -173,8 +172,7 @@ namespace WFInfoCS
                     primeType.Value.FilterOutVaulted(true);
 
                 RefreshVisibleRelics();
-            }
-            else
+            } else
                 ReapplyFilters();
         }
 
@@ -207,18 +205,16 @@ namespace WFInfoCS
             RefreshVisibleRelics();
         }
 
-        private void Add(object sender, RoutedEventArgs e)
+        private void ExpandAll(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Add was clicked");
-
-            //todo add 1 owned to current selected treeview item
+            foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
+                primeType.Value.ChangeExpandedTo(true);
         }
 
-        private void Subtract(object sender, RoutedEventArgs e)
+        private void CollapseAll(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Subtract was clicked");
-
-            //todo remove 1 owned of the current selected tree view item
+            foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
+                primeType.Value.ChangeExpandedTo(false);
         }
 
         private void RefreshVisibleRelics()
@@ -240,7 +236,7 @@ namespace WFInfoCS
                     TreeNode eqmt = (TreeNode)EqmtTree.Items.GetItemAt(index);
                     if (!activeNodes.Contains(eqmt))
                         EqmtTree.Items.RemoveAt(index);
-                     else
+                    else
                     {
                         activeNodes.Remove(eqmt);
                         index++;
@@ -251,8 +247,7 @@ namespace WFInfoCS
                     EqmtTree.Items.Add(eqmt);
 
                 SortBoxChanged(null, null);
-            }
-            else
+            } else
             {
                 foreach (string typeName in types)
                 {
@@ -262,8 +257,7 @@ namespace WFInfoCS
                     {
                         if (curr != -1)
                             EqmtTree.Items.RemoveAt(curr);
-                    }
-                    else
+                    } else
                     {
                         if (curr == -1)
                             EqmtTree.Items.Insert(index, primeType);

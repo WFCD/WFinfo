@@ -288,6 +288,13 @@ namespace WFInfoCS
             Col2_Img1_Shown = "Hidden";
         }
 
+        internal void ChangeExpandedTo(bool expand)
+        {
+            IsExpanded = expand;
+            foreach (TreeNode kid in Children)
+                kid.ChangeExpandedTo(expand);
+        }
+
         public void SetPrimePart(double plat, int ducat, int owned, int count)
         {
             SetPrimeEqmt(plat, owned, count);
@@ -629,11 +636,27 @@ namespace WFInfoCS
             set { SetField(ref _bonus, value); }
         }
 
+        private Visibility _isCollapsed = Visibility.Collapsed;
+        public Visibility IsCollapsed
+        {
+            get { return _isCollapsed; }
+            set
+            {
+                SetField(ref _isCollapsed, value);
+                SetField(ref _isExpanded, value == Visibility.Visible);
+            }
+        }
+
+
         private bool _isExpanded = false;
         public bool IsExpanded
         {
             get { return _isExpanded; }
-            set { SetField(ref _isExpanded, value); }
+            set
+            {
+                SetField(ref _isCollapsed, value ? Visibility.Visible : Visibility.Collapsed);
+                SetField(ref _isExpanded, value);
+            }
         }
 
         private List<TreeNode> _childrenFiltered;
@@ -704,7 +727,7 @@ namespace WFInfoCS
                     Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
                     Col1_Text1 = Owned_Val + "/" + Count_Val;
                     Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
-                    EquipmentWindow.INSTANCE.SortBoxChanged(null,null);
+                    EquipmentWindow.INSTANCE.SortBoxChanged(null, null);
                 }
             }
         }
