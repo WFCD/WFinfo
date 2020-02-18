@@ -590,7 +590,7 @@ namespace WFInfoCS
 
             for (int i = 1; i <= n; i++)
                 for (int j = 1; j <= m; j++)
-                    d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1), d[i - 1, j - 1] + (t[j - 1] == s[i - 1] ? 0 : 1));
+                    d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1), d[i - 1, j - 1] + ((t[j - 1] == s[i - 1] || t[j - 1] == ' ' || s[i - 1] == ' ') ? 0 : 1));
 
             return d[n, m];
         }
@@ -686,7 +686,7 @@ namespace WFInfoCS
             }
 
 
-            Main.AddLog("Found part: \"" + lowest_unfiltered + "\" from \"" + name + "\"");
+            Main.AddLog("Found part(" + low + "): \"" + lowest_unfiltered + "\" from \"" + name + "\"");
             return lowest;
         }
 

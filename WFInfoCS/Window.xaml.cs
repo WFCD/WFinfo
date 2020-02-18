@@ -8,11 +8,12 @@ namespace WFInfoCS
     /// </summary>
     public partial class Window : System.Windows.Window
     {
+
         public Window()
         {
             InitializeComponent();
         }
-        public void loadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, int partNumber)
+        public void loadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, int partNumber, bool resize = true)
         {
             Top = MainWindow.INSTANCE.Top + 150;
             Show();
@@ -25,7 +26,8 @@ namespace WFInfoCS
                     firstVolumeText.Text = volume + " sold last 48hrs";
                     firstVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
                     firstOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
-                    Width = 251;
+                    if (resize)
+                        Width = 251;
                     break;
 
                 case 1:
@@ -35,7 +37,8 @@ namespace WFInfoCS
                     secondVolumeText.Text = volume + " sold last 48hrs";
                     secondVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
                     secondOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
-                    Width = 501;
+                    if (resize)
+                        Width = 501;
                     break;
 
                 case 2:
@@ -45,7 +48,8 @@ namespace WFInfoCS
                     thirdVolumeText.Text = volume + " sold last 48hrs";
                     thirdVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
                     thirdOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
-                    Width = 751;
+                    if (resize)
+                        Width = 751;
                     break;
 
                 case 3:
@@ -55,7 +59,8 @@ namespace WFInfoCS
                     fourthVolumeText.Text = volume + " sold last 48hrs";
                     fourthVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
                     fourthOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
-                    Width = 1000;
+                    if (resize)
+                        Width = 1000;
                     break;
 
                 default:
@@ -63,7 +68,8 @@ namespace WFInfoCS
                     Main.StatusUpdate("something went wrong while displaying: " + name + " in window", 1);
                     break;
             }
-            Left = MainWindow.INSTANCE.Left + 150 - (Width / 2);
+            if (resize)
+                Left = MainWindow.INSTANCE.Left + 150 - (Width / 2);
         }
         private void Exit(object sender, RoutedEventArgs e)
         {
