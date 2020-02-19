@@ -275,7 +275,7 @@ namespace WFInfoCS
         private const double ERROR_DETECTION_THRESH = 0.25;
         private static bool CheckIfError()
         {
-            for(int i = 0; i < firstProximity.Length; i++)
+            for(int i = 0; i < firstChecks.Count; i++)
                 if(firstProximity[i] > ERROR_DETECTION_THRESH * firstChecks[i].Length && 
                   (secondProximity[i] == -1 || secondProximity[i] > ERROR_DETECTION_THRESH * secondChecks[i].Length))
                     return true;
