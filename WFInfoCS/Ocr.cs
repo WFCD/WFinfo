@@ -169,8 +169,7 @@ namespace WFInfoCS
                 long start = watch.ElapsedMilliseconds;
 
                 // Look at me mom, I'm doing fancy shit
-                Main.AddLog("Scaling values: Screen_Scaling = " + (screenScaling * 100).ToString("F2") + "%, DPI_Scaling = " + (dpiScaling * 100).ToString("F2") + "%, UI_Scaling = " + (uiScaling * 100).ToString("F0") + "%");
-
+                
 
                 // Get that theme
                 activeTheme = GetThemeWeighted(out _, file);
@@ -188,11 +187,8 @@ namespace WFInfoCS
                 partialScreenshotFiltered.Save(Main.appPath + @"\Debug\PartBoxFilter " + timestamp + ".png");
 
                 firstChecks = SeparatePlayers(partialScreenshotFiltered, firstEngine);
-                Task complete = null;
                 if (firstChecks != null)
                 {
-                    if (partialScreenshotFiltered.Height < 70)
-                        complete = Task.Factory.StartNew(SlowSecondProcess);
                     int width = (int)(pixleRewardWidth * screenScaling * uiScaling) + 10;
                     int startX = center.X - width / 2 + (int)(width * 0.004);
                     if (firstChecks.Count == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
@@ -230,9 +226,9 @@ namespace WFInfoCS
                     }
                     var end = watch.ElapsedMilliseconds;
                     Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
-                    if (complete != null)
+                    if (partialScreenshotFiltered.Height < 70)
                     {
-                        complete.Wait();
+                        SlowSecondProcess();
                         end = watch.ElapsedMilliseconds;
                     }
                     Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
@@ -286,9 +282,11 @@ namespace WFInfoCS
 
         public static void SlowSecondProcess()
         {
+
             Bitmap newFilter = ScaleUpAndFilter(partialScreenshot, activeTheme);
             partialScreenshotExpanded.Save(Main.appPath + @"\Debug\PartShotUpscaled " + timestamp + ".png");
             newFilter.Save(Main.appPath + @"\Debug\PartShotUpscaledFiltered " + timestamp + ".png");
+            Main.AddLog(("----  SECOND OCR CHECK  ------------------------------------------------------------------------------------------").Substring(0, 108));
             secondChecks = SeparatePlayers(newFilter, secondEngine);
             List<int> comparisions = new List<int>();
 
@@ -809,14 +807,14 @@ namespace WFInfoCS
                 {
                     HandleRef = new HandleRef(process, process.MainWindowHandle);
                     Warframe = process;
-                    Main.AddLog("Found Warframe in list of current active processes");
+                    Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
                     return true;
                 }
             }
             if (!Settings.debug)
             {
-                Main.AddLog("Unable to detect Warframe in list of current active processes");
-                Main.StatusUpdate("Unable to detect Warframe process", 1);
+                Main.AddLog("Did Not Detect Warfrape Process");
+                Main.StatusUpdate("Unable to Detect Warframe Process", 1);
             }
             return false;
 
@@ -836,6 +834,8 @@ namespace WFInfoCS
                 screenScaling = window.Height / 1080.0;
             else
                 screenScaling = window.Width / 1920.0; //image is higher than 16:9 aspect
+
+            Main.AddLog("SCALING VALUES UPDATED: Screen_Scaling = " + (screenScaling * 100).ToString("F2") + "%, DPI_Scaling = " + (dpiScaling * 100).ToString("F2") + "%, UI_Scaling = " + (uiScaling * 100).ToString("F0") + "%");
         }
 
         public static void UpdateWindow(Bitmap image = null)
@@ -847,6 +847,10 @@ namespace WFInfoCS
                 int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
                 window = new Rectangle(0, 0, width, height);
                 center = new Point(window.Width / 2, window.Height / 2);
+                if (image != null)
+                    Main.AddLog("DETECTED LOADED IMAGE BOUNDS: " + window.ToString());
+                else
+                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString());
 
                 RefreshScaling();
                 return;
@@ -856,11 +860,11 @@ namespace WFInfoCS
             { // get window size of warframe
                 if (Settings.debug)
                 { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
-                    Main.AddLog("No warframe detected, thus using center of screen");
                     int width = Screen.PrimaryScreen.Bounds.Width * (int)dpiScaling;
                     int height = Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
+                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString());
                     RefreshScaling();
                     return;
                 } else
@@ -875,11 +879,11 @@ namespace WFInfoCS
             { // if the window is in the VOID delete current process and re-set window to nothing
                 Warframe = null;
                 window = Rectangle.Empty;
-            } else if (window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
+            } else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
             { // checks if old window size is the right size if not change it
                 window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
                                                                                                                          // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
-                Main.AddLog("Window size detected: " + window.ToString());
+                Main.AddLog("Detected Warframe Process - Window Bounds: " + window.ToString());
                 int GWL_style = -16;
                 uint WS_BORDER = 0x00800000;
                 uint WS_POPUP = 0x80000000;
