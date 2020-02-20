@@ -139,6 +139,7 @@ namespace WFInfoCS
 
         private static Bitmap bigScreenshot;
         private static Bitmap partialScreenshot;
+        //private static Bitmap[] partScreenshots;
         private static Bitmap partialScreenshotExpanded;
         private static Bitmap partialScreenshotFiltered;
 
@@ -275,8 +276,8 @@ namespace WFInfoCS
         private const double ERROR_DETECTION_THRESH = 0.25;
         private static bool CheckIfError()
         {
-            for(int i = 0; i < firstChecks.Count; i++)
-                if(firstProximity[i] > ERROR_DETECTION_THRESH * firstChecks[i].Length && 
+            for (int i = 0; i < firstChecks.Count; i++)
+                if (firstProximity[i] > ERROR_DETECTION_THRESH * firstChecks[i].Length &&
                   (secondProximity[i] == -1 || secondProximity[i] > ERROR_DETECTION_THRESH * secondChecks[i].Length))
                     return true;
 
@@ -554,6 +555,7 @@ namespace WFInfoCS
             int top = (image.Height / 2) - (int)(pixleRewardYDisplay * screenScaling * uiScaling) + (int)(pixleRewardHeight * screenScaling * uiScaling) - lineHeight;
 
             partialScreenshot = new Bitmap(width + 10, lineHeight + 10);
+            //Bitmap theory = new Bitmap(width + 10, lineHeight * 2 + 20);
 
             Color clr;
             for (int x = 0; x < width; x++)
@@ -562,22 +564,63 @@ namespace WFInfoCS
                 {
                     clr = image.GetPixel(left + x, top + y);
                     partialScreenshot.SetPixel(x + 5, y + 5, clr);
+                    //theory.SetPixel(x + 5, y + 15, Color.White);
                 }
             }
+
+            //double weight = 0;
+            //double totalSub = 0;
+            //double totalPlus = 0;
+            //int mid = lineHeight * 3 / 2 + 10;
 
             Bitmap filtered = new Bitmap(partialScreenshot.Width, partialScreenshot.Height);
             for (int x = 0; x < filtered.Width; x++)
             {
+                //int count = 0;
                 for (int y = 0; y < filtered.Height; y++)
                 {
                     clr = partialScreenshot.GetPixel(x, y);
                     if (ThemeThresholdFilter(clr, active))
+                    {
                         filtered.SetPixel(x, y, Color.Black);
-                    else
+                        //theory.SetPixel(x, y + 10, Color.Black);
+                        //count++;
+                    } else
                         filtered.SetPixel(x, y, Color.White);
                 }
-            }
 
+                //count = Math.Min(count, lineHeight / 3);
+                //double sinVal = Math.Cos(8 * (x - 5) * Math.PI / width);
+                //weight += sinVal * count;
+
+                //int R = 0;
+                //if (sinVal < 0)
+                //{
+                //    totalSub -= sinVal * count;
+                //    R = (int)(-255 * sinVal);
+                //}
+                //int B = 0;
+                //if (sinVal > 0)
+                //{
+                //    totalPlus += sinVal * count;
+                //    B = (int)(255 * sinVal);
+                //}
+
+                //count = (int)(sinVal * count / 2);
+
+                //for (int i = 0; i < 10; i++)
+                //    theory.SetPixel(x, i, Color.FromArgb(R, 0, B));
+
+                //for (int i = 0; i < count; i++)
+                //    theory.SetPixel(x, mid + i, Color.Black);
+
+                //for (int i = 0; i > count; i--)
+                //    theory.SetPixel(x, mid + i, Color.Black);
+            }
+            //theory.Save(Main.appPath + @"\Debug\HeatMap " + timestamp + ".png");
+            //double total = totalSub + totalPlus;
+            //Console.WriteLine("EVEN DISTRIBUTION: " + (totalSub / total * 100).ToString("F2"));
+            //Console.WriteLine("ODD DISTRIBUTION: " + (totalPlus / total * 100).ToString("F2"));
             return filtered;
         }
 
@@ -724,7 +767,7 @@ namespace WFInfoCS
         {
             UpdateWindow();
 
-            if (window == null)
+            if (window == null || window.Width == 0 || window.Height == 0)
             {
                 window = Screen.PrimaryScreen.Bounds;
                 center = new Point(window.Width / 2, window.Height / 2);
@@ -787,26 +830,27 @@ namespace WFInfoCS
             uiScaling = Settings.scaling / 100.0;
         }
 
+        private static void RefreshScaling()
+        {
+            if (window.Width * 9 > window.Height * 16)  // image is less than 16:9 aspect
+                screenScaling = window.Height / 1080.0;
+            else
+                screenScaling = window.Width / 1920.0; //image is higher than 16:9 aspect
+        }
+
         public static void UpdateWindow(Bitmap image = null)
         {
             RefreshDPIScaling();
-            if (image != null)
+            if (image != null || !VerifyWarframe())
             {
                 int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)dpiScaling;
                 int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
                 window = new Rectangle(0, 0, width, height);
                 center = new Point(window.Width / 2, window.Height / 2);
 
-                if (window.Width * 9 > window.Height * 16)  // image is less than 16:9 aspect
-                    screenScaling = window.Height / 1080.0;
-                else
-                    screenScaling = window.Width / 1920.0; //image is higher than 16:9 aspect
+                RefreshScaling();
                 return;
             }
-
-
-            if (!VerifyWarframe())
-                return;
 
             if (!Win32.GetWindowRect(HandleRef, out Win32.r osRect))
             { // get window size of warframe
@@ -817,10 +861,7 @@ namespace WFInfoCS
                     int height = Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
-                    if (window.Width * 9 > window.Height * 16)  // image is less than 16:9 aspect
-                        screenScaling = window.Height / 1080.0;
-                    else
-                        screenScaling = window.Width / 1920.0; //image is higher than 16:9 aspect
+                    RefreshScaling();
                     return;
                 } else
                 {
@@ -863,10 +904,7 @@ namespace WFInfoCS
                     currentStyle = WindowStyle.FULLSCREEN;
                 }
                 center = new Point(window.Width / 2, window.Height / 2);
-                if (window.Width * 9 > window.Height * 16)  // image is less than 16:9 aspect
-                    screenScaling = window.Height / 1080.0;
-                else
-                    screenScaling = window.Width / 1920.0; //image is higher than 16:9 aspect
+                RefreshScaling();
             }
         }
 
