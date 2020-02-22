@@ -213,11 +213,11 @@ namespace WFInfo
 
                             if (i == firstChecks.Count - 1)
                             {
-                                clipboard += correctName.Replace(" Prime", "") + ": " + plat + ":platinum:, " + volume + " vol -- brought to you by WFInfo";
+                                clipboard += "["+ correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum:, " + volume + " vol -- brought to you by WFInfo";
                             }
                             else
                             {
-                                clipboard += correctName.Replace(" Prime", "") + ": " + plat + ":platinum:, " + volume + " vol || ";
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum:, " + volume + " vol -  ";
                             }
                             Main.RunOnUIThread(() =>
                             {
