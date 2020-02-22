@@ -191,6 +191,7 @@ namespace WFInfo
                 firstChecks = SeparatePlayers(partialScreenshotFiltered, firstEngine);
                 if (firstChecks != null)
                 {
+                    clipboard = String.Empty;
                     int width = (int)(pixleRewardWidth * screenScaling * uiScaling) + 10;
                     int startX = center.X - width / 2 + (int)(width * 0.004);
                     if (firstChecks.Count == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
@@ -212,11 +213,11 @@ namespace WFInfo
 
                             if (i == firstChecks.Count - 1)
                             {
-                                clipboard += correctName.Replace(" Prime", "") + ": " + plat + " :plat:, " + volume + " vol -- brought to you by WFInfo";
+                                clipboard += correctName.Replace(" Prime", "") + ": " + plat + ":platinum:, " + volume + " vol -- brought to you by WFInfo";
                             }
                             else
                             {
-                                clipboard += correctName.Replace(" Prime", "") + ": " + plat + " :plat:, " + volume + " vol | ";
+                                clipboard += correctName.Replace(" Prime", "") + ": " + plat + ":platinum:, " + volume + " vol || ";
                             }
                             Main.RunOnUIThread(() =>
                             {
