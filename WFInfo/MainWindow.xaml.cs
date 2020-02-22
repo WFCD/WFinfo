@@ -199,12 +199,15 @@ namespace WFInfo
         private void OnLocationChanged(object sender, EventArgs e)
         {
 
-            if (Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _)) {
+            if (Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
+            {
                 Settings.mainWindowLocation = new Point(Left, Top);
                 Settings.settingsObj["MainWindowLocation_X"] = Left;
                 Settings.settingsObj["MainWindowLocation_Y"] = Top;
                 Settings.Save();
-            } else {
+            }
+            else
+            {
                 Settings.mainWindowLocation = new Point(100, 100);
                 Settings.settingsObj["MainWindowLocation_X"] = 100;
                 Settings.settingsObj["MainWindowLocation_Y"] = 100;

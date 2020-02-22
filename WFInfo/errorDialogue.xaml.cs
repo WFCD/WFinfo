@@ -46,7 +46,7 @@ namespace WFInfo
                 using (ZipFile zip = new ZipFile())
                 {
                     foreach (FileInfo file in files)
-                        zip.AddFile(file.FullName,"");
+                        zip.AddFile(file.FullName, "");
                     zip.AddFile(startPath + @"\..\debug.log", "");
                     zip.Comment = "This zip was created at " + closest.ToString("yyyy-MM-dd HH-mm-ssff");
                     zip.MaxOutputSegmentSize64 = 8000 * 1024; // 8m segments

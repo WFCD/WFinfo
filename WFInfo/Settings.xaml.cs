@@ -208,7 +208,8 @@ namespace WFInfo
             Main.SpawnErrorPopup(DateTime.UtcNow, 1800);
         }
 
-        private void clipboardCheckbox_Checked(object sender, RoutedEventArgs e) {
+        private void clipboardCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
             settingsObj["Clipboard"] = clipboardCheckbox.IsChecked.Value;
             clipboard = clipboardCheckbox.IsChecked.Value;
         }

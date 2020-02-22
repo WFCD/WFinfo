@@ -227,7 +227,8 @@ namespace WFInfo
             if (!ducats.TryGetValue("ducats", out JToken temp))
             {
                 ducat = "0";
-            } else
+            }
+            else
             {
                 ducat = temp.ToObject<string>();
             }
@@ -312,7 +313,8 @@ namespace WFInfo
                         if (prime.Value["type"].ToString() == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")))
                         {
                             gameName += " Blueprint";
-                        } else if (prime.Value["type"].ToString() == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
+                        }
+                        else if (prime.Value["type"].ToString() == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
                         {
                             gameName += " Blueprint";
                         }
@@ -382,7 +384,8 @@ namespace WFInfo
                     if (equipmentData.TryGetValue(eqmt, out JToken temp))
                     {
                         equipmentData[eqmt]["parts"][str]["vaulted"] = false;
-                    } else
+                    }
+                    else
                     {
                         Console.WriteLine("Cannot find: " + eqmt + " in equipmentData");
                     }
@@ -679,7 +682,8 @@ namespace WFInfo
                 } while (!(maxX && maxY));
 
                 num = d[n, m] - 1;
-            } else
+            }
+            else
             {
                 num = n + m;
             }
