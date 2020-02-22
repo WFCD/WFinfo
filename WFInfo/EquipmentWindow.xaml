@@ -64,7 +64,7 @@
                                 <ColumnDefinition Width="100" />
                                 <ColumnDefinition Width="70" />
                             </Grid.ColumnDefinitions>
-
+                            
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Background="Transparent">
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Foreground="{Binding NameBrush}"/>
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Foreground="#506464" Padding="5,2,0,0" FontWeight="Normal" />
@@ -89,7 +89,7 @@
                                     </StackPanel.Style>
                                     <Label Content="＋" Foreground="#506464" FontSize="13" Padding="0">
                                         <Label.InputBindings>
-                                            <MouseBinding MouseAction="LeftClick" Command="{Binding IncrementPart}" />
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding IncrementPart}" /> 
                                         </Label.InputBindings>
                                         <Label.Style>
                                             <Style>
