@@ -351,8 +351,8 @@ namespace WFInfoCS
                 Size fissureSize = new Size(fissureWid, fissureHei);
                 using (Graphics graphics = Graphics.FromImage(image))
                 {
-                    graphics.CopyFromScreen(profileX, profileY, profileX, profileY, profileSize, CopyPixelOperation.SourceCopy);
-                    graphics.CopyFromScreen(fissureX, fissureY, fissureX, fissureY, fissureSize, CopyPixelOperation.SourceCopy);
+                    graphics.CopyFromScreen(window.X + profileX, window.Y + profileY, profileX, profileY, profileSize, CopyPixelOperation.SourceCopy);
+                    graphics.CopyFromScreen(window.X + fissureX, window.Y + fissureY, fissureX, fissureY, fissureSize, CopyPixelOperation.SourceCopy);
                 }
             }
 
@@ -406,7 +406,7 @@ namespace WFInfoCS
 
                 Size fissureSize = new Size(fissureWid, fissureHei);
                 using (Graphics graphics = Graphics.FromImage(image))
-                    graphics.CopyFromScreen(fissureX, fissureY, fissureX, fissureY, fissureSize, CopyPixelOperation.SourceCopy);
+                    graphics.CopyFromScreen(window.X + fissureX, window.Y + fissureY, fissureX, fissureY, fissureSize, CopyPixelOperation.SourceCopy);
                 //image.Save(Main.appPath + @"\Debug\TESTSHOT " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
             }
 
