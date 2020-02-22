@@ -62,8 +62,7 @@ namespace WFInfo
                     RelicTree.Items.Add(relic);
 
                 SortBoxChanged(null, null);
-            }
-            else
+            } else
             {
                 foreach (TreeNode era in RelicNodes)
                 {
@@ -72,8 +71,7 @@ namespace WFInfo
                     {
                         if (curr != -1)
                             RelicTree.Items.RemoveAt(curr);
-                    }
-                    else
+                    } else
                     {
                         if (curr == -1)
                             RelicTree.Items.Insert(index, era);
@@ -111,8 +109,7 @@ namespace WFInfo
                     era.FilterOutVaulted(true);
 
                 RefreshVisibleRelics();
-            }
-            else
+            } else
                 ReapplyFilters();
         }
 
