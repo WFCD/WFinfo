@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFInfoCS", "WFInfoCS\WFInfoCS.csproj", "{675B5B73-ECF0-494C-9AC0-3E7BEAE2DD43}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFInfo", "WFInfo\WFInfo.csproj", "{675B5B73-ECF0-494C-9AC0-3E7BEAE2DD43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
