@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "WFInfoVB", "WFInfo\WFInfoVB.vbproj", "{C06EA0EF-AA04-44C1-BFA5-A328400FB023}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFInfoCS", "WFInfoCS\WFInfoCS.csproj", "{675B5B73-ECF0-494C-9AC0-3E7BEAE2DD43}"
 EndProject
 Global
@@ -17,18 +15,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Debug|x64.ActiveCfg = Debug|x64
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Debug|x64.Build.0 = Debug|x64
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Debug|x86.ActiveCfg = Debug|x86
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Debug|x86.Build.0 = Debug|x86
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Release|x64.ActiveCfg = Release|x64
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Release|x64.Build.0 = Release|x64
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Release|x86.ActiveCfg = Release|x86
-		{C06EA0EF-AA04-44C1-BFA5-A328400FB023}.Release|x86.Build.0 = Release|x86
 		{675B5B73-ECF0-494C-9AC0-3E7BEAE2DD43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{675B5B73-ECF0-494C-9AC0-3E7BEAE2DD43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{675B5B73-ECF0-494C-9AC0-3E7BEAE2DD43}.Debug|x64.ActiveCfg = Debug|Any CPU
