@@ -2,6 +2,5 @@
 <item>
     <version>8.2.7.0</version>
     <url>https://github.com/WFCD/WFinfo/releases/latest/download/WFInfo.zip</url>
-    <changelog>https://github.com/WFCD/WFinfo/releases</changelog>
     <mandatory>false</mandatory>
 </item>
