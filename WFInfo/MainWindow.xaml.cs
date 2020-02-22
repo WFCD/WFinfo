@@ -30,8 +30,7 @@ namespace WFInfo
                 {
                     Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
 
-                }
-                else
+                } else
                 {
                     Settings.settingsObj = new JObject();
                 }
@@ -204,8 +203,7 @@ namespace WFInfo
                 Settings.settingsObj["MainWindowLocation_X"] = Left;
                 Settings.settingsObj["MainWindowLocation_Y"] = Top;
                 Settings.Save();
-            }
-            else
+            } else
             {
                 Settings.mainWindowLocation = new Point(100, 100);
                 Settings.settingsObj["MainWindowLocation_X"] = 100;
