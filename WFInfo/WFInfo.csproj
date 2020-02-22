@@ -249,6 +249,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
+    <Resource Include="Resources\discord_h.png" />
+    <Resource Include="Resources\discord.png" />
     <Resource Include="Resources\Axi.png" />
     <Resource Include="Resources\Lith.png" />
     <Resource Include="Resources\Meso.png" />

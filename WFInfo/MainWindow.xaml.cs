@@ -145,8 +145,7 @@ namespace WFInfo
 
         private void websiteClick(object sender, RoutedEventArgs e)
         {
-            //ChangeStatus("Go go website", 0);
-            Process.Start("https://wfinfo.warframestat.us/");
+            Process.Start("https://discord.gg/TAq7bqr");
         }
 
         private void relicsClick(object sender, RoutedEventArgs e)

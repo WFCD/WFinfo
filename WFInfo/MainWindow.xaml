@@ -54,12 +54,12 @@
         <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="64,3,0,2" Foreground="#FFB1D0D9" FontSize="11" FontWeight="Bold" Width="182" FontFamily="{DynamicResource Roboto}" Height="21" Grid.Column="1" Grid.ColumnSpan="2"/>
         <Label x:Name="minimise" MouseLeftButtonDown="Minimise" Content="_" FontSize="16" Foreground="#FFB1D0D9" BorderBrush="#FF646464" BorderThickness="1" FontFamily="{DynamicResource Roboto}" Grid.Column="1" Margin="216,0,-1,0" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource Label_Button}"/>
         <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" FontSize="16" Foreground="#FFB1D0D9" BorderBrush="#FF646464" BorderThickness="1" FontFamily="{DynamicResource Roboto}" Grid.Column="2" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontWeight="Bold" Style="{StaticResource Label_Button}"/>
-        <Label x:Name="Website" ToolTip="Opens WFinfo website" MouseLeftButtonDown="websiteClick" Margin="0,0,0,52" Grid.Column="2" Grid.Row="1" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+        <Label x:Name="Website" ToolTip="Opens WFinfo discord" MouseLeftButtonDown="websiteClick" Margin="0,0,0,52" Grid.Column="2" Grid.Row="1" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0,1,0,0">
             <Label.Style>
                 <Style>
                     <Setter Property="Label.Content">
                         <Setter.Value>
-                            <Image Source="Resources/home.png" Stretch="Uniform" />
+                            <Image Source="Resources/discord.png" Stretch="Uniform" />
                         </Setter.Value>
                     </Setter>
                     <Style.Triggers>
@@ -70,7 +70,7 @@
                             </MultiTrigger.Conditions>
                             <Setter Property="Label.Content">
                                 <Setter.Value>
-                                    <Image Source="Resources/home_h.png" Stretch="Uniform" />
+                                    <Image Source="Resources/discord_h.png" Stretch="Uniform" />
                                 </Setter.Value>
                             </Setter>
                         </MultiTrigger>
