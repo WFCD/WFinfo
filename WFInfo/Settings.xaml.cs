@@ -25,6 +25,7 @@ namespace WFInfo
 
         public static int scaling { get; internal set; }
         public static bool auto { get; internal set; }
+        public static bool clipboard { get; internal set; }
 
 
         public Settings()
@@ -45,8 +46,8 @@ namespace WFInfo
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
                 autoCheckbox.IsChecked = true;
 
-            //if (Convert.ToBoolean(settingsObj.GetValue("Debug")))
-            //    Debug.IsChecked = true;
+            if (Convert.ToBoolean(settingsObj.GetValue("Clipboard")))
+                clipboardCheckbox.IsChecked = true;
 
             //Activation_key_box.Text = "Snapshot";
             Scaling_box.Text = scaling.ToString() + "%";
@@ -205,6 +206,11 @@ namespace WFInfo
         private void ClickCreateDebug(object sender, RoutedEventArgs e)
         {
             Main.SpawnErrorPopup(DateTime.UtcNow, 1800);
+        }
+
+        private void clipboardCheckbox_Checked(object sender, RoutedEventArgs e) {
+            settingsObj["Clipboard"] = clipboardCheckbox.IsChecked.Value;
+            clipboard = clipboardCheckbox.IsChecked.Value;
         }
     }
 }

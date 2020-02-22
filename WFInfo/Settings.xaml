@@ -54,10 +54,13 @@
         <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Height="28" VerticalAlignment="Bottom">
             <Rectangle x:Name="First_window3" Stroke="#FF646464" Margin="0,-1,0,0"/>
             <Viewbox Margin="49,3,0,4" HorizontalAlignment="Left" />
-            <Viewbox Margin="0,0,209,4" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="60" >
+            <Viewbox Margin="0,0,262,4" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="60" >
                 <CheckBox x:Name="autoCheckbox" Content="Auto" ToolTip="Automatically detects when the relic screen is visable." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" Click="AutoClicked" FontFamily="{DynamicResource Roboto}"/>
             </Viewbox>
             <Button Content="Create debug zip" HorizontalAlignment="Left" Margin="188,-1,0,0" Width="146" FontFamily="/WFInfo;component/Resources/Roboto/#Roboto" FontSize="18" Background="#FF0F0F0F" Foreground="#FFB1D0D9" Click="ClickCreateDebug"/>
+            <Viewbox Margin="0,0,158,4" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="96" Height="20" >
+                <CheckBox x:Name="clipboardCheckbox" Content="Clipboard" ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" Click="AutoClicked" FontFamily="{DynamicResource Roboto}" Checked="clipboardCheckbox_Checked"/>
+            </Viewbox>
 
 
         </Grid>

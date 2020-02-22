@@ -53,6 +53,10 @@ namespace WFInfo
                     Settings.settingsObj["Debug"] = false;
                 Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
 
+                if (!Settings.settingsObj.TryGetValue("Clipboard", out _))
+                    Settings.settingsObj["Clipboard"] = false;
+                Settings.clipboard = (bool)Settings.settingsObj.GetValue("Clipboard");
+
                 if (!Settings.settingsObj.TryGetValue("Auto", out _))
                     Settings.settingsObj["Auto"] = false;
                 Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
@@ -194,10 +198,18 @@ namespace WFInfo
 
         private void OnLocationChanged(object sender, EventArgs e)
         {
-            Settings.mainWindowLocation = new Point(Left, Top);
-            Settings.settingsObj["MainWindowLocation_X"] = Left;
-            Settings.settingsObj["MainWindowLocation_Y"] = Top;
-            Settings.Save();
+
+            if (Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _)) {
+                Settings.mainWindowLocation = new Point(Left, Top);
+                Settings.settingsObj["MainWindowLocation_X"] = Left;
+                Settings.settingsObj["MainWindowLocation_Y"] = Top;
+                Settings.Save();
+            } else {
+                Settings.mainWindowLocation = new Point(100, 100);
+                Settings.settingsObj["MainWindowLocation_X"] = 100;
+                Settings.settingsObj["MainWindowLocation_Y"] = 100;
+                Settings.Save();
+            }
         }
     }
 }

@@ -150,6 +150,8 @@ namespace WFInfo
         private static int[] secondProximity = { -1, -1, -1, -1 };
         private static string timestamp;
 
+        private static string clipboard;
+
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
             if (processingActive)
@@ -208,6 +210,11 @@ namespace WFInfo
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
 
+                            if (i == firstChecks.Count - 1) {
+                                clipboard += correctName.Replace(" Prime", "") + ": " + plat + " :plat:, " + volume + " vol -- brought to you by WFInfo";
+                            } else {
+                                clipboard += correctName.Replace(" Prime", "") + ": " + plat + " :plat:, " + volume + " vol | ";
+                            }
                             Main.RunOnUIThread(() =>
                             {
                                 if (Settings.isOverlaySelected)
@@ -219,6 +226,9 @@ namespace WFInfo
                                 {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
                                 }
+                                if (Settings.clipboard) {
+                                    Clipboard.SetText(clipboard);
+                                }
                             });
 
                         }
@@ -226,6 +236,7 @@ namespace WFInfo
                     }
                     var end = watch.ElapsedMilliseconds;
                     Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
+
                     if (partialScreenshotFiltered.Height < 70)
                     {
                         SlowSecondProcess();
@@ -910,14 +921,6 @@ namespace WFInfo
                 center = new Point(window.Width / 2, window.Height / 2);
                 RefreshScaling();
             }
-        }
-
-        // WIP - please change accordingly to new logic Should be canned? Old system
-        public static void ParseFile(string filename)
-        {
-            Main.AddLog("Parsing file: " + filename);
-            Bitmap debugFile = new Bitmap(filename);
-            ProcessRewardScreen(debugFile);
         }
     }
 }
