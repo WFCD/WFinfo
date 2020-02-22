@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using AutoUpdaterDotNET;
 
 namespace WFInfo
 {
@@ -10,6 +11,8 @@ namespace WFInfo
         [STAThreadAttribute]
         public static void Main()
         {
+            AutoUpdater.Start("https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/update.xml");
+
             AppDomain.CurrentDomain.AssemblyResolve += OnResolveAssembly;
             App.Main();
         }
