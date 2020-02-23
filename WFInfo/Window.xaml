@@ -6,10 +6,13 @@
         xmlns:local="clr-namespace:WFInfo"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Settings" Height="207" Width="1000" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+        Title="Rewards Window" Height="207" Width="1000" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
         <System:Double x:Key="fontSize">22</System:Double>
+        <!-- <Style TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="DemiBold"/>
+        </Style> -->
     </Window.Resources>
     <Grid Background="#FF1B1B1B" x:Name="mainWindow" MouseDown="MouseDown">
         <Grid x:Name="Titlebar" Margin="0,0,0,180">
@@ -30,7 +33,7 @@
                     </TransformGroup>
                 </Image.RenderTransform>
             </Image>
-            <Button x:Name="exit" Content="X" HorizontalAlignment="Right" FontWeight="Bold" VerticalAlignment="Top"  Width="30" Background="{x:Null}" Foreground="#FFB1D0D9" Height="27" Click="Exit" FontSize="20" MinWidth="2" RenderTransformOrigin="0.5,0.319" Padding="-1" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" Grid.Column="1" Margin="0,0,0,-27"/>
+            <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" HorizontalAlignment="Right" Width="30" Grid.Column="1" Style="{StaticResource Label_Button}"/>
 
         </Grid>
         <Grid x:Name="FirstReward" HorizontalAlignment="Left" Height="180" Margin="0,27,0,0" VerticalAlignment="Top" Width="250">
