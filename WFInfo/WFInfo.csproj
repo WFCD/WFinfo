@@ -252,6 +252,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
+    <Resource Include="Resources\background_dark.jpg" />
     <Resource Include="Resources\discord_h.png" />
     <Resource Include="Resources\discord.png" />
     <Resource Include="Resources\Axi.png" />

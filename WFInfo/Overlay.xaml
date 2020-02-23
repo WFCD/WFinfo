@@ -10,17 +10,22 @@
         <ImageBrush ImageSource="Resources/background.jpg"/>
     </Window.Background>
     <Grid>
+        <Grid.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="FontWeight" Value="Medium" />
+            </Style>
+        </Grid.Resources>
         <Viewbox x:Name="partMargin" Margin="0,39,0,82" HorizontalAlignment="Center">
             <TextBlock x:Name="partText" Foreground="#FFB1D0D9"  FontFamily="/WFInfo;component/Resources/#Roboto Condensed" Text="Part name"/>
         </Viewbox>
         <Viewbox x:Name="volumeMargin" Margin="0,104,0,17" >
             <TextBlock x:Name="volumeText" Text="XX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
         </Viewbox>
-        <Viewbox x:Name="platMargin" Margin="77,77,0,43" HorizontalAlignment="Left">
+        <Viewbox x:Name="platMargin" Margin="0,77,162,43" HorizontalAlignment="Right">
             <TextBlock x:Name="platText" Text="Plat" Foreground="#FFB1D0D9" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
         </Viewbox>
-        <Viewbox x:Name="ducatMargin" Margin="164,77,0,43" HorizontalAlignment="Left">
-            <TextBlock x:Name="ducatText" Text="Ducats" Foreground="#FFB1D0D9" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
+        <Viewbox x:Name="ducatMargin" Margin="0,77,78,43" HorizontalAlignment="Right">
+            <TextBlock x:Name="ducatText" Text="100" Foreground="#FFB1D0D9" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
         </Viewbox>
         <Viewbox x:Name="vaultedMargin" Margin="0,15,23,110" HorizontalAlignment="Right" Visibility="Hidden" >
             <TextBlock x:Name="vaultedText" Text="VAULTED" Foreground="#FF828C96" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
@@ -28,9 +33,9 @@
         <Viewbox x:Name="ownedMargin" Margin="23,15,0,110" HorizontalAlignment="Left" >
             <TextBlock x:Name="ownedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
         </Viewbox>
-        
 
-        <Image x:Name="ducatImage" HorizontalAlignment="Left" Height="20" Margin="138,0,0,44" VerticalAlignment="Bottom" Width="20" Source="Resources/ducat_w.gif"/>
-        <Image x:Name="platImage" HorizontalAlignment="Left" Margin="50,0,0,44" Width="20" Source="Resources/plat.gif" Height="20" VerticalAlignment="Bottom"/>
+
+        <Image x:Name="ducatImage" Source="Resources/ducat_w.gif" Margin="172,0,0,44" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+        <Image x:Name="platImage"  Source="Resources/plat.gif"     Margin="88,0,0,44" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
     </Grid>
 </Window>

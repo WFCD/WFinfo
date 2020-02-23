@@ -16,6 +16,28 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style x:Key="Label_Button" TargetType="Label">
+        <Setter Property="Label.Background" Value="Transparent"/>
+        <Setter Property="Label.FontSize" Value="16"/>
+        <Setter Property="Label.Foreground" Value="#FFB1D0D9"/>
+        <Setter Property="Label.BorderBrush" Value="#FF646464"/>
+        <Setter Property="Label.BorderThickness" Value="1"/>
+        <Setter Property="Label.FontFamily" Value="{DynamicResource Roboto}"/>
+        <Setter Property="Control.FontWeight" Value="Bold"/>
+        <Setter Property="Control.Padding" Value="0"/>
+        <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Control.VerticalContentAlignment" Value="Center"/>
+        
+        <Style.Triggers>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Label.IsMouseOver" Value="True"/>
+                    <Condition Property="Label.IsEnabled" Value="True"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Label.Background" Value="#FF1B1B1B"/>
+            </MultiTrigger>
+        </Style.Triggers>
+    </Style>
     <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#FF141414"/>
     <SolidColorBrush x:Key="ComboBox.Static.Background" Color="#FF0F0F0F"/>
     <SolidColorBrush x:Key="ComboBox.Static.Border" Color="#646464"/>

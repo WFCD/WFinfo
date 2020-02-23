@@ -12,15 +12,15 @@
         <System:Double x:Key="fontSize">22</System:Double>
     </Window.Resources>
     <Grid Background="#FF1B1B1B" x:Name="mainWindow" MouseDown="MouseDown">
-        <Grid x:Name="Titlebar" Margin="0,0,0,230">
+        <Grid x:Name="Titlebar" Margin="0,0,0,180">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="21*"/>
-                <ColumnDefinition Width="179*"/>
+                <ColumnDefinition Width="27*"/>
+                <ColumnDefinition Width="973*"/>
             </Grid.ColumnDefinitions>
             <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="1000" Grid.ColumnSpan="2" Margin="0,0,0,-27"/>
 
-            <Label Content="Rewards" HorizontalAlignment="Left" Margin="25,-5,0,-30" VerticalAlignment="Top" Foreground="#FFB1D0D9" Height="35" Width="135" FontFamily="{DynamicResource Roboto}" FontSize="{DynamicResource fontSize}" Grid.ColumnSpan="2"/>
-            <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" Source="Resources/WFLogo.png" Margin="0,0,0,-26" >
+            <TextBlock Text="Rewards" Margin="7,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
+            <Image Source="Resources/WFLogo.png" Height="26" VerticalAlignment="Top" HorizontalAlignment="Left" Width="26" Margin="1,-1,0,0" >
                 <Image.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform/>

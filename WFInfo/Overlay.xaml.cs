@@ -16,20 +16,22 @@ namespace WFInfo
         public static double partMarginBottom = 82.0;
         public static double volumeMarginTop = 104.0;
         public static double volumeMarginBottom = 17.0;
-        public static double platMarginLeft = 76.0;
+        //public static double platMarginLeft = 76.0;
+        public static double platMarginRight = 163.0;
         public static double platMarginTop = 77.0;
         public static double platMarginBottom = 43.0;
-        public static double ducatMarginLeft = 164.0;
+        //public static double ducatMarginLeft = 162.0;
+        public static double ducatMarginRight = 78.0;
         public static double ducatMarginTop = 77.0;
         public static double ducatMarginbottom = 43.0;
         public static double cornerMarginSide = 23.0;
         public static double cornerMarginTop = 15.0;
         public static double cornerMarginBottom = 110.0;
 
-        public static double platImageMarginLeft = 50.0;
+        public static double platImageMarginLeft = 88.0;
         public static double platImageMarginBottom = 44.0;
         public static double platImageHeightWidth = 20.0;
-        public static double ducatImageMarginLeft = 138.0;
+        public static double ducatImageMarginLeft = 172.0;
         public static double ducatImageMarginBottom = 44.0;
         public static double ducatImageHeightWidth = 20.0;
 
@@ -105,7 +107,7 @@ namespace WFInfo
             margin = platMargin.Margin;
             margin.Top = platMarginTop * scale;
             margin.Bottom = platMarginBottom * scale;
-            margin.Left = platMarginLeft * scale;
+            margin.Right = platMarginRight * scale;
             platMargin.Margin = margin;
             platText.FontSize = mediumFont * scale;
 
@@ -114,7 +116,7 @@ namespace WFInfo
             margin = ducatMargin.Margin;
             margin.Top = ducatMarginTop * scale;
             margin.Bottom = ducatMarginbottom * scale;
-            margin.Left = ducatMarginLeft * scale;
+            margin.Right = ducatMarginRight * scale;
             ducatMargin.Margin = margin;
             ducatText.FontSize = mediumFont * scale;
 

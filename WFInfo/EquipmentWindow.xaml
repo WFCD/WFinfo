@@ -40,11 +40,8 @@
             <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top"/>
 
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
-            <Viewbox HorizontalAlignment="Left" Height="27" Width="210" Margin="30,0,0,0" VerticalAlignment="Center">
-                <Label Content="Equipment" Background="{x:Null}" Foreground="#FFB1D0D9" FontFamily="Roboto" FontSize="22" Padding="0" VerticalContentAlignment="Center" Height="30" Width="205"/>
-            </Viewbox>
-            <Button x:Name="exit" Content="x" Click="Hide" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" HorizontalAlignment="Right" Width="29"/>
-
+            <TextBlock Text="Equipment" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
+            <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right"/>
         </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
             <TreeView x:Name="EqmtTree" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">

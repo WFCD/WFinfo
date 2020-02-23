@@ -73,6 +73,16 @@ namespace WFInfo.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap background_dark {
+            get {
+                object obj = ResourceManager.GetObject("background_dark", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ducat_w {
             get {
                 object obj = ResourceManager.GetObject("ducat_w", resourceCulture);
