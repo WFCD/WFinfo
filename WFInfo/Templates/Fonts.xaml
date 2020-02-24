@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:WFInfo">
     <FontFamily x:Key="Roboto_Condensed">/WFInfo;component/Resources/RobotoCondensed/#Roboto Condensed</FontFamily>
+    <FontFamily x:Key="Roboto_Condensed_Bold">/WFInfo;component/Resources/RobotoCondensed/#Roboto Condensed Bold</FontFamily>
     <FontFamily x:Key="Roboto_Mono">/WFInfo;component/Resources/RobotoMono/#Roboto Mono</FontFamily>
     <FontFamily x:Key="Roboto">/WFInfo;component/Resources/Roboto/#Roboto</FontFamily>
     <FontFamily x:Key="Roboto_Medium">/WFInfo;component/Resources/Roboto/#Roboto Medium</FontFamily>

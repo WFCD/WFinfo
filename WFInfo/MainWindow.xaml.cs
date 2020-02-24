@@ -111,7 +111,7 @@ namespace WFInfo
         public void ChangeStatus(string status, int serverity)
         {
             Console.WriteLine("Status message: " + status);
-            Status.Content = status;
+            Status.Text = status;
             switch (serverity)
             {
                 case 0: //default, no problem

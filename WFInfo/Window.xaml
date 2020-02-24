@@ -22,7 +22,7 @@
             </Grid.ColumnDefinitions>
             <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="1000" Grid.ColumnSpan="2" Margin="0,0,0,-27"/>
 
-            <TextBlock Text="Rewards" Margin="7,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
+            <TextBlock Text="Rewards" Margin="7,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
             <Image Source="Resources/WFLogo.png" Height="26" VerticalAlignment="Top" HorizontalAlignment="Left" Width="26" Margin="1,-1,0,0" >
                 <Image.RenderTransform>
                     <TransformGroup>
@@ -39,10 +39,10 @@
         <Grid x:Name="FirstReward" HorizontalAlignment="Left" Height="180" Margin="0,27,0,0" VerticalAlignment="Top" Width="250">
             <Rectangle HorizontalAlignment="Left" Height="181" Stroke="#FF646464" VerticalAlignment="Top" Width="251" Margin="0,-1,-1,0"/>
             <Viewbox x:Name="firstOwnedMargin" Margin="10,7,0,148" HorizontalAlignment="Left" Width="135" Height="25">
-                <TextBlock x:Name="firstOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{DynamicResource Roboto}"/>
+                <TextBlock x:Name="firstOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{StaticResource Roboto}"/>
             </Viewbox>
             <Viewbox x:Name="firstVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,8,10,147"  >
-                <TextBlock x:Name="firstVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="{DynamicResource Roboto}"/>
+                <TextBlock x:Name="firstVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="{StaticResource Roboto}"/>
             </Viewbox>
             <TextBlock x:Name="firstPartText" Text="Part name" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="15,38,10,77" Width="225" FontSize="24" Height="65"/>
 
@@ -60,10 +60,10 @@
         <Grid x:Name="secondReward" HorizontalAlignment="Left" Height="180" Margin="250,27,0,0" VerticalAlignment="Top" Width="250">
             <Rectangle HorizontalAlignment="Left" Height="181" Stroke="#FF646464" VerticalAlignment="Top" Width="251" Margin="0,-1,-1,0"/>
             <Viewbox x:Name="secondOwnedMargin" Margin="10,7,0,148" HorizontalAlignment="Left" Width="135" Height="25">
-                <TextBlock x:Name="secondOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{DynamicResource Roboto}"/>
+                <TextBlock x:Name="secondOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{StaticResource Roboto}"/>
             </Viewbox>
             <Viewbox x:Name="secondVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,8,10,147"  >
-                <TextBlock x:Name="secondVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="{DynamicResource Roboto}"/>
+                <TextBlock x:Name="secondVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="{StaticResource Roboto}"/>
             </Viewbox>
             <TextBlock x:Name="secondPartText" Text="Part name" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="15,38,10,77" Width="225" FontSize="24" Height="65"/>
 
@@ -80,10 +80,10 @@
         <Grid x:Name="thirdReward" HorizontalAlignment="Left" Height="180" Margin="500,27,0,-3" VerticalAlignment="Top" Width="250">
             <Rectangle HorizontalAlignment="Left" Height="181" Stroke="#FF646464" VerticalAlignment="Top" Width="251" Margin="0,-1,-1,0"/>
             <Viewbox x:Name="thirdOwnedMargin" Margin="10,7,0,148" HorizontalAlignment="Left" Width="135" Height="25">
-                <TextBlock x:Name="thirdOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{DynamicResource Roboto}"/>
+                <TextBlock x:Name="thirdOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{StaticResource Roboto}"/>
             </Viewbox>
             <Viewbox x:Name="thirdVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,8,10,147"  >
-                <TextBlock x:Name="thirdVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="{DynamicResource Roboto}"/>
+                <TextBlock x:Name="thirdVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="{StaticResource Roboto}"/>
             </Viewbox>
             <TextBlock x:Name="thirdPartText" Text="Part name" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="15,38,10,77" Width="225" FontSize="24" Height="65"/>
 
@@ -100,10 +100,10 @@
         <Grid x:Name="fourthReward" HorizontalAlignment="Left" Height="180" Margin="750,27,0,0" VerticalAlignment="Top" Width="250">
             <Rectangle HorizontalAlignment="Left" Height="181" Stroke="#FF646464" VerticalAlignment="Top" Width="250" Margin="0,-1,0,0"/>
             <Viewbox x:Name="fourthOwnedMargin" Margin="10,7,0,148" HorizontalAlignment="Left" Width="135" Height="25">
-                <TextBlock x:Name="fourthOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{DynamicResource Roboto}"/>
+                <TextBlock x:Name="fourthOwnedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{StaticResource Roboto}"/>
             </Viewbox>
             <Viewbox x:Name="fourthVaultedMargin"  HorizontalAlignment="Right" Height="25" Margin="0,8,10,147"  >
-                <TextBlock x:Name="fourthVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="{DynamicResource Roboto}"/>
+                <TextBlock x:Name="fourthVaultedText" Text="VAULTED" Foreground="#FF828C96" Width="auto" FontFamily="{StaticResource Roboto}"/>
             </Viewbox>
             <TextBlock x:Name="fourthPartText" Text="Part name" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="15,38,10,77" Width="225" FontSize="24" Height="65"/>
 

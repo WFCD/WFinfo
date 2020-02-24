@@ -70,7 +70,7 @@
             <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top"/>
 
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
-            <TextBlock Text="Equipment" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
+            <TextBlock Text="Equipment" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
             <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right"/>
         </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
@@ -80,7 +80,7 @@
                         <HierarchicalDataTemplate.Resources>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="FontSize" Value="13" />
-                                <Setter Property="FontFamily" Value="{DynamicResource Roboto}" />
+                                <Setter Property="FontFamily" Value="{StaticResource Roboto}" />
                                 <Setter Property="Foreground" Value="#FFB1D0D9" />
                                 <Setter Property="Padding" Value="0,2,0,0" />
                             </Style>

@@ -28,7 +28,7 @@
         <Rectangle Grid.Row="1"     Stroke="#FF646464" Margin="0,-1,-1,-1"/>
         <Rectangle Grid.RowSpan="2" Stroke="#FF646464" Margin="0,-1,0,0" Grid.Row="1" Grid.Column="2"/>
 
-        <Image HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" Grid.ColumnSpan="2" >
+        <Image Margin="2,0,2,2" Source="Resources/WFLogo.png" >
             <Image.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -38,7 +38,7 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <TextBlock Text="WFInfo" Margin="7,0,0,7" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" Height="15" FontWeight="Bold" Width="51" Grid.Column="1"/>
+        <TextBlock Text="WFInfo" Margin="7,0,0,7" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="16" FontFamily="{StaticResource Roboto_Black}" Height="15" FontWeight="Bold" Width="51" Grid.Column="1"/>
         <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="60,3,0,2" FontSize="11" FontWeight="Bold" Width="182" Height="21" Grid.Column="1"/>
         <Label x:Name="minimise" MouseLeftButtonDown="Minimise" Content="_" Grid.Column="1" Margin="216,0,-1,0" Style="{StaticResource Label_Button}" Padding="0,0,0,3"/>
         <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" Grid.Column="2" Style="{StaticResource Label_Button}"/>
@@ -186,8 +186,8 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="Status_Label" Content="Status:" Background="{x:Null}" FontSize="11" Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Left" FontWeight="Bold" Grid.ColumnSpan="2" Height="25" Width="45"/>
-        <Label x:Name="Status" Content="Loading..." Background="{x:Null}" FontSize="11" HorizontalAlignment="Left" Margin="11,0,0,0" Grid.Row="2" VerticalAlignment="Top" Grid.Column="1" Height="25" Width="233"/>
+        <TextBlock                 Text="Status:"    FontSize="13" Margin=" 5,5,0,0" Grid.Row="2" Grid.ColumnSpan="2" FontFamily="{StaticResource Roboto_Condensed_Bold}"/>
+        <TextBlock x:Name="Status" Text="Loading..." FontSize="13" Margin="19,5,0,0" Grid.Row="2" Grid.Column="1"     FontFamily="{StaticResource Roboto_Condensed}"/>
         <Label x:Name="Market_Data_Label" Content="Market Data:" Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="0,13,122,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1" Height="26" Width="101"/>
         <Label x:Name="Market_Data"       Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="117,13,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Column="1" Height="26" Width="127"/>
         <Label x:Name="Drop_Data_Label"   Content="Prime Data:"  Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="0,40,122,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1" Height="26" Width="93"/>
