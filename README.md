@@ -1,9 +1,10 @@
 # Description
 
 
-WFInfo is a companion app for Warframe, based on the original [WFInfo](httpps://https://github.com/Schwaxx/WFInfo) which is no longer developed. WFinfo is designed to fix a missing feature from Warframe, quick access to both Platinum and Ducat prices while selecting a fissure reward.
+WFInfo V9 is a companion app for Warframe, based on the [original](https://github.com/Schwaxx/WFInfo) which is no being longer developed. 
+WFinfo is designed to fix a missing feature from Warframe: quick access to both Platinum and Ducat prices when selecting a fissure reward.
 
-WFinfo provides recent platinum values from warframe.market of each primed item. This is accomplished all without affecting Warframe in any way. 
+WFinfo provides recent platinum values from warframe.market of every primed item. This is accomplished all without affecting Warframe in any way. 
 
 # Features
 
@@ -11,13 +12,19 @@ WFinfo provides recent platinum values from warframe.market of each primed item.
 
 ![Fissure Prices](https://i.imgur.com/Fl2z7qS.png)
 
-To get the prices of the prime drops during a fissure event, press the assigned hotkey (Print Screen by default) during the reward screen. The Platinum and Ducat prices can either be displayed over Warframe itself or shown on a window located on a second screen. To make things easier there is also the Automation Mode, which will check Warframe if you are on the reward screen every second, If it finds any, it will display the Plat/Ducat values in your preferred way.
+To get the platinum prices during a fissure reward screen, press the activation hotkey (Print Screen by default) during the reward screen. 
+The Platinum and Ducat prices will then be displayed either over Warframe itself or shown in a window that can be viewed on a second screen. 
+
+To simplify operation, we've added Auto Mode, which will wait till Warframe says it "Got rewards" in the EE.log. Once it detects that message, it will look for the rewards screen and trigger the key for you. If it can't find the screen in five seconds, it will give up. At any point, you can trigger it yourself, if the Auto Mode isn't finding the screen.
 
 ### Relic Panel
 
 ![Relic Panel](https://i.imgur.com/k2yEW87.png)
 
-The Relics panel allows you to look at all relics and see how much plat they award on average unrefined, and how much more platinum it awards when refined to radiant. Some relics this is small because the high plat items are common rewards, and others it is large because the rare reward is the high plat item.
+The Relics panel allows you to look at all relics and see statistics for each. We show basic info such as whether a relic is vaulted and the relic's rewards and the rarities of those rewards, and we have three complex statistics for every relic:
+1. The average platinum price of an Intact relic's rewards, which are based on drop chance.
+1. The average platinum price of a Radiant relic's rewards, which are as well.
+1. The difference between the two above values, which can be used to find which relics will give you more plat, on average, when refined.
 
 ### Equipment Panel
 
