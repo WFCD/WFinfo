@@ -15,53 +15,53 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="334"/>
         </Grid.ColumnDefinitions>
-        <Grid HorizontalAlignment="Left" Height="27" VerticalAlignment="Top" Width="334">
+        <Grid HorizontalAlignment="Left" Height="27" VerticalAlignment="Top" Width="334" Panel.ZIndex="500">
 
             <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="334" Margin="0,0,-234,0"/>
 
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="27" RenderTransformOrigin="-1.263,-0.625" Source="Resources/WFLogo.png" Margin="1,0,0,0" />
-            <TextBlock Text="Settings" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
+            <TextBlock Text="Settings" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
             <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Margin="304,0,0,0" Style="{StaticResource Label_Button}"/>
 
-            <!-- <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="304,0,1,0" Width="30" Click="Hide" Foreground="#FFB1D0D9" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" Height="27" VerticalAlignment="Top"/> -->
+            <!-- <Button x:Name="exit" Content="x" HorizontalAlignment="Center" Margin="304,0,1,0" Width="30" Click="Hide" Background="{x:Null}" FontSize="16" RenderTransformOrigin="0.5,1" BorderThickness="1" SnapsToDevicePixels="True" FontWeight="Bold" BorderBrush="#FF646464" Height="27" VerticalAlignment="Top"/> -->
         </Grid>
         <Grid x:Name="Display_setting" HorizontalAlignment="Left" Height="59" VerticalAlignment="Top" Width="334" Grid.RowSpan="2" Margin="0,26,0,0">
             <Rectangle x:Name="First_window" Stroke="#FF646464"/>
-            <RadioButton x:Name="WindowRadio" Margin="51,32,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Window" ToolTip="Display rewards in a seperate window"  VerticalContentAlignment="Center" Checked="WindowChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontSize="{DynamicResource FontSize}" FontFamily="{DynamicResource Roboto}"/>
+            <RadioButton x:Name="WindowRadio" Margin="51,32,0,6" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Window" ToolTip="Display rewards in a seperate window"  VerticalContentAlignment="Center" Checked="WindowChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}" FontFamily="{DynamicResource Roboto}"/>
 
-            <RadioButton x:Name="OverlayRadio" Margin="0,32,50,5" HorizontalAlignment="Right" VerticalAlignment="Center" Content="Overlay" ToolTip="Display rewards on top of Warframe"  VerticalContentAlignment="Center" Checked="OverlayChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontSize="{DynamicResource FontSize}" FontFamily="{DynamicResource Roboto}"/>
+            <RadioButton x:Name="OverlayRadio" Margin="0,32,50,5" HorizontalAlignment="Right" VerticalAlignment="Center" Content="Overlay" ToolTip="Display rewards on top of Warframe"  VerticalContentAlignment="Center" Checked="OverlayChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}" FontFamily="{DynamicResource Roboto}"/>
 
-            <Label Content="Rewards display" Foreground="#FFB1D0D9" VerticalAlignment="Top" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="334" Height="31" FontSize="{DynamicResource FontSize}" FontFamily="{DynamicResource Roboto}"/>
+            <Label Content="Rewards display" VerticalAlignment="Top" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="334" Height="31" FontSize="{DynamicResource FontSize}" FontFamily="{DynamicResource Roboto}"/>
         </Grid>
         <Grid x:Name="Activation_key" Height="38" VerticalAlignment="Top" Margin="0,85,0,0">
             <Rectangle x:Name="First_window2" Stroke="#FF646464" Height="39" VerticalAlignment="Top" Margin="0,-1,0,0"/>
-            <Label Content="Activation key" Margin="24,3,0,0" Foreground="#FFB1D0D9" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="126" FontFamily="{DynamicResource Roboto}" Padding="5,5,5,0"/>
-            <TextBox x:Name="Activation_key_box" ToolTip="Key to activate the program" Margin="190,5,24,5" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Foreground="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" FontFamily="{DynamicResource Roboto}" KeyDown="ActivationDown" Cursor="Arrow" GotFocus="ActivationFocus" KeyUp="ActivationUp" LostFocus="ActivationLost"/>
+            <Label Content="Activation key" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="126" Padding="5,5,5,0"/>
+            <TextBox x:Name="Activation_key_box" ToolTip="Key to activate the program" Margin="190,5,24,5" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="ActivationDown" Cursor="Arrow" GotFocus="ActivationFocus" KeyUp="ActivationUp" LostFocus="ActivationLost"/>
             <TextBlock x:Name="hidden" Focusable="True" Visibility="Visible" IsEnabled="True" HorizontalAlignment="Left" Margin="333,101,0,-64" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="1" Width="1" RenderTransformOrigin="0.5,0.5" >
 
             </TextBlock>
         </Grid>
         <Grid x:Name="Scalling_setting" HorizontalAlignment="Left" Width="334" Margin="0,122,0,29">
             <Rectangle x:Name="First_window1" Stroke="#FF646464" Margin="0,0,0,-1"/>
-            <TextBox x:Name="Scaling_box" Margin="190,5,24,0" ToolTip="Warframe in-game UI scaling" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Foreground="#FFB1D0D9" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" FontFamily="{DynamicResource Roboto}" LostFocus="ScaleLeave" KeyDown="ScaleDown" GotFocus="scaleFocus" Cursor="Arrow" Height="27" VerticalAlignment="Top"/>
-            <Label Content="Warframe UI scaling" Margin="5,3,0,0" Foreground="#FFB1D0D9" VerticalAlignment="Top" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="175" Height="35" FontFamily="{DynamicResource Roboto}"/>
+            <TextBox x:Name="Scaling_box" Margin="190,5,24,0" ToolTip="Warframe in-game UI scaling" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" LostFocus="ScaleLeave" KeyDown="ScaleDown" GotFocus="scaleFocus" Cursor="Arrow" Height="27" VerticalAlignment="Top"/>
+            <Label Content="Warframe UI scaling" Margin="5,3,0,0" VerticalAlignment="Top" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="175" Height="35" FontFamily="{DynamicResource Roboto}"/>
             <Slider x:Name="scaleBar" Margin="20,40,20,0" VerticalAlignment="Top" ValueChanged="ScalingValueChanged" Minimum="50" Maximum="100" Value="100" LargeChange="10" SmallChange="1" TickPlacement="BottomRight" IsSnapToTickEnabled="False" TickFrequency="10" />
-            <Label Content="Full" HorizontalAlignment="Left" Margin="290,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" Foreground="#FFB1D0D9" Width="37" HorizontalContentAlignment="Center" FontFamily="{DynamicResource Roboto}"/>
-            <Label Content="90" HorizontalAlignment="Left" Margin="238,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" Foreground="#FFB1D0D9" HorizontalContentAlignment="Center" FontFamily="{DynamicResource Roboto}"/>
-            <Label Content="80" HorizontalAlignment="Left" Margin="181,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" Foreground="#FFB1D0D9" HorizontalContentAlignment="Center" FontFamily="{DynamicResource Roboto}"/>
-            <Label Content="70" HorizontalAlignment="Left" Margin="125,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" Foreground="#FFB1D0D9" HorizontalContentAlignment="Center" Width="30" FontFamily="{DynamicResource Roboto}"/>
-            <Label Content="60" HorizontalAlignment="Left" Margin="68,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" Foreground="#FFB1D0D9" HorizontalContentAlignment="Center" FontFamily="{DynamicResource Roboto}"/>
-            <Label Content="50" HorizontalAlignment="Left" Margin="11,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" Foreground="#FFB1D0D9" HorizontalContentAlignment="Center" FontFamily="{DynamicResource Roboto}"/>
+            <Label Content="Full" HorizontalAlignment="Left" Margin="290,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" Width="37" HorizontalContentAlignment="Center" FontFamily="{DynamicResource Roboto}"/>
+            <Label Content="90" HorizontalAlignment="Left" Margin="238,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" FontFamily="{DynamicResource Roboto}"/>
+            <Label Content="80" HorizontalAlignment="Left" Margin="181,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" FontFamily="{DynamicResource Roboto}"/>
+            <Label Content="70" HorizontalAlignment="Left" Margin="125,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" Width="30" FontFamily="{DynamicResource Roboto}"/>
+            <Label Content="60" HorizontalAlignment="Left" Margin="68,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" FontFamily="{DynamicResource Roboto}"/>
+            <Label Content="50" HorizontalAlignment="Left" Margin="11,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" FontFamily="{DynamicResource Roboto}"/>
         </Grid>
         <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Height="28" VerticalAlignment="Bottom">
             <Rectangle x:Name="First_window3" Stroke="#FF646464" Margin="0,-1,0,0"/>
             <Viewbox Margin="49,3,0,4" HorizontalAlignment="Left" />
             <Viewbox Margin="0,0,262,4" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="60" >
-                <CheckBox x:Name="autoCheckbox" Content="Auto" ToolTip="Automatically detects when the relic screen is visable." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" Click="AutoClicked" FontFamily="{DynamicResource Roboto}"/>
+                <CheckBox x:Name="autoCheckbox" Content="Auto" ToolTip="Automatically detects when the relic screen is visable." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="AutoClicked" FontFamily="{DynamicResource Roboto}"/>
             </Viewbox>
-            <Button Content="Create debug zip" HorizontalAlignment="Left" Margin="188,-1,0,0" Width="146" FontFamily="/WFInfo;component/Resources/Roboto/#Roboto" FontSize="18" Background="#FF0F0F0F" Foreground="#FFB1D0D9" Click="ClickCreateDebug"/>
+            <Label MouseLeftButtonDown="ClickCreateDebug" Content="Create debug zip" Margin="188,-1,0,0" Width="146" FontWeight="Regular" Style="{StaticResource Label_Button}"/>
             <Viewbox Margin="0,0,158,4" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="96" Height="20" >
-                <CheckBox x:Name="clipboardCheckbox" Content="Clipboard" ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" Click="AutoClicked" FontFamily="{DynamicResource Roboto}" Checked="clipboardCheckbox_Checked"/>
+                <CheckBox x:Name="clipboardCheckbox" Content="Clipboard" ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="AutoClicked" Checked="clipboardCheckbox_Checked"/>
             </Viewbox>
 
 

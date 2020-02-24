@@ -181,12 +181,24 @@ namespace WFInfo
                 textBox.Clear();
         }
 
+        private void TextBoxLostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!searchActive)
+                textBox.Text = "Filter Terms";
+        }
+
         private void ToggleShowAllRelics(object sender, RoutedEventArgs e)
         {
             showAllRelics = !showAllRelics;
             foreach (TreeNode era in RelicNodes)
                 foreach (TreeNode relic in era.Children)
                     relic.topLevel = showAllRelics;
+
+            if (showAllRelics)
+                relicComboButton.Content = "All Relics";
+            else
+                relicComboButton.Content = "Relic Eras";
+
 
             RelicTree.Items.Clear();
             RefreshVisibleRelics();

@@ -9,17 +9,17 @@
         x:Class="WFInfo.RelicsWindow"
         Title="Relics" Height="400" Width="450" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="450" MinWidth="450" MinHeight="200" Loaded="WindowLoaded">
     <Window.Resources>
-        
+
     </Window.Resources>
 
     <Grid MouseDown="MouseDown">
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
-            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="0,-1" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" Width="114" FontSize="14" Click="VaultedClick" IsChecked="True"/>
-            <TextBox x:Name="textBox" Margin="152,-1,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Padding="0" Text="Filter Terms" TextChanged="TextboxTextChanged" Background="#FF141414" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" FontSize="14" Foreground="#FF646464" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" GotFocus="TextBoxFocus"/>
+            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1"/>
+            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." Click="VaultedClick" IsChecked="True" Margin="10,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+            <TextBox x:Name="textBox" Margin="152,0,0,0" VerticalContentAlignment="Center" Padding="0" Text="Filter Terms" Foreground="#FF646464" TextChanged="TextboxTextChanged" SelectionBrush="#FF7EB4EA" GotFocus="TextBoxFocus" LostFocus="TextBoxLostFocus" BorderBrush="#FF303030" BorderThickness="1,0,0,0"/>
             <Rectangle Stroke="#FF646464" Margin="110,-1,-1,-1"/>
-            <Label Content=" Filter:" HorizontalAlignment="Left" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" Margin="109,0,0,0" Padding="0" VerticalContentAlignment="Center" Width="50" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}"/>
+            <Label Content="Filter:" HorizontalAlignment="Left" Margin="116,0,0,0" Padding="0" VerticalContentAlignment="Center" />
 
         </Grid>
         <Grid Height="18" VerticalAlignment="Top" Margin="1,46,1,0">
@@ -27,32 +27,61 @@
 
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="3" />
             <Rectangle Stroke="#FF646464" Margin="69,-1,-1,-1" Grid.RowSpan="3"/>
-            <Button x:Name="relicComboButton" Content="Relic Eras" HorizontalAlignment="Left" VerticalAlignment="Top" Width="71" Height="20" Margin="-1,-1,0,-1" Background="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" FontSize="14" Click="ToggleShowAllRelics"/>
-            <ComboBox  x:Name="SortBox" Margin="129,-1,0,-1" Grid.RowSpan="3" Background="#FF0F0F0F" Foreground="#FFAFD0D9" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"  SelectionChanged="SortBoxChanged" BorderBrush="#FF646464" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}">
-                <ComboBoxItem Background="#FF0F0F0F" BorderBrush="#FF0F0F0F" IsSelected="True" Content="Name"/>
-                <ComboBoxItem Content="Average intact plat"/>
-                <ComboBoxItem Content="Average radiant plat"/>
-                <ComboBoxItem Content="Difference (radiant-intact)"/>
+            <Label x:Name="relicComboButton" MouseLeftButtonDown="ToggleShowAllRelics" Content="Relic Eras" FontSize="12" FontWeight="Normal" Margin="-1,-1,378,-1" Style="{StaticResource Label_Button}"/>
+            <!-- <Button x:Name="relicComboButton" Content="Relic Eras" HorizontalAlignment="Left" VerticalAlignment="Top" Width="71" Height="20" Margin="-1,-1,0,-1" Background="#FF0F0F0F" FontSize="14" Click="ToggleShowAllRelics"/> -->
+            <Border x:Name="ComboBorder" Margin="121,-1,-1,-1" Grid.RowSpan="3">
+                <Border.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=ComboBorder, Path=IsMouseOver}" Value="true">
+                                <Setter Property="Border.BorderThickness" Value="1"/>
+                                <Setter Property="Border.BorderBrush" Value="#FF7EB4EA"/>
+                                <Setter Property="Panel.ZIndex" Value="1000"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Border.BorderBrush" Value="#FF646464"/>
+                        <Setter Property="Border.BorderThickness" Value="0,1,1,1"/>
+                    </Style>
+                </Border.Style>
+                <Border>
+                    <Border.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=ComboBorder, Path=IsMouseOver}" Value="true">
+                                    <Setter Property="Border.BorderThickness" Value="0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                            <Setter Property="Border.BorderBrush" Value="#FF303030"/>
+                            <Setter Property="Border.BorderThickness" Value="1,0,0,0"/>
+                        </Style>
+                    </Border.Style>
+                    <ComboBox x:Name="SortBox" Background="#FF0F0F0F" Foreground="#FFAFD0D9" SelectionChanged="SortBoxChanged" BorderThickness="0" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}">
+                        <ComboBoxItem IsSelected="True" Content="Name"/>
+                        <ComboBoxItem Content="Average intact plat"/>
+                        <ComboBoxItem Content="Average radiant plat"/>
+                        <ComboBoxItem Content="Difference (radiant-intact)"/>
 
-            </ComboBox>
-            <Label Content="Sort by:" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" Margin="73,0,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" HorizontalAlignment="Left" Width="51"/>
+                    </ComboBox>
+                </Border>
+            </Border>
+            <Label Content="Sort by:" Margin="75,0,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="12" Background="{x:Null}" HorizontalAlignment="Left"/>
 
         </Grid>
         <Grid Height="27" VerticalAlignment="Top">
             <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top"/>
 
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
-            <TextBlock Text="Relics" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
-            <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right"/>
+            <TextBlock Text="Relics" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
         </Grid>
+        <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Height="27" VerticalAlignment="Top"/>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
-            <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
+            <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}" >
                         <HierarchicalDataTemplate.Resources>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="FontSize" Value="13" />
-                                <Setter Property="FontFamily" Value="Roboto" />
+                                <Setter Property="FontFamily" Value="{DynamicResource Roboto}" />
                                 <Setter Property="Foreground" Value="#FFB1D0D9" />
                                 <Setter Property="Padding" Value="0,2,0,0" />
                             </Style>

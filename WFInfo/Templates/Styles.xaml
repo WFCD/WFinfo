@@ -7,6 +7,28 @@
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" 
         xmlns:local="clr-namespace:WFInfo">
 
+    <!-- DEFAULT TEXT STYLES -->
+    <Style TargetType="{x:Type FrameworkElement}" x:Key="baseStyle">
+        <Setter Property="TextElement.Foreground" Value="#FFB1D0D9"/>
+        <Setter Property="TextElement.FontFamily" Value="{DynamicResource Roboto}"/>
+    </Style>
+    <Style TargetType="CheckBox" BasedOn="{StaticResource baseStyle}"/>
+    <Style TargetType="RadioButton" BasedOn="{StaticResource baseStyle}"/>
+    <Style TargetType="Label" BasedOn="{StaticResource baseStyle}"/>
+    <Style TargetType="TextBox" BasedOn="{StaticResource baseStyle}"/>
+    <Style TargetType="TextBlock" BasedOn="{StaticResource baseStyle}"/>
+    <Style TargetType="ToolTip" BasedOn="{StaticResource baseStyle}">
+        <Setter Property="Background" Value="#FF0F0F0F" />
+    </Style>
+
+
+
+
+
+
+
+
+
     <Style x:Key="FocusVisual">
         <Setter Property="Control.Template">
             <Setter.Value>
@@ -17,24 +39,26 @@
         </Setter>
     </Style>
     <Style x:Key="Label_Button" TargetType="Label">
-        <Setter Property="Label.Background" Value="Transparent"/>
-        <Setter Property="Label.FontSize" Value="16"/>
-        <Setter Property="Label.Foreground" Value="#FFB1D0D9"/>
-        <Setter Property="Label.BorderBrush" Value="#FF646464"/>
-        <Setter Property="Label.BorderThickness" Value="1"/>
-        <Setter Property="Label.FontFamily" Value="{DynamicResource Roboto}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Foreground" Value="#FFB1D0D9"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Roboto}"/>
+        <Setter Property="BorderBrush" Value="#FF646464"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Control.FontWeight" Value="Bold"/>
         <Setter Property="Control.Padding" Value="0"/>
         <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
         <Setter Property="Control.VerticalContentAlignment" Value="Center"/>
-        
+        <Setter Property="Panel.ZIndex" Value="500"/>
+
         <Style.Triggers>
             <MultiTrigger>
                 <MultiTrigger.Conditions>
                     <Condition Property="Label.IsMouseOver" Value="True"/>
                     <Condition Property="Label.IsEnabled" Value="True"/>
                 </MultiTrigger.Conditions>
-                <Setter Property="Label.Background" Value="#FF1B1B1B"/>
+                <Setter Property="Label.BorderBrush" Value="#FF7EB4EA"/>
+                <Setter Property="Panel.ZIndex" Value="1000"/>
             </MultiTrigger>
         </Style.Triggers>
     </Style>
@@ -285,7 +309,9 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
-        <Setter Property="Padding" Value="6,3,5,3"/>
+        <Setter Property="Padding" Value="5,0,5,0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
         <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
         <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>

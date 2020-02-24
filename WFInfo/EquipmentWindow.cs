@@ -198,12 +198,24 @@ namespace WFInfo
                 textBox.Clear();
         }
 
+        private void TextBoxLostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!searchActive)
+                textBox.Text = "Filter Terms";
+        }
+
         private void ToggleShowAllEqmt(object sender, RoutedEventArgs e)
         {
             showAllEqmt = !showAllEqmt;
             foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
                 foreach (TreeNode kid in primeType.Value.Children)
                     kid.topLevel = showAllEqmt;
+
+            if (showAllEqmt)
+                eqmtComboButton.Content = "All Equipment";
+            else
+                eqmtComboButton.Content = "Equipment Types";
+
             EqmtTree.Items.Clear();
             RefreshVisibleRelics();
         }

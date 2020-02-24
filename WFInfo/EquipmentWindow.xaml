@@ -9,48 +9,78 @@
         x:Class="WFInfo.EquipmentWindow"
         Title="Equipment" Height="400" Width="400" WindowStyle="None" AllowsTransparency="True" Loaded="WindowLoaded" ResizeMode="CanResizeWithGrip" MinWidth="400" MaxWidth="400" MinHeight="110">
     <Window.Resources>
-        
+
     </Window.Resources>
     <Grid MouseDown="MouseDown">
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
+        <Label MouseLeftButtonDown="ExpandAll" Content="+" ToolTip="Expand All Levels" Padding="0" Margin="20,26,359,354" Style="{StaticResource Label_Button}"/>
+        <Label MouseLeftButtonDown="CollapseAll" Content="-" ToolTip="Collapse All Levels" Padding="0" Margin="0,26,379,354" Style="{StaticResource Label_Button}"/>
+
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Hide vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Foreground="#FFB1D0D9" FontFamily="{DynamicResource Roboto}" Margin="39,-1,0,-1" RenderTransformOrigin="0.5,0.5" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="107" FontSize="14" Click="VaultedClick" IsChecked="True"/>
-            <Button Content="+" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="-1,-1,0,-1" Width="20" Background="{x:Null}" Click="ExpandAll"/>
-            <Button Content="-" Foreground="#FFB1D0D9" Padding="0" HorizontalAlignment="Left" Margin="18,-1,0,-1" Width="20" Background="{x:Null}" Click="CollapseAll"/>
-            <TextBox x:Name="textBox" Margin="192,-1,-1,-1" TextAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="Filter Terms" Background="#FF141414" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" FontSize="14" Foreground="#FF646464" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" GotFocus="TextBoxFocus" TextChanged="TextboxTextChanged"/>
+            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." Click="VaultedClick" IsChecked="True" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+            <!-- <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Hide vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Margin="39,-1,0,-1" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="107" FontSize="14" Click="VaultedClick" IsChecked="True"/> -->
+            <TextBox x:Name="textBox" Margin="191,0,0,0" VerticalContentAlignment="Center" Padding="0" Text="Filter Terms" Foreground="#FF646464" TextChanged="TextboxTextChanged" SelectionBrush="#FF7EB4EA" GotFocus="TextBoxFocus" LostFocus="TextBoxLostFocus" BorderBrush="#FF303030" BorderThickness="1,0,0,0"/>
             <Rectangle Stroke="#FF646464" Margin="149,-1,-1,-1"/>
-            <Label Content=" Filter:" HorizontalAlignment="Left" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" Margin="150,-1,0,-1" Padding="0" VerticalContentAlignment="Center" Width="42" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}"/>
+            <Label Content="Filter:" HorizontalAlignment="Left" Margin="155,0,0,0" Padding="0" VerticalContentAlignment="Center" />
 
         </Grid>
-        <Grid Height="18" VerticalAlignment="Top" Margin="1,46,1,0">
+        <Label x:Name="eqmtComboButton" MouseLeftButtonDown="ToggleShowAllEqmt" Content="Equipment Types" FontSize="12" FontWeight="Normal" Margin="0,45,276,335" Style="{StaticResource Label_Button}"/>
+        <Grid Margin="1,46,1,336">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="2" />
             <Rectangle Stroke="#FF646464" Margin="122,-1,-1,-1" Grid.RowSpan="2"/>
-            <Button x:Name="eqmtComboButton" Content="Equipment Groups" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" Foreground="#FFB1D0D9" Width="125" Height="20" Margin="-1,-1,0,-1" Grid.RowSpan="2" Background="#FF0F0F0F" FontSize="14" Click="ToggleShowAllEqmt"/>
-            <ComboBox x:Name="SortBox" Margin="184,-1,-1,-1" Grid.RowSpan="2" Background="#FF0F0F0F" Foreground="#FFAFD0D9" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" SelectionChanged="SortBoxChanged" Style="{DynamicResource ComboBoxStyle1}">
-                <ComboBoxItem IsSelected="True" Content="Name"/>
-                <ComboBoxItem Content="Cost"/>
-                <ComboBoxItem Content="Unowned"/>
-                <ComboBoxItem Content="Set cost"/>
-            </ComboBox>
-            <Label Content="Sort by:" FontFamily="/WFInfo;component/Resources/#Roboto Condensed" Margin="129,-1,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="15" Foreground="#FFB1D0D9" Background="{x:Null}" Grid.RowSpan="2" HorizontalAlignment="Left" Width="50"/>
+            <Border x:Name="ComboBorder" Margin="175,-1,-1,-1">
+                <Border.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=ComboBorder, Path=IsMouseOver}" Value="true">
+                                <Setter Property="Border.BorderThickness" Value="1"/>
+                                <Setter Property="Border.BorderBrush" Value="#FF7EB4EA"/>
+                                <Setter Property="Panel.ZIndex" Value="1000"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Border.BorderBrush" Value="#FF646464"/>
+                        <Setter Property="Border.BorderThickness" Value="0,1,1,1"/>
+                    </Style>
+                </Border.Style>
+                <Border>
+                    <Border.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=ComboBorder, Path=IsMouseOver}" Value="true">
+                                    <Setter Property="Border.BorderThickness" Value="0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                            <Setter Property="Border.BorderBrush" Value="#FF303030"/>
+                            <Setter Property="Border.BorderThickness" Value="1,0,0,0"/>
+                        </Style>
+                    </Border.Style>
+                    <ComboBox x:Name="SortBox" Background="#FF0F0F0F" Foreground="#FFAFD0D9" SelectionChanged="SortBoxChanged" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" BorderThickness="0">
+                        <ComboBoxItem IsSelected="True" Content="Name"/>
+                        <ComboBoxItem Content="Cost"/>
+                        <ComboBoxItem Content="Unowned"/>
+                        <ComboBoxItem Content="Set cost"/>
+                    </ComboBox>
+                </Border>
+            </Border>
+            <Label Content="Sort by:" Margin="129,0,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="12" Background="{x:Null}" HorizontalAlignment="Left"/>
 
         </Grid>
         <Grid Height="27" VerticalAlignment="Top">
             <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top"/>
 
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
-            <TextBlock Text="Equipment" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FFB1D0D9" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
+            <TextBlock Text="Equipment" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{DynamicResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
             <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right"/>
         </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
-            <TreeView x:Name="EqmtTree" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFB1D0D9" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
+            <TreeView x:Name="EqmtTree" Background="{x:Null}" BorderBrush="{x:Null}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}" >
                         <HierarchicalDataTemplate.Resources>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="FontSize" Value="13" />
-                                <Setter Property="FontFamily" Value="Roboto" />
+                                <Setter Property="FontFamily" Value="{DynamicResource Roboto}" />
                                 <Setter Property="Foreground" Value="#FFB1D0D9" />
                                 <Setter Property="Padding" Value="0,2,0,0" />
                             </Style>
@@ -61,7 +91,7 @@
                                 <ColumnDefinition Width="100" />
                                 <ColumnDefinition Width="70" />
                             </Grid.ColumnDefinitions>
-                            
+
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Background="Transparent">
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Foreground="{Binding NameBrush}"/>
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Foreground="#506464" Padding="5,2,0,0" FontWeight="Normal" />
@@ -86,7 +116,7 @@
                                     </StackPanel.Style>
                                     <Label Content="＋" Foreground="#506464" FontSize="13" Padding="0">
                                         <Label.InputBindings>
-                                            <MouseBinding MouseAction="LeftClick" Command="{Binding IncrementPart}" /> 
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding IncrementPart}" />
                                         </Label.InputBindings>
                                         <Label.Style>
                                             <Style>

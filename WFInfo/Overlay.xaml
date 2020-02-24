@@ -11,27 +11,27 @@
     </Window.Background>
     <Grid>
         <Grid.Resources>
-            <Style TargetType="TextBlock">
+            <Style TargetType="TextBlock" BasedOn="{StaticResource baseStyle}">
                 <Setter Property="FontWeight" Value="Medium" />
             </Style>
         </Grid.Resources>
         <Viewbox x:Name="partMargin" Margin="0,39,0,82" HorizontalAlignment="Center">
-            <TextBlock x:Name="partText" Foreground="#FFB1D0D9"  FontFamily="/WFInfo;component/Resources/#Roboto Condensed" Text="Part name"/>
+            <TextBlock x:Name="partText" Text="Part name"/>
         </Viewbox>
         <Viewbox x:Name="volumeMargin" Margin="0,104,0,17" >
-            <TextBlock x:Name="volumeText" Text="XX sold last 48hrs" Foreground="#FF9AAEB8" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
+            <TextBlock x:Name="volumeText" Text="XX sold last 48hrs"/>
         </Viewbox>
         <Viewbox x:Name="platMargin" Margin="0,77,162,43" HorizontalAlignment="Right">
-            <TextBlock x:Name="platText" Text="Plat" Foreground="#FFB1D0D9" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
+            <TextBlock x:Name="platText" Text="Plat"/>
         </Viewbox>
         <Viewbox x:Name="ducatMargin" Margin="0,77,78,43" HorizontalAlignment="Right">
-            <TextBlock x:Name="ducatText" Text="100" Foreground="#FFB1D0D9" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
+            <TextBlock x:Name="ducatText" Text="100"/>
         </Viewbox>
         <Viewbox x:Name="vaultedMargin" Margin="0,15,23,110" HorizontalAlignment="Right" Visibility="Hidden" >
-            <TextBlock x:Name="vaultedText" Text="VAULTED" Foreground="#FF828C96" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
+            <TextBlock x:Name="vaultedText" Text="VAULTED" Foreground="#FF828C96"/>
         </Viewbox>
         <Viewbox x:Name="ownedMargin" Margin="23,15,0,110" HorizontalAlignment="Left" >
-            <TextBlock x:Name="ownedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="/WFInfo;component/Resources/#Roboto Condensed"/>
+            <TextBlock x:Name="ownedText" Text="Number of owned" Foreground="#FF828C96"/>
         </Viewbox>
 
 
