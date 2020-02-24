@@ -13,7 +13,7 @@ namespace WFInfo
         public static double window_hei = 141.0;
         public static double part_line_hei = 20.0; // TBD
         public static double partMarginTop = 39.0;
-        public static double partMarginBottom = 82.0;
+        public static double partMarginBottom = 80.0;
         public static double volumeMarginTop = 104.0;
         public static double volumeMarginBottom = 17.0;
         //public static double platMarginLeft = 76.0;

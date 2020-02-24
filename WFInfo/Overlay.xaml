@@ -13,6 +13,7 @@
         <Grid.Resources>
             <Style TargetType="TextBlock" BasedOn="{StaticResource baseStyle}">
                 <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="FontFamily" Value="{StaticResource Roboto_Condensed}" />
             </Style>
         </Grid.Resources>
         <Viewbox x:Name="partMargin" Margin="0,39,0,82" HorizontalAlignment="Center">
@@ -28,10 +29,10 @@
             <TextBlock x:Name="ducatText" Text="100"/>
         </Viewbox>
         <Viewbox x:Name="vaultedMargin" Margin="0,15,23,110" HorizontalAlignment="Right" Visibility="Hidden" >
-            <TextBlock x:Name="vaultedText" Text="VAULTED" Foreground="#FF828C96"/>
+            <TextBlock x:Name="vaultedText" Text="VAULTED" Foreground="#FF828C96" FontFamily="{StaticResource Roboto}"/>
         </Viewbox>
         <Viewbox x:Name="ownedMargin" Margin="23,15,0,110" HorizontalAlignment="Left" >
-            <TextBlock x:Name="ownedText" Text="Number of owned" Foreground="#FF828C96"/>
+            <TextBlock x:Name="ownedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{StaticResource Roboto}"/>
         </Viewbox>
 
 
