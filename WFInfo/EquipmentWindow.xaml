@@ -114,7 +114,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </StackPanel.Style>
-                                    <Label Content="＋" Foreground="#506464" FontSize="13" Padding="0">
+                                    <Label Content="＋" Foreground="#506464" FontSize="13" Padding="0,2,0,0">
                                         <Label.InputBindings>
                                             <MouseBinding MouseAction="LeftClick" Command="{Binding IncrementPart}" />
                                         </Label.InputBindings>
@@ -134,7 +134,7 @@
                                         </Label.Style>
                                     </Label>
                                     <TextBlock x:Name="OwnedTextBlock" Text="{Binding Col1_Text1}" Foreground="{Binding NameBrush}" />
-                                    <Label Content="－" Foreground="#506464" FontSize="13" Padding="0">
+                                    <Label Content="－" Foreground="#506464" FontSize="13" Padding="0,2,0,0">
                                         <Label.InputBindings>
                                             <MouseBinding MouseAction="LeftClick" Command="{Binding DecrementPart}" />
                                         </Label.InputBindings>

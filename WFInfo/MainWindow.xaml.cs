@@ -83,7 +83,7 @@ namespace WFInfo
                 LowLevelListener.KeyAction += main.OnKeyAction;
                 listener.Hook();
                 InitializeComponent();
-                Version.Content = "v" + Main.BuildVersion + "-beta5.1";
+                Version.Content = "v" + Main.BuildVersion;
 
                 this.Left = 300;
                 this.Top = 300;

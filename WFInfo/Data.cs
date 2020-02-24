@@ -15,7 +15,7 @@ namespace WFInfo
 
     class Data
     {
-        public Dictionary<string, string> marketItems = new Dictionary<string, string>(); // Warframe.market item listing           {<id>: "<name>|<url_name>", ...}
+        public JObject marketItems; // Warframe.market item listing           {<id>: "<name>|<url_name>", ...}
         public JObject marketData; // Contains warframe.market ducatonator listing     {<partName>: {"ducats": <ducat_val>,"plat": <plat_val>}, ...}
         public JObject relicData; // Contains relicData from Warframe PC Drops        {<Era>: {"A1":{"vaulted": true,<rare1/uncommon[12]/common[123]>: <part>}, ...}, "Meso": ..., "Neo": ..., "Axi": ...}
         public JObject equipmentData; // Contains equipmentData from Warframe PC Drops          {<EQMT>: {"vaulted": true, "PARTS": {<NAME>:{"relic_name":<name>|"","count":<num>}, ...}},  ...}
@@ -137,46 +137,43 @@ namespace WFInfo
         }
 
         // Load item list from Sheets
-        private bool LoadItems()
+        private void ReloadItems()
         {
-            marketItems = new Dictionary<string, string>();
+            marketItems = new JObject();
 
             IList<IList<object>> sheet = sheetsApi.GetSheet("items!A:C");
             foreach (IList<object> row in sheet)
             {
                 string name = row[1].ToString();
                 if (name.Contains("Prime "))
-                {
                     marketItems[row[0].ToString()] = name + "|" + row[2].ToString();
-                }
             }
 
             marketItems["version"] = Main.BuildVersion;
             Main.AddLog("Item database has been downloaded");
-            return true;
         }
 
         // Load market data from Sheets
         private bool LoadMarket(bool force = false)
         {
-            if (!force && File.Exists(marketDataPath))
+            if (!force && File.Exists(marketDataPath) && File.Exists(marketItemsPath))
             {
                 if (marketData == null)
-                {
                     marketData = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(marketDataPath));
-                }
+                if (marketItems == null)
+                    marketItems = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(marketItemsPath));
 
                 if (marketData.TryGetValue("version", out JToken version) && (marketData["version"].ToObject<string>() == Main.BuildVersion))
                 {
                     DateTime timestamp = marketData["timestamp"].ToObject<DateTime>();
                     if (timestamp > DateTime.Now.AddHours(-12))
                     {
-                        Main.AddLog("Plat database is up to date");
+                        Main.AddLog("Market Databases are up to date");
                         return false;
                     }
                 }
             }
-
+            ReloadItems();
             marketData = new JObject();
 
             IList<IList<object>> sheet = sheetsApi.GetSheet("prices!A:I");
@@ -306,6 +303,7 @@ namespace WFInfo
                             equipmentData[primeName]["parts"][partName]["owned"] = 0;
                         equipmentData[primeName]["parts"][partName]["vaulted"] = part.Value["vaulted"];
                         equipmentData[primeName]["parts"][partName]["count"] = part.Value["count"];
+                        equipmentData[primeName]["parts"][partName]["ducats"] = part.Value["ducats"];
 
 
                         string gameName = part.Key;
@@ -316,7 +314,6 @@ namespace WFInfo
                         {
                             gameName += " Blueprint";
                         }
-
                         if (marketData.TryGetValue(partName, out _))
                         {
                             nameData[gameName] = partName;
@@ -326,11 +323,21 @@ namespace WFInfo
                 }
 
 
-                Main.AddLog("Drop database has been downloaded");
+                Main.AddLog("Prime Database has been downloaded");
                 return true;
             }
-            Main.AddLog("Drop database is up to date");
+            Main.AddLog("Prime Database is up to date");
             return false;
+        }
+
+        private void RefreshMarketDucats()
+        {
+            //equipmentData[primeName]["parts"][partName]["ducats"]
+            foreach(KeyValuePair<string,JToken> prime in equipmentData)
+                if(prime.Key != "timestamp")
+                    foreach (KeyValuePair<string, JToken> part in equipmentData[prime.Key]["parts"].ToObject<JObject>())
+                        if (marketData.TryGetValue(part.Key, out _))
+                            marketData[part.Key]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString());
         }
 
         private void MarkAllEquipmentVaulted()
@@ -393,52 +400,43 @@ namespace WFInfo
         public bool Update()
         {
             Main.AddLog("Checking for Updates to Databases");
-            bool saveMarket = LoadItems() | LoadMarket();
+            bool saveDatabases = LoadMarket();
 
-            foreach (KeyValuePair<string, string> elem in marketItems)
+            foreach (KeyValuePair<string, JToken> elem in marketItems)
             {
                 if (elem.Key != "version")
                 {
-                    string[] split = elem.Value.Split('|');
+                    string[] split = elem.Value.ToString().Split('|');
                     string itemName = split[0];
                     string itemUrl = split[1];
-                    if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out JToken tempOut))
+                    if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out _))
                     {
                         LoadMarketItem(itemName, itemUrl);
-                        saveMarket = true;
+                        saveDatabases = true;
                     }
                 }
             }
             Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm"); });
 
-            bool saveDrop = LoadEqmtData();
+            saveDatabases = LoadEqmtData(saveDatabases);
             Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm"); });
 
-            if (saveDrop)
-            {
-                SaveEquipmentJSONs();
-            }
+            if (saveDatabases)
+                SaveAllJSONs();
 
-            if (saveMarket || saveDrop)
-            {
-                SaveDatabase(marketItemsPath, marketItems);
-                SaveDatabase(marketDataPath, marketData);
-            }
-
-            return saveMarket;
+            return saveDatabases;
         }
 
         public void ForceMarketUpdate()
         {
             Main.AddLog("Forcing market update");
-            LoadItems();
             LoadMarket(true);
 
-            foreach (KeyValuePair<string, string> elem in marketItems)
+            foreach (KeyValuePair<string, JToken> elem in marketItems)
             {
                 if (elem.Key != "version")
                 {
-                    string[] split = elem.Value.Split('|');
+                    string[] split = elem.Value.ToString().Split('|');
                     string itemName = split[0];
                     string itemUrl = split[1];
                     if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out _))
@@ -447,6 +445,9 @@ namespace WFInfo
                     }
                 }
             }
+
+            RefreshMarketDucats();
+
             SaveDatabase(marketItemsPath, marketItems);
             SaveDatabase(marketDataPath, marketData);
             Main.RunOnUIThread(() =>
@@ -458,18 +459,20 @@ namespace WFInfo
             });
         }
 
-        public void SaveEquipmentJSONs()
+        public void SaveAllJSONs()
         {
             SaveDatabase(eqmtDataPath, equipmentData);
             SaveDatabase(relicDataPath, relicData);
             SaveDatabase(nameDataPath, nameData);
+            SaveDatabase(marketItemsPath, marketItems);
+            SaveDatabase(marketDataPath, marketData);
         }
 
         public void ForceEquipmentUpdate()
         {
             Main.AddLog("Forcing equipment update");
             LoadEqmtData(true);
-            SaveEquipmentJSONs();
+            SaveAllJSONs();
             Main.RunOnUIThread(() =>
             {
                 MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm");

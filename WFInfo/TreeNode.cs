@@ -714,7 +714,7 @@ namespace WFInfo
                 {
 
                     job["owned"] = owned - 1;
-                    Main.dataBase.SaveEquipmentJSONs();
+                    Main.dataBase.SaveAllJSONs();
 
                     this.Owned_Val--;
                     Parent.Owned_Val--;
@@ -738,7 +738,7 @@ namespace WFInfo
                 if (owned < count)
                 {
                     job["owned"] = owned + 1;
-                    Main.dataBase.SaveEquipmentJSONs();
+                    Main.dataBase.SaveAllJSONs();
 
                     this.Owned_Val++;
                     Parent.Owned_Val++;
