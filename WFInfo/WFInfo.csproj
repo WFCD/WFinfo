@@ -243,12 +243,6 @@
     <Resource Include="Resources\RobotoMono\RobotoMono-Regular.ttf" />
     <Resource Include="Resources\RobotoMono\RobotoMono-Thin.ttf" />
     <Resource Include="Resources\RobotoMono\RobotoMono-ThinItalic.ttf" />
-    <None Include="tessdata\engbest.traineddata">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="tessdata\englimited.traineddata">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />

@@ -15,6 +15,8 @@ namespace WFInfo
 {
     class OCR
     {
+        private static string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
+
         public enum WFtheme : int
         {
             VITRUVIAN,
@@ -93,11 +95,11 @@ namespace WFInfo
 
 
 
-        public static TesseractEngine firstEngine = new TesseractEngine("", "engbest")
+        public static TesseractEngine firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
         {
             DefaultPageSegMode = PageSegMode.SingleBlock
         };
-        public static TesseractEngine secondEngine = new TesseractEngine("", "engbest")
+        public static TesseractEngine secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
         {
             DefaultPageSegMode = PageSegMode.SingleBlock
         };
