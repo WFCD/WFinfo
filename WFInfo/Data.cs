@@ -333,8 +333,8 @@ namespace WFInfo
         private void RefreshMarketDucats()
         {
             //equipmentData[primeName]["parts"][partName]["ducats"]
-            foreach(KeyValuePair<string,JToken> prime in equipmentData)
-                if(prime.Key != "timestamp")
+            foreach (KeyValuePair<string, JToken> prime in equipmentData)
+                if (prime.Key != "timestamp")
                     foreach (KeyValuePair<string, JToken> part in equipmentData[prime.Key]["parts"].ToObject<JObject>())
                         if (marketData.TryGetValue(part.Key, out _))
                             marketData[part.Key]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString());

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Text.RegularExpressions;
+using System.Net;
 
 namespace WFInfo
 {
@@ -30,11 +31,36 @@ namespace WFInfo
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
             overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
             window = new Window();
+            RefreshTrainedData();
             dataBase = new Data();
             relicWindow = new RelicsWindow();
             equipmentWindow = new EquipmentWindow();
             settingsWindow = new Settings();
             Task.Factory.StartNew(new Action(ThreadedDataLoad));
+        }
+
+        private void RefreshTrainedData(string traineddata = "engbest.traineddata")
+        {
+            string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/WFInfo/tessdata/" + traineddata;
+            string tessdata_local = @"tessdata\" + traineddata;
+            string app_data_tessdata = appPath + @"\tessdata";
+            string app_data_tessdata_traineddata = app_data_tessdata + @"\" + traineddata;
+            Directory.CreateDirectory(app_data_tessdata);
+
+            if (!File.Exists(app_data_tessdata_traineddata))
+            {
+                if (Directory.Exists("tessdata") && File.Exists(tessdata_local))
+                {
+                    AddLog("Trained english data is not present in appData, but present in current directory, moving it to appData.");
+                    Directory.Move(tessdata_local, app_data_tessdata_traineddata);
+                    Directory.Delete("tessdata");
+                } else
+                {
+                    AddLog("Trained english data is not present in appData and locally, downloading it.");
+                    WebClient webClient = new WebClient();
+                    webClient.DownloadFile(traineddata_hotlink, app_data_tessdata_traineddata);
+                }
+            }
         }
 
         public static void ThreadedDataLoad()
@@ -136,8 +162,9 @@ namespace WFInfo
                             }
 
                         }
-                        catch (Exception)
+                        catch (Exception e)
                         {
+                            AddLog(e.Message);
                             StatusUpdate("Faild to load image", 1);
                         }
                     });
