@@ -15,6 +15,8 @@ namespace WFInfo
 {
     class OCR
     {
+        private static string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
+
         public enum WFtheme : int
         {
             VITRUVIAN,
@@ -93,11 +95,11 @@ namespace WFInfo
 
 
 
-        public static TesseractEngine firstEngine = new TesseractEngine("", "engbest")
+        public static TesseractEngine firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
         {
             DefaultPageSegMode = PageSegMode.SingleBlock
         };
-        public static TesseractEngine secondEngine = new TesseractEngine("", "engbest")
+        public static TesseractEngine secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
         {
             DefaultPageSegMode = PageSegMode.SingleBlock
         };
@@ -213,10 +215,10 @@ namespace WFInfo
 
                             if (i == firstChecks.Count - 1)
                             {
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum:, " + volume + " vol -- brought to you by WFInfo";
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -- by WFInfo (smart OCR with pricecheck)";
                             } else
                             {
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum:, " + volume + " vol -  ";
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -  ";
                             }
                             Main.RunOnUIThread(() =>
                             {
