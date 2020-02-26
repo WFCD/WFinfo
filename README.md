@@ -2,20 +2,35 @@
 
 
 WFInfo V9 is a companion app for Warframe, based on the [original](https://github.com/Schwaxx/WFInfo) which is no being longer developed. 
-WFinfo is designed to fix a missing feature from Warframe: quick access to both Platinum and Ducat prices when selecting a fissure reward.
+WFinfo is designed to provide quick access to both Platinum and Ducat prices for all fissure rewards to make selecting the best reward easy.
 
-WFinfo provides recent platinum values from warframe.market of every primed item. This is accomplished all without affecting Warframe in any way. 
+WFInfo does this by screenshotting the game window, cropping out the part text, then passing it to an Optical Character Recognition Engine, specifically Google's Tesseract. The OCR Engine will then send back the text it found, and we will pull out the part name from that text. From there, we display the stats for each part in an overlay or on a separate window.
+
+# Usage
+
+1. Download the [latest release](https://github.com/random-facades/WFInfo/releases)
+1. Run WFInfo.exe and wait for it load the databases
+1. Click the Cog Icon to open Settings, and configure your hotkey, scaling, etc
+1. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)
 
 # Features
 
-### Fissure Prices
+### Expansive Part Information
 
-![Fissure Prices](https://i.imgur.com/Fl2z7qS.png)
+![Overlays](https://i.imgur.com/Fl2z7qS.png)
 
-To get the platinum prices during a fissure reward screen, press the activation hotkey (Print Screen by default) during the reward screen. 
-The Platinum and Ducat prices will then be displayed either over Warframe itself or shown in a window that can be viewed on a second screen. 
+![Reward Window](https://i.imgur.com/Fl2z7qS.png)
 
-To simplify operation, we've added Auto Mode, which will wait till Warframe says it "Got rewards" in the EE.log. Once it detects that message, it will look for the rewards screen and trigger the key for you. If it can't find the screen in five seconds, it will give up. At any point, you can trigger it yourself, if the Auto Mode isn't finding the screen.
+When WFInfo displays the part information, through an overlay or a separate window, a large selection of data is displayed. 
+
+Here's a quick highlight of the information shown:
+
+- Owned count (based on the Equipment Window)
+- Vaulted tag (shows up if the part is vaulted)
+- Part name (use this to confirm no errors occured)
+- Plat Value (based on average prices on warframe.market)
+- Ducat Value
+- Volume Sold (amount of parts sold in the last 48 hours on warframe.market)
 
 ### Relic Panel
 
@@ -33,14 +48,6 @@ The Relics panel allows you to look at all relics and see statistics for each. W
 The Equipment window allows you to look at each prime equipment and its parts. It shows how much each costs currently on warframe.market, and also shows how much it will cost to purchase a whole set of equipment. You also can mark items that you own, and it will adjust the total cost to only the remaining items.
 
 ##### Note: For both of these info panels, there are several sorting options that allow you to find what is best for you. Also they have grouping features that allow you to see and sort all relics, or to only sort from one era, i.e. Lith.
-
-# Usage
-
-1. Download the latest release from [latest release](https://github.com/random-facades/WFInfo/releases).
-1. Run the .exe file.
-1. Configure by clicking the cog icon in the lower right.
-1. Press the hotkey on a fissure mission's reward screen (Or wait if set to auto)
-1. An overlay will appear or a second window will appear with the info.
 
 # Will I get Banned?
 
