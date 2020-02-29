@@ -105,7 +105,7 @@ namespace WFInfo
         };
 
         public static TesseractEngine[] engines = new TesseractEngine[4];
-        public static Regex RE = new Regex("[^a-z&//]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static Regex RE = new Regex("[^a-z&// ]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 
 
