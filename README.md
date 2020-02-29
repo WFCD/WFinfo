@@ -13,6 +13,16 @@ WFInfo does this by screenshotting the game window, cropping out the part text, 
 1. Click the Cog Icon to open Settings, and configure your hotkey, scaling, etc
 1. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)
 
+# Will I get Banned?
+
+DE[Adian] has confirmed in a forum post that this will not ban you. 
+
+[![Image of post](https://i.imgur.com/ZGD8ISp.jpg)](https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-prices/?do=findComment&comment=9176107)
+
+Reference:
+
+https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-prices/?do=findComment&comment=9176107
+
 # Features
 
 ### Expansive Part Information
@@ -45,19 +55,11 @@ The Relics panel allows you to look at all relics and see statistics for each. W
 
 ![Equipment Panel](https://i.imgur.com/bQRDYvR.png)
 
-The Equipment window allows you to look at each prime equipment and its parts. It shows how much each costs currently on warframe.market, and also shows how much it will cost to purchase a whole set of equipment. You also can mark items that you own, and it will adjust the total cost to only the remaining items.
+The Equipment window allows you to look at each prime equipment and its parts. It shows how much each costs currently on warframe.market, and also shows how much it will cost to purchase a whole set of equipment. 
+
+If you mark an item here, it will show up during a fissure reward screen.
 
 ##### Note: For both of these info panels, there are several sorting options that allow you to find what is best for you. Also they have grouping features that allow you to see and sort all relics, or to only sort from one era, i.e. Lith.
-
-# Will I get Banned?
-
-DE[Adian] has confirmed in a forum post that this will not ban you. 
-
-[![Image of post](https://i.imgur.com/ZGD8ISp.jpg)](https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-prices/?do=findComment&comment=9176107)
-
-Reference:
-
-https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-prices/?do=findComment&comment=9176107
 
 # Credits/Contact:
 
@@ -65,6 +67,8 @@ https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-pric
 
 **Dapal-003:** u/Dapal-003 (Reddit), Dapal003 (Warframe), ダパール・Dapal-003#0001 (Discord)
 
-[Discord](https://discord.gg/qfd3eFb)
+**Dimon222:** u/dimon222 (Reddit), dimon222 (Warframe), dimon222#8256 (Discord)
 
-[Website](https://random-facades.github.io/WFInfo/)
+Discord: https://discord.gg/qfd3eFb
+
+Website: https://wfinfo.warframestat.us/

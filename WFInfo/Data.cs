@@ -524,7 +524,10 @@ namespace WFInfo
             if (name.IndexOf("Prime") < 0)
                 return "";
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
-            return equipmentData[eqmt]["parts"][name]["owned"].ToString() + "/" + equipmentData[eqmt]["parts"][name]["count"].ToString();
+            string owned = equipmentData[eqmt]["parts"][name]["owned"].ToString();
+            if(owned == "0")
+                return "";
+            return owned + "/" + equipmentData[eqmt]["parts"][name]["count"].ToString();
         }
 
         private void AddElement(int[,] d, List<int> xList, List<int> yList, int x, int y)
