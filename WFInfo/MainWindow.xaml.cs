@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -34,18 +34,12 @@ namespace WFInfo
                 {
                     Settings.settingsObj = new JObject();
                     var message = "Welcome to WFInfo! Here's a quick guid on how to get started." + Environment.NewLine +
-                        " First go into settings (cog icon) and verrify the following settings:" + Environment.NewLine +
-                        "Overlay will overlay on warframe if you're not using fullscreen," + Environment.NewLine +
-                        "Window will make display it elsewhere, usefull for a extra monitor" + Environment.NewLine +
-                        "Set your hotkey to your prefered key by default it's printscreen. " + Environment.NewLine +
-                        "Then set your UI scaling, by default this is 100%" + Environment.NewLine +
-                        "If you want WFInfo to autmatically detect relics toggle auto." + Environment.NewLine +
-                        "If you want to copy the results to paste it toggle clipboard." + Environment.NewLine +
-                        "If you ever have any issues please contact the developers on discord, " + Environment.NewLine +
-                        "the invite link is in the discord icon." + Environment.NewLine +
-                        "The relic icon will show you the worth of relics when opening them" + Environment.NewLine +
-                        "Equipment will show you what you own and what it's worth " + Environment.NewLine +
-                        "(Marked as owned shows up in WFInfo!)";
+                        "First go into settings (cog icon) and verrify the following settings:" + Environment.NewLine +
+                        "🞄Overlay will overlay on warframe if you're not using fullscreen." + Environment.NewLine +
+                        "🞄Window will make display it elsewhere, usefull for a extra monitor" + Environment.NewLine +
+                        "🞄Set your hotkey to your prefered key by default it's printscreen. " + Environment.NewLine +
+                        "🞄Then set your UI scaling, by default this is 100%." +
+                        "Change this if you changed it in game.";
                     MessageBoxResult messageBoxResult = MessageBox.Show(message, "Introduction", MessageBoxButton.OK);
                 }
                 if (!Settings.settingsObj.TryGetValue("Display", out _))
