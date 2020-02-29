@@ -1,4 +1,4 @@
-# Description
+﻿# Description
 
 
 WFInfo V9 is a companion app for Warframe, based on the [original](https://github.com/Schwaxx/WFInfo) which is no being longer developed. 
@@ -9,7 +9,7 @@ WFInfo does this by screenshotting the game window, cropping out the part text, 
 # Usage
 
 1. Download the [latest release](https://github.com/random-facades/WFInfo/releases)
-1. Run WFInfo.exe and wait for it load the databases
+1. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
 1. Click the Cog Icon to open Settings, and configure your hotkey, scaling, etc
 1. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)
 
@@ -42,6 +42,26 @@ Here's a quick highlight of the information shown:
 - Ducat Value
 - Volume Sold (amount of parts sold in the last 48 hours on warframe.market)
 
+### Various Conveniences
+
+* Auto Mode
+  * When enabled, this will listen to the debug log (EE.log) and wait for a message to appear saying that the rewards are displayed. Currently, it is "Got rewards". Once it sees that message, it will trigger the display function and bring up your overlay/window with the reward info.
+  * If it can't detect the reward screen within 5 seconds, then it will assume an error happened.
+    * If it doesn't display, you can just hit the key and force it to activate.
+
+![Clipboard](https://i.imgur.com/Fl2z7qS.png)
+
+* Clipboard Copy
+  * When enabled, WFInfo will copy the plat prices and the part names into the clipboard so you can just paste them into Warframe's Chat for your party-mates.
+  * This does attempt to link the parts themselves so that it's easier to see.
+
+![AutoUpdate](https://i.imgur.com/Fl2z7qS.png)
+
+* Auto Update!
+  * During the initial load of WFInfo, it will query our site to check for any updates available.
+  * If any are found, it will display the prompt above and you can let it download and update WFInfo for you!
+  * We're currently working on slimming the download file down, so you don't have to worry about a massive download with every update. Current estimates are in the range of 15MB.
+
 ### Relic Panel
 
 ![Relic Panel](https://i.imgur.com/k2yEW87.png)
@@ -69,6 +89,6 @@ If you mark an item here, it will show up during a fissure reward screen.
 
 **Dimon222:** u/dimon222 (Reddit), dimon222 (Warframe), dimon222#8256 (Discord)
 
-Discord: https://discord.gg/qfd3eFb
+**Discord:** https://discord.gg/qfd3eFb
 
-Website: https://wfinfo.warframestat.us/
+**Website:** https://wfinfo.warframestat.us/
