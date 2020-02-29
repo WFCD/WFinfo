@@ -203,8 +203,6 @@ namespace WFInfo
 
                 firstChecks = new string[parts.Count];
                 Task[] tasks = new Task[parts.Count];
-
-
                 for (int i = 0; i < parts.Count; i++)
                 {
                     int tempI = i;
@@ -247,7 +245,7 @@ namespace WFInfo
                                 {
                                     Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                                     Main.overlays[partNumber].Resize(overWid);
-                                    Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
+                                    Main.overlays[partNumber].Display((int)((startX + width / 4 * i) / dpiScaling), startY);
                                 } else
                                 {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
@@ -257,9 +255,8 @@ namespace WFInfo
                                     Clipboard.SetText(clipboard);
                                 }
                             });
-
+                            partNumber++;
                         }
-                        partNumber++;
                     }
                     var end = watch.ElapsedMilliseconds;
                     Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
