@@ -323,7 +323,7 @@ namespace WFInfo
             secondChecks = SeparatePlayers(newFilter, secondEngine);
             List<int> comparisions = new List<int>();
 
-            if (firstChecks.Length != secondChecks.Count)
+            if (secondChecks != null && firstChecks.Length != secondChecks.Count)
             {
                 //Whelp, we fucked bois
                 Main.AddLog("Second check didn't find the same amount of part names");
