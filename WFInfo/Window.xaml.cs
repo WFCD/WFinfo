@@ -25,7 +25,7 @@ namespace WFInfo
                     firstDucatText.Text = ducats;
                     firstVolumeText.Text = volume + " sold last 48hrs";
                     firstVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
-                    firstOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
+                    firstOwnedText.Text = owned.Length > 0 ? owned + " OWNED" : "";
                     if (resize)
                         Width = 251;
                     break;
@@ -36,7 +36,7 @@ namespace WFInfo
                     secondDucatText.Text = ducats;
                     secondVolumeText.Text = volume + " sold last 48hrs";
                     secondVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
-                    secondOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
+                    secondOwnedText.Text = owned.Length > 0 ? owned + " OWNED" : "";
                     if (resize)
                         Width = 501;
                     break;
@@ -47,7 +47,7 @@ namespace WFInfo
                     thirdDucatText.Text = ducats;
                     thirdVolumeText.Text = volume + " sold last 48hrs";
                     thirdVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
-                    thirdOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
+                    thirdOwnedText.Text = owned.Length > 0 ? owned + " OWNED" : "";
                     if (resize)
                         Width = 751;
                     break;
@@ -58,7 +58,7 @@ namespace WFInfo
                     fourthDucatText.Text = ducats;
                     fourthVolumeText.Text = volume + " sold last 48hrs";
                     fourthVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
-                    fourthOwnedText.Text = owned.Length > 0 ? owned + " owned" : "";
+                    fourthOwnedText.Text = owned.Length > 0 ? owned + " OWNED" : "";
                     if (resize)
                         Width = 1000;
                     break;

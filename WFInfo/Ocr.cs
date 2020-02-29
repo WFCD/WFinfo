@@ -157,7 +157,7 @@ namespace WFInfo
 
         public static void init()
         {
-            for(int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
                 engines[i] = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
                 {
@@ -660,8 +660,10 @@ namespace WFInfo
 
         public static string GetTextFromImage(Bitmap image, TesseractEngine engine)
         {
+            string ret = "";
             using (Page page = engine.Process(image))
-                return page.GetText().Trim();
+                ret = page.GetText().Trim();
+            return RE.Replace(ret, "").Trim();
         }
 
         internal static List<string> SeparatePlayers(Bitmap image, TesseractEngine engine)
