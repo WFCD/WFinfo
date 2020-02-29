@@ -1,4 +1,4 @@
-@charset "UTF-8";
+﻿@charset "UTF-8";
 @import url(font-awesome.min.css);
 @import url("https://fonts.googleapis.com/css?family=Signika:300,700");
 
@@ -2436,7 +2436,7 @@
 			display: block;
 			width: 100%;
 			display: block;
-			
+			max-width: 100em;
 		}
 
 		.image.fit img {
