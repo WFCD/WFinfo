@@ -67,6 +67,7 @@ namespace WFInfo
         {
             dataBase.Update();
             //RelicsWindow.LoadNodesOnThread();
+            OCR.init();
             StatusUpdate("WFInfo Initialization Complete", 0);
             AddLog("WFInfo has launched successfully");
             if ((bool)Settings.settingsObj["Auto"])

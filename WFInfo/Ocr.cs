@@ -103,6 +103,8 @@ namespace WFInfo
         {
             DefaultPageSegMode = PageSegMode.SingleBlock
         };
+
+        public static TesseractEngine[] engines = new TesseractEngine[4];
         public static Regex RE = new Regex("[^a-z&//]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 
@@ -145,13 +147,24 @@ namespace WFInfo
         private static Bitmap partialScreenshotExpanded;
 
         private static WFtheme activeTheme;
-        private static List<string> firstChecks;
+        private static string[] firstChecks;
         private static List<string> secondChecks;
         private static int[] firstProximity = { -1, -1, -1, -1 };
         private static int[] secondProximity = { -1, -1, -1, -1 };
         private static string timestamp;
 
         private static string clipboard;
+
+        public static void init()
+        {
+            for(int i = 0; i < 4; i++)
+            {
+                engines[i] = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
+                {
+                    DefaultPageSegMode = PageSegMode.SingleBlock
+                };
+            }
+        }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
@@ -188,20 +201,27 @@ namespace WFInfo
                 bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + timestamp + ".png");
                 partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + timestamp + ".png");
 
-                firstChecks = new List<string>(parts.Count);
-                for(int i = 0; i < parts.Count; i++)
-                    firstChecks.Add(OCR.GetTextFromImage(parts[i], firstEngine));
+                firstChecks = new string[parts.Count];
+                Task[] tasks = new Task[parts.Count];
 
-                if (firstChecks.Count > 0)
+
+                for (int i = 0; i < parts.Count; i++)
+                {
+                    int tempI = i;
+                    tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]); });
+                }
+                Task.WaitAll(tasks);
+
+                if (firstChecks.Length > 0)
                 {
                     clipboard = String.Empty;
                     int width = (int)(pixleRewardWidth * screenScaling * uiScaling) + 10;
                     int startX = center.X - width / 2 + (int)(width * 0.004);
-                    if (firstChecks.Count == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
+                    if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
                     int overWid = (int)(width / (4.1 * dpiScaling));
                     int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScaling);
                     int partNumber = 0;
-                    for (int i = 0; i < firstChecks.Count; i++)
+                    for (int i = 0; i < firstChecks.Length; i++)
                     {
                         string part = firstChecks[i];
                         if (part.Length > 10)
@@ -214,7 +234,7 @@ namespace WFInfo
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
 
-                            if (i == firstChecks.Count - 1)
+                            if (i == firstChecks.Length - 1)
                             {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -- by WFInfo (smart OCR with pricecheck)";
                             } else
@@ -288,7 +308,7 @@ namespace WFInfo
         private const double ERROR_DETECTION_THRESH = 0.25;
         private static bool CheckIfError()
         {
-            for (int i = 0; i < firstChecks.Count; i++)
+            for (int i = 0; i < firstChecks.Length; i++)
                 if (firstProximity[i] > ERROR_DETECTION_THRESH * firstChecks[i].Length &&
                   (secondProximity[i] == -1 || secondProximity[i] > ERROR_DETECTION_THRESH * secondChecks[i].Length))
                     return true;
@@ -306,7 +326,7 @@ namespace WFInfo
             secondChecks = SeparatePlayers(newFilter, secondEngine);
             List<int> comparisions = new List<int>();
 
-            if (firstChecks.Count != secondChecks.Count)
+            if (firstChecks.Length != secondChecks.Count)
             {
                 //Whelp, we fucked bois
                 Main.AddLog("Second check didn't find the same amount of part names");
@@ -314,7 +334,7 @@ namespace WFInfo
             }
 
             int partNumber = 0;
-            for (int i = 0; i < firstChecks.Count; i++)
+            for (int i = 0; i < firstChecks.Length; i++)
             {
                 string first = firstChecks[i];
                 if (first.Length > 10)
