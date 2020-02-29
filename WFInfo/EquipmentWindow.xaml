@@ -13,10 +13,10 @@
     </Window.Resources>
     <Grid MouseDown="MouseDown">
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
-        <Label MouseLeftButtonDown="ExpandAll" Content="+" ToolTip="Expand All Levels" Padding="0" Margin="20,26,359,354" Style="{StaticResource Label_Button}"/>
-        <Label MouseLeftButtonDown="CollapseAll" Content="-" ToolTip="Collapse All Levels" Padding="0" Margin="0,26,379,354" Style="{StaticResource Label_Button}"/>
+        <Label MouseLeftButtonDown="ExpandAll" Content="+" ToolTip="Expand All Levels" Padding="0" Margin="20,26,359,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Label MouseLeftButtonDown="CollapseAll" Content="-" ToolTip="Collapse All Levels" Padding="0" Margin="0,26,379,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
 
-        <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
+        <Grid Margin="1,27,1,0" Height="18" VerticalAlignment="Top">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
             <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." Click="VaultedClick" IsChecked="True" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
             <!-- <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Hide vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Margin="39,-1,0,-1" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="107" FontSize="14" Click="VaultedClick" IsChecked="True"/> -->
@@ -25,8 +25,8 @@
             <Label Content="Filter:" HorizontalAlignment="Left" Margin="155,0,0,0" Padding="0" VerticalContentAlignment="Center" />
 
         </Grid>
-        <Label x:Name="eqmtComboButton" MouseLeftButtonDown="ToggleShowAllEqmt" Content="Equipment Types" FontSize="12" FontWeight="Normal" Margin="0,45,276,335" Style="{StaticResource Label_Button}"/>
-        <Grid Margin="1,46,1,336">
+        <Label x:Name="eqmtComboButton" MouseLeftButtonDown="ToggleShowAllEqmt" Content="Equipment Types" FontSize="12" FontWeight="Normal" Margin="0,45,276,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Grid Margin="1,46,1,0" Height="18" VerticalAlignment="Top">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="2" />
             <Rectangle Stroke="#FF646464" Margin="122,-1,-1,-1" Grid.RowSpan="2"/>
             <Border x:Name="ComboBorder" Margin="175,-1,-1,-1">
