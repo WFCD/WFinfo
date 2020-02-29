@@ -59,7 +59,7 @@ Here's a quick highlight of the information shown:
   * When enabled, WFInfo will copy the plat prices and the part names into the clipboard so you can just paste them into Warframe's Chat for your party-mates.
   * This does attempt to link the parts themselves so that it's easier to see.
 
-![AutoUpdate](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Auto_Updater.PNG)
+![AutoUpdate](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Auto_Update.PNG)
 
 * Auto Update!
   * During the initial load of WFInfo, it will query our site to check for any updates available.
