@@ -143,7 +143,6 @@ namespace WFInfo
         private static Bitmap partialScreenshot;
         //private static Bitmap[] partScreenshots;
         private static Bitmap partialScreenshotExpanded;
-        private static Bitmap partialScreenshotFiltered;
 
         private static WFtheme activeTheme;
         private static List<string> firstChecks;
@@ -182,16 +181,18 @@ namespace WFInfo
                 bigScreenshot = file ?? CaptureScreenshot();
 
                 // Get the part box and filter it
-                partialScreenshotFiltered = FilterPartNames(bigScreenshot, activeTheme);
+                List<Bitmap> parts = FilterAndSeparateParts(bigScreenshot, activeTheme);
 
                 Directory.CreateDirectory(Main.appPath + @"\Debug");
 
                 bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + timestamp + ".png");
                 partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + timestamp + ".png");
-                partialScreenshotFiltered.Save(Main.appPath + @"\Debug\PartBoxFilter " + timestamp + ".png");
 
-                firstChecks = SeparatePlayers(partialScreenshotFiltered, firstEngine);
-                if (firstChecks != null)
+                firstChecks = new List<string>(parts.Count);
+                for(int i = 0; i < parts.Count; i++)
+                    firstChecks.Add(OCR.GetTextFromImage(parts[i], firstEngine));
+
+                if (firstChecks.Count > 0)
                 {
                     clipboard = String.Empty;
                     int width = (int)(pixleRewardWidth * screenScaling * uiScaling) + 10;
@@ -243,7 +244,7 @@ namespace WFInfo
                     var end = watch.ElapsedMilliseconds;
                     Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
-                    if (partialScreenshotFiltered.Height < 70)
+                    if (partialScreenshot.Height < 70)
                     {
                         SlowSecondProcess();
                         end = watch.ElapsedMilliseconds;
@@ -274,8 +275,6 @@ namespace WFInfo
                 bigScreenshot = null;
                 partialScreenshot.Dispose();
                 partialScreenshot = null;
-                partialScreenshotFiltered.Dispose();
-                partialScreenshotFiltered = null;
             }
             catch (Exception ex)
             {
@@ -562,15 +561,14 @@ namespace WFInfo
             return filtered;
         }
 
-        private static Bitmap FilterPartNames(Bitmap image, WFtheme active)
+        private static List<Bitmap> FilterAndSeparateParts(Bitmap image, WFtheme active)
         {
             int width = (int)(pixleRewardWidth * screenScaling * uiScaling);
             int lineHeight = (int)(pixelRewardLineHeight * screenScaling * uiScaling);
             int left = (image.Width / 2) - (width / 2);
             int top = (image.Height / 2) - (int)(pixleRewardYDisplay * screenScaling * uiScaling) + (int)(pixleRewardHeight * screenScaling * uiScaling) - lineHeight;
 
-            partialScreenshot = new Bitmap(width + 10, lineHeight + 10);
-            //Bitmap theory = new Bitmap(width + 10, lineHeight * 2 + 20);
+            partialScreenshot = new Bitmap(width, lineHeight);
 
             Color clr;
             for (int x = 0; x < width; x++)
@@ -578,65 +576,75 @@ namespace WFInfo
                 for (int y = 0; y < lineHeight; y++)
                 {
                     clr = image.GetPixel(left + x, top + y);
-                    partialScreenshot.SetPixel(x + 5, y + 5, clr);
-                    //theory.SetPixel(x + 5, y + 15, Color.White);
+                    partialScreenshot.SetPixel(x, y, clr);
                 }
             }
 
-            //double weight = 0;
-            //double totalSub = 0;
-            //double totalPlus = 0;
-            //int mid = lineHeight * 3 / 2 + 10;
+            double weight = 0;
+            double totalEven = 0;
+            double totalOdd = 0;
+            int mid = lineHeight * 3 / 2;
 
             Bitmap filtered = new Bitmap(partialScreenshot.Width, partialScreenshot.Height);
             for (int x = 0; x < filtered.Width; x++)
             {
-                //int count = 0;
+                int count = 0;
                 for (int y = 0; y < filtered.Height; y++)
                 {
                     clr = partialScreenshot.GetPixel(x, y);
                     if (ThemeThresholdFilter(clr, active))
                     {
                         filtered.SetPixel(x, y, Color.Black);
-                        //theory.SetPixel(x, y + 10, Color.Black);
-                        //count++;
+                        count++;
                     } else
                         filtered.SetPixel(x, y, Color.White);
                 }
 
-                //count = Math.Min(count, lineHeight / 3);
-                //double sinVal = Math.Cos(8 * (x - 5) * Math.PI / width);
-                //weight += sinVal * count;
+                count = Math.Min(count, lineHeight / 3);
+                double sinVal = Math.Cos(8 * x * Math.PI / width);
+                sinVal = sinVal * sinVal * sinVal;
+                weight += sinVal * count;
 
-                //int R = 0;
-                //if (sinVal < 0)
-                //{
-                //    totalSub -= sinVal * count;
-                //    R = (int)(-255 * sinVal);
-                //}
-                //int B = 0;
-                //if (sinVal > 0)
-                //{
-                //    totalPlus += sinVal * count;
-                //    B = (int)(255 * sinVal);
-                //}
-
-                //count = (int)(sinVal * count / 2);
-
-                //for (int i = 0; i < 10; i++)
-                //    theory.SetPixel(x, i, Color.FromArgb(R, 0, B));
-
-                //for (int i = 0; i < count; i++)
-                //    theory.SetPixel(x, mid + i, Color.Black);
-
-                //for (int i = 0; i > count; i--)
-                //    theory.SetPixel(x, mid + i, Color.Black);
+                if (sinVal < 0)
+                    totalEven -= sinVal * count;
+                else if (sinVal > 0)
+                    totalOdd += sinVal * count;
             }
-            //theory.Save(Main.appPath + @"\Debug\HeatMap " + timestamp + ".png");
-            //double total = totalSub + totalPlus;
-            //Console.WriteLine("EVEN DISTRIBUTION: " + (totalSub / total * 100).ToString("F2"));
-            //Console.WriteLine("ODD DISTRIBUTION: " + (totalPlus / total * 100).ToString("F2"));
-            return filtered;
+
+            double total = totalEven + totalOdd;
+            Main.AddLog("EVEN DISTRIBUTION: " + (totalEven / total * 100).ToString("F2") + "%");
+            Main.AddLog("ODD DISTRIBUTION: " + (totalOdd / total * 100).ToString("F2") + "%");
+
+            int boxWidth = width / 4;
+            int boxHeight = filtered.Height;
+            Rectangle destRegion = new Rectangle(0, 0, boxWidth, boxHeight);
+
+            int currLeft = 0;
+            int playerCount = 4;
+
+            if (totalOdd > totalEven)
+            {
+                currLeft = boxWidth / 2;
+                playerCount = 3;
+            }
+
+            List<Bitmap> ret = new List<Bitmap>(playerCount);
+            for (int i = 0; i < playerCount; i++)
+            {
+                Rectangle srcRegion = new Rectangle(currLeft + i * boxWidth, 0, boxWidth, boxHeight);
+                Bitmap newBox = new Bitmap(boxWidth, boxHeight);
+                using (Graphics grD = Graphics.FromImage(newBox))
+                    grD.DrawImage(filtered, destRegion, srcRegion, GraphicsUnit.Pixel);
+                ret.Add(newBox);
+                newBox.Save(Main.appPath + @"\Debug\PartBox(" + i + ") " + timestamp + ".png");
+            }
+            return ret;
+        }
+
+        public static string GetTextFromImage(Bitmap image, TesseractEngine engine)
+        {
+            using (Page page = engine.Process(image))
+                return page.GetText().Trim();
         }
 
         internal static List<string> SeparatePlayers(Bitmap image, TesseractEngine engine)
