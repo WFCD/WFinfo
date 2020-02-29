@@ -31,7 +31,7 @@ https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-pric
 
 ![Overlays](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Overlays.PNG)
 
-![Reward Window](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/RewardsWindow.PNG)
+![Reward Window](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/RewardWindow.PNG)
 
 When WFInfo displays the part information, through an overlay or a separate window, a large selection of data is displayed. 
 
@@ -53,13 +53,13 @@ Here's a quick highlight of the information shown:
   * If it can't detect the reward screen within 5 seconds, then it will assume an error happened.
     * If it doesn't display, you can just hit the key and force it to activate.
 
-![Clipboard](https://i.imgur.com/Fl2z7qS.png)
+![Clipboard](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Clipboard.PNG)
 
 * Clipboard Copy
   * When enabled, WFInfo will copy the plat prices and the part names into the clipboard so you can just paste them into Warframe's Chat for your party-mates.
   * This does attempt to link the parts themselves so that it's easier to see.
 
-![AutoUpdate](https://i.imgur.com/Fl2z7qS.png)
+![AutoUpdate](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Auto_Updater.PNG)
 
 * Auto Update!
   * During the initial load of WFInfo, it will query our site to check for any updates available.
