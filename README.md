@@ -29,7 +29,7 @@ https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-pric
 
 ### Expansive Part Information
 
-![Overlays](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Overlay.PNG)
+![Overlays](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Overlays.PNG)
 
 ![Reward Window](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/RewardsWindow.PNG)
 
