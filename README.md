@@ -29,9 +29,9 @@ https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-pric
 
 ### Expansive Part Information
 
-![Overlays](https://i.imgur.com/Fl2z7qS.png)
+![Overlays](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/FullScreen.PNG)
 
-![Reward Window](https://i.imgur.com/Fl2z7qS.png)
+![Reward Window](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/RewardsWindow.PNG)
 
 When WFInfo displays the part information, through an overlay or a separate window, a large selection of data is displayed. 
 
@@ -45,6 +45,8 @@ Here's a quick highlight of the information shown:
 - Volume Sold (amount of parts sold in the last 48 hours on warframe.market)
 
 ### Various Conveniences
+
+![Settings Window](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Settings.PNG)
 
 * Auto Mode
   * When enabled, this will listen to the debug log (EE.log) and wait for a message to appear saying that the rewards are displayed. Currently, it is "Got rewards". Once it sees that message, it will trigger the display function and bring up your overlay/window with the reward info.
@@ -66,7 +68,7 @@ Here's a quick highlight of the information shown:
 
 ### Relic Panel
 
-![Relic Panel](https://i.imgur.com/k2yEW87.png)
+![Relic Panel](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Relics_Basic.PNG)
 
 The Relics panel allows you to look at all relics and see statistics for each. We show basic info such as whether a relic is vaulted and the relic's rewards and the rarities of those rewards, and we have three complex statistics for every relic:
 1. The average platinum price of an Intact relic's rewards, which are based on drop chance.
@@ -75,7 +77,7 @@ The Relics panel allows you to look at all relics and see statistics for each. W
 
 ### Equipment Panel
 
-![Equipment Panel](https://i.imgur.com/bQRDYvR.png)
+![Equipment Panel](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Eqmt_Addition.PNG)
 
 The Equipment window allows you to look at each prime equipment and its parts. It shows how much each costs currently on warframe.market, and also shows how much it will cost to purchase a whole set of equipment. 
 
