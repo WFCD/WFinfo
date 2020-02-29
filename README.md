@@ -29,9 +29,9 @@ https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-pric
 
 ### Expansive Part Information
 
-![Overlays](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Overlays.PNG)
+![Overlays](https://wfinfo.warframestat.us/images/Github/Overlays.PNG)
 
-![Reward Window](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/RewardWindow.PNG)
+![Reward Window](https://wfinfo.warframestat.us/images/Github/RewardWindow.PNG)
 
 When WFInfo displays the part information, through an overlay or a separate window, a large selection of data is displayed. 
 
@@ -46,20 +46,20 @@ Here's a quick highlight of the information shown:
 
 ### Various Conveniences
 
-![Settings Window](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Settings.PNG)
+![Settings Window](https://wfinfo.warframestat.us/images/Github/Settings.PNG)
 
 * Auto Mode
   * When enabled, this will listen to the debug log (EE.log) and wait for a message to appear saying that the rewards are displayed. Currently, it is "Got rewards". Once it sees that message, it will trigger the display function and bring up your overlay/window with the reward info.
   * If it can't detect the reward screen within 5 seconds, then it will assume an error happened.
     * If it doesn't display, you can just hit the key and force it to activate.
 
-![Clipboard](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Clipboard.PNG)
+![Clipboard](https://wfinfo.warframestat.us/images/Github/Clipboard.PNG)
 
 * Clipboard Copy
   * When enabled, WFInfo will copy the plat prices and the part names into the clipboard so you can just paste them into Warframe's Chat for your party-mates.
   * This does attempt to link the parts themselves so that it's easier to see.
 
-![AutoUpdate](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Auto_Update.PNG)
+![AutoUpdate](https://wfinfo.warframestat.us/images/Github/Auto_Update.PNG)
 
 * Auto Update!
   * During the initial load of WFInfo, it will query our site to check for any updates available.
@@ -68,7 +68,7 @@ Here's a quick highlight of the information shown:
 
 ### Relic Panel
 
-![Relic Panel](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Relics_Basic.PNG)
+![Relic Panel](https://wfinfo.warframestat.us/images/Github/Relics_Basic.PNG)
 
 The Relics panel allows you to look at all relics and see statistics for each. We show basic info such as whether a relic is vaulted and the relic's rewards and the rarities of those rewards, and we have three complex statistics for every relic:
 1. The average platinum price of an Intact relic's rewards, which are based on drop chance.
@@ -77,7 +77,7 @@ The Relics panel allows you to look at all relics and see statistics for each. W
 
 ### Equipment Panel
 
-![Equipment Panel](https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/images/Github/Eqmt_Addition.PNG)
+![Equipment Panel](https://wfinfo.warframestat.us/images/Github/Eqmt_Addition.PNG)
 
 The Equipment window allows you to look at each prime equipment and its parts. It shows how much each costs currently on warframe.market, and also shows how much it will cost to purchase a whole set of equipment. 
 
