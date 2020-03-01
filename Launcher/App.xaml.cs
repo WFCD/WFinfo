@@ -18,7 +18,7 @@ namespace Launcher
         {
             Console.WriteLine("Doing the update?");
             AutoUpdater.ReportErrors = true;
-            AutoUpdater.Start("https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/update.xml");
+            AutoUpdater.Start("https://raw.githubusercontent.com/WFCD/WFinfo/master/docs/update.xml");
         }
     }
 }
