@@ -525,7 +525,7 @@ namespace WFInfo
                 return "";
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
             string owned = equipmentData[eqmt]["parts"][name]["owned"].ToString();
-            if(owned == "0")
+            if (owned == "0")
                 return "";
             return owned + "/" + equipmentData[eqmt]["parts"][name]["count"].ToString();
         }

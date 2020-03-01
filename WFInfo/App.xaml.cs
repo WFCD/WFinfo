@@ -16,7 +16,7 @@ namespace WFInfo
     {
         public App()
         {
-            AutoUpdater.Start("https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/docs/update.xml");
+            AutoUpdater.Start("https://raw.githubusercontent.com/WFCD/WFinfo/master/docs/update.xml");
         }
     }
 }
