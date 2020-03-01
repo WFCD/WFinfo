@@ -235,7 +235,8 @@ namespace WFInfo
                             if (i == firstChecks.Length - 1)
                             {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -- by WFInfo (smart OCR with pricecheck)";
-                            } else
+                            }
+                            else
                             {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -  ";
                             }
@@ -246,7 +247,8 @@ namespace WFInfo
                                     Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                                     Main.overlays[partNumber].Resize(overWid);
                                     Main.overlays[partNumber].Display((int)((startX + width / 4 * i) / dpiScaling), startY);
-                                } else
+                                }
+                                else
                                 {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
                                 }
@@ -352,7 +354,8 @@ namespace WFInfo
                             if (Settings.isOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned);
-                            } else
+                            }
+                            else
                             {
                                 Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false);
                             }
@@ -613,7 +616,8 @@ namespace WFInfo
                     {
                         filtered.SetPixel(x, y, Color.Black);
                         count++;
-                    } else
+                    }
+                    else
                         filtered.SetPixel(x, y, Color.White);
                 }
 
@@ -911,7 +915,8 @@ namespace WFInfo
                     Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString());
                     RefreshScaling();
                     return;
-                } else
+                }
+                else
                 {
                     Main.AddLog("Failed to get window bounds");
                     Main.StatusUpdate("Failed to get window bounds", 1);
@@ -923,7 +928,8 @@ namespace WFInfo
             { // if the window is in the VOID delete current process and re-set window to nothing
                 Warframe = null;
                 window = Rectangle.Empty;
-            } else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
+            }
+            else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
             { // checks if old window size is the right size if not change it
                 window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
                                                                                                                          // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
@@ -939,13 +945,15 @@ namespace WFInfo
                     // Borderless, don't do anything
                     currentStyle = WindowStyle.BORDERLESS;
                     Main.AddLog("Borderless detected (0x" + styles.ToString("X8") + ")");
-                } else if ((styles & WS_BORDER) != 0)
+                }
+                else if ((styles & WS_BORDER) != 0)
                 {
                     // Windowed, adjust for thicc border
                     window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
                     Main.AddLog("Windowed detected (0x" + styles.ToString("X8") + "), adjusting window to: " + window.ToString());
                     currentStyle = WindowStyle.WINDOWED;
-                } else
+                }
+                else
                 {
                     // Assume Fullscreen, don't do anything
                     Main.AddLog("Fullscreen detected (0x" + styles.ToString("X8") + ")");

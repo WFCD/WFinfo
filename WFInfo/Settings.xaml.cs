@@ -105,14 +105,16 @@ namespace WFInfo
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
                     Main.dataBase.EnableLogcapture();
-                } else
+                }
+                else
                 {
                     settingsObj["Auto"] = false;
                     auto = false;
                     autoCheckbox.IsChecked = false;
                     Main.dataBase.DisableLogCapture();
                 }
-            } else
+            }
+            else
             {
                 settingsObj["Auto"] = false;
                 auto = false;
@@ -151,7 +153,8 @@ namespace WFInfo
                     scaleBar.Value = value;
                     Scaling_box.Text = value + "%";
                     Save();
-                } else
+                }
+                else
                     Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
             }
             catch
