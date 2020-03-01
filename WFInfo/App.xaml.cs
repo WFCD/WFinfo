@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using AutoUpdaterDotNET;
 
 namespace WFInfo
@@ -16,7 +10,7 @@ namespace WFInfo
     {
         public App()
         {
-            AutoUpdater.Start("https://raw.githubusercontent.com/WFCD/WFinfo/master/docs/update.xml");
+            AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
         }
     }
 }
