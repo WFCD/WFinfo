@@ -218,11 +218,13 @@ namespace WFInfo
                 {
                     _intact += INTACT_CHANCE_RARE * node._plat;
                     _radiant += RADIANT_CHANCE_RARE * node._plat;
-                } else if (node.NameColor == UNCOMMON_COLOR)
+                }
+                else if (node.NameColor == UNCOMMON_COLOR)
                 {
                     _intact += INTACT_CHANCE_UNCOMMON * node._plat;
                     _radiant += RADIANT_CHANCE_UNCOMMON * node._plat;
-                } else
+                }
+                else
                 {
                     _intact += INTACT_CHANCE_COMMON * node._plat;
                     _radiant += RADIANT_CHANCE_COMMON * node._plat;
@@ -311,11 +313,13 @@ namespace WFInfo
             {
                 NameColor = RARE_COLOR;
                 NameBrush = RARE_BRUSH;
-            } else if (rarity.Contains("uncomm"))
+            }
+            else if (rarity.Contains("uncomm"))
             {
                 NameColor = UNCOMMON_COLOR;
                 NameBrush = UNCOMMON_BRUSH;
-            } else if (rarity.Contains("comm"))
+            }
+            else if (rarity.Contains("comm"))
             {
                 NameColor = COMMON_COLOR;
                 NameBrush = COMMON_BRUSH;
@@ -341,7 +345,8 @@ namespace WFInfo
                 Col2_Img1_Shown = "Visible";
                 Col2_Margin1 = new Thickness(0, 0, 78, 0);
                 Col2_Margin2 = new Thickness(0, 0, 60, 0);
-            } else
+            }
+            else
             {
                 Col1_Img1 = null;
                 Col1_Text1 = "";
@@ -476,12 +481,14 @@ namespace WFInfo
                                 ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Name).ToList();
                                 break;
                         }
-                    } else            // Parts
+                    }
+                    else            // Parts
                     {
                         Children = Children.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
                         ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
                     }
-                } else
+                }
+                else
                 {
                     switch (index)
                     {
