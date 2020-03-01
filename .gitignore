@@ -245,3 +245,9 @@ WFInfo/WFIcon.jpg
 .editorconfig
 
 WFInfo/app.config
+
+Launcher/Launcher.csproj
+
+Launcher/packages.config
+
+WFInfo/WFInfo.csproj
