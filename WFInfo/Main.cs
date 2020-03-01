@@ -41,7 +41,7 @@ namespace WFInfo
 
         private void RefreshTrainedData(string traineddata = "engbest.traineddata")
         {
-            string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/c-sharp/WFInfo/tessdata/" + traineddata;
+            string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/" + traineddata;
             string tessdata_local = @"tessdata\" + traineddata;
             string app_data_tessdata = appPath + @"\tessdata";
             string app_data_tessdata_traineddata = app_data_tessdata + @"\" + traineddata;
