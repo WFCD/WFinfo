@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Input;
 
 namespace WFInfo
@@ -81,5 +82,6 @@ namespace WFInfo
             if (e.ChangedButton == MouseButton.Left)
                 DragMove();
         }
+
     }
 }

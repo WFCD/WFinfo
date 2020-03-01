@@ -243,3 +243,5 @@ ModelManifest.xml
 WFInfo/WFIcon.jpg
 
 .editorconfig
+
+WFInfo/app.config

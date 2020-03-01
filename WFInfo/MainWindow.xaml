@@ -4,13 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="WFInfo.MainWindow"
         mc:Ignorable="d"
         Title="WFInfo" Height="130" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
+
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="27"/>
             <ColumnDefinition Width="244"/>
@@ -21,7 +24,9 @@
             <RowDefinition Height="78"/>
             <RowDefinition Height="26"/>
         </Grid.RowDefinitions>
-
+        <Grid.Resources>
+            <local:BringToForeground x:Key="ToForeground" />
+        </Grid.Resources>
         <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Grid.ColumnSpan="3" Margin="0,0,0,0"/>
         <Rectangle Grid.RowSpan="3" Stroke="#FF646464" Grid.ColumnSpan="3" Margin="0,0,0,0"/>
         <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Grid.ColumnSpan="2" Margin="0,0,-1,0" Grid.Row="2"/>
@@ -195,6 +200,8 @@
         <Label x:Name="Wiki_Data_Label"   Content="Wiki Data:"   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="0,52,122,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="Hidden" Grid.Column="1" Height="26" Width="81"/>
         <Label x:Name="Wiki_Data"         Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="117,52,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Hidden" Grid.Column="1" Height="26" Width="80"/>
 
+        <tb:TaskbarIcon x:Name="notifyIcon" Visibility="Visible" ToolTipText="Warframe info" IconSource="Resources\WFLogo.ico" DoubleClickCommand="{StaticResource ToForeground}"
 
+      DoubleClickCommandParameter="Double click on NotifyIcon."/>
     </Grid>
 </Window>
