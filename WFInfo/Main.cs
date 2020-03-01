@@ -89,6 +89,7 @@ namespace WFInfo
         public static void StartMessage()
         {
             Directory.CreateDirectory(appPath);
+            Directory.CreateDirectory(appPath+ @"\debug");
             using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
             {
                 sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
