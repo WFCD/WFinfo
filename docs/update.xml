@@ -2,5 +2,5 @@
 <item>
     <version>9.0.1.0</version>
     <url>https://github.com/WFCD/WFinfo/releases/latest/download/WFInfo.zip</url>
-    <mandatory>false</mandatory>
+    <mandatory>true</mandatory>
 </item>
