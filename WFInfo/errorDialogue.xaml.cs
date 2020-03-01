@@ -48,6 +48,12 @@ namespace WFInfo
                     foreach (FileInfo file in files)
                         zip.AddFile(file.FullName, "");
                     zip.AddFile(startPath + @"\..\debug.log", "");
+                    zip.AddFile(startPath + @"\..\eqmt_data.json", "");
+                    zip.AddFile(startPath + @"\..\market_data.json", "");
+                    zip.AddFile(startPath + @"\..\market_items.json", "");
+                    zip.AddFile(startPath + @"\..\name_data.json", "");
+                    zip.AddFile(startPath + @"\..\relic_data.json", "");
+                    zip.AddFile(startPath + @"\..\settings.json", "");
                     zip.Comment = "This zip was created at " + closest.ToString("yyyy-MM-dd HH-mm-ssff");
                     zip.MaxOutputSegmentSize64 = 8000 * 1024; // 8m segments
                     zip.Save(fullZipPath);
