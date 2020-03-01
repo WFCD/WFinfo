@@ -45,7 +45,8 @@ namespace WFInfo
                     if (Directory.Exists("lib") && File.Exists("lib" + dll))
                     {
                         Directory.Move("lib" + dll, app_data_tesseract_catalog + dll);
-                    } else
+                    }
+                    else
                     {
                         //AddLog("Trained english data is not present in appData and locally, downloading it.");
                         WebClient webClient = new WebClient();

@@ -54,7 +54,8 @@ namespace WFInfo
                     AddLog("Trained english data is not present in appData, but present in current directory, moving it to appData.");
                     Directory.Move(tessdata_local, app_data_tessdata_traineddata);
                     Directory.Delete("tessdata");
-                } else
+                }
+                else
                 {
                     AddLog("Trained english data is not present in appData and locally, downloading it.");
                     WebClient webClient = new WebClient();
@@ -89,7 +90,7 @@ namespace WFInfo
         public static void StartMessage()
         {
             Directory.CreateDirectory(appPath);
-            Directory.CreateDirectory(appPath+ @"\debug");
+            Directory.CreateDirectory(appPath + @"\debug");
             using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
             {
                 sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
@@ -120,7 +121,8 @@ namespace WFInfo
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                } else if (Settings.debug || OCR.VerifyWarframe())
+                }
+                else if (Settings.debug || OCR.VerifyWarframe())
                 {
                     //if (Ocr.verifyFocus()) 
                     //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
@@ -170,7 +172,8 @@ namespace WFInfo
                             StatusUpdate("Faild to load image", 1);
                         }
                     });
-                } else
+                }
+                else
                 {
                     StatusUpdate("Faild to load image", 1);
                 }
