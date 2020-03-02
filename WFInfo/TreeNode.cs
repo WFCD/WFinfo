@@ -43,22 +43,21 @@ namespace WFInfo
     {
         public SimpleCommand(Action action)
         {
-            this.Action = action;
+            Action = action;
         }
 
         public Action Action { get; set; }
 
         public bool CanExecute(object parameter)
         {
-            return (this.Action != null);
+            return (Action != null);
         }
 
         public event EventHandler CanExecuteChanged;
 
         public void Execute(object parameter)
         {
-            if (this.Action != null)
-                this.Action();
+            Action?.Invoke();
         }
     }
 
@@ -366,6 +365,7 @@ namespace WFInfo
             // This doesn't work, maybe i made mistake
             //Children.AsParallel().ForAll(node => node.ResetFilter());
 
+            ForceVisibility = false;
             ChildrenFiltered = Children;
         }
 
@@ -431,18 +431,22 @@ namespace WFInfo
             List<TreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
             if (done)
             {
-                ChildrenFiltered = filterList;
+                if(ChildrenFiltered.Count > 0)
+                    ChildrenFiltered = filterList;
+                else
+                    ForceVisibility = true;
+
                 return true;
             }
 
             List<TreeNode> temp = new List<TreeNode>();
             foreach (TreeNode node in filterList)
-            {
                 if (node.FilterSearchText(searchText, removeLeaves, additionalFilter, matchedTextCopy))
-                {
                     temp.Add(node);
-                }
-            }
+
+            if(temp.Count == Children.Count)
+                foreach (TreeNode node in filterList)
+                    node.ForceVisibility = false;
 
             ChildrenFiltered = (filterList.Count > 0 && filterList[0].ChildrenFiltered.Count > 0) || removeLeaves ? temp : filterList;
             return temp.Count > 0;
@@ -645,9 +649,19 @@ namespace WFInfo
 
         public Visibility IsVisible
         {
-            get { return (Parent == null || Parent.IsExpanded || topLevel) ? Visibility.Visible : Visibility.Collapsed; }
+            get { return (_forceVisibility || Parent == null || Parent.IsExpanded || topLevel) ? Visibility.Visible : Visibility.Collapsed; }
         }
 
+        private bool _forceVisibility = false;
+        public bool ForceVisibility
+        {
+            get { return _forceVisibility; }
+            set
+            {
+                SetField(ref _forceVisibility, value);
+                RaisePropertyChanged("IsVisible");
+            }
+        }
 
         private bool _isExpanded = false;
         public bool IsExpanded
@@ -723,7 +737,7 @@ namespace WFInfo
                     job["owned"] = owned - 1;
                     Main.dataBase.SaveAllJSONs();
 
-                    this.Owned_Val--;
+                    Owned_Val--;
                     Parent.Owned_Val--;
                     Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
                     Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
@@ -747,7 +761,7 @@ namespace WFInfo
                     job["owned"] = owned + 1;
                     Main.dataBase.SaveAllJSONs();
 
-                    this.Owned_Val++;
+                    Owned_Val++;
                     Parent.Owned_Val++;
                     Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
                     Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;

@@ -62,7 +62,7 @@ namespace WFInfo
                     RelicTree.Items.Add(relic);
 
                 SortBoxChanged(null, null);
-            }
+            } 
             else
             {
                 foreach (TreeNode era in RelicNodes)
@@ -72,7 +72,7 @@ namespace WFInfo
                     {
                         if (curr != -1)
                             RelicTree.Items.RemoveAt(curr);
-                    }
+                    } 
                     else
                     {
                         if (curr == -1)
@@ -111,7 +111,7 @@ namespace WFInfo
                     era.FilterOutVaulted(true);
 
                 RefreshVisibleRelics();
-            }
+            } 
             else
                 ReapplyFilters();
         }
@@ -205,6 +205,18 @@ namespace WFInfo
 
             RelicTree.Items.Clear();
             RefreshVisibleRelics();
+        }
+
+        private void ExpandAll(object sender, RoutedEventArgs e)
+        {
+            foreach (TreeNode era in RelicNodes)
+                era.ChangeExpandedTo(true);
+        }
+
+        private void CollapseAll(object sender, RoutedEventArgs e)
+        {
+            foreach (TreeNode era in RelicNodes)
+                era.ChangeExpandedTo(false);
         }
 
         private void WindowLoaded(object sender, RoutedEventArgs e)

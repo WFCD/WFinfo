@@ -102,8 +102,8 @@ namespace WFInfo
                 {
                     if (scr.Bounds.Contains(winBounds))
                     {
-                        this.Left = Settings.mainWindowLocation.X;
-                        this.Top = Settings.mainWindowLocation.Y;
+                        Left = Settings.mainWindowLocation.X;
+                        Top = Settings.mainWindowLocation.Y;
                         break;
                     }
                 }

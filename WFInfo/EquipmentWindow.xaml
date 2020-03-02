@@ -13,8 +13,8 @@
     </Window.Resources>
     <Grid MouseDown="MouseDown">
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
-        <Label MouseLeftButtonDown="ExpandAll" Content="+" ToolTip="Expand All Levels" Padding="0" Margin="20,26,359,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
-        <Label MouseLeftButtonDown="CollapseAll" Content="-" ToolTip="Collapse All Levels" Padding="0" Margin="0,26,379,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Label MouseLeftButtonDown="ExpandAll" Content="＋" FontSize="15" ToolTip="Expand All Levels" Padding="0" Margin="0,26,379,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Label MouseLeftButtonDown="CollapseAll" Content="－" FontSize="15" ToolTip="Collapse All Levels" Padding="0" Margin="20,26,359,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
 
         <Grid Margin="1,27,1,0" Height="18" VerticalAlignment="Top">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
