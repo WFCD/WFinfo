@@ -19,7 +19,7 @@
 
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1"/>
-            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." Click="VaultedClick" IsChecked="True" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+            <CheckBox x:Name="vaulted" Content="Hide Vaulted" VerticalContentAlignment="Center" ToolTip="Show vaulted items." Click="VaultedClick" IsChecked="True" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Height="18"/>
             <TextBox x:Name="textBox" Margin="191,0,0,0" VerticalContentAlignment="Center" Padding="0" Text="Filter Terms" Foreground="#FF646464" TextChanged="TextboxTextChanged" SelectionBrush="#FF7EB4EA" GotFocus="TextBoxFocus" LostFocus="TextBoxLostFocus" BorderBrush="#FF303030" BorderThickness="1,0,0,0"/>
             <Rectangle Stroke="#FF646464" Margin="149,-1,-1,-1"/>
             <Label Content="Filter:" HorizontalAlignment="Left" Margin="155,0,0,0" Padding="0" VerticalContentAlignment="Center" />

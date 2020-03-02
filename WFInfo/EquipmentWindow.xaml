@@ -13,46 +13,54 @@
     </Window.Resources>
     <Grid MouseDown="MouseDown">
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
-        <Label MouseLeftButtonDown="ExpandAll" Content="＋" FontSize="15" ToolTip="Expand All Levels" Padding="0" Margin="0,26,379,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
-        <Label MouseLeftButtonDown="CollapseAll" Content="－" FontSize="15" ToolTip="Collapse All Levels" Padding="0" Margin="20,26,359,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+
+        <Grid Height="27" VerticalAlignment="Top">
+            <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top"/>
+
+            <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
+            <TextBlock Text="Equipment" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
+            <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right"/>
+        </Grid>
 
         <Grid Margin="1,27,1,0" Height="18" VerticalAlignment="Top">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." Click="VaultedClick" IsChecked="True" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." VerticalContentAlignment="Center" Click="VaultedClick" IsChecked="True" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Height="18"/>
             <!-- <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Hide vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Margin="39,-1,0,-1" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="107" FontSize="14" Click="VaultedClick" IsChecked="True"/> -->
             <TextBox x:Name="textBox" Margin="191,0,0,0" VerticalContentAlignment="Center" Padding="0" Text="Filter Terms" Foreground="#FF646464" TextChanged="TextboxTextChanged" SelectionBrush="#FF7EB4EA" GotFocus="TextBoxFocus" LostFocus="TextBoxLostFocus" BorderBrush="#FF303030" BorderThickness="1,0,0,0"/>
             <Rectangle Stroke="#FF646464" Margin="149,-1,-1,-1"/>
             <Label Content="Filter:" HorizontalAlignment="Left" Margin="155,0,0,0" Padding="0" VerticalContentAlignment="Center" />
+            <Label MouseLeftButtonDown="CollapseAll" Content="－" FontSize="15" ToolTip="Collapse All Levels" Padding="0" Margin="19,-1,358,-1" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+            <Label MouseLeftButtonDown="ExpandAll" Content="＋" FontSize="15" ToolTip="Expand All Levels" Padding="0" Margin="-1,-1,378,-1" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
 
         </Grid>
-        <Label x:Name="eqmtComboButton" MouseLeftButtonDown="ToggleShowAllEqmt" Content="Equipment Types" FontSize="12" FontWeight="Normal" Margin="0,45,276,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
         <Grid Margin="1,46,1,0" Height="18" VerticalAlignment="Top">
+            <Label x:Name="eqmtComboButton" MouseLeftButtonDown="ToggleShowAllEqmt" Content="Equipment Types" FontSize="12" FontWeight="Normal" Margin="-1,-1,275,-1" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="2" />
             <Rectangle Stroke="#FF646464" Margin="122,-1,-1,-1" Grid.RowSpan="2"/>
             <Border x:Name="ComboBorder" Margin="175,-1,-1,-1">
                 <Border.Style>
                     <Style>
+                        <Setter Property="Border.BorderBrush" Value="#FF646464"/>
+                        <Setter Property="Border.BorderThickness" Value="0,1,1,1"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=ComboBorder, Path=IsMouseOver}" Value="true">
+                            <DataTrigger Binding="{Binding IsMouseOver, ElementName=ComboBorder}" Value="true">
                                 <Setter Property="Border.BorderThickness" Value="1"/>
                                 <Setter Property="Border.BorderBrush" Value="#FF7EB4EA"/>
                                 <Setter Property="Panel.ZIndex" Value="1000"/>
                             </DataTrigger>
                         </Style.Triggers>
-                        <Setter Property="Border.BorderBrush" Value="#FF646464"/>
-                        <Setter Property="Border.BorderThickness" Value="0,1,1,1"/>
                     </Style>
                 </Border.Style>
                 <Border>
                     <Border.Style>
                         <Style>
+                            <Setter Property="Border.BorderBrush" Value="#FF303030"/>
+                            <Setter Property="Border.BorderThickness" Value="1,0,0,0"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=ComboBorder, Path=IsMouseOver}" Value="true">
+                                <DataTrigger Binding="{Binding IsMouseOver, ElementName=ComboBorder}" Value="true">
                                     <Setter Property="Border.BorderThickness" Value="0"/>
                                 </DataTrigger>
                             </Style.Triggers>
-                            <Setter Property="Border.BorderBrush" Value="#FF303030"/>
-                            <Setter Property="Border.BorderThickness" Value="1,0,0,0"/>
                         </Style>
                     </Border.Style>
                     <ComboBox x:Name="SortBox" Background="#FF0F0F0F" Foreground="#FFAFD0D9" SelectionChanged="SortBoxChanged" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" BorderThickness="0">
@@ -66,15 +74,15 @@
             <Label Content="Sort by:" Margin="129,0,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="12" Background="{x:Null}" HorizontalAlignment="Left"/>
 
         </Grid>
-        <Grid Height="27" VerticalAlignment="Top">
-            <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top"/>
-
-            <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
-            <TextBlock Text="Equipment" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
-            <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right"/>
-        </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
-            <TreeView x:Name="EqmtTree" Background="{x:Null}" BorderBrush="{x:Null}" TreeViewItem.Selected="SingleClickExpand" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
+            <TreeView x:Name="EqmtTree" Background="{x:Null}" BorderBrush="{x:Null}" TreeViewItem.Selected="SingleClickExpand" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+                <TreeView.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
+                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource WFInfo_TreeViewItem}">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        <Setter Property="Visibility" Value="{Binding IsVisible}" />
+                    </Style>
+                </TreeView.Resources>
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}" >
                         <HierarchicalDataTemplate.Resources>
@@ -109,7 +117,7 @@
                                         <Style>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Col1_Text1.Length}" Value="0">
-                                                    <Setter Property="StackPanel.IsEnabled" Value="False"/>
+                                                    <Setter Property="UIElement.IsEnabled" Value="False"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -120,14 +128,14 @@
                                         </Label.InputBindings>
                                         <Label.Style>
                                             <Style>
-                                                <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                                <Setter Property="UIElement.Visibility" Value="Hidden" />
                                                 <Style.Triggers>
                                                     <MultiDataTrigger>
                                                         <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type Border}}}" Value="True" />
                                                             <Condition  Binding="{Binding Children.Count}" Value="0" />
                                                         </MultiDataTrigger.Conditions>
-                                                        <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                        <Setter Property="UIElement.Visibility" Value="Visible" />
                                                     </MultiDataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -140,14 +148,14 @@
                                         </Label.InputBindings>
                                         <Label.Style>
                                             <Style>
-                                                <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                                <Setter Property="UIElement.Visibility" Value="Hidden" />
                                                 <Style.Triggers>
                                                     <MultiDataTrigger>
                                                         <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type Border}}}" Value="True" />
                                                             <Condition  Binding="{Binding Children.Count}" Value="0" />
                                                         </MultiDataTrigger.Conditions>
-                                                        <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                        <Setter Property="UIElement.Visibility" Value="Visible" />
                                                     </MultiDataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -174,13 +182,6 @@
                         </Grid>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
-                <TreeView.Resources>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
-                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource WFInfo_TreeViewItem}">
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                        <Setter Property="Visibility" Value="{Binding IsVisible}" />
-                    </Style>
-                </TreeView.Resources>
             </TreeView>
         </Grid>
 
