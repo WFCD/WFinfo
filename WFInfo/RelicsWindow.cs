@@ -178,6 +178,16 @@ namespace WFInfo
             }
         }
 
+        private void ExpandAll(object sender, RoutedEventArgs e) {
+            foreach (TreeNode relic in RelicTree.Items)
+                relic.ChangeExpandedTo(true);
+        }
+
+        private void CollapseAll(object sender, RoutedEventArgs e) {
+            foreach (TreeNode relic in RelicTree.Items)
+                relic.ChangeExpandedTo(false);
+        }
+
         private void TextBoxFocus(object sender, RoutedEventArgs e)
         {
             if (!searchActive)

@@ -25,6 +25,7 @@ namespace WFInfo
         private readonly string eqmtDataPath;
         private readonly string relicDataPath;
         private readonly string nameDataPath;
+        private readonly string debugDataPath;
 
         private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
 

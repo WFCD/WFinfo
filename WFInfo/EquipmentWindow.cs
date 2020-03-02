@@ -88,8 +88,6 @@ namespace WFInfo
                                 }
                             }
 
-
-
                             partNode.SetPrimeEqmt(plat, primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
                         }
                         else

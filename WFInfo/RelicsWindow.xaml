@@ -16,10 +16,12 @@
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1"/>
-            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." Click="VaultedClick" IsChecked="True" Margin="13,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-            <TextBox x:Name="textBox" Margin="152,0,0,0" VerticalContentAlignment="Center" Padding="0" Text="Filter Terms" Foreground="#FF646464" TextChanged="TextboxTextChanged" SelectionBrush="#FF7EB4EA" GotFocus="TextBoxFocus" LostFocus="TextBoxLostFocus" BorderBrush="#FF303030" BorderThickness="1,0,0,0"/>
-            <Rectangle Stroke="#FF646464" Margin="110,-1,-1,-1"/>
-            <Label Content="Filter:" HorizontalAlignment="Left" Margin="116,0,0,0" Padding="0" VerticalContentAlignment="Center" />
+            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." Click="VaultedClick" IsChecked="True" Margin="40,2,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Width="88" Height="16"/>
+            <TextBox x:Name="textBox" Margin="164,0,0,0" VerticalContentAlignment="Center" Padding="0" Text="Filter Terms" Foreground="#FF646464" TextChanged="TextboxTextChanged" SelectionBrush="#FF7EB4EA" GotFocus="TextBoxFocus" LostFocus="TextBoxLostFocus" BorderBrush="#FF303030" BorderThickness="1,0,0,0"/>
+            <Rectangle Stroke="#FF646464" Margin="130,-1,-1,-1"/>
+            <Label Content="Filter:" HorizontalAlignment="Left" Margin="133,0,0,0" Padding="0" VerticalContentAlignment="Center" />
+            <Label MouseLeftButtonDown="ExpandAll" Content="+" ToolTip="Expand All Levels" Padding="0" Margin="19,-1,408,-1" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top" BorderThickness="1,0,1,1"/>
+            <Label MouseLeftButtonDown="CollapseAll" Content="-" ToolTip="Collapse All Levels" Padding="0" Margin="-1,-1,428,-1" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top" BorderThickness="1,0,1,1"/>
 
         </Grid>
         <Grid Height="18" VerticalAlignment="Top" Margin="1,46,1,0">
