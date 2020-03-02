@@ -250,7 +250,7 @@ namespace WFInfo
                                 }
                                 else
                                 {
-                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
+                                    Main.rewardWindow.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
                                 }
                                 if (Settings.clipboard)
                                 {
@@ -357,7 +357,7 @@ namespace WFInfo
                             }
                             else
                             {
-                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false);
+                                Main.rewardWindow.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false);
                             }
                         });
 

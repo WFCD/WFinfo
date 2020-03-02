@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Drawing;
 using System.IO;
@@ -17,12 +17,13 @@ namespace WFInfo
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion;
         public static Data dataBase;
-        public static Window window;
+        public static RewardWindow rewardWindow;
         public static Overlay[] overlays;
         public static RelicsWindow relicWindow;
         public static EquipmentWindow equipmentWindow;
         public static Settings settingsWindow;
-        public static ErrorDialogue popup;
+        public static ErrorDialogue popupWindow;
+        public static Inventory inventoryWindow;
         public Main()
         {
             INSTANCE = this;
@@ -30,12 +31,13 @@ namespace WFInfo
             buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
             overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
-            window = new Window();
+            rewardWindow = new RewardWindow();
             RefreshTrainedData();
             dataBase = new Data();
             relicWindow = new RelicsWindow();
             equipmentWindow = new EquipmentWindow();
             settingsWindow = new Settings();
+            inventoryWindow = new Inventory();
             Task.Factory.StartNew(new Action(ThreadedDataLoad));
         }
 
@@ -136,7 +138,7 @@ namespace WFInfo
         // timestamp is the time to look for, and gap is the threshold of seconds different
         public static void SpawnErrorPopup(DateTime timeStamp, int gap = 30)
         {
-            popup = new ErrorDialogue(timeStamp, gap);
+            popupWindow = new ErrorDialogue(timeStamp, gap);
         }
 
         private void LoadScreenshot()

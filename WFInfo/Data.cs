@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -367,7 +367,7 @@ namespace WFInfo
                 }
             }
         }
-
+        // initalisation of the variables inside of database.
         public bool Update()
         {
             Main.AddLog("Checking for Updates to Databases");
