@@ -162,6 +162,7 @@ namespace WFInfo
                             prime.Background_Color = TreeNode.BACK_U_BRUSH;
                     }
                 }
+                EqmtTree.Items.Refresh();
             }
         }
 
