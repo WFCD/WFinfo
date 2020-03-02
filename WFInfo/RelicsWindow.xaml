@@ -78,7 +78,7 @@
         </Grid>
         <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Height="27" VerticalAlignment="Top"/>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
-            <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
+            <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}" TreeViewItem.Selected="SingleClickExpand" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}" >
                         <HierarchicalDataTemplate.Resources>

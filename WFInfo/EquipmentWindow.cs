@@ -222,6 +222,17 @@ namespace WFInfo
             RefreshVisibleRelics();
         }
 
+        private void SingleClickExpand(object sender, RoutedEventArgs e)
+        {
+            TreeViewItem tvi = e.OriginalSource as TreeViewItem;
+
+            if (tvi == null || e.Handled) return;
+
+            tvi.IsExpanded = !tvi.IsExpanded;
+            tvi.IsSelected = false;
+            e.Handled = true;
+        }
+
         private void ExpandAll(object sender, RoutedEventArgs e)
         {
             foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
