@@ -1,0 +1,19 @@
+﻿<Window x:Class="WFInfo.ErrorDialogue"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WFInfo"
+        mc:Ignorable="d"
+        Title="inventory" Height="400" Width="450" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="450" MinWidth="450" MinHeight="200" Loaded="WindowLoaded">
+    <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
+        <Rectangle Stroke="#FF707070"/>
+        <Grid x:Name="Header" Height="25" VerticalAlignment="Top">
+            <Rectangle Height="25" Stroke="#FF646464" VerticalAlignment="Top" Fill="#FF0F0F0F"/>
+            <Image HorizontalAlignment="Left" Height="23" VerticalAlignment="Center" Width="24" Source="Resources/WFLogo.png" Margin="1,1,0,1" />
+            <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Height="25" VerticalAlignment="Top"/>
+
+            <TextBlock Text="Inventory" Margin="27,2,0,0" TextAlignment="Left" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" Height="23" Width="78" RenderTransformOrigin="0.5,0.5"/>
+        </Grid>
+    </Grid>
+</Window>
