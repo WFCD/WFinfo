@@ -160,6 +160,7 @@ namespace WFInfo
                             prime.Background_Color = TreeNode.BACK_U_BRUSH;
                     }
                 }
+                EqmtTree.Items.Refresh();
             }
         }
 
@@ -218,6 +219,17 @@ namespace WFInfo
 
             EqmtTree.Items.Clear();
             RefreshVisibleRelics();
+        }
+
+        private void SingleClickExpand(object sender, RoutedEventArgs e)
+        {
+            TreeViewItem tvi = e.OriginalSource as TreeViewItem;
+
+            if (tvi == null || e.Handled) return;
+
+            tvi.IsExpanded = !tvi.IsExpanded;
+            tvi.IsSelected = false;
+            e.Handled = true;
         }
 
         private void ExpandAll(object sender, RoutedEventArgs e)

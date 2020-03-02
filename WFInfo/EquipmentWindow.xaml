@@ -13,8 +13,8 @@
     </Window.Resources>
     <Grid MouseDown="MouseDown">
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
-        <Label MouseLeftButtonDown="ExpandAll" Content="+" ToolTip="Expand All Levels" Padding="0" Margin="20,26,359,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top" FontWeight="Bold"/>
-        <Label MouseLeftButtonDown="CollapseAll" Content="-" ToolTip="Collapse All Levels" Padding="0" Margin="0,26,379,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Label MouseLeftButtonDown="ExpandAll" Content="＋" FontSize="15" ToolTip="Expand All Levels" Padding="0" Margin="0,26,379,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Label MouseLeftButtonDown="CollapseAll" Content="－" FontSize="15" ToolTip="Collapse All Levels" Padding="0" Margin="20,26,359,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
 
         <Grid Margin="1,27,1,0" Height="18" VerticalAlignment="Top">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
@@ -74,7 +74,7 @@
             <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right"/>
         </Grid>
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
-            <TreeView x:Name="EqmtTree" Background="{x:Null}" BorderBrush="{x:Null}" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
+            <TreeView x:Name="EqmtTree" Background="{x:Null}" BorderBrush="{x:Null}" TreeViewItem.Selected="SingleClickExpand" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}" >
                         <HierarchicalDataTemplate.Resources>
