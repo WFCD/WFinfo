@@ -259,8 +259,6 @@ namespace WFInfo
 
             if (force || eqmtDate.CompareTo(filteredDate) <= 0)
             {
-                filteredDate = filteredDate.AddHours(1);
-
                 equipmentData["timestamp"] = DateTime.Now;
                 relicData = new JObject();
                 relicData["timestamp"] = DateTime.Now;

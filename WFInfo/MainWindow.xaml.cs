@@ -222,5 +222,14 @@ namespace WFInfo
                 Settings.Save();
             }
         }
+
+        public void ToForeground(object sender, RoutedEventArgs e)
+        {
+            MainWindow.INSTANCE.Visibility = Visibility.Visible;
+            MainWindow.INSTANCE.Activate();
+            MainWindow.INSTANCE.Topmost = true;  // important
+            MainWindow.INSTANCE.Topmost = false; // important
+            MainWindow.INSTANCE.Focus();         // important
+        }
     }
 }
