@@ -133,7 +133,6 @@
     <Compile Include="EquipmentWindow.cs">
       <DependentUpon>EquipmentWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="BringToForeground.cs" />
     <Compile Include="TreeNode.cs" />
     <Compile Include="RelicsWindow.cs">
       <DependentUpon>RelicsWindow.xaml</DependentUpon>
@@ -180,6 +179,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Templates\PopupMenu.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

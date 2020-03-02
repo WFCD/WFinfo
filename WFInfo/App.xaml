@@ -9,6 +9,7 @@
                 <ResourceDictionary Source="Templates/Fonts.xaml" />
                 <ResourceDictionary Source="Templates/TreeView.xaml" />
                 <ResourceDictionary Source="Templates/Styles.xaml" />
+                <ResourceDictionary Source="Templates/PopupMenu.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

@@ -259,11 +259,9 @@ namespace WFInfo
 
             if (force || eqmtDate.CompareTo(filteredDate) <= 0)
             {
-                filteredDate = filteredDate.AddHours(1);
-
-                equipmentData["timestamp"] = filteredDate;
+                equipmentData["timestamp"] = DateTime.Now;
                 relicData = new JObject();
-                relicData["timestamp"] = filteredDate;
+                relicData["timestamp"] = DateTime.Now;
                 nameData = new JObject();
                 nameData["Forma Blueprint"] = "Forma Blueprint";
 
@@ -271,9 +269,7 @@ namespace WFInfo
                 {
                     relicData[era.Key] = new JObject();
                     foreach (KeyValuePair<string, JToken> relic in era.Value.ToObject<JObject>())
-                    {
                         relicData[era.Key][relic.Key] = relic.Value;
-                    }
                 }
 
                 foreach (KeyValuePair<string, JToken> prime in allFiltered["eqmt"].ToObject<JObject>())
