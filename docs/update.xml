@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <item>
-    <version>9.0.1.0</version>
+    <version>9.0.2.0</version>
     <url>https://github.com/WFCD/WFinfo/releases/latest/download/WFInfo.zip</url>
-    <mandatory>true</mandatory>
+    <mandatory>false</mandatory>
 </item>
