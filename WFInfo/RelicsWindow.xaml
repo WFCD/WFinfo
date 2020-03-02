@@ -25,8 +25,8 @@
             <Label Content="Filter:" HorizontalAlignment="Left" Margin="155,0,0,0" Padding="0" VerticalContentAlignment="Center" />
 
         </Grid>
-        <Label x:Name="relicComboButton" MouseLeftButtonDown="ToggleShowAllRelics" Content="Relic Eras" FontSize="12" FontWeight="Normal" Margin="0,45,379,335" Style="{StaticResource Label_Button}"/>
-        <Grid Margin="1,46,1,336">
+        <Label x:Name="relicComboButton" MouseLeftButtonDown="ToggleShowAllRelics" Content="Relic Eras" FontSize="12" FontWeight="Normal" Margin="0,45,379,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Grid Margin="1,46,1,0" Height="18" VerticalAlignment="Top">
 
 
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="3" />
