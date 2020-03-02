@@ -15,15 +15,49 @@ namespace WFInfo
         [STAThreadAttribute]
         public static void Main()
         {
+            Directory.CreateDirectory(appPath);
             RefreshTesseractDlls();
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve_Tesseract;
             AppDomain.CurrentDomain.AssemblyResolve += OnResolveAssembly;
             App.Main();
         }
 
+        // Detect if CPU has necessary optimizations
+        public static bool HasAvxSupport()
+        {
+            try
+            {
+                return (GetEnabledXStateFeatures() & 4) != 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        private static extern long GetEnabledXStateFeatures();
+        //
+
         private static void RefreshTesseractDlls(string libtesseract = "libtesseract400", string liblept = "liblept1760")
         {
-            string tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
+            string tesseract_hotlink_prefix;
+            if (HasAvxSupport())
+            {
+                tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
+            }
+            else
+            {
+                using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+                {
+                    sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
+                    sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "]   " + "CPU doesn't support AVX optimizations, falling back to SSE2");
+                }
+                // SSE2 version without AVX optimizations - for very old pre-2013 CPUs
+                tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/vb-archive/WFInfo/lib";
+            }
+
             string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
             Directory.CreateDirectory(app_data_tesseract_catalog);
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x86");
