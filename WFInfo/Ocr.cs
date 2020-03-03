@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -68,7 +68,6 @@ namespace WFInfo
 															Color.FromArgb(232, 227, 227),  	//EQUINOX		
 															Color.FromArgb(200, 169, 237) };    //DARK_LOTUS	
 
-
         public static WindowStyle currentStyle;
         public enum WindowStyle
         {
@@ -136,7 +135,10 @@ namespace WFInfo
         public const int pixelFissureWidth = 377;
         public const int pixelFissureHeight = 37;
         public const int pixelFissureXDisplay = 238; // Removed 50 pixels to assist with 2 player theme detection
-        public const int pixelFissureYDisplay = 47;
+
+
+
+		public const int pixelFissureYDisplay = 47;
 
         public const int SCALING_LIMIT = 100;
         private static bool processingActive = false;
@@ -332,6 +334,7 @@ namespace WFInfo
             {
                 //Whelp, we fucked bois
                 Main.AddLog("Second check didn't find the same amount of part names");
+                Main.StatusUpdate("Verification of items failed", 2);
                 return;
             }
 
@@ -490,6 +493,13 @@ namespace WFInfo
             return minTheme;
         }
 
+        internal static void ProcessSnapIt(Bitmap snapItImage) {
+            snapItImage.Save(Main.appPath + @"\Debug\SnapItImage " + timestamp + ".png");
+            //todo implement filter
+
+            var result = GetTextFromImage(snapItImage, firstEngine);
+            Console.WriteLine(result);
+        }
 
         private static bool ColorThreshold(Color test, Color thresh, int threshold = 10)
         {
@@ -831,21 +841,11 @@ namespace WFInfo
             return image;
         }
 
-        //public static Boolean verifyFocus() { // Returns True if warframe is in focuse, False if not
-        //	_ = Win32.GetWindowThreadProcessId(Win32.GetForegroundWindow(), out uint processID);
-        //	try {
-        //		if (processID == Warframe.Id || Settings.debug) { return true; } else {
-        //			Main.AddLog("Warframe is not focused");
-        //			Main.StatusUpdate("Warframe is out of focus", 2);
-        //			return false;
-        //		}
-        //	}
-        //	catch (Exception ex) {
-        //		Console.WriteLine(Warframe.ToString());
-        //		Console.WriteLine(ex.ToString());
-        //		return false;
-        //	}
-        //}
+        internal static void SnapScreenshot() {
+            Bitmap fullScreen = CaptureScreenshot();
+            SnapItOverlay snapItOverlay = new SnapItOverlay(fullScreen);
+            snapItOverlay.Show();
+        }
 
         public static bool VerifyWarframe()
         {

@@ -155,14 +155,13 @@ namespace WFInfo
                 }
                 else if (Settings.debug || OCR.VerifyWarframe())
                 {
-                    //if (Ocr.verifyFocus()) 
-                    //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
-                    //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
 
         }
+
+
 
         // timestamp is the time to look for, and gap is the threshold of seconds different
         public static void SpawnErrorPopup(DateTime timeStamp, int gap = 30)
