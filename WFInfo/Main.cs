@@ -22,7 +22,7 @@ namespace WFInfo
         public static RelicsWindow relicWindow;
         public static EquipmentWindow equipmentWindow;
         public static Settings settingsWindow;
-        public static ErrorDialogue popup;
+        public static ErrorDialogue popupWindow;
         public static UpdateDialogue update;
         public Main()
         {
@@ -126,18 +126,16 @@ namespace WFInfo
         {
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
-                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-                {
+                if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift) {
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
+                } else if ((Control.ModifierKeys & Keys.Control) == Keys.Control) {
+                    AddLog("Starting snap it");
+                    StatusUpdate("Single item pricecheck", 0);
+                    OCR.SnapScreenshot();
                 } else if (Settings.debug || OCR.VerifyWarframe())
                 {
-                    //if (Ocr.verifyFocus()) 
-                    //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
-                    //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
-
-
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
