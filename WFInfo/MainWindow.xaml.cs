@@ -156,12 +156,6 @@ namespace WFInfo
             Process.Start("https://discord.gg/TAq7bqr");
         }
 
-        private void inventoryClick(object sender, RoutedEventArgs e) {
-            if (Main.inventoryWindow == null) { ChangeStatus("Inventory data not yet loaded in", 2); return; }
-            Main.inventoryWindow.Show();
-            Main.inventoryWindow.Focus();
-        }
-
         private void relicsClick(object sender, RoutedEventArgs e)
         {
             if (Main.dataBase.relicData == null) { ChangeStatus("Relic data not yet loaded in", 2); return; }
