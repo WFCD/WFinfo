@@ -234,7 +234,7 @@ namespace WFInfo
 
                             if (i == firstChecks.Length - 1)
                             {
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -- " + Settings.ClipboardTemplate;
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + Settings.ClipboardTemplate;
                             }
                             else
                             {
