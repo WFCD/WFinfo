@@ -80,6 +80,12 @@ namespace WFInfo
                 if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
                     Settings.settingsObj["ImageRetentionTime"] = 12;
                 Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"));
+
+                if (!Settings.settingsObj.TryGetValue("ClipboardTemplate", out _))
+                    Settings.settingsObj["ClipboardTemplate"] = "by WFInfo (smart OCR with pricecheck)";
+                Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"));
+
+
                 Settings.Save();
 
                 string thisprocessname = Process.GetCurrentProcess().ProcessName;

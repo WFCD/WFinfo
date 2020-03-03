@@ -234,7 +234,7 @@ namespace WFInfo
 
                             if (i == firstChecks.Length - 1)
                             {
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -- by WFInfo (smart OCR with pricecheck)";
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -- " + Settings.ClipboardTemplate;
                             }
                             else
                             {
