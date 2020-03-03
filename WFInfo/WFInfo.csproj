@@ -133,6 +133,9 @@
     <Compile Include="EquipmentWindow.cs">
       <DependentUpon>EquipmentWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SnapItOverlay.xaml.cs">
+      <DependentUpon>SnapItOverlay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TreeNode.cs" />
     <Compile Include="RelicsWindow.cs">
       <DependentUpon>RelicsWindow.xaml</DependentUpon>
@@ -146,6 +149,10 @@
       <DependentUpon>Window.xaml</DependentUpon>
     </Compile>
     <Page Include="errorDialogue.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SnapItOverlay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

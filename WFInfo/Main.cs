@@ -22,7 +22,7 @@ namespace WFInfo
         public static RelicsWindow relicWindow;
         public static EquipmentWindow equipmentWindow;
         public static Settings settingsWindow;
-        public static ErrorDialogue popup;
+        public static ErrorDialogue popupWindow;
         public Main()
         {
             INSTANCE = this;
@@ -116,22 +116,23 @@ namespace WFInfo
         {
             if (KeyInterop.KeyFromVirtualKey((int)key) == Settings.activationKey)
             { //check if user pressed activation key
-                if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
-                {
+                if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift) {
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                }
-                else if (Settings.debug || OCR.VerifyWarframe())
+                } else if ((Control.ModifierKeys & Keys.Control) == Keys.Control) {
+                    AddLog("Starting snap it");
+                    StatusUpdate("Single item pricecheck", 0);
+                    OCR.SnapScreenshot();
+                } else if (Settings.debug || OCR.VerifyWarframe())
                 {
-                    //if (Ocr.verifyFocus()) 
-                    //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
-                    //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
 
         }
+
+
 
         // timestamp is the time to look for, and gap is the threshold of seconds different
         public static void SpawnErrorPopup(DateTime timeStamp, int gap = 30)
