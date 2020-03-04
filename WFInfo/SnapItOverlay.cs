@@ -67,6 +67,7 @@ namespace WFInfo
             }
             tempImage = tempImage.Clone(new Rectangle((int)startDrag.X, (int)startDrag.Y, (int)rectangle.Width, (int)rectangle.Height), System.Drawing.Imaging.PixelFormat.DontCare);
             Task.Factory.StartNew(() => OCR.ProcessSnapIt(tempImage));
+            tempImage.Dispose();
             Topmost = false;
             Hide();
         }

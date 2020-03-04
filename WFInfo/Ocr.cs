@@ -493,12 +493,10 @@ namespace WFInfo
 
         internal static void ProcessSnapIt(Bitmap snapItImage)
         {
-            DateTime time = DateTime.UtcNow;
-            timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
+            var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
             snapItImage.Save(Main.appPath + @"\Debug\SnapItImage " + timestamp + ".png");
-            snapItImage = ScaleUpAndFilter(snapItImage, (WFtheme)(int)Settings.settingsObj["ThemeOverwrite"]);
+            snapItImage = ScaleUpAndFilter(snapItImage, GetThemeWeighted(out _, snapItImage));
             snapItImage.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
-
             var name = GetTextFromImage(snapItImage, firstEngine);
             name = Main.dataBase.GetPartName(name, out firstProximity[0]);
             JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
