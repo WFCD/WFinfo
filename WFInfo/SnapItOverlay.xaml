@@ -31,6 +31,7 @@
     <Grid Cursor="Cross" x:Name="LayoutRoot">
         <Canvas x:Name="canvas" Background="#FF262626">
             <Image x:Name="Image"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Press any key to exit" VerticalAlignment="Top" FontSize="48" Canvas.Left="10" Canvas.Top="10"/>
             <Rectangle Fill="#14FFFFFF" StrokeDashArray="5" 
 
                 Stroke="#FFFFFFFF" Visibility="Hidden" 

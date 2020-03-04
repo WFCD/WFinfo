@@ -138,7 +138,7 @@ namespace WFInfo
 
 
 
-		public const int pixelFissureYDisplay = 47;
+        public const int pixelFissureYDisplay = 47;
 
         public const int SCALING_LIMIT = 100;
         private static bool processingActive = false;
@@ -493,12 +493,34 @@ namespace WFInfo
             return minTheme;
         }
 
-        internal static void ProcessSnapIt(Bitmap snapItImage) {
+        internal static void ProcessSnapIt(Bitmap snapItImage)
+        {
+            DateTime time = DateTime.UtcNow;
+            timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
             snapItImage.Save(Main.appPath + @"\Debug\SnapItImage " + timestamp + ".png");
-            //todo implement filter
+            snapItImage = ScaleUpAndFilter(snapItImage, (WFtheme)(int)Settings.settingsObj["ThemeOverwrite"]);
+            snapItImage.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
 
-            var result = GetTextFromImage(snapItImage, firstEngine);
-            Console.WriteLine(result);
+            var name = GetTextFromImage(snapItImage, firstEngine);
+            name = Main.dataBase.GetPartName(name, out firstProximity[0]);
+            JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
+            string plat = job["plat"].ToObject<string>();
+            string ducats = job["ducats"].ToObject<string>();
+            string volume = job["volume"].ToObject<string>();
+            bool vaulted = Main.dataBase.IsPartVaulted(name);
+            string partsOwned = Main.dataBase.PartsOwned(name);
+
+            Main.RunOnUIThread(() =>
+            {
+                if (Settings.isOverlaySelected)
+                {
+                    Main.overlays[1].LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
+                }
+                else
+                {
+                    Main.window.loadTextData(name, plat, ducats, volume, vaulted, partsOwned, 0, false);
+                }
+            });
         }
 
         private static bool ColorThreshold(Color test, Color thresh, int threshold = 10)
@@ -841,10 +863,14 @@ namespace WFInfo
             return image;
         }
 
-        internal static void SnapScreenshot() {
+        internal static void SnapScreenshot()
+        {
             Bitmap fullScreen = CaptureScreenshot();
-            SnapItOverlay snapItOverlay = new SnapItOverlay(fullScreen);
-            snapItOverlay.Show();
+            Main.snapItOverlayWindow.Populate(fullScreen);
+            Main.snapItOverlayWindow.Show();
+            Main.snapItOverlayWindow.Topmost = true;
+            Main.snapItOverlayWindow.Focusable = true;
+            Main.snapItOverlayWindow.Focus();
         }
 
         public static bool VerifyWarframe()

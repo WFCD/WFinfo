@@ -136,7 +136,7 @@
     <Compile Include="EquipmentWindow.cs">
       <DependentUpon>EquipmentWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SnapItOverlay.xaml.cs">
+    <Compile Include="SnapItOverlay.cs">
       <DependentUpon>SnapItOverlay.xaml</DependentUpon>
     </Compile>
     <Compile Include="TreeNode.cs" />

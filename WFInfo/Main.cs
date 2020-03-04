@@ -23,6 +23,7 @@ namespace WFInfo
         public static EquipmentWindow equipmentWindow;
         public static Settings settingsWindow;
         public static ErrorDialogue popupWindow;
+        public static SnapItOverlay snapItOverlayWindow;
         public static UpdateDialogue update;
         public Main()
         {
@@ -41,6 +42,7 @@ namespace WFInfo
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
 
+            snapItOverlayWindow = new SnapItOverlay();
             Task.Factory.StartNew(new Action(ThreadedDataLoad));
         }
 
@@ -126,15 +128,19 @@ namespace WFInfo
         {
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
-                if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift) {
+                if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                {
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                } else if ((Control.ModifierKeys & Keys.Control) == Keys.Control) {
+                }
+                else if (Settings.debug && (Control.ModifierKeys & Keys.Control) == Keys.Control)
+                {
                     AddLog("Starting snap it");
                     StatusUpdate("Single item pricecheck", 0);
                     OCR.SnapScreenshot();
-                } else if (Settings.debug || OCR.VerifyWarframe())
+                }
+                else if (Settings.debug || OCR.VerifyWarframe())
                 {
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
@@ -164,7 +170,7 @@ namespace WFInfo
         // timestamp is the time to look for, and gap is the threshold of seconds different
         public static void SpawnErrorPopup(DateTime timeStamp, int gap = 30)
         {
-            popup = new ErrorDialogue(timeStamp, gap);
+            popupWindow = new ErrorDialogue(timeStamp, gap);
         }
 
         private void LoadScreenshot()
