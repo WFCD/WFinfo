@@ -127,10 +127,6 @@ namespace WFInfo
                 Settings.settingsObj["ClipboardTemplate"] = "-- by WFInfo (smart OCR with pricecheck)";
             Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"));
 
-            if (!Settings.settingsObj.TryGetValue("ThemeOverwrite", out _))
-                Settings.settingsObj["ThemeOverwrite"] = 0;
-            Settings.ThemeOverwrite = Convert.ToInt32(Settings.settingsObj.GetValue("ThemeOverwrite"));
-
             Settings.Save();
         }
 
@@ -222,20 +218,21 @@ namespace WFInfo
 
         private void OnLocationChanged(object sender, EventArgs e)
         {
-
-            if (Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
-            {
-                Settings.mainWindowLocation = new Point(Left, Top);
-                Settings.settingsObj["MainWindowLocation_X"] = Left;
-                Settings.settingsObj["MainWindowLocation_Y"] = Top;
-                Settings.Save();
-            }
-            else
-            {
-                Settings.mainWindowLocation = new Point(100, 100);
-                Settings.settingsObj["MainWindowLocation_X"] = 100;
-                Settings.settingsObj["MainWindowLocation_Y"] = 100;
-                Settings.Save();
+            if (IsLoaded) { 
+                if (Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
+                {
+                    Settings.mainWindowLocation = new Point(Left, Top);
+                    Settings.settingsObj["MainWindowLocation_X"] = Left;
+                    Settings.settingsObj["MainWindowLocation_Y"] = Top;
+                    Settings.Save();
+                }
+                else
+                {
+                    Settings.mainWindowLocation = new Point(100, 100);
+                    Settings.settingsObj["MainWindowLocation_X"] = 100;
+                    Settings.settingsObj["MainWindowLocation_Y"] = 100;
+                    Settings.Save();
+                }
             }
         }
 
