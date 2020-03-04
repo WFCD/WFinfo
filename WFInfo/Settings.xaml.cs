@@ -26,7 +26,7 @@ namespace WFInfo
         public static int scaling { get; internal set; }
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
-
+        public static int ThemeOverwrite { get; internal set; }
 
         public Settings()
         {
@@ -212,6 +212,14 @@ namespace WFInfo
         {
             settingsObj["Clipboard"] = clipboardCheckbox.IsChecked.Value;
             clipboard = clipboardCheckbox.IsChecked.Value;
+        }
+
+        private void SortBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (IsLoaded)
+            { // Sortbox selection change trigers whilst loading as it populates the sort box. This prevents it from acedently changing.
+                settingsObj["ThemeOverwrite"] = SortBox.SelectedIndex;
+            }
         }
     }
 }

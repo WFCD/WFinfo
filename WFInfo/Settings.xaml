@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:WFInfo"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d" 
-        Title="Settings" Height="245" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+        Title="Settings" Height="280" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
@@ -36,11 +36,30 @@
             <Rectangle x:Name="First_window2" Stroke="#FF646464" Height="39" VerticalAlignment="Top" Margin="0,-1,0,0"/>
             <Label Content="Activation key" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="126" Padding="5,5,5,0"/>
             <TextBox x:Name="Activation_key_box" ToolTip="Key to activate the program" Margin="190,5,24,5" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="ActivationDown" Cursor="Arrow" GotFocus="ActivationFocus" KeyUp="ActivationUp" LostFocus="ActivationLost"/>
-            <TextBlock x:Name="hidden" Focusable="True" Visibility="Visible" IsEnabled="True" HorizontalAlignment="Left" Margin="333,101,0,-64" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="1" Width="1" RenderTransformOrigin="0.5,0.5" >
-
-            </TextBlock>
+            <TextBlock x:Name="hidden" Focusable="True" Visibility="Visible" IsEnabled="True" HorizontalAlignment="Left" Margin="333,101,0,-64" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="1" Width="1" RenderTransformOrigin="0.5,0.5" />
         </Grid>
-        <Grid x:Name="Scalling_setting" HorizontalAlignment="Left" Width="334" Margin="0,122,0,29">
+        <Grid x:Name="Theme_overwrite" HorizontalAlignment="Left" Height="38" VerticalAlignment="Top" Width="334" Margin="0,123,0,0">
+            <Rectangle HorizontalAlignment="Left" Height="30" Stroke="#FFB1D0D9" VerticalAlignment="Top" Width="146" Margin="164,4,0,0"/>
+            <Rectangle x:Name="First_window2_Copy" Stroke="#FF646464" Margin="0,-1,0,0" d:IsHidden="False"/>
+            <Label Content="UI Theme" Margin="24,5,0,5" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="126" Padding="5,5,5,0"/>
+            <ComboBox HorizontalContentAlignment="Center" x:Name="SortBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" Foreground="#FFAFD0D9" BorderThickness="0" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Margin="165,5,25,5" SelectionChanged="SortBox_SelectionChanged" FontFamily="/WFInfo;component/Resources/Roboto/#Roboto">
+                <ComboBoxItem IsSelected="True" Content="Vituvian"/>
+                <ComboBoxItem Content="Stalker"/>
+                <ComboBoxItem Content="Baruuk"/>
+                <ComboBoxItem Content="Corpus"/>
+                <ComboBoxItem Content="Fortuna"/>
+                <ComboBoxItem Content="Grineer"/>
+                <ComboBoxItem Content="Lotus"/>
+                <ComboBoxItem Content="Nidus"/>
+                <ComboBoxItem Content="Orokin"/>
+                <ComboBoxItem Content="Tenno"/>
+                <ComboBoxItem Content="High Contrast"/>
+                <ComboBoxItem Content="Legacy"/>
+                <ComboBoxItem Content="Equinox"/>
+                <ComboBoxItem Content="Dark Lotus"/>
+            </ComboBox>
+        </Grid>
+        <Grid x:Name="Scalling_setting" HorizontalAlignment="Left" Width="334" Margin="0,160,0,0" Height="91" VerticalAlignment="Top">
             <Rectangle x:Name="First_window1" Stroke="#FF646464" Margin="0,0,0,-1"/>
             <TextBox x:Name="Scaling_box" Margin="190,5,24,0" ToolTip="Warframe in-game UI scaling" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" LostFocus="ScaleLeave" KeyDown="ScaleDown" GotFocus="scaleFocus" Cursor="Arrow" Height="27" VerticalAlignment="Top"/>
             <Label Content="Warframe UI scaling" Margin="5,3,0,0" VerticalAlignment="Top" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="175" Height="35" FontFamily="{StaticResource Roboto}"/>
@@ -52,7 +71,7 @@
             <Label Content="60" HorizontalAlignment="Left" Margin="68,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" FontFamily="{StaticResource Roboto}"/>
             <Label Content="50" HorizontalAlignment="Left" Margin="11,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" FontFamily="{StaticResource Roboto}"/>
         </Grid>
-        <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Height="28" VerticalAlignment="Bottom">
+        <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Height="28" VerticalAlignment="Top" Margin="0,252,0,0">
             <Rectangle x:Name="First_window3" Stroke="#FF646464" Margin="0,-1,0,0"/>
             <Viewbox Margin="49,3,0,4" HorizontalAlignment="Left" />
             <Viewbox Margin="0,3,262,5" HorizontalAlignment="Right" >

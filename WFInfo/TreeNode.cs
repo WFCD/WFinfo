@@ -431,7 +431,7 @@ namespace WFInfo
             List<TreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
             if (done)
             {
-                if(ChildrenFiltered.Count > 0)
+                if (ChildrenFiltered.Count > 0)
                     ChildrenFiltered = filterList;
                 else
                     ForceVisibility = true;
@@ -444,7 +444,7 @@ namespace WFInfo
                 if (node.FilterSearchText(searchText, removeLeaves, additionalFilter, matchedTextCopy))
                     temp.Add(node);
 
-            if(temp.Count == Children.Count)
+            if (temp.Count == Children.Count)
                 foreach (TreeNode node in filterList)
                     node.ForceVisibility = false;
 

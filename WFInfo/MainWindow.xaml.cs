@@ -26,67 +26,7 @@ namespace WFInfo
             LowLevelListener listener = new LowLevelListener(); //publisher
             try
             {
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"))
-                {
-                    Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
-
-                }
-                else
-                {
-                    Settings.settingsObj = new JObject();
-                    var message = "Welcome to WFInfo! Here's a quick guid on how to get started." + Environment.NewLine +
-                        "First go into settings (cog icon) and verrify the following settings:" + Environment.NewLine +
-                        "🞄Overlay will overlay on warframe if you're not using fullscreen." + Environment.NewLine +
-                        "🞄Window will make display it elsewhere, usefull for a extra monitor" + Environment.NewLine +
-                        "🞄Set your hotkey to your prefered key by default it's printscreen. " + Environment.NewLine +
-                        "🞄Then set your UI scaling, by default this is 100%." +
-                        "Change this if you changed it in game.";
-                    MessageBoxResult messageBoxResult = MessageBox.Show(message, "Introduction", MessageBoxButton.OK);
-                }
-                if (!Settings.settingsObj.TryGetValue("Display", out _))
-                    Settings.settingsObj["Display"] = "Overlay";
-                Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
-
-                if (!Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
-                    Settings.settingsObj["MainWindowLocation_X"] = 300;
-                if (!Settings.settingsObj.TryGetValue("MainWindowLocation_Y", out _))
-                    Settings.settingsObj["MainWindowLocation_Y"] = 300;
-                Settings.mainWindowLocation = new Point(Settings.settingsObj.GetValue("MainWindowLocation_X").ToObject<Int32>(), Settings.settingsObj.GetValue("MainWindowLocation_Y").ToObject<Int32>());
-
-                if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
-                    Settings.settingsObj["ActivationKey"] = "Snapshot";
-                Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
-
-                if (!Settings.settingsObj.TryGetValue("Debug", out _))
-                    Settings.settingsObj["Debug"] = false;
-                Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
-
-                if (!Settings.settingsObj.TryGetValue("Clipboard", out _))
-                    Settings.settingsObj["Clipboard"] = false;
-                Settings.clipboard = (bool)Settings.settingsObj.GetValue("Clipboard");
-
-                if (!Settings.settingsObj.TryGetValue("Auto", out _))
-                    Settings.settingsObj["Auto"] = false;
-                Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
-
-                if (!Settings.settingsObj.TryGetValue("AutoDelay", out _))
-                    Settings.settingsObj["AutoDelay"] = 250L;
-                Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");
-
-                if (!Settings.settingsObj.TryGetValue("Scaling", out _))
-                    Settings.settingsObj["Scaling"] = 100.0;
-                Settings.scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
-
-                if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
-                    Settings.settingsObj["ImageRetentionTime"] = 12;
-                Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"));
-
-                if (!Settings.settingsObj.TryGetValue("ClipboardTemplate", out _))
-                    Settings.settingsObj["ClipboardTemplate"] = "-- by WFInfo (smart OCR with pricecheck)";
-                Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"));
-
-
-                Settings.Save();
+                InitializeSettings();
 
                 string thisprocessname = Process.GetCurrentProcess().ProcessName;
                 if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
@@ -122,6 +62,75 @@ namespace WFInfo
             {
                 Main.AddLog("An error occured while loading the main window: " + e.Message);
             }
+        }
+
+        private void InitializeSettings()
+        {
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"))
+            {
+                Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
+
+            }
+            else
+            {
+                Settings.settingsObj = new JObject();
+                var message = "Welcome to WFInfo! Here's a quick guid on how to get started." + Environment.NewLine +
+                    "First go into settings (cog icon) and verrify the following settings:" + Environment.NewLine +
+                    "🞄Overlay will overlay on warframe if you're not using fullscreen." + Environment.NewLine +
+                    "🞄Window will make display it elsewhere, usefull for a extra monitor" + Environment.NewLine +
+                    "🞄Set your hotkey to your prefered key by default it's printscreen. " + Environment.NewLine +
+                    "🞄Then set your UI scaling, by default this is 100%." +
+                    "Change this if you changed it in game.";
+                MessageBoxResult messageBoxResult = MessageBox.Show(message, "Introduction", MessageBoxButton.OK);
+            }
+
+            if (!Settings.settingsObj.TryGetValue("Display", out _))
+                Settings.settingsObj["Display"] = "Overlay";
+            Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
+
+            if (!Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
+                Settings.settingsObj["MainWindowLocation_X"] = 300;
+            if (!Settings.settingsObj.TryGetValue("MainWindowLocation_Y", out _))
+                Settings.settingsObj["MainWindowLocation_Y"] = 300;
+            Settings.mainWindowLocation = new Point(Settings.settingsObj.GetValue("MainWindowLocation_X").ToObject<Int32>(), Settings.settingsObj.GetValue("MainWindowLocation_Y").ToObject<Int32>());
+
+            if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
+                Settings.settingsObj["ActivationKey"] = "Snapshot";
+            Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+
+            if (!Settings.settingsObj.TryGetValue("Debug", out _))
+                Settings.settingsObj["Debug"] = false;
+            Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
+
+            if (!Settings.settingsObj.TryGetValue("Clipboard", out _))
+                Settings.settingsObj["Clipboard"] = false;
+            Settings.clipboard = (bool)Settings.settingsObj.GetValue("Clipboard");
+
+            if (!Settings.settingsObj.TryGetValue("Auto", out _))
+                Settings.settingsObj["Auto"] = false;
+            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
+
+            if (!Settings.settingsObj.TryGetValue("AutoDelay", out _))
+                Settings.settingsObj["AutoDelay"] = 250L;
+            Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");
+
+            if (!Settings.settingsObj.TryGetValue("Scaling", out _))
+                Settings.settingsObj["Scaling"] = 100.0;
+            Settings.scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
+
+            if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
+                Settings.settingsObj["ImageRetentionTime"] = 12;
+            Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"));
+
+            if (!Settings.settingsObj.TryGetValue("ClipboardTemplate", out _))
+                Settings.settingsObj["ClipboardTemplate"] = "-- by WFInfo (smart OCR with pricecheck)";
+            Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"));
+
+            if (!Settings.settingsObj.TryGetValue("ThemeOverwrite", out _))
+                Settings.settingsObj["ThemeOverwrite"] = 0;
+            Settings.ThemeOverwrite = Convert.ToInt32(Settings.settingsObj.GetValue("ThemeOverwrite"));
+
+            Settings.Save();
         }
 
         public void ChangeStatus(string status, int serverity)
