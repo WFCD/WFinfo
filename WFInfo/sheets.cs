@@ -26,16 +26,8 @@ namespace WFInfo
 
         public IList<IList<object>> GetSheet(string range)
         {
-            try {
-                ValueRange response = service.Spreadsheets.Values.Get(SheetID, range).Execute();
-                return response.Values;
-            }
-            catch (System.Exception) {
-                Main.AddLog("Unable to get response from google sheets");
-                Main.StatusUpdate("Unable to fetch database", 1);
-                throw;
-            }
-
+            ValueRange response = service.Spreadsheets.Values.Get(SheetID, range).Execute();
+            return response.Values;
         }
     }
 }

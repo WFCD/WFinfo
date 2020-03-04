@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Input;
 
 namespace WFInfo
@@ -6,10 +7,10 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for Window1.xaml
     /// </summary>
-    public partial class RewardWindow : Window
+    public partial class Window : System.Windows.Window
     {
 
-        public RewardWindow()
+        public Window()
         {
             InitializeComponent();
         }

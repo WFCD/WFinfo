@@ -11,7 +11,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for RelicsWindow.xaml
     /// </summary>
-    public partial class RelicsWindow : Window
+    public partial class RelicsWindow : System.Windows.Window
     {
         private bool searchActive = false;
         private bool showAllRelics = false;

@@ -12,7 +12,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for errorDialogue.xaml
     /// </summary>
-    public partial class ErrorDialogue : Window
+    public partial class ErrorDialogue : System.Windows.Window
     {
 
         string startPath = Main.appPath + @"\Debug";

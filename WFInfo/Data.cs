@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace WFInfo
@@ -99,6 +101,39 @@ namespace WFInfo
                 return Main.VersionToInteger(githubVersion);
             }
             return Main.VersionToInteger(Main.BuildVersion);
+        }
+
+        /*
+        private void Download(string url)
+        {
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse response = (HttpWebResponse)req.GetResponse();
+            string resUri = response.ResponseUri.AbsoluteUri;
+            Main.AddLog("Downloading to " + currentDirectory + "/WFinfo" + githubVersion + ".exe");
+            try
+            {
+                WebClient.DownloadFile(resUri, currentDirectory + "/WFInfonew.exe");
+                FileStream fs = File.Create(currentDirectory + "/update.bat");
+                byte[] info = new UTF8Encoding(true).GetBytes(
+                    "timeout 2" + Environment.NewLine + "del WFInfo.exe" + Environment.NewLine + "rename WFInfonew.exe WFInfo.exe" +
+                    Environment.NewLine + "start WFInfo.exe");
+                fs.Write(info, 0, info.Length);
+                fs.Close();
+                Process.Start(currentDirectory + "/update.bat");
+                Application.Current.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog("An error occured on Data.CS download(" + url + "), " + ex.ToString());
+                Main.StatusUpdate("Couldn't download " + url + "Due to " + ex.ToString(), 1);
+            }
+        }*/
+
+        private void TestDownloadGoogleDrive()
+        {
+            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
+            SaveDatabase(debugDataPath, allFiltered);
+
         }
 
         // Load item list from Sheets
@@ -216,15 +251,8 @@ namespace WFInfo
             // fill in equipmentData (NO OVERWRITE)
             // fill in nameData
             // fill in relicData
-            JObject allFiltered;
-            try {
-                allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
-            }
-            catch (Exception ex) {
-                Main.AddLog("Unable to download from google due to: " + ex.ToString());
-                Main.StatusUpdate("Make sure that system clock is set properly", 1);
-                throw;
-            }
+
+            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
 
             DateTime filteredDate = allFiltered["timestamp"].ToObject<DateTime>().ToLocalTime().AddHours(-1);
             DateTime eqmtDate = equipmentData.TryGetValue("timestamp", out _) ? equipmentData["timestamp"].ToObject<DateTime>() : filteredDate;
@@ -367,7 +395,7 @@ namespace WFInfo
                 }
             }
         }
-        // initalisation of the variables inside of database.
+
         public bool Update()
         {
             Main.AddLog("Checking for Updates to Databases");

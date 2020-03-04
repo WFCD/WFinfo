@@ -18,7 +18,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for RelicsWindow.xaml
     /// </summary>
-    public partial class EquipmentWindow : Window
+    public partial class EquipmentWindow : System.Windows.Window
     {
         private List<string> types = new List<string>() { "Warframes", "Primary", "Secondary", "Melee", "Archwing", "Companion" };
         private Dictionary<string, TreeNode> primeTypes;
@@ -87,6 +87,8 @@ namespace WFInfo
                                     plat += temp * subMarketValues["plat"].ToObject<double>();
                                 }
                             }
+
+
 
                             partNode.SetPrimeEqmt(plat, primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
                         }

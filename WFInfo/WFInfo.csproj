@@ -123,9 +123,6 @@
     <Compile Include="errorDialogue.xaml.cs">
       <DependentUpon>errorDialogue.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Inventory.xaml.cs">
-      <DependentUpon>Inventory.xaml</DependentUpon>
-    </Compile>
     <Compile Include="LogCapture.cs" />
     <Compile Include="LowLevelListener.cs" />
     <Compile Include="Main.cs" />
@@ -145,14 +142,10 @@
     </Compile>
     <Compile Include="Sheets.cs" />
     <Compile Include="Win32.cs" />
-    <Compile Include="RewardWindow.xaml.cs">
-      <DependentUpon>RewardWindow.xaml</DependentUpon>
+    <Compile Include="Window.xaml.cs">
+      <DependentUpon>Window.xaml</DependentUpon>
     </Compile>
     <Page Include="errorDialogue.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Inventory.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -201,7 +194,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="RewardWindow.xaml">
+    <Page Include="Window.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -13,7 +13,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
         readonly Main main; //subscriber
         public static MainWindow INSTANCE;
@@ -158,14 +158,9 @@ namespace WFInfo
             Visibility = Visibility.Hidden;
         }
 
-        private void websiteClick(object sender, RoutedEventArgs e) {
+        private void websiteClick(object sender, RoutedEventArgs e)
+        {
             Process.Start("https://discord.gg/TAq7bqr");
-        }
-
-        private void inventoryClick(object sender, RoutedEventArgs e) {
-            if (Main.inventoryWindow == null) { ChangeStatus("Inventory data not yet loaded in", 2); return; }
-            Main.inventoryWindow.Show();
-            Main.inventoryWindow.Focus();
         }
 
         private void relicsClick(object sender, RoutedEventArgs e)
@@ -212,7 +207,7 @@ namespace WFInfo
         private new void MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
-                try { DragMove(); } catch (Exception) { Main.AddLog("Unable to drag window"); }
+                DragMove();
         }
 
         private void OnLocationChanged(object sender, EventArgs e)

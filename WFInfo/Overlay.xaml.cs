@@ -7,7 +7,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for Overlay.xaml
     /// </summary>
-    public partial class Overlay : Window
+    public partial class Overlay : System.Windows.Window
     {
         public static double window_wid = 243.0;
         public static double window_hei = 141.0;
