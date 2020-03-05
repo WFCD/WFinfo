@@ -372,6 +372,13 @@ namespace WFInfo
             }
         }
 
+        /// <summary>
+        /// Processes the theme, parse image to detect the theme in the image. Parse null to detect the theme from the screen.
+        /// closeestThresh is used for ???
+        /// </summary>
+        /// <param name="closestThresh"></param>
+        /// <param name="image"></param>
+        /// <returns></returns>
         public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
             int profileX = (int)(pixelProfileXDisplay * screenScaling * uiScaling);
@@ -493,12 +500,18 @@ namespace WFInfo
             return minTheme;
         }
 
+        /// <summary>
+        /// Processes the image the user cropped in the selection
+        /// </summary>
+        /// <param name="snapItImage"></param>
         internal static void ProcessSnapIt(Bitmap snapItImage)
         {
             var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
+            var theme = GetThemeWeighted(out _);
             snapItImage.Save(Main.appPath + @"\Debug\SnapItImage " + timestamp + ".png");
-            snapItImage = ScaleUpAndFilter(snapItImage, GetThemeWeighted(out _, snapItImage));
-            snapItImage.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+            Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme);
+            snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+
             var name = GetTextFromImage(snapItImage, firstEngine);
             name = Main.dataBase.GetPartName(name, out firstProximity[0]);
             JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
@@ -513,12 +526,15 @@ namespace WFInfo
                 if (Settings.isOverlaySelected)
                 {
                     Main.overlays[1].LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
+                    Main.overlays[1].Display(Cursor.Position.X+50, Cursor.Position.Y+50);
                 }
                 else
                 {
                     Main.window.loadTextData(name, plat, ducats, volume, vaulted, partsOwned, 0, false);
                 }
             });
+
+            Main.snapItOverlayWindow.tempImage.Dispose();
         }
 
         private static bool ColorThreshold(Color test, Color thresh, int threshold = 10)
@@ -583,6 +599,7 @@ namespace WFInfo
 
         private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active)
         {
+            image.Save(@"F:\test.png");
             partialScreenshotExpanded = new Bitmap(image.Width * SCALING_LIMIT / image.Height, SCALING_LIMIT);
             partialScreenshotExpanded.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
@@ -609,7 +626,7 @@ namespace WFInfo
                         filtered.SetPixel(x, y, Color.White);
                 }
             }
-
+            filtered.Save(@"F:/test.png");
             return filtered;
         }
 
