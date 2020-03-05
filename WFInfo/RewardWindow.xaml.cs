@@ -69,8 +69,8 @@ namespace WFInfo
                     Main.StatusUpdate("something went wrong while displaying: " + name + " in window", 1);
                     break;
             }
-            //if (resize)
-            //    Left = MainWindow.INSTANCE.Left + 150 - (Width / 2);
+            if (resize)
+                Left = MainWindow.INSTANCE.Left + 150 - (Width / 2);
         }
         private void Exit(object sender, RoutedEventArgs e)
         {

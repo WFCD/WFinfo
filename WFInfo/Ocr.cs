@@ -528,7 +528,7 @@ namespace WFInfo
                 }
                 else
                 {
-                    Main.window.loadTextData(name, plat, ducats, volume, vaulted, partsOwned, 0, false);
+                    Main.window.loadTextData(name, plat, ducats, volume, vaulted, partsOwned, 0);
                 }
             });
 
