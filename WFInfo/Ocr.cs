@@ -235,8 +235,7 @@ namespace WFInfo
                             if (i == firstChecks.Length - 1)
                             {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + Settings.ClipboardTemplate;
-                            }
-                            else
+                            } else
                             {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -  ";
                             }
@@ -247,8 +246,7 @@ namespace WFInfo
                                     Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                                     Main.overlays[partNumber].Resize(overWid);
                                     Main.overlays[partNumber].Display((int)((startX + width / 4 * i) / dpiScaling), startY);
-                                }
-                                else
+                                } else
                                 {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
                                 }
@@ -354,8 +352,7 @@ namespace WFInfo
                             if (Settings.isOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned);
-                            }
-                            else
+                            } else
                             {
                                 Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false);
                             }
@@ -583,6 +580,8 @@ namespace WFInfo
 
         private static List<Bitmap> FilterAndSeparateParts(Bitmap image, WFtheme active)
         {
+            Color clr;
+
             int width = (int)(pixleRewardWidth * screenScaling * uiScaling);
             int lineHeight = (int)(pixelRewardLineHeight * screenScaling * uiScaling);
             int left = (image.Width / 2) - (width / 2);
@@ -590,7 +589,64 @@ namespace WFInfo
 
             partialScreenshot = new Bitmap(width, lineHeight);
 
-            Color clr;
+            int mostWidth = (int)(pixleRewardWidth * screenScaling * 1.1);
+            int mostLeft = (image.Width / 2) - (mostWidth / 2);
+            // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
+            //                   (316          -        235        +       44)    *    1.1    =    137
+            int mostTop = image.Height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling * 1.1);
+            int mostBot = image.Height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.4);
+            Bitmap giantShot = new Bitmap(mostWidth, mostBot - mostTop);
+            Bitmap giantShot2 = new Bitmap(mostWidth, mostBot - mostTop);
+
+
+            double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+            for (int x = 0; x < giantShot.Width; x++)
+                for (int y = 0; y < giantShot.Height; y++)
+                {
+                    int match = (int)GetClosestTheme(image.GetPixel(mostLeft + x, mostTop + y), out int thresh);
+                    if (thresh < 5)
+                    {
+                        weights[match] += 1.0 / (thresh + 1);
+                    }
+                }
+
+            double max = 0;
+            WFtheme closest = WFtheme.UNKNOWN;
+            for (int i = 0; i < weights.Length; i++)
+            {
+                Console.Write(weights[i].ToString("F2") + " ");
+                if (weights[i] > max)
+                {
+                    max = weights[i];
+                    closest = (WFtheme)i;
+                }
+            }
+            Console.WriteLine();
+
+            Main.AddLog("CLOSEST THEME(" + max.ToString("F2") + "): " + closest.ToString());
+
+            for (int y = 0; y < giantShot.Height; y++)
+            {
+                int count = 0;
+                for (int x = 0; x < giantShot.Width; x++)
+                {
+                    clr = image.GetPixel(mostLeft + x, mostTop + y);
+                    giantShot2.SetPixel(x, y, clr);
+                    if (ThemeThresholdFilter(clr, closest))
+                    {
+                        giantShot.SetPixel(x, y, Color.Black);
+                        count++;
+                    } else
+                        giantShot.SetPixel(x, y, Color.White);
+                }
+                //Console.WriteLine("ROW " + y + " - " + count);
+            }
+
+            giantShot.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
+            giantShot2.Save(Main.appPath + @"\Debug\DebugBox2 " + timestamp + ".png");
+
+
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < lineHeight; y++)
@@ -616,8 +672,7 @@ namespace WFInfo
                     {
                         filtered.SetPixel(x, y, Color.Black);
                         count++;
-                    }
-                    else
+                    } else
                         filtered.SetPixel(x, y, Color.White);
                 }
 
@@ -915,8 +970,7 @@ namespace WFInfo
                     Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString());
                     RefreshScaling();
                     return;
-                }
-                else
+                } else
                 {
                     Main.AddLog("Failed to get window bounds");
                     Main.StatusUpdate("Failed to get window bounds", 1);
@@ -928,8 +982,7 @@ namespace WFInfo
             { // if the window is in the VOID delete current process and re-set window to nothing
                 Warframe = null;
                 window = Rectangle.Empty;
-            }
-            else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
+            } else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
             { // checks if old window size is the right size if not change it
                 window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
                                                                                                                          // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
@@ -945,15 +998,13 @@ namespace WFInfo
                     // Borderless, don't do anything
                     currentStyle = WindowStyle.BORDERLESS;
                     Main.AddLog("Borderless detected (0x" + styles.ToString("X8") + ")");
-                }
-                else if ((styles & WS_BORDER) != 0)
+                } else if ((styles & WS_BORDER) != 0)
                 {
                     // Windowed, adjust for thicc border
                     window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
                     Main.AddLog("Windowed detected (0x" + styles.ToString("X8") + "), adjusting window to: " + window.ToString());
                     currentStyle = WindowStyle.WINDOWED;
-                }
-                else
+                } else
                 {
                     // Assume Fullscreen, don't do anything
                     Main.AddLog("Fullscreen detected (0x" + styles.ToString("X8") + ")");
