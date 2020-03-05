@@ -528,7 +528,7 @@ namespace WFInfo
                 }
                 else
                 {
-                    Main.window.loadTextData(name, plat, ducats, volume, vaulted, partsOwned, 0);
+                    Main.window.loadTextData(name, plat, ducats, volume, vaulted, partsOwned, 0 );
                 }
             });
 
@@ -624,7 +624,6 @@ namespace WFInfo
                         filtered.SetPixel(x, y, Color.White);
                 }
             }
-            filtered.Save(@"F:/test.png");
             return filtered;
         }
 
