@@ -12,10 +12,10 @@ namespace WFInfo
     /// Interaction logic for SnapItOverlay.xaml
     /// Marching ant logic by: https://www.codeproject.com/Articles/27816/Marching-Ants-Selection
     /// </summary>
-    public partial class SnapItOverlay : System.Windows.Window
+    public partial class SnapItOverlay : Window
     {
 
-        private Bitmap tempImage;
+        public Bitmap tempImage;
         private System.Windows.Point startDrag;
         public SnapItOverlay()
         {
@@ -52,15 +52,13 @@ namespace WFInfo
             Hide();
         }
 
-        private void canvas_MouseUp(object sender, MouseButtonEventArgs e)
-        {
+        private void canvas_MouseUp(object sender, MouseButtonEventArgs e) {
             //Release the mouse
             if (canvas.IsMouseCaptured)
                 canvas.ReleaseMouseCapture();
             canvas.Cursor = Cursors.Arrow;
             Main.AddLog("User drew rectangle: Starting point: " + startDrag.ToString() + " Width: " + rectangle.Width + " Height:" + rectangle.Height);
-            if (rectangle.Width < 10 || rectangle.Height < 10)
-            { // box is smaller than 10x10 and thus will never be able to have any text. Also used as a failsave to prevent the program from crashing if the user makes a 0x0 sleection
+            if (rectangle.Width < 10 || rectangle.Height < 10) { // box is smaller than 10x10 and thus will never be able to have any text. Also used as a failsave to prevent the program from crashing if the user makes a 0x0 sleection
                 Main.AddLog("User selected an area too small");
                 Main.StatusUpdate("Please slecet a larger area to scan", 2);
                 return;
@@ -69,9 +67,7 @@ namespace WFInfo
             Task.Factory.StartNew(() => OCR.ProcessSnapIt(tempImage));
             Topmost = false;
             Hide();
-            Task.WaitAll();
-            tempImage.Dispose();
-            }
+        }
 
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {

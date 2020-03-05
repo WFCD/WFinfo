@@ -13,7 +13,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : System.Windows.Window
+    public partial class MainWindow : Window
     {
         readonly Main main; //subscriber
         public static MainWindow INSTANCE;
@@ -208,7 +208,11 @@ namespace WFInfo
             Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
         }
 
-        // Allows the draging of the window
+        /// <summary>
+        /// Allows draging of window.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private new void MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)

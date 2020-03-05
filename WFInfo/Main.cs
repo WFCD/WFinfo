@@ -17,7 +17,7 @@ namespace WFInfo
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion;
         public static Data dataBase;
-        public static Window window;
+        public static RewardWindow window;
         public static Overlay[] overlays;
         public static RelicsWindow relicWindow;
         public static EquipmentWindow equipmentWindow;
@@ -31,7 +31,7 @@ namespace WFInfo
             buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
             overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
-            window = new Window();
+            window = new RewardWindow();
             RefreshTrainedData();
             dataBase = new Data();
             relicWindow = new RelicsWindow();
