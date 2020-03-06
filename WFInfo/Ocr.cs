@@ -195,6 +195,7 @@ namespace WFInfo
 
                 // Get the part box and filter it
                 List<Bitmap> parts = FilterAndSeparateParts(bigScreenshot, activeTheme);
+                GetThemeAndScaling(out _, file);
 
                 Directory.CreateDirectory(Main.appPath + @"\Debug");
 
@@ -503,41 +504,41 @@ namespace WFInfo
 
             switch (theme)
             {
-                case WFtheme.VITRUVIAN:
+                case WFtheme.VITRUVIAN:     // TO CHECK
                     return Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
-                case WFtheme.LOTUS:
+                case WFtheme.LOTUS:         // TO CHECK
                     return Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - primary.GetBrightness()) <= 0.1
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.65);
-                case WFtheme.OROKIN:
+                case WFtheme.OROKIN:        // TO CHECK
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() <= 0.42 && test.GetSaturation() >= 0.1)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
                 case WFtheme.STALKER:
-                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.5)
-                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.65)) && test.GetBrightness() >= 0.20;
-                case WFtheme.CORPUS:
+                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.55)
+                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
+                case WFtheme.CORPUS:        // TO CHECK
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetBrightness() >= 0.35 && test.GetSaturation() >= 0.45)
                          || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.30 && test.GetSaturation() >= 0.35);
-                case WFtheme.EQUINOX:
+                case WFtheme.EQUINOX:       // TO CHECK
                     return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.52;
                 case WFtheme.DARK_LOTUS:
-                    return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.42 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.20 && test.GetSaturation() >= 0.07)
+                    return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.35 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.25 && test.GetSaturation() >= 0.05)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
                 case WFtheme.FORTUNA:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 3) && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.20;
+                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.35) || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.15)) && test.GetSaturation() >= 0.20;
                 case WFtheme.HIGH_CONTRAST:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.25; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
-                case WFtheme.LEGACY:
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.35; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
+                case WFtheme.LEGACY:        // TO CHECK
                     return (test.GetBrightness() >= 0.75 && test.GetSaturation() <= 0.2)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
                 case WFtheme.NIDUS:
-                    return (Math.Abs(test.GetHue() - (primary.GetHue() + 7.5)) < 10 && test.GetSaturation() >= 0.31)
+                    return (Math.Abs(test.GetHue() - (primary.GetHue() + 6)) < 8 && test.GetSaturation() >= 0.30)
                     || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetSaturation() >= 0.55);
                 case WFtheme.TENNO:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.3 && test.GetBrightness() <= 0.6;
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.38 && test.GetBrightness() <= 0.55;
                 case WFtheme.BARUUK:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 2) && test.GetSaturation() > 0.25 && test.GetBrightness() > 0.5;
                 case WFtheme.GRINEER:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 6 && test.GetBrightness() > 0.3)
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() > 0.5)
                     || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() > 0.55);
                 default:
                     // This shouldn't be ran
@@ -578,37 +579,37 @@ namespace WFInfo
             return filtered;
         }
 
-        private static List<Bitmap> FilterAndSeparateParts(Bitmap image, WFtheme active)
+        private static WFtheme GetThemeAndScaling(out double scaling, Bitmap fullScreen = null)
         {
             Color clr;
-
-            int width = (int)(pixleRewardWidth * screenScaling * uiScaling);
-            int lineHeight = (int)(pixelRewardLineHeight * screenScaling * uiScaling);
-            int left = (image.Width / 2) - (width / 2);
-            int top = (image.Height / 2) - (int)(pixleRewardYDisplay * screenScaling * uiScaling) + (int)(pixleRewardHeight * screenScaling * uiScaling) - lineHeight;
-
-            partialScreenshot = new Bitmap(width, lineHeight);
-
-            int mostWidth = (int)(pixleRewardWidth * screenScaling * 1.1);
-            int mostLeft = (image.Width / 2) - (mostWidth / 2);
+            int width = fullScreen == null ? window.Width * (int)dpiScaling : fullScreen.Width;
+            int height = fullScreen == null ? window.Height * (int)dpiScaling : fullScreen.Height;
+            int mostWidth = (int)(pixleRewardWidth * screenScaling);
+            int mostLeft = (width / 2) - (mostWidth / 2);
             // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
             //                   (316          -        235        +       44)    *    1.1    =    137
-            int mostTop = image.Height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling * 1.1);
-            int mostBot = image.Height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.4);
-            Bitmap giantShot = new Bitmap(mostWidth, mostBot - mostTop);
-            Bitmap giantShot2 = new Bitmap(mostWidth, mostBot - mostTop);
+            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
+            int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
+            Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
+            Bitmap preFilter;
+
+            if (fullScreen != null)
+                preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
+            else
+            {
+                preFilter = new Bitmap(mostWidth, mostBot - mostTop);
+                using (Graphics graphics = Graphics.FromImage(preFilter))
+                    graphics.CopyFromScreen(mostLeft, mostTop, 0, 0, new Size(preFilter.Width, preFilter.Height), CopyPixelOperation.SourceCopy);
+            }
 
 
             double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-            for (int x = 0; x < giantShot.Width; x++)
-                for (int y = 0; y < giantShot.Height; y++)
+            for (int x = 0; x < preFilter.Width; x++)
+                for (int y = 0; y < preFilter.Height; y++)
                 {
-                    int match = (int)GetClosestTheme(image.GetPixel(mostLeft + x, mostTop + y), out int thresh);
-                    if (thresh < 5)
-                    {
-                        weights[match] += 1.0 / (thresh + 1);
-                    }
+                    int match = (int)GetClosestTheme(preFilter.GetPixel(x, y), out int thresh);
+                    weights[match] += 1 / Math.Pow(thresh + 1, 4);
                 }
 
             double max = 0;
@@ -624,29 +625,116 @@ namespace WFInfo
             }
             Console.WriteLine();
 
+            int[] rows = new int[preFilter.Height];
+            // 0 => 50   27 => 77   50 => 100
+
             Main.AddLog("CLOSEST THEME(" + max.ToString("F2") + "): " + closest.ToString());
 
-            for (int y = 0; y < giantShot.Height; y++)
+
+            for (int y = 0; y < preFilter.Height; y++)
             {
-                int count = 0;
-                for (int x = 0; x < giantShot.Width; x++)
+                rows[y] = 0;
+                for (int x = 0; x < preFilter.Width; x++)
                 {
-                    clr = image.GetPixel(mostLeft + x, mostTop + y);
-                    giantShot2.SetPixel(x, y, clr);
+                    clr = preFilter.GetPixel(x, y);
                     if (ThemeThresholdFilter(clr, closest))
                     {
-                        giantShot.SetPixel(x, y, Color.Black);
-                        count++;
+                        postFilter.SetPixel(x, y, Color.Black);
+                        rows[y]++;
                     } else
-                        giantShot.SetPixel(x, y, Color.White);
+                        postFilter.SetPixel(x, y, Color.White);
                 }
-                //Console.WriteLine("ROW " + y + " - " + count);
+                //Console.WriteLine("ROW " + y + ": " + rows[y]);
             }
 
-            giantShot.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
-            giantShot2.Save(Main.appPath + @"\Debug\DebugBox2 " + timestamp + ".png");
+            double[] percWeights = new double[51];
+            double[] midAverage = new double[51];
+            double[] topWeights = new double[51];
+            double[] midWeights = new double[51];
+            double[] botWeights = new double[51];
+
+            int fullHeight = (int)(pixelRewardLineHeight * screenScaling);
+            int lineHeight = fullHeight / 2;
+
+            int topLine_100 = preFilter.Height - lineHeight;
+            int topLine_50 = lineHeight / 2;
+
+            int bestScale = -1;
+            double lowestWeight = 0;
+
+            for (int i = 0; i <= 50; i++)
+            {
+                int yFromTop = preFilter.Height - (i * (topLine_100 - topLine_50) / 50 + topLine_50);
+
+                int scale = (50 + i);
+                int scaleWidth = preFilter.Width * scale / 100;
 
 
+                int textLowerTop = (int)(screenScaling * 5 * scale / 100);
+                int textBothBot = (int)(screenScaling * 17 * scale / 100);
+                int textTailBot = (int)(screenScaling * 21 * scale / 100);
+
+                int loc = 0;
+                for (; loc < textLowerTop; loc++)
+                    topWeights[i] += Math.Abs(scaleWidth * 0.07 - rows[yFromTop + loc]);
+                for (; loc < textBothBot; loc++)
+                {
+                    midAverage[i] += rows[yFromTop + loc];
+                    midWeights[i] += Math.Abs(scaleWidth * 0.24 - rows[yFromTop + loc]);
+                }
+                for (; loc < textTailBot; loc++)
+                    botWeights[i] += rows[yFromTop + loc];
+
+                midAverage[i] /= 12.0 * scaleWidth;
+                percWeights[i] = topWeights[i] + midWeights[i] + botWeights[i];
+
+                percWeights[i] *= 100.0 / scale;
+                percWeights[i] *= 100.0 / scale;
+
+                if (bestScale == -1 || lowestWeight > percWeights[i])
+                {
+                    bestScale = scale;
+                    lowestWeight = percWeights[i];
+                }
+            }
+
+            int[] topFive = new int[] { -1, -1, -1, -1, -1 };
+
+            for (int i = 0; i <= 50; i++)
+            {
+                int match = 4;
+                while (match != -1 && topFive[match] != -1 && percWeights[i] > percWeights[topFive[match]])
+                    match--;
+
+                if (match != -1)
+                {
+                    for (int move = 0; move < match; move++)
+                        topFive[move] = topFive[move + 1];
+                    topFive[match] = i;
+                }
+            }
+
+            for (int i = 0; i < 5; i++)
+                Console.WriteLine("RANK " + (5 - i) + " SCALE: " + (topFive[i] + 50) + "%\t\t" + percWeights[topFive[i]] + " -- " + topWeights[topFive[i]] + ", " + midWeights[topFive[i]] + ", " + botWeights[topFive[i]] + " -- " + midAverage[topFive[i]]);
+
+
+            postFilter.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
+            preFilter.Save(Main.appPath + @"\Debug\DebugBox2 " + timestamp + ".png");
+
+            scaling = 0;
+            return WFtheme.UNKNOWN;
+        }
+
+        private static List<Bitmap> FilterAndSeparateParts(Bitmap image, WFtheme active)
+        {
+            int width = (int)(pixleRewardWidth * screenScaling * uiScaling);
+            int lineHeight = (int)(pixelRewardLineHeight * screenScaling * uiScaling);
+            int left = (image.Width / 2) - (width / 2);
+            int top = (image.Height / 2) - (int)(pixleRewardYDisplay * screenScaling * uiScaling) + (int)(pixleRewardHeight * screenScaling * uiScaling) - lineHeight;
+
+            partialScreenshot = new Bitmap(width, lineHeight);
+
+            Color clr;
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < lineHeight; y++)
