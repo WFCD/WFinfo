@@ -114,7 +114,7 @@ namespace WFInfo
 
         public void OnKeyAction(Keys key)
         {
-            if (KeyInterop.KeyFromVirtualKey((int)key) == Settings.activationKey)
+            if (KeyInterop.KeyFromVirtualKey((int)key) == Settings.ActivationKey)
             { //check if user pressed activation key
                 if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
