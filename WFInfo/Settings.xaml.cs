@@ -233,9 +233,10 @@ namespace WFInfo
         public static string GetKeyName(Key key)
         {
             char temp = GetCharFromKey(key);
-
             switch (key)
             {
+                case Key.OemTilde:
+                    return "Tilde";
                 case Key.Return:
                     return "Enter";
                 case Key.Next:
@@ -259,7 +260,7 @@ namespace WFInfo
                 case Key.Divide:
                     return "NumPad" + key.ToString().Substring(0,3);
             }
-            if (temp > 40)
+            if (temp > ' ')
                 return temp.ToString().ToUpper();
             return key.ToString();
         }
