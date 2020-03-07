@@ -515,9 +515,8 @@ namespace WFInfo
                 case WFtheme.STALKER:
                     return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.55)
                     || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
-                case WFtheme.CORPUS:        // TO CHECK
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetBrightness() >= 0.35 && test.GetSaturation() >= 0.45)
-                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.30 && test.GetSaturation() >= 0.35);
+                case WFtheme.CORPUS:
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.42 && test.GetSaturation() >= 0.35;
                 case WFtheme.EQUINOX:       // TO CHECK
                     return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.52;
                 case WFtheme.DARK_LOTUS:
@@ -644,7 +643,7 @@ namespace WFInfo
                     } else
                         postFilter.SetPixel(x, y, Color.White);
                 }
-                //Console.WriteLine("ROW " + y + ": " + rows[y]);
+                Console.WriteLine("ROW " + y + ": " + rows[y]);
             }
 
             double[] percWeights = new double[51];
@@ -653,8 +652,7 @@ namespace WFInfo
             double[] midWeights = new double[51];
             double[] botWeights = new double[51];
 
-            int fullHeight = (int)(pixelRewardLineHeight * screenScaling);
-            int lineHeight = fullHeight / 2;
+            int lineHeight = (int)(pixelRewardLineHeight * screenScaling / 2);
 
             int topLine_100 = preFilter.Height - lineHeight;
             int topLine_50 = lineHeight / 2;
@@ -670,22 +668,29 @@ namespace WFInfo
                 int scaleWidth = preFilter.Width * scale / 100;
 
 
+                int textTop = (int)(screenScaling * 1 * scale / 100);
+                int textTopBot = (int)(screenScaling * 4 * scale / 100);
                 int textLowerTop = (int)(screenScaling * 5 * scale / 100);
-                int textBothBot = (int)(screenScaling * 17 * scale / 100);
+                int textBothBot = (int)(screenScaling * 16 * scale / 100);
+                int textTailTop = (int)(screenScaling * 17 * scale / 100);
                 int textTailBot = (int)(screenScaling * 21 * scale / 100);
 
-                int loc = 0;
-                for (; loc < textLowerTop; loc++)
-                    topWeights[i] += Math.Abs(scaleWidth * 0.07 - rows[yFromTop + loc]);
-                for (; loc < textBothBot; loc++)
+                int loc = textTop;
+                for (; loc < textTopBot; loc++)
+                    topWeights[i] += Math.Abs(scaleWidth * 0.08 - rows[yFromTop + loc]);
+                for (loc = textLowerTop; loc < textBothBot; loc++)
                 {
                     midAverage[i] += rows[yFromTop + loc];
-                    midWeights[i] += Math.Abs(scaleWidth * 0.24 - rows[yFromTop + loc]);
+                    if (rows[yFromTop + loc] < scaleWidth / 15)
+                        midWeights[i] += (scaleWidth * 0.24 - rows[yFromTop + loc]) * 5;
+                    else
+                        midWeights[i] += Math.Abs(scaleWidth * 0.24 - rows[yFromTop + loc]);
                 }
-                for (; loc < textTailBot; loc++)
+                
+                for (loc = textTailTop; loc < textTailBot; loc++)
                     botWeights[i] += rows[yFromTop + loc];
 
-                midAverage[i] /= 12.0 * scaleWidth;
+                midAverage[i] /= (textBothBot - textLowerTop) * scaleWidth;
                 percWeights[i] = topWeights[i] + midWeights[i] + botWeights[i];
 
                 percWeights[i] *= 100.0 / scale;
