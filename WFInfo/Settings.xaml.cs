@@ -18,7 +18,21 @@ namespace WFInfo
 
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
-        private static Key activeKeyVal;
+
+        public static MouseButton backupMouseVal = MouseButton.Left;
+        private static MouseButton activeMouseVal = MouseButton.Left;
+        public static MouseButton ActivationMouseButton
+        {
+            get { return activeMouseVal; }
+            set
+            {
+                activeMouseVal = value;
+                backupMouseVal = value;
+            }
+        }
+
+        public static Key backupKeyVal = Key.None;
+        private static Key activeKeyVal = Key.None;
         public static Key ActivationKey
         {
             get { return activeKeyVal; }
@@ -28,7 +42,6 @@ namespace WFInfo
                 backupKeyVal = value;
             }
         }
-        public static Key backupKeyVal;
         public static KeyConverter converter = new KeyConverter();
         public static Point mainWindowLocation;
         public static bool isOverlaySelected;
@@ -64,7 +77,7 @@ namespace WFInfo
 
             Scaling_box.Text = scaling.ToString() + "%";
 
-            Activation_key_box.Text = GetKeyName(ActivationKey);
+            ResetActivationKeyText();
             Focus();
         }
 
@@ -193,15 +206,48 @@ namespace WFInfo
             e.Handled = true;
         }
 
+        private void ActivationMouseDown(object sender, MouseEventArgs e)
+        {
+            if (activeKeyVal == Key.None && ActivationMouseButton == MouseButton.Left)
+            {
+                MouseButton key = MouseButton.Left;
+
+                if (e.MiddleButton == MouseButtonState.Pressed)
+                    key = MouseButton.Middle;
+                else if (e.XButton1 == MouseButtonState.Pressed)
+                    key = MouseButton.XButton1;
+                else if (e.XButton2 == MouseButtonState.Pressed)
+                    key = MouseButton.XButton2;
+
+                if (key != MouseButton.Left)
+                {
+                    e.Handled = true;
+                    //Set key to disabled 
+                    ActivationKey = Key.None;
+
+                    ActivationMouseButton = key;
+                    Activation_key_box.Text = key.ToString();
+                    settingsObj["ActivationKey"] = key.ToString();
+                    hidden.Focus();
+                    Save();
+                }
+            }
+        }
+
         private void ActivationFocus(object sender, RoutedEventArgs e)
         {
             activeKeyVal = Key.None;
+            activeMouseVal = MouseButton.Left;
             Activation_key_box.Text = "";
         }
 
         private void ActivationUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
+
+            //Set mouse button to disabled (never gonna use left as a trigger)
+            ActivationMouseButton = MouseButton.Left;
+
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
             ActivationKey = key;
@@ -211,10 +257,22 @@ namespace WFInfo
             Save();
         }
 
+        private void ResetActivationKeyText()
+        {
+            if (backupKeyVal != Key.None)
+            {
+                activeKeyVal = backupKeyVal;
+                Activation_key_box.Text = GetKeyName(ActivationKey);
+            } else
+            {
+                activeMouseVal = backupMouseVal;
+                Activation_key_box.Text = ActivationMouseButton.ToString();
+            }
+        }
+
         private void ActivationLost(object sender, RoutedEventArgs e)
         {
-            activeKeyVal = backupKeyVal;
-            Activation_key_box.Text = GetKeyName(ActivationKey);
+            ResetActivationKeyText();
         }
 
         private void ClickCreateDebug(object sender, RoutedEventArgs e)
@@ -258,7 +316,7 @@ namespace WFInfo
                 case Key.Subtract:
                 case Key.Multiply:
                 case Key.Divide:
-                    return "NumPad" + key.ToString().Substring(0,3);
+                    return "NumPad" + key.ToString().Substring(0, 3);
             }
             if (temp > ' ')
                 return temp.ToString().ToUpper();

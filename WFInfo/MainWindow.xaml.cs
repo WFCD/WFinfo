@@ -60,9 +60,15 @@ namespace WFInfo
                     Settings.ActivationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
                 } catch
                 {
-                    Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
-                    Settings.settingsObj["ActivationKey"] = "Snapshot";
-                    Settings.ActivationKey = Key.Snapshot;
+                    try
+                    {
+                        Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                    } catch
+                    {
+                        Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
+                        Settings.settingsObj["ActivationKey"] = "Snapshot";
+                        Settings.ActivationKey = Key.Snapshot;
+                    }
                 }
 
                 if (!Settings.settingsObj.TryGetValue("Debug", out _))
@@ -103,7 +109,8 @@ namespace WFInfo
                     Close();
                 }
 
-                LowLevelListener.KeyAction += main.OnKeyAction;
+                LowLevelListener.KeyEvent += main.OnKeyAction;
+                LowLevelListener.MouseEvent += main.OnMouseAction;
                 listener.Hook();
                 InitializeComponent();
                 Version.Content = "v" + Main.BuildVersion;
