@@ -145,7 +145,7 @@ namespace WFInfo
             }
         }
 
-        private void Exit(object sender, RoutedEventArgs e)
+        public void Exit(object sender, RoutedEventArgs e)
         {
             Main.relicWindow.Close();
             Main.equipmentWindow.Close();

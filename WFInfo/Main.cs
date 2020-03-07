@@ -24,6 +24,7 @@ namespace WFInfo
         public static EquipmentWindow equipmentWindow;
         public static Settings settingsWindow;
         public static ErrorDialogue popup;
+        public static UpdateDialogue update;
         public Main()
         {
             INSTANCE = this;
@@ -46,60 +47,8 @@ namespace WFInfo
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
         {
-            /*
-            if (args != null)
-            {
-                if (args.IsUpdateAvailable)
-                {
-                    MessageBoxResult dialogResult;
-                    if (args.Mandatory)
-                    {
-                        dialogResult =
-                            MessageBox.Show(
-                                $@"There is new version {args.CurrentVersion} available. You are using version {args.InstalledVersion}. This is required update. Press Ok to begin updating the application.", @"Update Available",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Information);
-                    } else
-                    {
-                        dialogResult =
-                            MessageBox.Show(
-                                $@"There is new version {args.CurrentVersion} available. You are using version {
-                                        args.InstalledVersion
-                                    }. Do you want to update the application now?", @"Update Available",
-                                MessageBoxButton.YesNo,
-                                MessageBoxImage.Information);
-                    }
-
-                    // Uncomment the following line if you want to show standard update dialog instead.
-                    // AutoUpdater.ShowUpdateForm(args);
-
-                    if (dialogResult.Equals(MessageBoxResult.Yes) || dialogResult.Equals(MessageBoxResult.OK))
-                    {
-                        try
-                        {
-                            if (AutoUpdater.DownloadUpdate())
-                            {
-                                WFInfo.MainWindow.INSTANCE.Exit(null, null);
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            MessageBox.Show(exception.Message, exception.GetType().ToString(), MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
-                        }
-                    }
-                } else
-                {
-                    MessageBox.Show(@"There is no update available please try again later.", @"No update available",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            } else
-            {
-                MessageBox.Show(
-                        @"There is a problem reaching update server please check your internet connection and try again later.",
-                        @"Update check failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            */
+            Console.WriteLine("Looks like you want to update");
+            update = new UpdateDialogue(args);
         }
 
         private void RefreshTrainedData(string traineddata = "engbest.traineddata")
