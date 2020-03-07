@@ -28,6 +28,8 @@ namespace WFInfo
             updateInfo = args;
 
             string version = args.CurrentVersion.ToString();
+            if(Settings.settingsObj.TryGetValue("ignored", out JToken val) && val.ToString() == version)
+                return;
             version = version.Substring(0, version.LastIndexOf("."));
             Console.WriteLine(version);
             //TitleText.Text = "WFInfo " + version + " is available";
@@ -81,7 +83,8 @@ namespace WFInfo
 
         private void Skip(object sender, RoutedEventArgs e)
         {
-            // Need to add code to ignore this version, and when the version doesn't match, then try again
+            Settings.settingsObj["ignored"] = updateInfo.CurrentVersion.ToString();
+            Settings.Save();
             Close();
         }
 
