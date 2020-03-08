@@ -14,7 +14,7 @@ namespace WFInfo
     /// </summary>
     public partial class SnapItOverlay : Window
     {
-
+        public bool isEnabled;
         public Bitmap tempImage;
         private System.Windows.Point startDrag;
         public SnapItOverlay()
@@ -23,7 +23,6 @@ namespace WFInfo
             canvas.MouseDown += new MouseButtonEventHandler(canvas_MouseDown);
             canvas.MouseUp += new MouseButtonEventHandler(canvas_MouseUp);
             canvas.MouseMove += new MouseEventHandler(canvas_MouseMove);
-            canvas.KeyDown += new KeyEventHandler(canvas_KeyDown);
         }
 
         public void Populate(Bitmap screenshot)
@@ -31,6 +30,7 @@ namespace WFInfo
             var displayImage = Win32.ImageSourceFromBitmap(screenshot);
             Image.Source = displayImage;
             tempImage = screenshot;
+            isEnabled = true;
         }
 
         private void canvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -45,11 +45,11 @@ namespace WFInfo
             canvas.Cursor = Cursors.Cross;
         }
 
-        private void canvas_KeyDown(object sender, KeyEventArgs e)
+        public void closeOverlay()
         {
-            Console.WriteLine(e.Key);
             Topmost = false;
             Hide();
+            isEnabled = false;
         }
 
         private void canvas_MouseUp(object sender, MouseButtonEventArgs e) {

@@ -116,6 +116,13 @@ namespace WFInfo
 
         public void OnKeyAction(Keys key)
         {
+            // close the snapit overlay when *any* key is pressed down
+
+            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None) {
+                snapItOverlayWindow.closeOverlay();
+                return;
+            }
+
             if (KeyInterop.KeyFromVirtualKey((int)key) == Settings.activationKey)
             { //check if user pressed activation key
                 if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
