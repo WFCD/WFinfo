@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using AutoUpdaterDotNET;
 
 namespace WFInfo
 {
@@ -10,7 +9,6 @@ namespace WFInfo
     {
         public App()
         {
-            AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
         }
     }
 }

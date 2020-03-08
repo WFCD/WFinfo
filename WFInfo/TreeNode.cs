@@ -726,7 +726,6 @@ namespace WFInfo
 
         public void DecrementPartFunc()
         {
-            Console.WriteLine("Decrementing " + GetFullName());
             if (Parent.dataRef != null)
             {
                 JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
@@ -750,7 +749,6 @@ namespace WFInfo
 
         public void IncrementPartFunc()
         {
-            Console.WriteLine("Incrementing " + GetFullName());
             if (Parent.dataRef != null)
             {
                 JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;

@@ -55,7 +55,21 @@ namespace WFInfo
 
                 if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
                     Settings.settingsObj["ActivationKey"] = "Snapshot";
-                Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                try
+                {
+                    Settings.ActivationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                } catch
+                {
+                    try
+                    {
+                        Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                    } catch
+                    {
+                        Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
+                        Settings.settingsObj["ActivationKey"] = "Snapshot";
+                        Settings.ActivationKey = Key.Snapshot;
+                    }
+                }
 
                 if (!Settings.settingsObj.TryGetValue("Debug", out _))
                     Settings.settingsObj["Debug"] = false;
@@ -95,7 +109,8 @@ namespace WFInfo
                     Close();
                 }
 
-                LowLevelListener.KeyAction += main.OnKeyAction;
+                LowLevelListener.KeyEvent += main.OnKeyAction;
+                LowLevelListener.MouseEvent += main.OnMouseAction;
                 listener.Hook();
                 InitializeComponent();
                 Version.Content = "v" + Main.BuildVersion;
@@ -145,7 +160,7 @@ namespace WFInfo
             }
         }
 
-        private void Exit(object sender, RoutedEventArgs e)
+        public void Exit(object sender, RoutedEventArgs e)
         {
             Main.relicWindow.Close();
             Main.equipmentWindow.Close();

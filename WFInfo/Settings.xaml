@@ -11,7 +11,7 @@
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
-    <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
+    <Grid Background="#FF1B1B1B" MouseDown="MouseDown" PreviewMouseDown="ActivationMouseDown">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="334"/>
         </Grid.ColumnDefinitions>

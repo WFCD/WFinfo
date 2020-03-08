@@ -4,10 +4,10 @@ using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Text.RegularExpressions;
 using System.Net;
+using AutoUpdaterDotNET;
 
 namespace WFInfo
 {
@@ -23,6 +23,7 @@ namespace WFInfo
         public static EquipmentWindow equipmentWindow;
         public static Settings settingsWindow;
         public static ErrorDialogue popup;
+        public static UpdateDialogue update;
         public Main()
         {
             INSTANCE = this;
@@ -36,7 +37,16 @@ namespace WFInfo
             relicWindow = new RelicsWindow();
             equipmentWindow = new EquipmentWindow();
             settingsWindow = new Settings();
+
+            AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
+            AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
+
             Task.Factory.StartNew(new Action(ThreadedDataLoad));
+        }
+
+        private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
+        {
+            update = new UpdateDialogue(args);
         }
 
         private void RefreshTrainedData(string traineddata = "engbest.traineddata")
@@ -112,11 +122,32 @@ namespace WFInfo
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, serverity); });
         }
 
-        public void OnKeyAction(Keys key)
+        public void OnMouseAction(MouseButton key)
         {
-            if (KeyInterop.KeyFromVirtualKey((int)key) == Settings.activationKey)
+            if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
-                if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                {
+                    AddLog("Loading screenshot from file");
+                    StatusUpdate("Offline testing with screenshot", 0);
+                    LoadScreenshot();
+                } else if (Settings.debug || OCR.VerifyWarframe())
+                {
+                    //if (Ocr.verifyFocus()) 
+                    //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
+                    //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
+
+
+                    Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
+                }
+            }
+        }
+
+        public void OnKeyAction(Key key)
+        {
+            if (key == Settings.ActivationKey)
+            { //check if user pressed activation key
+                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
                 {
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
@@ -141,7 +172,8 @@ namespace WFInfo
 
         private void LoadScreenshot()
         {
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            // Using WinForms for the openFileDialog because it's simpler and much easier
+            using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
             {
                 openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
                 openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
@@ -149,7 +181,7 @@ namespace WFInfo
                 openFileDialog.RestoreDirectory = true;
                 openFileDialog.Multiselect = true;
 
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     Task.Factory.StartNew(() =>
                     {
@@ -181,6 +213,7 @@ namespace WFInfo
         }
 
         //getters, boring shit
+        //    you're boring shit
         public static string BuildVersion { get => buildVersion; }
         public string AppPath { get => appPath; }
 
