@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo"
         mc:Ignorable="d"
-        Title="New Update Found" Height="400" Width="500" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+        Title="New Update Found" Height="320" Width="420" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <Style TargetType="TextBlock" BasedOn="{StaticResource baseStyle}">
 
@@ -34,13 +34,13 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <TextBlock x:Name="NewVersionText" Text="WFInfo version 9.0.0 has been released!" HorizontalAlignment="Left" Margin="8,5,0,0" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Top" FontFamily="{StaticResource Roboto_Black}"/>
-        <TextBlock x:Name="OldVersionText" Text="You have version 9.0.0 installed." HorizontalAlignment="Left" Margin="8,26,0,0" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Top"/>
-        <TextBlock                         Text="Would you like to download it now?" HorizontalAlignment="Left" Margin="8,40,0,0" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Top"/>
+        <TextBlock x:Name="NewVersionText" Text="WFInfo version 9.0.0 has been released!" HorizontalAlignment="Left" Margin="17,9,0,0" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Top" FontFamily="{StaticResource Roboto_Black}"/>
+        <TextBlock x:Name="OldVersionText" Text="You have version 9.0.0 installed." HorizontalAlignment="Left" Margin="17,30,0,0" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Top"/>
+        <TextBlock                         Text="Would you like to download it now?" HorizontalAlignment="Left" Margin="17,44,0,0" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Top"/>
         <Button Content="No" Margin="143,76,101,0" VerticalAlignment="Top" Background="#FF0F0F0F" Click="Skip" Grid.Column="1" Height="0" Grid.Row="1"/>
         <TextBlock x:Name="TitleText" Text="New Update is Available!" Margin="7,3,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" Grid.Column="1" Height="19" Width="178" />
         <Label MouseLeftButtonDown="Exit" Content="x" Style="{StaticResource Label_Button}" Margin="0,0,0,0" Grid.Column="2"/>
-        <TextBlock x:Name="ReleaseNotes_Header" Text="Release Notes:" HorizontalAlignment="Left" Margin="8,65,0,0" Grid.ColumnSpan="2" Grid.Row="1" FontFamily="{StaticResource Roboto_Black}" Height="14" VerticalAlignment="Top"/>
+        <TextBlock x:Name="ReleaseNotes_Header" Text="Release Notes:" HorizontalAlignment="Left" Margin="17,68,0,0" Grid.ColumnSpan="2" Grid.Row="1" FontFamily="{StaticResource Roboto_Black}" Height="14" VerticalAlignment="Top"/>
         <Border BorderBrush="#646464" BorderThickness="1" Margin="17,93,17,45" Grid.Row="1" Grid.ColumnSpan="3">
             <ScrollViewer Padding="5,5,5,5">
                 <StackPanel x:Name="ReleaseNotes">

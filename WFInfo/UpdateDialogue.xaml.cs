@@ -28,11 +28,9 @@ namespace WFInfo
             updateInfo = args;
 
             string version = args.CurrentVersion.ToString();
-            if(Settings.settingsObj.TryGetValue("ignored", out JToken val) && val.ToString() == version)
+            if(!args.IsUpdateAvailable || (Settings.settingsObj.TryGetValue("ignored", out JToken val) && val.ToString() == version))
                 return;
             version = version.Substring(0, version.LastIndexOf("."));
-            Console.WriteLine(version);
-            //TitleText.Text = "WFInfo " + version + " is available";
 
             NewVersionText.Text = "WFInfo version " + version + " has been released!";
             OldVersionText.Text = "You have version " + Main.BuildVersion + " installed.";
@@ -54,7 +52,6 @@ namespace WFInfo
                     tag.Text = tag_name;
                     tag.FontWeight = FontWeights.Bold;
                     ReleaseNotes.Children.Add(tag);
-                    Console.WriteLine(prop["body"]);
                     TextBlock body = new TextBlock();
                     body.Text = prop["body"].ToString() + "\n";
                     body.Padding = new Thickness(10, 0, 0, 0);
