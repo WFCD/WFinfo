@@ -126,6 +126,13 @@ namespace WFInfo
 
         public void OnMouseAction(MouseButton key)
         {
+            // close the snapit overlay when *any* key is pressed down
+
+            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None) {
+                snapItOverlayWindow.closeOverlay();
+                return;
+            }
+
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
                 if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)

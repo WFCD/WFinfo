@@ -50,7 +50,7 @@
             <Label Content="60" HorizontalAlignment="Left" Margin="68,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" FontFamily="{StaticResource Roboto}"/>
             <Label Content="50" HorizontalAlignment="Left" Margin="11,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" FontFamily="{StaticResource Roboto}"/>
         </Grid>
-        <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Height="28" VerticalAlignment="Top" Margin="0,214,0,0">
+        <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Margin="0,214,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="175*"/>
                 <ColumnDefinition Width="159*"/>
