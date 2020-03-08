@@ -46,7 +46,6 @@ namespace WFInfo
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
         {
-            Console.WriteLine("Looks like you want to update");
             update = new UpdateDialogue(args);
         }
 
