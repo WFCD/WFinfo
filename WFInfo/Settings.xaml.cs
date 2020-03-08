@@ -2,6 +2,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
@@ -16,7 +18,31 @@ namespace WFInfo
 
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
-        public static Key activationKey;
+
+        public static MouseButton backupMouseVal = MouseButton.Left;
+        private static MouseButton activeMouseVal = MouseButton.Left;
+        public static MouseButton ActivationMouseButton
+        {
+            get { return activeMouseVal; }
+            set
+            {
+                activeMouseVal = value;
+                backupMouseVal = value;
+            }
+        }
+
+        public static Key backupKeyVal = Key.None;
+        private static Key activeKeyVal = Key.None;
+        public static Key ActivationKey
+        {
+            get { return activeKeyVal; }
+            set
+            {
+                activeKeyVal = value;
+                backupKeyVal = value;
+            }
+        }
+        public static KeyConverter converter = new KeyConverter();
         public static Point mainWindowLocation;
         public static bool isOverlaySelected;
         public static bool debug;
@@ -49,9 +75,9 @@ namespace WFInfo
             if (Convert.ToBoolean(settingsObj.GetValue("Clipboard")))
                 clipboardCheckbox.IsChecked = true;
 
-            //Activation_key_box.Text = "Snapshot";
             Scaling_box.Text = scaling.ToString() + "%";
-            Activation_key_box.Text = settingsObj.GetValue("ActivationKey").ToString();
+
+            ResetActivationKeyText();
             Focus();
         }
 
@@ -105,16 +131,14 @@ namespace WFInfo
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
                     Main.dataBase.EnableLogcapture();
-                }
-                else
+                } else
                 {
                     settingsObj["Auto"] = false;
                     auto = false;
                     autoCheckbox.IsChecked = false;
                     Main.dataBase.DisableLogCapture();
                 }
-            }
-            else
+            } else
             {
                 settingsObj["Auto"] = false;
                 auto = false;
@@ -153,8 +177,7 @@ namespace WFInfo
                     scaleBar.Value = value;
                     Scaling_box.Text = value + "%";
                     Save();
-                }
-                else
+                } else
                     Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
             }
             catch
@@ -183,24 +206,73 @@ namespace WFInfo
             e.Handled = true;
         }
 
+        private void ActivationMouseDown(object sender, MouseEventArgs e)
+        {
+            if (activeKeyVal == Key.None && ActivationMouseButton == MouseButton.Left)
+            {
+                MouseButton key = MouseButton.Left;
+
+                if (e.MiddleButton == MouseButtonState.Pressed)
+                    key = MouseButton.Middle;
+                else if (e.XButton1 == MouseButtonState.Pressed)
+                    key = MouseButton.XButton1;
+                else if (e.XButton2 == MouseButtonState.Pressed)
+                    key = MouseButton.XButton2;
+
+                if (key != MouseButton.Left)
+                {
+                    e.Handled = true;
+                    //Set key to disabled 
+                    ActivationKey = Key.None;
+
+                    ActivationMouseButton = key;
+                    Activation_key_box.Text = key.ToString();
+                    settingsObj["ActivationKey"] = key.ToString();
+                    hidden.Focus();
+                    Save();
+                }
+            }
+        }
+
         private void ActivationFocus(object sender, RoutedEventArgs e)
         {
+            activeKeyVal = Key.None;
+            activeMouseVal = MouseButton.Left;
             Activation_key_box.Text = "";
         }
 
         private void ActivationUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
-            activationKey = e.Key;
-            Activation_key_box.Text = e.Key.ToString();
-            settingsObj["ActivationKey"] = e.Key.ToString();
+
+            //Set mouse button to disabled (never gonna use left as a trigger)
+            ActivationMouseButton = MouseButton.Left;
+
+
+            Key key = e.Key != Key.System ? e.Key : e.SystemKey;
+            ActivationKey = key;
+            Activation_key_box.Text = GetKeyName(ActivationKey);
+            settingsObj["ActivationKey"] = key.ToString();
             hidden.Focus();
             Save();
         }
 
+        private void ResetActivationKeyText()
+        {
+            if (backupKeyVal != Key.None)
+            {
+                activeKeyVal = backupKeyVal;
+                Activation_key_box.Text = GetKeyName(ActivationKey);
+            } else
+            {
+                activeMouseVal = backupMouseVal;
+                Activation_key_box.Text = ActivationMouseButton.ToString();
+            }
+        }
+
         private void ActivationLost(object sender, RoutedEventArgs e)
         {
-            Activation_key_box.Text = activationKey.ToString();
+            ResetActivationKeyText();
         }
 
         private void ClickCreateDebug(object sender, RoutedEventArgs e)
@@ -212,6 +284,99 @@ namespace WFInfo
         {
             settingsObj["Clipboard"] = clipboardCheckbox.IsChecked.Value;
             clipboard = clipboardCheckbox.IsChecked.Value;
+        }
+
+
+
+        public static string GetKeyName(Key key)
+        {
+            char temp = GetCharFromKey(key);
+            switch (key)
+            {
+                case Key.OemTilde:
+                    return "Tilde";
+                case Key.Return:
+                    return "Enter";
+                case Key.Next:
+                    return "PageDown";
+                case Key.NumPad0:
+                case Key.NumPad1:
+                case Key.NumPad2:
+                case Key.NumPad3:
+                case Key.NumPad4:
+                case Key.NumPad5:
+                case Key.NumPad6:
+                case Key.NumPad7:
+                case Key.NumPad8:
+                case Key.NumPad9:
+                    return key.ToString();
+                case Key.Decimal:
+                    return "NumpadDot";
+                case Key.Add:
+                case Key.Subtract:
+                case Key.Multiply:
+                case Key.Divide:
+                    return "NumPad" + key.ToString().Substring(0, 3);
+            }
+            if (temp > ' ')
+                return temp.ToString().ToUpper();
+            return key.ToString();
+        }
+
+        // Black magic below - blame: https://stackoverflow.com/a/5826175
+
+        public enum MapType : uint
+        {
+            MAPVK_VK_TO_VSC = 0x0,
+            MAPVK_VSC_TO_VK = 0x1,
+            MAPVK_VK_TO_CHAR = 0x2,
+            MAPVK_VSC_TO_VK_EX = 0x3,
+        }
+
+        [DllImport("user32.dll")]
+        public static extern int ToUnicode(
+            uint wVirtKey,
+            uint wScanCode,
+            byte[] lpKeyState,
+            [Out, MarshalAs(UnmanagedType.LPWStr, SizeParamIndex = 4)]
+            StringBuilder pwszBuff,
+            int cchBuff,
+            uint wFlags);
+
+        //[DllImport("user32.dll")]
+        //public static extern bool GetKeyboardState(byte[] lpKeyState);
+
+        [DllImport("user32.dll")]
+        public static extern uint MapVirtualKey(uint uCode, MapType uMapType);
+
+        public static char GetCharFromKey(Key key)
+        {
+            char ch = ' ';
+
+            int virtualKey = KeyInterop.VirtualKeyFromKey(key);
+            byte[] keyboardState = new byte[256];
+            //  Disabled to avoid Shifted variants   EX: Shift + \ => |
+            //  But we don't care about the character, we just want the key
+            //  So ignore they current keyboard state
+            //GetKeyboardState(keyboardState);
+
+            uint scanCode = MapVirtualKey((uint)virtualKey, MapType.MAPVK_VK_TO_VSC);
+            StringBuilder stringBuilder = new StringBuilder(2);
+
+            int result = ToUnicode((uint)virtualKey, scanCode, keyboardState, stringBuilder, stringBuilder.Capacity, 0);
+            switch (result)
+            {
+                case -1:
+                    break;
+                case 0:
+                    break;
+                default:
+                    {
+                        ch = stringBuilder[0];
+                        break;
+                    }
+            }
+            return ch;
         }
     }
 }
