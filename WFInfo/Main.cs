@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Text.RegularExpressions;
 using System.Net;
+using AutoUpdaterDotNET;
 
 namespace WFInfo
 {
@@ -23,6 +24,7 @@ namespace WFInfo
         public static EquipmentWindow equipmentWindow;
         public static Settings settingsWindow;
         public static ErrorDialogue popup;
+        public static UpdateDialogue update;
         public Main()
         {
             INSTANCE = this;
@@ -36,7 +38,17 @@ namespace WFInfo
             relicWindow = new RelicsWindow();
             equipmentWindow = new EquipmentWindow();
             settingsWindow = new Settings();
+
+            AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
+            AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
+
             Task.Factory.StartNew(new Action(ThreadedDataLoad));
+        }
+
+        private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
+        {
+            Console.WriteLine("Looks like you want to update");
+            update = new UpdateDialogue(args);
         }
 
         private void RefreshTrainedData(string traineddata = "engbest.traineddata")
