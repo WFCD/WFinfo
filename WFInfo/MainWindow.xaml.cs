@@ -17,6 +17,7 @@ namespace WFInfo
     {
         readonly Main main; //subscriber
         public static MainWindow INSTANCE;
+        public static WelcomeDialogue hai;
 
         public MainWindow()
         {
@@ -34,14 +35,7 @@ namespace WFInfo
                 else
                 {
                     Settings.settingsObj = new JObject();
-                    var message = "Welcome to WFInfo! Here's a quick guid on how to get started." + Environment.NewLine +
-                        "First go into settings (cog icon) and verrify the following settings:" + Environment.NewLine +
-                        "🞄Overlay will overlay on warframe if you're not using fullscreen." + Environment.NewLine +
-                        "🞄Window will make display it elsewhere, usefull for a extra monitor" + Environment.NewLine +
-                        "🞄Set your hotkey to your prefered key by default it's printscreen. " + Environment.NewLine +
-                        "🞄Then set your UI scaling, by default this is 100%." +
-                        "Change this if you changed it in game.";
-                    MessageBoxResult messageBoxResult = MessageBox.Show(message, "Introduction", MessageBoxButton.OK);
+                    hai = new WelcomeDialogue();
                 }
                 if (!Settings.settingsObj.TryGetValue("Display", out _))
                     Settings.settingsObj["Display"] = "Overlay";
@@ -139,6 +133,16 @@ namespace WFInfo
             }
         }
 
+        public void OnContentRendered(object sender, EventArgs e)
+        {
+            if(hai != null)
+            {
+                hai.Left = Left + Width + 30;
+                hai.Top = Top + Height / 2 - hai.Height/2;
+                hai.Show();
+            }
+        }
+
         public void ChangeStatus(string status, int serverity)
         {
             Console.WriteLine("Status message: " + status);
@@ -205,7 +209,7 @@ namespace WFInfo
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
             Market_Data.Content = "Loading...";
-            Main.StatusUpdate("Market data force reloading", 0);
+            Main.StatusUpdate("Forcing Market Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
         }
 
@@ -214,7 +218,7 @@ namespace WFInfo
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
             Drop_Data.Content = "Loading...";
-            Main.StatusUpdate("Drop data force reloading", 0);
+            Main.StatusUpdate("Forcing Prime Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
         }
 
