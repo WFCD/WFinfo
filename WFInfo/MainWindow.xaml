@@ -7,7 +7,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="WFInfo.MainWindow"
         mc:Ignorable="d"
-        Title="WFInfo" Height="130" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged">
+        Title="WFInfo" Height="130" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>

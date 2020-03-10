@@ -11,7 +11,7 @@
         <Rectangle Stroke="#FF707070"/>
         <Rectangle HorizontalAlignment="Left" Height="25" Stroke="#FF646464" VerticalAlignment="Top" Width="300" Fill="#FF0F0F0F"/>
         <Label x:Name="errorText" Content="Something Unexpected Happened" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalAlignment="Top" Height="32" Margin="1,23,0,0" Width="298" FontSize="18"/>
-        <TextBlock Margin="15,52,15,0" TextWrapping="Wrap" Text="Would you like to create a zip containing debug info for the developers? Please send it to them on discord" TextAlignment="Center" VerticalAlignment="Top" Height="53"/>
+        <TextBlock Margin="15,52,15,0" TextWrapping="Wrap" Text="Would you like to create a zip containing debug info for the developers?&#x0a;Please send it to them on discord" TextAlignment="Center" VerticalAlignment="Top" Height="53"/>
         <Button Content="Yes" HorizontalAlignment="Left" Margin="75,102,0,0" VerticalAlignment="Top" Width="55" Background="#FF0F0F0F" Click="YesClick"/>
         <Button Content="No" Margin="170,102,75,0" VerticalAlignment="Top" Background="#FF0F0F0F" Click="NoClick"/>
         <Image HorizontalAlignment="Left" Height="23" VerticalAlignment="Center" Width="24" Source="Resources/WFLogo.png" Margin="1,0,0,107" >

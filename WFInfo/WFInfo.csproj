@@ -58,7 +58,7 @@
     <ApplicationIcon>WFLogo.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>WFInfo.CustonEntrypoint</StartupObject>
+    <StartupObject>WFInfo.CustomEntrypoint</StartupObject>
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
@@ -121,6 +121,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="CustomEntrypoint.cs" />
+    <Compile Include="WelcomeDialogue.xaml.cs">
+      <DependentUpon>WelcomeDialogue.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="InitialDialogue.xaml.cs">
+      <DependentUpon>InitialDialogue.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UpdateDialogue.xaml.cs">
       <DependentUpon>UpdateDialogue.xaml</DependentUpon>
     </Compile>
@@ -152,6 +158,14 @@
     <Compile Include="RewardWindow.xaml.cs">
       <DependentUpon>RewardWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="WelcomeDialogue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="InitialDialogue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UpdateDialogue.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

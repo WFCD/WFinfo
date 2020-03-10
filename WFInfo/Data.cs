@@ -442,34 +442,44 @@ namespace WFInfo
 
         public void ForceMarketUpdate()
         {
-            Main.AddLog("Forcing market update");
-            LoadMarket(true);
-
-            foreach (KeyValuePair<string, JToken> elem in marketItems)
+            try
             {
-                if (elem.Key != "version")
+                Main.AddLog("Forcing market update");
+                LoadMarket(true);
+
+                foreach (KeyValuePair<string, JToken> elem in marketItems)
                 {
-                    string[] split = elem.Value.ToString().Split('|');
-                    string itemName = split[0];
-                    string itemUrl = split[1];
-                    if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out _))
+                    if (elem.Key != "version")
                     {
-                        LoadMarketItem(itemName, itemUrl);
+                        string[] split = elem.Value.ToString().Split('|');
+                        string itemName = split[0];
+                        string itemUrl = split[1];
+                        if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out _))
+                        {
+                            LoadMarketItem(itemName, itemUrl);
+                        }
                     }
                 }
+
+                RefreshMarketDucats();
+
+                SaveDatabase(marketItemsPath, marketItems);
+                SaveDatabase(marketDataPath, marketData);
+                Main.RunOnUIThread(() =>
+                {
+                    MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm");
+                    Main.StatusUpdate("Market Update Complete", 0);
+                    MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
+                    MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
+                });
             }
-
-            RefreshMarketDucats();
-
-            SaveDatabase(marketItemsPath, marketItems);
-            SaveDatabase(marketDataPath, marketData);
-            Main.RunOnUIThread(() =>
+            catch (Exception ex)
             {
-                MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm");
-                Main.StatusUpdate("Market data reloaded", 0);
-                MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
-                MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
-            });
+                Main.AddLog("Market Update Failed");
+                Main.AddLog(ex.ToString());
+                Main.StatusUpdate("Market Update Failed", 0);
+                new ErrorDialogue(DateTime.Now, 0);
+            }
         }
 
         public void SaveAllJSONs()
@@ -483,17 +493,27 @@ namespace WFInfo
 
         public void ForceEquipmentUpdate()
         {
-            Main.AddLog("Forcing equipment update");
-            LoadEqmtData(true);
-            SaveAllJSONs();
-            Main.RunOnUIThread(() =>
+            try
             {
-                MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm");
-                Main.StatusUpdate("Equipment data reloaded", 0);
+                Main.AddLog("Forcing equipment update");
+                LoadEqmtData(true);
+                SaveAllJSONs();
+                Main.RunOnUIThread(() =>
+                {
+                    MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm");
+                    Main.StatusUpdate("Prime Update Complete", 0);
 
-                MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
-                MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
-            });
+                    MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
+                    MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
+                });
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog("Prime Update Failed");
+                Main.AddLog(ex.ToString());
+                Main.StatusUpdate("Prime Update Failed", 0);
+                new ErrorDialogue(DateTime.Now, 0);
+            }
         }
 
         // There's no current use for it now
@@ -870,28 +890,37 @@ namespace WFInfo
 
         public static void AutoTriggered()
         {
-            var watch = Stopwatch.StartNew();
-            long stop = watch.ElapsedMilliseconds + 5000;
-            long wait = watch.ElapsedMilliseconds;
-
-            OCR.UpdateWindow();
-            int diff;
-
-            while (watch.ElapsedMilliseconds < stop)
+            try
             {
-                if (watch.ElapsedMilliseconds > wait)
+                var watch = Stopwatch.StartNew();
+                long stop = watch.ElapsedMilliseconds + 5000;
+                long wait = watch.ElapsedMilliseconds;
+
+                OCR.UpdateWindow();
+                int diff;
+
+                while (watch.ElapsedMilliseconds < stop)
                 {
-                    wait += Settings.autoDelay;
-                    diff = OCR.GetThemeThreshold();
-                    if (diff < 5)
+                    if (watch.ElapsedMilliseconds > wait)
                     {
-                        while (watch.ElapsedMilliseconds < wait) ;
-                        OCR.ProcessRewardScreen();
-                        break;
+                        wait += Settings.autoDelay;
+                        diff = OCR.GetThemeThreshold();
+                        if (diff < 5)
+                        {
+                            while (watch.ElapsedMilliseconds < wait) ;
+                            OCR.ProcessRewardScreen();
+                            break;
+                        }
                     }
                 }
+                watch.Stop();
+            } catch(Exception ex)
+            {
+                Main.AddLog("AUTO FAILED");
+                Main.AddLog(ex.ToString());
+                Main.StatusUpdate("Auto Detection Failed", 0);
+                new ErrorDialogue(DateTime.Now, 0);
             }
-            watch.Stop();
         }
     }
 }
