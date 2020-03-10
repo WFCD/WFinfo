@@ -62,8 +62,7 @@ namespace WFInfo
                 if (Directory.Exists("tessdata") && File.Exists(tessdata_local))
                 {
                     AddLog("Trained english data is not present in appData, but present in current directory, moving it to appData.");
-                    Directory.Move(tessdata_local, app_data_traineddata);
-                    Directory.Delete("tessdata");
+                    File.Copy(tessdata_local, app_data_traineddata);
                 } else
                 {
                     AddLog("Trained english data is not present in appData and locally, downloading it.");

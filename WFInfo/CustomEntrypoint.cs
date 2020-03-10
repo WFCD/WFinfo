@@ -111,7 +111,7 @@ namespace WFInfo
         {
             WebClient webClient = new WebClient();
 
-            foreach (var dll in list_of_dlls)
+            foreach (string dll in list_of_dlls)
             {
                 if (!File.Exists(app_data_tesseract_catalog + dll))
                 {
@@ -122,7 +122,6 @@ namespace WFInfo
                         {
                             File.Copy("lib" + dll, app_data_tesseract_catalog + dll);
                             success = true;
-                            Directory.Delete("lib" + dll);
                         }
                     }
                     catch (Exception ex)
@@ -138,9 +137,6 @@ namespace WFInfo
                         webClient.DownloadFile(tesseract_hotlink_prefix + dll.Replace("\\", "/"), app_data_tesseract_catalog + dll);
                 }
             }
-
-            if (Directory.Exists("lib") && Directory.GetFiles("lib").Length == 0)
-                Directory.Delete("lib", true);
             webClient.Dispose();
 
             dialogue.Dispatcher.Invoke(() =>
