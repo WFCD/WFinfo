@@ -76,14 +76,21 @@ namespace WFInfo
 
         public static void ThreadedDataLoad()
         {
-            dataBase.Update();
-            //RelicsWindow.LoadNodesOnThread();
-            OCR.init();
-            StatusUpdate("WFInfo Initialization Complete", 0);
-            AddLog("WFInfo has launched successfully");
-            if ((bool)Settings.settingsObj["Auto"])
+            try
             {
-                dataBase.EnableLogcapture();
+                dataBase.Update();
+                //RelicsWindow.LoadNodesOnThread();
+                OCR.init();
+                StatusUpdate("WFInfo Initialization Complete", 0);
+                AddLog("WFInfo has launched successfully");
+                if ((bool)Settings.settingsObj["Auto"])
+                    dataBase.EnableLogcapture();
+            } catch (Exception e)
+            {
+                AddLog("LOADING FAILED");
+                AddLog(e.ToString());
+                StatusUpdate("Launch Failure - Please Restart", 0);
+                new ErrorDialogue(DateTime.Now, 0);
             }
         }
 

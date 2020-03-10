@@ -824,9 +824,8 @@ namespace WFInfo
             int height = window.Height * (int)dpiScaling;
 
             Bitmap image = new Bitmap(width, height);
-            Size FullscreenSize = new Size(image.Width, image.Height);
             using (Graphics graphics = Graphics.FromImage(image))
-                graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
+                graphics.CopyFromScreen(window.Left, window.Top, 0, 0, image.Size, CopyPixelOperation.SourceCopy);
 
             return image;
         }
