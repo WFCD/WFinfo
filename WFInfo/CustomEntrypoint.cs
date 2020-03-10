@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace WFInfo
 {
-    public class CustonEntrypoint
+    public class CustomEntrypoint
     {
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string tesseract_version_folder { get; } = "tesseract4";
@@ -45,8 +45,7 @@ namespace WFInfo
             if (HasAvxSupport())
             {
                 tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
-            }
-            else
+            } else
             {
                 using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
                 {
@@ -63,6 +62,8 @@ namespace WFInfo
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x86");
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x64");
 
+            WebClient webClient = new WebClient();
+
             List<String> list_of_dlls = new List<String>()
             {
                 @"\x86\" + libtesseract + ".dll",
@@ -76,40 +77,48 @@ namespace WFInfo
             {
                 if (!File.Exists(app_data_tesseract_catalog + dll))
                 {
-                    if (Directory.Exists("lib") && File.Exists("lib" + dll))
+                    bool success = false;
+                    try
                     {
-                        Directory.Move("lib" + dll, app_data_tesseract_catalog + dll);
+                        if (Directory.Exists("lib") && File.Exists("lib" + dll))
+                        {
+                            File.Copy("lib" + dll, app_data_tesseract_catalog + dll);
+                            success = true;
+                            Directory.Delete("lib" + dll);
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        //AddLog("Trained english data is not present in appData and locally, downloading it.");
-                        WebClient webClient = new WebClient();
+                        using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+                        {
+                            sw.WriteLineAsync("[" + DateTime.UtcNow + "]   " + dll + " couldn't be moved");
+                            sw.WriteLineAsync("[" + DateTime.UtcNow + "]   " + ex.ToString());
+                        }
+                    }
+
+                    if (!success)
                         webClient.DownloadFile(tesseract_hotlink_prefix + dll.Replace("\\", "/"), app_data_tesseract_catalog + dll);
-                    }
                 }
             }
 
-            if (Directory.Exists("lib"))
-            {
+            if (Directory.Exists("lib") && Directory.GetFiles("lib").Length == 0)
                 Directory.Delete("lib", true);
-            }
+
+            webClient.Dispose();
         }
 
         private static Assembly CurrentDomain_AssemblyResolve_Tesseract(object sender, ResolveEventArgs args)
         {
-            var probingPath = appPath + @"\" + tesseract_version_folder;
-            var assyName = new AssemblyName(args.Name);
+            string probingPath = appPath + @"\" + tesseract_version_folder;
+            string assyName = new AssemblyName(args.Name).Name;
 
-            var newPath = Path.Combine(probingPath, assyName.Name);
+            string newPath = Path.Combine(probingPath, assyName);
             if (!newPath.EndsWith(".dll"))
-            {
-                newPath = newPath + ".dll";
-            }
+                newPath += ".dll";
+
             if (File.Exists(newPath))
-            {
-                var assy = Assembly.LoadFile(newPath);
-                return assy;
-            }
+                return Assembly.LoadFile(newPath);
+
             return null;
         }
 
@@ -120,9 +129,7 @@ namespace WFInfo
 
             string path = assemblyName.Name + ".dll";
             if (assemblyName.CultureInfo.Equals(CultureInfo.InvariantCulture) == false)
-            {
                 path = String.Format(@"{0}\{1}", assemblyName.CultureInfo, path);
-            }
 
             using (Stream stream = executingAssembly.GetManifestResourceStream(path))
             {

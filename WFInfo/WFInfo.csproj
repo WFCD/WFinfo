@@ -57,7 +57,7 @@
     <ApplicationIcon>WFLogo.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>WFInfo.CustonEntrypoint</StartupObject>
+    <StartupObject>WFInfo.CustomEntrypoint</StartupObject>
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
