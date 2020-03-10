@@ -41,7 +41,7 @@ namespace WFInfo
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
 
-            Task.Factory.StartNew(new Action(ThreadedDataLoad));
+            Task.Factory.StartNew(ThreadedDataLoad);
         }
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
@@ -208,13 +208,13 @@ namespace WFInfo
                         catch (Exception e)
                         {
                             AddLog(e.Message);
-                            StatusUpdate("Faild to load image", 1);
+                            StatusUpdate("Failed to load image", 1);
                         }
                     });
                 }
                 else
                 {
-                    StatusUpdate("Faild to load image", 1);
+                    StatusUpdate("Failed to load image", 1);
                 }
             }
         }

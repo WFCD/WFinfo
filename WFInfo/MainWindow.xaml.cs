@@ -205,7 +205,7 @@ namespace WFInfo
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
             Market_Data.Content = "Loading...";
-            Main.StatusUpdate("Market data force reloading", 0);
+            Main.StatusUpdate("Forcing Market Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
         }
 
@@ -214,7 +214,7 @@ namespace WFInfo
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
             Drop_Data.Content = "Loading...";
-            Main.StatusUpdate("Drop data force reloading", 0);
+            Main.StatusUpdate("Forcing Prime Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
         }
 
