@@ -120,6 +120,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="CustomEntrypoint.cs" />
+    <Compile Include="WelcomeDialogue.xaml.cs">
+      <DependentUpon>WelcomeDialogue.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="InitialDialogue.xaml.cs">
+      <DependentUpon>InitialDialogue.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UpdateDialogue.xaml.cs">
       <DependentUpon>UpdateDialogue.xaml</DependentUpon>
     </Compile>
@@ -148,6 +154,14 @@
     <Compile Include="Window.xaml.cs">
       <DependentUpon>Window.xaml</DependentUpon>
     </Compile>
+    <Page Include="WelcomeDialogue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="InitialDialogue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UpdateDialogue.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

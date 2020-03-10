@@ -4,32 +4,87 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace WFInfo
 {
     public class CustomEntrypoint
     {
-        public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
-        public static string tesseract_version_folder { get; } = "tesseract4";
+        public const string liblept = "liblept1760";
+        public const string libtesseract = "libtesseract400";
+        public const string tesseract_version_folder = "tesseract4";
+
+        public static string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
+        public static string tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
+
+        public static string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
+
+
+        public static string[] list_of_dlls = new string[]
+        {
+                @"\x86\" + libtesseract + ".dll",
+                @"\x86\" + liblept + ".dll",
+                @"\x64\" + libtesseract + ".dll",
+                @"\x64\" + liblept + ".dll",
+                @"\Tesseract.dll"
+        };
+
+
+        private static InitialDialogue dialogue = new InitialDialogue();
 
         [STAThreadAttribute]
         public static void Main()
         {
             Directory.CreateDirectory(appPath);
-            try
-            {
-                RefreshTesseractDlls();
-            }
-            catch (Exception ex)
+            Directory.CreateDirectory(app_data_tesseract_catalog);
+            Directory.CreateDirectory(app_data_tesseract_catalog + @"\x86");
+            Directory.CreateDirectory(app_data_tesseract_catalog + @"\x64");
+
+            if (!HasAvxSupport())
             {
                 using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
                 {
                     sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
                     sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + "]   ERROR DURING INITIAL LOAD");
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + "]   " + ex.ToString());
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "]   " + "CPU doesn't support AVX optimizations, falling back to SSE2");
                 }
+
+                // SSE2 version without AVX optimizations - for very old pre-2013 CPUs
+                tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/vb-archive/WFInfo/lib";
             }
+
+            bool fileNeeded = false;
+            foreach (string dll in list_of_dlls)
+                if (!File.Exists(app_data_tesseract_catalog + dll))
+                {
+                    fileNeeded = true;
+                    break;
+                }
+
+            if (fileNeeded)
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    try
+                    {
+                        RefreshTesseractDlls();
+                    }
+                    catch (Exception ex)
+                    {
+                        using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+                        {
+                            sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
+                            sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
+                            sw.WriteLineAsync("[" + DateTime.UtcNow + "]   ERROR DURING INITIAL LOAD");
+                            sw.WriteLineAsync("[" + DateTime.UtcNow + "]   " + ex.ToString());
+                        }
+                        Application.Current.Shutdown();
+                    }
+                });
+                dialogue.ShowDialog();
+            }
+
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve_Tesseract;
             AppDomain.CurrentDomain.AssemblyResolve += OnResolveAssembly;
             App.Main();
@@ -52,39 +107,9 @@ namespace WFInfo
         private static extern long GetEnabledXStateFeatures();
         //
 
-        private static void RefreshTesseractDlls(string libtesseract = "libtesseract400", string liblept = "liblept1760")
+        private static void RefreshTesseractDlls()
         {
-            string tesseract_hotlink_prefix;
-            if (HasAvxSupport())
-            {
-                tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
-            } else
-            {
-                using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
-                {
-                    sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
-                    sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + "]   " + "CPU doesn't support AVX optimizations, falling back to SSE2");
-                }
-                // SSE2 version without AVX optimizations - for very old pre-2013 CPUs
-                tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/vb-archive/WFInfo/lib";
-            }
-
-            string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
-            Directory.CreateDirectory(app_data_tesseract_catalog);
-            Directory.CreateDirectory(app_data_tesseract_catalog + @"\x86");
-            Directory.CreateDirectory(app_data_tesseract_catalog + @"\x64");
-
             WebClient webClient = new WebClient();
-
-            List<String> list_of_dlls = new List<String>()
-            {
-                @"\x86\" + libtesseract + ".dll",
-                @"\x86\" + liblept + ".dll",
-                @"\x64\" + libtesseract + ".dll",
-                @"\x64\" + liblept + ".dll",
-                @"\Tesseract.dll"
-            };
 
             foreach (var dll in list_of_dlls)
             {
@@ -116,8 +141,12 @@ namespace WFInfo
 
             if (Directory.Exists("lib") && Directory.GetFiles("lib").Length == 0)
                 Directory.Delete("lib", true);
-
             webClient.Dispose();
+
+            dialogue.Dispatcher.Invoke(() =>
+            {
+                dialogue.Close();
+            });
         }
 
         private static Assembly CurrentDomain_AssemblyResolve_Tesseract(object sender, ResolveEventArgs args)
