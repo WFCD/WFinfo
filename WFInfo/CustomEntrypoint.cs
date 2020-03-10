@@ -16,7 +16,20 @@ namespace WFInfo
         public static void Main()
         {
             Directory.CreateDirectory(appPath);
-            RefreshTesseractDlls();
+            try
+            {
+                RefreshTesseractDlls();
+            }
+            catch (Exception ex)
+            {
+                using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+                {
+                    sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
+                    sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "]   ERROR DURING INITIAL LOAD");
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "]   " + ex.ToString());
+                }
+            }
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve_Tesseract;
             AppDomain.CurrentDomain.AssemblyResolve += OnResolveAssembly;
             App.Main();
