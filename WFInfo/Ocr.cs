@@ -512,7 +512,7 @@ namespace WFInfo
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme);
             snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
 
-            var name = GetTextFromImage(snapItImage, firstEngine);
+            var name = GetTextFromImage(snapItImageFiltered, firstEngine);
             name = Main.dataBase.GetPartName(name, out firstProximity[0]);
             JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
             string plat = job["plat"].ToObject<string>();
