@@ -21,6 +21,12 @@ namespace WFInfo
 
         public MainWindow()
         {
+            string thisprocessname = Process.GetCurrentProcess().ProcessName;
+            if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1) {
+                Main.AddLog("Duplicate process found");
+                Close();
+            }
+
             INSTANCE = this;
             main = new Main();
 
@@ -95,13 +101,6 @@ namespace WFInfo
 
 
                 Settings.Save();
-
-                string thisprocessname = Process.GetCurrentProcess().ProcessName;
-                if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
-                {
-                    Main.AddLog("Duplicate process found");
-                    Close();
-                }
 
                 LowLevelListener.KeyEvent += main.OnKeyAction;
                 LowLevelListener.MouseEvent += main.OnMouseAction;
@@ -246,6 +245,10 @@ namespace WFInfo
                 Settings.settingsObj["MainWindowLocation_Y"] = 100;
                 Settings.Save();
             }
+        }
+
+        public void removeTrayIcon() {
+            notifyIcon.Dispose();
         }
 
         public void ToForeground(object sender, RoutedEventArgs e)

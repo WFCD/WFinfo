@@ -10,5 +10,11 @@ namespace WFInfo
         public App()
         {
         }
+
+        private void Application_Exit(object sender, ExitEventArgs e) { //Make a new tray icon and remove it, updating the old one. Can't acces the other classes here.
+            MainWindow mainwin = new MainWindow();
+            mainwin.removeTrayIcon();
+            mainwin.Close();
+        }
     }
 }
