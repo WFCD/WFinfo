@@ -24,6 +24,7 @@ namespace WFInfo
         public static Settings settingsWindow;
         public static ErrorDialogue popup;
         public static UpdateDialogue update;
+        public static SnapItOverlay snapItOverlayWindow;
         public Main()
         {
             INSTANCE = this;
@@ -36,6 +37,7 @@ namespace WFInfo
             relicWindow = new RelicsWindow();
             equipmentWindow = new EquipmentWindow();
             settingsWindow = new Settings();
+            snapItOverlayWindow = new SnapItOverlay();
 
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
@@ -132,20 +134,17 @@ namespace WFInfo
 
         public void OnMouseAction(MouseButton key)
         {
-            if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
-            { //check if user pressed activation key
-                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-                {
+
+            if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton) { //check if user pressed activation key
+                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift) {
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                } else if (Settings.debug || OCR.VerifyWarframe())
-                {
-                    //if (Ocr.verifyFocus()) 
-                    //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
-                    //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
-
-
+                } else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) {
+                    AddLog("Starting snap it");
+                    StatusUpdate("Single item pricecheck", 0);
+                    OCR.SnapScreenshot();
+                } else if (Settings.debug || OCR.VerifyWarframe()) {
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
@@ -153,6 +152,13 @@ namespace WFInfo
 
         public void OnKeyAction(Key key)
         {
+            // close the snapit overlay when *any* key is pressed down
+
+            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None) {
+                snapItOverlayWindow.closeOverlay();
+                return;
+            }
+
             if (key == Settings.ActivationKey)
             { //check if user pressed activation key
                 if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
@@ -160,6 +166,10 @@ namespace WFInfo
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
+                } else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) {
+                    AddLog("Starting snap it");
+                    StatusUpdate("Single item pricecheck", 0);
+                    OCR.SnapScreenshot();
                 } else if (Settings.debug || OCR.VerifyWarframe())
                 {
                     //if (Ocr.verifyFocus()) 

@@ -120,6 +120,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="CustomEntrypoint.cs" />
+    <Compile Include="SnapItOverlay.xaml.cs">
+      <DependentUpon>SnapItOverlay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WelcomeDialogue.xaml.cs">
       <DependentUpon>WelcomeDialogue.xaml</DependentUpon>
     </Compile>
@@ -154,6 +157,10 @@
     <Compile Include="Window.xaml.cs">
       <DependentUpon>Window.xaml</DependentUpon>
     </Compile>
+    <Page Include="SnapItOverlay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WelcomeDialogue.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
