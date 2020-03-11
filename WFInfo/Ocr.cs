@@ -152,6 +152,7 @@ namespace WFInfo
         private static int[] firstProximity = { -1, -1, -1, -1 };
         private static int[] secondProximity = { -1, -1, -1, -1 };
         private static string timestamp;
+        private static bool failure;
 
         private static string clipboard;
 
@@ -176,8 +177,10 @@ namespace WFInfo
             processingActive = true;
             Main.StatusUpdate("Processing...", 0);
             Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
+           
             try
             {
+                failure = false;
                 DateTime time = DateTime.UtcNow;
                 timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
 
@@ -206,9 +209,24 @@ namespace WFInfo
                 for (int i = 0; i < parts.Count; i++)
                 {
                     int tempI = i;
-                    tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]); });
+                    tasks[i] = Task.Factory.StartNew(() => {
+                        try
+                        {
+                            firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]);
+                        }
+                        catch (Exception ex)
+                        {
+                            Main.AddLog("FAILED PARSING " + tempI + " PART");
+                            Main.AddLog(ex.ToString());
+                            Main.StatusUpdate("Failed Parsing items", 0);
+                            new ErrorDialogue(DateTime.Now, 0);
+                            failure = true;
+                        }
+                    });
                 }
                 Task.WaitAll(tasks);
+                if(failure)
+                    return;
 
                 if (firstChecks.Length > 0)
                 {
@@ -297,6 +315,7 @@ namespace WFInfo
             {
                 Main.AddLog(ex.ToString());
                 Main.StatusUpdate("ERROR OCCURED DURING PROCESSING", 1);
+                new ErrorDialogue(DateTime.Now, 30);
             }
             processingActive = false;
 
@@ -824,9 +843,8 @@ namespace WFInfo
             int height = window.Height * (int)dpiScaling;
 
             Bitmap image = new Bitmap(width, height);
-            Size FullscreenSize = new Size(image.Width, image.Height);
             using (Graphics graphics = Graphics.FromImage(image))
-                graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
+                graphics.CopyFromScreen(window.Left, window.Top, 0, 0, image.Size, CopyPixelOperation.SourceCopy);
 
             return image;
         }
