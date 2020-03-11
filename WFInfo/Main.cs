@@ -17,13 +17,12 @@ namespace WFInfo
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion;
         public static Data dataBase;
-        public static RewardWindow window;
+        public static Window window;
         public static Overlay[] overlays;
         public static RelicsWindow relicWindow;
         public static EquipmentWindow equipmentWindow;
         public static Settings settingsWindow;
-        public static ErrorDialogue popupWindow;
-        public static SnapItOverlay snapItOverlayWindow;
+        public static ErrorDialogue popup;
         public static UpdateDialogue update;
         public Main()
         {
@@ -32,8 +31,7 @@ namespace WFInfo
             buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
             overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
-            window = new RewardWindow();
-            RefreshTrainedData();
+            window = new Window();
             dataBase = new Data();
             relicWindow = new RelicsWindow();
             equipmentWindow = new EquipmentWindow();
@@ -42,8 +40,7 @@ namespace WFInfo
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
 
-            snapItOverlayWindow = new SnapItOverlay();
-            Task.Factory.StartNew(new Action(ThreadedDataLoad));
+            Task.Factory.StartNew(ThreadedDataLoad);
         }
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
@@ -135,29 +132,20 @@ namespace WFInfo
 
         public void OnMouseAction(MouseButton key)
         {
-            // close the snapit overlay when *any* key is pressed down
-
-            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None) {
-                snapItOverlayWindow.closeOverlay();
-                return;
-            }
-
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
-                if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
                 {
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                }
-                else if (Settings.debug && (Control.ModifierKeys & Keys.Control) == Keys.Control)
+                } else if (Settings.debug || OCR.VerifyWarframe())
                 {
-                    AddLog("Starting snap it");
-                    StatusUpdate("Single item pricecheck", 0);
-                    OCR.SnapScreenshot();
-                }
-                else if (Settings.debug || OCR.VerifyWarframe())
-                {
+                    //if (Ocr.verifyFocus()) 
+                    //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
+                    //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
+
+
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
@@ -174,6 +162,9 @@ namespace WFInfo
                     LoadScreenshot();
                 } else if (Settings.debug || OCR.VerifyWarframe())
                 {
+                    //if (Ocr.verifyFocus()) 
+                    //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
+                    //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
@@ -183,7 +174,7 @@ namespace WFInfo
         // timestamp is the time to look for, and gap is the threshold of seconds different
         public static void SpawnErrorPopup(DateTime timeStamp, int gap = 30)
         {
-            popupWindow = new ErrorDialogue(timeStamp, gap);
+            popup = new ErrorDialogue(timeStamp, gap);
         }
 
         private void LoadScreenshot()

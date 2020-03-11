@@ -18,7 +18,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for RelicsWindow.xaml
     /// </summary>
-    public partial class EquipmentWindow : Window
+    public partial class EquipmentWindow : System.Windows.Window
     {
         private List<string> types = new List<string>() { "Warframes", "Primary", "Secondary", "Melee", "Archwing", "Companion" };
         private Dictionary<string, TreeNode> primeTypes;
