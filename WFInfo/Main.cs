@@ -48,35 +48,10 @@ namespace WFInfo
             update = new UpdateDialogue(args);
         }
 
-        private static void RefreshTrainedData(string traineddata = "engbest.traineddata")
-        {
-            string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/" + traineddata;
-            string tessdata_local = @"tessdata\" + traineddata;
-            string appdata_tessdata_folder = appPath + @"\tessdata";
-            Directory.CreateDirectory(appdata_tessdata_folder);
-
-            string app_data_traineddata = appdata_tessdata_folder + @"\" + traineddata;
-            if (!File.Exists(app_data_traineddata))
-            {
-                StatusUpdate("Updating OCR Engine...", 0);
-                if (Directory.Exists("tessdata") && File.Exists(tessdata_local))
-                {
-                    AddLog("Trained english data is not present in appData, but present in current directory, moving it to appData.");
-                    File.Copy(tessdata_local, app_data_traineddata);
-                } else
-                {
-                    AddLog("Trained english data is not present in appData and locally, downloading it.");
-                    WebClient webClient = new WebClient();
-                    webClient.DownloadFile(traineddata_hotlink, app_data_traineddata);
-                }
-            }
-        }
-
         public static void ThreadedDataLoad()
         {
             try
             {
-                RefreshTrainedData();
                 StatusUpdate("Updating Databases...", 0);
                 dataBase.Update();
                 //RelicsWindow.LoadNodesOnThread();

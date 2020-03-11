@@ -14,6 +14,9 @@ namespace WFInfo
     /// </summary>
     public partial class InitialDialogue : System.Windows.Window
     {
+        private int filesTotal = 0;
+        private int filesDone = 1;
+        private int percentage = 0;
         public InitialDialogue()
         {
             InitializeComponent();
@@ -24,6 +27,29 @@ namespace WFInfo
         {
             if (e.ChangedButton == MouseButton.Left)
                 DragMove();
+        }
+
+        private void Exit(object sender, EventArgs e)
+        {
+            CustomEntrypoint.stopDownloadTask.Cancel();
+        }
+
+        internal void SetFilesNeed(int filesNeeded)
+        {
+            filesTotal = filesNeeded;
+            Progress.Text = "0% (" + filesDone + "/" + filesTotal + ")";
+            Progress.Visibility = Visibility.Visible;
+        }
+
+        internal void UpdatePercentage(double perc)
+        {
+            Progress.Text = perc.ToString("F0") + "% (" + filesDone + "/" + filesTotal + ")";
+        }
+
+        internal void FileComplete()
+        {
+            filesDone++;
+            Progress.Text = "0% (" + filesDone + "/" + filesTotal + ")";
         }
     }
 }

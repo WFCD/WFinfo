@@ -39,14 +39,22 @@ namespace WFInfo
         }
     }
 
-    public class SimpleCommand : System.Windows.Input.ICommand
+    public class SimpleCommand : ICommand
     {
         public SimpleCommand(Action action)
         {
             Action = action;
         }
 
-        public Action Action { get; set; }
+        // The Visual Studio error bugged me
+        public Action _action;
+        public Action Action {
+            get { return _action; }
+            set {
+                _action = value;
+                CanExecuteChanged(this,null);
+            } 
+        }
 
         public bool CanExecute(object parameter)
         {
