@@ -6,7 +6,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for errorDialogue.xaml
     /// </summary>
-    public partial class WelcomeDialogue : System.Windows.Window
+    public partial class WelcomeDialogue : Window
     {
         public WelcomeDialogue()
         {

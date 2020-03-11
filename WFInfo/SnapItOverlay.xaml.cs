@@ -11,7 +11,7 @@ namespace WFInfo {
     /// Interaction logic for SnapItOverlay.xaml
     /// Marching ant logic by: https://www.codeproject.com/Articles/27816/Marching-Ants-Selection
     /// </summary>
-    public partial class SnapItOverlay : System.Windows.Window {
+    public partial class SnapItOverlay : Window {
         public bool isEnabled;
         public Bitmap tempImage;
         private System.Windows.Point startDrag;

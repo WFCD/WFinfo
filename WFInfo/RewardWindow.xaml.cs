@@ -5,7 +5,7 @@ using System.Windows.Input;
 namespace WFInfo
 {
     /// <summary>
-    /// Interaction logic for RewardWindow.xaml
+    /// Interaction logic for Window1.xaml
     /// </summary>
     public partial class RewardWindow : Window
     {
