@@ -11,7 +11,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for RelicsWindow.xaml
     /// </summary>
-    public partial class RelicsWindow : System.Windows.Window
+    public partial class RelicsWindow : Window
     {
         private bool searchActive = false;
         private bool showAllRelics = false;
@@ -62,7 +62,7 @@ namespace WFInfo
                     RelicTree.Items.Add(relic);
 
                 SortBoxChanged(null, null);
-            } 
+            }
             else
             {
                 foreach (TreeNode era in RelicNodes)
@@ -72,7 +72,7 @@ namespace WFInfo
                     {
                         if (curr != -1)
                             RelicTree.Items.RemoveAt(curr);
-                    } 
+                    }
                     else
                     {
                         if (curr == -1)
@@ -111,7 +111,7 @@ namespace WFInfo
                     era.FilterOutVaulted(true);
 
                 RefreshVisibleRelics();
-            } 
+            }
             else
                 ReapplyFilters();
         }
@@ -224,7 +224,7 @@ namespace WFInfo
             TreeViewItem tvi = e.OriginalSource as TreeViewItem;
 
             if (tvi == null || e.Handled) return;
-            
+
             tvi.IsExpanded = !tvi.IsExpanded;
             tvi.IsSelected = false;
             e.Handled = true;
