@@ -33,14 +33,7 @@ namespace WFInfo
                 else
                 {
                     Settings.settingsObj = new JObject();
-                    var message = "Welcome to WFInfo! Here's a quick guid on how to get started." + Environment.NewLine +
-                        "First go into settings (cog icon) and verrify the following settings:" + Environment.NewLine +
-                        "🞄Overlay will overlay on warframe if you're not using fullscreen." + Environment.NewLine +
-                        "🞄Window will make display it elsewhere, usefull for a extra monitor" + Environment.NewLine +
-                        "🞄Set your hotkey to your prefered key by default it's printscreen. " + Environment.NewLine +
-                        "🞄Then set your UI scaling, by default this is 100%." +
-                        "Change this if you changed it in game.";
-                    MessageBoxResult messageBoxResult = MessageBox.Show(message, "Introduction", MessageBoxButton.OK);
+                    hai = new WelcomeDialogue();
                 }
                 if (!Settings.settingsObj.TryGetValue("Display", out _))
                     Settings.settingsObj["Display"] = "Overlay";
@@ -201,6 +194,16 @@ namespace WFInfo
             Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"));
 
             Settings.Save();
+        }
+
+        public void OnContentRendered(object sender, EventArgs e)
+        {
+            if(hai != null)
+            {
+                hai.Left = Left + Width + 30;
+                hai.Top = Top + Height / 2 - hai.Height/2;
+                hai.Show();
+            }
         }
 
         public void OnContentRendered(object sender, EventArgs e)
