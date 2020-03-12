@@ -22,9 +22,9 @@ namespace WFInfo
         public static RelicsWindow relicWindow;
         public static EquipmentWindow equipmentWindow;
         public static Settings settingsWindow;
-        public static ErrorDialogue popupWindow;
-        public static SnapItOverlay snapItOverlayWindow;
+        public static ErrorDialogue popup;
         public static UpdateDialogue update;
+        public static SnapItOverlay snapItOverlayWindow;
         public Main()
         {
             INSTANCE = this;
@@ -33,17 +33,16 @@ namespace WFInfo
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
             overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
             window = new RewardWindow();
-            RefreshTrainedData();
             dataBase = new Data();
             relicWindow = new RelicsWindow();
             equipmentWindow = new EquipmentWindow();
             settingsWindow = new Settings();
+            snapItOverlayWindow = new SnapItOverlay();
 
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
 
-            snapItOverlayWindow = new SnapItOverlay();
-            Task.Factory.StartNew(new Action(ThreadedDataLoad));
+            Task.Factory.StartNew(ThreadedDataLoad);
         }
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
@@ -51,41 +50,50 @@ namespace WFInfo
             update = new UpdateDialogue(args);
         }
 
-        private void RefreshTrainedData(string traineddata = "engbest.traineddata")
+        private static void RefreshTrainedData(string traineddata = "engbest.traineddata")
         {
             string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/" + traineddata;
             string tessdata_local = @"tessdata\" + traineddata;
-            string app_data_tessdata = appPath + @"\tessdata";
-            string app_data_tessdata_traineddata = app_data_tessdata + @"\" + traineddata;
-            Directory.CreateDirectory(app_data_tessdata);
+            string appdata_tessdata_folder = appPath + @"\tessdata";
+            Directory.CreateDirectory(appdata_tessdata_folder);
 
-            if (!File.Exists(app_data_tessdata_traineddata))
+            string app_data_traineddata = appdata_tessdata_folder + @"\" + traineddata;
+            if (!File.Exists(app_data_traineddata))
             {
+                StatusUpdate("Updating OCR Engine...", 0);
                 if (Directory.Exists("tessdata") && File.Exists(tessdata_local))
                 {
                     AddLog("Trained english data is not present in appData, but present in current directory, moving it to appData.");
-                    Directory.Move(tessdata_local, app_data_tessdata_traineddata);
-                    Directory.Delete("tessdata");
-                }
-                else
+                    File.Copy(tessdata_local, app_data_traineddata);
+                } else
                 {
                     AddLog("Trained english data is not present in appData and locally, downloading it.");
                     WebClient webClient = new WebClient();
-                    webClient.DownloadFile(traineddata_hotlink, app_data_tessdata_traineddata);
+                    webClient.DownloadFile(traineddata_hotlink, app_data_traineddata);
                 }
             }
         }
 
         public static void ThreadedDataLoad()
         {
-            dataBase.Update();
-            //RelicsWindow.LoadNodesOnThread();
-            OCR.init();
-            StatusUpdate("WFInfo Initialization Complete", 0);
-            AddLog("WFInfo has launched successfully");
-            if ((bool)Settings.settingsObj["Auto"])
+            try
             {
-                dataBase.EnableLogcapture();
+                RefreshTrainedData();
+                StatusUpdate("Updating Databases...", 0);
+                dataBase.Update();
+                //RelicsWindow.LoadNodesOnThread();
+                OCR.init();
+                StatusUpdate("WFInfo Initialization Complete", 0);
+                AddLog("WFInfo has launched successfully");
+                if ((bool)Settings.settingsObj["Auto"])
+                    dataBase.EnableLogcapture();
+            }
+            catch (Exception ex)
+            {
+                AddLog("LOADING FAILED");
+                AddLog(ex.ToString());
+                StatusUpdate("Launch Failure - Please Restart", 0);
+                new ErrorDialogue(DateTime.Now, 0);
             }
         }
 
@@ -126,29 +134,17 @@ namespace WFInfo
 
         public void OnMouseAction(MouseButton key)
         {
-            // close the snapit overlay when *any* key is pressed down
 
-            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None) {
-                snapItOverlayWindow.closeOverlay();
-                return;
-            }
-
-            if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
-            { //check if user pressed activation key
-                if (Settings.debug && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
-                {
+            if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton) { //check if user pressed activation key
+                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift) {
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                }
-                else if (Settings.debug && (Control.ModifierKeys & Keys.Control) == Keys.Control)
-                {
+                } else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) {
                     AddLog("Starting snap it");
                     StatusUpdate("Single item pricecheck", 0);
                     OCR.SnapScreenshot();
-                }
-                else if (Settings.debug || OCR.VerifyWarframe())
-                {
+                } else if (Settings.debug || OCR.VerifyWarframe()) {
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
@@ -156,6 +152,13 @@ namespace WFInfo
 
         public void OnKeyAction(Key key)
         {
+            // close the snapit overlay when *any* key is pressed down
+
+            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None) {
+                snapItOverlayWindow.closeOverlay();
+                return;
+            }
+
             if (key == Settings.ActivationKey)
             { //check if user pressed activation key
                 if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
@@ -163,9 +166,15 @@ namespace WFInfo
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                }
-                else if (Settings.debug || OCR.VerifyWarframe())
+                } else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) {
+                    AddLog("Starting snap it");
+                    StatusUpdate("Single item pricecheck", 0);
+                    OCR.SnapScreenshot();
+                } else if (Settings.debug || OCR.VerifyWarframe())
                 {
+                    //if (Ocr.verifyFocus()) 
+                    //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
+                    //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
@@ -175,7 +184,7 @@ namespace WFInfo
         // timestamp is the time to look for, and gap is the threshold of seconds different
         public static void SpawnErrorPopup(DateTime timeStamp, int gap = 30)
         {
-            popupWindow = new ErrorDialogue(timeStamp, gap);
+            popup = new ErrorDialogue(timeStamp, gap);
         }
 
         private void LoadScreenshot()
@@ -209,13 +218,12 @@ namespace WFInfo
                         catch (Exception e)
                         {
                             AddLog(e.Message);
-                            StatusUpdate("Faild to load image", 1);
+                            StatusUpdate("Failed to load image", 1);
                         }
                     });
-                }
-                else
+                } else
                 {
-                    StatusUpdate("Faild to load image", 1);
+                    StatusUpdate("Failed to load image", 1);
                 }
             }
         }

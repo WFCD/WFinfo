@@ -52,13 +52,12 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>WFLogo.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>WFInfo.CustonEntrypoint</StartupObject>
+    <StartupObject>WFInfo.CustomEntrypoint</StartupObject>
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
@@ -121,6 +120,18 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="CustomEntrypoint.cs" />
+    <Compile Include="RewardWindow.xaml.cs">
+      <DependentUpon>RewardWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SnapItOverlay.xaml.cs">
+      <DependentUpon>SnapItOverlay.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WelcomeDialogue.xaml.cs">
+      <DependentUpon>WelcomeDialogue.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="InitialDialogue.xaml.cs">
+      <DependentUpon>InitialDialogue.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UpdateDialogue.xaml.cs">
       <DependentUpon>UpdateDialogue.xaml</DependentUpon>
     </Compile>
@@ -137,9 +148,6 @@
     <Compile Include="EquipmentWindow.cs">
       <DependentUpon>EquipmentWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SnapItOverlay.cs">
-      <DependentUpon>SnapItOverlay.xaml</DependentUpon>
-    </Compile>
     <Compile Include="TreeNode.cs" />
     <Compile Include="RelicsWindow.cs">
       <DependentUpon>RelicsWindow.xaml</DependentUpon>
@@ -149,22 +157,27 @@
     </Compile>
     <Compile Include="Sheets.cs" />
     <Compile Include="Win32.cs" />
-    <Compile Include="RewardWindow.xaml.cs">
-      <DependentUpon>RewardWindow.xaml</DependentUpon>
-    </Compile>
+    <Page Include="RewardWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SnapItOverlay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WelcomeDialogue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="InitialDialogue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UpdateDialogue.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="SnapItOverlay.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SnapItOverlay.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SnapItOverlay.xaml">
+    <Page Include="errorDialogue.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -210,10 +223,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Templates\TreeView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="RewardWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

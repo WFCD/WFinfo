@@ -87,28 +87,32 @@ namespace WFInfo
             catch (Exception ex)
             {
                 Main.AddLog(ex.ToString());
+                new ErrorDialogue(DateTime.Now, 0);
             }
             finally
             {
                 if (memoryMappedFile != null)
-                {
                     memoryMappedFile.Dispose();
-                }
 
                 if (bufferReadyEvent != null)
-                {
                     bufferReadyEvent.Dispose();
-                }
 
                 if (dataReadyEvent != null)
-                {
                     dataReadyEvent.Dispose();
-                }
             }
         }
 
         public void Dispose()
         {
+            if (memoryMappedFile != null)
+                memoryMappedFile.Dispose();
+
+            if (bufferReadyEvent != null)
+                bufferReadyEvent.Dispose();
+
+            if (dataReadyEvent != null)
+                dataReadyEvent.Dispose();
+
             tokenSource.Cancel();
             tokenSource.Dispose();
             Main.AddLog("Stoping LogCapture");

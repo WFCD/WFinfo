@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:WFInfo"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d" 
-        Title="Settings" Height="239.916" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+        Title="Settings" Height="245" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
@@ -36,9 +36,11 @@
             <Rectangle x:Name="First_window2" Stroke="#FF646464" Height="39" VerticalAlignment="Top" Margin="0,-1,0,0"/>
             <Label Content="Activation key" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="126" Padding="5,5,5,0"/>
             <TextBox x:Name="Activation_key_box" ToolTip="Key to activate the program" Margin="190,5,24,5" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="ActivationDown" Cursor="Arrow" GotFocus="ActivationFocus" KeyUp="ActivationUp" LostFocus="ActivationLost"/>
-            <TextBlock x:Name="hidden" Focusable="True" Visibility="Visible" IsEnabled="True" HorizontalAlignment="Left" Margin="333,101,0,-64" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="1" Width="1" RenderTransformOrigin="0.5,0.5" />
+            <TextBlock x:Name="hidden" Focusable="True" Visibility="Visible" IsEnabled="True" HorizontalAlignment="Left" Margin="333,101,0,-64" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="1" Width="1" RenderTransformOrigin="0.5,0.5" >
+
+            </TextBlock>
         </Grid>
-        <Grid x:Name="Scalling_setting" HorizontalAlignment="Left" Width="334" Margin="0,122,0,0" Height="91" VerticalAlignment="Top">
+        <Grid x:Name="Scalling_setting" HorizontalAlignment="Left" Width="334" Margin="0,122,0,29">
             <Rectangle x:Name="First_window1" Stroke="#FF646464" Margin="0,0,0,-1"/>
             <TextBox x:Name="Scaling_box" Margin="190,5,24,0" ToolTip="Warframe in-game UI scaling" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" LostFocus="ScaleLeave" KeyDown="ScaleDown" GotFocus="scaleFocus" Cursor="Arrow" Height="27" VerticalAlignment="Top"/>
             <Label Content="Warframe UI scaling" Margin="5,3,0,0" VerticalAlignment="Top" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="175" Height="35" FontFamily="{StaticResource Roboto}"/>
@@ -50,18 +52,14 @@
             <Label Content="60" HorizontalAlignment="Left" Margin="68,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" FontFamily="{StaticResource Roboto}"/>
             <Label Content="50" HorizontalAlignment="Left" Margin="11,63,0,-1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.577" FontSize="{DynamicResource FontSize}" HorizontalContentAlignment="Center" FontFamily="{StaticResource Roboto}"/>
         </Grid>
-        <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Margin="0,214,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="175*"/>
-                <ColumnDefinition Width="159*"/>
-            </Grid.ColumnDefinitions>
-            <Rectangle x:Name="First_window3" Stroke="#FF646464" Margin="0,-1,0,0" Grid.ColumnSpan="2"/>
+        <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Height="28" VerticalAlignment="Bottom">
+            <Rectangle x:Name="First_window3" Stroke="#FF646464" Margin="0,-1,0,0"/>
             <Viewbox Margin="49,3,0,4" HorizontalAlignment="Left" />
-            <Viewbox Margin="0,3,103,5" HorizontalAlignment="Right" >
+            <Viewbox Margin="0,3,262,5" HorizontalAlignment="Right" >
                 <CheckBox x:Name="autoCheckbox" Content="Auto" ToolTip="Automatically detects when the relic screen is visable." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="AutoClicked"/>
             </Viewbox>
-            <Label MouseLeftButtonDown="ClickCreateDebug" Content="Create debug zip" Margin="13,-1,0,0" Width="146" FontWeight="Regular" Style="{StaticResource Label_Button}" Grid.Column="1"/>
-            <Viewbox Margin="0,3,158,5" HorizontalAlignment="Right" Grid.ColumnSpan="2" >
+            <Label MouseLeftButtonDown="ClickCreateDebug" Content="Create debug zip" Margin="188,-1,0,0" Width="146" FontWeight="Regular" Style="{StaticResource Label_Button}"/>
+            <Viewbox Margin="0,3,158,5" HorizontalAlignment="Right" >
                 <CheckBox x:Name="clipboardCheckbox" Content="Clipboard" ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="AutoClicked" Checked="clipboardCheckbox_Checked"/>
             </Viewbox>
 
