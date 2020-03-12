@@ -165,6 +165,7 @@ namespace WFInfo
 
         public void Exit(object sender, RoutedEventArgs e)
         {
+            notifyIcon.Dispose();
             Main.relicWindow.Close();
             Main.equipmentWindow.Close();
             Main.settingsWindow.Close();
@@ -245,10 +246,6 @@ namespace WFInfo
                 Settings.settingsObj["MainWindowLocation_Y"] = 100;
                 Settings.Save();
             }
-        }
-
-        public void removeTrayIcon() {
-            notifyIcon.Dispose();
         }
 
         public void ToForeground(object sender, RoutedEventArgs e)
