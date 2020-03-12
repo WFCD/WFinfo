@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo"
         mc:Ignorable="d"
-        Title="SnapItOverlay" BorderThickness="0" BorderBrush="Transparent" WindowStyle="None" WindowState="Maximized" Height="450" Width="800">
+        Title="SnapItOverlay" BorderThickness="0" AllowsTransparency="True" BorderBrush="Transparent" Background="#10FFFFFF" WindowStyle="None" WindowState="Maximized" Height="450" Width="800">
     <Window.Resources>
         <Storyboard x:Key="MarchingAnts">
             <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" 
@@ -25,9 +25,8 @@
     </Window.Triggers>
 
     <Grid Cursor="Cross" x:Name="LayoutRoot">
-        <Canvas x:Name="canvas" Background="#FF262626">
-            <Image x:Name="Image"/>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Press any key to exit" VerticalAlignment="Top" FontSize="48" Canvas.Left="10" Canvas.Top="10"/>
+        <Canvas x:Name="canvas">
+            <TextBlock TextWrapping="Wrap" Text="Press any key to exit" FontSize="48" Width="{Binding Path=ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}" TextAlignment="Center" Canvas.Bottom="10"/>
             <Rectangle Fill="#14FFFFFF" StrokeDashArray="5" 
 
                 Stroke="#FFFFFFFF" Visibility="Hidden" 
