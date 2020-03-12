@@ -513,7 +513,7 @@ namespace WFInfo
             snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
 
             string name = GetTextFromImage(snapItImageFiltered, firstEngine);
-            if(name.Length > 35) { // if the snap it text is larger than what a single item could possibly be
+            if(name.Length > 42) { // if the snap it text is larger than what a single item could possibly be
                 Main.AddLog("Snapit string too large, likely multiple items scanned");
                 Main.StatusUpdate("Unable to process string, too many charactres", 2);
                 return;
