@@ -154,8 +154,8 @@
     </Compile>
     <Compile Include="Sheets.cs" />
     <Compile Include="Win32.cs" />
-    <Compile Include="Window.xaml.cs">
-      <DependentUpon>Window.xaml</DependentUpon>
+    <Compile Include="RewardWindow.xaml.cs">
+      <DependentUpon>RewardWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="SnapItOverlay.xaml">
       <SubType>Designer</SubType>
@@ -222,7 +222,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Window.xaml">
+    <Page Include="RewardWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
