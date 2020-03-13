@@ -12,7 +12,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for errorDialogue.xaml
     /// </summary>
-    public partial class InitialDialogue : System.Windows.Window
+    public partial class InitialDialogue : Window
     {
         private int filesTotal = 0;
         private int filesDone = 1;
