@@ -14,7 +14,10 @@ namespace WFInfo
         private void Application_Exit(object sender, ExitEventArgs e)
         {
             if (WFInfo.MainWindow.INSTANCE != null)
+            {
+                WFInfo.MainWindow.listener.Dispose();
                 WFInfo.MainWindow.INSTANCE.Exit(null, null);
+            }
         }
     }
 }

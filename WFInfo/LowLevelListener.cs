@@ -7,7 +7,7 @@ namespace WFInfo
 {
     public delegate void KeyboardAction();
 
-    class LowLevelListener : IDisposable
+    public class LowLevelListener : IDisposable
     {
         private const int WH_MOUSE_LL = 14;
         private const int WH_KEYBOARD_LL = 13;

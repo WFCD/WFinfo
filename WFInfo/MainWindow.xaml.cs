@@ -18,6 +18,7 @@ namespace WFInfo
         readonly Main main; //subscriber
         public static MainWindow INSTANCE;
         public static WelcomeDialogue hai;
+        public static LowLevelListener listener;
 
         public MainWindow()
         {
@@ -30,7 +31,7 @@ namespace WFInfo
             INSTANCE = this;
             main = new Main();
 
-            LowLevelListener listener = new LowLevelListener(); //publisher
+            listener = new LowLevelListener(); //publisher
             try
             {
                 if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"))
