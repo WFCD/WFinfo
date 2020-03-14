@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -166,10 +166,7 @@ namespace WFInfo
         public void Exit(object sender, RoutedEventArgs e)
         {
             notifyIcon.Dispose();
-            Main.relicWindow.Close();
-            Main.equipmentWindow.Close();
-            Main.settingsWindow.Close();
-            Application.Current.Shutdown();
+            Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
         }
 
         private void Minimise(object sender, RoutedEventArgs e)

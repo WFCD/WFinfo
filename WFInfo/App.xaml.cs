@@ -15,6 +15,9 @@ namespace WFInfo
         {
             if (WFInfo.MainWindow.INSTANCE != null)
                 WFInfo.MainWindow.INSTANCE.Exit(null, null);
+            WFInfo.Main.relicWindow.Close();
+            WFInfo.Main.equipmentWindow.Close();
+            WFInfo.Main.settingsWindow.Close();
         }
     }
 }
