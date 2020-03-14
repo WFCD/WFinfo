@@ -167,7 +167,7 @@ namespace WFInfo
         public void Exit(object sender, RoutedEventArgs e)
         {
             notifyIcon.Dispose();
-            Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
+            Application.Current.Shutdown();
         }
 
         private void Minimise(object sender, RoutedEventArgs e)
