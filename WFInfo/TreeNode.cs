@@ -47,21 +47,21 @@ namespace WFInfo
         }
 
         // The Visual Studio error bugged me
-        public Action _action;
-        public Action Action {
-            get { return _action; }
-            set {
-                _action = value;
-                CanExecuteChanged(this,null);
-            } 
-        }
+        public Action Action { get; set; }
 
         public bool CanExecute(object parameter)
         {
             return (Action != null);
         }
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged {
+            add {
+                CommandManager.RequerySuggested += value;
+            }
+            remove {
+                CommandManager.RequerySuggested -= value;
+            }
+        }
 
         public void Execute(object parameter)
         {

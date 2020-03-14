@@ -16,7 +16,6 @@ namespace WFInfo
     {
         private int filesTotal = 0;
         private int filesDone = 1;
-        private int percentage = 0;
         public InitialDialogue()
         {
             InitializeComponent();
