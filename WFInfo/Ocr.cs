@@ -607,21 +607,28 @@ namespace WFInfo
 
         private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active)
         {
-            if (image.Height > SCALING_LIMIT)
-                return image;
-            partialScreenshotExpanded = new Bitmap(image.Width * SCALING_LIMIT / image.Height, SCALING_LIMIT);
-            partialScreenshotExpanded.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            using (Graphics graphics = Graphics.FromImage(partialScreenshotExpanded))
+            Bitmap filtered;
+            if (image.Height <= SCALING_LIMIT)
             {
-                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                partialScreenshotExpanded = new Bitmap(image.Width * SCALING_LIMIT / image.Height, SCALING_LIMIT);
+                partialScreenshotExpanded.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-                graphics.DrawImage(image, 0, 0, partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
+                using (Graphics graphics = Graphics.FromImage(partialScreenshotExpanded))
+                {
+                    graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+                    graphics.DrawImage(image, 0, 0, partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
+                }
+
+                filtered = new Bitmap(partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
             }
-
-            Bitmap filtered = new Bitmap(partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
+            else
+            {
+                partialScreenshotExpanded = image;
+                filtered = image;
+            }
 
             Color clr;
             for (int x = 0; x < filtered.Width; x++)
