@@ -79,9 +79,9 @@ namespace WFInfo
                 return;
             }
 
-            Bitmap cutout = tempImage.Clone(new Rectangle(topLeft.X, topLeft.Y, (int)rectangle.Width, (int)rectangle.Height), System.Drawing.Imaging.PixelFormat.DontCare);
-            int xPos = topLeft.X + (int)rectangle.Width / 2;
-            int yPos = topLeft.Y + 10;
+            Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * OCR.dpiScaling), (int)(topLeft.Y * OCR.dpiScaling), (int)(rectangle.Width * OCR.dpiScaling), (int)(rectangle.Height * OCR.dpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
+            int xPos = topLeft.X + (int)rectangle.Width / 2 * (int)(OCR.dpiScaling);
+            int yPos = topLeft.Y + 10 * (int)(OCR.dpiScaling);
             Task.Factory.StartNew(() => OCR.ProcessSnapIt(cutout,tempImage,xPos,yPos));
 
             closeOverlay();
