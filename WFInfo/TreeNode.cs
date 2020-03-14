@@ -46,22 +46,18 @@ namespace WFInfo
             Action = action;
         }
 
-        // The Visual Studio error bugged me
-        public Action _action;
-        public Action Action {
-            get { return _action; }
-            set {
-                _action = value;
-                CanExecuteChanged(this,null);
-            } 
-        }
+        public Action Action { get; set; }
 
         public bool CanExecute(object parameter)
         {
             return (Action != null);
         }
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged
+        { // This will never be used, this is just to ignore the warning prompt in VS
+            add { }    // doesn't matter
+            remove { } // doesn't matter
+        }
 
         public void Execute(object parameter)
         {
@@ -225,13 +221,11 @@ namespace WFInfo
                 {
                     _intact += INTACT_CHANCE_RARE * node._plat;
                     _radiant += RADIANT_CHANCE_RARE * node._plat;
-                }
-                else if (node.NameColor == UNCOMMON_COLOR)
+                } else if (node.NameColor == UNCOMMON_COLOR)
                 {
                     _intact += INTACT_CHANCE_UNCOMMON * node._plat;
                     _radiant += RADIANT_CHANCE_UNCOMMON * node._plat;
-                }
-                else
+                } else
                 {
                     _intact += INTACT_CHANCE_COMMON * node._plat;
                     _radiant += RADIANT_CHANCE_COMMON * node._plat;
@@ -320,13 +314,11 @@ namespace WFInfo
             {
                 NameColor = RARE_COLOR;
                 NameBrush = RARE_BRUSH;
-            }
-            else if (rarity.Contains("uncomm"))
+            } else if (rarity.Contains("uncomm"))
             {
                 NameColor = UNCOMMON_COLOR;
                 NameBrush = UNCOMMON_BRUSH;
-            }
-            else if (rarity.Contains("comm"))
+            } else if (rarity.Contains("comm"))
             {
                 NameColor = COMMON_COLOR;
                 NameBrush = COMMON_BRUSH;
@@ -352,8 +344,7 @@ namespace WFInfo
                 Col2_Img1_Shown = "Visible";
                 Col2_Margin1 = new Thickness(0, 0, 78, 0);
                 Col2_Margin2 = new Thickness(0, 0, 60, 0);
-            }
-            else
+            } else
             {
                 Col1_Img1 = null;
                 Col1_Text1 = "";
@@ -439,7 +430,7 @@ namespace WFInfo
             List<TreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
             if (done)
             {
-                if(ChildrenFiltered.Count > 0)
+                if (ChildrenFiltered.Count > 0)
                     ChildrenFiltered = filterList;
                 else
                     ForceVisibility = true;
@@ -452,7 +443,7 @@ namespace WFInfo
                 if (node.FilterSearchText(searchText, removeLeaves, additionalFilter, matchedTextCopy))
                     temp.Add(node);
 
-            if(temp.Count == Children.Count)
+            if (temp.Count == Children.Count)
                 foreach (TreeNode node in filterList)
                     node.ForceVisibility = false;
 
@@ -493,14 +484,12 @@ namespace WFInfo
                                 ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Name).ToList();
                                 break;
                         }
-                    }
-                    else            // Parts
+                    } else            // Parts
                     {
                         Children = Children.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
                         ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
                     }
-                }
-                else
+                } else
                 {
                     switch (index)
                     {
