@@ -228,8 +228,11 @@ namespace WFInfo
                         {
                             string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
                             JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
-                            string plat = job["plat"].ToObject<string>();
                             string ducats = job["ducats"].ToObject<string>();
+                            if(int.Parse(ducats) == 0) {
+                                continue;
+                            }
+                            string plat = job["plat"].ToObject<string>();
                             string volume = job["volume"].ToObject<string>();
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
@@ -298,7 +301,7 @@ namespace WFInfo
             catch (Exception ex)
             {
                 Main.AddLog(ex.ToString());
-                Main.StatusUpdate("ERROR OCCURED DURING PROCESSING", 1);
+                Main.StatusUpdate("Genneric error occured during processing", 1);
             }
             processingActive = false;
 
@@ -349,8 +352,11 @@ namespace WFInfo
                     if (secondProximity[i] < firstProximity[i])
                     {
                         JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
-                        string plat = job["plat"].ToObject<string>();
                         string ducats = job["ducats"].ToObject<string>();
+                        if (int.Parse(ducats) == 0) {
+                            continue;
+                        }
+                        string plat = job["plat"].ToObject<string>();
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(secondName);
                         string partsOwned = Main.dataBase.PartsOwned(secondName);
