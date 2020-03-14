@@ -60,7 +60,7 @@
             </Viewbox>
             <Label MouseLeftButtonDown="ClickCreateDebug" Content="Create debug zip" Margin="188,-1,0,0" Width="146" FontWeight="Regular" Style="{StaticResource Label_Button}"/>
             <Viewbox Margin="0,3,158,5" HorizontalAlignment="Right" >
-                <CheckBox x:Name="clipboardCheckbox" Content="Clipboard" ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="AutoClicked" Checked="clipboardCheckbox_Checked"/>
+                <CheckBox x:Name="clipboardCheckbox" Content="Clipboard" ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Checked="clipboardCheckbox_Checked"/>
             </Viewbox>
 
 
