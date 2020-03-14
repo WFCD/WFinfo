@@ -221,6 +221,7 @@ namespace WFInfo
                     int overWid = (int)(width / (4.1 * dpiScaling));
                     int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScaling);
                     int partNumber = 0;
+                    bool hideRewardInfo = false;
                     for (int i = 0; i < firstChecks.Length; i++)
                     {
                         string part = firstChecks[i];
@@ -230,7 +231,7 @@ namespace WFInfo
                             JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
                             string ducats = job["ducats"].ToObject<string>();
                             if(int.Parse(ducats) == 0) {
-                                continue;
+                                hideRewardInfo = true;
                             }
                             string plat = job["plat"].ToObject<string>();
                             string volume = job["volume"].ToObject<string>();
@@ -248,12 +249,13 @@ namespace WFInfo
                             {
                                 if (Settings.isOverlaySelected)
                                 {
-                                    Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
-                                    Main.overlays[partNumber].Resize(overWid);
-                                    Main.overlays[partNumber].Display((int)((startX + width / 4 * i) / dpiScaling), startY);
+                                        Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                        Main.overlays[partNumber].Resize(overWid);
+                                        Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
+                                    
                                 } else
                                 {
-                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
+                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber, true, hideRewardInfo);
                                 }
                                 if (Settings.clipboard)
                                 {
@@ -261,6 +263,7 @@ namespace WFInfo
                                 }
                             });
                             partNumber++;
+                            hideRewardInfo = false;
                         }
                     }
                     var end = watch.ElapsedMilliseconds;
@@ -340,7 +343,7 @@ namespace WFInfo
                 Main.StatusUpdate("Verification of items failed", 2);
                 return;
             }
-
+            bool hideRewardInfo = false;
             int partNumber = 0;
             for (int i = 0; i < firstChecks.Length; i++)
             {
@@ -354,7 +357,7 @@ namespace WFInfo
                         JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
                         string ducats = job["ducats"].ToObject<string>();
                         if (int.Parse(ducats) == 0) {
-                            continue;
+                            hideRewardInfo = true;
                         }
                         string plat = job["plat"].ToObject<string>();
                         string volume = job["volume"].ToObject<string>();
@@ -365,14 +368,15 @@ namespace WFInfo
                         {
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
                             } else
                             {
-                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false);
+                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
                             }
                         });
 
                     }
+                    hideRewardInfo = false;
                     partNumber++;
                 }
             }
@@ -539,7 +543,7 @@ namespace WFInfo
             {
                 if (Settings.isOverlaySelected)
                 {
-                    Main.overlays[1].LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
+                    Main.overlays[1].LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
                     Main.overlays[1].Resize(width);
                     Main.overlays[1].Display(xPos - width / 2, yPos - (int)Main.overlays[1].Height - 20);
                 } else

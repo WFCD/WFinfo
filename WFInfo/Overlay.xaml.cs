@@ -50,20 +50,36 @@ namespace WFInfo
             InitializeComponent();
         }
 
-        public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned)
+        public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, bool hideRewardInfo)
         {
             partText.Text = name;
-            platText.Text = plat;
-            ducatText.Text = ducats;
-            volumeText.Text = volume + " sold last 48hrs";
-            if (vaulted)
-                vaultedMargin.Visibility = Visibility.Visible;
-            else
+            if (hideRewardInfo) {
+                platText.Visibility = Visibility.Hidden;
+                ducatText.Visibility = Visibility.Hidden;
+                volumeText.Visibility = Visibility.Hidden;
                 vaultedMargin.Visibility = Visibility.Hidden;
-            if (owned.Length > 0)
-                ownedText.Text = owned + " OWNED";
-            else
+                platImage.Visibility = Visibility.Hidden;
+                ducatImage.Visibility = Visibility.Hidden;
                 ownedText.Text = "";
+            } else {
+                platText.Visibility = Visibility.Visible;
+                ducatText.Visibility = Visibility.Visible;
+                volumeText.Visibility = Visibility.Visible;
+                vaultedMargin.Visibility = Visibility.Visible;
+                platImage.Visibility = Visibility.Visible;
+                ducatImage.Visibility = Visibility.Visible;
+                platText.Text = plat;
+                ducatText.Text = ducats;
+                volumeText.Text = volume + " sold last 48hrs";
+                if (vaulted)
+                    vaultedMargin.Visibility = Visibility.Visible;
+                else
+                    vaultedMargin.Visibility = Visibility.Hidden;
+                if (owned.Length > 0)
+                    ownedText.Text = owned + " OWNED";
+                else
+                    ownedText.Text = "";
+            }
         }
 
         public void Resize(int wid)
