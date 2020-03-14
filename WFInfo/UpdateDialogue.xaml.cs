@@ -17,7 +17,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for errorDialogue.xaml
     /// </summary>
-    public partial class UpdateDialogue : System.Windows.Window
+    public partial class UpdateDialogue : Window
     {
         UpdateInfoEventArgs updateInfo;
         readonly WebClient WebClient;

@@ -68,7 +68,6 @@ namespace WFInfo
 															Color.FromArgb(232, 227, 227),  	//EQUINOX		
 															Color.FromArgb(200, 169, 237) };    //DARK_LOTUS	
 
-
         public static WindowStyle currentStyle;
         public enum WindowStyle
         {
@@ -136,6 +135,9 @@ namespace WFInfo
         public const int pixelFissureWidth = 377;
         public const int pixelFissureHeight = 37;
         public const int pixelFissureXDisplay = 238; // Removed 50 pixels to assist with 2 player theme detection
+
+
+
         public const int pixelFissureYDisplay = 47;
 
         public const int SCALING_LIMIT = 100;
@@ -152,7 +154,6 @@ namespace WFInfo
         private static int[] firstProximity = { -1, -1, -1, -1 };
         private static int[] secondProximity = { -1, -1, -1, -1 };
         private static string timestamp;
-        private static bool failure;
 
         private static string clipboard;
 
@@ -177,10 +178,8 @@ namespace WFInfo
             processingActive = true;
             Main.StatusUpdate("Processing...", 0);
             Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
-           
             try
             {
-                failure = false;
                 DateTime time = DateTime.UtcNow;
                 timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
 
@@ -209,24 +208,9 @@ namespace WFInfo
                 for (int i = 0; i < parts.Count; i++)
                 {
                     int tempI = i;
-                    tasks[i] = Task.Factory.StartNew(() => {
-                        try
-                        {
-                            firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]);
-                        }
-                        catch (Exception ex)
-                        {
-                            Main.AddLog("FAILED PARSING " + tempI + " PART");
-                            Main.AddLog(ex.ToString());
-                            Main.StatusUpdate("Failed Parsing items", 0);
-                            new ErrorDialogue(DateTime.Now, 0);
-                            failure = true;
-                        }
-                    });
+                    tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]); });
                 }
                 Task.WaitAll(tasks);
-                if(failure)
-                    return;
 
                 if (firstChecks.Length > 0)
                 {
@@ -315,7 +299,6 @@ namespace WFInfo
             {
                 Main.AddLog(ex.ToString());
                 Main.StatusUpdate("ERROR OCCURED DURING PROCESSING", 1);
-                new ErrorDialogue(DateTime.Now, 30);
             }
             processingActive = false;
 
@@ -351,6 +334,7 @@ namespace WFInfo
             {
                 //Whelp, we fucked bois
                 Main.AddLog("Second check didn't find the same amount of part names");
+                Main.StatusUpdate("Verification of items failed", 2);
                 return;
             }
 
@@ -388,6 +372,13 @@ namespace WFInfo
             }
         }
 
+        /// <summary>
+        /// Processes the theme, parse image to detect the theme in the image. Parse null to detect the theme from the screen.
+        /// closeestThresh is used for ???
+        /// </summary>
+        /// <param name="closestThresh"></param>
+        /// <param name="image"></param>
+        /// <returns></returns>
         public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
             int profileX = (int)(pixelProfileXDisplay * screenScaling * uiScaling);
@@ -509,6 +500,50 @@ namespace WFInfo
             return minTheme;
         }
 
+        /// <summary>
+        /// Processes the image the user cropped in the selection
+        /// </summary>
+        /// <param name="snapItImage"></param>
+        internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot, int xPos, int yPos)
+        {
+            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
+            WFtheme theme = GetThemeWeighted(out _, fullShot);
+            snapItImage.Save(Main.appPath + @"\Debug\SnapItImage " + timestamp + ".png");
+            Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme);
+            snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+
+            string name = GetTextFromImage(snapItImageFiltered, firstEngine);
+            if(name.Length > 42) { // if the snap it text is larger than what a single item could possibly be
+                Main.AddLog("Snapit string too large, likely multiple items scanned");
+                Main.StatusUpdate("Unable to process string, too many charactres", 2);
+                return;
+            }
+            name = Main.dataBase.GetPartName(name, out firstProximity[0]);
+            JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
+            string plat = job["plat"].ToObject<string>();
+            string ducats = job["ducats"].ToObject<string>();
+            string volume = job["volume"].ToObject<string>();
+            bool vaulted = Main.dataBase.IsPartVaulted(name);
+            string partsOwned = Main.dataBase.PartsOwned(name);
+
+
+            int width = (int)((pixleRewardWidth * screenScaling * uiScaling + 10) / (4 * dpiScaling));
+
+            Main.RunOnUIThread(() =>
+            {
+                if (Settings.isOverlaySelected)
+                {
+                    Main.overlays[1].LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
+                    Main.overlays[1].Resize(width);
+                    Main.overlays[1].Display(xPos - width / 2, yPos - (int)Main.overlays[1].Height - 20);
+                } else
+                {
+                    Main.window.loadTextData(name, plat, ducats, volume, vaulted, partsOwned, 0);
+                }
+            });
+
+            Main.snapItOverlayWindow.tempImage.Dispose();
+        }
 
         private static bool ColorThreshold(Color test, Color thresh, int threshold = 10)
         {
@@ -572,6 +607,8 @@ namespace WFInfo
 
         private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active)
         {
+            if (image.Height > SCALING_LIMIT)
+                return image;
             partialScreenshotExpanded = new Bitmap(image.Width * SCALING_LIMIT / image.Height, SCALING_LIMIT);
             partialScreenshotExpanded.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
@@ -598,7 +635,6 @@ namespace WFInfo
                         filtered.SetPixel(x, y, Color.White);
                 }
             }
-
             return filtered;
         }
 
@@ -843,27 +879,22 @@ namespace WFInfo
             int height = window.Height * (int)dpiScaling;
 
             Bitmap image = new Bitmap(width, height);
+            Size FullscreenSize = new Size(image.Width, image.Height);
             using (Graphics graphics = Graphics.FromImage(image))
-                graphics.CopyFromScreen(window.Left, window.Top, 0, 0, image.Size, CopyPixelOperation.SourceCopy);
+                graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
 
             return image;
         }
 
-        //public static Boolean verifyFocus() { // Returns True if warframe is in focuse, False if not
-        //	_ = Win32.GetWindowThreadProcessId(Win32.GetForegroundWindow(), out uint processID);
-        //	try {
-        //		if (processID == Warframe.Id || Settings.debug) { return true; } else {
-        //			Main.AddLog("Warframe is not focused");
-        //			Main.StatusUpdate("Warframe is out of focus", 2);
-        //			return false;
-        //		}
-        //	}
-        //	catch (Exception ex) {
-        //		Console.WriteLine(Warframe.ToString());
-        //		Console.WriteLine(ex.ToString());
-        //		return false;
-        //	}
-        //}
+        internal static void SnapScreenshot()
+        {
+            Bitmap fullScreen = CaptureScreenshot();
+            Main.snapItOverlayWindow.Populate(fullScreen);
+            Main.snapItOverlayWindow.Show();
+            Main.snapItOverlayWindow.Topmost = true;
+            Main.snapItOverlayWindow.Focusable = true;
+            Main.snapItOverlayWindow.Focus();
+        }
 
         public static bool VerifyWarframe()
         {

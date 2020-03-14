@@ -13,7 +13,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : System.Windows.Window
+    public partial class MainWindow : Window
     {
         readonly Main main; //subscriber
         public static MainWindow INSTANCE;
@@ -21,6 +21,12 @@ namespace WFInfo
 
         public MainWindow()
         {
+            string thisprocessname = Process.GetCurrentProcess().ProcessName;
+            if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1) {
+                Main.AddLog("Duplicate process found");
+                Close();
+            }
+
             INSTANCE = this;
             main = new Main();
 
@@ -96,13 +102,6 @@ namespace WFInfo
 
                 Settings.Save();
 
-                string thisprocessname = Process.GetCurrentProcess().ProcessName;
-                if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
-                {
-                    Main.AddLog("Duplicate process found");
-                    Close();
-                }
-
                 LowLevelListener.KeyEvent += main.OnKeyAction;
                 LowLevelListener.MouseEvent += main.OnMouseAction;
                 listener.Hook();
@@ -166,6 +165,7 @@ namespace WFInfo
 
         public void Exit(object sender, RoutedEventArgs e)
         {
+            notifyIcon.Dispose();
             Main.relicWindow.Close();
             Main.equipmentWindow.Close();
             Main.settingsWindow.Close();
