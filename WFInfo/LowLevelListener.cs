@@ -7,7 +7,7 @@ namespace WFInfo
 {
     public delegate void KeyboardAction();
 
-    class LowLevelListener
+    class LowLevelListener : IDisposable
     {
         private const int WH_MOUSE_LL = 14;
         private const int WH_KEYBOARD_LL = 13;
@@ -51,16 +51,25 @@ namespace WFInfo
         {
         }
 
+        private bool hooked = false;
         public void Hook()
         {
-            _hookIDKeyboard = SetHookKB(_procKeyboard);
-            _hookIDMouse = SetHookM(_procMouse);
+            if (!hooked)
+            {
+                _hookIDKeyboard = SetHookKB(_procKeyboard);
+                _hookIDMouse = SetHookM(_procMouse);
+                hooked = true;
+            }
         }
 
         public void UnHook()
         {
-            UnhookWindowsHookEx(_hookIDKeyboard);
-            UnhookWindowsHookEx(_hookIDMouse);
+            if (hooked)
+            {
+                UnhookWindowsHookEx(_hookIDKeyboard);
+                UnhookWindowsHookEx(_hookIDMouse);
+                hooked = false;
+            }
         }
 
         private static IntPtr SetHookKB(LowLevelKeyboardProc proc)
@@ -160,6 +169,11 @@ namespace WFInfo
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        public void Dispose()
+        {
+            UnHook();
+        }
     }
 
 }
