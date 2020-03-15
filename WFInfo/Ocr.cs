@@ -534,7 +534,7 @@ namespace WFInfo
                 {
                     Main.overlays[1].LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
                     Main.overlays[1].Resize(width);
-                    Main.overlays[1].Display(xPos - (avrageSnapitCenter.X / 2), yPos + avrageSnapitCenter.Y - (int)Main.overlays[1].Height - 20);
+                    Main.overlays[1].Display(xPos + avrageSnapitCenter.X - width/2, yPos + avrageSnapitCenter.Y - (int)Main.overlays[1].Height - 20);
                 } else
                 {
                     Main.window.loadTextData(name, plat, ducats, volume, vaulted, partsOwned, 0);
