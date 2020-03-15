@@ -120,9 +120,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="CustomEntrypoint.cs" />
-    <Compile Include="RewardWindow.xaml.cs">
-      <DependentUpon>RewardWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="SnapItOverlay.xaml.cs">
       <DependentUpon>SnapItOverlay.xaml</DependentUpon>
     </Compile>
@@ -157,10 +154,9 @@
     </Compile>
     <Compile Include="Sheets.cs" />
     <Compile Include="Win32.cs" />
-    <Page Include="RewardWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
+    <Compile Include="RewardWindow.xaml.cs">
+      <DependentUpon>RewardWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="SnapItOverlay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -223,6 +219,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Templates\TreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RewardWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

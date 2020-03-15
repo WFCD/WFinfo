@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -18,13 +18,21 @@ namespace WFInfo
         readonly Main main; //subscriber
         public static MainWindow INSTANCE;
         public static WelcomeDialogue hai;
+        public static LowLevelListener listener;
 
         public MainWindow()
         {
+            string thisprocessname = Process.GetCurrentProcess().ProcessName;
+            if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
+            {
+                Main.AddLog("Duplicate process found");
+                Close();
+            }
+
             INSTANCE = this;
             main = new Main();
 
-            LowLevelListener listener = new LowLevelListener(); //publisher
+            listener = new LowLevelListener(); //publisher
             try
             {
                 if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"))
@@ -52,12 +60,14 @@ namespace WFInfo
                 try
                 {
                     Settings.ActivationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
-                } catch
+                }
+                catch
                 {
                     try
                     {
                         Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton), Settings.settingsObj.GetValue("ActivationKey").ToString());
-                    } catch
+                    }
+                    catch
                     {
                         Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
                         Settings.settingsObj["ActivationKey"] = "Snapshot";
@@ -96,13 +106,6 @@ namespace WFInfo
 
                 Settings.Save();
 
-                string thisprocessname = Process.GetCurrentProcess().ProcessName;
-                if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
-                {
-                    Main.AddLog("Duplicate process found");
-                    Close();
-                }
-
                 LowLevelListener.KeyEvent += main.OnKeyAction;
                 LowLevelListener.MouseEvent += main.OnMouseAction;
                 listener.Hook();
@@ -135,10 +138,10 @@ namespace WFInfo
 
         public void OnContentRendered(object sender, EventArgs e)
         {
-            if(hai != null)
+            if (hai != null)
             {
                 hai.Left = Left + Width + 30;
-                hai.Top = Top + Height / 2 - hai.Height/2;
+                hai.Top = Top + Height / 2 - hai.Height / 2;
                 hai.Show();
             }
         }
@@ -166,9 +169,7 @@ namespace WFInfo
 
         public void Exit(object sender, RoutedEventArgs e)
         {
-            Main.relicWindow.Close();
-            Main.equipmentWindow.Close();
-            Main.settingsWindow.Close();
+            notifyIcon.Dispose();
             Application.Current.Shutdown();
         }
 

@@ -28,7 +28,7 @@ namespace WFInfo
             updateInfo = args;
 
             string version = args.CurrentVersion.ToString();
-            if(!args.IsUpdateAvailable || (Settings.settingsObj.TryGetValue("ignored", out JToken val) && val.ToString() == version))
+            if (!args.IsUpdateAvailable || (Settings.settingsObj.TryGetValue("ignored", out JToken val) && val.ToString() == version))
                 return;
             version = version.Substring(0, version.LastIndexOf("."));
 

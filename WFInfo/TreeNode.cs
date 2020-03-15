@@ -39,7 +39,7 @@ namespace WFInfo
         }
     }
 
-    public class SimpleCommand : System.Windows.Input.ICommand
+    public class SimpleCommand : ICommand
     {
         public SimpleCommand(Action action)
         {
@@ -53,7 +53,11 @@ namespace WFInfo
             return (Action != null);
         }
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged
+        { // This will never be used, this is just to ignore the warning prompt in VS
+            add { }    // doesn't matter
+            remove { } // doesn't matter
+        }
 
         public void Execute(object parameter)
         {
@@ -431,7 +435,7 @@ namespace WFInfo
             List<TreeNode> filterList = additionalFilter ? ChildrenFiltered : Children;
             if (done)
             {
-                if(ChildrenFiltered.Count > 0)
+                if (ChildrenFiltered.Count > 0)
                     ChildrenFiltered = filterList;
                 else
                     ForceVisibility = true;
@@ -444,7 +448,7 @@ namespace WFInfo
                 if (node.FilterSearchText(searchText, removeLeaves, additionalFilter, matchedTextCopy))
                     temp.Add(node);
 
-            if(temp.Count == Children.Count)
+            if (temp.Count == Children.Count)
                 foreach (TreeNode node in filterList)
                     node.ForceVisibility = false;
 
