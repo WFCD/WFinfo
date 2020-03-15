@@ -1,0 +1,70 @@
+<Window x:Class="WFInfo.InitialDialogue"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WFInfo"
+        mc:Ignorable="d"
+        Title="WFInfo Installation" Height="90" Width="300" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+    <Window.Resources>
+        <Style TargetType="{x:Type FrameworkElement}" x:Key="baseStyle">
+            <Setter Property="TextElement.Foreground" Value="#FFB1D0D9"/>
+            <Setter Property="TextElement.FontFamily" Value="{StaticResource Roboto}"/>
+        </Style>
+        <Style TargetType="CheckBox" BasedOn="{StaticResource baseStyle}"/>
+        <Style TargetType="RadioButton" BasedOn="{StaticResource baseStyle}"/>
+        <Style TargetType="Label" BasedOn="{StaticResource baseStyle}"/>
+        <Style TargetType="TextBox" BasedOn="{StaticResource baseStyle}"/>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource baseStyle}"/>
+        <Style TargetType="ToolTip" BasedOn="{StaticResource baseStyle}">
+            <Setter Property="Background" Value="#FF0F0F0F" />
+        </Style>
+    </Window.Resources>
+    <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
+
+        <Rectangle Stroke="#FF707070"/>
+        <Rectangle HorizontalAlignment="Left" Height="26" Stroke="#FF646464" VerticalAlignment="Top" Width="300" Fill="#FF0F0F0F"/>
+        <Label x:Name="errorText" Content="Installing Required Files" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Margin="0,22,0,0" Width="298" FontSize="18"/>
+        <TextBlock Margin="0,51,0,0" TextWrapping="Wrap" Text="Only happens with initial setup and major updates&#x0a;This will take a moment or two..." TextAlignment="Center"/>
+        <TextBlock Text="WFInfo" Margin="34,4,0,0" HorizontalAlignment="Left" FontSize="16" FontFamily="/WFInfo;component/Resources/Roboto/#Roboto Black" FontWeight="Bold"/>
+        <Image Margin="2,0,0,0" Source="Resources/WFLogo.png" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="23" >
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform Y="0.25"/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+        <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" Margin="271,0,0,64">
+            <Label.Style>
+                <Style  TargetType="Label">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="FontSize" Value="16"/>
+                    <Setter Property="Foreground" Value="#FFB1D0D9"/>
+                    <Setter Property="FontFamily" Value="/WFInfo;component/Resources/Roboto/#Roboto"/>
+                    <Setter Property="BorderBrush" Value="#FF646464"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="Control.FontWeight" Value="Bold"/>
+                    <Setter Property="Control.Padding" Value="0"/>
+                    <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="Control.VerticalContentAlignment" Value="Center"/>
+                    <Setter Property="Panel.ZIndex" Value="500"/>
+
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Label.IsMouseOver" Value="True"/>
+                                <Condition Property="Label.IsEnabled" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Label.BorderBrush" Value="#FF7EB4EA"/>
+                            <Setter Property="Panel.ZIndex" Value="1000"/>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
+        <TextBlock x:Name="Progress" Visibility="Visible" Text="0% (0/0)" Margin="0,5,34,0" FontSize="13" FontFamily="/WFInfo;component/Resources/Roboto/#Roboto" FontWeight="Bold" HorizontalAlignment="Right"/>
+    </Grid>
+</Window>

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -13,17 +13,25 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : System.Windows.Window
+    public partial class MainWindow : Window
     {
         readonly Main main; //subscriber
         public static MainWindow INSTANCE;
+        public static WelcomeDialogue hai;
+        public static LowLevelListener listener;
 
         public MainWindow()
         {
+            string thisprocessname = Process.GetCurrentProcess().ProcessName;
+            if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1) {
+                Main.AddLog("Duplicate process found");
+                Close();
+            }
+
             INSTANCE = this;
             main = new Main();
 
-            LowLevelListener listener = new LowLevelListener(); //publisher
+            listener = new LowLevelListener(); //publisher
             try
             {
                 if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"))
@@ -34,14 +42,7 @@ namespace WFInfo
                 else
                 {
                     Settings.settingsObj = new JObject();
-                    var message = "Welcome to WFInfo! Here's a quick guid on how to get started." + Environment.NewLine +
-                        "First go into settings (cog icon) and verrify the following settings:" + Environment.NewLine +
-                        "🞄Overlay will overlay on warframe if you're not using fullscreen." + Environment.NewLine +
-                        "🞄Window will make display it elsewhere, usefull for a extra monitor" + Environment.NewLine +
-                        "🞄Set your hotkey to your prefered key by default it's printscreen. " + Environment.NewLine +
-                        "🞄Then set your UI scaling, by default this is 100%." +
-                        "Change this if you changed it in game.";
-                    MessageBoxResult messageBoxResult = MessageBox.Show(message, "Introduction", MessageBoxButton.OK);
+                    hai = new WelcomeDialogue();
                 }
                 if (!Settings.settingsObj.TryGetValue("Display", out _))
                     Settings.settingsObj["Display"] = "Overlay";
@@ -55,7 +56,21 @@ namespace WFInfo
 
                 if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
                     Settings.settingsObj["ActivationKey"] = "Snapshot";
-                Settings.activationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                try
+                {
+                    Settings.ActivationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                } catch
+                {
+                    try
+                    {
+                        Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                    } catch
+                    {
+                        Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
+                        Settings.settingsObj["ActivationKey"] = "Snapshot";
+                        Settings.ActivationKey = Key.Snapshot;
+                    }
+                }
 
                 if (!Settings.settingsObj.TryGetValue("Debug", out _))
                     Settings.settingsObj["Debug"] = false;
@@ -92,14 +107,8 @@ namespace WFInfo
 
                 Settings.Save();
 
-                string thisprocessname = Process.GetCurrentProcess().ProcessName;
-                if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
-                {
-                    Main.AddLog("Duplicate process found");
-                    Close();
-                }
-
-                LowLevelListener.KeyAction += main.OnKeyAction;
+                LowLevelListener.KeyEvent += main.OnKeyAction;
+                LowLevelListener.MouseEvent += main.OnMouseAction;
                 listener.Hook();
                 InitializeComponent();
                 Version.Content = "v" + Main.BuildVersion;
@@ -128,6 +137,16 @@ namespace WFInfo
             }
         }
 
+        public void OnContentRendered(object sender, EventArgs e)
+        {
+            if(hai != null)
+            {
+                hai.Left = Left + Width + 30;
+                hai.Top = Top + Height / 2 - hai.Height/2;
+                hai.Show();
+            }
+        }
+
         public void ChangeStatus(string status, int serverity)
         {
             Console.WriteLine("Status message: " + status);
@@ -149,11 +168,9 @@ namespace WFInfo
             }
         }
 
-        private void Exit(object sender, RoutedEventArgs e)
+        public void Exit(object sender, RoutedEventArgs e)
         {
-            Main.relicWindow.Close();
-            Main.equipmentWindow.Close();
-            Main.settingsWindow.Close();
+            notifyIcon.Dispose();
             Application.Current.Shutdown();
         }
 
@@ -194,7 +211,7 @@ namespace WFInfo
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
             Market_Data.Content = "Loading...";
-            Main.StatusUpdate("Market data force reloading", 0);
+            Main.StatusUpdate("Forcing Market Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
         }
 
@@ -203,7 +220,7 @@ namespace WFInfo
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
             Drop_Data.Content = "Loading...";
-            Main.StatusUpdate("Drop data force reloading", 0);
+            Main.StatusUpdate("Forcing Prime Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
         }
 

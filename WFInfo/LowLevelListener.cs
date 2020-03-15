@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
+using System.Windows.Input;
 
 namespace WFInfo
 {
     public delegate void KeyboardAction();
 
-    class LowLevelListener
+    public class LowLevelListener : IDisposable
     {
         private const int WH_MOUSE_LL = 14;
         private const int WH_KEYBOARD_LL = 13;
@@ -21,6 +21,8 @@ namespace WFInfo
         {
             WM_LBUTTONDOWN = 0x0201,
             WM_LBUTTONUP = 0x0202,
+            WM_MBUTTONDOWN = 0x0207,
+            WM_MBUTTONUP = 0x0208,
             WM_MOUSEMOVE = 0x0200,
             WM_MOUSEWHEEL = 0x020A,
             WM_RBUTTONDOWN = 0x0204,
@@ -49,16 +51,25 @@ namespace WFInfo
         {
         }
 
+        private bool hooked = false;
         public void Hook()
         {
-            _hookIDKeyboard = SetHookKB(_procKeyboard);
-            _hookIDMouse = SetHookM(_procMouse);
+            if (!hooked)
+            {
+                _hookIDKeyboard = SetHookKB(_procKeyboard);
+                _hookIDMouse = SetHookM(_procMouse);
+                hooked = true;
+            }
         }
 
         public void UnHook()
         {
-            UnhookWindowsHookEx(_hookIDKeyboard);
-            UnhookWindowsHookEx(_hookIDMouse);
+            if (hooked)
+            {
+                UnhookWindowsHookEx(_hookIDKeyboard);
+                UnhookWindowsHookEx(_hookIDMouse);
+                hooked = false;
+            }
         }
 
         private static IntPtr SetHookKB(LowLevelKeyboardProc proc)
@@ -79,21 +90,29 @@ namespace WFInfo
             }
         }
 
-        public delegate void keyActionHandler(Keys key);
-        public static event keyActionHandler KeyAction;
+        public delegate void keyActionHandler(Key key);
+        public static event keyActionHandler KeyEvent;
+
+        public delegate void mouseActionHandler(MouseButton key);
+        public static event mouseActionHandler MouseEvent;
         private static IntPtr HookCallbackKB(int nCode, IntPtr wParam, IntPtr lParam) //handels keyboard input
         {
             if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
             {
                 int vkCode = Marshal.ReadInt32(lParam);
-                OnKeyAction((Keys)vkCode);
+                OnKeyAction(KeyInterop.KeyFromVirtualKey(vkCode));
             }
             return CallNextHookEx(_hookIDKeyboard, nCode, wParam, lParam);
         }
 
-        protected static void OnKeyAction(Keys key)
+        protected static void OnKeyAction(Key key)
         {
-            KeyAction?.Invoke(key);
+            KeyEvent?.Invoke(key);
+        }
+
+        protected static void OnMouseAction(MouseButton key)
+        {
+            MouseEvent?.Invoke(key);
         }
 
         private static IntPtr HookCallbackM(int nCode, IntPtr wParam, IntPtr lParam) //handels mouse input
@@ -106,19 +125,22 @@ namespace WFInfo
                     case mouseMessages.WM_MOUSEMOVE:
                         break;
                     case mouseMessages.WM_LBUTTONDOWN:
-                        OnKeyAction(Keys.LButton);
+                        OnMouseAction(MouseButton.Left);
                         break;
                     case mouseMessages.WM_RBUTTONDOWN:
-                        OnKeyAction(Keys.RButton);
+                        OnMouseAction(MouseButton.Right);
+                        break;
+                    case mouseMessages.WM_MBUTTONDOWN:
+                        OnMouseAction(MouseButton.Middle);
                         break;
                     case mouseMessages.WM_MOUSEWHEEL:
                         //Should this stay implemented?
                         break;
                     case mouseMessages.WM_XBUTTONDOWN: //https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-xbuttondown
                         if (hookStruct.pt.y == 1)
-                            OnKeyAction(Keys.XButton1);
+                            OnMouseAction(MouseButton.XButton1);
                         else
-                            OnKeyAction(Keys.XButton2);
+                            OnMouseAction(MouseButton.XButton2);
                         break;
                     default:
                         break;
@@ -147,6 +169,11 @@ namespace WFInfo
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        public void Dispose()
+        {
+            UnHook();
+        }
     }
 
 }

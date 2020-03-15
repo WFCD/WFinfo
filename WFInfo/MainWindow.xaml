@@ -7,7 +7,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="WFInfo.MainWindow"
         mc:Ignorable="d"
-        Title="WFInfo" Height="130" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged">
+        Title="WFInfo" Height="130" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
@@ -40,7 +40,7 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <TextBlock Text="WFInfo" Margin="7,0,0,7" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="16" FontFamily="{StaticResource Roboto_Black}" Height="15" FontWeight="Bold" Width="51" Grid.Column="1"/>
+        <TextBlock Text="WFInfo" Margin="7,0,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="16" FontFamily="{StaticResource Roboto_Black}" Height="22" FontWeight="Bold" Width="51" Grid.Column="1"/>
         <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="60,3,0,2" FontSize="11" FontWeight="Bold" Width="182" Height="21" Grid.Column="1"/>
         <Label x:Name="minimise" MouseLeftButtonDown="Minimise" Content="_" Grid.Column="1" Margin="216,0,-1,0" Style="{StaticResource Label_Button}" Padding="0,0,0,3"/>
         <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" Grid.Column="2" Style="{StaticResource Label_Button}"/>

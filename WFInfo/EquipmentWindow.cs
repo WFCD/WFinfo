@@ -18,7 +18,7 @@ namespace WFInfo
     /// <summary>
     /// Interaction logic for RelicsWindow.xaml
     /// </summary>
-    public partial class EquipmentWindow : System.Windows.Window
+    public partial class EquipmentWindow : Window
     {
         private List<string> types = new List<string>() { "Warframes", "Primary", "Secondary", "Melee", "Archwing", "Companion" };
         private Dictionary<string, TreeNode> primeTypes;
@@ -93,12 +93,18 @@ namespace WFInfo
                             partNode.SetPrimeEqmt(plat, primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
                         }
                         else
-                            Console.WriteLine(primePart.Key + " has no marketValues?");
+                        {
+                            Main.AddLog("COULDN'T FIND MARKET VALUES FOR: " + primePart.Key);
+                            continue;
+                        }
 
                         primeNode.AddChild(partNode);
                     }
-                    primeNode.GetSetInfo();
-                    type.AddChild(primeNode);
+                    if(primeNode.Children.Count() > 0)
+                    {
+                        primeNode.GetSetInfo();
+                        type.AddChild(primeNode);
+                    }
                 }
             }
 
