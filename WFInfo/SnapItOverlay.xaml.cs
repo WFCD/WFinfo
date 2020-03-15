@@ -78,9 +78,8 @@ namespace WFInfo
                 Main.StatusUpdate("Please slecet a larger area to scan", 2);
                 return;
             }
-            int posX = topLeft.X - (int)(rectangle.Width / 2); // removed DPI scaling as it was already pixle accurate.
             Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * OCR.dpiScaling), (int)(topLeft.Y * OCR.dpiScaling), (int)(rectangle.Width * OCR.dpiScaling), (int)(rectangle.Height * OCR.dpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
-            Task.Factory.StartNew(() => OCR.ProcessSnapIt(cutout,tempImage, posX, topLeft.Y));
+            Task.Factory.StartNew(() => OCR.ProcessSnapIt(cutout,tempImage, topLeft.X, topLeft.Y));
 
             closeOverlay();
         }
