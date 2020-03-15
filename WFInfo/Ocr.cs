@@ -512,9 +512,8 @@ namespace WFInfo
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, true);
             snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
 
-            int padding = (int)(5 * screenScaling * snapItImageFiltered.Width / snapItImage.Width);
 
-            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, padding);
+            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
 
             foreach (var part in foundParts)
             {
@@ -527,21 +526,20 @@ namespace WFInfo
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
 
-
                 int width = (int)((pixleRewardWidth * screenScaling * uiScaling + 10) / (4 * dpiScaling));
 
                 Main.RunOnUIThread(() =>
                 {
-                    Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
-                    itemOverlay.Resize(width);
-                    itemOverlay.Display(part.bounding.X + width / 2, part.bounding.Y - (int)itemOverlay.Height - 20);
+                    //Overlay itemOverlay = new Overlay();
+                    //itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
+                    //itemOverlay.Resize(width);
+                    //itemOverlay.Display(part.bounding.X + width / 2, part.bounding.Y - (int)itemOverlay.Height - 20);
                 });
             }
             Main.snapItOverlayWindow.tempImage.Dispose();
         }
 
-        private static List<InventoryItem> FindAllParts(Bitmap filteredImage, int padding)
+        private static List<InventoryItem> FindAllParts(Bitmap filteredImage)
         {
             List<InventoryItem> foundItems = new List<InventoryItem>();
             using (var page = firstEngine.Process(filteredImage, PageSegMode.Auto))
@@ -560,7 +558,7 @@ namespace WFInfo
                             currentWord = RE.Replace(currentWord, "").Trim();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
-                                var paddedBounds = new Rectangle(bounds.X - padding, bounds.Y - padding, bounds.Width + padding * 2, bounds.Height + padding * 2);
+                                var paddedBounds = new Rectangle(bounds.X - bounds.Height / 2, bounds.Y - bounds.Height / 2, bounds.Width + bounds.Height, bounds.Height + bounds.Height);
                                 using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
                                     g.DrawRectangle(new Pen(Brushes.Red), paddedBounds);
@@ -595,6 +593,7 @@ namespace WFInfo
                     while (iterator.Next(PageIteratorLevel.Word));
                 }
             }
+            Console.WriteLine("Output");
             filteredImage.Save(Main.appPath + @"\Debug\testimg " + timestamp + ".png");
             return foundItems;
         }
