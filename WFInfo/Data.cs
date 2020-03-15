@@ -328,19 +328,19 @@ namespace WFInfo
             return false;
         }
 
-      /*private JToken AttemptFullParse(JObject database, string[] levels)
-        {
-            JObject curr = database;
-            int i = 0;
-            while (curr != null && curr.TryGetValue(levels[i], out JToken val))
-            {
-                i++;
-                if (i > levels.Length)
-                    return val;
-                curr = val as JObject;
-            }
-            return null;
-        }*/
+        /*private JToken AttemptFullParse(JObject database, string[] levels)
+          {
+              JObject curr = database;
+              int i = 0;
+              while (curr != null && curr.TryGetValue(levels[i], out JToken val))
+              {
+                  i++;
+                  if (i > levels.Length)
+                      return val;
+                  curr = val as JObject;
+              }
+              return null;
+          }*/
 
         private void RefreshMarketDucats()
         {
@@ -914,7 +914,8 @@ namespace WFInfo
                     }
                 }
                 watch.Stop();
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Main.AddLog("AUTO FAILED");
                 Main.AddLog(ex.ToString());

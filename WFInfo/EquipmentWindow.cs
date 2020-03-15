@@ -100,7 +100,7 @@ namespace WFInfo
 
                         primeNode.AddChild(partNode);
                     }
-                    if(primeNode.Children.Count() > 0)
+                    if (primeNode.Children.Count() > 0)
                     {
                         primeNode.GetSetInfo();
                         type.AddChild(primeNode);

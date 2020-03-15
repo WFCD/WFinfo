@@ -111,7 +111,8 @@ namespace WFInfo
                         if (stopDownloadTask.IsCancellationRequested)
                         {
                             dialogue.Dispatcher.Invoke(() => { dialogue.Close(); });
-                        } else
+                        }
+                        else
                         {
                             using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
                             {
@@ -179,7 +180,8 @@ namespace WFInfo
                 if (Directory.Exists("tessdata") && File.Exists(tessdata_local))
                 {
                     File.Copy(tessdata_local, app_data_traineddata);
-                } else
+                }
+                else
                 {
                     try
                     {

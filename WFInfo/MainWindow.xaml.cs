@@ -23,7 +23,8 @@ namespace WFInfo
         public MainWindow()
         {
             string thisprocessname = Process.GetCurrentProcess().ProcessName;
-            if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1) {
+            if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
+            {
                 Main.AddLog("Duplicate process found");
                 Close();
             }
@@ -59,12 +60,14 @@ namespace WFInfo
                 try
                 {
                     Settings.ActivationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
-                } catch
+                }
+                catch
                 {
                     try
                     {
                         Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton), Settings.settingsObj.GetValue("ActivationKey").ToString());
-                    } catch
+                    }
+                    catch
                     {
                         Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
                         Settings.settingsObj["ActivationKey"] = "Snapshot";
@@ -135,10 +138,10 @@ namespace WFInfo
 
         public void OnContentRendered(object sender, EventArgs e)
         {
-            if(hai != null)
+            if (hai != null)
             {
                 hai.Left = Left + Width + 30;
-                hai.Top = Top + Height / 2 - hai.Height/2;
+                hai.Top = Top + Height / 2 - hai.Height / 2;
                 hai.Show();
             }
         }
