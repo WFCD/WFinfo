@@ -236,8 +236,7 @@ namespace WFInfo
                             if (i == firstChecks.Length - 1)
                             {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + Settings.ClipboardTemplate;
-                            }
-                            else
+                            } else
                             {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -  ";
                             }
@@ -248,8 +247,7 @@ namespace WFInfo
                                     Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
                                     Main.overlays[partNumber].Resize(overWid);
                                     Main.overlays[partNumber].Display((int)((startX + width / 4 * i) / dpiScaling), startY);
-                                }
-                                else
+                                } else
                                 {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
                                 }
@@ -361,8 +359,7 @@ namespace WFInfo
                             if (Settings.isOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned);
-                            }
-                            else
+                            } else
                             {
                                 Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false);
                             }
@@ -508,13 +505,16 @@ namespace WFInfo
         /// <param name="snapItImage"></param>
         internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot)
         {
+
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
             WFtheme theme = GetThemeWeighted(out _, fullShot);
             snapItImage.Save(Main.appPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, true);
             snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
 
-            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
+            int padding = (int)(5 * screenScaling * snapItImageFiltered.Width / snapItImage.Width);
+
+            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, padding);
 
             foreach (var part in foundParts)
             {
@@ -541,10 +541,9 @@ namespace WFInfo
             Main.snapItOverlayWindow.tempImage.Dispose();
         }
 
-        private static List<InventoryItem> FindAllParts(Bitmap filteredImage)
+        private static List<InventoryItem> FindAllParts(Bitmap filteredImage, int padding)
         {
             List<InventoryItem> foundItems = new List<InventoryItem>();
-            List<InventoryItem> result = new List<InventoryItem>();
             using (var page = firstEngine.Process(filteredImage, PageSegMode.Auto))
             {
                 using (var iterator = page.GetIterator())
@@ -561,37 +560,34 @@ namespace WFInfo
                             currentWord = RE.Replace(currentWord, "").Trim();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
-                                int padding = (int)(5 * screenScaling);
-                                var paddedBounds = new Rectangle(bounds.X - padding, bounds.Y - padding, bounds.Width + padding * 2, bounds.Height + padding*2);
-                                Console.WriteLine("new padded from: " + currentWord + paddedBounds.ToString());
-                                if (foundItems.Count == 0 || !foundItems.Contains(new InventoryItem(currentWord, bounds))) {
-                                    foundItems.Add(new InventoryItem(currentWord, bounds));
-                                }
-
-                                for (int i = 0; i < foundItems.Count; i++)
+                                var paddedBounds = new Rectangle(bounds.X - padding, bounds.Y - padding, bounds.Width + padding * 2, bounds.Height + padding * 2);
+                                using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
-                                    if (foundItems[i].bounding.IntersectsWith(paddedBounds)) {
-                                        Rectangle intersectingBounds = new Rectangle(
-                                        foundItems[i].bounding.X < paddedBounds.X ? foundItems[i].bounding.X : paddedBounds.X,
-                                        foundItems[i].bounding.Y < paddedBounds.Y ? foundItems[i].bounding.Y : paddedBounds.Y,
-                                        foundItems[i].bounding.Width > paddedBounds.Width ? foundItems[i].bounding.Width : paddedBounds.Width,
-                                        foundItems[i].bounding.Height > paddedBounds.Height ? foundItems[i].bounding.Height : paddedBounds.Height);
-                                        InventoryItem newItem = new InventoryItem(foundItems[i].name + currentWord, intersectingBounds);
-                                        Console.WriteLine("New intersecting bounds from: " + currentWord + intersectingBounds.ToString());
-                                        result = foundItems.ToList();
-                                        result.Remove(foundItems[i]);
-                                        result.Add(newItem);
-                                        var tmpimg = filteredImage;
-                                        using (Graphics g = Graphics.FromImage(tmpimg)) {
-                                            g.DrawRectangle(new Pen(Brushes.Red), paddedBounds);
-                                            g.DrawRectangle(new Pen(Brushes.Pink), bounds);
-                                            g.DrawRectangle(new Pen(Brushes.Orange), intersectingBounds);
-                                        }
-                                        tmpimg.Save(@"F:/test/testimg.png");
-                                    }
-
+                                    g.DrawRectangle(new Pen(Brushes.Red), paddedBounds);
+                                    g.DrawRectangle(new Pen(Brushes.Pink), bounds);
                                 }
 
+                                int i = foundItems.Count - 1;
+
+                                for (; i >= 0; i--)
+                                    if (foundItems[i].bounding.IntersectsWith(paddedBounds))
+                                        break;
+
+                                if (i == -1)
+                                    foundItems.Add(new InventoryItem(currentWord, paddedBounds));
+                                else
+                                {
+                                    int left = Math.Min(foundItems[i].bounding.Left, paddedBounds.Left);
+                                    int top = Math.Min(foundItems[i].bounding.Top, paddedBounds.Top);
+                                    int right = Math.Max(foundItems[i].bounding.Right, paddedBounds.Right);
+                                    int bot = Math.Max(foundItems[i].bounding.Bottom, paddedBounds.Bottom);
+
+                                    Rectangle intersectingBounds = new Rectangle(left, top, right - left, bot - top);
+
+                                    InventoryItem newItem = new InventoryItem(foundItems[i].name + " " + currentWord, intersectingBounds);
+                                    foundItems.RemoveAt(i);
+                                    foundItems.Add(newItem);
+                                }
 
                             }
                         }
@@ -599,7 +595,8 @@ namespace WFInfo
                     while (iterator.Next(PageIteratorLevel.Word));
                 }
             }
-            return result;
+            filteredImage.Save(Main.appPath + @"\Debug\testimg " + timestamp + ".png");
+            return foundItems;
         }
 
 
@@ -676,8 +673,7 @@ namespace WFInfo
                 }
 
                 filtered = new Bitmap(partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
-            }
-            else
+            } else
             {
                 partialScreenshotExpanded = image;
                 filtered = image;
@@ -731,8 +727,7 @@ namespace WFInfo
                     {
                         filtered.SetPixel(x, y, Color.Black);
                         count++;
-                    }
-                    else
+                    } else
                         filtered.SetPixel(x, y, Color.White);
                 }
 
@@ -1023,8 +1018,7 @@ namespace WFInfo
                     Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString());
                     RefreshScaling();
                     return;
-                }
-                else
+                } else
                 {
                     Main.AddLog("Failed to get window bounds");
                     Main.StatusUpdate("Failed to get window bounds", 1);
@@ -1036,8 +1030,7 @@ namespace WFInfo
             { // if the window is in the VOID delete current process and re-set window to nothing
                 Warframe = null;
                 window = Rectangle.Empty;
-            }
-            else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
+            } else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
             { // checks if old window size is the right size if not change it
                 window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
                                                                                                                          // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
@@ -1053,15 +1046,13 @@ namespace WFInfo
                     // Borderless, don't do anything
                     currentStyle = WindowStyle.BORDERLESS;
                     Main.AddLog("Borderless detected (0x" + styles.ToString("X8") + ")");
-                }
-                else if ((styles & WS_BORDER) != 0)
+                } else if ((styles & WS_BORDER) != 0)
                 {
                     // Windowed, adjust for thicc border
                     window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
                     Main.AddLog("Windowed detected (0x" + styles.ToString("X8") + "), adjusting window to: " + window.ToString());
                     currentStyle = WindowStyle.WINDOWED;
-                }
-                else
+                } else
                 {
                     // Assume Fullscreen, don't do anything
                     Main.AddLog("Fullscreen detected (0x" + styles.ToString("X8") + ")");
