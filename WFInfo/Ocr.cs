@@ -136,8 +136,6 @@ namespace WFInfo
         public const int pixelFissureHeight = 37;
         public const int pixelFissureXDisplay = 238; // Removed 50 pixels to assist with 2 player theme detection
 
-
-
         public const int pixelFissureYDisplay = 47;
 
         public const int SCALING_LIMIT = 100;
@@ -148,6 +146,7 @@ namespace WFInfo
         //private static Bitmap[] partScreenshots;
         private static Bitmap partialScreenshotExpanded;
 
+        private static Point avrageSnapitCenter;
         private static WFtheme activeTheme;
         private static string[] firstChecks;
         private static List<string> secondChecks;
@@ -509,7 +508,7 @@ namespace WFInfo
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
             WFtheme theme = GetThemeWeighted(out _, fullShot);
             snapItImage.Save(Main.appPath + @"\Debug\SnapItImage " + timestamp + ".png");
-            Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme);
+            Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, true);
             snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
 
             string name = GetTextFromImage(snapItImageFiltered, firstEngine);
@@ -535,7 +534,7 @@ namespace WFInfo
                 {
                     Main.overlays[1].LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
                     Main.overlays[1].Resize(width);
-                    Main.overlays[1].Display(xPos - width / 2, yPos - (int)Main.overlays[1].Height - 20);
+                    Main.overlays[1].Display(xPos + avrageSnapitCenter.X - width/2, yPos + avrageSnapitCenter.Y - (int)Main.overlays[1].Height - 20);
                 } else
                 {
                     Main.window.loadTextData(name, plat, ducats, volume, vaulted, partsOwned, 0);
@@ -605,35 +604,51 @@ namespace WFInfo
             }
         }
 
-        private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active)
+        private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active, bool fromSnapit = false)
         {
-            if (image.Height > SCALING_LIMIT)
-                return image;
-            partialScreenshotExpanded = new Bitmap(image.Width * SCALING_LIMIT / image.Height, SCALING_LIMIT);
-            partialScreenshotExpanded.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            using (Graphics graphics = Graphics.FromImage(partialScreenshotExpanded))
+            Bitmap filtered;
+            if (image.Height <= SCALING_LIMIT)
             {
-                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                partialScreenshotExpanded = new Bitmap(image.Width * SCALING_LIMIT / image.Height, SCALING_LIMIT);
+                partialScreenshotExpanded.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-                graphics.DrawImage(image, 0, 0, partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
-            }
-
-            Bitmap filtered = new Bitmap(partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
-
-            Color clr;
-            for (int x = 0; x < filtered.Width; x++)
-            {
-                for (int y = 0; y < filtered.Height; y++)
+                using (Graphics graphics = Graphics.FromImage(partialScreenshotExpanded))
                 {
+                    graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+                    graphics.DrawImage(image, 0, 0, partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
+                }
+
+                filtered = new Bitmap(partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
+            }
+            else
+            {
+                partialScreenshotExpanded = image;
+                filtered = image;
+            }
+            List<Point> partPixels = new List<Point>();
+            Color clr;
+            for (int x = 0; x < filtered.Width; x++) {
+                for (int y = 0; y < filtered.Height; y++) {
                     clr = partialScreenshotExpanded.GetPixel(x, y);
-                    if (ThemeThresholdFilter(clr, active))
+                    if (ThemeThresholdFilter(clr, active)) {
                         filtered.SetPixel(x, y, Color.Black);
-                    else
+                        if (fromSnapit)
+                            partPixels.Add(new Point(x, y));
+                    } else
                         filtered.SetPixel(x, y, Color.White);
                 }
+            }
+            if (fromSnapit) {
+                int avrageY = 0;
+                int avrageX = 0;
+                foreach (Point blackPixel in partPixels) {
+                    avrageX += blackPixel.X;
+                    avrageY += blackPixel.Y;
+                }
+                 avrageSnapitCenter = new Point(avrageX /= partPixels.Count, avrageY /= partPixels.Count);
             }
             return filtered;
         }
@@ -660,7 +675,6 @@ namespace WFInfo
             double weight = 0;
             double totalEven = 0;
             double totalOdd = 0;
-            int mid = lineHeight * 3 / 2;
 
             Bitmap filtered = new Bitmap(partialScreenshot.Width, partialScreenshot.Height);
             for (int x = 0; x < filtered.Width; x++)
