@@ -954,6 +954,8 @@ namespace WFInfo
         {
             Main.snapItOverlayWindow.Populate(CaptureScreenshot());
             Main.snapItOverlayWindow.Show();
+            Main.snapItOverlayWindow.Top = 0;
+            Main.snapItOverlayWindow.WindowState = System.Windows.WindowState.Maximized;
             Main.snapItOverlayWindow.Topmost = true;
             Main.snapItOverlayWindow.Focusable = true;
             Main.snapItOverlayWindow.Focus();
@@ -1011,7 +1013,7 @@ namespace WFInfo
                 if (image != null)
                     Main.AddLog("DETECTED LOADED IMAGE BOUNDS: " + window.ToString());
                 else
-                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString());
+                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + Screen.PrimaryScreen.DeviceName);
 
                 RefreshScaling();
                 return;
@@ -1025,7 +1027,7 @@ namespace WFInfo
                     int height = Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
-                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString());
+                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + Screen.PrimaryScreen.DeviceName);
                     RefreshScaling();
                     return;
                 }

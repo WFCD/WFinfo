@@ -20,10 +20,15 @@ namespace WFInfo
         private System.Drawing.Point topLeft;
         public SnapItOverlay()
         {
+            WindowStartupLocation = WindowStartupLocation.Manual;
+
+            Left = 0;
+            Top = 0;
             InitializeComponent();
             MouseDown += new MouseButtonEventHandler(canvas_MouseDown);
             MouseUp += new MouseButtonEventHandler(canvas_MouseUp);
             MouseMove += new MouseEventHandler(canvas_MouseMove);
+            
         }
 
         public void Populate(Bitmap screenshot)
