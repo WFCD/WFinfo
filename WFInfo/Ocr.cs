@@ -506,7 +506,7 @@ namespace WFInfo
         /// Processes the image the user cropped in the selection
         /// </summary>
         /// <param name="snapItImage"></param>
-        internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot)
+        internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot, Point snapItOrigin)
         {
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
@@ -520,7 +520,6 @@ namespace WFInfo
 
             foreach (var part in foundParts)
             {
-
                 string name = Main.dataBase.GetPartName(part.name, out firstProximity[0]);
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
                 string plat = job["plat"].ToObject<string>();
@@ -529,19 +528,27 @@ namespace WFInfo
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
 
-                int width = (int)((pixleRewardWidth * screenScaling * uiScaling + 10) / (4 * dpiScaling));
-
+                int width = (int)(part.bounding.Width * screenScaling);
+                if (width < 120) {
+                    if (width < 50)
+                        continue;
+                    width = 120;
+                }
                 Main.RunOnUIThread(() =>
                 {
-                    //Overlay itemOverlay = new Overlay();
-                    //itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
-                    //itemOverlay.Resize(width);
-                    //itemOverlay.Display(part.bounding.X + width / 2, part.bounding.Y - (int)itemOverlay.Height - 20);
+                    Overlay itemOverlay = new Overlay();
+                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
+                    itemOverlay.Resize(width);
+                    itemOverlay.Display(snapItOrigin.X + (part.bounding.X - width / 8), (int)(snapItOrigin.Y + part.bounding.Y - itemOverlay.Height));
                 });
             }
             Main.snapItOverlayWindow.tempImage.Dispose();
         }
-
+        /// <summary>
+        /// Filters out any group of words and addes them all into a single InventoryItem, containing the found words as well as the bounds within they reside.
+        /// </summary>
+        /// <param name="filteredImage"></param>
+        /// <returns>List of found items</returns>
         private static List<InventoryItem> FindAllParts(Bitmap filteredImage)
         {
             List<InventoryItem> foundItems = new List<InventoryItem>();
@@ -597,7 +604,7 @@ namespace WFInfo
                 }
             }
             Console.WriteLine("Output");
-            filteredImage.Save(Main.appPath + @"\Debug\testimg " + timestamp + ".png");
+            filteredImage.Save(Main.appPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
             return foundItems;
         }
 
