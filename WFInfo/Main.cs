@@ -141,7 +141,7 @@ namespace WFInfo
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                } else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) {
+                } else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control || (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) {
                     AddLog("Starting snap it");
                     StatusUpdate("Single item pricecheck", 0);
                     OCR.SnapScreenshot();
