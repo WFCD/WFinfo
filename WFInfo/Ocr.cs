@@ -223,6 +223,7 @@ namespace WFInfo
                     int overWid = (int)(width / (4.1 * dpiScaling));
                     int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScalingVal);
                     int partNumber = 0;
+                    bool hideRewardInfo = false;
                     for (int i = 0; i < firstChecks.Length; i++)
                     {
                         string part = firstChecks[i];
@@ -230,8 +231,11 @@ namespace WFInfo
                         {
                             string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
                             JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
-                            string plat = job["plat"].ToObject<string>();
                             string ducats = job["ducats"].ToObject<string>();
+                            if(int.Parse(ducats) == 0) {
+                                hideRewardInfo = true;
+                            }
+                            string plat = job["plat"].ToObject<string>();
                             string volume = job["volume"].ToObject<string>();
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
@@ -247,12 +251,13 @@ namespace WFInfo
                             {
                                 if (Settings.isOverlaySelected)
                                 {
-                                    Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
-                                    Main.overlays[partNumber].Resize(overWid);
-                                    Main.overlays[partNumber].Display((int)((startX + width / 4 * i) / dpiScaling), startY);
+                                        Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                        Main.overlays[partNumber].Resize(overWid);
+                                        Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
+                                    
                                 } else
                                 {
-                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
+                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber, true, hideRewardInfo);
                                 }
                                 if (Settings.clipboard)
                                 {
@@ -260,6 +265,7 @@ namespace WFInfo
                                 }
                             });
                             partNumber++;
+                            hideRewardInfo = false;
                         }
                     }
                     var end = watch.ElapsedMilliseconds;
@@ -295,7 +301,7 @@ namespace WFInfo
             catch (Exception ex)
             {
                 Main.AddLog(ex.ToString());
-                Main.StatusUpdate("ERROR OCCURED DURING PROCESSING", 1);
+                Main.StatusUpdate("Genneric error occured during processing", 1);
             }
 
             if (bigScreenshot != null)
@@ -348,7 +354,7 @@ namespace WFInfo
                 Main.StatusUpdate("Verification of items failed", 2);
                 return;
             }
-
+            bool hideRewardInfo = false;
             int partNumber = 0;
             for (int i = 0; i < firstChecks.Length; i++)
             {
@@ -360,8 +366,11 @@ namespace WFInfo
                     if (secondProximity[i] < firstProximity[i])
                     {
                         JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
-                        string plat = job["plat"].ToObject<string>();
                         string ducats = job["ducats"].ToObject<string>();
+                        if (int.Parse(ducats) == 0) {
+                            hideRewardInfo = true;
+                        }
+                        string plat = job["plat"].ToObject<string>();
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(secondName);
                         string partsOwned = Main.dataBase.PartsOwned(secondName);
@@ -370,14 +379,15 @@ namespace WFInfo
                         {
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
                             } else
                             {
-                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false);
+                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
                             }
                         });
 
                     }
+                    hideRewardInfo = false;
                     partNumber++;
                 }
             }
@@ -552,7 +562,7 @@ namespace WFInfo
             {
                 if (Settings.isOverlaySelected)
                 {
-                    Main.overlays[1].LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
+                    Main.overlays[1].LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
                     Main.overlays[1].Resize(width);
                     Main.overlays[1].Display(xPos + avrageSnapitCenter.X - width/2, yPos + avrageSnapitCenter.Y - (int)Main.overlays[1].Height - 20);
                 } else
