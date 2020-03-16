@@ -508,11 +508,13 @@ namespace WFInfo
         /// <param name="snapItImage"></param>
         internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot)
         {
+
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
             WFtheme theme = GetThemeWeighted(out _, fullShot);
             snapItImage.Save(Main.appPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, true);
             snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+
 
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
 
@@ -527,15 +529,14 @@ namespace WFInfo
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
 
-
                 int width = (int)((pixleRewardWidth * screenScaling * uiScaling + 10) / (4 * dpiScaling));
 
                 Main.RunOnUIThread(() =>
                 {
-                    Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
-                    itemOverlay.Resize(width);
-                    itemOverlay.Display(part.bounding.X + width / 2, part.bounding.Y - (int)itemOverlay.Height - 20);
+                    //Overlay itemOverlay = new Overlay();
+                    //itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
+                    //itemOverlay.Resize(width);
+                    //itemOverlay.Display(part.bounding.X + width / 2, part.bounding.Y - (int)itemOverlay.Height - 20);
                 });
             }
             Main.snapItOverlayWindow.tempImage.Dispose();
@@ -544,7 +545,6 @@ namespace WFInfo
         private static List<InventoryItem> FindAllParts(Bitmap filteredImage)
         {
             List<InventoryItem> foundItems = new List<InventoryItem>();
-            List<InventoryItem> result = new List<InventoryItem>();
             using (var page = firstEngine.Process(filteredImage, PageSegMode.Auto))
             {
                 using (var iterator = page.GetIterator())
@@ -561,37 +561,34 @@ namespace WFInfo
                             currentWord = RE.Replace(currentWord, "").Trim();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
-                                int padding = (int)(5 * screenScaling);
-                                var paddedBounds = new Rectangle(bounds.X - padding, bounds.Y - padding, bounds.Width + padding * 2, bounds.Height + padding*2);
-                                Console.WriteLine("new padded from: " + currentWord + paddedBounds.ToString());
-                                if (foundItems.Count == 0 || !foundItems.Contains(new InventoryItem(currentWord, bounds))) {
-                                    foundItems.Add(new InventoryItem(currentWord, bounds));
-                                }
-
-                                for (int i = 0; i < foundItems.Count; i++)
+                                var paddedBounds = new Rectangle(bounds.X - bounds.Height / 2, bounds.Y - bounds.Height / 2, bounds.Width + bounds.Height, bounds.Height + bounds.Height);
+                                using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
-                                    if (foundItems[i].bounding.IntersectsWith(paddedBounds)) {
-                                        Rectangle intersectingBounds = new Rectangle(
-                                        foundItems[i].bounding.X < paddedBounds.X ? foundItems[i].bounding.X : paddedBounds.X,
-                                        foundItems[i].bounding.Y < paddedBounds.Y ? foundItems[i].bounding.Y : paddedBounds.Y,
-                                        foundItems[i].bounding.Width > paddedBounds.Width ? foundItems[i].bounding.Width : paddedBounds.Width,
-                                        foundItems[i].bounding.Height > paddedBounds.Height ? foundItems[i].bounding.Height : paddedBounds.Height);
-                                        InventoryItem newItem = new InventoryItem(foundItems[i].name + currentWord, intersectingBounds);
-                                        Console.WriteLine("New intersecting bounds from: " + currentWord + intersectingBounds.ToString());
-                                        result = foundItems.ToList();
-                                        result.Remove(foundItems[i]);
-                                        result.Add(newItem);
-                                        var tmpimg = filteredImage;
-                                        using (Graphics g = Graphics.FromImage(tmpimg)) {
-                                            g.DrawRectangle(new Pen(Brushes.Red), paddedBounds);
-                                            g.DrawRectangle(new Pen(Brushes.Pink), bounds);
-                                            g.DrawRectangle(new Pen(Brushes.Orange), intersectingBounds);
-                                        }
-                                        tmpimg.Save(@"F:/test/testimg.png");
-                                    }
-
+                                    g.DrawRectangle(new Pen(Brushes.Red), paddedBounds);
+                                    g.DrawRectangle(new Pen(Brushes.Pink), bounds);
                                 }
 
+                                int i = foundItems.Count - 1;
+
+                                for (; i >= 0; i--)
+                                    if (foundItems[i].bounding.IntersectsWith(paddedBounds))
+                                        break;
+
+                                if (i == -1)
+                                    foundItems.Add(new InventoryItem(currentWord, paddedBounds));
+                                else
+                                {
+                                    int left = Math.Min(foundItems[i].bounding.Left, paddedBounds.Left);
+                                    int top = Math.Min(foundItems[i].bounding.Top, paddedBounds.Top);
+                                    int right = Math.Max(foundItems[i].bounding.Right, paddedBounds.Right);
+                                    int bot = Math.Max(foundItems[i].bounding.Bottom, paddedBounds.Bottom);
+
+                                    Rectangle intersectingBounds = new Rectangle(left, top, right - left, bot - top);
+
+                                    InventoryItem newItem = new InventoryItem(foundItems[i].name + " " + currentWord, intersectingBounds);
+                                    foundItems.RemoveAt(i);
+                                    foundItems.Add(newItem);
+                                }
 
                             }
                         }
@@ -599,7 +596,9 @@ namespace WFInfo
                     while (iterator.Next(PageIteratorLevel.Word));
                 }
             }
-            return result;
+            Console.WriteLine("Output");
+            filteredImage.Save(Main.appPath + @"\Debug\testimg " + timestamp + ".png");
+            return foundItems;
         }
 
 
@@ -676,8 +675,7 @@ namespace WFInfo
                 }
 
                 filtered = new Bitmap(partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
-            }
-            else
+            } else
             {
                 partialScreenshotExpanded = image;
                 filtered = image;
