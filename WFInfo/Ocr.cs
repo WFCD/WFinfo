@@ -531,10 +531,15 @@ namespace WFInfo
                 string partsOwned = Main.dataBase.PartsOwned(name);
 
                 int width = (int)(part.bounding.Width * screenScaling);
-                if (width < 120) {
+                if (width < 120)
+                {
                     if (width < 50)
                         continue;
                     width = 120;
+                }
+                else if (width > 160)
+                {
+                    width = 160;
                 }
                 Main.RunOnUIThread(() =>
                 {
@@ -553,8 +558,9 @@ namespace WFInfo
         /// <returns>List of found items</returns>
         private static List<InventoryItem> FindAllParts(Bitmap filteredImage)
         {
+            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
             List<InventoryItem> foundItems = new List<InventoryItem>();
-            using (var page = firstEngine.Process(filteredImage, PageSegMode.Auto))
+            using (var page = firstEngine.Process(filteredImage, PageSegMode.SparseText))
             {
                 using (var iterator = page.GetIterator())
                 {
@@ -570,13 +576,37 @@ namespace WFInfo
                             currentWord = RE.Replace(currentWord, "").Trim();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
-                                var paddedBounds = new Rectangle(bounds.X - bounds.Height / 2, bounds.Y - bounds.Height / 2, bounds.Width + bounds.Height, bounds.Height + bounds.Height);
+                                var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
+
+
+
                                 using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
-                                    g.DrawRectangle(new Pen(Brushes.Red), paddedBounds);
-                                    g.DrawRectangle(new Pen(Brushes.Pink), bounds);
-                                }
+                                    if (paddedBounds.Height > 30 * screenScaling || paddedBounds.Width > 60 * screenScaling)
+                                    { //box is invalid, fill it out
+                                        if (currentWord.Length > 3)
+                                        { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
+                                            g.DrawRectangle(new Pen(Brushes.Orange), paddedBounds);
+                                        }
+                                        else
+                                        {
+                                            g.FillRectangle(new SolidBrush(Color.FromArgb(100, 139, 0, 0)), paddedBounds);
+                                            continue;
+                                        }
+                                    }
+                                    else if (currentWord.Length < 2)
+                                    {
+                                        g.FillRectangle(new SolidBrush(Color.FromArgb(100, 255, 165, 0)), paddedBounds);
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        g.DrawRectangle(new Pen(Brushes.Pink), paddedBounds);
+                                    }
+                                    g.DrawRectangle(new Pen(Brushes.Green), bounds);
+                                    g.DrawString(currentWord, new Font("Arial", 16), new SolidBrush(Color.Pink), new Point(paddedBounds.X, paddedBounds.Y));
 
+                                }
                                 int i = foundItems.Count - 1;
 
                                 for (; i >= 0; i--)
@@ -584,7 +614,9 @@ namespace WFInfo
                                         break;
 
                                 if (i == -1)
+                                {
                                     foundItems.Add(new InventoryItem(currentWord, paddedBounds));
+                                }
                                 else
                                 {
                                     int left = Math.Min(foundItems[i].bounding.Left, paddedBounds.Left);
@@ -616,51 +648,53 @@ namespace WFInfo
             return Math.Abs(test.R - thresh.R) + Math.Abs(test.G - thresh.G) + Math.Abs(test.B - thresh.B);
         }
 
-        public static bool ThemeThresholdFilter(Color test, WFtheme theme) {
+        public static bool ThemeThresholdFilter(Color test, WFtheme theme)
+        {
             Color primary = ThemePrimary[(int)theme];
             Color secondary = ThemeSecondary[(int)theme];
 
-            switch (theme) {
+            switch (theme)
+            {
                 case WFtheme.VITRUVIAN:
-                return Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
                 case WFtheme.LOTUS:
-                return Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - primary.GetBrightness()) <= 0.1
-                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.65);
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - primary.GetBrightness()) <= 0.1
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.65);
                 case WFtheme.OROKIN:
-                return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() <= 0.42 && test.GetSaturation() >= 0.1)
-                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() <= 0.42 && test.GetSaturation() >= 0.1)
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
                 case WFtheme.STALKER:
-                return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.5)
-                || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.65)) && test.GetBrightness() >= 0.20;
+                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.5)
+                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.65)) && test.GetBrightness() >= 0.20;
                 case WFtheme.CORPUS:
-                return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetBrightness() >= 0.35 && test.GetSaturation() >= 0.45)
-                     || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.30 && test.GetSaturation() >= 0.35);
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetBrightness() >= 0.35 && test.GetSaturation() >= 0.45)
+                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.30 && test.GetSaturation() >= 0.35);
                 case WFtheme.EQUINOX:
-                return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.52;
+                    return test.GetSaturation() <= 0.2 && test.GetBrightness() >= 0.55;
                 case WFtheme.DARK_LOTUS:
-                return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.42 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.20 && test.GetSaturation() >= 0.07)
-                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
+                    return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.42 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.20 && test.GetSaturation() >= 0.07)
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
                 case WFtheme.FORTUNA:
-                return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 3) && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.20;
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 3) && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.20;
                 case WFtheme.HIGH_CONTRAST:
-                return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.25; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.25; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
                 case WFtheme.LEGACY:
-                return (test.GetBrightness() >= 0.75 && test.GetSaturation() <= 0.2)
-                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
+                    return (test.GetBrightness() >= 0.75 && test.GetSaturation() <= 0.2)
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
                 case WFtheme.NIDUS:
-                return (Math.Abs(test.GetHue() - (primary.GetHue() + 7.5)) < 10 && test.GetSaturation() >= 0.31)
-                || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetSaturation() >= 0.55);
+                    return (Math.Abs(test.GetHue() - (primary.GetHue() + 7.5)) < 10 && test.GetSaturation() >= 0.31)
+                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetSaturation() >= 0.55);
                 case WFtheme.TENNO:
-                return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.3 && test.GetBrightness() <= 0.6;
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.3 && test.GetBrightness() <= 0.6;
                 case WFtheme.BARUUK:
-                return (Math.Abs(test.GetHue() - primary.GetHue()) < 2) && test.GetSaturation() > 0.25 && test.GetBrightness() > 0.5;
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 2) && test.GetSaturation() > 0.25 && test.GetBrightness() > 0.5;
                 case WFtheme.GRINEER:
-                return (Math.Abs(test.GetHue() - primary.GetHue()) < 6 && test.GetBrightness() > 0.3)
-                || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() > 0.55);
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 6 && test.GetBrightness() > 0.3)
+                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() > 0.55);
                 default:
-                // This shouldn't be ran
-                //   Only for initial testing
-                return Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
+                    // This shouldn't be ran
+                    //   Only for initial testing
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
             }
         }
 
@@ -682,7 +716,8 @@ namespace WFInfo
                 }
 
                 filtered = new Bitmap(partialScreenshotExpanded.Width, partialScreenshotExpanded.Height);
-            } else
+            }
+            else
             {
                 partialScreenshotExpanded = image;
                 filtered = image;

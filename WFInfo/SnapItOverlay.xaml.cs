@@ -28,7 +28,7 @@ namespace WFInfo
             MouseDown += new MouseButtonEventHandler(canvas_MouseDown);
             MouseUp += new MouseButtonEventHandler(canvas_MouseUp);
             MouseMove += new MouseEventHandler(canvas_MouseMove);
-            
+
         }
 
         public void Populate(Bitmap screenshot)
