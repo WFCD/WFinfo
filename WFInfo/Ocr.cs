@@ -193,7 +193,8 @@ namespace WFInfo
                 if (Settings.autoScaling)
                 {
                     parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
-                } else
+                }
+                else
                 {
                     // Get that theme
                     activeTheme = GetThemeWeighted(out _, file);
@@ -232,7 +233,8 @@ namespace WFInfo
                             string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
                             JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
                             string ducats = job["ducats"].ToObject<string>();
-                            if(int.Parse(ducats) == 0) {
+                            if (int.Parse(ducats) == 0)
+                            {
                                 hideRewardInfo = true;
                             }
                             string plat = job["plat"].ToObject<string>();
@@ -240,11 +242,15 @@ namespace WFInfo
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
 
-                            if(double.Parse(plat) > 0) {
+                            if (double.Parse(plat) > 0)
+                            {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
-                                if (i == firstChecks.Length - 1) {
+                                if (i == firstChecks.Length - 1)
+                                {
                                     clipboard += Settings.ClipboardTemplate;
-                                } else {
+                                }
+                                else
+                                {
                                     clipboard += "-  ";
                                 }
                             }
@@ -253,11 +259,12 @@ namespace WFInfo
                             {
                                 if (Settings.isOverlaySelected)
                                 {
-                                        Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
-                                        Main.overlays[partNumber].Resize(overWid);
-                                        Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
-                                    
-                                } else
+                                    Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                    Main.overlays[partNumber].Resize(overWid);
+                                    Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
+
+                                }
+                                else
                                 {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber, true, hideRewardInfo);
                                 }
@@ -369,7 +376,8 @@ namespace WFInfo
                     {
                         JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
                         string ducats = job["ducats"].ToObject<string>();
-                        if (int.Parse(ducats) == 0) {
+                        if (int.Parse(ducats) == 0)
+                        {
                             hideRewardInfo = true;
                         }
                         string plat = job["plat"].ToObject<string>();
@@ -382,7 +390,8 @@ namespace WFInfo
                             if (Settings.isOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
-                            } else
+                            }
+                            else
                             {
                                 Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
                             }
@@ -549,7 +558,7 @@ namespace WFInfo
             long end = watch.ElapsedMilliseconds;
 
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
-            List <InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
+            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
 
             foreach (var part in foundParts)
             {
@@ -594,8 +603,12 @@ namespace WFInfo
         /// <returns>List of found items</returns>
         private static List<InventoryItem> FindAllParts(Bitmap filteredImage)
         {
-            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
+            DateTime time = DateTime.UtcNow;
+            string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
             List<InventoryItem> foundItems = new List<InventoryItem>();
+            int numberTooLarge = 0;
+            int numberTooFewCharacters = 0;
+            int numberTooLargeButEnoughCharacters = 0;
             using (var page = firstEngine.Process(filteredImage, PageSegMode.SparseText))
             {
                 using (var iterator = page.GetIterator())
@@ -623,16 +636,19 @@ namespace WFInfo
                                         if (currentWord.Length > 3)
                                         { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
                                             g.DrawRectangle(new Pen(Brushes.Orange), paddedBounds);
+                                            numberTooLargeButEnoughCharacters++;
                                         }
                                         else
                                         {
                                             g.FillRectangle(new SolidBrush(Color.FromArgb(100, 139, 0, 0)), paddedBounds);
+                                            numberTooLarge++;
                                             continue;
                                         }
                                     }
                                     else if (currentWord.Length < 2)
                                     {
                                         g.FillRectangle(new SolidBrush(Color.FromArgb(100, 255, 165, 0)), paddedBounds);
+                                        numberTooFewCharacters++;
                                         continue;
                                     }
                                     else
@@ -673,7 +689,16 @@ namespace WFInfo
                     while (iterator.Next(PageIteratorLevel.Word));
                 }
             }
-            Console.WriteLine("Output");
+
+            if (numberTooLarge > .3 * foundItems.Count || numberTooFewCharacters > .4 * foundItems.Count || numberTooLargeButEnoughCharacters > .8 * foundItems.Count)
+            {
+                //If there's a too large % of any error make a pop-up. These precentages are arbritary at the moment, a rough index.
+                Main.RunOnUIThread(() =>
+                {
+                    Main.SpawnErrorPopup(time);
+                });
+            }
+
             filteredImage.Save(Main.appPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
             return foundItems;
         }
