@@ -536,6 +536,8 @@ namespace WFInfo
         /// <param name="snapItImage"></param>
         internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot, Point snapItOrigin)
         {
+            var watch = Stopwatch.StartNew();
+            long start = watch.ElapsedMilliseconds;
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
             WFtheme theme = GetThemeWeighted(out _, fullShot);
@@ -543,8 +545,10 @@ namespace WFInfo
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, true);
             snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
 
+            long end = watch.ElapsedMilliseconds;
 
-            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
+            Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
+            List <InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
 
             foreach (var part in foundParts)
             {
@@ -572,12 +576,15 @@ namespace WFInfo
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned);
+                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
                     itemOverlay.Resize(width);
                     itemOverlay.Display(snapItOrigin.X + (part.bounding.X - width / 8), (int)(snapItOrigin.Y + part.bounding.Y - itemOverlay.Height));
                 });
             }
             Main.snapItOverlayWindow.tempImage.Dispose();
+            end = watch.ElapsedMilliseconds;
+            Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
+            watch.Stop();
         }
         /// <summary>
         /// Filters out any group of words and addes them all into a single InventoryItem, containing the found words as well as the bounds within they reside.
