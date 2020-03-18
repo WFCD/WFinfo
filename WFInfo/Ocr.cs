@@ -240,14 +240,15 @@ namespace WFInfo
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
 
-                            if (i == firstChecks.Length - 1)
-                            {
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + Settings.ClipboardTemplate;
+                            if(double.Parse(plat) > 0) {
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
+                                if (i == firstChecks.Length - 1) {
+                                    clipboard += Settings.ClipboardTemplate;
+                                } else {
+                                    clipboard += "-  ";
+                                }
                             }
-                            else
-                            {
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -  ";
-                            }
+
                             Main.RunOnUIThread(() =>
                             {
                                 if (Settings.isOverlaySelected)
