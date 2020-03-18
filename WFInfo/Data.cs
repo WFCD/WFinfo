@@ -103,39 +103,6 @@ namespace WFInfo
             return Main.VersionToInteger(Main.BuildVersion);
         }
 
-        /*
-        private void Download(string url)
-        {
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-            HttpWebResponse response = (HttpWebResponse)req.GetResponse();
-            string resUri = response.ResponseUri.AbsoluteUri;
-            Main.AddLog("Downloading to " + currentDirectory + "/WFinfo" + githubVersion + ".exe");
-            try
-            {
-                WebClient.DownloadFile(resUri, currentDirectory + "/WFInfonew.exe");
-                FileStream fs = File.Create(currentDirectory + "/update.bat");
-                byte[] info = new UTF8Encoding(true).GetBytes(
-                    "timeout 2" + Environment.NewLine + "del WFInfo.exe" + Environment.NewLine + "rename WFInfonew.exe WFInfo.exe" +
-                    Environment.NewLine + "start WFInfo.exe");
-                fs.Write(info, 0, info.Length);
-                fs.Close();
-                Process.Start(currentDirectory + "/update.bat");
-                Application.Current.Shutdown();
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog("An error occured on Data.CS download(" + url + "), " + ex.ToString());
-                Main.StatusUpdate("Couldn't download " + url + "Due to " + ex.ToString(), 1);
-            }
-        }*/
-
-        private void TestDownloadGoogleDrive()
-        {
-            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
-            SaveDatabase(debugDataPath, allFiltered);
-
-        }
-
         // Load item list from Sheets
         private void ReloadItems()
         {
@@ -246,8 +213,6 @@ namespace WFInfo
             if (nameData == null)
                 nameData = File.Exists(nameDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(nameDataPath)) : new JObject();
 
-
-
             // fill in equipmentData (NO OVERWRITE)
             // fill in nameData
             // fill in relicData
@@ -327,20 +292,6 @@ namespace WFInfo
             Main.AddLog("Prime Database is up to date");
             return false;
         }
-
-        /*private JToken AttemptFullParse(JObject database, string[] levels)
-          {
-              JObject curr = database;
-              int i = 0;
-              while (curr != null && curr.TryGetValue(levels[i], out JToken val))
-              {
-                  i++;
-                  if (i > levels.Length)
-                      return val;
-                  curr = val as JObject;
-              }
-              return null;
-          }*/
 
         private void RefreshMarketDucats()
         {
@@ -515,34 +466,6 @@ namespace WFInfo
                 new ErrorDialogue(DateTime.Now, 0);
             }
         }
-
-        // There's no current use for it now
-        //public JArray GetPlatLive(string itemUrl)
-        //{
-        //    Stopwatch stopWatch = new Stopwatch();
-        //    stopWatch.Start();
-        //    JObject stats = JsonConvert.DeserializeObject<JObject>(
-        //        WebClient.DownloadString("https://api.warframe.market/v1/items/" + itemUrl + "/orders"));
-        //    stopWatch.Stop();
-        //    Console.WriteLine("Time taken to download all listings: " + stopWatch.ElapsedMilliseconds + "ms");
-
-        //    stopWatch.Start();
-        //    JArray sellers = new JArray();
-        //    foreach (JToken listing in stats["payload"]["orders"])
-        //    {
-        //        if (listing["order_type"].ToObject<string>() == "buy" ||
-        //            listing["user"]["status"].ToObject<string>() == "offline")
-        //        {
-        //            continue;
-        //        }
-
-        //        sellers.Add(listing);
-        //    }
-        //    stopWatch.Stop();
-        //    Console.WriteLine("Time taken to process sell and online listings: " + stopWatch.ElapsedMilliseconds + "ms");
-        //    Console.WriteLine(sellers);
-        //    return sellers;
-        //}
 
         public bool IsPartVaulted(string name)
         {

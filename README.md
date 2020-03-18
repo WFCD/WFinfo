@@ -10,7 +10,7 @@ WFInfo does this by screenshotting the game window, cropping out the part text, 
 
 # Usage
 
-1. Download the [latest release](https://github.com/random-facades/WFInfo/releases)
+1. Download the [latest release](https://github.com/WFCD/WFinfo/releases/latest)
 1. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
 1. Click the Cog Icon to open Settings, and configure your hotkey, scaling, etc
 1. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)

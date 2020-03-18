@@ -87,6 +87,10 @@ namespace WFInfo
                     Settings.settingsObj["Auto"] = false;
                 Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
 
+                if (!Settings.settingsObj.TryGetValue("CuttingEdge", out _))
+                    Settings.settingsObj["CuttingEdge"] = false;
+                Settings.autoScaling = (bool)Settings.settingsObj.GetValue("CuttingEdge");
+
                 if (!Settings.settingsObj.TryGetValue("AutoDelay", out _))
                     Settings.settingsObj["AutoDelay"] = 250L;
                 Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");

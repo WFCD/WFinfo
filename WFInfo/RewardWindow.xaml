@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WFInfo"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Rewards Window" Height="207" Width="0" MinWidth="251" MaxWidth="1000" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+        Title="Rewards Window" Height="207" Width="1000" MinWidth="251" MaxWidth="1000" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
         <System:Double x:Key="fontSize">22</System:Double>
@@ -14,7 +14,7 @@
             <Setter Property="FontWeight" Value="DemiBold"/>
         </Style> -->
     </Window.Resources>
-    <Grid Background="#FF1B1B1B" x:Name="mainWindow" MouseDown="MouseDown" Margin="0,0,-749,0">
+    <Grid Background="#FF1B1B1B" x:Name="mainWindow" MouseDown="MouseDown">
         <Grid x:Name="Titlebar" Margin="0,0,0,180">
 
             <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="1000" Grid.ColumnSpan="2" Margin="0,0,0,-27"/>
@@ -22,7 +22,7 @@
             <TextBlock Text="Rewards" Margin="30,4,0,0" Background="{x:Null}" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" FontWeight="Bold" HorizontalAlignment="Left" Width="62" />
             <Image Source="Resources/WFLogo.png" Margin="1,0,0,2" HorizontalAlignment="Left" Width="24" />
 
-            <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" HorizontalAlignment="Right" Width="30" Grid.Column="1" Style="{StaticResource Label_Button}"/>
+            <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" HorizontalAlignment="Right" Width="30" Style="{StaticResource Label_Button}"/>
 
         </Grid>
         <Grid x:Name="FirstReward" HorizontalAlignment="Left" Height="180" Margin="0,27,0,0" VerticalAlignment="Top" Width="250">

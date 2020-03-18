@@ -158,6 +158,8 @@ namespace WFInfo
         #endregion
         public static void init()
         {
+            Directory.CreateDirectory(Main.appPath + @"\Debug");
+
             for (int i = 0; i < 4; i++)
             {
                 engines[i] = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
@@ -185,22 +187,23 @@ namespace WFInfo
                 var watch = Stopwatch.StartNew();
                 long start = watch.ElapsedMilliseconds;
 
-                // Look at me mom, I'm doing fancy shit
+                double uiScalingVal = uiScaling;
+                List<Bitmap> parts;
 
+                if (Settings.autoScaling)
+                {
+                    parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
+                } else
+                {
+                    // Get that theme
+                    activeTheme = GetThemeWeighted(out _, file);
 
-                // Get that theme
-                activeTheme = GetThemeWeighted(out _, file);
+                    bigScreenshot = file ?? CaptureScreenshot();
 
+                    // Get the part box and filter it
+                    parts = FilterAndSeparateParts(bigScreenshot, activeTheme);
+                }
 
-                bigScreenshot = file ?? CaptureScreenshot();
-
-                // Get the part box and filter it
-                List<Bitmap> parts = FilterAndSeparateParts(bigScreenshot, activeTheme);
-
-                Directory.CreateDirectory(Main.appPath + @"\Debug");
-
-                bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + timestamp + ".png");
-                partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + timestamp + ".png");
 
                 firstChecks = new string[parts.Count];
                 Task[] tasks = new Task[parts.Count];
@@ -213,22 +216,26 @@ namespace WFInfo
 
                 if (firstChecks.Length > 0)
                 {
-                    clipboard = String.Empty;
-                    int width = (int)(pixleRewardWidth * screenScaling * uiScaling) + 10;
+                    clipboard = string.Empty;
+                    int width = (int)(pixleRewardWidth * screenScaling * uiScalingVal) + 10;
                     int startX = center.X - width / 2 + (int)(width * 0.004);
                     if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
                     int overWid = (int)(width / (4.1 * dpiScaling));
-                    int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScaling);
+                    int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScalingVal);
                     int partNumber = 0;
+                    bool hideRewardInfo = false;
                     for (int i = 0; i < firstChecks.Length; i++)
                     {
                         string part = firstChecks[i];
-                        if (part.Length > 10)
+                        if (part.Replace(" ", "").Length > 6)
                         {
                             string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
                             JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
-                            string plat = job["plat"].ToObject<string>();
                             string ducats = job["ducats"].ToObject<string>();
+                            if(int.Parse(ducats) == 0) {
+                                hideRewardInfo = true;
+                            }
+                            string plat = job["plat"].ToObject<string>();
                             string volume = job["volume"].ToObject<string>();
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
@@ -245,13 +252,13 @@ namespace WFInfo
                             {
                                 if (Settings.isOverlaySelected)
                                 {
-                                    Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned);
-                                    Main.overlays[partNumber].Resize(overWid);
-                                    Main.overlays[partNumber].Display((int)((startX + width / 4 * i) / dpiScaling), startY);
-                                }
-                                else
+                                        Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                        Main.overlays[partNumber].Resize(overWid);
+                                        Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
+                                    
+                                } else
                                 {
-                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber);
+                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber, true, hideRewardInfo);
                                 }
                                 if (Settings.clipboard)
                                 {
@@ -259,6 +266,7 @@ namespace WFInfo
                                 }
                             });
                             partNumber++;
+                            hideRewardInfo = false;
                         }
                     }
                     var end = watch.ElapsedMilliseconds;
@@ -290,17 +298,26 @@ namespace WFInfo
                 (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
                     .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
                     .ToList().ForEach(f => f.Delete());
-
-                bigScreenshot.Dispose();
-                bigScreenshot = null;
-                partialScreenshot.Dispose();
-                partialScreenshot = null;
             }
             catch (Exception ex)
             {
                 Main.AddLog(ex.ToString());
-                Main.StatusUpdate("ERROR OCCURED DURING PROCESSING", 1);
+                Main.StatusUpdate("Genneric error occured during processing", 1);
             }
+
+            if (bigScreenshot != null)
+            {
+                bigScreenshot.Save(Main.appPath + @"\Debug\FullScreenShot " + timestamp + ".png");
+                bigScreenshot.Dispose();
+                bigScreenshot = null;
+            }
+            if (partialScreenshot != null)
+            {
+                partialScreenshot.Save(Main.appPath + @"\Debug\PartBox " + timestamp + ".png");
+                partialScreenshot.Dispose();
+                partialScreenshot = null;
+            }
+
             processingActive = false;
 
         }
@@ -338,20 +355,23 @@ namespace WFInfo
                 Main.StatusUpdate("Verification of items failed", 2);
                 return;
             }
-
+            bool hideRewardInfo = false;
             int partNumber = 0;
             for (int i = 0; i < firstChecks.Length; i++)
             {
                 string first = firstChecks[i];
-                if (first.Length > 10)
+                if (first.Replace(" ", "").Length > 6)
                 {
                     string second = secondChecks[i];
                     string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
                     if (secondProximity[i] < firstProximity[i])
                     {
                         JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
-                        string plat = job["plat"].ToObject<string>();
                         string ducats = job["ducats"].ToObject<string>();
+                        if (int.Parse(ducats) == 0) {
+                            hideRewardInfo = true;
+                        }
+                        string plat = job["plat"].ToObject<string>();
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(secondName);
                         string partsOwned = Main.dataBase.PartsOwned(secondName);
@@ -360,15 +380,15 @@ namespace WFInfo
                         {
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned);
-                            }
-                            else
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                            } else
                             {
-                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false);
+                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
                             }
                         });
 
                     }
+                    hideRewardInfo = false;
                     partNumber++;
                 }
             }
@@ -480,11 +500,17 @@ namespace WFInfo
             return closest;
         }
 
+        private static int[,,] GetThemeCache = new int[256, 256, 256];
+        private static int[,,] GetThresholdCache = new int[256, 256, 256];
         private static WFtheme GetClosestTheme(Color clr, out int threshold)
         {
-
             threshold = 999;
             WFtheme minTheme = WFtheme.CORPUS;
+            if (GetThemeCache[clr.R, clr.G, clr.B] > 0)
+            {
+                threshold = GetThresholdCache[clr.R, clr.G, clr.B];
+                return (WFtheme)(GetThemeCache[clr.R, clr.G, clr.B] - 1);
+            }
 
             foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
             {
@@ -499,6 +525,8 @@ namespace WFInfo
                     }
                 }
             }
+            GetThemeCache[clr.R, clr.G, clr.B] = (int)minTheme + 1;
+            GetThresholdCache[clr.R, clr.G, clr.B] = threshold;
             return minTheme;
         }
 
@@ -655,41 +683,40 @@ namespace WFInfo
 
             switch (theme)
             {
-                case WFtheme.VITRUVIAN:
+                case WFtheme.VITRUVIAN:     // TO CHECK
                     return Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
                 case WFtheme.LOTUS:
                     return Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - primary.GetBrightness()) <= 0.1
-                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.65);
-                case WFtheme.OROKIN:
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetBrightness() >= 0.65);
+                case WFtheme.OROKIN:        // TO CHECK
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() <= 0.42 && test.GetSaturation() >= 0.1)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
                 case WFtheme.STALKER:
-                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.5)
-                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.65)) && test.GetBrightness() >= 0.20;
+                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.55)
+                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
                 case WFtheme.CORPUS:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetBrightness() >= 0.35 && test.GetSaturation() >= 0.45)
-                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.30 && test.GetSaturation() >= 0.35);
+                    return Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.42 && test.GetSaturation() >= 0.35;
                 case WFtheme.EQUINOX:
                     return test.GetSaturation() <= 0.2 && test.GetBrightness() >= 0.55;
                 case WFtheme.DARK_LOTUS:
-                    return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.42 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.20 && test.GetSaturation() >= 0.07)
+                    return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.35 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.25 && test.GetSaturation() >= 0.05)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
                 case WFtheme.FORTUNA:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 3) && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.20;
+                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.35) || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.15)) && test.GetSaturation() >= 0.20;
                 case WFtheme.HIGH_CONTRAST:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.25; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.35; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
                 case WFtheme.LEGACY:
                     return (test.GetBrightness() >= 0.75 && test.GetSaturation() <= 0.2)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
                 case WFtheme.NIDUS:
-                    return (Math.Abs(test.GetHue() - (primary.GetHue() + 7.5)) < 10 && test.GetSaturation() >= 0.31)
+                    return (Math.Abs(test.GetHue() - (primary.GetHue() + 6)) < 8 && test.GetSaturation() >= 0.30)
                     || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetSaturation() >= 0.55);
                 case WFtheme.TENNO:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 4 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.3 && test.GetBrightness() <= 0.6;
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.38 && test.GetBrightness() <= 0.55;
                 case WFtheme.BARUUK:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 2) && test.GetSaturation() > 0.25 && test.GetBrightness() > 0.5;
                 case WFtheme.GRINEER:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 6 && test.GetBrightness() > 0.3)
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() > 0.5)
                     || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() > 0.55);
                 default:
                     // This shouldn't be ran
@@ -737,36 +764,227 @@ namespace WFInfo
             return filtered;
         }
 
-        private static List<Bitmap> FilterAndSeparateParts(Bitmap image, WFtheme active)
+        // The parts of text
+        // The top bit (upper case and dots/strings, bdfhijklt) > the juicy bit (lower case, acemnorsuvwxz) > the tails (gjpqy)
+        // we ignore the "tippy top" because it has a lot of variance, so we just look at the "bottom half of the top"
+        private static readonly int[] TextSegments = new int[] { 2, 4, 16, 21 };
+        private static List<Bitmap> ExtractPartBoxAutomatically(out double scaling, out WFtheme active, Bitmap fullScreen = null)
         {
-            int width = (int)(pixleRewardWidth * screenScaling * uiScaling);
-            int lineHeight = (int)(pixelRewardLineHeight * screenScaling * uiScaling);
-            int left = (image.Width / 2) - (width / 2);
-            int top = (image.Height / 2) - (int)(pixleRewardYDisplay * screenScaling * uiScaling) + (int)(pixleRewardHeight * screenScaling * uiScaling) - lineHeight;
+            Stopwatch watch = Stopwatch.StartNew();
+            long start = watch.ElapsedMilliseconds;
+            long beginning = start;
 
-            partialScreenshot = new Bitmap(width, lineHeight);
+            int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
 
             Color clr;
-            for (int x = 0; x < width; x++)
+            int width = fullScreen == null ? window.Width * (int)dpiScaling : fullScreen.Width;
+            int height = fullScreen == null ? window.Height * (int)dpiScaling : fullScreen.Height;
+            int mostWidth = (int)(pixleRewardWidth * screenScaling);
+            int mostLeft = (width / 2) - (mostWidth / 2);
+            // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
+            //                   (316          -        235        +       44)    *    1.1    =    137
+            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
+            int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
+            //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
+            Bitmap preFilter;
+
+            if (fullScreen != null)
+                preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
+            else
             {
-                for (int y = 0; y < lineHeight; y++)
+                preFilter = new Bitmap(mostWidth, mostBot - mostTop);
+                using (Graphics graphics = Graphics.FromImage(preFilter))
+                    graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(preFilter.Width, preFilter.Height), CopyPixelOperation.SourceCopy);
+            }
+
+            long end = watch.ElapsedMilliseconds;
+            Console.WriteLine("Grabbed images " + (end - start) + "ms");
+            start = watch.ElapsedMilliseconds;
+
+            double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            int minWidth = mostWidth / 4;
+
+            for (int y = lineHeight; y < preFilter.Height; y++)
+            {
+                double perc = (y - lineHeight) / (preFilter.Height - lineHeight);
+                int totWidth = (int)(minWidth * perc + minWidth);
+                for (int x = 0; x < totWidth; x++)
                 {
-                    clr = image.GetPixel(left + x, top + y);
-                    partialScreenshot.SetPixel(x, y, clr);
+                    int match = (int)GetClosestTheme(preFilter.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
+                    weights[match] += 1 / Math.Pow(thresh + 1, 4);
                 }
             }
 
+            double max = 0;
+            active = WFtheme.UNKNOWN;
+            for (int i = 0; i < weights.Length; i++)
+            {
+                Console.Write(weights[i].ToString("F2") + " ");
+                if (weights[i] > max)
+                {
+                    max = weights[i];
+                    active = (WFtheme)i;
+                }
+            }
+            Console.WriteLine();
+
+            Main.AddLog("CLOSEST THEME(" + max.ToString("F2") + "): " + active.ToString());
+
+            end = watch.ElapsedMilliseconds;
+            Console.WriteLine("Got theme " + (end - start) + "ms");
+            start = watch.ElapsedMilliseconds;
+
+            int[] rows = new int[preFilter.Height];
+            // 0 => 50   27 => 77   50 => 100
+
+
+            //Console.WriteLine("ROWS: 0 to " + preFilter.Height);
+            for (int y = 0; y < preFilter.Height; y++)
+            {
+                rows[y] = 0;
+                for (int x = 0; x < preFilter.Width; x++)
+                {
+                    clr = preFilter.GetPixel(x, y);
+                    if (ThemeThresholdFilter(clr, active))
+                    {
+                        rows[y]++;
+                        //postFilter.SetPixel(x, y, Color.Black);
+                    } //else
+                      //  postFilter.SetPixel(x, y, Color.White);
+                }
+                //Console.Write(rows[y] + " ");
+            }
+            //Console.WriteLine();
+
+
+            end = watch.ElapsedMilliseconds;
+            Console.WriteLine("Filtered Image " + (end - start) + "ms");
+            start = watch.ElapsedMilliseconds;
+
+            double[] percWeights = new double[51];
+            double[] topWeights = new double[51];
+            double[] midWeights = new double[51];
+            double[] botWeights = new double[51];
+
+            int topLine_100 = preFilter.Height - lineHeight;
+            int topLine_50 = lineHeight / 2;
+
+            scaling = -1;
+            double lowestWeight = 0;
+
+            for (int i = 0; i <= 50; i++)
+            {
+                int yFromTop = preFilter.Height - (i * (topLine_100 - topLine_50) / 50 + topLine_50);
+
+                int scale = (50 + i);
+                int scaleWidth = preFilter.Width * scale / 100;
+
+                int textTop = (int)(screenScaling * TextSegments[0] * scale / 100);
+                int textTopBot = (int)(screenScaling * TextSegments[1] * scale / 100);
+                int textBothBot = (int)(screenScaling * TextSegments[2] * scale / 100);
+                int textTailBot = (int)(screenScaling * TextSegments[3] * scale / 100);
+
+                int loc = textTop;
+                for (; loc <= textTopBot; loc++)
+                    topWeights[i] += Math.Abs(scaleWidth * 0.06 - rows[yFromTop + loc]);
+
+                loc++;
+                for (; loc < textBothBot; loc++)
+                {
+                    if (rows[yFromTop + loc] < scaleWidth / 15)
+                        midWeights[i] += (scaleWidth * 0.26 - rows[yFromTop + loc]) * 5;
+                    else
+                        midWeights[i] += Math.Abs(scaleWidth * 0.24 - rows[yFromTop + loc]);
+                }
+
+                loc++;
+                for (; loc < textTailBot; loc++)
+                    botWeights[i] += 10 * Math.Abs(scaleWidth * 0.007 - rows[yFromTop + loc]);
+
+                topWeights[i] /= textTopBot - textTop + 1;
+                midWeights[i] /= textBothBot - textTopBot - 2;
+                botWeights[i] /= textTailBot - textBothBot - 1;
+                percWeights[i] = topWeights[i] + midWeights[i] + botWeights[i];
+
+                if (scaling == -1 || lowestWeight > percWeights[i])
+                {
+                    scaling = scale;
+                    lowestWeight = percWeights[i];
+                }
+            }
+
+            end = watch.ElapsedMilliseconds;
+            Console.WriteLine("Got scaling " + (end - start) + "ms");
+
+            int[] topFive = new int[] { -1, -1, -1, -1, -1 };
+
+            for (int i = 0; i <= 50; i++)
+            {
+                int match = 4;
+                while (match != -1 && topFive[match] != -1 && percWeights[i] > percWeights[topFive[match]])
+                    match--;
+
+                if (match != -1)
+                {
+                    for (int move = 0; move < match; move++)
+                        topFive[move] = topFive[move + 1];
+                    topFive[match] = i;
+                }
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                //int yFromTop = preFilter.Height - (topFive[i] * (topLine_100 - topLine_50) / 50 + topLine_50);
+
+                //int scale = (50 + topFive[i]);
+
+                //int textTop = (int)(screenScaling * TextSegments[0] * scale / 100);
+                //int textTopBot = (int)(screenScaling * TextSegments[1] * scale / 100);
+                //int textBothBot = (int)(screenScaling * TextSegments[2] * scale / 100);
+                //int textTailBot = (int)(screenScaling * TextSegments[3] * scale / 100);
+
+                Main.AddLog("RANK " + (5 - i) + " SCALE: " + (topFive[i] + 50) + "%\t\t" + percWeights[topFive[i]].ToString("F2") + " -- " + topWeights[topFive[i]].ToString("F2") + ", " + midWeights[topFive[i]].ToString("F2") + ", " + botWeights[topFive[i]].ToString("F2"));
+                //Console.WriteLine("\t" + yFromTop + " - " + textTop + " - " + textTopBot + " - " + textBothBot + " - " + textTailBot);
+            }
+
+
+            //postFilter.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
+            preFilter.Save(Main.appPath + @"\Debug\FullPartArea " + timestamp + ".png");
+
+            scaling /= 100;
+            double highScaling = scaling < 1.0 ? scaling + 0.01 : scaling;
+            double lowScaling = scaling > 0.5 ? scaling - 0.01 : scaling;
+
+            int cropWidth = (int)(pixleRewardWidth * screenScaling * highScaling);
+            int cropLeft = (preFilter.Width / 2) - (cropWidth / 2);
+            int cropTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling * highScaling);
+            int cropBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * lowScaling);
+            int cropHei = cropBot - cropTop;
+            cropTop = cropTop - mostTop;
+
+            Rectangle rect = new Rectangle(cropLeft, cropTop, cropWidth, cropHei);
+            partialScreenshot = preFilter.Clone(rect, System.Drawing.Imaging.PixelFormat.DontCare);
+
+            end = watch.ElapsedMilliseconds;
+            Console.WriteLine("Finished function " + (end - beginning) + "ms");
+
+            return FilterAndSeparatePartsFromPartBox(partialScreenshot, active);
+        }
+
+        private static List<Bitmap> FilterAndSeparatePartsFromPartBox(Bitmap partBox, WFtheme active)
+        {
+            Color clr;
             double weight = 0;
             double totalEven = 0;
             double totalOdd = 0;
 
-            Bitmap filtered = new Bitmap(partialScreenshot.Width, partialScreenshot.Height);
+            Bitmap filtered = new Bitmap(partBox.Width, partBox.Height);
             for (int x = 0; x < filtered.Width; x++)
             {
                 int count = 0;
                 for (int y = 0; y < filtered.Height; y++)
                 {
-                    clr = partialScreenshot.GetPixel(x, y);
+                    clr = partBox.GetPixel(x, y);
                     if (ThemeThresholdFilter(clr, active))
                     {
                         filtered.SetPixel(x, y, Color.Black);
@@ -776,8 +994,8 @@ namespace WFInfo
                         filtered.SetPixel(x, y, Color.White);
                 }
 
-                count = Math.Min(count, lineHeight / 3);
-                double sinVal = Math.Cos(8 * x * Math.PI / width);
+                count = Math.Min(count, partBox.Height / 3);
+                double sinVal = Math.Cos(8 * x * Math.PI / partBox.Width);
                 sinVal = sinVal * sinVal * sinVal;
                 weight += sinVal * count;
 
@@ -791,7 +1009,7 @@ namespace WFInfo
             Main.AddLog("EVEN DISTRIBUTION: " + (totalEven / total * 100).ToString("F2") + "%");
             Main.AddLog("ODD DISTRIBUTION: " + (totalOdd / total * 100).ToString("F2") + "%");
 
-            int boxWidth = width / 4;
+            int boxWidth = partBox.Width / 4;
             int boxHeight = filtered.Height;
             Rectangle destRegion = new Rectangle(0, 0, boxWidth, boxHeight);
 
@@ -815,6 +1033,27 @@ namespace WFInfo
                 newBox.Save(Main.appPath + @"\Debug\PartBox(" + i + ") " + timestamp + ".png");
             }
             return ret;
+        }
+
+        private static List<Bitmap> FilterAndSeparateParts(Bitmap image, WFtheme active)
+        {
+            int width = (int)(pixleRewardWidth * screenScaling * uiScaling);
+            int lineHeight = (int)(pixelRewardLineHeight * screenScaling * uiScaling);
+            int left = (image.Width / 2) - (width / 2);
+            int top = (image.Height / 2) - (int)(pixleRewardYDisplay * screenScaling * uiScaling) + (int)(pixleRewardHeight * screenScaling * uiScaling) - lineHeight;
+
+            partialScreenshot = new Bitmap(width, lineHeight);
+
+            Color clr;
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < partialScreenshot.Height; y++)
+                {
+                    clr = image.GetPixel(left + x, top + y);
+                    partialScreenshot.SetPixel(x, y, clr);
+                }
+            }
+            return FilterAndSeparatePartsFromPartBox(partialScreenshot, active);
         }
 
         public static string GetTextFromImage(Bitmap image, TesseractEngine engine)
