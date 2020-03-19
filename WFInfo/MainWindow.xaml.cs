@@ -181,7 +181,7 @@ namespace WFInfo
 
         private void websiteClick(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://discord.gg/TAq7bqr");
+            Process.Start("https://discord.gg/N8S5zfw");
         }
 
         private void relicsClick(object sender, RoutedEventArgs e)
@@ -228,7 +228,12 @@ namespace WFInfo
         private new void MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
-                DragMove();
+                try {
+                    DragMove();
+                }
+                catch (Exception) {
+                    Main.AddLog("Error in Mouse down in mainwindow");
+                }
         }
 
         private void OnLocationChanged(object sender, EventArgs e)
