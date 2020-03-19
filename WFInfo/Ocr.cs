@@ -559,7 +559,7 @@ namespace WFInfo
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
             string csv = string.Empty;
 
-            if(!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv") && Settings.SnapitExport)
+            if(!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd")+".csv") && Settings.SnapitExport)
                 csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned," + DateTime.UtcNow.ToString("yyyy-MM-dd") + Environment.NewLine;
             
             foreach (var part in foundParts)
@@ -577,7 +577,8 @@ namespace WFInfo
                 string partsOwned = Main.dataBase.PartsOwned(name);
 
                 if (Settings.SnapitExport) {
-                    csv += name + "," + plat + "," +ducats + "," + volume + "," + vaulted.ToString() + "," + partsOwned == string.Empty ? "0" : partsOwned + ", \"\"" + Environment.NewLine;
+                    var owned = partsOwned == string.Empty ? "0" : partsOwned;
+                    csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString() + "," + owned + ", \"\"" + Environment.NewLine;
                 }
 
                 int width = (int)(part.bounding.Width * screenScaling);
