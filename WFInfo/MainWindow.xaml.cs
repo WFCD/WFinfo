@@ -107,6 +107,10 @@ namespace WFInfo
                     Settings.settingsObj["ClipboardTemplate"] = "-- by WFInfo (smart OCR with pricecheck)";
                 Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"));
 
+                if (!Settings.settingsObj.TryGetValue("SnapitExport", out _))
+                    Settings.settingsObj["SnapitExport"] = false;
+                Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"));
+
 
                 Settings.Save();
 

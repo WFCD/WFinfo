@@ -54,9 +54,9 @@ namespace WFInfo
         public static int scaling { get; internal set; }
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
+		public static bool SnapitExport { get; internal set; }
 
-
-        public Settings()
+		public Settings()
         {
             InitializeComponent();
         }

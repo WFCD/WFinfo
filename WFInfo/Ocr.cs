@@ -554,16 +554,20 @@ namespace WFInfo
             snapItImage.Save(Main.appPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, true);
             snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
-
             long end = watch.ElapsedMilliseconds;
-
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
+            string csv = string.Empty;
 
+            if(!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv") && Settings.SnapitExport)
+                csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned," + DateTime.UtcNow.ToString("yyyy-MM-dd") + Environment.NewLine;
+            
             foreach (var part in foundParts)
             {
                 if (part.name.Length < 13) // if part name is smaller than "Bo prime handle" skip current part
                     continue;
+
+
                 string name = Main.dataBase.GetPartName(part.name, out firstProximity[0]);
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
                 string plat = job["plat"].ToObject<string>();
@@ -572,17 +576,20 @@ namespace WFInfo
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
 
+                if (Settings.SnapitExport) {
+                    csv += name + "," + plat + "," +ducats + "," + volume + "," + vaulted.ToString() + "," + partsOwned == string.Empty ? "0" : partsOwned + ", \"\"" + Environment.NewLine;
+                }
+
                 int width = (int)(part.bounding.Width * screenScaling);
-                if (width < 120)
-                {
+                if (width < 120) {
                     if (width < 50)
                         continue;
                     width = 120;
-                }
-                else if (width > 160)
-                {
+                } else if (width > 160) {
                     width = 160;
                 }
+
+
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
@@ -595,6 +602,9 @@ namespace WFInfo
             end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
             watch.Stop();
+            if (Settings.SnapitExport) {
+                File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv", csv);
+            }
         }
         /// <summary>
         /// Filters out any group of words and addes them all into a single InventoryItem, containing the found words as well as the bounds within they reside.
@@ -690,8 +700,9 @@ namespace WFInfo
                 }
             }
 
-            if (numberTooLarge > .3 * foundItems.Count || numberTooFewCharacters > .4 * foundItems.Count || numberTooLargeButEnoughCharacters > .8 * foundItems.Count)
+            if (numberTooLarge > .3 * foundItems.Count || numberTooFewCharacters > .4 * foundItems.Count || numberTooLargeButEnoughCharacters > .95 * foundItems.Count)
             {
+                Main.AddLog("numberTooLarge: " + numberTooLarge + ", numberTooFewCharacters: " + numberTooFewCharacters + ", numberTooLargeButEnoughCharacters: " + numberTooLargeButEnoughCharacters + ", foundItems.Count: " + foundItems.Count);
                 //If there's a too large % of any error make a pop-up. These precentages are arbritary at the moment, a rough index.
                 Main.RunOnUIThread(() =>
                 {
