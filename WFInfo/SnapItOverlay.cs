@@ -17,22 +17,18 @@ namespace WFInfo
         public bool isEnabled;
         public Bitmap tempImage;
         private System.Windows.Point startDrag;
-        private System.Drawing.Point topLeft;
         public SnapItOverlay()
         {
-            WindowStartupLocation = WindowStartupLocation.Manual;
-
-            Left = 0;
-            Top = 0;
             InitializeComponent();
-            MouseDown += new MouseButtonEventHandler(canvas_MouseDown);
-            MouseUp += new MouseButtonEventHandler(canvas_MouseUp);
-            MouseMove += new MouseEventHandler(canvas_MouseMove);
-
+            canvas.MouseDown += new MouseButtonEventHandler(canvas_MouseDown);
+            canvas.MouseUp += new MouseButtonEventHandler(canvas_MouseUp);
+            canvas.MouseMove += new MouseEventHandler(canvas_MouseMove);
         }
 
         public void Populate(Bitmap screenshot)
         {
+            var displayImage = Win32.ImageSourceFromBitmap(screenshot);
+            Image.Source = displayImage;
             tempImage = screenshot;
             isEnabled = true;
         }
@@ -51,42 +47,26 @@ namespace WFInfo
 
         public void closeOverlay()
         {
-            rectangle.Width = 0;
-            rectangle.Height = 0;
-            rectangle.RenderTransform = new TranslateTransform(0, 0);
             Topmost = false;
+            Hide();
             isEnabled = false;
-
-            // THIS FUCKING RECTANGLE WOULDN'T GO AWAY 
-            //    AND IT WOULD STAY FOR 1 FRAME WHEN RE-OPENNING THIS WINDOW
-            //    SO I FORCED THAT FRAME TO HAPPEN BEFORE CLOSING
-            //       AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHH
-            //
-            //  fucking hate rectangles
-            Task.Factory.StartNew(async () =>
-            {
-                await Task.Delay(100);
-                Dispatcher.Invoke(Hide);
-            });
         }
 
-        private void canvas_MouseUp(object sender, MouseButtonEventArgs e)
-        {
+        private void canvas_MouseUp(object sender, MouseButtonEventArgs e) {
             //Release the mouse
             if (canvas.IsMouseCaptured)
                 canvas.ReleaseMouseCapture();
             canvas.Cursor = Cursors.Arrow;
             Main.AddLog("User drew rectangle: Starting point: " + startDrag.ToString() + " Width: " + rectangle.Width + " Height:" + rectangle.Height);
-            if (rectangle.Width < 10 || rectangle.Height < 10)
-            { // box is smaller than 10x10 and thus will never be able to have any text. Also used as a failsave to prevent the program from crashing if the user makes a 0x0 sleection
+            if (rectangle.Width < 10 || rectangle.Height < 10) { // box is smaller than 10x10 and thus will never be able to have any text. Also used as a failsave to prevent the program from crashing if the user makes a 0x0 sleection
                 Main.AddLog("User selected an area too small");
                 Main.StatusUpdate("Please slecet a larger area to scan", 2);
                 return;
             }
-            Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * OCR.dpiScaling), (int)(topLeft.Y * OCR.dpiScaling), (int)(rectangle.Width * OCR.dpiScaling), (int)(rectangle.Height * OCR.dpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
-            Task.Factory.StartNew(() => OCR.ProcessSnapIt(cutout, tempImage, topLeft));
-
-            closeOverlay();
+            tempImage = tempImage.Clone(new Rectangle((int)startDrag.X, (int)startDrag.Y, (int)rectangle.Width, (int)rectangle.Height), System.Drawing.Imaging.PixelFormat.DontCare);
+            Task.Factory.StartNew(() => OCR.ProcessSnapIt(tempImage));
+            Topmost = false;
+            Hide();
         }
 
         private void canvas_MouseMove(object sender, MouseEventArgs e)
@@ -104,7 +84,6 @@ namespace WFInfo
                     rectangle.Visibility = Visibility.Visible;
 
                 //Move the rectangle to proper place
-                topLeft = new System.Drawing.Point((int)x, (int)y);
                 rectangle.RenderTransform = new TranslateTransform(x, y);
                 //Set its size
                 rectangle.Width = Math.Abs(e.GetPosition(canvas).X - startDrag.X);

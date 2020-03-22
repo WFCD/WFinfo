@@ -837,7 +837,8 @@ namespace WFInfo
                     }
                 }
                 watch.Stop();
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Main.AddLog("AUTO FAILED");
                 Main.AddLog(ex.ToString());

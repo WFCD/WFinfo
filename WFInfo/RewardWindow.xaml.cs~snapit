@@ -14,7 +14,7 @@ namespace WFInfo
         {
             InitializeComponent();
         }
-        public void loadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, int partNumber, bool resize = true, bool hideReward = false)
+        public void loadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, int partNumber, bool resize = true)
         {
             Top = MainWindow.INSTANCE.Top + 150;
             Show();
@@ -22,21 +22,6 @@ namespace WFInfo
             {
                 case 0:
                     firstPartText.Text = name;
-                    if (hideReward)
-                    {
-                        platImage.Visibility = Visibility.Hidden;
-                        firstDucatImage.Visibility = Visibility.Hidden;
-                        firstPlatText.Text = string.Empty;
-                        firstDucatText.Text = string.Empty;
-                        firstVolumeText.Text = string.Empty;
-                        firstVaultedMargin.Visibility = Visibility.Hidden;
-                        firstOwnedText.Text = string.Empty;
-                        if (resize)
-                            Width = 251;
-                        break;
-                    }
-                    platImage.Visibility = Visibility.Visible;
-                    firstDucatImage.Visibility = Visibility.Visible;
                     firstPlatText.Text = plat;
                     firstDucatText.Text = ducats;
                     firstVolumeText.Text = volume + " sold last 48hrs";
@@ -48,20 +33,6 @@ namespace WFInfo
 
                 case 1:
                     secondPartText.Text = name;
-                    if (hideReward)
-                    {
-                        platImage1.Visibility = Visibility.Hidden;
-                        firstDucatImage1.Visibility = Visibility.Hidden;
-                        secondPlatText.Text = string.Empty;
-                        secondDucatText.Text = string.Empty;
-                        secondVolumeText.Text = string.Empty;
-                        secondVaultedMargin.Visibility = Visibility.Hidden;
-                        secondOwnedText.Text = string.Empty;
-                        if (resize)
-                            Width = 501;
-                    }
-                    platImage1.Visibility = Visibility.Visible;
-                    firstDucatImage1.Visibility = Visibility.Visible;
                     secondPlatText.Text = plat;
                     secondDucatText.Text = ducats;
                     secondVolumeText.Text = volume + " sold last 48hrs";
@@ -73,20 +44,6 @@ namespace WFInfo
 
                 case 2:
                     thirdPartText.Text = name;
-                    if (hideReward)
-                    {
-                        platImage2.Visibility = Visibility.Hidden;
-                        firstDucatImage2.Visibility = Visibility.Hidden;
-                        thirdPlatText.Text = string.Empty;
-                        thirdDucatText.Text = string.Empty;
-                        thirdVolumeText.Text = string.Empty;
-                        thirdVaultedMargin.Visibility = Visibility.Hidden;
-                        thirdOwnedText.Text = string.Empty;
-                        if (resize)
-                            Width = 751;
-                    }
-                    platImage2.Visibility = Visibility.Visible;
-                    firstDucatImage2.Visibility = Visibility.Visible;
                     thirdPlatText.Text = plat;
                     thirdDucatText.Text = ducats;
                     thirdVolumeText.Text = volume + " sold last 48hrs";
@@ -98,20 +55,6 @@ namespace WFInfo
 
                 case 3:
                     fourthPartText.Text = name;
-                    if (hideReward)
-                    {
-                        platImage3.Visibility = Visibility.Hidden;
-                        firstDucatImage3.Visibility = Visibility.Hidden;
-                        fourthPlatText.Text = string.Empty;
-                        fourthDucatText.Text = string.Empty;
-                        fourthVolumeText.Text = string.Empty;
-                        fourthVaultedMargin.Visibility = Visibility.Hidden;
-                        fourthOwnedText.Text = string.Empty;
-                        if (resize)
-                            Width = 1000;
-                    }
-                    platImage3.Visibility = Visibility.Visible;
-                    firstDucatImage3.Visibility = Visibility.Visible;
                     fourthPlatText.Text = plat;
                     fourthDucatText.Text = ducats;
                     fourthVolumeText.Text = volume + " sold last 48hrs";

@@ -110,16 +110,60 @@ namespace WFInfo
         public void OnMouseAction(MouseButton key)
         {
 
-            if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton) { //check if user pressed activation key
-                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift) {
+            if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
+            { //check if user pressed activation key
+                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
+                    using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
+                    {
+                        openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                        openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
+                        openFileDialog.FilterIndex = 2;
+                        openFileDialog.RestoreDirectory = true;
+                        openFileDialog.Multiselect = true;
+
+                        if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                        {
+                            Task.Factory.StartNew(() =>
+                            {
+                                try
+                                {
+                                    foreach (string file in openFileDialog.FileNames)
+                                    {
+                                        Console.WriteLine("Testing fullscreen file: " + file.ToString());
+
+                                        Bitmap image = new Bitmap(file);
+                                        OCR.ProcessSnapIt(image, image, new Point(0, 0));
+                                    }
+
+                                }
+                                catch (Exception e)
+                                {
+                                    AddLog(e.Message);
+                                    StatusUpdate("Failed to load image", 1);
+                                }
+                            });
+                        }
+                        else
+                        {
+                            StatusUpdate("Failed to load image", 1);
+                        }
+                    }
+                }
+                else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                {
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                } else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) {
+                }
+                else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
                     AddLog("Starting snap it");
-                    StatusUpdate("Single item pricecheck", 0);
+                    StatusUpdate("Starting snap it", 0);
                     OCR.SnapScreenshot();
-                } else if (Settings.debug || OCR.VerifyWarframe()) {
+                }
+                else if (Settings.debug || OCR.VerifyWarframe())
+                {
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
@@ -129,23 +173,65 @@ namespace WFInfo
         {
             // close the snapit overlay when *any* key is pressed down
 
-            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None) {
+            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
+            {
                 snapItOverlayWindow.closeOverlay();
                 return;
             }
 
             if (key == Settings.ActivationKey)
             { //check if user pressed activation key
-                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
+                    using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
+                    {
+                        openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                        openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
+                        openFileDialog.FilterIndex = 2;
+                        openFileDialog.RestoreDirectory = true;
+                        openFileDialog.Multiselect = true;
+
+                        if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                        {
+                            Task.Factory.StartNew(() =>
+                            {
+                                try
+                                {
+                                    foreach (string file in openFileDialog.FileNames)
+                                    {
+                                        Console.WriteLine("Testing snapit on file: " + file.ToString());
+
+                                        Bitmap image = new Bitmap(file);
+                                        OCR.ProcessSnapIt(image, image, new Point(0, 0));
+                                    }
+
+                                }
+                                catch (Exception e)
+                                {
+                                    AddLog(e.Message);
+                                    StatusUpdate("Failed to load image", 1);
+                                }
+                            });
+                        }
+                        else
+                        {
+                            StatusUpdate("Failed to load image", 1);
+                        }
+                    }
+                }
+                else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
                 {
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
-                } else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control || (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) {
+                }
+                else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control || (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
                     AddLog("Starting snap it");
                     StatusUpdate("Single item pricecheck", 0);
                     OCR.SnapScreenshot();
-                } else if (Settings.debug || OCR.VerifyWarframe())
+                }
+                else if (Settings.debug || OCR.VerifyWarframe())
                 {
                     //if (Ocr.verifyFocus()) 
                     //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
@@ -196,7 +282,8 @@ namespace WFInfo
                             StatusUpdate("Failed to load image", 1);
                         }
                     });
-                } else
+                }
+                else
                 {
                     StatusUpdate("Failed to load image", 1);
                 }

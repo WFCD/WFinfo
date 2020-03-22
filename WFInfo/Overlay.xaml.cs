@@ -53,7 +53,8 @@ namespace WFInfo
         public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, bool hideRewardInfo)
         {
             partText.Text = name;
-            if (hideRewardInfo) {
+            if (hideRewardInfo)
+            {
                 platText.Visibility = Visibility.Hidden;
                 ducatText.Visibility = Visibility.Hidden;
                 volumeText.Visibility = Visibility.Hidden;
@@ -61,7 +62,9 @@ namespace WFInfo
                 platImage.Visibility = Visibility.Hidden;
                 ducatImage.Visibility = Visibility.Hidden;
                 ownedText.Text = "";
-            } else {
+            }
+            else
+            {
                 platText.Visibility = Visibility.Visible;
                 ducatText.Visibility = Visibility.Visible;
                 volumeText.Visibility = Visibility.Visible;

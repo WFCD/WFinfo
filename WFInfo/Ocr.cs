@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,7 +17,7 @@ namespace WFInfo
     class OCR
     {
         private static string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
-
+        #region variabels and sizzle
         public enum WFtheme : int
         {
             VITRUVIAN,
@@ -146,7 +147,6 @@ namespace WFInfo
         //private static Bitmap[] partScreenshots;
         private static Bitmap partialScreenshotExpanded;
 
-        private static Point avrageSnapitCenter;
         private static WFtheme activeTheme;
         private static string[] firstChecks;
         private static List<string> secondChecks;
@@ -155,7 +155,7 @@ namespace WFInfo
         private static string timestamp;
 
         private static string clipboard;
-
+        #endregion
         public static void init()
         {
             Directory.CreateDirectory(Main.appPath + @"\Debug");
@@ -193,7 +193,8 @@ namespace WFInfo
                 if (Settings.autoScaling)
                 {
                     parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
-                } else
+                }
+                else
                 {
                     // Get that theme
                     activeTheme = GetThemeWeighted(out _, file);
@@ -232,7 +233,8 @@ namespace WFInfo
                             string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
                             JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
                             string ducats = job["ducats"].ToObject<string>();
-                            if(int.Parse(ducats) == 0) {
+                            if (int.Parse(ducats) == 0)
+                            {
                                 hideRewardInfo = true;
                             }
                             string plat = job["plat"].ToObject<string>();
@@ -240,22 +242,29 @@ namespace WFInfo
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
 
-                            if (i == firstChecks.Length - 1)
+                            if (double.Parse(plat) > 0)
                             {
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + Settings.ClipboardTemplate;
-                            } else
-                            {
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: -  ";
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
+                                if (i == firstChecks.Length - 1)
+                                {
+                                    clipboard += Settings.ClipboardTemplate;
+                                }
+                                else
+                                {
+                                    clipboard += "-  ";
+                                }
                             }
+
                             Main.RunOnUIThread(() =>
                             {
                                 if (Settings.isOverlaySelected)
                                 {
-                                        Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
-                                        Main.overlays[partNumber].Resize(overWid);
-                                        Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
-                                    
-                                } else
+                                    Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                    Main.overlays[partNumber].Resize(overWid);
+                                    Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
+
+                                }
+                                else
                                 {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber, true, hideRewardInfo);
                                 }
@@ -367,7 +376,8 @@ namespace WFInfo
                     {
                         JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
                         string ducats = job["ducats"].ToObject<string>();
-                        if (int.Parse(ducats) == 0) {
+                        if (int.Parse(ducats) == 0)
+                        {
                             hideRewardInfo = true;
                         }
                         string plat = job["plat"].ToObject<string>();
@@ -380,7 +390,8 @@ namespace WFInfo
                             if (Settings.isOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
-                            } else
+                            }
+                            else
                             {
                                 Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
                             }
@@ -533,51 +544,177 @@ namespace WFInfo
         /// Processes the image the user cropped in the selection
         /// </summary>
         /// <param name="snapItImage"></param>
-        internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot, int xPos, int yPos)
+        internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot, Point snapItOrigin)
         {
+            var watch = Stopwatch.StartNew();
+            long start = watch.ElapsedMilliseconds;
+
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
             WFtheme theme = GetThemeWeighted(out _, fullShot);
             snapItImage.Save(Main.appPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, true);
             snapItImageFiltered.Save(Main.appPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+            long end = watch.ElapsedMilliseconds;
+            Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
+            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
+            string csv = string.Empty;
 
-            string name = GetTextFromImage(snapItImageFiltered, firstEngine);
-            if(name.Length > 42) { // if the snap it text is larger than what a single item could possibly be
-                Main.AddLog("Snapit string too large, likely multiple items scanned");
-                Main.StatusUpdate("Unable to process string, too many charactres", 2);
-                return;
-            }
-            name = Main.dataBase.GetPartName(name, out firstProximity[0]);
-            JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
-            string plat = job["plat"].ToObject<string>();
-            string ducats = job["ducats"].ToObject<string>();
-            string volume = job["volume"].ToObject<string>();
-            bool vaulted = Main.dataBase.IsPartVaulted(name);
-            string partsOwned = Main.dataBase.PartsOwned(name);
-
-
-            int width = (int)((pixleRewardWidth * screenScaling * uiScaling + 10) / (4 * dpiScaling));
-
-            Main.RunOnUIThread(() =>
+            if(!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd")+".csv") && Settings.SnapitExport)
+                csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned," + DateTime.UtcNow.ToString("yyyy-MM-dd") + Environment.NewLine;
+            
+            foreach (var part in foundParts)
             {
-                if (Settings.isOverlaySelected)
-                {
-                    Main.overlays[1].LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
-                    Main.overlays[1].Resize(width);
-                    Main.overlays[1].Display(xPos + avrageSnapitCenter.X - width/2, yPos + avrageSnapitCenter.Y - (int)Main.overlays[1].Height - 20);
-                } else
-                {
-                    Main.window.loadTextData(name, plat, ducats, volume, vaulted, partsOwned, 0);
+                if (part.name.Length < 13) // if part name is smaller than "Bo prime handle" skip current part
+                    continue;
+
+
+                string name = Main.dataBase.GetPartName(part.name, out firstProximity[0]);
+                JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
+                string plat = job["plat"].ToObject<string>();
+                string ducats = job["ducats"].ToObject<string>();
+                string volume = job["volume"].ToObject<string>();
+                bool vaulted = Main.dataBase.IsPartVaulted(name);
+                string partsOwned = Main.dataBase.PartsOwned(name);
+
+                if (Settings.SnapitExport) {
+                    var owned = partsOwned == string.Empty ? "0" : partsOwned;
+                    csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString() + "," + owned + ", \"\"" + Environment.NewLine;
                 }
-            });
 
+                int width = (int)(part.bounding.Width * screenScaling);
+                if (width < 120) {
+                    if (width < 50)
+                        continue;
+                    width = 120;
+                } else if (width > 160) {
+                    width = 160;
+                }
+
+
+                Main.RunOnUIThread(() =>
+                {
+                    Overlay itemOverlay = new Overlay();
+                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
+                    itemOverlay.Resize(width);
+                    itemOverlay.Display(snapItOrigin.X + (part.bounding.X - width / 8), (int)(snapItOrigin.Y + part.bounding.Y - itemOverlay.Height));
+                });
+            }
             Main.snapItOverlayWindow.tempImage.Dispose();
+            end = watch.ElapsedMilliseconds;
+            Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
+            watch.Stop();
+            if (Settings.SnapitExport) {
+                File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv", csv);
+            }
+        }
+        /// <summary>
+        /// Filters out any group of words and addes them all into a single InventoryItem, containing the found words as well as the bounds within they reside.
+        /// </summary>
+        /// <param name="filteredImage"></param>
+        /// <returns>List of found items</returns>
+        private static List<InventoryItem> FindAllParts(Bitmap filteredImage)
+        {
+            DateTime time = DateTime.UtcNow;
+            string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
+            List<InventoryItem> foundItems = new List<InventoryItem>();
+            int numberTooLarge = 0;
+            int numberTooFewCharacters = 0;
+            int numberTooLargeButEnoughCharacters = 0;
+            using (var page = firstEngine.Process(filteredImage, PageSegMode.SparseText))
+            {
+                using (var iterator = page.GetIterator())
+                {
+
+                    iterator.Begin();
+                    do
+                    {
+                        string currentWord = iterator.GetText(PageIteratorLevel.Word);
+                        iterator.TryGetBoundingBox(PageIteratorLevel.Word, out Rect tempbounds);
+                        Rectangle bounds = new Rectangle(tempbounds.X1, tempbounds.Y1, tempbounds.Width, tempbounds.Height);
+                        if (currentWord != null)
+                        {
+                            currentWord = RE.Replace(currentWord, "").Trim();
+                            if (currentWord.Length > 0)
+                            { //word is valid start comparing to others
+                                var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
+
+
+
+                                using (Graphics g = Graphics.FromImage(filteredImage))
+                                {
+                                    if (paddedBounds.Height > 30 * screenScaling || paddedBounds.Width > 60 * screenScaling)
+                                    { //box is invalid, fill it out
+                                        if (currentWord.Length > 3)
+                                        { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
+                                            g.DrawRectangle(new Pen(Brushes.Orange), paddedBounds);
+                                            numberTooLargeButEnoughCharacters++;
+                                        }
+                                        else
+                                        {
+                                            g.FillRectangle(new SolidBrush(Color.FromArgb(100, 139, 0, 0)), paddedBounds);
+                                            numberTooLarge++;
+                                            continue;
+                                        }
+                                    }
+                                    else if (currentWord.Length < 2)
+                                    {
+                                        g.FillRectangle(new SolidBrush(Color.FromArgb(100, 255, 165, 0)), paddedBounds);
+                                        numberTooFewCharacters++;
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        g.DrawRectangle(new Pen(Brushes.Pink), paddedBounds);
+                                    }
+                                    g.DrawRectangle(new Pen(Brushes.Green), bounds);
+                                    g.DrawString(currentWord, new Font("Arial", 16), new SolidBrush(Color.Pink), new Point(paddedBounds.X, paddedBounds.Y));
+
+                                }
+                                int i = foundItems.Count - 1;
+
+                                for (; i >= 0; i--)
+                                    if (foundItems[i].bounding.IntersectsWith(paddedBounds))
+                                        break;
+
+                                if (i == -1)
+                                {
+                                    foundItems.Add(new InventoryItem(currentWord, paddedBounds));
+                                }
+                                else
+                                {
+                                    int left = Math.Min(foundItems[i].bounding.Left, paddedBounds.Left);
+                                    int top = Math.Min(foundItems[i].bounding.Top, paddedBounds.Top);
+                                    int right = Math.Max(foundItems[i].bounding.Right, paddedBounds.Right);
+                                    int bot = Math.Max(foundItems[i].bounding.Bottom, paddedBounds.Bottom);
+
+                                    Rectangle intersectingBounds = new Rectangle(left, top, right - left, bot - top);
+
+                                    InventoryItem newItem = new InventoryItem(foundItems[i].name + " " + currentWord, intersectingBounds);
+                                    foundItems.RemoveAt(i);
+                                    foundItems.Add(newItem);
+                                }
+
+                            }
+                        }
+                    }
+                    while (iterator.Next(PageIteratorLevel.Word));
+                }
+            }
+
+            if (numberTooLarge > .3 * foundItems.Count || numberTooFewCharacters > .4 * foundItems.Count || numberTooLargeButEnoughCharacters > .95 * foundItems.Count)
+            {
+                Main.AddLog("numberTooLarge: " + numberTooLarge + ", numberTooFewCharacters: " + numberTooFewCharacters + ", numberTooLargeButEnoughCharacters: " + numberTooLargeButEnoughCharacters + ", foundItems.Count: " + foundItems.Count);
+                //If there's a too large % of any error make a pop-up. These precentages are arbritary at the moment, a rough index.
+                Main.RunOnUIThread(() =>
+                {
+                    Main.SpawnErrorPopup(time);
+                });
+            }
+
+            filteredImage.Save(Main.appPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
+            return foundItems;
         }
 
-        private static bool ColorThreshold(Color test, Color thresh, int threshold = 10)
-        {
-            return (Math.Abs(test.R - thresh.R) < threshold) && (Math.Abs(test.G - thresh.G) < threshold) && (Math.Abs(test.B - thresh.B) < threshold);
-        }
 
         private static int ColorDifference(Color test, Color thresh)
         {
@@ -605,7 +742,7 @@ namespace WFInfo
                 case WFtheme.CORPUS:
                     return Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.42 && test.GetSaturation() >= 0.35;
                 case WFtheme.EQUINOX:
-                    return test.GetSaturation() <= 0.1 && test.GetBrightness() >= 0.52;
+                    return test.GetSaturation() <= 0.2 && test.GetBrightness() >= 0.55;
                 case WFtheme.DARK_LOTUS:
                     return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.35 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.25 && test.GetSaturation() >= 0.05)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
@@ -657,27 +794,17 @@ namespace WFInfo
                 partialScreenshotExpanded = image;
                 filtered = image;
             }
-            List<Point> partPixels = new List<Point>();
             Color clr;
-            for (int x = 0; x < filtered.Width; x++) {
-                for (int y = 0; y < filtered.Height; y++) {
+            for (int x = 0; x < filtered.Width; x++)
+            {
+                for (int y = 0; y < filtered.Height; y++)
+                {
                     clr = partialScreenshotExpanded.GetPixel(x, y);
-                    if (ThemeThresholdFilter(clr, active)) {
+                    if (ThemeThresholdFilter(clr, active))
                         filtered.SetPixel(x, y, Color.Black);
-                        if (fromSnapit)
-                            partPixels.Add(new Point(x, y));
-                    } else
+                    else
                         filtered.SetPixel(x, y, Color.White);
                 }
-            }
-            if (fromSnapit) {
-                int avrageY = 0;
-                int avrageX = 0;
-                foreach (Point blackPixel in partPixels) {
-                    avrageX += blackPixel.X;
-                    avrageY += blackPixel.Y;
-                }
-                 avrageSnapitCenter = new Point(avrageX /= partPixels.Count, avrageY /= partPixels.Count);
             }
             return filtered;
         }
@@ -907,7 +1034,8 @@ namespace WFInfo
                     {
                         filtered.SetPixel(x, y, Color.Black);
                         count++;
-                    } else
+                    }
+                    else
                         filtered.SetPixel(x, y, Color.White);
                 }
 
@@ -1143,9 +1271,10 @@ namespace WFInfo
 
         internal static void SnapScreenshot()
         {
-            Bitmap fullScreen = CaptureScreenshot();
-            Main.snapItOverlayWindow.Populate(fullScreen);
+            Main.snapItOverlayWindow.Populate(CaptureScreenshot());
             Main.snapItOverlayWindow.Show();
+            Main.snapItOverlayWindow.Top = 0;
+            Main.snapItOverlayWindow.WindowState = System.Windows.WindowState.Maximized;
             Main.snapItOverlayWindow.Topmost = true;
             Main.snapItOverlayWindow.Focusable = true;
             Main.snapItOverlayWindow.Focus();
@@ -1203,7 +1332,7 @@ namespace WFInfo
                 if (image != null)
                     Main.AddLog("DETECTED LOADED IMAGE BOUNDS: " + window.ToString());
                 else
-                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString());
+                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + Screen.PrimaryScreen.DeviceName);
 
                 RefreshScaling();
                 return;
@@ -1217,10 +1346,11 @@ namespace WFInfo
                     int height = Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.Width / 2, window.Height / 2);
-                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString());
+                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + Screen.PrimaryScreen.DeviceName);
                     RefreshScaling();
                     return;
-                } else
+                }
+                else
                 {
                     Main.AddLog("Failed to get window bounds");
                     Main.StatusUpdate("Failed to get window bounds", 1);
@@ -1232,7 +1362,8 @@ namespace WFInfo
             { // if the window is in the VOID delete current process and re-set window to nothing
                 Warframe = null;
                 window = Rectangle.Empty;
-            } else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
+            }
+            else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
             { // checks if old window size is the right size if not change it
                 window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
                                                                                                                          // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
@@ -1248,13 +1379,15 @@ namespace WFInfo
                     // Borderless, don't do anything
                     currentStyle = WindowStyle.BORDERLESS;
                     Main.AddLog("Borderless detected (0x" + styles.ToString("X8") + ")");
-                } else if ((styles & WS_BORDER) != 0)
+                }
+                else if ((styles & WS_BORDER) != 0)
                 {
                     // Windowed, adjust for thicc border
                     window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
                     Main.AddLog("Windowed detected (0x" + styles.ToString("X8") + "), adjusting window to: " + window.ToString());
                     currentStyle = WindowStyle.WINDOWED;
-                } else
+                }
+                else
                 {
                     // Assume Fullscreen, don't do anything
                     Main.AddLog("Fullscreen detected (0x" + styles.ToString("X8") + ")");
@@ -1264,5 +1397,30 @@ namespace WFInfo
                 RefreshScaling();
             }
         }
+    }
+
+    public struct InventoryItem
+    {
+        public InventoryItem(string itemName, Rectangle boundingbox)
+        {
+            name = itemName;
+            bounding = boundingbox;
+        }
+
+        static public T DeepCopy<T>(T obj)
+        {
+            BinaryFormatter s = new BinaryFormatter();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                s.Serialize(ms, obj);
+                ms.Position = 0;
+                T t = (T)s.Deserialize(ms);
+
+                return t;
+            }
+        }
+
+        public string name;
+        public Rectangle bounding;
     }
 }

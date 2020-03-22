@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo"
         mc:Ignorable="d"
-        Title="SnapItOverlay" BorderThickness="0" AllowsTransparency="True" BorderBrush="Transparent" Background="#10FFFFFF" WindowStyle="None" WindowState="Maximized" Height="450" Width="800">
+        Title="SnapItOverlay" BorderThickness="0" AllowsTransparency="True" BorderBrush="Transparent" Background="#10FFFFFF" WindowStyle="None" Height="1" Width="1" WindowStartupLocation="Manual">
     <Window.Resources>
         <Storyboard x:Key="MarchingAnts">
             <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" 
