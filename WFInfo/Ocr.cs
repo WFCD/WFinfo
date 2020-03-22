@@ -268,10 +268,9 @@ namespace WFInfo
                                 {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber, true, hideRewardInfo);
                                 }
-                                if (Settings.clipboard)
-                                {
+                                if (Settings.clipboard && clipboard != string.Empty)
                                     Clipboard.SetText(clipboard);
-                                }
+                                
                             });
                             partNumber++;
                             hideRewardInfo = false;
