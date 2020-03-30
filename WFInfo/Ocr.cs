@@ -700,7 +700,7 @@ namespace WFInfo
                 }
             }
 
-            if (numberTooLarge > .3 * foundItems.Count || numberTooFewCharacters > .4 * foundItems.Count || numberTooLargeButEnoughCharacters > .95 * foundItems.Count)
+            if (numberTooLarge > .3 * foundItems.Count || numberTooFewCharacters > .4 * foundItems.Count)
             {
                 Main.AddLog("numberTooLarge: " + numberTooLarge + ", numberTooFewCharacters: " + numberTooFewCharacters + ", numberTooLargeButEnoughCharacters: " + numberTooLargeButEnoughCharacters + ", foundItems.Count: " + foundItems.Count);
                 //If there's a too large % of any error make a pop-up. These precentages are arbritary at the moment, a rough index.
@@ -1251,14 +1251,18 @@ namespace WFInfo
         {
             UpdateWindow();
 
+            int width = window.Width;
+            int height = window.Height;
+
             if (window == null || window.Width == 0 || window.Height == 0)
             {
                 window = Screen.PrimaryScreen.Bounds;
                 center = new Point(window.Width / 2, window.Height / 2);
+
+                width *= (int)dpiScaling;
+                height *= (int)dpiScaling;
             }
 
-            int width = window.Width * (int)dpiScaling;
-            int height = window.Height * (int)dpiScaling;
 
             Bitmap image = new Bitmap(width, height);
             Size FullscreenSize = new Size(image.Width, image.Height);

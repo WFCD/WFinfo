@@ -228,7 +228,7 @@ namespace WFInfo
                 else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control || (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
                 {
                     AddLog("Starting snap it");
-                    StatusUpdate("Single item pricecheck", 0);
+                    StatusUpdate("Starting snap it", 0);
                     OCR.SnapScreenshot();
                 }
                 else if (Settings.debug || OCR.VerifyWarframe())
