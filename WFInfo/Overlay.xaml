@@ -12,7 +12,6 @@
     <Grid>
         <Grid.Resources>
             <Style TargetType="TextBlock" BasedOn="{StaticResource baseStyle}">
-                <Setter Property="FontWeight" Value="Medium" />
                 <Setter Property="FontFamily" Value="{StaticResource Roboto_Condensed}" />
             </Style>
         </Grid.Resources>
@@ -23,7 +22,7 @@
             <TextBlock x:Name="volumeText" Text="XX sold last 48hrs"/>
         </Viewbox>
         <Viewbox x:Name="platMargin" Margin="0,77,162,43" HorizontalAlignment="Right">
-            <TextBlock x:Name="platText" Text="Plat"/>
+            <TextBlock x:Name="platText" Text="100" FontWeight="Bold"/>
         </Viewbox>
         <Viewbox x:Name="ducatMargin" Margin="0,77,78,43" HorizontalAlignment="Right">
             <TextBlock x:Name="ducatText" Text="100"/>

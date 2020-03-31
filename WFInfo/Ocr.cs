@@ -216,6 +216,15 @@ namespace WFInfo
                 }
                 Task.WaitAll(tasks);
 
+                double bestPlat = 0;
+                int bestDucat = 0;
+                double bestRatio = 0;
+                int bestPlatItem = 0;
+                int bestDucatItem = 0;
+                int bestRatioItem = 0;
+                NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
+                IFormatProvider provider = CultureInfo.CreateSpecificCulture("en-GB");
+
                 if (firstChecks.Length > 0)
                 {
                     clipboard = string.Empty;
@@ -226,48 +235,54 @@ namespace WFInfo
                     int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScalingVal);
                     int partNumber = 0;
                     bool hideRewardInfo = false;
-                    for (int i = 0; i < firstChecks.Length; i++)
-                    {
+                    for (int i = 0; i < firstChecks.Length; i++) {
                         string part = firstChecks[i];
-                        if (part.Replace(" ", "").Length > 6)
-                        {
+                        if (part.Replace(" ", "").Length > 6) {
+
+
                             string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
                             JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
                             string ducats = job["ducats"].ToObject<string>();
-                            if (int.Parse(ducats) == 0)
-                            {
+                            if (int.Parse(ducats) == 0) {
                                 hideRewardInfo = true;
                             }
                             string plat = job["plat"].ToObject<string>();
+                            double platinum = double.Parse(plat, styles, provider);
+
+                            int duc = int.Parse(ducats);
+                            if (platinum >= bestPlat) {
+                                bestPlat = platinum; bestPlatItem = i;
+                                if (duc >= bestDucat) {
+                                    bestDucat = duc; bestDucatItem = i;
+                                }
+                                if (duc / platinum >= bestRatio) {
+                                    bestRatio = platinum / duc; bestRatioItem = i;
+                                }
+                            }
+                            if (duc > bestDucat) {
+                                bestDucat = duc; bestDucatItem = i;
+                            }
+
                             string volume = job["volume"].ToObject<string>();
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
-                            NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
-                            IFormatProvider provider = CultureInfo.CreateSpecificCulture("en-GB");
-                            if (double.Parse(plat, styles, provider) > 0)
-                            {
+
+                            if (platinum > 0) {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
-                                if (i == firstChecks.Length - 1)
-                                {
+                                if (i == firstChecks.Length - 1) {
                                     clipboard += Settings.ClipboardTemplate;
-                                }
-                                else
-                                {
+                                } else {
                                     clipboard += "-  ";
                                 }
                             }
 
-                            Main.RunOnUIThread(() =>
-                            {
-                                if (Settings.isOverlaySelected)
-                                {
+                            Main.RunOnUIThread(() => {
+                                if (Settings.isOverlaySelected) {
                                     Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
                                     Main.overlays[partNumber].Resize(overWid);
                                     Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
 
-                                }
-                                else
-                                {
+                                } else {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber, true, hideRewardInfo);
                                 }
                                 if (Settings.clipboard && clipboard != string.Empty)
@@ -281,10 +296,25 @@ namespace WFInfo
                     var end = watch.ElapsedMilliseconds;
                     Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
-                    if (partialScreenshot.Height < 70)
-                    {
+                    if (Settings.Highlight) {
+                        Main.RunOnUIThread(() => {
+                            Main.overlays[bestPlatItem].bestPlatChoice();
+                            Main.overlays[bestDucatItem].bestDucatChoice();
+                            Main.overlays[bestRatioItem].bestRatioChoice();
+                        });
+                    }
+
+                    if (partialScreenshot.Height < 70) {
                         SlowSecondProcess();
                         end = watch.ElapsedMilliseconds;
+                    }
+
+                    if (Settings.Highlight) {
+                        Main.RunOnUIThread(() => {
+                            Main.overlays[bestPlatItem].bestPlatChoice();
+                            Main.overlays[bestDucatItem].bestDucatChoice();
+                            Main.overlays[bestRatioItem].bestRatioChoice();
+                        });
                     }
                     Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
                 }
