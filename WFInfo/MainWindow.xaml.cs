@@ -235,10 +235,12 @@ namespace WFInfo
         private new void MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
-                try {
+                try
+                {
                     DragMove();
                 }
-                catch (Exception) {
+                catch (Exception)
+                {
                     Main.AddLog("Error in Mouse down in mainwindow");
                 }
         }

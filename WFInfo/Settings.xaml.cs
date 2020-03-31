@@ -54,9 +54,10 @@ namespace WFInfo
         public static int scaling { get; internal set; }
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
-		public static bool SnapitExport { get; internal set; }
+        public static bool detectScaling { get; internal set; }
+        public static bool SnapitExport { get; internal set; }
 
-		public Settings()
+        public Settings()
         {
             InitializeComponent();
         }
@@ -76,6 +77,9 @@ namespace WFInfo
 
             if (Convert.ToBoolean(settingsObj.GetValue("Clipboard")))
                 clipboardCheckbox.IsChecked = true;
+
+            if (Convert.ToBoolean(settingsObj.GetValue("CuttingEdge")))
+                detectScalingCheckbox.IsChecked = true;
 
             Scaling_box.Text = scaling.ToString() + "%";
 
@@ -286,10 +290,11 @@ namespace WFInfo
             Main.SpawnErrorPopup(DateTime.UtcNow, 1800);
         }
 
-        private void clipboardCheckbox_Checked(object sender, RoutedEventArgs e)
+        private void clipboardCheckboxClicked(object sender, RoutedEventArgs e)
         {
             settingsObj["Clipboard"] = clipboardCheckbox.IsChecked.Value;
             clipboard = clipboardCheckbox.IsChecked.Value;
+            Save();
         }
 
 
@@ -383,6 +388,13 @@ namespace WFInfo
                     }
             }
             return ch;
+        }
+
+        private void detectScalingClicked(object sender, RoutedEventArgs e)
+        {
+            settingsObj["CuttingEdge"] = detectScalingCheckbox.IsChecked.Value;
+            detectScaling = detectScalingCheckbox.IsChecked.Value;
+            Save();
         }
     }
 }

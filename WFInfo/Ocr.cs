@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -241,8 +242,9 @@ namespace WFInfo
                             string volume = job["volume"].ToObject<string>();
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
-
-                            if (double.Parse(plat) > 0)
+                            NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
+                            IFormatProvider provider = CultureInfo.CreateSpecificCulture("en-GB");
+                            if (double.Parse(plat, styles, provider) > 0)
                             {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
                                 if (i == firstChecks.Length - 1)
@@ -270,7 +272,7 @@ namespace WFInfo
                                 }
                                 if (Settings.clipboard && clipboard != string.Empty)
                                     Clipboard.SetText(clipboard);
-                                
+
                             });
                             partNumber++;
                             hideRewardInfo = false;
@@ -558,9 +560,9 @@ namespace WFInfo
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
             string csv = string.Empty;
 
-            if(!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd")+".csv") && Settings.SnapitExport)
+            if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv") && Settings.SnapitExport)
                 csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned," + DateTime.UtcNow.ToString("yyyy-MM-dd") + Environment.NewLine;
-            
+
             foreach (var part in foundParts)
             {
                 if (part.name.Length < 13) // if part name is smaller than "Bo prime handle" skip current part
@@ -575,17 +577,21 @@ namespace WFInfo
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
 
-                if (Settings.SnapitExport) {
+                if (Settings.SnapitExport)
+                {
                     var owned = partsOwned == string.Empty ? "0" : partsOwned;
                     csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString() + "," + owned + ", \"\"" + Environment.NewLine;
                 }
 
                 int width = (int)(part.bounding.Width * screenScaling);
-                if (width < 120) {
+                if (width < 120)
+                {
                     if (width < 50)
                         continue;
                     width = 120;
-                } else if (width > 160) {
+                }
+                else if (width > 160)
+                {
                     width = 160;
                 }
 
@@ -602,7 +608,8 @@ namespace WFInfo
             end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
             watch.Stop();
-            if (Settings.SnapitExport) {
+            if (Settings.SnapitExport)
+            {
                 File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv", csv);
             }
         }
@@ -700,7 +707,7 @@ namespace WFInfo
                 }
             }
 
-            if (numberTooLarge > .3 * foundItems.Count || numberTooFewCharacters > .4 * foundItems.Count || numberTooLargeButEnoughCharacters > .95 * foundItems.Count)
+            if (numberTooLarge > .3 * foundItems.Count || numberTooFewCharacters > .4 * foundItems.Count)
             {
                 Main.AddLog("numberTooLarge: " + numberTooLarge + ", numberTooFewCharacters: " + numberTooFewCharacters + ", numberTooLargeButEnoughCharacters: " + numberTooLargeButEnoughCharacters + ", foundItems.Count: " + foundItems.Count);
                 //If there's a too large % of any error make a pop-up. These precentages are arbritary at the moment, a rough index.
@@ -1251,14 +1258,18 @@ namespace WFInfo
         {
             UpdateWindow();
 
+            int width = window.Width;
+            int height = window.Height;
+
             if (window == null || window.Width == 0 || window.Height == 0)
             {
                 window = Screen.PrimaryScreen.Bounds;
                 center = new Point(window.Width / 2, window.Height / 2);
+
+                width *= (int)dpiScaling;
+                height *= (int)dpiScaling;
             }
 
-            int width = window.Width * (int)dpiScaling;
-            int height = window.Height * (int)dpiScaling;
 
             Bitmap image = new Bitmap(width, height);
             Size FullscreenSize = new Size(image.Width, image.Height);
