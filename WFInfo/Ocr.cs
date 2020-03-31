@@ -1335,7 +1335,7 @@ namespace WFInfo
             }
             if (!Settings.debug)
             {
-                Main.AddLog("Did Not Detect Warfrape Process");
+                Main.AddLog("Did Not Detect Warframe Process");
                 Main.StatusUpdate("Unable to Detect Warframe Process", 1);
             }
             return false;
