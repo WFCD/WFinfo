@@ -55,9 +55,9 @@ namespace WFInfo
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
-		public static bool SnapitExport { get; internal set; }
+        public static bool SnapitExport { get; internal set; }
 
-		public Settings()
+        public Settings()
         {
             InitializeComponent();
         }
@@ -390,7 +390,8 @@ namespace WFInfo
             return ch;
         }
 
-        private void detectScalingClicked(object sender, RoutedEventArgs e) {
+        private void detectScalingClicked(object sender, RoutedEventArgs e)
+        {
             settingsObj["CuttingEdge"] = detectScalingCheckbox.IsChecked.Value;
             detectScaling = detectScalingCheckbox.IsChecked.Value;
             Save();
