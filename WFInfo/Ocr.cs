@@ -194,8 +194,9 @@ namespace WFInfo
                 if (Settings.autoScaling)
                 {
                     parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
-                }
-                else
+                    bigScreenshot = file ?? CaptureScreenshot();
+
+                } else
                 {
                     // Get that theme
                     activeTheme = GetThemeWeighted(out _, file);
@@ -218,10 +219,10 @@ namespace WFInfo
 
                 double bestPlat = 0;
                 int bestDucat = 0;
-                double bestRatio = 0;
                 int bestPlatItem = 0;
                 int bestDucatItem = 0;
-                int bestRatioItem = 0;
+                List<int> unownedItems = new List<int>();
+
                 NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
                 IFormatProvider provider = CultureInfo.CreateSpecificCulture("en-GB");
 
@@ -248,24 +249,27 @@ namespace WFInfo
                             }
                             string plat = job["plat"].ToObject<string>();
                             double platinum = double.Parse(plat, styles, provider);
-
+                            string volume = job["volume"].ToObject<string>();
+                            bool vaulted = Main.dataBase.IsPartVaulted(correctName);
+                            string partsOwned = Main.dataBase.PartsOwned(correctName);
                             int duc = int.Parse(ducats);
+                            int owned = int.Parse(partsOwned);
+
                             if (platinum >= bestPlat) {
                                 bestPlat = platinum; bestPlatItem = i;
                                 if (duc >= bestDucat) {
                                     bestDucat = duc; bestDucatItem = i;
-                                }
-                                if (duc / platinum >= bestRatio) {
-                                    bestRatio = platinum / duc; bestRatioItem = i;
                                 }
                             }
                             if (duc > bestDucat) {
                                 bestDucat = duc; bestDucatItem = i;
                             }
 
-                            string volume = job["volume"].ToObject<string>();
-                            bool vaulted = Main.dataBase.IsPartVaulted(correctName);
-                            string partsOwned = Main.dataBase.PartsOwned(correctName);
+                            Console.WriteLine(Main.dataBase.GetSetName(correctName));
+                            if (owned < int.Parse(Main.dataBase.equipmentData[Main.dataBase.GetSetName(correctName)]["parts"][correctName]["count"].ToString())) {
+                                unownedItems.Add(i);
+                            }
+
 
                             if (platinum > 0) {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
@@ -300,7 +304,9 @@ namespace WFInfo
                         Main.RunOnUIThread(() => {
                             Main.overlays[bestPlatItem].bestPlatChoice();
                             Main.overlays[bestDucatItem].bestDucatChoice();
-                            Main.overlays[bestRatioItem].bestRatioChoice();
+                            foreach (int item in unownedItems) {
+                                Main.overlays[item].bestOwnedChoice();
+                            }
                         });
                     }
 
@@ -313,7 +319,9 @@ namespace WFInfo
                         Main.RunOnUIThread(() => {
                             Main.overlays[bestPlatItem].bestPlatChoice();
                             Main.overlays[bestDucatItem].bestDucatChoice();
-                            Main.overlays[bestRatioItem].bestRatioChoice();
+                            foreach (int item in unownedItems) {
+                                Main.overlays[item].bestOwnedChoice();
+                            }
                         });
                     }
                     Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));

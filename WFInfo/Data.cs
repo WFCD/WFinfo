@@ -482,7 +482,7 @@ namespace WFInfo
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
             string owned = equipmentData[eqmt]["parts"][name]["owned"].ToString();
             if (owned == "0")
-                return "";
+                return "0";
             return owned + "/" + equipmentData[eqmt]["parts"][name]["count"].ToString();
         }
 
@@ -682,6 +682,9 @@ namespace WFInfo
             {
                 string str = prop.Key.ToLower();
                 str = str.Replace("neuroptics", "");
+                str = str.Replace("lower", "");
+                str = str.Replace("upper", "");
+                str = str.Replace("limb", "");
                 str = str.Replace("chassis", "");
                 str = str.Replace("sytems", "");
                 str = str.Replace("carapace", "");
@@ -711,6 +714,9 @@ namespace WFInfo
             }
 
             result = result.ToLower();
+            result = result.Replace("lower", "");
+            result = result.Replace("upper", "");
+            result = result.Replace("limb", "");
             result = result.Replace("neuroptics", "");
             result = result.Replace("chassis", "");
             result = result.Replace("sytems", "");
@@ -732,7 +738,8 @@ namespace WFInfo
             result = result.Replace("wings", "");
             result = result.Replace("blades", "");
             result = result.Replace("hilt", "");
-            result = result.TrimEnd() + " set";
+            result = result.Replace("set", "");
+            result = result.TrimEnd();
             result = Main.culture.TextInfo.ToTitleCase(result);
             return result;
         }

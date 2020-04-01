@@ -61,18 +61,18 @@ namespace WFInfo
             ducatText.Foreground = new SolidColorBrush(Color.FromRgb(255, 215, 0));
         }
 
-        public void bestRatioChoice() {
-            platText.FontWeight = FontWeights.Bold;
-            ducatText.FontWeight = FontWeights.Bold;
-            ducatText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 215));
-            platText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 215));
+        public void bestOwnedChoice() {
+            ownedText.FontWeight = FontWeights.Bold;
+            ownedText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 215));
         }
 
         public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, bool hideRewardInfo)
         {
             ducatText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
             platText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
+            ownedText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
             platText.FontWeight = FontWeights.Normal;
+            ownedText.FontWeight = FontWeights.Normal;
             ducatText.FontWeight = FontWeights.Normal;
 
             partText.Text = name;

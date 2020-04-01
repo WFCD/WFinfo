@@ -22,7 +22,7 @@
             <TextBlock x:Name="volumeText" Text="XX sold last 48hrs"/>
         </Viewbox>
         <Viewbox x:Name="platMargin" Margin="0,77,162,43" HorizontalAlignment="Right">
-            <TextBlock x:Name="platText" Text="100" FontWeight="Bold"/>
+            <TextBlock x:Name="platText" Text="100"/>
         </Viewbox>
         <Viewbox x:Name="ducatMargin" Margin="0,77,78,43" HorizontalAlignment="Right">
             <TextBlock x:Name="ducatText" Text="100"/>
