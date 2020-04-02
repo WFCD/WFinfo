@@ -53,17 +53,23 @@ namespace WFInfo
 
         public void bestPlatChoice() {
             platText.FontWeight = FontWeights.Bold;
-            platText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0));
+            partText.FontWeight = FontWeights.Bold;
+            platText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0)); 
+            partText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0));
         }
 
         public void bestDucatChoice() {
             ducatText.FontWeight = FontWeights.Bold;
+            partText.FontWeight = FontWeights.Bold;
             ducatText.Foreground = new SolidColorBrush(Color.FromRgb(255, 215, 0));
+            partText.Foreground = new SolidColorBrush(Color.FromRgb(255, 215, 0));
         }
 
         public void bestOwnedChoice() {
             ownedText.FontWeight = FontWeights.Bold;
+            partText.FontWeight = FontWeights.Bold;
             ownedText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 215));
+            partText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 215));
         }
 
         public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, bool hideRewardInfo)
@@ -71,9 +77,11 @@ namespace WFInfo
             ducatText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
             platText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
             ownedText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
+            partText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
             platText.FontWeight = FontWeights.Normal;
             ownedText.FontWeight = FontWeights.Normal;
             ducatText.FontWeight = FontWeights.Normal;
+            partText.FontWeight = FontWeights.Normal;
 
             partText.Text = name;
             if (hideRewardInfo)

@@ -478,7 +478,7 @@ namespace WFInfo
         public string PartsOwned(string name)
         {
             if (name.IndexOf("Prime") < 0)
-                return "";
+                return "0";
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
             string owned = equipmentData[eqmt]["parts"][name]["owned"].ToString();
             if (owned == "0")
@@ -777,27 +777,6 @@ namespace WFInfo
 
             return lowest;
         }
-
-        //private Boolean waiting = false;
-        //private void WatcherCreated(Object sender, FileSystemEventArgs e)
-        //{
-        //    waiting = true;
-        //}
-
-        //private void WatcherChanged(Object sender, FileSystemEventArgs e)
-        //{
-        //    if (waiting)
-        //    {
-        //        waiting = false;
-        //        Thread.Sleep(500);
-        //        OCR.ParseFile(e.FullPath);
-        //    }
-        //}
-        ///
-        ///
-        /// WIP - the rest code is TBD
-        ///
-        /// 
 
         private Task autoThread;
 

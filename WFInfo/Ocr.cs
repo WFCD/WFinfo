@@ -300,16 +300,6 @@ namespace WFInfo
                     var end = watch.ElapsedMilliseconds;
                     Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
-                    if (Settings.Highlight) {
-                        Main.RunOnUIThread(() => {
-                            Main.overlays[bestPlatItem].bestPlatChoice();
-                            Main.overlays[bestDucatItem].bestDucatChoice();
-                            foreach (int item in unownedItems) {
-                                Main.overlays[item].bestOwnedChoice();
-                            }
-                        });
-                    }
-
                     if (partialScreenshot.Height < 70) {
                         SlowSecondProcess();
                         end = watch.ElapsedMilliseconds;
@@ -317,11 +307,11 @@ namespace WFInfo
 
                     if (Settings.Highlight) {
                         Main.RunOnUIThread(() => {
-                            Main.overlays[bestPlatItem].bestPlatChoice();
-                            Main.overlays[bestDucatItem].bestDucatChoice();
                             foreach (int item in unownedItems) {
                                 Main.overlays[item].bestOwnedChoice();
                             }
+                            Main.overlays[bestDucatItem].bestDucatChoice();
+                            Main.overlays[bestPlatItem].bestPlatChoice();
                         });
                     }
                     Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
