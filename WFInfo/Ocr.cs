@@ -253,7 +253,6 @@ namespace WFInfo
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
                             int duc = int.Parse(ducats);
-                            int owned = int.Parse(partsOwned);
 
                             if (platinum >= bestPlat) {
                                 bestPlat = platinum; bestPlatItem = i;
@@ -265,11 +264,12 @@ namespace WFInfo
                                 bestDucat = duc; bestDucatItem = i;
                             }
 
-                            Console.WriteLine(Main.dataBase.GetSetName(correctName));
-                            if (owned < int.Parse(Main.dataBase.equipmentData[Main.dataBase.GetSetName(correctName)]["parts"][correctName]["count"].ToString())) {
-                                unownedItems.Add(i);
+                            if (duc > 0) {
+                                bool _ = int.TryParse(partsOwned, out int owned);
+                                if (owned < int.Parse(Main.dataBase.equipmentData[Main.dataBase.GetSetName(correctName)]["parts"][correctName]["count"].ToString())) {
+                                    unownedItems.Add(i);
+                                }
                             }
-
 
                             if (platinum > 0) {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";

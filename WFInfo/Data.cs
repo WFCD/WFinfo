@@ -673,53 +673,52 @@ namespace WFInfo
 
         public string GetSetName(string name)
         {
-            name = name.ToLower();
-            name = name.Replace("*", "");
-            string result = null;
-            int low = 9999;
+            //name = name.ToLower();
+            //name = name.Replace("*", "");
+            //string result = null;
+            //int low = 9999;
 
-            foreach (KeyValuePair<string, JToken> prop in marketData)
-            {
-                string str = prop.Key.ToLower();
-                str = str.Replace("neuroptics", "");
-                str = str.Replace("lower", "");
-                str = str.Replace("upper", "");
-                str = str.Replace("limb", "");
-                str = str.Replace("chassis", "");
-                str = str.Replace("sytems", "");
-                str = str.Replace("carapace", "");
-                str = str.Replace("cerebrum", "");
-                str = str.Replace("blueprint", "");
-                str = str.Replace("harness", "");
-                str = str.Replace("blade", "");
-                str = str.Replace("pouch", "");
-                str = str.Replace("barrel", "");
-                str = str.Replace("receiver", "");
-                str = str.Replace("stock", "");
-                str = str.Replace("disc", "");
-                str = str.Replace("grip", "");
-                str = str.Replace("string", "");
-                str = str.Replace("handle", "");
-                str = str.Replace("ornament", "");
-                str = str.Replace("wings", "");
-                str = str.Replace("blades", "");
-                str = str.Replace("hilt", "");
-                str = str.TrimEnd();
-                int val = LevenshteinDistance(str, name);
-                if (val < low)
-                {
-                    low = val;
-                    result = prop.Key;
-                }
-            }
+            //foreach (KeyValuePair<string, JToken> prop in marketData)
+            //{
+            //    string str = prop.Key.ToLower();
+            //    str = str.Replace("neuroptics", "");
+            //    str = str.Replace("lower", "");
+            //    str = str.Replace("upper", "");
+            //    str = str.Replace("limb", "");
+            //    str = str.Replace("chassis", "");
+            //    str = str.Replace("sytems", "");
+            //    str = str.Replace("carapace", "");
+            //    str = str.Replace("cerebrum", "");
+            //    str = str.Replace("blueprint", "");
+            //    str = str.Replace("harness", "");
+            //    str = str.Replace("blade", "");
+            //    str = str.Replace("pouch", "");
+            //    str = str.Replace("barrel", "");
+            //    str = str.Replace("receiver", "");
+            //    str = str.Replace("stock", "");
+            //    str = str.Replace("disc", "");
+            //    str = str.Replace("grip", "");
+            //    str = str.Replace("string", "");
+            //    str = str.Replace("handle", "");
+            //    str = str.Replace("ornament", "");
+            //    str = str.Replace("wings", "");
+            //    str = str.Replace("blades", "");
+            //    str = str.Replace("hilt", "");
+            //    str = str.TrimEnd();
+            //    int val = LevenshteinDistance(str, name);
+            //    if (val < low)
+            //    {
+            //        low = val;
+            //        result = prop.Key;
+            //    }
+            //}
 
-            result = result.ToLower();
-            result = result.Replace("lower", "");
-            result = result.Replace("upper", "");
-            result = result.Replace("limb", "");
+            string result = name.ToLower();
+            result = result.Replace("lower limb", "");
+            result = result.Replace("upper limb", "");
             result = result.Replace("neuroptics", "");
             result = result.Replace("chassis", "");
-            result = result.Replace("sytems", "");
+            result = result.Replace("systems", "");
             result = result.Replace("carapace", "");
             result = result.Replace("cerebrum", "");
             result = result.Replace("blueprint", "");
@@ -738,7 +737,6 @@ namespace WFInfo
             result = result.Replace("wings", "");
             result = result.Replace("blades", "");
             result = result.Replace("hilt", "");
-            result = result.Replace("set", "");
             result = result.TrimEnd();
             result = Main.culture.TextInfo.ToTitleCase(result);
             return result;
