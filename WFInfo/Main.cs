@@ -156,7 +156,7 @@ namespace WFInfo
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
                 }
-                else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                else if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
                 {
                     AddLog("Starting snap it");
                     StatusUpdate("Starting snap it", 0);
@@ -225,7 +225,7 @@ namespace WFInfo
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
                 }
-                else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control || (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                else if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
                 {
                     AddLog("Starting snap it");
                     StatusUpdate("Starting snap it", 0);
