@@ -157,14 +157,7 @@ namespace WFInfo
                     };
                 }
             }
-
-            marketData["Forma Blueprint"] = new JObject
-            {
-                { "ducats", 0 },
-                { "plat", 0 },
-                { "volume", 0 },
-            };
-
+            
             marketData["timestamp"] = DateTime.Now;
             marketData["version"] = Main.BuildVersion;
 
@@ -228,7 +221,6 @@ namespace WFInfo
                 relicData = new JObject();
                 relicData["timestamp"] = DateTime.Now;
                 nameData = new JObject();
-                nameData["Forma Blueprint"] = "Forma Blueprint";
 
                 foreach (KeyValuePair<string, JToken> era in allFiltered["relics"].ToObject<JObject>())
                 {
@@ -285,6 +277,12 @@ namespace WFInfo
                     }
                 }
 
+                // Add default values for ignored items
+                foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
+                {
+                    nameData[ignored.Key] = ignored.Key;
+                    marketData[ignored.Key] = ignored.Value;
+                }
 
                 Main.AddLog("Prime Database has been downloaded");
                 return true;
