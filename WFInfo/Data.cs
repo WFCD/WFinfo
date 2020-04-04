@@ -121,7 +121,7 @@ namespace WFInfo
         }
 
         // Load market data from Sheets
-        private bool LoadMarket(bool force = false)
+        private bool LoadMarket(JObject allFiltered, bool force = false)
         {
             if (!force && File.Exists(marketDataPath) && File.Exists(marketItemsPath))
             {
@@ -157,7 +157,13 @@ namespace WFInfo
                     };
                 }
             }
-            
+
+            // Add default values for ignored items
+            foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
+            {
+                marketData[ignored.Key] = ignored.Value;
+            }
+
             marketData["timestamp"] = DateTime.Now;
             marketData["version"] = Main.BuildVersion;
 
@@ -197,7 +203,7 @@ namespace WFInfo
             };
         }
 
-        private bool LoadEqmtData(bool force = false)
+        private bool LoadEqmtData(JObject allFiltered, bool force = false)
         {
             if (equipmentData == null)
                 equipmentData = File.Exists(eqmtDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath)) : new JObject();
@@ -209,8 +215,6 @@ namespace WFInfo
             // fill in equipmentData (NO OVERWRITE)
             // fill in nameData
             // fill in relicData
-
-            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
 
             DateTime filteredDate = allFiltered["timestamp"].ToObject<DateTime>().ToLocalTime().AddHours(-1);
             DateTime eqmtDate = equipmentData.TryGetValue("timestamp", out _) ? equipmentData["timestamp"].ToObject<DateTime>() : filteredDate;
@@ -281,7 +285,6 @@ namespace WFInfo
                 foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
                 {
                     nameData[ignored.Key] = ignored.Key;
-                    marketData[ignored.Key] = ignored.Value;
                 }
 
                 Main.AddLog("Prime Database has been downloaded");
@@ -362,7 +365,8 @@ namespace WFInfo
         public bool Update()
         {
             Main.AddLog("Checking for Updates to Databases");
-            bool saveDatabases = LoadMarket();
+            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
+            bool saveDatabases = LoadMarket(allFiltered);
 
             foreach (KeyValuePair<string, JToken> elem in marketItems)
             {
@@ -380,7 +384,7 @@ namespace WFInfo
             }
             Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm"); });
 
-            saveDatabases = LoadEqmtData(saveDatabases);
+            saveDatabases = LoadEqmtData(allFiltered, saveDatabases);
             Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm"); });
 
             if (saveDatabases)
@@ -394,7 +398,8 @@ namespace WFInfo
             try
             {
                 Main.AddLog("Forcing market update");
-                LoadMarket(true);
+                JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
+                LoadMarket(allFiltered, true);
 
                 foreach (KeyValuePair<string, JToken> elem in marketItems)
                 {
@@ -445,7 +450,8 @@ namespace WFInfo
             try
             {
                 Main.AddLog("Forcing equipment update");
-                LoadEqmtData(true);
+                JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
+                LoadEqmtData(allFiltered, true);
                 SaveAllJSONs();
                 Main.RunOnUIThread(() =>
                 {
