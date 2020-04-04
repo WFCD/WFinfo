@@ -311,7 +311,7 @@ namespace WFInfo
             catch (Exception ex)
             {
                 Main.AddLog(ex.ToString());
-                Main.StatusUpdate("Genneric error occured during processing", 1);
+                Main.StatusUpdate("Generic error occured during processing", 1);
             }
 
             if (bigScreenshot != null)
@@ -1305,7 +1305,7 @@ namespace WFInfo
             }
             if (!Settings.debug)
             {
-                Main.AddLog("Did Not Detect Warfrape Process");
+                Main.AddLog("Did Not Detect Warframe Process");
                 Main.StatusUpdate("Unable to Detect Warframe Process", 1);
             }
             return false;
