@@ -216,6 +216,9 @@ namespace WFInfo
                 }
                 Task.WaitAll(tasks);
 
+                // Remove any empty items from the array
+                firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s)).ToArray();
+
                 if (firstChecks.Length > 0)
                 {
                     clipboard = string.Empty;
@@ -1243,7 +1246,8 @@ namespace WFInfo
                 return null;
             }
 
-            return ret;
+            // Remove any empty items from the array
+            return ret.Where(s => !string.IsNullOrEmpty(s)).ToList();
         }
 
         private class arr2D_Compare : IComparer<List<int>>
