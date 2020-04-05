@@ -252,6 +252,7 @@ namespace WFInfo
                             string volume = job["volume"].ToObject<string>();
                             bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                             string partsOwned = Main.dataBase.PartsOwned(correctName);
+                            string partsCount = Main.dataBase.PartsCount(correctName);
                             int duc = int.Parse(ducats);
 
                             if (platinum >= bestPlat) {
@@ -265,8 +266,7 @@ namespace WFInfo
                             }
 
                             if (duc > 0) {
-                                bool _ = int.TryParse(partsOwned, out int owned);
-                                if (owned < int.Parse(Main.dataBase.equipmentData[Main.dataBase.GetSetName(correctName)]["parts"][correctName]["count"].ToString())) {
+                                if (int.Parse(partsOwned) < int.Parse(partsCount)) {
                                     unownedItems.Add(i);
                                 }
                             }
@@ -282,12 +282,12 @@ namespace WFInfo
 
                             Main.RunOnUIThread(() => {
                                 if (Settings.isOverlaySelected) {
-                                    Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                    Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, hideRewardInfo);
                                     Main.overlays[partNumber].Resize(overWid);
                                     Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
 
                                 } else {
-                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, partNumber, true, hideRewardInfo);
+                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, partNumber, true, hideRewardInfo);
                                 }
                                 if (Settings.clipboard && clipboard != string.Empty)
                                     Clipboard.SetText(clipboard);
@@ -299,6 +299,16 @@ namespace WFInfo
                     }
                     var end = watch.ElapsedMilliseconds;
                     Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
+
+                    if (Settings.Highlight) {
+                        Main.RunOnUIThread(() => {
+                            foreach (int item in unownedItems) {
+                                Main.overlays[item].bestOwnedChoice();
+                            }
+                            Main.overlays[bestDucatItem].bestDucatChoice();
+                            Main.overlays[bestPlatItem].bestPlatChoice();
+                        });
+                    }
 
                     if (partialScreenshot.Height < 70) {
                         SlowSecondProcess();

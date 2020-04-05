@@ -483,7 +483,17 @@ namespace WFInfo
             string owned = equipmentData[eqmt]["parts"][name]["owned"].ToString();
             if (owned == "0")
                 return "0";
-            return owned + "/" + equipmentData[eqmt]["parts"][name]["count"].ToString();
+            return owned;
+        }
+
+        public string PartsCount(string name) {
+            if (name.IndexOf("Prime") < 0)
+                return "0";
+            string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
+            string count = equipmentData[eqmt]["parts"][name]["count"].ToString();
+            if (count == "0")
+                return "0";
+            return count;
         }
 
         private void AddElement(int[,] d, List<int> xList, List<int> yList, int x, int y)
