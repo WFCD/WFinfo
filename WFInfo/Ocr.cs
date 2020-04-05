@@ -196,7 +196,8 @@ namespace WFInfo
                     parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
                     bigScreenshot = file ?? CaptureScreenshot();
 
-                } else
+                }
+                else
                 {
                     // Get that theme
                     activeTheme = GetThemeWeighted(out _, file);
@@ -236,15 +237,18 @@ namespace WFInfo
                     int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScalingVal);
                     int partNumber = 0;
                     bool hideRewardInfo = false;
-                    for (int i = 0; i < firstChecks.Length; i++) {
+                    for (int i = 0; i < firstChecks.Length; i++)
+                    {
                         string part = firstChecks[i];
-                        if (part.Replace(" ", "").Length > 6) {
+                        if (part.Replace(" ", "").Length > 6)
+                        {
 
 
                             string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
                             JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
                             string ducats = job["ducats"].ToObject<string>();
-                            if (int.Parse(ducats) == 0) {
+                            if (int.Parse(ducats) == 0)
+                            {
                                 hideRewardInfo = true;
                             }
                             string plat = job["plat"].ToObject<string>();
@@ -255,38 +259,51 @@ namespace WFInfo
                             string partsCount = Main.dataBase.PartsCount(correctName);
                             int duc = int.Parse(ducats);
 
-                            if (platinum >= bestPlat) {
+                            if (platinum >= bestPlat)
+                            {
                                 bestPlat = platinum; bestPlatItem = i;
-                                if (duc >= bestDucat) {
+                                if (duc >= bestDucat)
+                                {
                                     bestDucat = duc; bestDucatItem = i;
                                 }
                             }
-                            if (duc > bestDucat) {
+                            if (duc > bestDucat)
+                            {
                                 bestDucat = duc; bestDucatItem = i;
                             }
 
-                            if (duc > 0) {
-                                if (int.Parse(partsOwned) < int.Parse(partsCount)) {
+                            if (duc > 0)
+                            {
+                                if (int.Parse(partsOwned) < int.Parse(partsCount))
+                                {
                                     unownedItems.Add(i);
                                 }
                             }
 
-                            if (platinum > 0) {
+                            if (platinum > 0)
+                            {
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
-                                if (partNumber == firstChecks.Length - 1) {
+                                if (partNumber == firstChecks.Length - 1)
+                                {
                                     clipboard += Settings.ClipboardTemplate;
-                                } else {
+                                }
+                                else
+                                {
                                     clipboard += "-  ";
                                 }
                             }
 
-                            Main.RunOnUIThread(() => {
-                                if (Settings.isOverlaySelected) {
+                            Main.RunOnUIThread(() =>
+                            {
+                                if (Settings.isOverlaySelected)
+                                {
                                     Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, hideRewardInfo);
                                     Main.overlays[partNumber].Resize(overWid);
                                     Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
 
-                                } else {
+                                }
+                                else
+                                {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, partNumber, true, hideRewardInfo);
                                 }
                                 if (Settings.clipboard && clipboard != string.Empty)
@@ -300,9 +317,12 @@ namespace WFInfo
                     var end = watch.ElapsedMilliseconds;
                     Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
-                    if (Settings.Highlight) {
-                        Main.RunOnUIThread(() => {
-                            foreach (int item in unownedItems) {
+                    if (Settings.Highlight)
+                    {
+                        Main.RunOnUIThread(() =>
+                        {
+                            foreach (int item in unownedItems)
+                            {
                                 Main.overlays[item].bestOwnedChoice();
                             }
                             Main.overlays[bestDucatItem].bestDucatChoice();
@@ -310,14 +330,18 @@ namespace WFInfo
                         });
                     }
 
-                    if (partialScreenshot.Height < 70) {
+                    if (partialScreenshot.Height < 70)
+                    {
                         SlowSecondProcess();
                         end = watch.ElapsedMilliseconds;
                     }
 
-                    if (Settings.Highlight) {
-                        Main.RunOnUIThread(() => {
-                            foreach (int item in unownedItems) {
+                    if (Settings.Highlight)
+                    {
+                        Main.RunOnUIThread(() =>
+                        {
+                            foreach (int item in unownedItems)
+                            {
                                 Main.overlays[item].bestOwnedChoice();
                             }
                             Main.overlays[bestDucatItem].bestDucatChoice();

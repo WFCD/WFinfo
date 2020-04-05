@@ -486,7 +486,8 @@ namespace WFInfo
             return owned;
         }
 
-        public string PartsCount(string name) {
+        public string PartsCount(string name)
+        {
             if (name.IndexOf("Prime") < 0)
                 return "0";
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);

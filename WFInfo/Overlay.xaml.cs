@@ -51,21 +51,24 @@ namespace WFInfo
             InitializeComponent();
         }
 
-        public void bestPlatChoice() {
+        public void bestPlatChoice()
+        {
             platText.FontWeight = FontWeights.Bold;
             partText.FontWeight = FontWeights.Bold;
-            platText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0)); 
+            platText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0));
             partText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0));
         }
 
-        public void bestDucatChoice() {
+        public void bestDucatChoice()
+        {
             ducatText.FontWeight = FontWeights.Bold;
             partText.FontWeight = FontWeights.Bold;
             ducatText.Foreground = new SolidColorBrush(Color.FromRgb(255, 215, 0));
             partText.Foreground = new SolidColorBrush(Color.FromRgb(255, 215, 0));
         }
 
-        public void bestOwnedChoice() {
+        public void bestOwnedChoice()
+        {
             ownedText.FontWeight = FontWeights.Bold;
             partText.FontWeight = FontWeights.Bold;
             ownedText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 215));
