@@ -218,6 +218,8 @@ namespace WFInfo
                 }
                 Task.WaitAll(tasks);
 
+                // Remove any empty items from the array
+                firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s)).ToArray();
                 double bestPlat = 0;
                 int bestDucat = 0;
                 int bestPlatItem = 0;
@@ -373,7 +375,7 @@ namespace WFInfo
             catch (Exception ex)
             {
                 Main.AddLog(ex.ToString());
-                Main.StatusUpdate("Genneric error occured during processing", 1);
+                Main.StatusUpdate("Generic error occured during processing", 1);
             }
 
             if (bigScreenshot != null)
@@ -1305,7 +1307,8 @@ namespace WFInfo
                 return null;
             }
 
-            return ret;
+            // Remove any empty items from the array
+            return ret.Where(s => !string.IsNullOrEmpty(s)).ToList();
         }
 
         private class arr2D_Compare : IComparer<List<int>>
