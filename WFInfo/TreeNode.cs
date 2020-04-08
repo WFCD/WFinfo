@@ -728,49 +728,65 @@ namespace WFInfo
             IncrementPart = new SimpleCommand(IncrementPartFunc);
         }
 
-        public void DecrementPartFunc()
+        public async void DecrementPartFunc()
         {
             if (Parent.dataRef != null)
             {
-                JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
-                int owned = job["owned"].ToObject<int>();
-                if (owned > 0)
-                {
+                await System.Threading.Tasks.Task.Run(() => DecrementPartThreaded(Parent));
 
-                    job["owned"] = owned - 1;
-                    Main.dataBase.SaveAllJSONs();
 
-                    Owned_Val--;
-                    Parent.Owned_Val--;
-                    Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
-                    Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
-                    Col1_Text1 = Owned_Val + "/" + Count_Val;
-                    Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
-                    EquipmentWindow.INSTANCE.SortBoxChanged(null, null);
-                }
             }
         }
 
-        public void IncrementPartFunc()
+        public async void IncrementPartFunc()
         {
             if (Parent.dataRef != null)
             {
-                JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
-                int count = job["count"].ToObject<int>();
-                int owned = job["owned"].ToObject<int>();
-                if (owned < count)
-                {
-                    job["owned"] = owned + 1;
-                    Main.dataBase.SaveAllJSONs();
+                await System.Threading.Tasks.Task.Run(() => IncrementPartThreaded(Parent));
+            }
+        }
 
-                    Owned_Val++;
-                    Parent.Owned_Val++;
-                    Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
-                    Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
-                    Col1_Text1 = Owned_Val + "/" + Count_Val;
-                    Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
+        private void DecrementPartThreaded(TreeNode Parent)
+        {
+            JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
+            int owned = job["owned"].ToObject<int>();
+            if (owned > 0)
+            {
+                job["owned"] = owned - 1;
+                Main.dataBase.SaveAllJSONs();
+                Owned_Val--;
+                Parent.Owned_Val--;
+                Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
+                Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
+                Col1_Text1 = Owned_Val + "/" + Count_Val;
+                Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
+                Main.RunOnUIThread(() =>
+                {
                     EquipmentWindow.INSTANCE.SortBoxChanged(null, null);
-                }
+                });
+
+            }
+        }
+
+        private void IncrementPartThreaded(TreeNode Parent)
+        {
+            JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
+            int count = job["count"].ToObject<int>();
+            int owned = job["owned"].ToObject<int>();
+            if (owned < count)
+            {
+                job["owned"] = owned + 1;
+                Main.dataBase.SaveAllJSONs();
+                Owned_Val++;
+                Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
+                Col1_Text1 = Owned_Val + "/" + Count_Val;
+                Parent.Owned_Val++;
+                Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
+                Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
+                Main.RunOnUIThread(() =>
+                {
+                    EquipmentWindow.INSTANCE.SortBoxChanged(null, null);
+                });
             }
         }
     }
