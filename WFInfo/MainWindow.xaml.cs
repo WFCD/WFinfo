@@ -111,6 +111,9 @@ namespace WFInfo
                     Settings.settingsObj["SnapitExport"] = false;
                 Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"));
 
+                if (!Settings.settingsObj.TryGetValue("Highlight", out _))
+                    Settings.settingsObj["Highlight"] = false;
+                Settings.Highlight = Convert.ToBoolean(Settings.settingsObj.GetValue("Highlight"));
 
                 Settings.Save();
 
