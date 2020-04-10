@@ -839,14 +839,28 @@ namespace WFInfo
             //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
             Bitmap preFilter;
 
-            if (fullScreen != null)
-                preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
-            else
-            {
-                preFilter = new Bitmap(mostWidth, mostBot - mostTop);
-                using (Graphics graphics = Graphics.FromImage(preFilter))
-                    graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(preFilter.Width, preFilter.Height), CopyPixelOperation.SourceCopy);
+            try {
+                if (fullScreen != null) {
+                    Main.AddLog(fullScreen.ToString());
+                    preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
+                } else {
+                    preFilter = new Bitmap(mostWidth, mostBot - mostTop);
+                    Main.AddLog("Pre filter: " + preFilter.ToString());
+                    Main.AddLog("window.Left: " + window.Left);
+                    Main.AddLog("mostLeft: " + mostLeft);
+                    Main.AddLog("window.Top: " + window.Top);
+                    Main.AddLog("mostTop: " + mostTop);
+                    Main.AddLog("preFilter.Width: " + preFilter.Width);
+                    Main.AddLog("preFilter.Height: " + preFilter.Height);
+                    using (Graphics graphics = Graphics.FromImage(preFilter))
+                        graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(preFilter.Width, preFilter.Height));
+                }
             }
+            catch (Exception ex) {
+                Main.AddLog("Something went wrong with getting the starting image: " + ex.ToString());
+                throw;
+            }
+
 
             long end = watch.ElapsedMilliseconds;
             Console.WriteLine("Grabbed images " + (end - start) + "ms");
@@ -1012,9 +1026,15 @@ namespace WFInfo
             int cropBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * lowScaling);
             int cropHei = cropBot - cropTop;
             cropTop = cropTop - mostTop;
+            try {
+                Rectangle rect = new Rectangle(cropLeft, cropTop, cropWidth, cropHei);
+                partialScreenshot = preFilter.Clone(rect, System.Drawing.Imaging.PixelFormat.DontCare);
+            }
+            catch (Exception ex) {
+                Main.AddLog("Something went wrong while trying to copy the right part of the screen into partial screenshot: " + ex.ToString());
+                throw;
+            }
 
-            Rectangle rect = new Rectangle(cropLeft, cropTop, cropWidth, cropHei);
-            partialScreenshot = preFilter.Clone(rect, System.Drawing.Imaging.PixelFormat.DontCare);
 
             end = watch.ElapsedMilliseconds;
             Console.WriteLine("Finished function " + (end - beginning) + "ms");
