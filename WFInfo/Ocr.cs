@@ -209,6 +209,7 @@ namespace WFInfo
 
                 firstChecks = new string[parts.Count];
                 Task[] tasks = new Task[parts.Count];
+                Console.WriteLine(parts.Count);
                 for (int i = 0; i < parts.Count; i++)
                 {
                     int tempI = i;
@@ -221,7 +222,9 @@ namespace WFInfo
                     clipboard = string.Empty;
                     int width = (int)(pixleRewardWidth * screenScaling * uiScalingVal) + 10;
                     int startX = center.X - width / 2 + (int)(width * 0.004);
-                    if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
+                    Console.WriteLine("lentgh is: "+ firstChecks.Length);
+                    if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8;}
+                    if (firstChecks.Length == 4 && firstChecks[0].Replace(" ", "").Length < 6) { startX += 2 * (width / 8);}
                     int overWid = (int)(width / (4.1 * dpiScaling));
                     int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScalingVal);
                     int partNumber = 0;
@@ -644,12 +647,10 @@ namespace WFInfo
                             { //word is valid start comparing to others
                                 var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
 
-
-
                                 using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
-                                    if (paddedBounds.Height > 30 * screenScaling || paddedBounds.Width > 60 * screenScaling)
-                                    { //box is invalid, fill it out
+                                    if (paddedBounds.Height > 40 * screenScaling || paddedBounds.Width > 70 * screenScaling)
+                                    { //box is too large
                                         if (currentWord.Length > 3)
                                         { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
                                             g.DrawRectangle(new Pen(Brushes.Orange), paddedBounds);
