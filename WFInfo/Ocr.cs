@@ -266,7 +266,7 @@ namespace WFInfo
                                 {
                                     Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
                                     Main.overlays[partNumber].Resize(overWid);
-                                    Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY);
+                                    Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY, Settings.delay);
 
                                 }
                                 else
@@ -604,7 +604,7 @@ namespace WFInfo
                     Overlay itemOverlay = new Overlay();
                     itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
                     itemOverlay.Resize(width);
-                    itemOverlay.Display(snapItOrigin.X + (part.bounding.X - width / 8), (int)(snapItOrigin.Y + part.bounding.Y - itemOverlay.Height));
+                    itemOverlay.Display((int)(snapItOrigin.X + (part.bounding.X - width / 8) / dpiScaling), (int)((snapItOrigin.Y + part.bounding.Y - itemOverlay.Height) / dpiScaling));
                 });
             }
             Main.snapItOverlayWindow.tempImage.Dispose();
