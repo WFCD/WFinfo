@@ -355,7 +355,7 @@ namespace WFInfo
                     }
                     else
                     {
-                        Console.WriteLine("Cannot find: " + eqmt + " in equipmentData");
+                        Main.AddLog("Cannot find: " + eqmt + " in equipmentData");
                     }
                 }
             }

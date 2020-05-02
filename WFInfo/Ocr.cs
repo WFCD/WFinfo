@@ -209,7 +209,6 @@ namespace WFInfo
 
                 firstChecks = new string[parts.Count];
                 Task[] tasks = new Task[parts.Count];
-                Console.WriteLine(parts.Count);
                 for (int i = 0; i < parts.Count; i++)
                 {
                     int tempI = i;
@@ -222,9 +221,8 @@ namespace WFInfo
                     clipboard = string.Empty;
                     int width = (int)(pixleRewardWidth * screenScaling * uiScalingVal) + 10;
                     int startX = center.X - width / 2 + (int)(width * 0.004);
-                    Console.WriteLine("lentgh is: "+ firstChecks.Length);
-                    if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8;}
-                    if (firstChecks.Length == 4 && firstChecks[0].Replace(" ", "").Length < 6) { startX += 2 * (width / 8);}
+                    if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
+                    if (firstChecks.Length == 4 && firstChecks[0].Replace(" ", "").Length < 6) { startX += 2 * (width / 8); }
                     int overWid = (int)(width / (4.1 * dpiScaling));
                     int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScalingVal);
                     int partNumber = 0;
@@ -840,11 +838,15 @@ namespace WFInfo
             //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
             Bitmap preFilter;
 
-            try {
-                if (fullScreen != null) {
+            try
+            {
+                if (fullScreen != null)
+                {
                     Main.AddLog(fullScreen.ToString());
                     preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
-                } else {
+                }
+                else
+                {
                     preFilter = new Bitmap(mostWidth, mostBot - mostTop);
                     Main.AddLog("Pre filter: " + preFilter.ToString());
                     Main.AddLog("window.Left: " + window.Left);
@@ -857,14 +859,15 @@ namespace WFInfo
                         graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(preFilter.Width, preFilter.Height));
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Main.AddLog("Something went wrong with getting the starting image: " + ex.ToString());
                 throw;
             }
 
 
             long end = watch.ElapsedMilliseconds;
-            Console.WriteLine("Grabbed images " + (end - start) + "ms");
+            Main.AddLog("Grabbed images " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
 
             double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -892,19 +895,18 @@ namespace WFInfo
                     active = (WFtheme)i;
                 }
             }
-            Console.WriteLine();
 
             Main.AddLog("CLOSEST THEME(" + max.ToString("F2") + "): " + active.ToString());
 
             end = watch.ElapsedMilliseconds;
-            Console.WriteLine("Got theme " + (end - start) + "ms");
+            Main.AddLog("Got theme " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
 
             int[] rows = new int[preFilter.Height];
             // 0 => 50   27 => 77   50 => 100
 
 
-            //Console.WriteLine("ROWS: 0 to " + preFilter.Height);
+            //Main.AddLog("ROWS: 0 to " + preFilter.Height);
             for (int y = 0; y < preFilter.Height; y++)
             {
                 rows[y] = 0;
@@ -920,11 +922,10 @@ namespace WFInfo
                 }
                 //Console.Write(rows[y] + " ");
             }
-            //Console.WriteLine();
 
 
             end = watch.ElapsedMilliseconds;
-            Console.WriteLine("Filtered Image " + (end - start) + "ms");
+            Main.AddLog("Filtered Image " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
 
             double[] percWeights = new double[51];
@@ -980,7 +981,7 @@ namespace WFInfo
             }
 
             end = watch.ElapsedMilliseconds;
-            Console.WriteLine("Got scaling " + (end - start) + "ms");
+            Main.AddLog("Got scaling " + (end - start) + "ms");
 
             int[] topFive = new int[] { -1, -1, -1, -1, -1 };
 
@@ -1010,7 +1011,7 @@ namespace WFInfo
                 //int textTailBot = (int)(screenScaling * TextSegments[3] * scale / 100);
 
                 Main.AddLog("RANK " + (5 - i) + " SCALE: " + (topFive[i] + 50) + "%\t\t" + percWeights[topFive[i]].ToString("F2") + " -- " + topWeights[topFive[i]].ToString("F2") + ", " + midWeights[topFive[i]].ToString("F2") + ", " + botWeights[topFive[i]].ToString("F2"));
-                //Console.WriteLine("\t" + yFromTop + " - " + textTop + " - " + textTopBot + " - " + textBothBot + " - " + textTailBot);
+                //Main.AddLog("\t" + yFromTop + " - " + textTop + " - " + textTopBot + " - " + textBothBot + " - " + textTailBot);
             }
 
 
@@ -1027,18 +1028,20 @@ namespace WFInfo
             int cropBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * lowScaling);
             int cropHei = cropBot - cropTop;
             cropTop = cropTop - mostTop;
-            try {
+            try
+            {
                 Rectangle rect = new Rectangle(cropLeft, cropTop, cropWidth, cropHei);
                 partialScreenshot = preFilter.Clone(rect, System.Drawing.Imaging.PixelFormat.DontCare);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Main.AddLog("Something went wrong while trying to copy the right part of the screen into partial screenshot: " + ex.ToString());
                 throw;
             }
 
 
             end = watch.ElapsedMilliseconds;
-            Console.WriteLine("Finished function " + (end - beginning) + "ms");
+            Main.AddLog("Finished function " + (end - beginning) + "ms");
 
             return FilterAndSeparatePartsFromPartBox(partialScreenshot, active);
         }
@@ -1177,7 +1180,6 @@ namespace WFInfo
                     {
                         iter.TryGetBoundingBox(PageIteratorLevel.Word, out outRect);
                         string word = iter.GetText(PageIteratorLevel.Word);
-                        //Console.WriteLine(outRect.ToString());
                         if (word != null)
                         {
                             word = RE.Replace(word, "").Trim();
@@ -1257,7 +1259,7 @@ namespace WFInfo
             ret.Add((currPartTop.Trim() + " " + currPartBot.Trim()).Trim());
 
 
-            Console.WriteLine((ret[0].Length == 0 ? ret.Count - 1 : ret.Count) + " Players Found -- Odds (" + oddCount + ") vs Evens (" + evenCount + ")");
+            Main.AddLog((ret[0].Length == 0 ? ret.Count - 1 : ret.Count) + " Players Found -- Odds (" + oddCount + ") vs Evens (" + evenCount + ")");
 
             if ((oddCount == 0 && evenCount == 0) || oddCount == evenCount)
             { //Detected 0 rewards

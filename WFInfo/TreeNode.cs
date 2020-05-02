@@ -417,7 +417,7 @@ namespace WFInfo
             {
                 prnt += kvp.Key + "(" + kvp.Value + ") ";
             }
-            Console.WriteLine(prnt);
+            Main.AddLog(prnt);
         }
 
         public bool FilterSearchText(string[] searchText, bool removeLeaves, bool additionalFilter = false, Dictionary<string, bool> matchedText = null)
