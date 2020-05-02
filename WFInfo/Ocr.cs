@@ -284,15 +284,16 @@ namespace WFInfo
 
                             if (platinum > 0)
                             {
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
-                                if (partNumber == firstChecks.Length - 1)
-                                {
-                                    clipboard += Settings.ClipboardTemplate;
-                                }
-                                else
+                                if (clipboard != String.Empty)
                                 {
                                     clipboard += "-  ";
                                 }
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
+                            }
+
+                            if ((partNumber == firstChecks.Length - 1) && (clipboard != String.Empty))
+                            {
+                                clipboard += Settings.ClipboardTemplate;
                             }
 
                             Main.RunOnUIThread(() =>
