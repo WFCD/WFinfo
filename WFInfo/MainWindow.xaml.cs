@@ -114,6 +114,9 @@ namespace WFInfo
                 if (!Settings.settingsObj.TryGetValue("Delay", out _))
                     Settings.settingsObj["Delay"] = 10000;
                 Settings.delay = Convert.ToInt32(Settings.settingsObj.GetValue("Delay"));
+                if (!Settings.settingsObj.TryGetValue("Highlight", out _))
+                    Settings.settingsObj["Highlight"] = false;
+                Settings.Highlight = Convert.ToBoolean(Settings.settingsObj.GetValue("Highlight"));
 
                 Settings.Save();
 
