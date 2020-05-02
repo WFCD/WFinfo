@@ -121,7 +121,7 @@ namespace WFInfo
         }
 
         // Load market data from Sheets
-        private bool LoadMarket(bool force = false)
+        private bool LoadMarket(JObject allFiltered, bool force = false)
         {
             if (!force && File.Exists(marketDataPath) && File.Exists(marketItemsPath))
             {
@@ -158,12 +158,11 @@ namespace WFInfo
                 }
             }
 
-            marketData["Forma Blueprint"] = new JObject
+            // Add default values for ignored items
+            foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
             {
-                { "ducats", 0 },
-                { "plat", 0 },
-                { "volume", 0 },
-            };
+                marketData[ignored.Key] = ignored.Value;
+            }
 
             marketData["timestamp"] = DateTime.Now;
             marketData["version"] = Main.BuildVersion;
@@ -204,7 +203,7 @@ namespace WFInfo
             };
         }
 
-        private bool LoadEqmtData(bool force = false)
+        private bool LoadEqmtData(JObject allFiltered, bool force = false)
         {
             if (equipmentData == null)
                 equipmentData = File.Exists(eqmtDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath)) : new JObject();
@@ -217,8 +216,6 @@ namespace WFInfo
             // fill in nameData
             // fill in relicData
 
-            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
-
             DateTime filteredDate = allFiltered["timestamp"].ToObject<DateTime>().ToLocalTime().AddHours(-1);
             DateTime eqmtDate = equipmentData.TryGetValue("timestamp", out _) ? equipmentData["timestamp"].ToObject<DateTime>() : filteredDate;
 
@@ -228,7 +225,6 @@ namespace WFInfo
                 relicData = new JObject();
                 relicData["timestamp"] = DateTime.Now;
                 nameData = new JObject();
-                nameData["Forma Blueprint"] = "Forma Blueprint";
 
                 foreach (KeyValuePair<string, JToken> era in allFiltered["relics"].ToObject<JObject>())
                 {
@@ -285,6 +281,11 @@ namespace WFInfo
                     }
                 }
 
+                // Add default values for ignored items
+                foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
+                {
+                    nameData[ignored.Key] = ignored.Key;
+                }
 
                 Main.AddLog("Prime Database has been downloaded");
                 return true;
@@ -364,7 +365,8 @@ namespace WFInfo
         public bool Update()
         {
             Main.AddLog("Checking for Updates to Databases");
-            bool saveDatabases = LoadMarket();
+            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
+            bool saveDatabases = LoadMarket(allFiltered);
 
             foreach (KeyValuePair<string, JToken> elem in marketItems)
             {
@@ -382,7 +384,7 @@ namespace WFInfo
             }
             Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm"); });
 
-            saveDatabases = LoadEqmtData(saveDatabases);
+            saveDatabases = LoadEqmtData(allFiltered, saveDatabases);
             Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm"); });
 
             if (saveDatabases)
@@ -396,7 +398,8 @@ namespace WFInfo
             try
             {
                 Main.AddLog("Forcing market update");
-                LoadMarket(true);
+                JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
+                LoadMarket(allFiltered, true);
 
                 foreach (KeyValuePair<string, JToken> elem in marketItems)
                 {
@@ -447,7 +450,8 @@ namespace WFInfo
             try
             {
                 Main.AddLog("Forcing equipment update");
-                LoadEqmtData(true);
+                JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
+                LoadEqmtData(allFiltered, true);
                 SaveAllJSONs();
                 Main.RunOnUIThread(() =>
                 {
@@ -478,12 +482,23 @@ namespace WFInfo
         public string PartsOwned(string name)
         {
             if (name.IndexOf("Prime") < 0)
-                return "";
+                return "0";
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
             string owned = equipmentData[eqmt]["parts"][name]["owned"].ToString();
             if (owned == "0")
-                return "";
-            return owned + "/" + equipmentData[eqmt]["parts"][name]["count"].ToString();
+                return "0";
+            return owned;
+        }
+
+        public string PartsCount(string name)
+        {
+            if (name.IndexOf("Prime") < 0)
+                return "0";
+            string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
+            string count = equipmentData[eqmt]["parts"][name]["count"].ToString();
+            if (count == "0")
+                return "0";
+            return count;
         }
 
         private void AddElement(int[,] d, List<int> xList, List<int> yList, int x, int y)
@@ -673,47 +688,52 @@ namespace WFInfo
 
         public string GetSetName(string name)
         {
-            name = name.ToLower();
-            name = name.Replace("*", "");
-            string result = null;
-            int low = 9999;
+            //name = name.ToLower();
+            //name = name.Replace("*", "");
+            //string result = null;
+            //int low = 9999;
 
-            foreach (KeyValuePair<string, JToken> prop in marketData)
-            {
-                string str = prop.Key.ToLower();
-                str = str.Replace("neuroptics", "");
-                str = str.Replace("chassis", "");
-                str = str.Replace("sytems", "");
-                str = str.Replace("carapace", "");
-                str = str.Replace("cerebrum", "");
-                str = str.Replace("blueprint", "");
-                str = str.Replace("harness", "");
-                str = str.Replace("blade", "");
-                str = str.Replace("pouch", "");
-                str = str.Replace("barrel", "");
-                str = str.Replace("receiver", "");
-                str = str.Replace("stock", "");
-                str = str.Replace("disc", "");
-                str = str.Replace("grip", "");
-                str = str.Replace("string", "");
-                str = str.Replace("handle", "");
-                str = str.Replace("ornament", "");
-                str = str.Replace("wings", "");
-                str = str.Replace("blades", "");
-                str = str.Replace("hilt", "");
-                str = str.TrimEnd();
-                int val = LevenshteinDistance(str, name);
-                if (val < low)
-                {
-                    low = val;
-                    result = prop.Key;
-                }
-            }
+            //foreach (KeyValuePair<string, JToken> prop in marketData)
+            //{
+            //    string str = prop.Key.ToLower();
+            //    str = str.Replace("neuroptics", "");
+            //    str = str.Replace("lower", "");
+            //    str = str.Replace("upper", "");
+            //    str = str.Replace("limb", "");
+            //    str = str.Replace("chassis", "");
+            //    str = str.Replace("sytems", "");
+            //    str = str.Replace("carapace", "");
+            //    str = str.Replace("cerebrum", "");
+            //    str = str.Replace("blueprint", "");
+            //    str = str.Replace("harness", "");
+            //    str = str.Replace("blade", "");
+            //    str = str.Replace("pouch", "");
+            //    str = str.Replace("barrel", "");
+            //    str = str.Replace("receiver", "");
+            //    str = str.Replace("stock", "");
+            //    str = str.Replace("disc", "");
+            //    str = str.Replace("grip", "");
+            //    str = str.Replace("string", "");
+            //    str = str.Replace("handle", "");
+            //    str = str.Replace("ornament", "");
+            //    str = str.Replace("wings", "");
+            //    str = str.Replace("blades", "");
+            //    str = str.Replace("hilt", "");
+            //    str = str.TrimEnd();
+            //    int val = LevenshteinDistance(str, name);
+            //    if (val < low)
+            //    {
+            //        low = val;
+            //        result = prop.Key;
+            //    }
+            //}
 
-            result = result.ToLower();
+            string result = name.ToLower();
+            result = result.Replace("lower limb", "");
+            result = result.Replace("upper limb", "");
             result = result.Replace("neuroptics", "");
             result = result.Replace("chassis", "");
-            result = result.Replace("sytems", "");
+            result = result.Replace("systems", "");
             result = result.Replace("carapace", "");
             result = result.Replace("cerebrum", "");
             result = result.Replace("blueprint", "");
@@ -732,7 +752,7 @@ namespace WFInfo
             result = result.Replace("wings", "");
             result = result.Replace("blades", "");
             result = result.Replace("hilt", "");
-            result = result.TrimEnd() + " set";
+            result = result.TrimEnd();
             result = Main.culture.TextInfo.ToTitleCase(result);
             return result;
         }
@@ -772,27 +792,6 @@ namespace WFInfo
 
             return lowest;
         }
-
-        //private Boolean waiting = false;
-        //private void WatcherCreated(Object sender, FileSystemEventArgs e)
-        //{
-        //    waiting = true;
-        //}
-
-        //private void WatcherChanged(Object sender, FileSystemEventArgs e)
-        //{
-        //    if (waiting)
-        //    {
-        //        waiting = false;
-        //        Thread.Sleep(500);
-        //        OCR.ParseFile(e.FullPath);
-        //    }
-        //}
-        ///
-        ///
-        /// WIP - the rest code is TBD
-        ///
-        /// 
 
         private Task autoThread;
 

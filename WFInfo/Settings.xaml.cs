@@ -51,6 +51,7 @@ namespace WFInfo
         public static string ClipboardTemplate;
         public static bool autoScaling;
         internal static int delay;
+        public static bool Highlight;
 
         public static int scaling { get; internal set; }
         public static bool auto { get; internal set; }

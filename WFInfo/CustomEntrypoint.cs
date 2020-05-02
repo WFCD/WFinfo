@@ -138,6 +138,11 @@ namespace WFInfo
         // Detect if CPU has necessary optimizations
         public static bool HasAvxSupport()
         {
+            if (File.Exists(appPath + @"/old_as_fuck.boys"))
+            {
+                Console.WriteLine("Yup, she old");
+                return false;
+            }
             try
             {
                 return (GetEnabledXStateFeatures() & 4) != 0;
