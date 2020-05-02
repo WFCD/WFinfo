@@ -111,6 +111,9 @@ namespace WFInfo
                     Settings.settingsObj["SnapitExport"] = false;
                 Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"));
 
+                if (!Settings.settingsObj.TryGetValue("Delay", out _))
+                    Settings.settingsObj["Delay"] = 10000;
+                Settings.delay = Convert.ToInt32(Settings.settingsObj.GetValue("Delay"));
 
                 Settings.Save();
 
