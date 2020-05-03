@@ -27,7 +27,8 @@ namespace WFInfo
                 @"\x86\" + liblept + ".dll",
                 @"\x64\" + libtesseract + ".dll",
                 @"\x64\" + liblept + ".dll",
-                @"\Tesseract.dll"
+                @"\Tesseract.dll",
+                @"\CustomCPUID.dll"
         };
 
         public static string[] list_of_checksums = new string[]
@@ -36,7 +37,8 @@ namespace WFInfo
                 "99d45c6347e46c35ece6d735df42f7f1",     //  x86/liblept1760  
                 "bfbaf1f36f4767648a229c65e46ec338",     //  x64/libtesseract400 
                 "bd2b84e121f1a3e7786f2cfa2d351eea",     //  x64/liblept1760 
-                "7849c3e838444e696fcfaa5e8b9b5c1e"      //  Tesseract
+                "7849c3e838444e696fcfaa5e8b9b5c1e",     //  Tesseract
+                "23b463f8811480e508f10ce5e984bf2f"      //  CPU AVX2 detection
         };
 
         public static string[] list_of_checksums_AVX_free = new string[]
@@ -45,7 +47,8 @@ namespace WFInfo
                 "99d45c6347e46c35ece6d735df42f7f1",     //  x86/liblept1760  
                 "cf729c20c0fe44f27b235f8ca5efe6b3",     //  x64/libtesseract400 
                 "bd2b84e121f1a3e7786f2cfa2d351eea",     //  x64/liblept1760 
-                "7849c3e838444e696fcfaa5e8b9b5c1e"      //  Tesseract
+                "7849c3e838444e696fcfaa5e8b9b5c1e",     //  Tesseract
+                "23b463f8811480e508f10ce5e984bf2f"      //  CPU AVX2 detection
         };
 
         public static string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
