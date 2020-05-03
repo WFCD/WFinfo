@@ -27,8 +27,7 @@ namespace WFInfo
                 @"\x86\" + liblept + ".dll",
                 @"\x64\" + libtesseract + ".dll",
                 @"\x64\" + liblept + ".dll",
-                @"\Tesseract.dll",
-                @"\CustomCPUID.dll"
+                @"\Tesseract.dll"
         };
 
         public static string[] list_of_checksums = new string[]
@@ -37,8 +36,7 @@ namespace WFInfo
                 "99d45c6347e46c35ece6d735df42f7f1",     //  x86/liblept1760  
                 "bfbaf1f36f4767648a229c65e46ec338",     //  x64/libtesseract400 
                 "bd2b84e121f1a3e7786f2cfa2d351eea",     //  x64/liblept1760 
-                "7849c3e838444e696fcfaa5e8b9b5c1e",     //  Tesseract
-                "23b463f8811480e508f10ce5e984bf2f"      //  CPU AVX2 detection
+                "7849c3e838444e696fcfaa5e8b9b5c1e"      //  Tesseract
         };
 
         public static string[] list_of_checksums_AVX_free = new string[]
@@ -47,8 +45,7 @@ namespace WFInfo
                 "99d45c6347e46c35ece6d735df42f7f1",     //  x86/liblept1760  
                 "cf729c20c0fe44f27b235f8ca5efe6b3",     //  x64/libtesseract400 
                 "bd2b84e121f1a3e7786f2cfa2d351eea",     //  x64/liblept1760 
-                "7849c3e838444e696fcfaa5e8b9b5c1e",     //  Tesseract
-                "23b463f8811480e508f10ce5e984bf2f"      //  CPU AVX2 detection
+                "7849c3e838444e696fcfaa5e8b9b5c1e"      //  Tesseract
         };
 
         public static string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
@@ -72,8 +69,7 @@ namespace WFInfo
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x64");
 
             Directory.CreateDirectory(appdata_tessdata_folder);
-
-            AvxSupport = isAVX2supported();
+            AvxSupport = isAVX2Available();
 
             if (!AvxSupport)
             {
@@ -138,10 +134,37 @@ namespace WFInfo
             }
 
         }
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool isAVX2supported();
 
-        // Detect if CPU has necessary optimizations
-        [DllImport("CustomCPUID.dll", CharSet = CharSet.Unicode)]
-        public static extern bool isAVX2supported();
+        public static bool isAVX2Available()
+        {
+            string dll = "CustomCPUID.dll";
+            string path = app_data_tesseract_catalog + @"\" + dll;
+            string md5 = "23b463f8811480e508f10ce5e984bf2f";
+            if (!File.Exists(path) || GetMD5hash(path) != md5)
+            {
+                WebClient webClient = new WebClient();
+                webClient.DownloadFile(tesseract_hotlink_prefix + "/" + dll, path);
+            }
+            IntPtr pDll = NativeMethods.LoadLibrary(path);
+            IntPtr pAddressOfFunctionToCall = NativeMethods.GetProcAddress(pDll, "isAVX2supported");
+            isAVX2supported isAvx2Supported = (isAVX2supported)Marshal.GetDelegateForFunctionPointer(
+                pAddressOfFunctionToCall,
+                typeof(isAVX2supported));
+            return isAvx2Supported();
+        }
+        static class NativeMethods
+        {
+            [DllImport("kernel32.dll")]
+            public static extern IntPtr LoadLibrary(string dllToLoad);
+
+            [DllImport("kernel32.dll")]
+            public static extern IntPtr GetProcAddress(IntPtr hModule, string procedureName);
+
+            [DllImport("kernel32.dll")]
+            public static extern bool FreeLibrary(IntPtr hModule);
+        }
 
         public static string GetMD5hash(string filePath)
         {
