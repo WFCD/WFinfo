@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo"
         mc:Ignorable="d"
-        Title="Welcome to WFInfo" Height="248" Width="390" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+        Title="Welcome to WFInfo" Height="330" Width="390" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <Style TargetType="{x:Type FrameworkElement}" x:Key="baseStyle">
             <Setter Property="TextElement.Foreground" Value="#FFB1D0D9"/>
@@ -25,20 +25,9 @@
         <Rectangle Stroke="#FF707070"/>
         <Rectangle Height="26" Stroke="#FF646464" VerticalAlignment="Top" Fill="#FF0F0F0F"/>
         <Label x:Name="errorText" Content="Welcome to WFInfo!" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,31,0,0" FontSize="18"/>
-        <TextBlock Margin="10,63,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <Run Text="Here's a quick guide on how to get started"/>
-            <LineBreak/>
-            <LineBreak/><Run Text="First go into Settings("/><InlineUIContainer BaselineAlignment="Center"><Image Source="Resources/Settings.png" Stretch="Uniform" Width="13"/></InlineUIContainer><Run Text=") and verify the following settings:"/>
-            <LineBreak/><Run Text="&#x2022; Overlay will overlay the results on top of Warframe"/>
-            <LineBreak/><Run Text="&#x2022; Window will make it display elsewhere, like a 2nd monitor"/>
-            <LineBreak/><Run Text="&#x2022; Activation Key is the key/mouse press that will trigger the display"/>
-            <LineBreak/><Run Text="&#x2022; Scaling needs to be set to your warframe scaling setting"/>
-            <LineBreak/>
-            <LineBreak/><Run Text="After all of these have been checked,"/>
-            <LineBreak/><Run Text="You should be good to use our app!"/>
-            <LineBreak/>
-            <LineBreak/><Run Text="If you have any questions or need help, we're active in Discord!"/>
-        </TextBlock>
+        <TextBlock Margin="20,63,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Height="252"><Run Text="Here's a quick guide on how to get started"/><LineBreak/><LineBreak/><Run Text="First go into Settings("/><InlineUIContainer BaselineAlignment="Center">
+                <Image Source="Resources/Settings.png" Stretch="Uniform" Width="13"/>
+            </InlineUIContainer><Run Text=") and verify the following settings:"/><LineBreak/><Run Text="* Overlay will overlay the results on top of Warframe"/><LineBreak/><Run Text="* Window will make it display elsewhere, like a 2nd monitor"/><LineBreak/><Run Text="* Activation Key is the key/mouse press that will trigger the display"/><LineBreak/><Run Text="* Scaling needs to be set to your warframe scaling setting"/><LineBreak/><LineBreak/><Run Text="After all of these have been checked,"/><LineBreak/><Run Text="You should be good to use our app!"/><LineBreak/><Run/><LineBreak/><Run Text="If you want to use Snap-it make sure that you have &quot;labels&quot;"/><LineBreak/><Run Text="activated in your settings! It is required."/><LineBreak/><Run Text="To activate Snap-it press ctrl + activation key, "/><LineBreak/><Run Text="then drag a rectangle over the items you want to scan."/><LineBreak/><LineBreak/><Run Text="If you have any questions or need help, we're active in Discord!"/></TextBlock>
         <TextBlock Text="WFInfo" Margin="34,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="/WFInfo;component/Resources/Roboto/#Roboto Black" Height="15" FontWeight="Bold"/>
         <Image Margin="2,0,0,0" Source="Resources/WFLogo.png" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="23" >
             <Image.RenderTransform>

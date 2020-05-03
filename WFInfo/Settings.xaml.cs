@@ -50,6 +50,7 @@ namespace WFInfo
         public static int imageRetentionTime;
         public static string ClipboardTemplate;
         public static bool autoScaling;
+        internal static int delay;
         public static bool Highlight;
 
         public static int scaling { get; internal set; }

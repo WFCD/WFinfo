@@ -130,7 +130,7 @@ namespace WFInfo
                                 {
                                     foreach (string file in openFileDialog.FileNames)
                                     {
-                                        Console.WriteLine("Testing fullscreen file: " + file.ToString());
+                                        Main.AddLog("Testing fullscreen file: " + file.ToString());
 
                                         Bitmap image = new Bitmap(file);
                                         OCR.ProcessSnapIt(image, image, new Point(0, 0));
@@ -199,7 +199,7 @@ namespace WFInfo
                                 {
                                     foreach (string file in openFileDialog.FileNames)
                                     {
-                                        Console.WriteLine("Testing snapit on file: " + file.ToString());
+                                        Main.AddLog("Testing snapit on file: " + file.ToString());
 
                                         Bitmap image = new Bitmap(file);
                                         OCR.ProcessSnapIt(image, image, new Point(0, 0));
@@ -267,7 +267,7 @@ namespace WFInfo
                         {
                             foreach (string file in openFileDialog.FileNames)
                             {
-                                Console.WriteLine("Testing file: " + file.ToString());
+                                Main.AddLog("Testing file: " + file.ToString());
 
                                 //Get the path of specified file
                                 Bitmap image = new Bitmap(file);
