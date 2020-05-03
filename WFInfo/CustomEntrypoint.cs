@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,7 +70,7 @@ namespace WFInfo
 
             Directory.CreateDirectory(appdata_tessdata_folder);
 
-            AvxSupport = HasAvxSupport();
+            AvxSupport = isAVX2supported();
 
             if (!AvxSupport)
             {
@@ -136,22 +137,8 @@ namespace WFInfo
         }
 
         // Detect if CPU has necessary optimizations
-        public static bool HasAvxSupport()
-        {
-            if (File.Exists(appPath + @"/old_as_fuck.boys"))
-            {
-                Console.WriteLine("Yup, she old");
-                return false;
-            }
-            try
-            {
-                return (GetEnabledXStateFeatures() & 4) != 0;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        [DllImport("CustomCPUID.dll", CharSet = CharSet.Unicode)]
+        public static extern bool isAVX2supported();
 
         public static string GetMD5hash(string filePath)
         {
