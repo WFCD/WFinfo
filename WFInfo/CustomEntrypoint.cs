@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,8 +69,7 @@ namespace WFInfo
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x64");
 
             Directory.CreateDirectory(appdata_tessdata_folder);
-
-            AvxSupport = HasAvxSupport();
+            AvxSupport = isAVX2Available();
 
             if (!AvxSupport)
             {
@@ -134,23 +134,36 @@ namespace WFInfo
             }
 
         }
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool isAVX2supported();
 
-        // Detect if CPU has necessary optimizations
-        public static bool HasAvxSupport()
+        public static bool isAVX2Available()
         {
-            if (File.Exists(appPath + @"/old_as_fuck.boys"))
+            string dll = "CustomCPUID.dll";
+            string path = app_data_tesseract_catalog + @"\" + dll;
+            string md5 = "23b463f8811480e508f10ce5e984bf2f";
+            if (!File.Exists(path) || GetMD5hash(path) != md5)
             {
-                Console.WriteLine("Yup, she old");
-                return false;
+                WebClient webClient = new WebClient();
+                webClient.DownloadFile(tesseract_hotlink_prefix + "/" + dll, path);
             }
-            try
-            {
-                return (GetEnabledXStateFeatures() & 4) != 0;
-            }
-            catch
-            {
-                return false;
-            }
+            IntPtr pDll = NativeMethods.LoadLibrary(path);
+            IntPtr pAddressOfFunctionToCall = NativeMethods.GetProcAddress(pDll, "isAVX2supported");
+            isAVX2supported isAvx2Supported = (isAVX2supported)Marshal.GetDelegateForFunctionPointer(
+                pAddressOfFunctionToCall,
+                typeof(isAVX2supported));
+            return isAvx2Supported();
+        }
+        static class NativeMethods
+        {
+            [DllImport("kernel32.dll")]
+            public static extern IntPtr LoadLibrary(string dllToLoad);
+
+            [DllImport("kernel32.dll")]
+            public static extern IntPtr GetProcAddress(IntPtr hModule, string procedureName);
+
+            [DllImport("kernel32.dll")]
+            public static extern bool FreeLibrary(IntPtr hModule);
         }
 
         public static string GetMD5hash(string filePath)
