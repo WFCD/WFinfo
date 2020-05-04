@@ -667,7 +667,7 @@ namespace WFInfo
                     Overlay itemOverlay = new Overlay();
                     itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
                     itemOverlay.Resize(width);
-                    itemOverlay.Display((int)(snapItOrigin.X + (part.bounding.X - width / 8) / dpiScaling), (int)((snapItOrigin.Y + part.bounding.Y - itemOverlay.Height) / dpiScaling));
+                    itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.bounding.Y - itemOverlay.Height) / dpiScaling));
                 });
             }
             Main.snapItOverlayWindow.tempImage.Dispose();
@@ -1353,7 +1353,7 @@ namespace WFInfo
             if (window == null || window.Width == 0 || window.Height == 0)
             {
                 window = Screen.PrimaryScreen.Bounds;
-                center = new Point(window.Width / 2, window.Height / 2);
+                center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
 
                 width *= (int)dpiScaling;
                 height *= (int)dpiScaling;
@@ -1372,8 +1372,10 @@ namespace WFInfo
         {
             Main.snapItOverlayWindow.Populate(CaptureScreenshot());
             Main.snapItOverlayWindow.Show();
-            Main.snapItOverlayWindow.Top = 0;
-            Main.snapItOverlayWindow.WindowState = System.Windows.WindowState.Maximized;
+            Main.snapItOverlayWindow.Left = window.Left;
+            Main.snapItOverlayWindow.Top = window.Top;
+            Main.snapItOverlayWindow.Width = window.Width;
+            Main.snapItOverlayWindow.Height = window.Height;
             Main.snapItOverlayWindow.Topmost = true;
             Main.snapItOverlayWindow.Focusable = true;
             Main.snapItOverlayWindow.Focus();
@@ -1427,7 +1429,7 @@ namespace WFInfo
                 int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)dpiScaling;
                 int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
                 window = new Rectangle(0, 0, width, height);
-                center = new Point(window.Width / 2, window.Height / 2);
+                center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
                 if (image != null)
                     Main.AddLog("DETECTED LOADED IMAGE BOUNDS: " + window.ToString());
                 else
@@ -1444,7 +1446,7 @@ namespace WFInfo
                     int width = Screen.PrimaryScreen.Bounds.Width * (int)dpiScaling;
                     int height = Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
                     window = new Rectangle(0, 0, width, height);
-                    center = new Point(window.Width / 2, window.Height / 2);
+                    center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
                     Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + Screen.PrimaryScreen.DeviceName);
                     RefreshScaling();
                     return;
@@ -1492,7 +1494,7 @@ namespace WFInfo
                     Main.AddLog("Fullscreen detected (0x" + styles.ToString("X8") + ")");
                     currentStyle = WindowStyle.FULLSCREEN;
                 }
-                center = new Point(window.Width / 2, window.Height / 2);
+                center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
                 RefreshScaling();
             }
         }
