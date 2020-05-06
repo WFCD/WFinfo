@@ -347,7 +347,7 @@ namespace WFInfo
         }
 
         [DllImport("user32.dll")]
-        public static extern int ToUnicode(
+        private static extern int ToUnicode(
             uint wVirtKey,
             uint wScanCode,
             byte[] lpKeyState,
@@ -360,7 +360,7 @@ namespace WFInfo
         //public static extern bool GetKeyboardState(byte[] lpKeyState);
 
         [DllImport("user32.dll")]
-        public static extern uint MapVirtualKey(uint uCode, MapType uMapType);
+        private static extern uint MapVirtualKey(uint uCode, MapType uMapType);
 
         public static char GetCharFromKey(Key key)
         {
