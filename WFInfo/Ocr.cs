@@ -193,8 +193,8 @@ namespace WFInfo
 
                 if (Settings.autoScaling)
                 {
-                    parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
                     bigScreenshot = file ?? CaptureScreenshot();
+                    parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
 
                 }
                 else
@@ -220,6 +220,16 @@ namespace WFInfo
 
                 // Remove any empty items from the array
                 firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s)).ToArray();
+
+                if (firstChecks == null || firstChecks.Length == 0 || CheckIfError()) {
+                    Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
+                    Main.StatusUpdate("Couldn't find any rewards to display", 2);
+                    if (firstChecks == null) {
+                        Main.RunOnUIThread(() => {
+                            Main.SpawnErrorPopup(time);
+                        });
+                    }
+                }
                 double bestPlat = 0;
                 int bestDucat = 0;
                 int bestPlatItem = 0;
@@ -355,19 +365,6 @@ namespace WFInfo
                     Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
                 }
 
-                if (firstChecks == null || CheckIfError())
-                {
-                    if (firstChecks == null)
-                    {
-                        Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
-                        Main.StatusUpdate("Couldn't find any rewards to display", 2);
-                    }
-                    Main.RunOnUIThread(() =>
-                    {
-                        Main.SpawnErrorPopup(time);
-                    });
-
-                }
                 watch.Stop();
 
                 (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
