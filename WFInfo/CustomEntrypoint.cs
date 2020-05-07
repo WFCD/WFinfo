@@ -13,15 +13,15 @@ namespace WFInfo
 {
     public class CustomEntrypoint
     {
-        public const string traineddata = "engbest.traineddata";
-        public const string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/" + traineddata;
-        public const string traineddata_md5 = "7af2ad02d11702c7092a5f8dd044d52f";
+        private const string traineddata = "engbest.traineddata";
+        private const string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/" + traineddata;
+        private const string traineddata_md5 = "7af2ad02d11702c7092a5f8dd044d52f";
 
-        public const string liblept = "liblept1760";
-        public const string libtesseract = "libtesseract400";
-        public const string tesseract_version_folder = "tesseract4";
+        private const string liblept = "liblept1760";
+        private const string libtesseract = "libtesseract400";
+        private const string tesseract_version_folder = "tesseract4";
 
-        public static string[] list_of_dlls = new string[]
+        private static string[] list_of_dlls = new string[]
         {
                 @"\x86\" + libtesseract + ".dll",
                 @"\x86\" + liblept + ".dll",
@@ -30,7 +30,7 @@ namespace WFInfo
                 @"\Tesseract.dll"
         };
 
-        public static string[] list_of_checksums = new string[]
+        private static string[] list_of_checksums = new string[]
         {
                 "e5254009fce68dc5ace9307cb5e0ee5f",     //  x86/libtesseract400
                 "99d45c6347e46c35ece6d735df42f7f1",     //  x86/liblept1760  
@@ -39,7 +39,7 @@ namespace WFInfo
                 "7849c3e838444e696fcfaa5e8b9b5c1e"      //  Tesseract
         };
 
-        public static string[] list_of_checksums_AVX_free = new string[]
+        private static string[] list_of_checksums_AVX_free = new string[]
         {
                 "b03b474606c397c716bd509f19fb8a2d",     //  x86/libtesseract400
                 "99d45c6347e46c35ece6d735df42f7f1",     //  x86/liblept1760  
@@ -48,16 +48,16 @@ namespace WFInfo
                 "7849c3e838444e696fcfaa5e8b9b5c1e"      //  Tesseract
         };
 
-        public static string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
-        public static string tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
-        public static string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
+        private static readonly string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
+        private static string tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
+        private static readonly string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
 
-        public static string tessdata_local = @"tessdata\" + traineddata;
-        public static string appdata_tessdata_folder = appPath + @"\tessdata";
-        public static string app_data_traineddata = appdata_tessdata_folder + @"\" + traineddata;
+        private const string tessdata_local = @"tessdata\" + traineddata;
+        private static readonly string appdata_tessdata_folder = appPath + @"\tessdata";
+        private static readonly string app_data_traineddata = appdata_tessdata_folder + @"\" + traineddata;
 
-        private static InitialDialogue dialogue = new InitialDialogue();
-        public static bool AvxSupport = true;
+        private static readonly InitialDialogue dialogue = new InitialDialogue();
+        private static bool AvxSupport = true;
         public static CancellationTokenSource stopDownloadTask;
 
         [STAThreadAttribute]
@@ -156,10 +156,10 @@ namespace WFInfo
         }
         static class NativeMethods
         {
-            [DllImport("kernel32.dll")]
+            [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
             public static extern IntPtr LoadLibrary(string dllToLoad);
 
-            [DllImport("kernel32.dll")]
+            [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
             public static extern IntPtr GetProcAddress(IntPtr hModule, string procedureName);
 
             [DllImport("kernel32.dll")]
@@ -177,9 +177,6 @@ namespace WFInfo
                 }
             }
         }
-
-        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
-        private static extern long GetEnabledXStateFeatures();
 
         private static void DownloadProgressCallback(object sender, DownloadProgressChangedEventArgs e)
         {
