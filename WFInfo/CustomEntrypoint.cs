@@ -134,6 +134,9 @@ namespace WFInfo
             }
 
         }
+
+        // External method from DLL to identify AVX2 support
+        // Source code can be found on https://github.com/dimon222/CustomCPUID
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool isAVX2supported();
 
@@ -142,11 +145,13 @@ namespace WFInfo
             string dll = "CustomCPUID.dll";
             string path = app_data_tesseract_catalog + @"\" + dll;
             string md5 = "23b463f8811480e508f10ce5e984bf2f";
+            // Redownload if DLL is not present or got corrupted
             if (!File.Exists(path) || GetMD5hash(path) != md5)
             {
                 WebClient webClient = new WebClient();
                 webClient.DownloadFile(tesseract_hotlink_prefix + "/" + dll, path);
             }
+            // Import DLL that includes low level check for AVX2 support
             IntPtr pDll = NativeMethods.LoadLibrary(path);
             IntPtr pAddressOfFunctionToCall = NativeMethods.GetProcAddress(pDll, "isAVX2supported");
             isAVX2supported isAvx2Supported = (isAVX2supported)Marshal.GetDelegateForFunctionPointer(
