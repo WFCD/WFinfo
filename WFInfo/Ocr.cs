@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -478,67 +478,6 @@ namespace WFInfo
         /// <returns></returns>
         public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
-            int profileX = (int)(pixelProfileXDisplay * screenScaling * uiScaling);
-            int profileY = (int)(pixelProfileYDisplay * screenScaling * uiScaling);
-            int profileWid = (int)(pixelProfileWidth * screenScaling * uiScaling);
-
-            int fissureX = (int)(pixelFissureXDisplay * screenScaling * uiScaling);
-            int fissureY = (int)(pixelFissureYDisplay * screenScaling * uiScaling);
-            int fissureWid = (int)(pixelFissureWidth * screenScaling * uiScaling);
-            int fissureHei = (int)(pixelFissureHeight * screenScaling * uiScaling);
-
-
-            if (image == null)
-            {
-                image = new Bitmap(fissureX + fissureWid + 1, profileY + 1);
-
-                Size profileSize = new Size(profileWid, 1);
-                Size fissureSize = new Size(fissureWid, fissureHei);
-                using (Graphics graphics = Graphics.FromImage(image))
-                {
-                    graphics.CopyFromScreen(window.X + profileX, window.Y + profileY, profileX, profileY, profileSize, CopyPixelOperation.SourceCopy);
-                    graphics.CopyFromScreen(window.X + fissureX, window.Y + fissureY, fissureX, fissureY, fissureSize, CopyPixelOperation.SourceCopy);
-                }
-            }
-
-            double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            int closest = 0;
-
-            int coorX = fissureX;
-            int coorY = fissureY + (fissureHei / 2);
-            int endX = fissureX + fissureWid;
-
-            for (; coorX < endX; coorX++)
-            {
-                closest = (int)GetClosestTheme(image.GetPixel(coorX, coorY), out int thresh);
-                weights[closest] += 1.0 / (1 + thresh);
-            }
-
-            coorX = profileX;
-            coorY = profileY;
-            endX = profileX + profileWid;
-
-            for (; coorX < endX; coorX++)
-            {
-                closest = (int)GetClosestTheme(image.GetPixel(coorX, coorY), out int thresh);
-                weights[closest] += 1.0 / (1 + thresh);
-            }
-
-            closest = 0;
-            for (int i = 1; i < weights.Length; i++)
-            {
-                if (weights[closest] < weights[i])
-                    closest = i;
-            }
-
-            WFtheme ret = ((WFtheme)closest);
-            Main.AddLog("HIGHEST WEIGHTED THEME(" + weights[closest].ToString("F2") + "): " + ret.ToString());
-            closestThresh = weights[closest];
-            return ret;
-        }
-
-        public static int GetThemeThreshold(Bitmap image = null)
-        {
             int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
             int width = image == null ? window.Width * (int)dpiScaling : image.Width;
             int height = image == null ? window.Height * (int)dpiScaling : image.Height;
@@ -546,26 +485,27 @@ namespace WFInfo
             int mostLeft = (width / 2) - (mostWidth / 2);
             int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
             int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
-            Bitmap preFilter;
 
-            try {
-                preFilter = new Bitmap(mostWidth, mostBot - mostTop);
-                using (Graphics graphics = Graphics.FromImage(preFilter))
-                    graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(preFilter.Width, preFilter.Height));
-               }
-            catch (Exception ex) {
-                Main.AddLog("Something went wrong with getting the starting image: " + ex.ToString());
-                throw;
+            if(image == null) {
+                try {
+                    image = new Bitmap(mostWidth, mostBot - mostTop);
+                    using (Graphics graphics = Graphics.FromImage(image))
+                        graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(image.Width, image.Height));
+                }
+                catch (Exception ex) {
+                    Main.AddLog("Something went wrong with getting the starting image: " + ex.ToString());
+                    throw;
+                }
             }
 
             double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             int minWidth = mostWidth / 4;
 
-            for (int y = lineHeight; y < preFilter.Height; y++) {
-                double perc = (y - lineHeight) / (preFilter.Height - lineHeight);
+            for (int y = lineHeight; y < image.Height; y++) {
+                double perc = (y - lineHeight) / (image.Height - lineHeight);
                 int totWidth = (int)(minWidth * perc + minWidth);
                 for (int x = 0; x < totWidth; x++) {
-                    int match = (int)GetClosestTheme(preFilter.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
+                    int match = (int)GetClosestTheme(image.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
                     weights[match] += 1 / Math.Pow(thresh + 1, 4);
                 }
             }
@@ -580,9 +520,56 @@ namespace WFInfo
                 }
             }
             Main.AddLog("CLOSEST THEME(" + max.ToString("F2") + "): " + active.ToString());
-
-            return (int)max;
+            closestThresh = max;
+            return active;
         }
+
+        //public static int GetThemeThreshold(Bitmap image = null)
+        //{
+        //    int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
+        //    int width = image == null ? window.Width * (int)dpiScaling : image.Width;
+        //    int height = image == null ? window.Height * (int)dpiScaling : image.Height;
+        //    int mostWidth = (int)(pixleRewardWidth * screenScaling);
+        //    int mostLeft = (width / 2) - (mostWidth / 2);
+        //    int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
+        //    int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
+        //    Bitmap preFilter;
+
+        //    try {
+        //        preFilter = new Bitmap(mostWidth, mostBot - mostTop);
+        //        using (Graphics graphics = Graphics.FromImage(preFilter))
+        //            graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(preFilter.Width, preFilter.Height));
+        //       }
+        //    catch (Exception ex) {
+        //        Main.AddLog("Something went wrong with getting the starting image: " + ex.ToString());
+        //        throw;
+        //    }
+
+        //    double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        //    int minWidth = mostWidth / 4;
+
+        //    for (int y = lineHeight; y < preFilter.Height; y++) {
+        //        double perc = (y - lineHeight) / (preFilter.Height - lineHeight);
+        //        int totWidth = (int)(minWidth * perc + minWidth);
+        //        for (int x = 0; x < totWidth; x++) {
+        //            int match = (int)GetClosestTheme(preFilter.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
+        //            weights[match] += 1 / Math.Pow(thresh + 1, 4);
+        //        }
+        //    }
+
+        //    double max = 0;
+        //    WFtheme active = WFtheme.UNKNOWN;
+        //    for (int i = 0; i < weights.Length; i++) {
+        //        Console.Write(weights[i].ToString("F2") + " ");
+        //        if (weights[i] > max) {
+        //            max = weights[i];
+        //            active = (WFtheme)i;
+        //        }
+        //    }
+        //    Main.AddLog("CLOSEST THEME(" + max.ToString("F2") + "): " + active.ToString());
+
+        //    return (int)max;
+        //}
 
         private static int[,,] GetThemeCache = new int[256, 256, 256];
         private static int[,,] GetThresholdCache = new int[256, 256, 256];
