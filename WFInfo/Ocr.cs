@@ -460,10 +460,11 @@ namespace WFInfo
                         partNumber++;
                     }
                 }
-
             }
-            catch (Exception) {
-
+            catch (Exception ex) {
+                Main.AddLog("Couldn't process second check");
+                Main.StatusUpdate("Couldn't process second check", 1);
+                Main.AddLog(ex.ToString());
                 throw;
             }
         }
