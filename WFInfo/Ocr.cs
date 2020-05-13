@@ -180,8 +180,8 @@ namespace WFInfo
             processingActive = true;
             Main.StatusUpdate("Processing...", 0);
             Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
-            try
-            {
+            //try
+            //{
                 DateTime time = DateTime.UtcNow;
                 timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
 
@@ -370,12 +370,12 @@ namespace WFInfo
                 (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
                     .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
                     .ToList().ForEach(f => f.Delete());
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog(ex.ToString());
-                Main.StatusUpdate("Generic error occured during processing", 1);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Main.AddLog(ex.ToString());
+            //    Main.StatusUpdate("Generic error occured during processing", 1);
+            //}
 
             if (bigScreenshot != null)
             {
@@ -429,42 +429,42 @@ namespace WFInfo
             }
             bool hideRewardInfo = false;
             int partNumber = 0;
-            for (int i = 0; i < firstChecks.Length; i++)
-            {
-                string first = firstChecks[i];
-                if (first.Replace(" ", "").Length > 6)
-                {
-                    string second = secondChecks[i];
-                    string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
-                    if (secondProximity[i] < firstProximity[i])
-                    {
-                        JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
-                        string ducats = job["ducats"].ToObject<string>();
-                        if (int.Parse(ducats) == 0)
-                        {
-                            hideRewardInfo = true;
+            try {
+                for (int i = 0; i < firstChecks.Length; i++) {
+                    string first = firstChecks[i];
+                    if (first.Replace(" ", "").Length > 6) {
+                        string second = secondChecks[i];
+                        string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
+                        if (secondProximity[i] < firstProximity[i]) {
+                            JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
+                            string ducats = job["ducats"].ToObject<string>();
+                            if (int.Parse(ducats) == 0) {
+                                hideRewardInfo = true;
+                            }
+                            string plat = job["plat"].ToObject<string>();
+                            string volume = job["volume"].ToObject<string>();
+                            bool vaulted = Main.dataBase.IsPartVaulted(secondName);
+                            string partsOwned = Main.dataBase.PartsOwned(secondName);
+
+                            Main.RunOnUIThread(() =>
+                            {
+                                if (Settings.isOverlaySelected) {
+                                    Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                } else {
+                                    Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
+                                }
+                            });
+
                         }
-                        string plat = job["plat"].ToObject<string>();
-                        string volume = job["volume"].ToObject<string>();
-                        bool vaulted = Main.dataBase.IsPartVaulted(secondName);
-                        string partsOwned = Main.dataBase.PartsOwned(secondName);
-
-                        Main.RunOnUIThread(() =>
-                        {
-                            if (Settings.isOverlaySelected)
-                            {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
-                            }
-                            else
-                            {
-                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
-                            }
-                        });
-
+                        hideRewardInfo = false;
+                        partNumber++;
                     }
-                    hideRewardInfo = false;
-                    partNumber++;
                 }
+
+            }
+            catch (Exception) {
+
+                throw;
             }
         }
 
@@ -538,40 +538,49 @@ namespace WFInfo
 
         public static int GetThemeThreshold(Bitmap image = null)
         {
-            int fissureX = (int)(pixelFissureXDisplay * screenScaling * uiScaling);
-            int fissureY = (int)(pixelFissureYDisplay * screenScaling * uiScaling);
-            int fissureWid = (int)(pixelFissureWidth * screenScaling * uiScaling);
-            int fissureHei = (int)(pixelFissureHeight * screenScaling * uiScaling);
+            int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
+            int width = image == null ? window.Width * (int)dpiScaling : image.Width;
+            int height = image == null ? window.Height * (int)dpiScaling : image.Height;
+            int mostWidth = (int)(pixleRewardWidth * screenScaling);
+            int mostLeft = (width / 2) - (mostWidth / 2);
+            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
+            int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
+            Bitmap preFilter;
 
-
-            if (image == null)
-            {
-                image = new Bitmap(fissureX + fissureWid, fissureY + fissureHei);
-
-                Size fissureSize = new Size(fissureWid, fissureHei);
-                using (Graphics graphics = Graphics.FromImage(image))
-                    graphics.CopyFromScreen(window.X + fissureX, window.Y + fissureY, fissureX, fissureY, fissureSize, CopyPixelOperation.SourceCopy);
-                //image.Save(Main.appPath + @"\Debug\TESTSHOT " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff") + ".png");
+            try {
+                preFilter = new Bitmap(mostWidth, mostBot - mostTop);
+                using (Graphics graphics = Graphics.FromImage(preFilter))
+                    graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(preFilter.Width, preFilter.Height));
+               }
+            catch (Exception ex) {
+                Main.AddLog("Something went wrong with getting the starting image: " + ex.ToString());
+                throw;
             }
 
-            int closest = 999;
-            WFtheme theme = WFtheme.UNKNOWN;
+            double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            int minWidth = mostWidth / 4;
 
-            int coorY = fissureY + (fissureHei / 2);
-            int endX = fissureX + fissureWid;
-
-            for (int coorX = fissureX; coorX < endX; coorX++)
-            {
-                WFtheme temp = GetClosestTheme(image.GetPixel(coorX, coorY), out int thresh);
-                if (thresh < closest)
-                {
-                    theme = temp;
-                    closest = thresh;
+            for (int y = lineHeight; y < preFilter.Height; y++) {
+                double perc = (y - lineHeight) / (preFilter.Height - lineHeight);
+                int totWidth = (int)(minWidth * perc + minWidth);
+                for (int x = 0; x < totWidth; x++) {
+                    int match = (int)GetClosestTheme(preFilter.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
+                    weights[match] += 1 / Math.Pow(thresh + 1, 4);
                 }
             }
 
-            Main.AddLog("CLOSEST THEME(" + closest + "): " + theme.ToString());
-            return closest;
+            double max = 0;
+            WFtheme active = WFtheme.UNKNOWN;
+            for (int i = 0; i < weights.Length; i++) {
+                Console.Write(weights[i].ToString("F2") + " ");
+                if (weights[i] > max) {
+                    max = weights[i];
+                    active = (WFtheme)i;
+                }
+            }
+            Main.AddLog("CLOSEST THEME(" + max.ToString("F2") + "): " + active.ToString());
+
+            return (int)max;
         }
 
         private static int[,,] GetThemeCache = new int[256, 256, 256];
@@ -957,7 +966,6 @@ namespace WFInfo
                     active = (WFtheme)i;
                 }
             }
-
             Main.AddLog("CLOSEST THEME(" + max.ToString("F2") + "): " + active.ToString());
 
             end = watch.ElapsedMilliseconds;

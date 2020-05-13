@@ -827,9 +827,10 @@ namespace WFInfo
                     {
                         wait += Settings.autoDelay;
                         diff = OCR.GetThemeThreshold();
-                        if (diff < 5)
+                        if (diff > 100)
                         {
                             while (watch.ElapsedMilliseconds < wait) ;
+                            Main.AddLog("started auto processing");
                             OCR.ProcessRewardScreen();
                             break;
                         }
