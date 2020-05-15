@@ -706,7 +706,7 @@ namespace WFInfo
 
                                 using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
-                                    if (paddedBounds.Height > 40 * screenScaling || paddedBounds.Width > 70 * screenScaling)
+                                    if (paddedBounds.Height > 50 * screenScaling || paddedBounds.Width > 80 * screenScaling)
                                     { //box is too large
                                         if (currentWord.Length > 3)
                                         { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
