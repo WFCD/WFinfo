@@ -706,8 +706,8 @@ namespace WFInfo
 
                                 using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
-                                    if (paddedBounds.Height > 50 * screenScaling || paddedBounds.Width > 80 * screenScaling)
-                                    { //box is too large
+                                    if (paddedBounds.Height > 50 * screenScaling || paddedBounds.Width > 80 * screenScaling) 
+                                    { //Determen weither or not the box is too large, false positives in OCR can scan items (such as neuroptics, chassis or systems) as a character.
                                         if (currentWord.Length > 3)
                                         { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
                                             g.DrawRectangle(new Pen(Brushes.Orange), paddedBounds);
