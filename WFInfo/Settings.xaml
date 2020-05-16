@@ -26,11 +26,12 @@
         </Grid>
         <Grid x:Name="Display_setting" HorizontalAlignment="Left" Height="59" VerticalAlignment="Top" Width="334" Grid.RowSpan="2" Margin="0,26,0,0">
             <Rectangle x:Name="First_window" Stroke="#FF646464"/>
-            <RadioButton x:Name="WindowRadio" Margin="51,32,194,6" Content="Window" ToolTip="Display rewards in a seperate window"  VerticalContentAlignment="Center" Checked="WindowChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}"/>
+            <RadioButton x:Name="WindowRadio" Margin="116,33,129,5" Content="Window" ToolTip="Display rewards in a seperate window"  VerticalContentAlignment="Center" Checked="WindowChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}"/>
 
-            <RadioButton x:Name="OverlayRadio" Margin="209,32,44,5" Content="Overlay" ToolTip="Display rewards on top of Warframe"  VerticalContentAlignment="Center" Checked="OverlayChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}"/>
+            <RadioButton x:Name="OverlayRadio" Margin="228,32,25,5" Content="Overlay" ToolTip="Display rewards on top of Warframe"  VerticalContentAlignment="Center" Checked="OverlayChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}"/>
 
             <Label Content="Rewards display" VerticalAlignment="Top" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="334" Height="31" FontSize="{DynamicResource FontSize}" FontFamily="{StaticResource Roboto}"/>
+            <RadioButton x:Name="LightRadio" Margin="27,33,218,5" Content="Light" ToolTip="Do not display any window at all"  VerticalContentAlignment="Center" Checked="LightRadioChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}"/>
         </Grid>
         <Grid x:Name="Activation_key" Height="38" VerticalAlignment="Top" Margin="0,85,0,0">
             <Rectangle x:Name="First_window2" Stroke="#FF646464" Height="39" VerticalAlignment="Top" Margin="0,-1,0,0"/>

@@ -45,6 +45,7 @@ namespace WFInfo
         public static KeyConverter converter = new KeyConverter();
         public static Point mainWindowLocation;
         public static bool isOverlaySelected;
+        public static bool isLightSlected;
         public static bool debug;
         public static long autoDelay;
         public static int imageRetentionTime;
@@ -70,10 +71,17 @@ namespace WFInfo
 
             scaleBar.Value = scaling;
             if (settingsObj.GetValue("Display").ToString() == "Overlay")
+            {
                 OverlayRadio.IsChecked = true;
+            }
+            else if (settingsObj.GetValue("Display").ToString() == "Light")
+            {
+                LightRadio.IsChecked = true;
+            }
             else
+            {
                 WindowRadio.IsChecked = true;
-
+            }
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
                 autoCheckbox.IsChecked = true;
 
@@ -112,6 +120,9 @@ namespace WFInfo
         {
             settingsObj["Display"] = "Window";
             isOverlaySelected = false;
+            isLightSlected = false;
+            clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
+            clipboardCheckbox.IsEnabled = true;
             Save();
         }
 
@@ -119,6 +130,9 @@ namespace WFInfo
         {
             settingsObj["Display"] = "Overlay";
             isOverlaySelected = true;
+            isLightSlected = false;
+            clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
+            clipboardCheckbox.IsEnabled = true;
             Save();
         }
 
@@ -396,6 +410,16 @@ namespace WFInfo
         {
             settingsObj["CuttingEdge"] = detectScalingCheckbox.IsChecked.Value;
             detectScaling = detectScalingCheckbox.IsChecked.Value;
+            Save();
+        }
+
+        private void LightRadioChecked(object sender, RoutedEventArgs e)
+        {
+            settingsObj["Display"] = "Light";
+            isLightSlected = true;
+            clipboard = true;
+            clipboardCheckbox.IsChecked = true;
+            clipboardCheckbox.IsEnabled = false;
             Save();
         }
     }
