@@ -189,6 +189,7 @@ namespace WFInfo
             if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
             {
                 snapItOverlayWindow.closeOverlay();
+                Main.StatusUpdate("Closed snapit", 0);
                 return;
             }
 
@@ -202,6 +203,7 @@ namespace WFInfo
                         overlay.Hide();
                     }
                 }
+                Main.StatusUpdate("Overlays dissmissed", 1);
                 return;
             }
 
