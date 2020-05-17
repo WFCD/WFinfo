@@ -297,9 +297,9 @@ namespace WFInfo
                             {
                                 if (clipboard != String.Empty) { clipboard += "-  "; }
 
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + ducats + ":ducats:";
 
-                                if (Settings.ClipboardVaulted && vaulted) { clipboard += "[V]"; }
+                                if (Settings.ClipboardVaulted && vaulted) { clipboard += "(V)"; }
                             }
 
                             if ((partNumber == firstChecks.Length - 1) && (clipboard != String.Empty))
