@@ -371,7 +371,7 @@ namespace WFInfo
                     Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
                 }
 
-            if (Settings.isLightSlected) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
+            if (Settings.isLightSlected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
             {
                 player.Play();
             }
