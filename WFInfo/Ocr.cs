@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
@@ -69,6 +70,11 @@ namespace WFInfo
 															Color.FromArgb(232, 213,  93),  	//LEGACY		
 															Color.FromArgb(232, 227, 227),  	//EQUINOX		
 															Color.FromArgb(200, 169, 237) };    //DARK_LOTUS	
+
+        public static Assembly assembly = Assembly.GetExecutingAssembly();
+        public static Stream audioStream = assembly.GetManifestResourceStream("WFInfo.Resources.achievment_03.wav");
+        public static System.Media.SoundPlayer player = new System.Media.SoundPlayer(audioStream);
+
 
         public static WindowStyle currentStyle;
         public enum WindowStyle
@@ -319,7 +325,7 @@ namespace WFInfo
                                     Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY, Settings.delay);
 
                                 }
-                                else
+                                else if(!Settings.isLightSlected)
                                 {
                                     Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, partNumber, true, hideRewardInfo);
                                 }
@@ -368,7 +374,12 @@ namespace WFInfo
                     Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
                 }
 
-                watch.Stop();
+            if (Settings.isLightSlected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
+            {
+                player.Play();
+            }
+
+            watch.Stop();
 
                 (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
                     .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
@@ -453,6 +464,8 @@ namespace WFInfo
                             Main.RunOnUIThread(() =>
                             {
                                 if (Settings.isOverlaySelected) {
+                                    Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                } else if (!Settings.isLightSlected) {
                                     Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, hideRewardInfo);
                                 } else {
                                     Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
