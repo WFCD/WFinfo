@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Text.RegularExpressions;
 using System.Net;
 using AutoUpdaterDotNET;
+using System.Windows;
 
 namespace WFInfo
 {
@@ -109,6 +110,19 @@ namespace WFInfo
 
         public void OnMouseAction(MouseButton key)
         {
+            //Close all overlays if hotkey + delete is held down
+
+            if (key == Settings.ActivationMouseButton && Keyboard.IsKeyDown(Key.Delete))
+            {
+                foreach (Window overlay in App.Current.Windows)
+                {
+                    if (overlay.GetType().ToString() == "WFInfo.Overlay")
+                    {
+                        overlay.Hide();
+                    }
+                }
+                return;
+            }
 
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
@@ -133,7 +147,7 @@ namespace WFInfo
                                         Main.AddLog("Testing fullscreen file: " + file.ToString());
 
                                         Bitmap image = new Bitmap(file);
-                                        OCR.ProcessSnapIt(image, image, new Point(0, 0));
+                                        OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
                                     }
 
                                 }
@@ -172,10 +186,24 @@ namespace WFInfo
         public void OnKeyAction(Key key)
         {
             // close the snapit overlay when *any* key is pressed down
-
             if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
             {
                 snapItOverlayWindow.closeOverlay();
+                Main.StatusUpdate("Closed snapit", 0);
+                return;
+            }
+
+            //Close all overlays if hotkey + delete is held down
+            if (key == Settings.ActivationKey && Keyboard.IsKeyDown(Key.Delete))
+            {
+                foreach (Window overlay in App.Current.Windows)
+                {
+                    if (overlay.GetType().ToString() == "WFInfo.Overlay")
+                    {
+                        overlay.Hide();
+                    }
+                }
+                Main.StatusUpdate("Overlays dissmissed", 1);
                 return;
             }
 
@@ -202,7 +230,7 @@ namespace WFInfo
                                         Main.AddLog("Testing snapit on file: " + file.ToString());
 
                                         Bitmap image = new Bitmap(file);
-                                        OCR.ProcessSnapIt(image, image, new Point(0, 0));
+                                        OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
                                     }
 
                                 }

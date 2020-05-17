@@ -297,6 +297,9 @@ namespace WFInfo
                             {
                                 if (clipboard != String.Empty) { clipboard += "-  "; }
 
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
+
+                                if (Settings.ClipboardVaulted && vaulted) { clipboard += "[V]"; }
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + ducats + ":ducats:";
 
                                 if (Settings.ClipboardVaulted && vaulted) { clipboard += "(V)"; }
@@ -662,7 +665,7 @@ namespace WFInfo
                     Overlay itemOverlay = new Overlay();
                     itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
                     itemOverlay.Resize(width);
-                    itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.bounding.Y - itemOverlay.Height) / dpiScaling));
+                    itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
                 });
             }
             Main.snapItOverlayWindow.tempImage.Dispose();
