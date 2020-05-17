@@ -58,6 +58,7 @@ namespace WFInfo
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
         public static bool SnapitExport { get; internal set; }
+        public static bool ClipboardVaulted { get; internal set; }
 
         public Settings()
         {

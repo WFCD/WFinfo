@@ -295,11 +295,11 @@ namespace WFInfo
 
                             if (platinum > 0)
                             {
-                                if (clipboard != String.Empty)
-                                {
-                                    clipboard += "-  ";
-                                }
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
+                                if (clipboard != String.Empty) { clipboard += "-  "; }
+
+                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + ducats + ":ducats:";
+
+                                if (Settings.ClipboardVaulted && vaulted) { clipboard += "(V)"; }
                             }
 
                             if ((partNumber == firstChecks.Length - 1) && (clipboard != String.Empty))
@@ -445,11 +445,12 @@ namespace WFInfo
                             string volume = job["volume"].ToObject<string>();
                             bool vaulted = Main.dataBase.IsPartVaulted(secondName);
                             string partsOwned = Main.dataBase.PartsOwned(secondName);
+                            string partsCount = Main.dataBase.PartsCount(secondName);
 
                             Main.RunOnUIThread(() =>
                             {
                                 if (Settings.isOverlaySelected) {
-                                    Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                    Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, hideRewardInfo);
                                 } else {
                                     Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
                                 }
