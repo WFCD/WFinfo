@@ -188,188 +188,191 @@ namespace WFInfo
             Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
             //try
             //{
-                DateTime time = DateTime.UtcNow;
-                timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
+            DateTime time = DateTime.UtcNow;
+            timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
 
-                var watch = Stopwatch.StartNew();
-                long start = watch.ElapsedMilliseconds;
+            var watch = Stopwatch.StartNew();
+            long start = watch.ElapsedMilliseconds;
 
-                double uiScalingVal = uiScaling;
-                List<Bitmap> parts;
+            double uiScalingVal = uiScaling;
+            List<Bitmap> parts;
 
-                if (Settings.autoScaling)
+            if (Settings.autoScaling)
+            {
+                bigScreenshot = file ?? CaptureScreenshot();
+                parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
+
+            }
+            else
+            {
+                // Get that theme
+                activeTheme = GetThemeWeighted(out _, file);
+
+                bigScreenshot = file ?? CaptureScreenshot();
+
+                // Get the part box and filter it
+                parts = FilterAndSeparateParts(bigScreenshot, activeTheme);
+            }
+
+
+            firstChecks = new string[parts.Count];
+            Task[] tasks = new Task[parts.Count];
+            for (int i = 0; i < parts.Count; i++)
+            {
+                int tempI = i;
+                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]); });
+            }
+            Task.WaitAll(tasks);
+
+            // Remove any empty items from the array
+            firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s)).ToArray();
+
+            if (firstChecks == null || firstChecks.Length == 0 || CheckIfError())
+            {
+                Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
+                Main.StatusUpdate("Couldn't find any rewards to display", 2);
+                if (firstChecks == null)
                 {
-                    bigScreenshot = file ?? CaptureScreenshot();
-                    parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
-
-                }
-                else
-                {
-                    // Get that theme
-                    activeTheme = GetThemeWeighted(out _, file);
-
-                    bigScreenshot = file ?? CaptureScreenshot();
-
-                    // Get the part box and filter it
-                    parts = FilterAndSeparateParts(bigScreenshot, activeTheme);
-                }
-
-
-                firstChecks = new string[parts.Count];
-                Task[] tasks = new Task[parts.Count];
-                for (int i = 0; i < parts.Count; i++)
-                {
-                    int tempI = i;
-                    tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]); });
-                }
-                Task.WaitAll(tasks);
-
-                // Remove any empty items from the array
-                firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s)).ToArray();
-
-                if (firstChecks == null || firstChecks.Length == 0 || CheckIfError()) {
-                    Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
-                    Main.StatusUpdate("Couldn't find any rewards to display", 2);
-                    if (firstChecks == null) {
-                        Main.RunOnUIThread(() => {
-                            Main.SpawnErrorPopup(time);
-                        });
-                    }
-                }
-                double bestPlat = 0;
-                int bestDucat = 0;
-                int bestPlatItem = 0;
-                int bestDucatItem = 0;
-                List<int> unownedItems = new List<int>();
-
-                NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
-                IFormatProvider provider = CultureInfo.CreateSpecificCulture("en-GB");
-
-                if (firstChecks.Length > 0)
-                {
-                    clipboard = string.Empty;
-                    int width = (int)(pixleRewardWidth * screenScaling * uiScalingVal) + 10;
-                    int startX = center.X - width / 2 + (int)(width * 0.004);
-                    if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
-                    if (firstChecks.Length == 4 && firstChecks[0].Replace(" ", "").Length < 6) { startX += 2 * (width / 8); }
-                    int overWid = (int)(width / (4.1 * dpiScaling));
-                    int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScalingVal);
-                    int partNumber = 0;
-                    bool hideRewardInfo = false;
-                    for (int i = 0; i < firstChecks.Length; i++)
+                    Main.RunOnUIThread(() =>
                     {
-                        string part = firstChecks[i];
-                        if (part.Replace(" ", "").Length > 6)
+                        Main.SpawnErrorPopup(time);
+                    });
+                }
+            }
+            double bestPlat = 0;
+            int bestDucat = 0;
+            int bestPlatItem = 0;
+            int bestDucatItem = 0;
+            List<int> unownedItems = new List<int>();
+
+            NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
+            IFormatProvider provider = CultureInfo.CreateSpecificCulture("en-GB");
+
+            if (firstChecks.Length > 0)
+            {
+                clipboard = string.Empty;
+                int width = (int)(pixleRewardWidth * screenScaling * uiScalingVal) + 10;
+                int startX = center.X - width / 2 + (int)(width * 0.004);
+                if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
+                if (firstChecks.Length == 4 && firstChecks[0].Replace(" ", "").Length < 6) { startX += 2 * (width / 8); }
+                int overWid = (int)(width / (4.1 * dpiScaling));
+                int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScalingVal);
+                int partNumber = 0;
+                bool hideRewardInfo = false;
+                for (int i = 0; i < firstChecks.Length; i++)
+                {
+                    string part = firstChecks[i];
+                    if (part.Replace(" ", "").Length > 6)
+                    {
+
+
+                        string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
+                        JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
+                        string ducats = job["ducats"].ToObject<string>();
+                        if (int.Parse(ducats) == 0)
                         {
+                            hideRewardInfo = true;
+                        }
+                        string plat = job["plat"].ToObject<string>();
+                        double platinum = double.Parse(plat, styles, provider);
+                        string volume = job["volume"].ToObject<string>();
+                        bool vaulted = Main.dataBase.IsPartVaulted(correctName);
+                        string partsOwned = Main.dataBase.PartsOwned(correctName);
+                        string partsCount = Main.dataBase.PartsCount(correctName);
+                        int duc = int.Parse(ducats);
 
-
-                            string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
-                            JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
-                            string ducats = job["ducats"].ToObject<string>();
-                            if (int.Parse(ducats) == 0)
-                            {
-                                hideRewardInfo = true;
-                            }
-                            string plat = job["plat"].ToObject<string>();
-                            double platinum = double.Parse(plat, styles, provider);
-                            string volume = job["volume"].ToObject<string>();
-                            bool vaulted = Main.dataBase.IsPartVaulted(correctName);
-                            string partsOwned = Main.dataBase.PartsOwned(correctName);
-                            string partsCount = Main.dataBase.PartsCount(correctName);
-                            int duc = int.Parse(ducats);
-
-                            if (platinum >= bestPlat)
-                            {
-                                bestPlat = platinum; bestPlatItem = i;
-                                if (duc >= bestDucat)
-                                {
-                                    bestDucat = duc; bestDucatItem = i;
-                                }
-                            }
-                            if (duc > bestDucat)
+                        if (platinum >= bestPlat)
+                        {
+                            bestPlat = platinum; bestPlatItem = i;
+                            if (duc >= bestDucat)
                             {
                                 bestDucat = duc; bestDucatItem = i;
                             }
-
-                            if (duc > 0)
-                            {
-                                if (int.Parse(partsOwned) < int.Parse(partsCount))
-                                {
-                                    unownedItems.Add(i);
-                                }
-                            }
-
-                            if (platinum > 0)
-                            {
-                                if (clipboard != String.Empty) { clipboard += "-  "; }
-
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + ducats + ":ducats:";
-
-                                if (Settings.ClipboardVaulted && vaulted) { clipboard += "(V)"; }
-                            }
-
-                            if ((partNumber == firstChecks.Length - 1) && (clipboard != String.Empty))
-                            {
-                                clipboard += Settings.ClipboardTemplate;
-                            }
-
-                            Main.RunOnUIThread(() =>
-                            {
-                                if (Settings.isOverlaySelected)
-                                {
-                                    Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, hideRewardInfo);
-                                    Main.overlays[partNumber].Resize(overWid);
-                                    Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY, Settings.delay);
-
-                                }
-                                else if(!Settings.isLightSlected)
-                                {
-                                    Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, partNumber, true, hideRewardInfo);
-                                }
-                                if (Settings.clipboard && clipboard != string.Empty)
-                                    Clipboard.SetText(clipboard);
-
-                            });
-                            partNumber++;
-                            hideRewardInfo = false;
                         }
-                    }
-                    var end = watch.ElapsedMilliseconds;
-                    Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
+                        if (duc > bestDucat)
+                        {
+                            bestDucat = duc; bestDucatItem = i;
+                        }
 
-                    if (Settings.Highlight)
-                    {
+                        if (duc > 0)
+                        {
+                            if (int.Parse(partsOwned) < int.Parse(partsCount))
+                            {
+                                unownedItems.Add(i);
+                            }
+                        }
+
+                        if (platinum > 0)
+                        {
+                            if (clipboard != String.Empty) { clipboard += "-  "; }
+
+                            clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + ducats + ":ducats:";
+
+                            if (Settings.ClipboardVaulted && vaulted) { clipboard += "(V)"; }
+                        }
+
+                        if ((partNumber == firstChecks.Length - 1) && (clipboard != String.Empty))
+                        {
+                            clipboard += Settings.ClipboardTemplate;
+                        }
+
                         Main.RunOnUIThread(() =>
                         {
-                            foreach (int item in unownedItems)
+                            if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[item].bestOwnedChoice();
+                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, hideRewardInfo);
+                                Main.overlays[partNumber].Resize(overWid);
+                                Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber) / dpiScaling), startY, Settings.delay);
+
                             }
-                            Main.overlays[bestDucatItem].bestDucatChoice();
-                            Main.overlays[bestPlatItem].bestPlatChoice();
-                        });
-                    }
-
-                    if (partialScreenshot.Height < 70)
-                    {
-                        SlowSecondProcess();
-                        end = watch.ElapsedMilliseconds;
-                    }
-
-                    if (Settings.Highlight)
-                    {
-                        Main.RunOnUIThread(() =>
-                        {
-                            foreach (int item in unownedItems)
+                            else if (!Settings.isLightSlected)
                             {
-                                Main.overlays[item].bestOwnedChoice();
+                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, partNumber, true, hideRewardInfo);
                             }
-                            Main.overlays[bestDucatItem].bestDucatChoice();
-                            Main.overlays[bestPlatItem].bestPlatChoice();
+                            if (Settings.clipboard && clipboard != string.Empty)
+                                Clipboard.SetText(clipboard);
+
                         });
+                        partNumber++;
+                        hideRewardInfo = false;
                     }
-                    Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
                 }
+                var end = watch.ElapsedMilliseconds;
+                Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
+
+                if (Settings.Highlight)
+                {
+                    Main.RunOnUIThread(() =>
+                    {
+                        foreach (int item in unownedItems)
+                        {
+                            Main.overlays[item].bestOwnedChoice();
+                        }
+                        Main.overlays[bestDucatItem].bestDucatChoice();
+                        Main.overlays[bestPlatItem].bestPlatChoice();
+                    });
+                }
+
+                if (partialScreenshot.Height < 70)
+                {
+                    SlowSecondProcess();
+                    end = watch.ElapsedMilliseconds;
+                }
+
+                if (Settings.Highlight)
+                {
+                    Main.RunOnUIThread(() =>
+                    {
+                        foreach (int item in unownedItems)
+                        {
+                            Main.overlays[item].bestOwnedChoice();
+                        }
+                        Main.overlays[bestDucatItem].bestDucatChoice();
+                        Main.overlays[bestPlatItem].bestPlatChoice();
+                    });
+                }
+                Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
+            }
 
             if (Settings.isLightSlected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
             {
@@ -378,9 +381,9 @@ namespace WFInfo
 
             watch.Stop();
 
-                (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
-                    .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
-                    .ToList().ForEach(f => f.Delete());
+            (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
+                .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
+                .ToList().ForEach(f => f.Delete());
             //}
             //catch (Exception ex)
             //{
@@ -440,16 +443,21 @@ namespace WFInfo
             }
             bool hideRewardInfo = false;
             int partNumber = 0;
-            try {
-                for (int i = 0; i < firstChecks.Length; i++) {
+            try
+            {
+                for (int i = 0; i < firstChecks.Length; i++)
+                {
                     string first = firstChecks[i];
-                    if (first.Replace(" ", "").Length > 6) {
+                    if (first.Replace(" ", "").Length > 6)
+                    {
                         string second = secondChecks[i];
                         string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
-                        if (secondProximity[i] < firstProximity[i]) {
+                        if (secondProximity[i] < firstProximity[i])
+                        {
                             JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
                             string ducats = job["ducats"].ToObject<string>();
-                            if (int.Parse(ducats) == 0) {
+                            if (int.Parse(ducats) == 0)
+                            {
                                 hideRewardInfo = true;
                             }
                             string plat = job["plat"].ToObject<string>();
@@ -460,11 +468,16 @@ namespace WFInfo
 
                             Main.RunOnUIThread(() =>
                             {
-                                if (Settings.isOverlaySelected) {
+                                if (Settings.isOverlaySelected)
+                                {
                                     Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
-                                } else if (!Settings.isLightSlected) {
+                                }
+                                else if (!Settings.isLightSlected)
+                                {
                                     Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, hideRewardInfo);
-                                } else {
+                                }
+                                else
+                                {
                                     Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
                                 }
                             });
@@ -475,7 +488,8 @@ namespace WFInfo
                     }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Main.AddLog("Couldn't process second check");
                 Main.StatusUpdate("Couldn't process second check", 1);
                 Main.AddLog(ex.ToString());
@@ -500,13 +514,16 @@ namespace WFInfo
             int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
             int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
 
-            if(image == null) {
-                try {
+            if (image == null)
+            {
+                try
+                {
                     image = new Bitmap(mostWidth, mostBot - mostTop);
                     using (Graphics graphics = Graphics.FromImage(image))
                         graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(image.Width, image.Height));
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Main.AddLog("Something went wrong with getting the starting image: " + ex.ToString());
                     throw;
                 }
@@ -515,10 +532,12 @@ namespace WFInfo
             double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             int minWidth = mostWidth / 4;
 
-            for (int y = lineHeight; y < image.Height; y++) {
+            for (int y = lineHeight; y < image.Height; y++)
+            {
                 double perc = (y - lineHeight) / (image.Height - lineHeight);
                 int totWidth = (int)(minWidth * perc + minWidth);
-                for (int x = 0; x < totWidth; x++) {
+                for (int x = 0; x < totWidth; x++)
+                {
                     int match = (int)GetClosestTheme(image.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
                     weights[match] += 1 / Math.Pow(thresh + 1, 4);
                 }
@@ -526,9 +545,11 @@ namespace WFInfo
 
             double max = 0;
             WFtheme active = WFtheme.UNKNOWN;
-            for (int i = 0; i < weights.Length; i++) {
+            for (int i = 0; i < weights.Length; i++)
+            {
                 Console.Write(weights[i].ToString("F2") + " ");
-                if (weights[i] > max) {
+                if (weights[i] > max)
+                {
                     max = weights[i];
                     active = (WFtheme)i;
                 }
@@ -720,7 +741,7 @@ namespace WFInfo
 
                                 using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
-                                    if (paddedBounds.Height > 50 * screenScaling || paddedBounds.Width > 84 * screenScaling) 
+                                    if (paddedBounds.Height > 50 * screenScaling || paddedBounds.Width > 84 * screenScaling)
                                     { //Determen weither or not the box is too large, false positives in OCR can scan items (such as neuroptics, chassis or systems) as a character(s).
                                         if (currentWord.Length > 3)
                                         { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
