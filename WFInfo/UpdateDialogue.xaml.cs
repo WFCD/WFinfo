@@ -69,7 +69,7 @@ namespace WFInfo
             try
             {
                 e.Handled = true;
-                if (AutoUpdater.DownloadUpdate())
+                if (AutoUpdater.DownloadUpdate(updateInfo))
                     WFInfo.MainWindow.INSTANCE.Exit(null, null);
             }
             catch (Exception exception)
