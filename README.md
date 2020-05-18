@@ -17,7 +17,7 @@ WFInfo does this by screenshotting the game window, cropping out the part text, 
 
 # Will I get Banned?
 
-DE[Adian] has confirmed in a forum post that this will not ban you. 
+DE[Aidan] has confirmed in a forum post that this will not ban you. 
 
 [![Image of post](https://i.imgur.com/ZGD8ISp.jpg)](https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-prices/?do=findComment&comment=9176107)
 
