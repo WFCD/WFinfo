@@ -417,6 +417,7 @@ namespace WFInfo
         private void LightRadioChecked(object sender, RoutedEventArgs e)
         {
             settingsObj["Display"] = "Light";
+            isOverlaySelected = false;
             isLightSlected = true;
             clipboard = true;
             clipboardCheckbox.IsChecked = true;
