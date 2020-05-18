@@ -303,9 +303,6 @@ namespace WFInfo
                             {
                                 if (clipboard != String.Empty) { clipboard += "-  "; }
 
-                                clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
-
-                                if (Settings.ClipboardVaulted && vaulted) { clipboard += "[V]"; }
                                 clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + ducats + ":ducats:";
 
                                 if (Settings.ClipboardVaulted && vaulted) { clipboard += "(V)"; }
