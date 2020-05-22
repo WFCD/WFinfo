@@ -83,14 +83,18 @@ namespace WFInfo
             {
                 WindowRadio.IsChecked = true;
             }
+
+            if (Convert.ToBoolean(settingsObj.GetValue("DetectScaling"))) {
+                detectScalingCheckbox.IsChecked = true;
+                scaleBar.IsEnabled = false;
+                Scaling_box.IsEnabled = false;
+            }
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
                 autoCheckbox.IsChecked = true;
 
             if (Convert.ToBoolean(settingsObj.GetValue("Clipboard")))
                 clipboardCheckbox.IsChecked = true;
 
-            if (Convert.ToBoolean(settingsObj.GetValue("CuttingEdge")))
-                detectScalingCheckbox.IsChecked = true;
 
             Scaling_box.Text = scaling.ToString() + "%";
 
@@ -409,8 +413,11 @@ namespace WFInfo
 
         private void detectScalingClicked(object sender, RoutedEventArgs e)
         {
-            settingsObj["CuttingEdge"] = detectScalingCheckbox.IsChecked.Value;
+            settingsObj["DetectScaling"] = detectScalingCheckbox.IsChecked.Value;
             detectScaling = detectScalingCheckbox.IsChecked.Value;
+            scaleBar.IsEnabled = !detectScalingCheckbox.IsChecked.Value;
+            Scaling_box.IsEnabled = !detectScalingCheckbox.IsChecked.Value;
+
             Save();
         }
 
