@@ -416,7 +416,7 @@ namespace WFInfo
             settingsObj["DetectScaling"] = detectScalingCheckbox.IsChecked.Value;
             detectScaling = detectScalingCheckbox.IsChecked.Value;
             scaleBar.IsEnabled = !detectScalingCheckbox.IsChecked.Value;
-            Scaling_box.IsEnabled = !detectScalingCheckbox.IsChecked.Value;
+            Scaling_box.IsEnabled = !detectScalingCheckbox.IsChecked.Value; 
 
             Save();
         }
