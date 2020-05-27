@@ -293,7 +293,6 @@ namespace WFInfo
                         {
                             bestDucat = duc; bestDucatItem = i;
                         }
-                        +ducats + ":ducats:"
                         if (duc > 0)
                         {
                             if (int.Parse(partsOwned) < int.Parse(partsCount))
