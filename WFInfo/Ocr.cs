@@ -194,25 +194,10 @@ namespace WFInfo
             var watch = Stopwatch.StartNew();
             long start = watch.ElapsedMilliseconds;
 
-            double uiScalingVal = uiScaling;
             List<Bitmap> parts;
 
-            if (Settings.autoScaling)
-            {
-                bigScreenshot = file ?? CaptureScreenshot();
-                parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
-
-            }
-            else
-            {
-                // Get that theme
-                activeTheme = GetThemeWeighted(out _, file);
-
-                bigScreenshot = file ?? CaptureScreenshot();
-
-                // Get the part box and filter it
-                parts = FilterAndSeparateParts(bigScreenshot, activeTheme);
-            }
+            bigScreenshot = file ?? CaptureScreenshot();
+            parts = ExtractPartBoxAutomatically(out double uiScalingVal, out activeTheme, file);
 
 
             firstChecks = new string[parts.Count];
@@ -384,12 +369,6 @@ namespace WFInfo
             (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
                 .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
                 .ToList().ForEach(f => f.Delete());
-            //}
-            //catch (Exception ex)
-            //{
-            //    Main.AddLog(ex.ToString());
-            //    Main.StatusUpdate("Generic error occured during processing", 1);
-            //}
 
             if (bigScreenshot != null)
             {
@@ -499,7 +478,7 @@ namespace WFInfo
 
         /// <summary>
         /// Processes the theme, parse image to detect the theme in the image. Parse null to detect the theme from the screen.
-        /// closeestThresh is used for ???
+        /// closeestThresh is used for getting the most "Accuracte" result, anything over 100 is sure to be correct.
         /// </summary>
         /// <param name="closestThresh"></param>
         /// <param name="image"></param>
@@ -616,7 +595,6 @@ namespace WFInfo
                 if (part.name.Length < 13) // if part name is smaller than "Bo prime handle" skip current part
                     continue;
 
-
                 string name = Main.dataBase.GetPartName(part.name, out firstProximity[0]);
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
                 string plat = job["plat"].ToObject<string>();
@@ -661,6 +639,7 @@ namespace WFInfo
                 File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv", csv);
             }
         }
+
         /// <summary>
         /// Filters out any group of words and addes them all into a single InventoryItem, containing the found words as well as the bounds within they reside.
         /// </summary>
@@ -1388,8 +1367,6 @@ namespace WFInfo
         {
             using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
                 dpiScaling = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only need to check one value
-
-            uiScaling = Settings.scaling / 100.0;
         }
 
         private static void RefreshScaling()

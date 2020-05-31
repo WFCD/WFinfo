@@ -77,7 +77,8 @@ namespace WFInfo
             }
         }
 
-        private void InitializeSettings() {
+        private void InitializeSettings()
+        {
             if (!Settings.settingsObj.TryGetValue("Display", out _))
                 Settings.settingsObj["Display"] = "Overlay";
             Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
@@ -91,14 +92,18 @@ namespace WFInfo
 
             if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
                 Settings.settingsObj["ActivationKey"] = "Snapshot";
-            try {
+            try
+            {
                 Settings.ActivationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
             }
-            catch {
-                try {
+            catch
+            {
+                try
+                {
                     Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton), Settings.settingsObj.GetValue("ActivationKey").ToString());
                 }
-                catch {
+                catch
+                {
                     Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
                     Settings.settingsObj["ActivationKey"] = "Snapshot";
                     Settings.ActivationKey = Key.Snapshot;
@@ -113,21 +118,9 @@ namespace WFInfo
                 Settings.settingsObj["Clipboard"] = false;
             Settings.clipboard = (bool)Settings.settingsObj.GetValue("Clipboard");
 
-            if (!Settings.settingsObj.TryGetValue("Auto", out _))
-                Settings.settingsObj["Auto"] = false;
-            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
-
-            if (!Settings.settingsObj.TryGetValue("DetectScaling", out _))
-                Settings.settingsObj["DetectScaling"] = true;
-            Settings.autoScaling = (bool)Settings.settingsObj.GetValue("DetectScaling");
-
             if (!Settings.settingsObj.TryGetValue("AutoDelay", out _))
                 Settings.settingsObj["AutoDelay"] = 250L;
             Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");
-
-            if (!Settings.settingsObj.TryGetValue("Scaling", out _))
-                Settings.settingsObj["Scaling"] = 100.0;
-            Settings.scaling = Convert.ToInt32(Settings.settingsObj.GetValue("Scaling"));
 
             if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
                 Settings.settingsObj["ImageRetentionTime"] = 12;
