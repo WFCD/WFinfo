@@ -194,25 +194,10 @@ namespace WFInfo
             var watch = Stopwatch.StartNew();
             long start = watch.ElapsedMilliseconds;
 
-            double uiScalingVal = uiScaling;
             List<Bitmap> parts;
 
-            if (Settings.autoScaling)
-            {
-                bigScreenshot = file ?? CaptureScreenshot();
-                parts = ExtractPartBoxAutomatically(out uiScalingVal, out activeTheme, file);
-
-            }
-            else
-            {
-                // Get that theme
-                activeTheme = GetThemeWeighted(out _, file);
-
-                bigScreenshot = file ?? CaptureScreenshot();
-
-                // Get the part box and filter it
-                parts = FilterAndSeparateParts(bigScreenshot, activeTheme);
-            }
+            bigScreenshot = file ?? CaptureScreenshot();
+            parts = ExtractPartBoxAutomatically(out double uiScalingVal, out activeTheme, file);
 
 
             firstChecks = new string[parts.Count];
@@ -293,7 +278,6 @@ namespace WFInfo
                         {
                             bestDucat = duc; bestDucatItem = i;
                         }
-
                         if (duc > 0)
                         {
                             if (int.Parse(partsOwned) < int.Parse(partsCount))
@@ -306,9 +290,10 @@ namespace WFInfo
                         {
                             if (clipboard != String.Empty) { clipboard += "-  "; }
 
-                            clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: " + ducats + ":ducats:";
+                            clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
 
-                            if (Settings.ClipboardVaulted && vaulted) { clipboard += "(V)"; }
+
+                            if (Settings.ClipboardVaulted && vaulted) { clipboard += ducats + ":ducats:" + "(V)"; }
                         }
 
                         if ((partNumber == firstChecks.Length - 1) && (clipboard != String.Empty))
@@ -384,12 +369,6 @@ namespace WFInfo
             (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
                 .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
                 .ToList().ForEach(f => f.Delete());
-            //}
-            //catch (Exception ex)
-            //{
-            //    Main.AddLog(ex.ToString());
-            //    Main.StatusUpdate("Generic error occured during processing", 1);
-            //}
 
             if (bigScreenshot != null)
             {
@@ -499,7 +478,7 @@ namespace WFInfo
 
         /// <summary>
         /// Processes the theme, parse image to detect the theme in the image. Parse null to detect the theme from the screen.
-        /// closeestThresh is used for ???
+        /// closeestThresh is used for getting the most "Accuracte" result, anything over 100 is sure to be correct.
         /// </summary>
         /// <param name="closestThresh"></param>
         /// <param name="image"></param>
@@ -559,53 +538,6 @@ namespace WFInfo
             return active;
         }
 
-        //public static int GetThemeThreshold(Bitmap image = null)
-        //{
-        //    int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
-        //    int width = image == null ? window.Width * (int)dpiScaling : image.Width;
-        //    int height = image == null ? window.Height * (int)dpiScaling : image.Height;
-        //    int mostWidth = (int)(pixleRewardWidth * screenScaling);
-        //    int mostLeft = (width / 2) - (mostWidth / 2);
-        //    int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
-        //    int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
-        //    Bitmap preFilter;
-
-        //    try {
-        //        preFilter = new Bitmap(mostWidth, mostBot - mostTop);
-        //        using (Graphics graphics = Graphics.FromImage(preFilter))
-        //            graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(preFilter.Width, preFilter.Height));
-        //       }
-        //    catch (Exception ex) {
-        //        Main.AddLog("Something went wrong with getting the starting image: " + ex.ToString());
-        //        throw;
-        //    }
-
-        //    double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        //    int minWidth = mostWidth / 4;
-
-        //    for (int y = lineHeight; y < preFilter.Height; y++) {
-        //        double perc = (y - lineHeight) / (preFilter.Height - lineHeight);
-        //        int totWidth = (int)(minWidth * perc + minWidth);
-        //        for (int x = 0; x < totWidth; x++) {
-        //            int match = (int)GetClosestTheme(preFilter.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
-        //            weights[match] += 1 / Math.Pow(thresh + 1, 4);
-        //        }
-        //    }
-
-        //    double max = 0;
-        //    WFtheme active = WFtheme.UNKNOWN;
-        //    for (int i = 0; i < weights.Length; i++) {
-        //        Console.Write(weights[i].ToString("F2") + " ");
-        //        if (weights[i] > max) {
-        //            max = weights[i];
-        //            active = (WFtheme)i;
-        //        }
-        //    }
-        //    Main.AddLog("CLOSEST THEME(" + max.ToString("F2") + "): " + active.ToString());
-
-        //    return (int)max;
-        //}
-
         private static int[,,] GetThemeCache = new int[256, 256, 256];
         private static int[,,] GetThresholdCache = new int[256, 256, 256];
         private static WFtheme GetClosestTheme(Color clr, out int threshold)
@@ -663,7 +595,6 @@ namespace WFInfo
                 if (part.name.Length < 13) // if part name is smaller than "Bo prime handle" skip current part
                     continue;
 
-
                 string name = Main.dataBase.GetPartName(part.name, out firstProximity[0]);
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
                 string plat = job["plat"].ToObject<string>();
@@ -708,6 +639,7 @@ namespace WFInfo
                 File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".csv", csv);
             }
         }
+
         /// <summary>
         /// Filters out any group of words and addes them all into a single InventoryItem, containing the found words as well as the bounds within they reside.
         /// </summary>
@@ -1435,8 +1367,6 @@ namespace WFInfo
         {
             using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
                 dpiScaling = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only need to check one value
-
-            uiScaling = Settings.scaling / 100.0;
         }
 
         private static void RefreshScaling()

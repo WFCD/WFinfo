@@ -50,11 +50,9 @@ namespace WFInfo
         public static long autoDelay;
         public static int imageRetentionTime;
         public static string ClipboardTemplate;
-        public static bool autoScaling;
         internal static int delay;
         public static bool Highlight;
 
-        public static int scaling { get; internal set; }
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
@@ -70,7 +68,6 @@ namespace WFInfo
         {
             DataContext = this;
 
-            scaleBar.Value = scaling;
             if (settingsObj.GetValue("Display").ToString() == "Overlay")
             {
                 OverlayRadio.IsChecked = true;
@@ -83,16 +80,12 @@ namespace WFInfo
             {
                 WindowRadio.IsChecked = true;
             }
+
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
                 autoCheckbox.IsChecked = true;
 
             if (Convert.ToBoolean(settingsObj.GetValue("Clipboard")))
                 clipboardCheckbox.IsChecked = true;
-
-            if (Convert.ToBoolean(settingsObj.GetValue("CuttingEdge")))
-                detectScalingCheckbox.IsChecked = true;
-
-            Scaling_box.Text = scaling.ToString() + "%";
 
             ResetActivationKeyText();
             Focus();
@@ -172,60 +165,6 @@ namespace WFInfo
             Save();
         }
 
-        private void ScalingValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (IsLoaded)
-            {
-                int newVal = (int)Math.Round(e.NewValue);
-                scaleBar.Value = newVal;
-                settingsObj["Scaling"] = newVal;
-                scaling = newVal;
-                Scaling_box.Text = newVal.ToString() + "%";
-                Save();
-            }
-        }
-
-        private void ScaleLeave(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                string input = Regex.Replace(Scaling_box.Text.ToString(), "[^0-9]", "");
-                if (input.Length > 0)
-                {
-                    int value = Convert.ToInt32(input);
-                    if (value < 50)
-                        value = 50;
-                    else if (value > 100)
-                        value = 100;
-
-                    settingsObj["Scaling"] = value;
-                    scaleBar.Value = value;
-                    Scaling_box.Text = value + "%";
-                    Save();
-                }
-                else
-                    Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
-            }
-            catch
-            {
-                Scaling_box.Text = settingsObj.GetValue("Scaling").ToString() + "%";
-                Main.AddLog("Couldn't save scaling from text input"); //works don't ask me how
-            }
-
-        }
-
-        private void ScaleDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Return)
-            {
-                scaleBar.Focus();
-            }
-        }
-
-        private void scaleFocus(object sender, RoutedEventArgs e)
-        {
-            Scaling_box.Text = "";
-        }
 
         private void ActivationDown(object sender, KeyEventArgs e)
         {
@@ -313,8 +252,6 @@ namespace WFInfo
             clipboard = clipboardCheckbox.IsChecked.Value;
             Save();
         }
-
-
 
         public static string GetKeyName(Key key)
         {
@@ -405,13 +342,6 @@ namespace WFInfo
                     }
             }
             return ch;
-        }
-
-        private void detectScalingClicked(object sender, RoutedEventArgs e)
-        {
-            settingsObj["CuttingEdge"] = detectScalingCheckbox.IsChecked.Value;
-            detectScaling = detectScalingCheckbox.IsChecked.Value;
-            Save();
         }
 
         private void LightRadioChecked(object sender, RoutedEventArgs e)
