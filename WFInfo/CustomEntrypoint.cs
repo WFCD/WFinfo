@@ -74,12 +74,10 @@ namespace WFInfo
 
             AvxSupport = isAVX2Available();
 
-            if (!AvxSupport)
+            if (!AvxSupport || File.Exists(appPath + @"\useSSE.txt"))
             {
                 using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
                 {
-                    sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
-                    sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
                     sw.WriteLineAsync("[" + DateTime.UtcNow + "]   " + "CPU doesn't support AVX optimizations, falling back to SSE2");
                 }
 
@@ -151,7 +149,7 @@ namespace WFInfo
             // Redownload if DLL is not present or got corrupted
             using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
             {
-                sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
+                sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
                 ManagementObjectSearcher mos = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_Processor");
                 foreach (ManagementObject mo in mos.Get())
                 {
