@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -144,20 +145,39 @@ namespace WFInfo
         {
             string dll = "CustomCPUID.dll";
             string path = app_data_tesseract_catalog + @"\" + dll;
-            string md5 = "23b463f8811480e508f10ce5e984bf2f";
+            string md5 = "3e7731e429ae6dd005fab5b2cd78e0bd";
             // Redownload if DLL is not present or got corrupted
-            if (!File.Exists(path) || GetMD5hash(path) != md5)
+            using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
             {
-                WebClient webClient = new WebClient();
-                webClient.DownloadFile(tesseract_hotlink_prefix + "/" + dll, path);
+                if (!File.Exists(path) || GetMD5hash(path) != md5))
+                {
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL is missing or corrupted, downloading");
+                    WebClient webClient = new WebClient();
+                    webClient.DownloadFile(tesseract_hotlink_prefix + "/" + dll, path);
+                }
+
+                // Import DLL that includes low level check for AVX2 support
+                IntPtr pDll = NativeMethods.LoadLibrary(path);
+                if (pDll == IntPtr.Zero)
+                {
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL Pointer is pointing to null, fallback to SSE");
+                    return false;
+                    // throw new Exception("DLL pointer to CustomCPUID.dll is not identified");
+                }
+
+                IntPtr pAddressOfFunctionToCall = NativeMethods.GetProcAddress(pDll, "isAVX2supported");
+
+                if (pAddressOfFunctionToCall == IntPtr.Zero)
+                {
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL Function Pointer is pointing to null, fallback to SSE");
+                    return false;
+                    // throw new Exception("DLL function pointer in CustomCPUID.dll is not identified");
+                }
+                isAVX2supported isAvx2Supported = (isAVX2supported) Marshal.GetDelegateForFunctionPointer(
+                    pAddressOfFunctionToCall,
+                    typeof(isAVX2supported));
+                return isAvx2Supported();
             }
-            // Import DLL that includes low level check for AVX2 support
-            IntPtr pDll = NativeMethods.LoadLibrary(path);
-            IntPtr pAddressOfFunctionToCall = NativeMethods.GetProcAddress(pDll, "isAVX2supported");
-            isAVX2supported isAvx2Supported = (isAVX2supported)Marshal.GetDelegateForFunctionPointer(
-                pAddressOfFunctionToCall,
-                typeof(isAVX2supported));
-            return isAvx2Supported();
         }
         static class NativeMethods
         {
