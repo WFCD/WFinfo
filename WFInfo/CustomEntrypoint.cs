@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Management;
 
 namespace WFInfo
 {
@@ -70,6 +71,7 @@ namespace WFInfo
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x64");
 
             Directory.CreateDirectory(appdata_tessdata_folder);
+
             AvxSupport = isAVX2Available();
 
             if (!AvxSupport)
@@ -145,11 +147,18 @@ namespace WFInfo
         {
             string dll = "CustomCPUID.dll";
             string path = app_data_tesseract_catalog + @"\" + dll;
-            string md5 = "3e7731e429ae6dd005fab5b2cd78e0bd";
+            string md5 = "745d1bdb33e1d2c8df1a90ce1a6cebcd";
             // Redownload if DLL is not present or got corrupted
             using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
             {
-                if (!File.Exists(path) || GetMD5hash(path) != md5))
+                sw.WriteLineAsync("--------------------------------------------------------------------------------------------");
+                ManagementObjectSearcher mos = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_Processor");
+                foreach (ManagementObject mo in mos.Get())
+                {
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] CPU model name is " + mo["Name"]);
+                }
+
+                if (!File.Exists(path) || GetMD5hash(path) != md5)
                 {
                     sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL is missing or corrupted, downloading");
                     WebClient webClient = new WebClient();
@@ -166,7 +175,6 @@ namespace WFInfo
                 }
 
                 IntPtr pAddressOfFunctionToCall = NativeMethods.GetProcAddress(pDll, "isAVX2supported");
-
                 if (pAddressOfFunctionToCall == IntPtr.Zero)
                 {
                     sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL Function Pointer is pointing to null, fallback to SSE");
@@ -176,6 +184,7 @@ namespace WFInfo
                 isAVX2supported isAvx2Supported = (isAVX2supported) Marshal.GetDelegateForFunctionPointer(
                     pAddressOfFunctionToCall,
                     typeof(isAVX2supported));
+
                 return isAvx2Supported();
             }
         }
