@@ -201,7 +201,7 @@ namespace WFInfo
             List<Bitmap> parts;
 
             bigScreenshot = file ?? CaptureScreenshot();
-            parts = ExtractPartBoxAutomatically(out double uiScalingVal, out activeTheme, file);
+            parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, file);
 
 
             firstChecks = new string[parts.Count];
@@ -240,12 +240,12 @@ namespace WFInfo
             if (firstChecks.Length > 0)
             {
                 clipboard = string.Empty;
-                int width = (int)(pixleRewardWidth * screenScaling * uiScalingVal) + 10;
+                int width = (int)(pixleRewardWidth * screenScaling * uiScaling) + 10;
                 int startX = center.X - width / 2 + (int)(width * 0.004);
                 if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
                 if (firstChecks.Length == 4 && firstChecks[0].Replace(" ", "").Length < 6) { startX += 2 * (width / 8); }
                 int overWid = (int)(width / (4.1 * dpiScaling));
-                int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScalingVal);
+                int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScaling);
                 int partNumber = 0;
                 bool hideRewardInfo = false;
                 for (int i = 0; i < firstChecks.Length; i++)
