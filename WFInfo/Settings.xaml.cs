@@ -4,7 +4,6 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 
@@ -33,15 +32,16 @@ namespace WFInfo
 
         public static Key backupKeyVal = Key.None;
         private static Key activeKeyVal = Key.None;
-        public static Key ActivationKey
-        {
+        public static Key ActivationKey {
             get { return activeKeyVal; }
-            set
-            {
+            set {
                 activeKeyVal = value;
                 backupKeyVal = value;
             }
         }
+        public static Key DebugModifierKey;
+        public static Key SnapitModifierKey;
+        public static Key SearchItModifierKey;
         public static KeyConverter converter = new KeyConverter();
         public static Point mainWindowLocation;
         public static bool isOverlaySelected;
