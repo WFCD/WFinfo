@@ -47,7 +47,11 @@ namespace WFInfo {
 		private void textChanged(object sender, TextChangedEventArgs e) {
 				if (searchField.Text != "")
 					placeholder.Visibility = Visibility.Hidden;
-			}
+				List<string> closest = Main.dataBase.ClosestAutoComplete(searchField.Text, 1);
+				foreach (string result in closest) {
+					Main.AddLog(result);
+				}
+		}
 		}
 	}
 	

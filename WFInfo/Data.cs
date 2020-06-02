@@ -9,6 +9,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 
 namespace WFInfo
 {
@@ -665,6 +666,15 @@ namespace WFInfo
             return num;
         }
 
+        public List<string> ClosestAutoComplete(string searchQuery, int maxResults) {
+            List<string> results = new List<string>();
+            //for (int i = 0; i < maxResults; i++) { //todo allow multiple "Best" results to show up
+
+            //}
+            results.Add(GetPartNameHuman(searchQuery, out _));
+            return results;
+        }
+
         public string GetPartName(string name, out int low)
         { // Checks the Levenshtein Distance of a string and returns the index in Names() of the closest part
             string lowest = null;
@@ -678,6 +688,24 @@ namespace WFInfo
                     low = val;
                     lowest = prop.Value.ToObject<string>();
                     lowest_unfiltered = prop.Key;
+                }
+            }
+
+
+            Main.AddLog("Found part(" + low + "): \"" + lowest_unfiltered + "\" from \"" + name + "\"");
+            return lowest;
+        }
+
+        public string GetPartNameHuman(string name, out int low) { // Checks the Levenshtein Distance of a string and returns the index in Names() of the closest part optimized for human searching
+            string lowest = null;
+            string lowest_unfiltered = null;
+            low = 9999;
+            foreach (KeyValuePair<string, JToken> prop in nameData) {
+                int val = LevenshteinDistance(prop.Value.ToString(), name);
+                if (val < low) {
+                    low = val;
+                    lowest = prop.Value.ToObject<string>();
+                    lowest_unfiltered = prop.Value.ToString();
                 }
             }
 
