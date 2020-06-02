@@ -114,73 +114,36 @@ namespace WFInfo
 
         public void OnMouseAction(MouseButton key)
         {
-            //Close all overlays if hotkey + delete is held down
-
-            if (key == Settings.ActivationMouseButton && Keyboard.IsKeyDown(Key.Delete))
-            {
-                foreach (Window overlay in App.Current.Windows)
-                {
-                    if (overlay.GetType().ToString() == "WFInfo.Overlay")
-                    {
-                        overlay.Hide();
-                    }
-                }
-                return;
-            }
-
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
-                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                {
-                    using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
-                    {
-                        openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-                        openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
-                        openFileDialog.FilterIndex = 2;
-                        openFileDialog.RestoreDirectory = true;
-                        openFileDialog.Multiselect = true;
-
-                        if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                        {
-                            Task.Factory.StartNew(() =>
-                            {
-                                try
-                                {
-                                    foreach (string file in openFileDialog.FileNames)
-                                    {
-                                        Main.AddLog("Testing fullscreen file: " + file.ToString());
-
-                                        Bitmap image = new Bitmap(file);
-                                        OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
-                                    }
-
-                                }
-                                catch (Exception e)
-                                {
-                                    AddLog(e.Message);
-                                    StatusUpdate("Failed to load image", 1);
-                                }
-                            });
-                        }
-                        else
-                        {
-                            StatusUpdate("Failed to load image", 1);
+                if (Keyboard.IsKeyDown(Key.Delete)) { //Close all overlays if hotkey + delete is held down
+                    foreach (Window overlay in App.Current.Windows) {
+                        if (overlay.GetType().ToString() == "WFInfo.Overlay") {
+                            overlay.Hide();
                         }
                     }
+                    return;
                 }
-                else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) //snapit debug
+
+                {
+                    AddLog("Loading screenshot from file for snapit");
+                    StatusUpdate("Offline testing with screenshot for snapit", 0);
+                    LoadScreenshotSnap();
+                }
+                else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift) //normal debug
                 {
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
                 }
-                else if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                else if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) //snapit
                 {
                     AddLog("Starting snap it");
                     StatusUpdate("Starting snap it", 0);
                     OCR.SnapScreenshot();
                 }
-                else if (Settings.debug || OCR.VerifyWarframe())
+                else if (Settings.debug || OCR.VerifyWarframe()) //default
                 {
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
@@ -190,66 +153,28 @@ namespace WFInfo
         public void OnKeyAction(Key key)
         {
             // close the snapit overlay when *any* key is pressed down
-            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
-            {
+            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None) {
                 snapItOverlayWindow.closeOverlay();
-                Main.StatusUpdate("Closed snapit", 0);
-                return;
-            }
-
-            //Close all overlays if hotkey + delete is held down
-            if (key == Settings.ActivationKey && Keyboard.IsKeyDown(Key.Delete))
-            {
-                foreach (Window overlay in App.Current.Windows)
-                {
-                    if (overlay.GetType().ToString() == "WFInfo.Overlay")
-                    {
-                        overlay.Hide();
-                    }
-                }
-                Main.StatusUpdate("Overlays dissmissed", 1);
+                StatusUpdate("Closed snapit", 0);
                 return;
             }
 
             if (key == Settings.ActivationKey)
             { //check if user pressed activation key
-                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                {
-                    using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
-                    {
-                        openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-                        openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
-                        openFileDialog.FilterIndex = 2;
-                        openFileDialog.RestoreDirectory = true;
-                        openFileDialog.Multiselect = true;
-
-                        if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                        {
-                            Task.Factory.StartNew(() =>
-                            {
-                                try
-                                {
-                                    foreach (string file in openFileDialog.FileNames)
-                                    {
-                                        Main.AddLog("Testing snapit on file: " + file.ToString());
-
-                                        Bitmap image = new Bitmap(file);
-                                        OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
-                                    }
-
-                                }
-                                catch (Exception e)
-                                {
-                                    AddLog(e.Message);
-                                    StatusUpdate("Failed to load image", 1);
-                                }
-                            });
-                        }
-                        else
-                        {
-                            StatusUpdate("Failed to load image", 1);
+                if (Keyboard.IsKeyDown(Key.Delete)) { //Close all overlays if hotkey + delete is held down
+                    foreach (Window overlay in App.Current.Windows) {
+                        if (overlay.GetType().ToString() == "WFInfo.Overlay") {
+                            overlay.Hide();
                         }
                     }
+                    StatusUpdate("Overlays dissmissed", 1);
+                    return;
+                }
+                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
+                    AddLog("Loading screenshot from file for snapit");
+                    StatusUpdate("Offline testing with screenshot for snapit", 0);
+                    LoadScreenshotSnap();
                 }
                 else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
                 {
@@ -299,7 +224,7 @@ namespace WFInfo
                         {
                             foreach (string file in openFileDialog.FileNames)
                             {
-                                Main.AddLog("Testing file: " + file.ToString());
+                                AddLog("Testing file: " + file.ToString());
 
                                 //Get the path of specified file
                                 Bitmap image = new Bitmap(file);
@@ -317,6 +242,37 @@ namespace WFInfo
                 }
                 else
                 {
+                    StatusUpdate("Failed to load image", 1);
+                }
+            }
+        }
+
+        private void LoadScreenshotSnap() {
+            using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog()) {
+                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 2;
+                openFileDialog.RestoreDirectory = true;
+                openFileDialog.Multiselect = true;
+
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
+                    Task.Factory.StartNew(() =>
+                    {
+                        try {
+                            foreach (string file in openFileDialog.FileNames) {
+                                AddLog("Testing snapit on file: " + file.ToString());
+
+                                Bitmap image = new Bitmap(file);
+                                OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
+                            }
+
+                        }
+                        catch (Exception e) {
+                            AddLog(e.Message);
+                            StatusUpdate("Failed to load image", 1);
+                        }
+                    });
+                } else {
                     StatusUpdate("Failed to load image", 1);
                 }
             }
