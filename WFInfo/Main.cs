@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Net;
 using AutoUpdaterDotNET;
 using System.Windows;
+using System.Diagnostics;
 
 namespace WFInfo
 {
@@ -26,6 +27,8 @@ namespace WFInfo
         public static ErrorDialogue popup;
         public static UpdateDialogue update;
         public static SnapItOverlay snapItOverlayWindow;
+        public static Stopwatch watch;
+
         public Main()
         {
             INSTANCE = this;
@@ -39,6 +42,7 @@ namespace WFInfo
             equipmentWindow = new EquipmentWindow();
             settingsWindow = new Settings();
             snapItOverlayWindow = new SnapItOverlay();
+            watch = Stopwatch.StartNew();
 
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");

@@ -178,10 +178,15 @@ namespace WFInfo
 
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
+
             if (processingActive)
             {
-                Main.StatusUpdate("Already Processing Reward Screen", 2);
-                return;
+                if(Main.watch.ElapsedMilliseconds > 2000) { // if it takes longer than 2 seconds assume it is done and start a new scan.
+                    Main.StatusUpdate("Processed for: " + Main.watch.ElapsedMilliseconds + " Starting afresh", 2);
+                } else {
+                    Main.StatusUpdate("Still Processing Reward Screen", 2);
+                    return;
+                }
             }
             processingActive = true;
             Main.StatusUpdate("Processing...", 0);
@@ -191,8 +196,7 @@ namespace WFInfo
             DateTime time = DateTime.UtcNow;
             timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
 
-            var watch = Stopwatch.StartNew();
-            long start = watch.ElapsedMilliseconds;
+            long start = Main.watch.ElapsedMilliseconds;
 
             List<Bitmap> parts;
 
@@ -214,7 +218,7 @@ namespace WFInfo
 
             if (firstChecks == null || firstChecks.Length == 0 || CheckIfError())
             {
-                Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
+                Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (Main.watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
                 Main.StatusUpdate("Couldn't find any rewards to display", 2);
                 if (firstChecks == null)
                 {
@@ -322,7 +326,7 @@ namespace WFInfo
                         hideRewardInfo = false;
                     }
                 }
-                var end = watch.ElapsedMilliseconds;
+                var end = Main.watch.ElapsedMilliseconds;
                 Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
                 if (Settings.Highlight)
@@ -341,7 +345,7 @@ namespace WFInfo
                 if (partialScreenshot.Height < 70)
                 {
                     SlowSecondProcess();
-                    end = watch.ElapsedMilliseconds;
+                    end = Main.watch.ElapsedMilliseconds;
                 }
 
                 if (Settings.Highlight)
@@ -364,7 +368,7 @@ namespace WFInfo
                 player.Play();
             }
 
-            watch.Stop();
+            Main.watch.Reset();
 
             (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
                 .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
