@@ -701,15 +701,26 @@ namespace WFInfo
             string lowest_unfiltered = null;
             low = 9999;
             foreach (KeyValuePair<string, JToken> prop in nameData) {
-                int val = LevenshteinDistance(prop.Value.ToString(), name);
-                if (val < low) {
-                    low = val;
-                    lowest = prop.Value.ToObject<string>();
-                    lowest_unfiltered = prop.Value.ToString();
+                if (prop.Value.ToString().ToLower().Contains(name.ToLower())) {
+                    int val = LevenshteinDistance(prop.Value.ToString(), name);
+                    if (val < low) {
+                        low = val;
+                        lowest = prop.Value.ToObject<string>();
+                        lowest_unfiltered = prop.Value.ToString();
+                    }
                 }
             }
-
-
+            if (low > 10) {
+                foreach (KeyValuePair<string, JToken> prop in nameData) {
+                        int val = LevenshteinDistance(prop.Value.ToString(), name);
+                        if (val < low) {
+                            low = val;
+                            lowest = prop.Value.ToObject<string>();
+                            lowest_unfiltered = prop.Value.ToString();
+                        }
+                    
+                }
+            }
             Main.AddLog("Found part(" + low + "): \"" + lowest_unfiltered + "\" from \"" + name + "\"");
             return lowest;
         }
