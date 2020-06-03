@@ -146,6 +146,14 @@ namespace WFInfo
                 Settings.settingsObj["ClipboardVaulted"] = false;
             Settings.ClipboardVaulted = (bool)Settings.settingsObj.GetValue("ClipboardVaulted");
 
+            if (!Settings.settingsObj.TryGetValue("Auto", out _))
+                Settings.settingsObj["Auto"] = false;
+            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
+
+            if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
+                Settings.settingsObj["HighContrast"] = false;
+            Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
+
             Settings.Save();
         }
 
