@@ -18,6 +18,7 @@ namespace WFInfo
         {
             Top = MainWindow.INSTANCE.Top + 150;
             Show();
+            Topmost = true;
             switch (partNumber)
             {
                 case 0:
@@ -131,6 +132,7 @@ namespace WFInfo
         }
         private void Exit(object sender, RoutedEventArgs e)
         {
+            Topmost = false;
             Hide();
         }
         // Allows the draging of the window
