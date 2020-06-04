@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         Title="Overlay" Height="141" Width="243" WindowStyle="None" AllowsTransparency="True" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" IsTabStop="False" Focusable="False">
     <Window.Background>
-        <ImageBrush ImageSource="Resources/background.jpg"/>
+        <ImageBrush  ImageSource="Resources/background.jpg"/>
     </Window.Background>
-    <Grid>
+    <Grid x:Name="BackgroundGrid" Background="#00000000">
         <Grid.Resources>
             <Style TargetType="TextBlock" BasedOn="{StaticResource baseStyle}">
                 <Setter Property="FontFamily" Value="{StaticResource Roboto_Condensed}" />

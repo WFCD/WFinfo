@@ -52,8 +52,9 @@ namespace WFInfo
         public static string ClipboardTemplate;
         internal static int delay;
         public static bool Highlight;
+		internal static bool highContrast;
 
-        public static bool auto { get; internal set; }
+		public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
         public static bool SnapitExport { get; internal set; }

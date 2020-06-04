@@ -47,7 +47,6 @@ namespace WFInfo
         {
             hider.Interval = TimeSpan.FromSeconds(10);
             hider.Tick += HideOverlay;
-
             InitializeComponent();
         }
 
@@ -85,6 +84,13 @@ namespace WFInfo
             ownedText.FontWeight = FontWeights.Normal;
             ducatText.FontWeight = FontWeights.Normal;
             partText.FontWeight = FontWeights.Normal;
+
+            if (Settings.highContrast) {
+                Console.WriteLine("Turning high contrast on");
+                BackgroundGrid.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            } else {
+                new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+            }
 
             partText.Text = name;
             if (hideRewardInfo)
