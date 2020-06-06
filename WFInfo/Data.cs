@@ -27,7 +27,8 @@ namespace WFInfo {
 		private readonly string relicDataPath;
 		private readonly string nameDataPath;
 		private string JWT;
-		private HttpResponseHeaders headers;
+		private string userEmail;
+		private string userPassword;
 		private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
 
 		static readonly HttpClient client = new HttpClient();
@@ -780,7 +781,9 @@ namespace WFInfo {
 					RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
 					Method = HttpMethod.Post,
 				};
-				var json = "{ \"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+				userEmail = email; userPassword = password;
+
+				var json = "{ \"email\":\"" + userEmail + "\",\"password\":\"" + userPassword + "\"}";
 				Console.WriteLine(json);
 				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 				request.Headers.Add("Authorization", "JWT");
@@ -792,9 +795,21 @@ namespace WFInfo {
 				HttpResponseMessage response = await client.SendAsync(request);
 				string responseBody = await response.Content.ReadAsStringAsync();
 				Console.WriteLine(responseBody);
-				headers = response.Headers;
+				//foreach (var item in response.Headers) { //scan all headers
+				//	Console.WriteLine("Key: " + item.Key + " Value: ");
+				//	foreach (var val in item.Value) {
+				//		Console.WriteLine(val);
+				//	}
+				//}
+				foreach (var item in response.Headers.GetValues("Set-Cookie")) {
+					if (item.Contains("JWT=")) {
+						int start = item.LastIndexOf("JWT=") + "JWT=".Length;
+						int length = item.IndexOf(";");
+						JWT = item.Substring(start, length-start);
+					}
+				}
 			}
-			catch (HttpRequestException e) {
+			catch (Exception e) {
 				Console.WriteLine("\nException Caught!");
 				Console.WriteLine("Message :{0} ", e.Message);
 			}
@@ -804,19 +819,21 @@ namespace WFInfo {
 		public async void ListItem(string itemID, int platinum, int quantity) {
 			try {
 				var request = new HttpRequestMessage() {
-					RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
+					RequestUri = new Uri("https://api.warframe.market/v1/profile/orders"),
 					Method = HttpMethod.Post,
 				};
-				var json = "{ \"order_type\":\"sell\",\"item_id\":" + itemID + ",\"platinum\":" + platinum + ",\"quantity\": " + quantity + "\"}";
+				var json = "{\"order_type\":\"sell\",\"item_id\":\""+ itemID + "\",\"platinum\":" + platinum + ",\"quantity\":" + quantity + "}";
 				Console.WriteLine(json);
 				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-				foreach (var item in headers) {
-					request.Headers.Add(item.Key, item.Value);
-				}
+				request.Headers.Add("Authorization", "JWT"+JWT);
+				request.Headers.Add("language", "en"); 
+				request.Headers.Add("accept", "application/json");
+				request.Headers.Add("platform", "pc");
+				request.Headers.Add("auth_type", "header");
+
 				HttpResponseMessage response = await client.SendAsync(request);
 				string responseBody = await response.Content.ReadAsStringAsync();
 				Console.WriteLine(responseBody);
-				headers = response.Headers;
 			}
 			catch (HttpRequestException e) {
 				Console.WriteLine("\nException Caught!");

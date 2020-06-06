@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo"
         mc:Ignorable="d"
-        Title="WebBrowser" Height="120" Width="235" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" Background="{x:Null}">
+        Title="WebBrowser" Height="170" Width="235" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" Background="{x:Null}">
 
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
         <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Width="29" Height="26" VerticalAlignment="Top"/>
@@ -26,5 +26,6 @@
         <TextBlock HorizontalAlignment="Left" Margin="12,36,0,0" TextWrapping="Wrap" Text="Email:" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="12,64,0,0" TextWrapping="Wrap" Text="Password:" VerticalAlignment="Top"/>
         <PasswordBox x:Name="Password" HorizontalAlignment="Left" Margin="85,62,0,0" VerticalAlignment="Top" Width="122" Foreground="#FFB1D0D9"/>
+        <Label x:Name="MakeListing" MouseLeftButtonDown="MakeListing_MouseLeftButtonDown" Content="Make listing lol" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Width="215" Height="26" VerticalAlignment="Top" Margin="0,129,10,0"/>
     </Grid>
 </Window>

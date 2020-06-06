@@ -29,6 +29,8 @@ namespace WFInfo {
 			Main.dataBase.GetUserLogin(Email.Text, Password.Password.ToString());
 		}
 
-
+		private void MakeListing_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { //{"order_type":"sell","item_id":"54a73e65e779893a797fff58","platinum":30,"quantity":1}
+			Main.dataBase.ListItem("54a73e65e779893a797fff58", 30, 1);
+		}
 	}
 }
