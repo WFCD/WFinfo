@@ -29,6 +29,7 @@ namespace WFInfo
         public static SnapItOverlay snapItOverlayWindow;
         public static Stopwatch watch;
 		public static SearchIt searchBox;
+		public static Login browser;
         public Main()
         {
             INSTANCE = this;
@@ -44,6 +45,7 @@ namespace WFInfo
             snapItOverlayWindow = new SnapItOverlay();
             watch = Stopwatch.StartNew();
 			searchBox = new SearchIt();
+			browser = new Login();
 
 			AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
 			AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
@@ -186,7 +188,8 @@ namespace WFInfo
 				} else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey)) { //Searchit  
 					AddLog("Starting search it");
 					StatusUpdate("Starting search it", 0);
-					searchBox.Start();
+					//searchBox.Start();
+					browser.Show();
 				} else if (Settings.debug || OCR.VerifyWarframe()) {
 					Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
 				}
