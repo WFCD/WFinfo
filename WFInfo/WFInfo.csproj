@@ -120,6 +120,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CookieAwareClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="CustomEntrypoint.cs" />
     <Compile Include="SearchIt.xaml.cs">
       <DependentUpon>SearchIt.xaml</DependentUpon>

@@ -7,10 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Net.Http.Headers;
+using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
-using System.Windows.Forms.VisualStyles;
 
 namespace WFInfo {
 
@@ -27,10 +26,11 @@ namespace WFInfo {
 		private readonly string eqmtDataPath;
 		private readonly string relicDataPath;
 		private readonly string nameDataPath;
-		private static string userHash;
-
+		private string JWT;
+		private HttpResponseHeaders headers;
 		private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
 
+		static readonly HttpClient client = new HttpClient();
 		readonly WebClient WebClient;
 		private readonly Sheets sheetsApi;
 		private string githubVersion;
@@ -774,74 +774,54 @@ namespace WFInfo {
 			}
 		}
 
-		public async Task GetUserLogin(string email, string password) {
-			//var values = new Dictionary<string, string>
-			//{
-			//    { "email", email },
-			//    { "password", password }
-			//};
-			//CookieContainer cookies = new CookieContainer();
-			//HttpClientHandler handler = new HttpClientHandler();
-			//handler.CookieContainer = cookies;
+		public async void GetUserLogin(string email, string password) {
+			try {
+				var request = new HttpRequestMessage() {
+					RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
+					Method = HttpMethod.Post,
+				};
+				var json = "{ \"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+				Console.WriteLine(json);
+				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+				request.Headers.Add("Authorization", "JWT");
+				request.Headers.Add("language", "en");
+				request.Headers.Add("accept", "application/json");
+				request.Headers.Add("platform", "pc");
+				request.Headers.Add("auth_type", "header");
 
-			//HttpClient client = new HttpClient(handler);
-			//HttpResponseMessage response = client.GetAsync("https://api.warframe.market/v1/auth/signin").Result;
-			//client.DefaultRequestHeaders.Add("x-csrftoken", "##602fb97b31ec03a8d6c701099291cc2d95c395c15b003bdd4fe5ce2f5210c54ac73db44f09a9db11c28b717859985f8e8421f854fcdd0aa44d66a465be9b88f7");
-			//var message = new HttpRequestMessage(HttpMethod.Post, "https://api.warframe.market/v1/auth/signin");
-			//Uri uri = new Uri("https://api.warframe.market/v1/auth/signin");
-			//IEnumerable<Cookie> responseCookies = cookies.GetCookies(uri).Cast<Cookie>();
-			//foreach (Cookie cookie in responseCookies) {
-			//    Console.WriteLine(cookie.Name + ": " + cookie.Value);
-			//    cookies.Add(uri , cookie);
-			//}
-			//var content = new FormUrlEncodedContent(values);
-
-			//var loginResponse = await client.PostAsync("https://api.warframe.market/v1/auth/signin", content);
-
-			//userHash = await loginResponse.Content.ReadAsStringAsync();
-			//Console.WriteLine("User hash is:" + userHash);
-
-			List<Cookie> cookiesColelction = getCookies("https://api.warframe.market/v1/auth/signin");
+				HttpResponseMessage response = await client.SendAsync(request);
+				string responseBody = await response.Content.ReadAsStringAsync();
+				Console.WriteLine(responseBody);
+				headers = response.Headers;
+			}
+			catch (HttpRequestException e) {
+				Console.WriteLine("\nException Caught!");
+				Console.WriteLine("Message :{0} ", e.Message);
+			}
+		}
 
 
-			var baseAddress = new Uri("https://warframe.market/");
-			var cookieContainer = new CookieContainer();
-			using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
-			using (var client = new HttpClient(handler) { BaseAddress = baseAddress }) {
-				var content = new FormUrlEncodedContent(new Dictionary<string, string>
-				{
-					{ "email", email },
-					{ "password", password }
-				});
-				foreach (var item in cookiesColelction) {
-					cookieContainer.Add(baseAddress, item);
+		public async void ListItem(string itemID, int platinum, int quantity) {
+			try {
+				var request = new HttpRequestMessage() {
+					RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
+					Method = HttpMethod.Post,
+				};
+				var json = "{ \"order_type\":\"sell\",\"item_id\":" + itemID + ",\"platinum\":" + platinum + ",\"quantity\": " + quantity + "\"}";
+				Console.WriteLine(json);
+				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+				foreach (var item in headers) {
+					request.Headers.Add(item.Key, item.Value);
 				}
-				
-				var result = await client.PostAsync("/auth/signin", content);
-				//result.EnsureSuccessStatusCode();
-				Console.WriteLine(result);
+				HttpResponseMessage response = await client.SendAsync(request);
+				string responseBody = await response.Content.ReadAsStringAsync();
+				Console.WriteLine(responseBody);
+				headers = response.Headers;
+			}
+			catch (HttpRequestException e) {
+				Console.WriteLine("\nException Caught!");
+				Console.WriteLine("Message :{0} ", e.Message);
 			}
 		}
-
-		public List<Cookie> getCookies(string link) {
-			CookieContainer cookies = new CookieContainer();
-			HttpClientHandler handler = new HttpClientHandler();
-			handler.CookieContainer = cookies;
-
-			HttpClient client = new HttpClient(handler);
-			HttpResponseMessage response = client.GetAsync(link).Result;
-
-			Uri uri = new Uri(link);
-
-			List<Cookie> result = new List<Cookie>();
-			IEnumerable <Cookie> responseCookies = cookies.GetCookies(uri).Cast<Cookie>();
-			foreach (Cookie cookie in responseCookies) {
-				Console.WriteLine(cookie.Name + ": " + cookie.Value);
-				result.Add(cookie);
-			}
-
-			return result;
-		}
-
 	}
 }
