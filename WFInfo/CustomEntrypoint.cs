@@ -179,7 +179,7 @@ namespace WFInfo
                     return false;
                     // throw new Exception("DLL function pointer in CustomCPUID.dll is not identified");
                 }
-                isAVX2supported isAvx2Supported = (isAVX2supported) Marshal.GetDelegateForFunctionPointer(
+                isAVX2supported isAvx2Supported = (isAVX2supported)Marshal.GetDelegateForFunctionPointer(
                     pAddressOfFunctionToCall,
                     typeof(isAVX2supported));
 

@@ -181,9 +181,12 @@ namespace WFInfo
 
             if (processingActive)
             {
-                if(Main.watch.ElapsedMilliseconds > 2000) { // if it takes longer than 2 seconds assume it is done and start a new scan.
+                if (Main.watch.ElapsedMilliseconds > 2000)
+                { // if it takes longer than 2 seconds assume it is done and start a new scan.
                     Main.StatusUpdate("Processed for: " + Main.watch.ElapsedMilliseconds + " Starting afresh", 2);
-                } else {
+                }
+                else
+                {
                     Main.StatusUpdate("Still Processing Reward Screen", 2);
                     return;
                 }

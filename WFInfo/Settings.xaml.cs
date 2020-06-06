@@ -32,9 +32,11 @@ namespace WFInfo
 
         public static Key backupKeyVal = Key.None;
         private static Key activeKeyVal = Key.None;
-        public static Key ActivationKey {
+        public static Key ActivationKey
+        {
             get { return activeKeyVal; }
-            set {
+            set
+            {
                 activeKeyVal = value;
                 backupKeyVal = value;
             }
@@ -52,9 +54,9 @@ namespace WFInfo
         public static string ClipboardTemplate;
         internal static int delay;
         public static bool Highlight;
-		internal static bool highContrast;
+        internal static bool highContrast;
 
-		public static bool auto { get; internal set; }
+        public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
         public static bool SnapitExport { get; internal set; }

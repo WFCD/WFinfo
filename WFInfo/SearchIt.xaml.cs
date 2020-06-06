@@ -12,47 +12,55 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace WFInfo {
-	/// <summary>
-	/// Interaction logic for SearchIt.xaml
-	/// </summary>
-	/// 
+namespace WFInfo
+{
+    /// <summary>
+    /// Interaction logic for SearchIt.xaml
+    /// </summary>
+    /// 
 
-	public partial class SearchIt : Window {
+    public partial class SearchIt : Window
+    {
 
-		public SearchIt() {
-			InitializeComponent();
-		}
+        public SearchIt()
+        {
+            InitializeComponent();
+        }
 
-		public bool isInUse = false;
+        public bool isInUse = false;
 
-		public void Start() {
-			isInUse = true;
-			Main.searchBox.Show();
-			searchField.Focusable = true;
-		}
+        public void Start()
+        {
+            isInUse = true;
+            Main.searchBox.Show();
+            searchField.Focusable = true;
+        }
 
-		private void Search(object sender, RoutedEventArgs e) {
-			Main.AddLog(searchField.Text);
-			finish();
-		}
-		internal void finish() {
-			searchField.Text = "";
-			placeholder.Visibility = Visibility.Visible;
-			searchField.Focusable = false;
-			isInUse = false;
-			Hide();
-		}
+        private void Search(object sender, RoutedEventArgs e)
+        {
+            Main.AddLog(searchField.Text);
+            finish();
+        }
+        internal void finish()
+        {
+            searchField.Text = "";
+            placeholder.Visibility = Visibility.Visible;
+            searchField.Focusable = false;
+            isInUse = false;
+            Hide();
+        }
 
-		private void textChanged(object sender, TextChangedEventArgs e) {
-				if (searchField.Text != "")
-					placeholder.Visibility = Visibility.Hidden;
-				List<string> closest = Main.dataBase.ClosestAutoComplete(searchField.Text, 1);
-				foreach (string result in closest) {
-					Main.AddLog(result);
-				}
-		}
-		}
-	}
-	
+        private void textChanged(object sender, TextChangedEventArgs e)
+        {
+            if (searchField.Text != "")
+                placeholder.Visibility = Visibility.Hidden;
+            List<string> closest = Main.dataBase.ClosestAutoComplete(searchField.Text, 1);
+            foreach (string result in closest)
+            {
+                Main.AddLog(result);
+            }
+        }
+    }
+}
+
 

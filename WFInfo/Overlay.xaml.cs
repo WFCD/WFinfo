@@ -85,10 +85,13 @@ namespace WFInfo
             ducatText.FontWeight = FontWeights.Normal;
             partText.FontWeight = FontWeights.Normal;
 
-            if (Settings.highContrast) {
+            if (Settings.highContrast)
+            {
                 Console.WriteLine("Turning high contrast on");
                 BackgroundGrid.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-            } else {
+            }
+            else
+            {
                 new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
             }
 
