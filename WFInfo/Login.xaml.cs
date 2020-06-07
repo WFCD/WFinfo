@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace WFInfo {
@@ -11,6 +13,7 @@ namespace WFInfo {
 			InitializeComponent();
 		}
 		private void Hide(object sender, MouseButtonEventArgs e) {
+			Main.searchBox.Hide();
 			Hide();
 		}
 
@@ -20,14 +23,18 @@ namespace WFInfo {
 				DragMove();
 		}
 
-		private void Click(object sender, MouseButtonEventArgs e) {
-			Main.dataBase.GetUserLogin(Email.Text, Password.Password);
+		private async void Click(object sender, MouseButtonEventArgs e) {
+
 			if (!Main.dataBase.IsJwtAvailable())
-				return;
+				await Main.dataBase.GetUserLogin(Email.Text, Password.Password);
+			Close(); //dispose of window once done
+
 			Main.searchBox.placeholder.Content = "Logged in";
 			Main.searchBox.isInUse = true;
 			Main.searchBox.searchField.Focusable = true;
-			Close(); //dispose of window once done
+			if(RememberMe.IsChecked.Value)
+				Settings.JWT = Main.dataBase.JWT;
+			Console.WriteLine(Settings.JWT);
 		}
 
 		private void Email_GotFocus(object sender, RoutedEventArgs e) {

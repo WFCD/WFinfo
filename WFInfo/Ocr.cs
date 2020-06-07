@@ -1350,17 +1350,23 @@ namespace WFInfo
 
         public static bool VerifyWarframe()
         {
-            if (Warframe != null && !Warframe.HasExited) { return true; }
+
+            if (Warframe != null && !Warframe.HasExited) {
+	            Main.dataBase.setStatus("ingame");
+	            return true;
+            }
             foreach (Process process in Process.GetProcesses())
             {
                 if (process.MainWindowTitle == "Warframe")
                 {
                     HandleRef = new HandleRef(process, process.MainWindowHandle);
                     Warframe = process;
+                    Main.dataBase.setStatus("ingame");
                     Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
                     return true;
                 }
             }
+            Main.dataBase.setStatus("online");
             if (!Settings.debug)
             {
                 Main.AddLog("Did Not Detect Warframe Process");

@@ -55,6 +55,7 @@ namespace WFInfo
         internal static int delay;
         public static bool Highlight;
         internal static bool highContrast;
+        public static string JWT;
 
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }

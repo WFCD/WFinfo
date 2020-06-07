@@ -324,10 +324,8 @@ namespace WFInfo
             }
         }
 
-        //getters, boring shit
-        //    you're boring shit
+
         public static string BuildVersion { get => buildVersion; }
-        public string AppPath { get => appPath; }
 
         public static int VersionToInteger(string vers)
         {

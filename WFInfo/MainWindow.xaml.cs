@@ -166,6 +166,12 @@ namespace WFInfo
                 Settings.settingsObj["Auto"] = false;
             Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
 
+            if (!Settings.settingsObj.TryGetValue("JWT", out _))
+	            Settings.settingsObj["JWT"] = null;
+            Settings.JWT = (string)Settings.settingsObj.GetValue("JWT");
+            Main.dataBase.JWT = (string)Settings.settingsObj.GetValue("JWT");
+
+
             if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
                 Settings.settingsObj["HighContrast"] = false;
             Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
@@ -207,6 +213,8 @@ namespace WFInfo
         public void Exit(object sender, RoutedEventArgs e)
         {
             notifyIcon.Dispose();
+            Settings.JWT = Main.dataBase.JWT;
+            Settings.Save();
             Application.Current.Shutdown();
         }
 
@@ -295,11 +303,11 @@ namespace WFInfo
 
         public void ToForeground(object sender, RoutedEventArgs e)
         {
-            MainWindow.INSTANCE.Visibility = Visibility.Visible;
-            MainWindow.INSTANCE.Activate();
-            MainWindow.INSTANCE.Topmost = true;  // important
-            MainWindow.INSTANCE.Topmost = false; // important
-            MainWindow.INSTANCE.Focus();         // important
+            INSTANCE.Visibility = Visibility.Visible;
+            INSTANCE.Activate();
+            INSTANCE.Topmost = true;  // important
+            INSTANCE.Topmost = false; // important
+            INSTANCE.Focus();         // important
         }
     }
 }
