@@ -91,6 +91,11 @@ namespace WFInfo
             File.WriteAllText(path, JsonConvert.SerializeObject(db, Formatting.Indented));
         }
 
+        public bool IsJwtAvailable()
+        {
+	        return JWT != null;
+        }
+
         public int GetGithubVersion()
         {
             WebClient.Headers.Add("User-Agent", "WFCD");
@@ -896,7 +901,7 @@ namespace WFInfo
 
         public async void GetUserLogin(string email, string password)
         {
-            try
+	        try
             {
                 var request = new HttpRequestMessage()
                 {
@@ -914,66 +919,45 @@ namespace WFInfo
 
                 HttpResponseMessage response = await client.SendAsync(request);
                 string responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(responseBody);
 
-                setJWT(response.Headers);
-                openSocket("");
+                if (response.IsSuccessStatusCode)
+                {
+	                Console.WriteLine(responseBody);
+	                setJWT(response.Headers);
+	                openSocket();
+                }
+                else
+                {
+	                throw new Exception(responseBody);
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine("\nException Caught!");
-                Console.WriteLine("Message :{0} ", e.Message);
+	            JWT = null;
+                Main.AddLog("Couldn't login: " + e.Message);
+                JObject json = JsonConvert.DeserializeObject<JObject>(e.Message);
+                json.TryGetValue("error", out JToken msg);
+                if (msg["email"].HasValues)
+                {
+	                if (msg["email"].First.ToString() == "app.form.invalid")
+	                {
+		                Main.StatusUpdate("Invalid email form", 2);
+	                }
+	                else
+	                {
+		                Main.StatusUpdate("Unknown email", 1);
+	                }
+                }
+                else
+                {
+	                Main.StatusUpdate("Invalid password", 1); //either invald format or invalid adress 
+                }
+
             }
         }
 
-        public void openSocket(string message)
+        public void openSocket()
         {
-            //try {
-            //	// Create a TcpClient.
-            //	// Note, for this client to work you need to have a TcpServer
-            //	// connected to the same address as specified by the server, port
-            //	// combination.
-            //	Int32 port = 443;
-            //	string server = "warframe.market/socket"; //wss://warframe.market/socket
-            //	TcpClient client = new TcpClient(server, port);
-
-            //	// Translate the passed message into ASCII and store it as a Byte array.
-            //	Byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
-
-            //	// Get a client stream for reading and writing.
-            //	//  Stream stream = client.GetStream();
-
-            //	NetworkStream stream = client.GetStream();
-
-            //	// Send the message to the connected TcpServer.
-            //	stream.Write(data, 0, data.Length);
-
-            //	Console.WriteLine("Sent: {0}", message);
-
-            //	// Receive the TcpServer.response.
-
-            //	// Buffer to store the response bytes.
-            //	data = new Byte[256];
-
-            //	// String to store the response ASCII representation.
-            //	String responseData = String.Empty;
-
-            //	// Read the first batch of the TcpServer response bytes.
-            //	Int32 bytes = stream.Read(data, 0, data.Length);
-            //	responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-            //	Console.WriteLine("Received: {0}", responseData);
-
-            //	// Close everything.
-            //	stream.Close();
-            //	client.Close();
-            //}
-            //catch (ArgumentNullException e) {
-            //	Console.WriteLine("ArgumentNullException: {0}", e);
-            //}
-            //catch (SocketException e) {
-            //	Console.WriteLine("SocketException: {0}", e);
-            //}
-
             if (marketSocket == null)
             {
                 marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
@@ -994,6 +978,17 @@ namespace WFInfo
                 throw;
             }
 
+            marketSocket.OnMessage += (sender, e) =>
+            {
+	            if (e.Data.Contains("@WS/ERROR")) // error checking, report back to main.status
+	            {
+		            JObject json = JsonConvert.DeserializeObject<JObject>(e.Data);
+		            json.TryGetValue("error", out JToken msg);
+		            Main.StatusUpdate(msg.ToString(Formatting.None), 1);
+                    JWT = null; //assume authentication is invalid
+	            }
+            };
+
             marketSocket.OnOpen += (sender, e) =>
             {
                 marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}"); //
@@ -1006,9 +1001,7 @@ namespace WFInfo
             {
                 if (item.Contains("JWT="))
                 {
-                    int start = item.LastIndexOf("JWT=") + "JWT=".Length;
-                    int length = item.IndexOf(";");
-                    JWT = item.Substring(start, length - start);
+	                JWT = getSubstring(item, "JWT=", ";");
                 }
             }
         }
@@ -1067,6 +1060,14 @@ namespace WFInfo
         private void sendMessage(string data)
         {
             marketSocket.Send(data);
+        }
+
+        private string getSubstring(string origin, string start, string end)
+        {
+	        int a = origin.LastIndexOf(start) + start.Length;
+	        int b = origin.LastIndexOf(end);
+            Console.WriteLine(a + " " + b);
+	        return origin.Substring(a, (b - a));
         }
     }
 }

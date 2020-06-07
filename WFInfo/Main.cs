@@ -29,7 +29,6 @@ namespace WFInfo
         public static SnapItOverlay snapItOverlayWindow;
         public static Stopwatch watch;
         public static SearchIt searchBox;
-        public static Login browser;
         public Main()
         {
             INSTANCE = this;
@@ -45,7 +44,6 @@ namespace WFInfo
             snapItOverlayWindow = new SnapItOverlay();
             watch = Stopwatch.StartNew();
             searchBox = new SearchIt();
-            browser = new Login();
 
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
@@ -204,7 +202,7 @@ namespace WFInfo
                             overlay.Hide();
                         }
                     }
-                    StatusUpdate("Overlays dissmissed", 1);
+                    StatusUpdate("Overlays dismissed", 1);
                     return;
                 }
                 if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
@@ -229,8 +227,7 @@ namespace WFInfo
                 { //Searchit  
                     AddLog("Starting search it");
                     StatusUpdate("Starting search it", 0);
-                    //searchBox.Start();
-                    browser.Show();
+                    searchBox.Start();
                 }
                 else if (Settings.debug || OCR.VerifyWarframe())
                 {

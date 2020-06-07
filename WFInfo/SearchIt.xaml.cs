@@ -31,6 +31,17 @@ namespace WFInfo
 
         public void Start()
         {
+	        Main.searchBox.Show();
+	        Main.searchBox.placeholder.Content = "Search for warframe.market Items";
+            if (!Main.dataBase.IsJwtAvailable())
+            {
+	            Main.searchBox.placeholder.Content = "Please log in first";
+                Login wfmLogin = new Login();
+                wfmLogin.Show();
+                wfmLogin.Top = Main.searchBox.Top - wfmLogin.Height;
+                wfmLogin.Left = Left;
+                return;
+	        }
             isInUse = true;
             Main.searchBox.Show();
             searchField.Focusable = true;
