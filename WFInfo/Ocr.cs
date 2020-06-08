@@ -291,8 +291,12 @@ namespace WFInfo
 
                             clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
 
-
-                            if (Settings.ClipboardVaulted && vaulted) { clipboard += ducats + ":ducats:" + "(V)"; }
+                            if (Settings.ClipboardVaulted)
+                            {
+	                            clipboard += ducats + ":ducats:";
+	                            if (vaulted)
+		                            clipboard += "(V)";
+                            }
                         }
 
                         if ((partNumber == firstChecks.Length - 1) && (clipboard != String.Empty))
