@@ -18,7 +18,7 @@ namespace WFInfo
 {
     class OCR
     {
-        private static string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
+        private static readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         #region variabels and sizzle
         public enum WFtheme : int
         {
@@ -181,21 +181,15 @@ namespace WFInfo
 
             if (processingActive)
             {
-                if(Main.watch.ElapsedMilliseconds > 2000) { // if it takes longer than 2 seconds assume it is done and start a new scan.
-                    Main.StatusUpdate("Processed for: " + Main.watch.ElapsedMilliseconds + " Starting afresh", 2);
-                } else {
-                    Main.StatusUpdate("Still Processing Reward Screen", 2);
-                    return;
-                }
+	            Main.StatusUpdate("Still Processing Reward Screen", 2);
+	            return;
             }
             processingActive = true;
             Main.StatusUpdate("Processing...", 0);
             Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
-            //try
-            //{
+
             DateTime time = DateTime.UtcNow;
             timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
-
             long start = Main.watch.ElapsedMilliseconds;
 
             List<Bitmap> parts;
@@ -218,7 +212,8 @@ namespace WFInfo
 
             if (firstChecks == null || firstChecks.Length == 0 || CheckIfError())
             {
-                Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (Main.watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
+	            processingActive = false;
+	            Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (Main.watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
                 Main.StatusUpdate("Couldn't find any rewards to display", 2);
                 if (firstChecks == null)
                 {
@@ -473,9 +468,16 @@ namespace WFInfo
             }
             catch (Exception ex)
             {
+	            DateTime time = DateTime.UtcNow;
+	            timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
+                processingActive = false;
                 Main.AddLog("Couldn't process second check");
                 Main.StatusUpdate("Couldn't process second check", 1);
                 Main.AddLog(ex.ToString());
+                Main.RunOnUIThread(() =>
+                {
+	                Main.SpawnErrorPopup(time);
+                });
                 throw;
             }
         }
