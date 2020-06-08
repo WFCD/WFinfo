@@ -779,10 +779,8 @@ namespace WFInfo {
 			}
 		}
 
-		public async Task GetUserLogin(string email, string password)
-		{
-			var request = new HttpRequestMessage()
-			{
+		public async Task GetUserLogin(string email, string password) {
+			var request = new HttpRequestMessage() {
 				RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
 				Method = HttpMethod.Post,
 			};
@@ -794,143 +792,152 @@ namespace WFInfo {
 			request.Headers.Add("platform", "pc");
 			request.Headers.Add("auth_type", "header");
 
-			try
-			{
+			try {
 				HttpResponseMessage response = await client.SendAsync(request);
 				string responseBody = await response.Content.ReadAsStringAsync();
 
-				if (response.IsSuccessStatusCode)
-				{
+				if (response.IsSuccessStatusCode) {
 					setJWT(response.Headers);
-					openSocket();
-				}
-				else
-				{
+					await openSocket();
+				} else {
 					throw new Exception(responseBody);
 				}
 			}
-			catch (Exception e)
-			{
+			catch (Exception e) {
 				JWT = null;
 				Main.AddLog("Couldn't login: " + e.Message);
 				JObject json = JsonConvert.DeserializeObject<JObject>(e.Message);
 				json.TryGetValue("error", out JToken msg); //password
 
-				if (msg.Value<string>("email") != null)
-				{
-					if (msg["email"].First.ToString() == "app.form.invalid")
-					{
+				if (msg.Value<string>("email") != null) {
+					if (msg["email"].First.ToString() == "app.form.invalid") {
 						Main.RunOnUIThread(() => Main.StatusUpdate("Invalid email form", 2));
-					}
-					else
+					} else
 						Main.RunOnUIThread(() => Main.StatusUpdate("Unknown email", 1));
 
-				}
-				else if (msg.Value<string>("password") != null)
-				{
+				} else if (msg.Value<string>("password") != null) {
 					Main.RunOnUIThread(() => Main.StatusUpdate("Wrong password", 1));
-				}
-				else
-				{
+				} else {
 					Main.RunOnUIThread(() => Main.StatusUpdate("Too many requests", 1)); //default to too many requests
 				}
 			}
 		}
 
 
-		public void openSocket() {
-				if (marketSocket == null) 
-					marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
-				
-				marketSocket.OnMessage += (sender, e) =>
-					Console.WriteLine("warframe.market: " + e.Data);
-				marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
-				try {
-					marketSocket.SetCookie(new WebSocketSharp.Net.Cookie("JWT", JWT));
-					marketSocket.ConnectAsync();
-				}
-				catch (Exception e) {
-					Console.WriteLine(e.Data);
-					throw;
-				}
+		public async Task openSocket() {
+			if (marketSocket == null)
+				marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
 
-				marketSocket.OnMessage += (sender, e) => {
-					if (e.Data.Contains("@WS/ERROR")) // error checking, report back to main.status
-					{
-						JObject json = JsonConvert.DeserializeObject<JObject>(e.Data);
-						json.TryGetValue("error", out JToken msg);
-						Main.AddLog(msg.ToString());
-						JWT = null; //assume authentication is invalid
-					}
+			marketSocket.OnMessage += (sender, e) =>
+				Console.WriteLine("warframe.market: " + e.Data);
+			marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
+			try {
+				marketSocket.SetCookie(new WebSocketSharp.Net.Cookie("JWT", JWT));
+				marketSocket.ConnectAsync();
+			}
+			catch (Exception e) {
+				Console.WriteLine(e.Data);
+				throw;
+			}
+
+			marketSocket.OnMessage += (sender, e) => {
+				if (e.Data.Contains("@WS/ERROR")) // error checking, report back to main.status
+				{
+					JObject json = JsonConvert.DeserializeObject<JObject>(e.Data);
+					json.TryGetValue("error", out JToken msg);
+					Main.AddLog(msg.ToString());
+					JWT = null; //assume authentication is invalid
+				}
+			};
+
+			marketSocket.OnOpen += (sender, e) => {
+				marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}"); //
+			};
+		}
+
+		public void setJWT(HttpResponseHeaders headers) {
+			foreach (var item in headers.GetValues("Set-Cookie")) {
+				if (item.Contains("JWT=")) {
+					JWT = getSubstring(item, "JWT=", "; Domain=.warframe.market;");
+				}
+			}
+		}
+
+		public async void ListItem(string itemID, int platinum, int quantity) {
+			try {
+				var request = new HttpRequestMessage() {
+					RequestUri = new Uri("https://api.warframe.market/v1/profile/orders"),
+					Method = HttpMethod.Post,
 				};
+				var json = "{\"order_type\":\"sell\",\"item_id\":\"" + itemID + "\",\"platinum\":" + platinum + ",\"quantity\":" + quantity + "}";
+				Console.WriteLine(json);
+				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+				request.Headers.Add("Authorization", "JWT" + JWT);
+				request.Headers.Add("language", "en");
+				request.Headers.Add("accept", "application/json");
+				request.Headers.Add("platform", "pc");
+				request.Headers.Add("auth_type", "header");
 
-				marketSocket.OnOpen += (sender, e) => {
-					marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}"); //
-				};
+				HttpResponseMessage response = await client.SendAsync(request);
+				string responseBody = await response.Content.ReadAsStringAsync();
+				Console.WriteLine(responseBody);
+				setJWT(response.Headers);
+
 			}
-
-			public void setJWT(HttpResponseHeaders headers) {
-				foreach (var item in headers.GetValues("Set-Cookie")) {
-					if (item.Contains("JWT=")) {
-						JWT = getSubstring(item, "JWT=", "; Domain=.warframe.market;");
-					}
-				}
+			catch (HttpRequestException e) {
+				Console.WriteLine("\nException Caught!");
+				Console.WriteLine("Message :{0} ", e.Message);
 			}
+		}
 
-			public async void ListItem(string itemID, int platinum, int quantity) {
-				try {
-					var request = new HttpRequestMessage() {
-						RequestUri = new Uri("https://api.warframe.market/v1/profile/orders"),
-						Method = HttpMethod.Post,
-					};
-					var json = "{\"order_type\":\"sell\",\"item_id\":\"" + itemID + "\",\"platinum\":" + platinum + ",\"quantity\":" + quantity + "}";
-					Console.WriteLine(json);
-					request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-					request.Headers.Add("Authorization", "JWT" + JWT);
-					request.Headers.Add("language", "en");
-					request.Headers.Add("accept", "application/json");
-					request.Headers.Add("platform", "pc");
-					request.Headers.Add("auth_type", "header");
 
-					HttpResponseMessage response = await client.SendAsync(request);
-					string responseBody = await response.Content.ReadAsStringAsync();
-					Console.WriteLine(responseBody);
-					setJWT(response.Headers);
+		/// <summary>
+		/// Sets the status of WFM websocket. Will try to reconnect if it is not already connected.
+		/// </summary>
+		/// <param name="status">Accepts the following values:
+		/// offline, set's player status to be hidden on the site.  
+		/// online, set's player status to be online on the site.   
+		/// in game, set's player status to be online and ingame on the site
+		/// </param>
+		public async void SetStatus(string status) {
+			if (!IsJwtAvailable())
+				return;
 
-				}
-				catch (HttpRequestException e) {
-					Console.WriteLine("\nException Caught!");
-					Console.WriteLine("Message :{0} ", e.Message);
-				}
+			var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\""; //invisible\"}
+			switch (status) {
+				case "offline":
+				message += "invisible\"}";
+				break;
+				case "online":
+				message += "online\"}";
+				break;
+				case "in game":
+				message += "ingame\"}";
+				break;
+				default:
+				throw new Exception("Tried setting status to something else");
 			}
-
-			public async void setStatus(string status) {
-				var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\""; //invisible\"}
-				switch (status) {
-					case "offline":
-					message += "invisible\"}";
-					break;
-					case "online":
-					message += "online\"}";
-					break;
-					case "in game":
-					message += "ingame\"}";
-					break;
-					default:
-					throw new Exception("Tried setting status to something else");
+			try {
+				if (marketSocket == null) {
+					await openSocket();
 				}
 				SendMessage(message);
 			}
-
-			private void SendMessage(string data) {
-				marketSocket.Send(data);
-			}
-
-			private string getSubstring(string origin, string start, string end) {
-				int a = origin.LastIndexOf(start) + start.Length;
-				int b = origin.LastIndexOf(end);
-				Console.WriteLine(a + " " + b);
-				return origin.Substring(a, (b - a));
+			catch (Exception e) {
+				Console.WriteLine(e);
+				throw;
 			}
 		}
+
+		private void SendMessage(string data) {
+			marketSocket.Send(data);
+		}
+
+		private string getSubstring(string origin, string start, string end) {
+			int a = origin.LastIndexOf(start) + start.Length;
+			int b = origin.LastIndexOf(end);
+			Console.WriteLine(a + " " + b);
+			return origin.Substring(a, (b - a));
+		}
 	}
+}

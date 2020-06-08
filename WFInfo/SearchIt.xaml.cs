@@ -37,8 +37,7 @@ namespace WFInfo
             if (!Main.dataBase.IsJwtAvailable())
             {
                 Main.searchBox.placeholder.Content = "Please log in first";
-                Login wfmLogin = new Login {Topmost = true, Top= Main.searchBox.Top - 130, Left = Main.searchBox.Left};
-                wfmLogin.Show();
+				Main.login.MoveLogin(Left, Main.searchBox.Top - 130);
                 return;
 	        }
             MainWindow.INSTANCE.Topmost = false;
@@ -50,6 +49,7 @@ namespace WFInfo
         private void Search(object sender, RoutedEventArgs e)
         {
             Main.AddLog(searchField.Text);
+
             finish();
         }
         internal void finish()

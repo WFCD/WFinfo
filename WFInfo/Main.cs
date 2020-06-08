@@ -18,32 +18,25 @@ namespace WFInfo
         public static Main INSTANCE;
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion;
-        public static Data dataBase;
-        public static RewardWindow window;
-        public static Overlay[] overlays;
-        public static RelicsWindow relicWindow;
-        public static EquipmentWindow equipmentWindow;
-        public static Settings settingsWindow;
+        public static Data dataBase = new Data();
+        public static RewardWindow window = new RewardWindow();
+        public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
+		public static RelicsWindow relicWindow = new RelicsWindow();
+        public static EquipmentWindow equipmentWindow = new EquipmentWindow();
+        public static Settings settingsWindow = new Settings();
         public static ErrorDialogue popup;
         public static UpdateDialogue update;
-        public static SnapItOverlay snapItOverlayWindow;
-        public static Stopwatch watch;
-        public static SearchIt searchBox;
+        public static SnapItOverlay snapItOverlayWindow = new SnapItOverlay();
+        public static Stopwatch watch = new Stopwatch();
+        public static SearchIt searchBox = new SearchIt();
+        public static Login login = new Login();
         public Main()
         {
             INSTANCE = this;
             StartMessage();
+            watch = Stopwatch.StartNew();
             buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
-            overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
-            window = new RewardWindow();
-            dataBase = new Data();
-            relicWindow = new RelicsWindow();
-            equipmentWindow = new EquipmentWindow();
-            settingsWindow = new Settings();
-            snapItOverlayWindow = new SnapItOverlay();
-            watch = Stopwatch.StartNew();
-            searchBox = new SearchIt();
 
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
@@ -76,11 +69,6 @@ namespace WFInfo
                 StatusUpdate("Launch Failure - Please Restart", 0);
                 new ErrorDialogue(DateTime.Now, 0);
             }
-        }
-
-        public static T CreateOnUIThread<T>(Func<T> act)
-        {
-            return MainWindow.INSTANCE.Dispatcher.Invoke(act);
         }
 
         public static void RunOnUIThread(Action act)
@@ -324,6 +312,10 @@ namespace WFInfo
             }
         }
 
+        public static void loggedIn()
+        { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
+	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.loggedIn(); });
+        }
 
         public static string BuildVersion { get => buildVersion; }
 

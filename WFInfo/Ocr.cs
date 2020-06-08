@@ -1352,7 +1352,8 @@ namespace WFInfo
         {
 
             if (Warframe != null && !Warframe.HasExited) {
-	            Main.dataBase.setStatus("ingame");
+                if(Main.dataBase.IsJwtAvailable())
+					Main.dataBase.SetStatus("ingame");
 	            return true;
             }
             foreach (Process process in Process.GetProcesses())
@@ -1361,12 +1362,14 @@ namespace WFInfo
                 {
                     HandleRef = new HandleRef(process, process.MainWindowHandle);
                     Warframe = process;
-                    Main.dataBase.setStatus("ingame");
+                    if (Main.dataBase.IsJwtAvailable())
+                        Main.dataBase.SetStatus("ingame");
                     Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
                     return true;
                 }
             }
-            Main.dataBase.setStatus("online");
+            if (Main.dataBase.IsJwtAvailable())
+                Main.dataBase.SetStatus("online");
             if (!Settings.debug)
             {
                 Main.AddLog("Did Not Detect Warframe Process");

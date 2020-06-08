@@ -309,5 +309,38 @@ namespace WFInfo
             INSTANCE.Topmost = false; // important
             INSTANCE.Focus();         // important
         }
+
+        private void ComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
+            Console.WriteLine(ComboBox.SelectionBoxItem);
+            Console.WriteLine(ComboBox.Text);
+            switch (ComboBox.SelectionBoxItem)
+            {
+                case "a":
+                    break;
+                case "b":
+	                break;
+                case "c":
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public void loggedIn()
+        {
+	        Login.Visibility = Visibility.Collapsed;
+	        ComboBox.Visibility = Visibility.Visible;
+        }
+
+        private void SpawnLogin(object sender, RoutedEventArgs e)
+        {
+	        Main.login.MoveLogin(Left + Width, Top);
+        }
+
+        private void ComboBoxGotFocus(object sender, RoutedEventArgs e)
+        {
+	        Console.WriteLine(ComboBox.SelectionBoxItem);
+	        Console.WriteLine(ComboBox.Text);
+        }
     }
 }

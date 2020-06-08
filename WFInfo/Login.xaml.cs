@@ -12,6 +12,7 @@ namespace WFInfo {
 		public Login() {
 			InitializeComponent();
 		}
+
 		private void Hide(object sender, MouseButtonEventArgs e) {
 			Main.searchBox.Hide();
 			Hide();
@@ -29,10 +30,15 @@ namespace WFInfo {
 				await Main.dataBase.GetUserLogin(Email.Text, Password.Password);
 			Close(); //dispose of window once done
 
-			Main.searchBox.placeholder.Content = "Logged in";
-			Main.searchBox.isInUse = true;
-			Main.searchBox.searchField.Focusable = true;
-			if(RememberMe.IsChecked.Value)
+			if (Main.searchBox.IsActive) {
+				Main.searchBox.placeholder.Content = "Logged in";
+				Main.searchBox.isInUse = true;
+				Main.searchBox.searchField.Focusable = true;
+			}
+
+			Main.loggedIn();
+
+			if (RememberMe.IsChecked.Value)
 				Settings.JWT = Main.dataBase.JWT;
 			Console.WriteLine(Settings.JWT);
 		}
@@ -42,6 +48,11 @@ namespace WFInfo {
 				Email.Text = "";
 		}
 
+		public void MoveLogin(double x, double y) {
+			Left = x;
+			Top = y;
+			Show();
+		}
 
 		//private void MakeListing_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 		//{
