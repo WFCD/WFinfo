@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
+using Newtonsoft.Json.Linq;
 
 namespace WFInfo {
 	/// <summary>
@@ -33,7 +34,9 @@ namespace WFInfo {
 		public MarketListing getMarketListing(string primeName) 
 		{
 			var results = Main.dataBase.getTopListings(primeName);
-			Console.WriteLine(results.ToString());
+			JArray sellOrders = new JArray(results["payload"]["sell_orders"]);
+
+			Console.WriteLine(sellOrders.ToString());
 			return null;
 		}
 	}

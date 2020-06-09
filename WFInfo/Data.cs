@@ -28,7 +28,7 @@ namespace WFInfo {
 		private readonly string relicDataPath;
 		private readonly string nameDataPath;
 		public string JWT; // JWT is the securty key, store this as email+pw combo
-		private WebSocket marketSocket;
+		private WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
 		private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
 
 		static readonly HttpClient client = new HttpClient();
@@ -778,8 +778,11 @@ namespace WFInfo {
 		/// </summary>
 		/// <returns>A task to be awaited</returns>
 		public async Task openSocket() {
-			if (marketSocket == null || !marketSocket.IsAlive)
-				marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
+			
+			if (marketSocket.IsAlive)
+			{
+				return;
+			}
 
 			marketSocket.OnMessage += (sender, e) =>
 				Console.WriteLine("warframe.market: " + e.Data);
@@ -883,9 +886,6 @@ namespace WFInfo {
 				throw new Exception("Tried setting status to something else");
 			}
 			try {
-				if (marketSocket == null) {
-					await openSocket();
-				}
 				SendMessage(message);
 			}
 			catch (Exception e) {

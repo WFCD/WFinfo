@@ -172,7 +172,6 @@ namespace WFInfo
 	            Settings.settingsObj["JWT"] = null;
             Settings.JWT = (string)Settings.settingsObj.GetValue("JWT");
             Main.dataBase.JWT = (string)Settings.settingsObj.GetValue("JWT");
-            Console.WriteLine(Settings.settingsObj.GetValue("JWT"));
 
             if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
                 Settings.settingsObj["HighContrast"] = false;
@@ -334,9 +333,9 @@ namespace WFInfo
 		        Main.AddLog("Got JWT already trying to log in with it");
                 try
                 {
-	               await Main.dataBase.SetStatus("online");
-	               LoggedIn();
-	               Main.dataBase.JWT = (string)Settings.settingsObj["JWT"];
+	                await Main.dataBase.openSocket();
+	                LoggedIn();
+	                Main.dataBase.JWT = (string)Settings.settingsObj["JWT"];
                 }
                 catch (Exception exception)
                 {
@@ -366,13 +365,22 @@ namespace WFInfo
 		        return;
 	        switch (ComboBox.SelectedIndex) {
 		        case 0: //Online in game
-			        Main.dataBase.SetStatus("in game");
+			        Task.Run(() =>
+			        {
+				        Main.dataBase.SetStatus("in game");
+			        });
 			        break;
 		        case 1: //Online
-			        Main.dataBase.SetStatus("online");
+			        Task.Run(() =>
+			        {
+				        Main.dataBase.SetStatus("online");
+			        });
 			        break;
 		        case 2: //Invisible
-			        Main.dataBase.SetStatus("offline");
+			        Task.Run(() =>
+			        {
+				        Main.dataBase.SetStatus("offline");
+			        });
 			        break;
 		        case 3: //Sign out
 			        Login.Visibility = Visibility.Visible;
