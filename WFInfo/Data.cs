@@ -939,30 +939,25 @@ namespace WFInfo {
 
 		public async Task<int> GetCurrentListedAmount(string primeName)
 		{
-			int ammount;
+			int amount;
 			try {
 				var request = new HttpRequestMessage() {
-					RequestUri = new Uri("https://api.warframe.market/v1/profile/orders"),
+					RequestUri = new Uri("https://api.warframe.market/v1/profile"),
 					Method = HttpMethod.Get,
 				};
 				request.Headers.Add("Authorization", "JWT" + JWT);
-				request.Headers.Add("language", "en");
-				request.Headers.Add("accept", "application/json");
-				request.Headers.Add("platform", "pc");
-				request.Headers.Add("auth_type", "header");
-
-				HttpResponseMessage response = await client.SendAsync(request);
-				string responseBody = await response.Content.ReadAsStringAsync();
+				var response = await client.SendAsync(request);
+				var responseBody = await response.Content.ReadAsStringAsync();
 				Console.WriteLine(responseBody);
-				ammount = 1;
+				amount = 1;
 			}
-			catch (HttpRequestException e)
+			catch (Exception e)
 			{
-				ammount = 0;
+				amount = 0;
 				Console.WriteLine("\nException Caught!");
 				Console.WriteLine("Message :{0} ", e.Message);
 			}
-			return ammount;
+			return amount;
 		}
 	}
 }

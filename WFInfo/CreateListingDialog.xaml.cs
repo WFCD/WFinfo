@@ -31,50 +31,56 @@ namespace WFInfo {
 
 		}
 
-		public RewardCollection GetRewardCollection(List<string> primeName)
+		/// <summary>
+		/// returns the data for an entire "Create listing" screen
+		/// </summary>
+		/// <param name="primeNames">The human friendly name to search listings for</param>
+		/// <returns>the data for an entire "Create listing" screen</returns>
+		public RewardCollection GetRewardCollection(List<string> primeNames)
 		{
-			List<int> platinumValues = new List<int>(4);
-			List<int> listedQuantity = new List<int>(4);
-			List<MarketListing> marketListings = new List<MarketListing>(4);
-			foreach (string primeItem in primeName)
+			var platinumValues = new List<int>(4);
+			var listedQuantity = new List<int>(4);
+			var marketListings = new List<MarketListing>(5);
+
+			foreach (var primeItem in primeNames)
 			{
-				platinumValues.Add(Main.dataBase.marketData.GetValue(primeItem).ToObject<JObject>()["plat"].ToObject<int>());
+				var tempListings = getMarketListing(primeItem);
+				marketListings = tempListings;
+				platinumValues.Add(tempListings[1].platinum);
 				listedQuantity.Add(Main.dataBase.GetCurrentListedAmount(primeItem).Result);
 			}
-			return null;
+			return new RewardCollection(primeNames, platinumValues, marketListings, listedQuantity);
 		}
-
+		/// <summary>
+		/// Gets the top 5 current market listings
+		/// </summary>
+		/// <param name="primeName">The human friendly name to search listings for</param>
+		/// <returns>the top 5 current market listings</returns>
 		public List<MarketListing> getMarketListing(string primeName) 
 		{
 			var results = Main.dataBase.getTopListings(primeName);
-			List<MarketListing> listings = new List<MarketListing>();
-			JArray sellOrders = new JArray(results["payload"]["sell_orders"].Children());
+			var listings = new List<MarketListing>();
+			var sellOrders = new JArray(results["payload"]["sell_orders"].Children());
 			foreach (var item in sellOrders)
 			{
 				var platinum = item.Value<int>("platinum");
 				var amount = item.Value<int>("quantity");
 				var reputation = item["user"].Value<int>("reputation");
 				listings.Add(new MarketListing(platinum, amount, reputation));
-				
-				//Console.WriteLine("Current item: \n" +item);
 			}
-			//Console.WriteLine("All from sellOrders: \n" +sellOrders);
 			return listings;
 		}
 	}
 
-
-
-
 	/// <summary>
-	/// Class to represent a single "sheet" of the create listing screen, consisting of up to 4 rewards and up to 5 active "online in game" listings 
+	/// Class to represent a single "sheet" of the create listing screen, consisting of up to 4 possible rewards for which are unique plat, quantity and market listings 
 	/// </summary>
 	public class RewardCollection
 	{
-		private List<string> primeNames = new List<string>(4); // the reward items in case user wants to change selection
-		private List<int> platinumValues = new List<int>(4);
-		private List<int> listedQuantity = new List<int>(4);
-		private List<MarketListing> marketListings = new List<MarketListing>(4);
+		public List<string> primeNames = new List<string>(4); // the reward items in case user wants to change selection
+		public List<int> platinumValues = new List<int>(4);
+		public List<int> listedQuantity = new List<int>(4);
+		public List<MarketListing> marketListings = new List<MarketListing>(5);
 
 		public RewardCollection(List<string> primeNames, List<int> platinumValues, List<MarketListing> marketListings, List<int> listedQuantity)
 		{
@@ -89,9 +95,9 @@ namespace WFInfo {
 	/// </summary>
 	public class MarketListing
 	{
-		private int platinum; // plat amount of listing
-		private int amount; //amount user lists
-		private int reputation; // user's reputation
+		public int platinum; // plat amount of listing
+		public int amount; //amount user lists
+		public int reputation; // user's reputation
 
 		public MarketListing(int platinum, int amount, int reputation)
 		{

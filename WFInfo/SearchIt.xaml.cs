@@ -41,13 +41,10 @@ namespace WFInfo
         {
             Main.AddLog(searchField.Text);
             var closest = Main.dataBase.GetPartNameHuman(searchField.Text, out _);
-            List<MarketListing> listings = new List<MarketListing>();
-            listings = Main.listingHelper.getMarketListing(closest);
-
-            foreach (var marketListing in listings)
-            {
-	            Console.WriteLine(marketListing.ToString());
-            }
+            //var primeRewards = new List<string> { closest, closest, closest, closest };
+            //var listings = Main.listingHelper.GetRewardCollection(primeRewards);
+            //Console.WriteLine(listings.ToString());
+            Console.WriteLine(Main.dataBase.GetCurrentListedAmount(closest));
 
             finish();
         }
