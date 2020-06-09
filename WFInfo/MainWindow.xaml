@@ -216,9 +216,9 @@
 
 
 
-        <ComboBox x:Name="ComboBox" GotFocus="ComboBoxGotFocus" Visibility="Collapsed" Grid.Column="1" HorizontalAlignment="Left" Margin="128,0,0,0" VerticalAlignment="Top" Width="89" Height="26" Background="#FF0F0F0F" Foreground="#FFAFD0D9"  SelectionChanged="ComboBox_SelectionChanged" BorderBrush="{x:Null}" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" >
+        <ComboBox x:Name="ComboBox" Visibility="Collapsed" Grid.Column="1" HorizontalAlignment="Left" Margin="128,0,0,0" VerticalAlignment="Top" Width="89" Height="26" Background="#FF0F0F0F" Foreground="#FFAFD0D9"  SelectionChanged="ComboBox_SelectionChanged" BorderBrush="{x:Null}" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" >
             <ComboBoxItem Content="In game"/>
-            <ComboBoxItem IsSelected="True"  Content="Online"/>
+            <ComboBoxItem IsSelected="True" Content="Online"/>
             <ComboBoxItem Content="Offline"/>
             <ComboBoxItem Content="Log out"/>
         </ComboBox>

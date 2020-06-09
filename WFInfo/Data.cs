@@ -27,7 +27,7 @@ namespace WFInfo {
 		private readonly string eqmtDataPath;
 		private readonly string relicDataPath;
 		private readonly string nameDataPath;
-		public string JWT;
+		public string JWT; // JWT is the securty key, store this as email+pw combo
 		private WebSocket marketSocket;
 		private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
 
@@ -924,12 +924,12 @@ namespace WFInfo {
 				SendMessage(message);
 			}
 			catch (Exception e) {
-				Console.WriteLine(e);
-				throw;
+				Main.AddLog("Was unable to set status due to: " + e);
 			}
 		}
 
 		private void SendMessage(string data) {
+			Main.AddLog("Sending: " + data + " to websocket.");
 			marketSocket.Send(data);
 		}
 

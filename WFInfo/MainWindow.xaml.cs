@@ -311,17 +311,23 @@ namespace WFInfo
         }
 
         private void ComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
-            Console.WriteLine(ComboBox.SelectionBoxItem);
-            Console.WriteLine(ComboBox.Text);
+            if(!ComboBox.IsLoaded) //Prevent firing off to early
+                return;
             switch (ComboBox.SelectionBoxItem)
             {
-                case "a":
+                case "In game":
+                    Main.dataBase.SetStatus("in game");
                     break;
-                case "b":
+                case "Online":
+	                Main.dataBase.SetStatus("online");
 	                break;
-                case "c":
-                    break;
-                default:
+                case "Offline":
+	                Main.dataBase.SetStatus("offline");
+	                break;
+                case "Log out":
+                    Login.Visibility = Visibility.Visible;
+	                ComboBox.Visibility = Visibility.Hidden;
+	                Main.dataBase.JWT = null;
                     break;
             }
         }
@@ -337,10 +343,5 @@ namespace WFInfo
 	        Main.login.MoveLogin(Left + Width, Top);
         }
 
-        private void ComboBoxGotFocus(object sender, RoutedEventArgs e)
-        {
-	        Console.WriteLine(ComboBox.SelectionBoxItem);
-	        Console.WriteLine(ComboBox.Text);
-        }
     }
 }
