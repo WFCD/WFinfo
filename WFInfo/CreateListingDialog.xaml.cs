@@ -31,13 +31,35 @@ namespace WFInfo {
 
 		}
 
-		public MarketListing getMarketListing(string primeName) 
+		public RewardCollection GetRewardCollection(List<string> primeName)
+		{
+			List<int> platinumValues = new List<int>(4);
+			List<int> listedQuantity = new List<int>(4);
+			List<MarketListing> marketListings = new List<MarketListing>(4);
+			foreach (string primeItem in primeName)
+			{
+				platinumValues.Add(Main.dataBase.marketData.GetValue(primeItem).ToObject<JObject>()["plat"].ToObject<int>());
+				listedQuantity.Add(Main.dataBase.GetCurrentListedAmount(primeItem).Result);
+			}
+			return null;
+		}
+
+		public List<MarketListing> getMarketListing(string primeName) 
 		{
 			var results = Main.dataBase.getTopListings(primeName);
-			JArray sellOrders = new JArray(results["payload"]["sell_orders"]);
-
-			Console.WriteLine(sellOrders.ToString());
-			return null;
+			List<MarketListing> listings = new List<MarketListing>();
+			JArray sellOrders = new JArray(results["payload"]["sell_orders"].Children());
+			foreach (var item in sellOrders)
+			{
+				var platinum = item.Value<int>("platinum");
+				var amount = item.Value<int>("quantity");
+				var reputation = item["user"].Value<int>("reputation");
+				listings.Add(new MarketListing(platinum, amount, reputation));
+				
+				//Console.WriteLine("Current item: \n" +item);
+			}
+			//Console.WriteLine("All from sellOrders: \n" +sellOrders);
+			return listings;
 		}
 	}
 
@@ -49,9 +71,18 @@ namespace WFInfo {
 	/// </summary>
 	public class RewardCollection
 	{
-		private List<string> primeNames = new List<string>(); // the reward items in case user wants to change selection
-		private List<int> platinumValues = new List<int>();
-		private List<MarketListing> listings = new List<MarketListing>();
+		private List<string> primeNames = new List<string>(4); // the reward items in case user wants to change selection
+		private List<int> platinumValues = new List<int>(4);
+		private List<int> listedQuantity = new List<int>(4);
+		private List<MarketListing> marketListings = new List<MarketListing>(4);
+
+		public RewardCollection(List<string> primeNames, List<int> platinumValues, List<MarketListing> marketListings, List<int> listedQuantity)
+		{
+			this.primeNames = primeNames;
+			this.platinumValues = platinumValues;
+			this.marketListings = marketListings;
+			this.listedQuantity = listedQuantity;
+		}
 	}
 	/// <summary>
 	/// Class to represent a single listing of an item, usually comes in groups of 5
@@ -60,13 +91,18 @@ namespace WFInfo {
 	{
 		private int platinum; // plat amount of listing
 		private int amount; //amount user lists
-		private int ranking; //n'th ranking of the listing 0 through 4
+		private int reputation; // user's reputation
 
-		public MarketListing(int platinum, int amount, int ranking)
+		public MarketListing(int platinum, int amount, int reputation)
 		{
-			platinum = this.platinum;
-			amount = this.amount;
-			ranking = this.ranking;
+			this.platinum = platinum;
+			this.amount = amount;
+			this.reputation = reputation;
+		}
+
+		public override string ToString()
+		{
+			return "Platinum: " + platinum + " Amount: " + amount + " Reputation: " + reputation;
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -39,10 +40,15 @@ namespace WFInfo
         private void Search(object sender, RoutedEventArgs e)
         {
             Main.AddLog(searchField.Text);
-            List<string> closest = Main.dataBase.ClosestAutoComplete(searchField.Text, 1);
-            foreach (string result in closest) {
-	            Main.listingHelper.getMarketListing(result);
+            var closest = Main.dataBase.GetPartNameHuman(searchField.Text, out _);
+            List<MarketListing> listings = new List<MarketListing>();
+            listings = Main.listingHelper.getMarketListing(closest);
+
+            foreach (var marketListing in listings)
+            {
+	            Console.WriteLine(marketListing.ToString());
             }
+
             finish();
         }
         internal void finish()

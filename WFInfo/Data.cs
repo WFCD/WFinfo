@@ -579,13 +579,8 @@ namespace WFInfo {
 			return num;
 		}
 
-		public List<string> ClosestAutoComplete(string searchQuery, int maxResults) {
-			List<string> results = new List<string>();
-			//for (int i = 0; i < maxResults; i++) { //todo allow multiple "Best" results to show up
-
-			//}
-			results.Add(GetPartNameHuman(searchQuery, out _));
-			return results;
+		public string ClosestAutoComplete(string searchQuery, int maxResults) {
+			return GetPartNameHuman(searchQuery, out _);
 		}
 
 		public string GetPartName(string name, out int low) { // Checks the Levenshtein Distance of a string and returns the index in Names() of the closest part
@@ -940,6 +935,34 @@ namespace WFInfo {
 			}
 
 			return null;
+		}
+
+		public async Task<int> GetCurrentListedAmount(string primeName)
+		{
+			int ammount;
+			try {
+				var request = new HttpRequestMessage() {
+					RequestUri = new Uri("https://api.warframe.market/v1/profile/orders"),
+					Method = HttpMethod.Get,
+				};
+				request.Headers.Add("Authorization", "JWT" + JWT);
+				request.Headers.Add("language", "en");
+				request.Headers.Add("accept", "application/json");
+				request.Headers.Add("platform", "pc");
+				request.Headers.Add("auth_type", "header");
+
+				HttpResponseMessage response = await client.SendAsync(request);
+				string responseBody = await response.Content.ReadAsStringAsync();
+				Console.WriteLine(responseBody);
+				ammount = 1;
+			}
+			catch (HttpRequestException e)
+			{
+				ammount = 0;
+				Console.WriteLine("\nException Caught!");
+				Console.WriteLine("Message :{0} ", e.Message);
+			}
+			return ammount;
 		}
 	}
 }
