@@ -17,7 +17,7 @@ namespace WFInfo
     {
         public static Main INSTANCE;
         public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
-        public static string buildVersion;
+        public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static Data dataBase = new Data();
         public static RewardWindow window = new RewardWindow();
         public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
@@ -27,15 +27,12 @@ namespace WFInfo
         public static ErrorDialogue popup;
         public static UpdateDialogue update;
         public static SnapItOverlay snapItOverlayWindow = new SnapItOverlay();
-        public static Stopwatch watch = new Stopwatch(); //refactor to be OCR.cs only
         public static SearchIt searchBox = new SearchIt();
         public static Login login = new Login();
         public Main()
         {
             INSTANCE = this;
             StartMessage();
-            watch = Stopwatch.StartNew();
-            buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
 
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;

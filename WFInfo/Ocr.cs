@@ -85,7 +85,7 @@ namespace WFInfo
         }
         public static HandleRef HandleRef { get; private set; }
         public static Process Warframe = null;
-
+        private static Stopwatch watch = new Stopwatch();
         public static Point center;
         public static Rectangle window;
 
@@ -190,7 +190,7 @@ namespace WFInfo
 
             DateTime time = DateTime.UtcNow;
             timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
-            long start = Main.watch.ElapsedMilliseconds;
+            long start = watch.ElapsedMilliseconds;
 
             List<Bitmap> parts;
 
@@ -213,7 +213,7 @@ namespace WFInfo
             if (firstChecks == null || firstChecks.Length == 0 || CheckIfError())
             {
 	            processingActive = false;
-	            Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (Main.watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
+	            Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
                 Main.StatusUpdate("Couldn't find any rewards to display", 2);
                 if (firstChecks == null)
                 {
@@ -325,7 +325,7 @@ namespace WFInfo
                         hideRewardInfo = false;
                     }
                 }
-                var end = Main.watch.ElapsedMilliseconds;
+                var end = watch.ElapsedMilliseconds;
                 Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
                 if (Settings.Highlight)
@@ -344,7 +344,7 @@ namespace WFInfo
                 if (partialScreenshot.Height < 70)
                 {
                     SlowSecondProcess();
-                    end = Main.watch.ElapsedMilliseconds;
+                    end = watch.ElapsedMilliseconds;
                 }
 
                 if (Settings.Highlight)
@@ -367,7 +367,7 @@ namespace WFInfo
                 player.Play();
             }
 
-            Main.watch.Reset();
+            watch.Reset();
 
             (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
                 .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
