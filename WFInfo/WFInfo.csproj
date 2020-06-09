@@ -190,8 +190,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CreateListingDialog .xaml.cs">
-      <DependentUpon>CreateListingDialog .xaml</DependentUpon>
+    <Compile Include="CreateListingDialog.xaml.cs">
+      <DependentUpon>CreateListingDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="CustomEntrypoint.cs" />
     <Compile Include="SearchIt.xaml.cs">
@@ -237,7 +237,7 @@
     <Compile Include="RewardWindow.xaml.cs">
       <DependentUpon>RewardWindow.xaml</DependentUpon>
     </Compile>
-    <Page Include="CreateListingDialog .xaml">
+    <Page Include="CreateListingDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
