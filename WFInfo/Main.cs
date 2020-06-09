@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Threading;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Text.RegularExpressions;
-using System.Net;
 using AutoUpdaterDotNET;
 using System.Windows;
-using System.Diagnostics;
 
 namespace WFInfo
 {
