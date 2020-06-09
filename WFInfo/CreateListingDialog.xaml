@@ -53,7 +53,7 @@
                 <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
                 <Label Padding="0" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
             </Grid>
-            <Grid x:Name="Listing_4_Copy" HorizontalAlignment="Left" Width="300" Margin="0,165,0,0" Height="20" VerticalAlignment="Top">
+            <Grid x:Name="Listing_5" HorizontalAlignment="Left" Width="300" Margin="0,165,0,0" Height="20" VerticalAlignment="Top">
                 <Label Padding="0" Content="5# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
                 <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
                 <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
@@ -61,9 +61,15 @@
                 <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
                 <Label Padding="0" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
             </Grid>
-            <Label HorizontalContentAlignment="Center" Content="Confirm listing" Margin="90,190,90,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
-            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Top" Margin="90,190,90,0"/>
+            <Label HorizontalContentAlignment="Center" Content="Confirm listing" Margin="0,190,70,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}" HorizontalAlignment="Right" Width="105"/>
+            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Top" Margin="0,190,70,0" HorizontalAlignment="Right" Width="105"/>
             <ComboBox HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="10,10,0,0" VerticalAlignment="Top" Width="280" Height="24"  Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Background="{x:Null}"/>
+            <Label HorizontalContentAlignment="Center" Content="Back" Margin="15,190,245,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
+            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Bottom" Margin="15,0,0,10" HorizontalAlignment="Left" Width="40"/>
+            <Label HorizontalContentAlignment="Center" Content="Next" Margin="240,190,20,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
+            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Top" Margin="240,190,20,0"/>
+            <Label HorizontalContentAlignment="Center" Content="Cancel" Margin="65,190,185,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
+            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Bottom" Margin="65,0,0,10" HorizontalAlignment="Left" Width="50"/>
         </Grid>
     </Grid>
 </Window>

@@ -828,7 +828,6 @@ namespace WFInfo {
 		/// <param name="itemID">Warframe.market's ID for the item</param>
 		/// <param name="platinum">The amount of platinum the user entered for the listing</param>
 		/// <param name="quantity">The quantity of items the user listed.</param>
-
 		public async void ListItem(string itemID, int platinum, int quantity) {
 			try {
 				var request = new HttpRequestMessage() {
@@ -913,6 +912,34 @@ namespace WFInfo {
 			Settings.settingsObj["JWT"] = null;
 			Settings.Save();
 			marketSocket.Close(1006);
+		}
+
+		public string getUrlName(string primeName)
+		{
+			return primeName.ToLower().Replace(' ', '_'); //seems to work for now but might need to be changed.
+		}
+
+		/// <summary>
+		/// Tries to get the top listings of a prime item
+		/// </summary>
+		/// <param name="primeName"></param>
+		/// <returns></returns>
+		public JObject getTopListings(string primeName) //https://api.warframe.market/v1/items/ prime_name /orders/top
+		{
+			var urlName = getUrlName(primeName);
+			var RequestUri = new Uri("https://api.warframe.market/v1/items/" + urlName + "/orders/top");
+
+			try {
+				JObject topListings = JsonConvert.DeserializeObject<JObject>(
+						WebClient.DownloadString(RequestUri));
+				return topListings;
+			}
+			catch (Exception e) {
+				Console.WriteLine("\nException Caught!");
+				Console.WriteLine("Message :{0} ", e.Message);
+			}
+
+			return null;
 		}
 	}
 }

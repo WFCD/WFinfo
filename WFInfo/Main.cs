@@ -26,6 +26,7 @@ namespace WFInfo
         public static SnapItOverlay snapItOverlayWindow = new SnapItOverlay();
         public static SearchIt searchBox = new SearchIt();
         public static Login login = new Login();
+        public static CreateListing listingHelper = new CreateListing();
         public Main()
         {
             INSTANCE = this;

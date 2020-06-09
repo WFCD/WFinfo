@@ -39,7 +39,10 @@ namespace WFInfo
         private void Search(object sender, RoutedEventArgs e)
         {
             Main.AddLog(searchField.Text);
-
+            List<string> closest = Main.dataBase.ClosestAutoComplete(searchField.Text, 1);
+            foreach (string result in closest) {
+	            Main.listingHelper.getMarketListing(result);
+            }
             finish();
         }
         internal void finish()
@@ -55,11 +58,7 @@ namespace WFInfo
         {
             if (searchField.Text != "")
                 placeholder.Visibility = Visibility.Hidden;
-            List<string> closest = Main.dataBase.ClosestAutoComplete(searchField.Text, 1);
-            foreach (string result in closest)
-            {
-                Main.AddLog(result);
-            }
+            
         }
     }
 }
