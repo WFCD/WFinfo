@@ -8,7 +8,7 @@
         Title="WebBrowser" Height="130" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" Background="{x:Null}">
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
         <Rectangle Margin="0,25,0,0" Stroke="#FF646464"/>
-        <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Width="29" Height="26" VerticalAlignment="Top"/>
+        <Label x:Name="exit" MouseLeftButtonDown="HideExternal" Content="x" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Width="29" Height="26" VerticalAlignment="Top"/>
         <Rectangle Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="26" Stroke="#FF646464" VerticalAlignment="Top" Width="1280"/>
         <Image Margin="1,0,0,0" Source="Resources/WFLogo.png" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="24" >
             <Image.RenderTransform>
@@ -21,7 +21,7 @@
             </Image.RenderTransform>
         </Image>
         <TextBlock Text="Warframe.Market login" Margin="30,4,0,0" Background="{x:Null}" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" Height="22" FontWeight="Bold" HorizontalAlignment="Left" Width="170"/>
-        <Label x:Name="BackupButton" MouseLeftButtonDown="Click" Content="Login" Style="{StaticResource Label_Button}" Height="26" VerticalAlignment="Top" Margin="20,94,160,0"/>
+        <Label x:Name="BackupButton" MouseLeftButtonDown="LoginClick" Content="Login" Style="{StaticResource Label_Button}" Height="26" VerticalAlignment="Top" Margin="20,94,160,0"/>
         <TextBox x:Name="Email" Height="18" Margin="93,37,20,0" TextWrapping="Wrap" VerticalContentAlignment="Center" Text="Email" VerticalAlignment="Top" BorderBrush="#FF646464" GotFocus="Email_GotFocus"/>
         <TextBlock HorizontalAlignment="Left" Margin="20,39,0,0" TextWrapping="Wrap" Text="Email:" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="20,67,0,0" TextWrapping="Wrap" Text="Password:" VerticalAlignment="Top"/>

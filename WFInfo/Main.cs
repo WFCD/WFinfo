@@ -27,7 +27,7 @@ namespace WFInfo
         public static ErrorDialogue popup;
         public static UpdateDialogue update;
         public static SnapItOverlay snapItOverlayWindow = new SnapItOverlay();
-        public static Stopwatch watch = new Stopwatch();
+        public static Stopwatch watch = new Stopwatch(); //refactor to be OCR.cs only
         public static SearchIt searchBox = new SearchIt();
         public static Login login = new Login();
         public Main()
@@ -314,7 +314,7 @@ namespace WFInfo
 
         public static void loggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
-	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.loggedIn(); });
+	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
         }
 
         public static string BuildVersion { get => buildVersion; }
@@ -336,6 +336,11 @@ namespace WFInfo
 
         // Glob
         public static System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("en");
+
+        public static void signOut()
+        {
+	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.signOut(); });
+        }
     }
 
     public class Status

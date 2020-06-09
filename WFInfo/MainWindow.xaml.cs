@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -68,6 +69,7 @@ namespace WFInfo
                 }
                 Settings.settingsObj["MainWindowLocation_X"] = Left;
                 Settings.settingsObj["MainWindowLocation_Y"] = Top;
+
                 Settings.Save();
 
             }
@@ -170,7 +172,7 @@ namespace WFInfo
 	            Settings.settingsObj["JWT"] = null;
             Settings.JWT = (string)Settings.settingsObj.GetValue("JWT");
             Main.dataBase.JWT = (string)Settings.settingsObj.GetValue("JWT");
-
+            Console.WriteLine(Settings.settingsObj.GetValue("JWT"));
 
             if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
                 Settings.settingsObj["HighContrast"] = false;
@@ -213,8 +215,6 @@ namespace WFInfo
         public void Exit(object sender, RoutedEventArgs e)
         {
             notifyIcon.Dispose();
-            Settings.JWT = Main.dataBase.JWT;
-            Settings.Save();
             Application.Current.Shutdown();
         }
 
@@ -310,38 +310,76 @@ namespace WFInfo
             INSTANCE.Focus();         // important
         }
 
-        private void ComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
-            if(!ComboBox.IsLoaded) //Prevent firing off to early
-                return;
-            switch (ComboBox.SelectionBoxItem)
-            {
-                case "In game":
-                    Main.dataBase.SetStatus("in game");
-                    break;
-                case "Online":
-	                Main.dataBase.SetStatus("online");
-	                break;
-                case "Offline":
-	                Main.dataBase.SetStatus("offline");
-	                break;
-                case "Log out":
-                    Login.Visibility = Visibility.Visible;
-	                ComboBox.Visibility = Visibility.Hidden;
-	                Main.dataBase.JWT = null;
-                    break;
+        public void LoggedIn()
+        {
+	        Login.Visibility = Visibility.Collapsed;
+	        ComboBox.SelectedIndex = 1;
+	        ComboBox.Visibility = Visibility.Visible;
+            ChangeStatus("Logged in",0);
+        }
+
+        /// <summary>
+        /// Prompts user to log in or sets JWT if remember me was ticked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void SpawnLogin(object sender, RoutedEventArgs e)
+        {
+            if (Settings.settingsObj["JWT"].ToString().Length < 10)
+	        {
+		        Main.login.MoveLogin(Left + Width, Top);
+	        }
+	        else
+	        {
+		        Main.AddLog("Got JWT already trying to log in with it");
+                try
+                {
+	               await Main.dataBase.SetStatus("online");
+	               LoggedIn();
+	               Main.dataBase.JWT = (string)Settings.settingsObj["JWT"];
+                }
+                catch (Exception exception)
+                {
+	                Main.AddLog("Was unable to log in with old JWT: " +exception.Message);
+                    Main.StatusUpdate("Old session expired, please log in again", 2);
+                    Settings.settingsObj["JWT"] = null;
+                    signOut();
+                }
+
             }
         }
 
-        public void loggedIn()
+        public void signOut()
         {
-	        Login.Visibility = Visibility.Collapsed;
-	        ComboBox.Visibility = Visibility.Visible;
+	        Login.Visibility = Visibility.Visible;
+	        ComboBox.Visibility = Visibility.Collapsed;
         }
 
-        private void SpawnLogin(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Allows the user to overwrite the current websocket status
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-	        Main.login.MoveLogin(Left + Width, Top);
+	        if (!ComboBox.IsLoaded) //Prevent firing off to early
+		        return;
+	        switch (ComboBox.SelectedIndex) {
+		        case 0: //Online in game
+			        Main.dataBase.SetStatus("in game");
+			        break;
+		        case 1: //Online
+			        Main.dataBase.SetStatus("online");
+			        break;
+		        case 2: //Invisible
+			        Main.dataBase.SetStatus("offline");
+			        break;
+		        case 3: //Sign out
+			        Login.Visibility = Visibility.Visible;
+			        ComboBox.Visibility = Visibility.Hidden;
+			        Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
+			        break;
+	        }
         }
-
     }
 }

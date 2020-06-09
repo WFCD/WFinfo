@@ -636,46 +636,6 @@ namespace WFInfo {
 		}
 
 		public string GetSetName(string name) {
-			//name = name.ToLower();
-			//name = name.Replace("*", "");
-			//string result = null;
-			//int low = 9999;
-
-			//foreach (KeyValuePair<string, JToken> prop in marketData)
-			//{
-			//    string str = prop.Key.ToLower();
-			//    str = str.Replace("neuroptics", "");
-			//    str = str.Replace("lower", "");
-			//    str = str.Replace("upper", "");
-			//    str = str.Replace("limb", "");
-			//    str = str.Replace("chassis", "");
-			//    str = str.Replace("sytems", "");
-			//    str = str.Replace("carapace", "");
-			//    str = str.Replace("cerebrum", "");
-			//    str = str.Replace("blueprint", "");
-			//    str = str.Replace("harness", "");
-			//    str = str.Replace("blade", "");
-			//    str = str.Replace("pouch", "");
-			//    str = str.Replace("barrel", "");
-			//    str = str.Replace("receiver", "");
-			//    str = str.Replace("stock", "");
-			//    str = str.Replace("disc", "");
-			//    str = str.Replace("grip", "");
-			//    str = str.Replace("string", "");
-			//    str = str.Replace("handle", "");
-			//    str = str.Replace("ornament", "");
-			//    str = str.Replace("wings", "");
-			//    str = str.Replace("blades", "");
-			//    str = str.Replace("hilt", "");
-			//    str = str.TrimEnd();
-			//    int val = LevenshteinDistance(str, name);
-			//    if (val < low)
-			//    {
-			//        low = val;
-			//        result = prop.Key;
-			//    }
-			//}
-
 			string result = name.ToLower();
 			result = result.Replace("lower limb", "");
 			result = result.Replace("upper limb", "");
@@ -779,6 +739,13 @@ namespace WFInfo {
 			}
 		}
 
+		/// <summary>
+		///	Get's the user's login JWT to authenticate future API calls.
+		/// </summary>
+		/// <param name="email">Users email</param>
+		/// <param name="password">Users password</param>
+		/// <exception cref="Exception">Connection exception JSON formated</exception>
+		/// <returns>A task to be awaited</returns>
 		public async Task GetUserLogin(string email, string password) {
 			var request = new HttpRequestMessage() {
 				RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
@@ -792,40 +759,26 @@ namespace WFInfo {
 			request.Headers.Add("platform", "pc");
 			request.Headers.Add("auth_type", "header");
 
-			try {
-				HttpResponseMessage response = await client.SendAsync(request);
-				string responseBody = await response.Content.ReadAsStringAsync();
+			
+			HttpResponseMessage response = await client.SendAsync(request);
+			string responseBody = await response.Content.ReadAsStringAsync();
 
-				if (response.IsSuccessStatusCode) {
-					setJWT(response.Headers);
-					await openSocket();
-				} else {
-					throw new Exception(responseBody);
-				}
+			if (response.IsSuccessStatusCode) {
+				setJWT(response.Headers);
+				await openSocket();
+			} else {
+				throw new Exception(responseBody);
 			}
-			catch (Exception e) {
-				JWT = null;
-				Main.AddLog("Couldn't login: " + e.Message);
-				JObject json = JsonConvert.DeserializeObject<JObject>(e.Message);
-				json.TryGetValue("error", out JToken msg); //password
+			
 
-				if (msg.Value<string>("email") != null) {
-					if (msg["email"].First.ToString() == "app.form.invalid") {
-						Main.RunOnUIThread(() => Main.StatusUpdate("Invalid email form", 2));
-					} else
-						Main.RunOnUIThread(() => Main.StatusUpdate("Unknown email", 1));
-
-				} else if (msg.Value<string>("password") != null) {
-					Main.RunOnUIThread(() => Main.StatusUpdate("Wrong password", 1));
-				} else {
-					Main.RunOnUIThread(() => Main.StatusUpdate("Too many requests", 1)); //default to too many requests
-				}
-			}
 		}
 
-
+		/// <summary>
+		/// Attempts to connect the user's account to the websocket
+		/// </summary>
+		/// <returns>A task to be awaited</returns>
 		public async Task openSocket() {
-			if (marketSocket == null)
+			if (marketSocket == null || !marketSocket.IsAlive)
 				marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
 
 			marketSocket.OnMessage += (sender, e) =>
@@ -843,25 +796,38 @@ namespace WFInfo {
 			marketSocket.OnMessage += (sender, e) => {
 				if (e.Data.Contains("@WS/ERROR")) // error checking, report back to main.status
 				{
-					JObject json = JsonConvert.DeserializeObject<JObject>(e.Data);
-					json.TryGetValue("error", out JToken msg);
-					Main.AddLog(msg.ToString());
+					Main.AddLog(e.Data);
 					JWT = null; //assume authentication is invalid
+					Main.signOut();
 				}
 			};
 
 			marketSocket.OnOpen += (sender, e) => {
-				marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}"); //
+				marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}"); //
 			};
 		}
-
+		/// <summary>
+		/// Sets the JWT to be used for future calls
+		/// </summary>
+		/// <param name="headers">Response headers from the original Login call</param>
 		public void setJWT(HttpResponseHeaders headers) {
 			foreach (var item in headers.GetValues("Set-Cookie")) {
 				if (item.Contains("JWT=")) {
-					JWT = getSubstring(item, "JWT=", "; Domain=.warframe.market;");
+					int a = item.LastIndexOf("JWT=") + "JWT=".Length;
+					int b = item.LastIndexOf("; Domain=.warframe.market;");
+					JWT = item.Substring(a, (b - a));
+					if (Settings.settingsObj["JWT"].ToString().Length > 10)  //update the cashed JWT if it exists
+						Settings.settingsObj["JWT"] = JWT;
 				}
 			}
 		}
+
+		/// <summary>
+		/// Lists an item under an account. Expected to be called after being logged in thus no login attempts.
+		/// </summary>
+		/// <param name="itemID">Warframe.market's ID for the item</param>
+		/// <param name="platinum">The amount of platinum the user entered for the listing</param>
+		/// <param name="quantity">The quantity of items the user listed.</param>
 
 		public async void ListItem(string itemID, int platinum, int quantity) {
 			try {
@@ -899,11 +865,11 @@ namespace WFInfo {
 		/// online, set's player status to be online on the site.   
 		/// in game, set's player status to be online and ingame on the site
 		/// </param>
-		public async void SetStatus(string status) {
+		public async Task SetStatus(string status) {
 			if (!IsJwtAvailable())
 				return;
 
-			var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\""; //invisible\"}
+			var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
 			switch (status) {
 				case "offline":
 				message += "invisible\"}";
@@ -925,19 +891,28 @@ namespace WFInfo {
 			}
 			catch (Exception e) {
 				Main.AddLog("Was unable to set status due to: " + e);
+				throw;
 			}
 		}
 
+		/// <summary>
+		/// Dummy method to make it so that you log send messages
+		/// </summary>
+		/// <param name="data">The JSON string of data being sent over websocket</param>
 		private void SendMessage(string data) {
 			Main.AddLog("Sending: " + data + " to websocket.");
 			marketSocket.Send(data);
 		}
-
-		private string getSubstring(string origin, string start, string end) {
-			int a = origin.LastIndexOf(start) + start.Length;
-			int b = origin.LastIndexOf(end);
-			Console.WriteLine(a + " " + b);
-			return origin.Substring(a, (b - a));
+		/// <summary>
+		/// Disconnects the user from websocket and sets JWT to null
+		/// </summary>
+		public void Disconnect()
+		{
+			SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
+			JWT = null;
+			Settings.settingsObj["JWT"] = null;
+			Settings.Save();
+			marketSocket.Close(1006);
 		}
 	}
 }
