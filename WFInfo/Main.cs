@@ -153,71 +153,70 @@ namespace WFInfo
             }
         }
 
-        public void OnKeyAction(Key key)
-        {
-            // close the snapit overlay when *any* key is pressed down
-            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
-            {
-                snapItOverlayWindow.closeOverlay();
-                StatusUpdate("Closed snapit", 0);
-                return;
-            }
-            if (searchBox.isInUse)
-            { //if key is pressed and searchbox is active then rederect keystokes to it.
-                if (key == Key.Escape)
-                { // close it if esc is used.
-                    searchBox.finish();
-                    return;
-                }
-                searchBox.searchField.Focus();
-                return;
-            }
+		public void OnKeyAction(Key key)
+		{
+		    // close the snapit overlay when *any* key is pressed down
+		    if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
+		    {
+		        snapItOverlayWindow.closeOverlay();
+		        StatusUpdate("Closed snapit", 0);
+		        return;
+		    }
+		    if (searchBox.isInUse)
+		    { //if key is pressed and searchbox is active then rederect keystokes to it.
+		        if (key == Key.Escape)
+		        { // close it if esc is used.
+		            searchBox.finish();
+		            return;
+		        }
+		        searchBox.searchField.Focus();
+		        return;
+		    }
 
-            if (key == Settings.ActivationKey)
-            { //check if user pressed activation key
-                if (Keyboard.IsKeyDown(Key.Delete))
-                { //Close all overlays if hotkey + delete is held down
-                    foreach (Window overlay in App.Current.Windows)
-                    {
-                        if (overlay.GetType().ToString() == "WFInfo.Overlay")
-                        {
-                            overlay.Hide();
-                        }
-                    }
-                    StatusUpdate("Overlays dismissed", 1);
-                    return;
-                }
-                if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
-                { //snapit debug
-                    AddLog("Loading screenshot from file for snapit");
-                    StatusUpdate("Offline testing with screenshot for snapit", 0);
-                    LoadScreenshotSnap();
-                }
-                else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
-                {//normal debug
-                    AddLog("Loading screenshot from file");
-                    StatusUpdate("Offline testing with screenshot", 0);
-                    LoadScreenshot();
-                }
-                else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
-                {//snapit
-                    AddLog("Starting snap it");
-                    StatusUpdate("Starting snap it", 0);
-                    OCR.SnapScreenshot();
-                }
-                else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
-                { //Searchit  
-                    AddLog("Starting search it");
-                    StatusUpdate("Starting search it", 0);
-                    searchBox.Start();
-                }
-                else if (Settings.debug || OCR.VerifyWarframe())
-                {
-                    Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
-                }
-            }
-
-        }
+		    if (key == Settings.ActivationKey)
+		    { //check if user pressed activation key
+		        if (Keyboard.IsKeyDown(Key.Delete))
+		        { //Close all overlays if hotkey + delete is held down
+		            foreach (Window overlay in App.Current.Windows)
+		            {
+		                if (overlay.GetType().ToString() == "WFInfo.Overlay")
+		                {
+		                    overlay.Hide();
+		                }
+		            }
+		            StatusUpdate("Overlays dismissed", 1);
+		            return;
+		        }
+		        if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+		        { //snapit debug
+		            AddLog("Loading screenshot from file for snapit");
+		            StatusUpdate("Offline testing with screenshot for snapit", 0);
+		            LoadScreenshotSnap();
+		        }
+		        else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
+		        {//normal debug
+		            AddLog("Loading screenshot from file");
+		            StatusUpdate("Offline testing with screenshot", 0);
+		            LoadScreenshot();
+		        }
+		        else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+		        {//snapit
+		            AddLog("Starting snap it");
+		            StatusUpdate("Starting snap it", 0);
+		            OCR.SnapScreenshot();
+		        }
+		        else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
+		        { //Searchit  
+		            AddLog("Starting search it");
+		            StatusUpdate("Starting search it", 0);
+		            searchBox.Start();
+		        }
+		        else if (Settings.debug || OCR.VerifyWarframe())
+		        {
+		            Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
+		        }
+		    }
+		}
 
         // timestamp is the time to look for, and gap is the threshold of seconds different
         public static void SpawnErrorPopup(DateTime timeStamp, int gap = 30)
@@ -225,47 +224,47 @@ namespace WFInfo
             popup = new ErrorDialogue(timeStamp, gap);
         }
 
-        private void LoadScreenshot()
-        {
-            // Using WinForms for the openFileDialog because it's simpler and much easier
-            using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
-            {
-                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-                openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
-                openFileDialog.FilterIndex = 2;
-                openFileDialog.RestoreDirectory = true;
-                openFileDialog.Multiselect = true;
+		private void LoadScreenshot()
+		{
+		    // Using WinForms for the openFileDialog because it's simpler and much easier
+		    using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
+		    {
+		        openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+		        openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
+		        openFileDialog.FilterIndex = 2;
+		        openFileDialog.RestoreDirectory = true;
+		        openFileDialog.Multiselect = true;
 
-                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    Task.Factory.StartNew(() =>
-                    {
-                        try
-                        {
-                            foreach (string file in openFileDialog.FileNames)
-                            {
-                                AddLog("Testing file: " + file.ToString());
+		        if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+		        {
+		            Task.Factory.StartNew(() =>
+		            {
+		                try
+		                {
+		                    foreach (string file in openFileDialog.FileNames)
+		                    {
+		                        AddLog("Testing file: " + file.ToString());
 
-                                //Get the path of specified file
-                                Bitmap image = new Bitmap(file);
-                                OCR.UpdateWindow(image);
-                                OCR.ProcessRewardScreen(image);
-                            }
+		                        //Get the path of specified file
+		                        Bitmap image = new Bitmap(file);
+		                        OCR.UpdateWindow(image);
+		                        OCR.ProcessRewardScreen(image);
+		                    }
 
-                        }
-                        catch (Exception e)
-                        {
-                            AddLog(e.Message);
-                            StatusUpdate("Failed to load image", 1);
-                        }
-                    });
-                }
-                else
-                {
-                    StatusUpdate("Failed to load image", 1);
-                }
-            }
-        }
+		                }
+		                catch (Exception e)
+		                {
+		                    AddLog(e.Message);
+		                    StatusUpdate("Failed to load image", 1);
+		                }
+		            });
+		        }
+		        else
+		        {
+		            StatusUpdate("Failed to load image", 1);
+		        }
+		    }
+		}
 
         private void LoadScreenshotSnap()
         {

@@ -100,8 +100,6 @@ namespace WFInfo
         // Screen / Resolution Scaling - Used to adjust pixel values to each person's monitor
         public static double screenScaling;
 
-
-
         public static TesseractEngine firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
         {
             DefaultPageSegMode = PageSegMode.SingleBlock
@@ -114,37 +112,11 @@ namespace WFInfo
         public static TesseractEngine[] engines = new TesseractEngine[4];
         public static Regex RE = new Regex("[^a-z&// ]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-
-
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
         public const int pixleRewardWidth = 968;
         public const int pixleRewardHeight = 235;
         public const int pixleRewardYDisplay = 316;
         public const int pixelRewardLineHeight = 44;
-        public const int pixleRewardLineWidth = 240;
-
-        // Pixel measurement for player bars for player count
-        //   Width is same as pixRwrdWid
-        // public static int pixRareWid = pixRwrdWid;
-        //   Height is always 1px
-        // public static int pixRareHei = 1;
-        //   Box is centered horizontally
-        // public static int pixRareXDisp = ???;
-        public const int pixleRareYDisplay = 58;
-        public const int pixleOverlayPossition = 30;
-
-        // Pixel measurement for profile bars ( for theme detection )
-        public const int pixelProfileXDisplay = 97;
-        public const int pixelProfileYDisplay = 86;
-        public const int pixelProfileWidth = 184;
-        public const int pixelProfileHeight = 1;
-
-        // Pixel measurements for the "VOID FISSURE / REWARDS"
-        public const int pixelFissureWidth = 377;
-        public const int pixelFissureHeight = 37;
-        public const int pixelFissureXDisplay = 238; // Removed 50 pixels to assist with 2 player theme detection
-
-        public const int pixelFissureYDisplay = 47;
 
         public const int SCALING_LIMIT = 100;
         private static bool processingActive = false;
@@ -1354,9 +1326,7 @@ namespace WFInfo
         public static bool VerifyWarframe()
         {
 
-            if (Warframe != null && !Warframe.HasExited) {
-                if(Main.dataBase.IsJwtAvailable())
-					Main.dataBase.SetStatus("ingame");
+            if (Warframe != null && !Warframe.HasExited) { // don't update status
 	            return true;
             }
             foreach (Process process in Process.GetProcesses())

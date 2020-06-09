@@ -15,7 +15,6 @@
         </Grid>
         <Grid x:Name="Content" Margin="0,26,0,0">
             <Rectangle Stroke="#FF646464"/>
-            <Label x:Name="ItemName" HorizontalContentAlignment="Center" Content="Item name" Margin="0,10,0,0" VerticalAlignment="Top" FontSize="16"/>
             <Grid x:Name="Values" HorizontalAlignment="Left" Height="38" VerticalAlignment="Top" Width="300" Margin="0,39,0,0">
                 <TextBox x:Name="PlatinumTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="20,15,0,0" TextWrapping="Wrap" Text="Platinum" VerticalAlignment="Top" Width="100"/>
                 <TextBox x:Name="AmountTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="23" Margin="0,15,20,0" TextWrapping="Wrap" Text="Amount" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100"/>
@@ -64,6 +63,7 @@
             </Grid>
             <Label HorizontalContentAlignment="Center" Content="Confirm listing" Margin="90,190,90,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
             <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Top" Margin="90,190,90,0"/>
+            <ComboBox HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="10,10,0,0" VerticalAlignment="Top" Width="280" Height="24"  Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Background="{x:Null}"/>
         </Grid>
     </Grid>
 </Window>
