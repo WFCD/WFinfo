@@ -16,10 +16,12 @@
         <Grid x:Name="Content" Margin="0,26,0,0">
             <Rectangle Stroke="#FF646464"/>
             <Grid x:Name="Values" HorizontalAlignment="Left" Height="38" VerticalAlignment="Top" Width="300" Margin="0,39,0,0">
-                <TextBox x:Name="PlatinumTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="20,15,0,0" TextWrapping="Wrap" Text="Platinum" VerticalAlignment="Top" Width="100"/>
-                <TextBox x:Name="AmountTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="23" Margin="0,15,20,0" TextWrapping="Wrap" Text="Amount" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100"/>
+                <TextBox x:Name="PlatinumTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="20,15,0,0" TextWrapping="Wrap" Text="Platinum" VerticalAlignment="Top" Width="100" BorderBrush="#FF646464"/>
+                <TextBox x:Name="AmountTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="23" Margin="0,15,20,0" TextWrapping="Wrap" Text="Amount" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" d:IsHidden="True"/>
                 <Label IsEnabled="False" Padding="0" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Center" Content="Platinum" Margin="20,0,0,0" VerticalAlignment="Top" Height="15" FontSize="10" HorizontalAlignment="Left" Width="100"/>
-                <Label IsEnabled="False" Padding="0" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Center" Content="Amount" Margin="0,0,20,0" FontSize="10" Height="15" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100"/>
+                <Label IsEnabled="False" Padding="0" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Center" Content="Amount" Margin="0,0,20,0" FontSize="10" Height="15" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" d:IsHidden="True"/>
+                <Label HorizontalContentAlignment="Center" Content="Confirm listing" Margin="0,14,25,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}" HorizontalAlignment="Right" Width="105"/>
+                <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Top" Margin="0,14,25,0" HorizontalAlignment="Right" Width="105"/>
             </Grid>
             <Grid x:Name="Listing_1" HorizontalAlignment="Left" Width="300" Margin="0,85,0,0" Height="20" VerticalAlignment="Top">
                 <Label Padding="0" Content="1# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
@@ -61,15 +63,13 @@
                 <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
                 <Label Padding="0" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
             </Grid>
-            <Label HorizontalContentAlignment="Center" Content="Confirm listing" Margin="0,190,70,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}" HorizontalAlignment="Right" Width="105"/>
-            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Top" Margin="0,190,70,0" HorizontalAlignment="Right" Width="105"/>
             <ComboBox HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="10,10,0,0" VerticalAlignment="Top" Width="280" Height="24"  Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Background="{x:Null}"/>
-            <Label HorizontalContentAlignment="Center" Content="Back" Margin="15,190,245,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
-            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Bottom" Margin="15,0,0,10" HorizontalAlignment="Left" Width="40"/>
-            <Label HorizontalContentAlignment="Center" Content="Next" Margin="240,190,20,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
-            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Top" Margin="240,190,20,0"/>
-            <Label HorizontalContentAlignment="Center" Content="Cancel" Margin="65,190,185,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
-            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Bottom" Margin="65,0,0,10" HorizontalAlignment="Left" Width="50"/>
+            <Label HorizontalContentAlignment="Center" Content="Back" Margin="40,190,220,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
+            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Bottom" Margin="40,0,0,10" HorizontalAlignment="Left" Width="40"/>
+            <Label HorizontalContentAlignment="Center" Content="Next" Margin="220,190,40,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
+            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Top" Margin="220,190,40,0"/>
+            <Label HorizontalContentAlignment="Center" Content="Cancel" Margin="125,190,125,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
+            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Bottom" Margin="125,0,0,10" HorizontalAlignment="Left" Width="50"/>
         </Grid>
     </Grid>
 </Window>
