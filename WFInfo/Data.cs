@@ -754,7 +754,7 @@ namespace WFInfo {
 			request.Headers.Add("platform", "pc");
 			request.Headers.Add("auth_type", "header");
 
-			
+
 			HttpResponseMessage response = await client.SendAsync(request);
 			string responseBody = await response.Content.ReadAsStringAsync();
 
@@ -764,7 +764,7 @@ namespace WFInfo {
 			} else {
 				throw new Exception(responseBody);
 			}
-			
+
 
 		}
 
@@ -773,9 +773,8 @@ namespace WFInfo {
 		/// </summary>
 		/// <returns>A task to be awaited</returns>
 		public async Task openSocket() {
-			
-			if (marketSocket.IsAlive)
-			{
+
+			if (marketSocket.IsAlive) {
 				return;
 			}
 
@@ -835,7 +834,7 @@ namespace WFInfo {
 				var json = "{\"order_type\":\"sell\",\"item_id\":\"" + itemID + "\",\"platinum\":" + platinum + ",\"quantity\":" + quantity + "}";
 				Console.WriteLine(json);
 				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-				request.Headers.Add("Authorization", "JWT" + JWT);
+				request.Headers.Add("Authorization", "JWT " + JWT);
 				request.Headers.Add("language", "en");
 				request.Headers.Add("accept", "application/json");
 				request.Headers.Add("platform", "pc");
@@ -843,7 +842,6 @@ namespace WFInfo {
 
 				HttpResponseMessage response = await client.SendAsync(request);
 				string responseBody = await response.Content.ReadAsStringAsync();
-				Console.WriteLine(responseBody);
 				setJWT(response.Headers);
 
 			}
@@ -900,8 +898,7 @@ namespace WFInfo {
 		/// <summary>
 		/// Disconnects the user from websocket and sets JWT to null
 		/// </summary>
-		public void Disconnect()
-		{
+		public void Disconnect() {
 			SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
 			JWT = null;
 			Settings.settingsObj["JWT"] = null;
@@ -909,8 +906,7 @@ namespace WFInfo {
 			marketSocket.Close(1006);
 		}
 
-		public string getUrlName(string primeName)
-		{
+		public string getUrlName(string primeName) {
 			return primeName.ToLower().Replace(' ', '_'); //seems to work for now but might need to be changed.
 		}
 
@@ -936,23 +932,65 @@ namespace WFInfo {
 
 			return null;
 		}
-
-		public async Task<int> GetCurrentListedAmount(string primeName)
+		/// <summary>
+		/// Untested, might not work
+		/// </summary>
+		/// <returns>bool of which answers the question "Is the user JWT valid?"</returns>
+		public async Task<bool> checkIfJWTisValid()
 		{
-			int amount;
 			try {
 				var request = new HttpRequestMessage() {
 					RequestUri = new Uri("https://api.warframe.market/v1/profile"),
 					Method = HttpMethod.Get,
 				};
-				request.Headers.Add("Authorization", "JWT" + JWT);
+				request.Headers.Add("Authorization", "JWT " + JWT);
 				var response = await client.SendAsync(request);
-				var responseBody = await response.Content.ReadAsStringAsync();
-				Console.WriteLine(responseBody);
-				amount = 1;
+				setJWT(response.Headers);
+				var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
+				Console.WriteLine(profile.GetValue("role"));
+				return (string)profile.GetValue("role") != "anonymous";
 			}
-			catch (Exception e)
-			{
+			catch (Exception e) {
+				Console.WriteLine("\nException Caught!");
+				Console.WriteLine("Message :{0} ", e.Message);
+				return false;
+			}
+
+		}
+
+		public async Task<int> GetCurrentListedAmount(string primeName) {               //todo get the current user name and then probe  https://api.warframe.market/v1/profile/ <-username-> /orders to get quantaties
+			int amount = 0;
+			var inGameName = string.Empty;
+			try {
+				var request = new HttpRequestMessage() {
+					RequestUri = new Uri("https://api.warframe.market/v1/profile"),
+					Method = HttpMethod.Get
+				};
+				request.Headers.Add("Authorization", "JWT " + JWT);
+				request.Headers.Add("language", "en");
+				request.Headers.Add("accept", "application/json");
+				request.Headers.Add("platform", "pc");
+				request.Headers.Add("auth_type", "header");
+				var response = await client.SendAsync(request);
+				//setJWT(response.Headers);
+				var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
+				Console.WriteLine(profile["profile"]);
+				inGameName = profile["profile"].Value<string>("ingame_name");
+				request = new HttpRequestMessage() {
+					RequestUri = new Uri("https://api.warframe.market/v1/profile/" + inGameName + "/orders"),
+					Method = HttpMethod.Get
+				};
+				request.Headers.Add("Authorization", "JWT " + JWT);
+				request.Headers.Add("language", "en");
+				request.Headers.Add("accept", "application/json");
+				request.Headers.Add("platform", "pc");
+				request.Headers.Add("auth_type", "header");
+				var secondResponse = await client.SendAsync(request);
+				var body = await secondResponse.Content.ReadAsStringAsync();
+				Console.WriteLine(body);
+
+			}
+			catch (Exception e) {
 				amount = 0;
 				Console.WriteLine("\nException Caught!");
 				Console.WriteLine("Message :{0} ", e.Message);

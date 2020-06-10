@@ -333,7 +333,9 @@ namespace WFInfo
 		        Main.AddLog("Got JWT already trying to log in with it");
                 try
                 {
-	                await Main.dataBase.openSocket();
+	                await Task.Run(async () => {
+                        await Main.dataBase.openSocket();
+	                });
 	                LoggedIn();
 	                Main.dataBase.JWT = (string)Settings.settingsObj["JWT"];
                 }
