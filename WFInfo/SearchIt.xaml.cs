@@ -44,7 +44,7 @@ namespace WFInfo
             var primeRewards = new List<string> { closest, "Saryn Prime Blueprint", "Volt Prime Chassis", "Vectis Prime Barrel" }; 
             var rewardCollection = await Main.listingHelper.GetRewardCollection(primeRewards);
             Console.WriteLine(rewardCollection.ToHumanString());
-            //Console.WriteLine(await Main.dataBase.GetCurrentListedAmount(closest));
+            //Console.WriteLine(await Main.dataBase.GetCurrentListing(closest));
 
             finish();
         }

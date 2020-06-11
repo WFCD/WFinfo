@@ -50,7 +50,8 @@ namespace WFInfo {
 				var tempListings = getMarketListing(primeItem);
 				marketListings.Add(tempListings);
 				platinumValues.Add(tempListings[1].platinum);
-				listedQuantity.Add(await Main.dataBase.GetCurrentListedAmount(primeItem) + 1);
+				var listing = await Main.dataBase.GetCurrentListing(primeItem);
+				listedQuantity.Add((int)listing?["quantity"]);
 			}
 			return new RewardCollection(primeNames, platinumValues, marketListings, listedQuantity);
 		}
@@ -61,7 +62,7 @@ namespace WFInfo {
 		/// <returns>the top 5 current market listings</returns>
 		public List<MarketListing> getMarketListing(string primeName) 
 		{
-			var results = Main.dataBase.getTopListings(primeName);
+			var results = Main.dataBase.GetTopListings(primeName);
 			var listings = new List<MarketListing>();
 			var sellOrders = new JArray(results["payload"]["sell_orders"].Children());
 			foreach (var item in sellOrders)
