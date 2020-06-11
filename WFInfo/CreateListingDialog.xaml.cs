@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Remoting.Messaging;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Newtonsoft.Json.Linq;
@@ -36,18 +39,18 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="primeNames">The human friendly name to search listings for</param>
 		/// <returns>the data for an entire "Create listing" screen</returns>
-		public RewardCollection GetRewardCollection(List<string> primeNames)
+		public async Task<RewardCollection> GetRewardCollection(List<string> primeNames)
 		{
 			var platinumValues = new List<int>(4);
 			var listedQuantity = new List<int>(4);
-			var marketListings = new List<MarketListing>(5);
+			var marketListings = new List<List<MarketListing>>(5);
 
 			foreach (var primeItem in primeNames)
 			{
 				var tempListings = getMarketListing(primeItem);
-				marketListings = tempListings;
+				marketListings.Add(tempListings);
 				platinumValues.Add(tempListings[1].platinum);
-				listedQuantity.Add(Main.dataBase.GetCurrentListedAmount(primeItem).Result);
+				listedQuantity.Add(await Main.dataBase.GetCurrentListedAmount(primeItem) + 1);
 			}
 			return new RewardCollection(primeNames, platinumValues, marketListings, listedQuantity);
 		}
@@ -80,14 +83,29 @@ namespace WFInfo {
 		public List<string> primeNames = new List<string>(4); // the reward items in case user wants to change selection
 		public List<int> platinumValues = new List<int>(4);
 		public List<int> listedQuantity = new List<int>(4);
-		public List<MarketListing> marketListings = new List<MarketListing>(5);
+		public List<List<MarketListing>> marketListings = new List<List<MarketListing>>(5);
 
-		public RewardCollection(List<string> primeNames, List<int> platinumValues, List<MarketListing> marketListings, List<int> listedQuantity)
+		public RewardCollection(List<string> primeNames, List<int> platinumValues, List<List<MarketListing>> marketListings, List<int> listedQuantity)
 		{
 			this.primeNames = primeNames;
 			this.platinumValues = platinumValues;
 			this.marketListings = marketListings;
 			this.listedQuantity = listedQuantity;
+		}
+		/// <summary>
+		/// Gets a human friendly version back for logging.
+		/// </summary>
+		/// <returns></returns>
+		public string ToHumanString()
+		{
+			var msg = "Reward collection screen:\n";
+			foreach (var item in primeNames)
+			{
+				var index = primeNames.IndexOf(item);
+				msg += $"Prime item: \"{item}\", Platinum value: \"{platinumValues[index]}\", Quantity: \"{listedQuantity[index]}\",  Market listings: \n";
+				msg = marketListings[index].Aggregate(msg, (current, listing) => current + (listing.ToHumanString() + "\n"));
+			}
+			return msg;
 		}
 	}
 	/// <summary>
@@ -105,8 +123,11 @@ namespace WFInfo {
 			this.amount = amount;
 			this.reputation = reputation;
 		}
-
-		public override string ToString()
+		/// <summary>
+		/// Gets a human friendly version back for logging.
+		/// </summary>
+		/// <returns></returns>
+		public string ToHumanString()
 		{
 			return "Platinum: " + platinum + " Amount: " + amount + " Reputation: " + reputation;
 		}

@@ -932,6 +932,7 @@ namespace WFInfo {
 
 			return null;
 		}
+		
 		/// <summary>
 		/// Untested, might not work
 		/// </summary>
@@ -957,10 +958,13 @@ namespace WFInfo {
 			}
 
 		}
-
+		
+		/// <summary>
+		/// Queries the current account for the amount of the CURRENT listed items
+		/// </summary>
+		/// <param name="primeName"></param>
+		/// <returns>Quantity of prime named listed on the site</returns>
 		public async Task<int> GetCurrentListedAmount(string primeName) {               //todo get the current user name and then probe  https://api.warframe.market/v1/profile/ <-username-> /orders to get quantaties
-			int amount = 0;
-			var inGameName = string.Empty;
 			try {
 				var request = new HttpRequestMessage() {
 					RequestUri = new Uri("https://api.warframe.market/v1/profile"),
@@ -974,8 +978,8 @@ namespace WFInfo {
 				var response = await client.SendAsync(request);
 				//setJWT(response.Headers);
 				var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-				Console.WriteLine(profile["profile"]);
-				inGameName = profile["profile"].Value<string>("ingame_name");
+				//Console.WriteLine(profile["profile"]);
+				var inGameName = profile["profile"]?.Value<string>("ingame_name");
 				request = new HttpRequestMessage() {
 					RequestUri = new Uri("https://api.warframe.market/v1/profile/" + inGameName + "/orders"),
 					Method = HttpMethod.Get
@@ -986,16 +990,28 @@ namespace WFInfo {
 				request.Headers.Add("platform", "pc");
 				request.Headers.Add("auth_type", "header");
 				var secondResponse = await client.SendAsync(request);
-				var body = await secondResponse.Content.ReadAsStringAsync();
-				Console.WriteLine(body);
+				var payload = JsonConvert.DeserializeObject<JObject>(await secondResponse.Content.ReadAsStringAsync());
+				var sellOrders = (JArray)payload?["payload"]?["sell_orders"];
 
+				if (sellOrders != null)
+				{
+					foreach (var listing in sellOrders)
+					{
+						if (primeName == (string) listing?["item"]?["en"]?["item_name"])
+							return (int)listing?["quantity"];
+					}
+				}
+				else
+				{
+					throw new Exception("No sell orders found: " + payload);
+				}
 			}
 			catch (Exception e) {
-				amount = 0;
-				Console.WriteLine("\nException Caught!");
-				Console.WriteLine("Message :{0} ", e.Message);
+				Main.AddLog("\nException Caught!");
+				Main.AddLog("Message : " + e.Message);
+				return 0;
 			}
-			return amount;
+			return 0;
 		}
 	}
 }

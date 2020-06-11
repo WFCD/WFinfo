@@ -37,14 +37,14 @@ namespace WFInfo
             searchField.Focusable = true;
         }
 
-        private void Search(object sender, RoutedEventArgs e)
+        private async void Search(object sender, RoutedEventArgs e)
         {
-            Main.AddLog(searchField.Text);
+            //Main.AddLog(searchField.Text);
             var closest = Main.dataBase.GetPartNameHuman(searchField.Text, out _);
-            //var primeRewards = new List<string> { closest, closest, closest, closest };
-            //var listings = Main.listingHelper.GetRewardCollection(primeRewards);
-            //Console.WriteLine(listings.ToString());
-            Console.WriteLine(Main.dataBase.GetCurrentListedAmount(closest));
+            var primeRewards = new List<string> { closest, "Saryn Prime Blueprint", "Volt Prime Chassis", "Vectis Prime Barrel" }; 
+            var rewardCollection = await Main.listingHelper.GetRewardCollection(primeRewards);
+            Console.WriteLine(rewardCollection.ToHumanString());
+            //Console.WriteLine(await Main.dataBase.GetCurrentListedAmount(closest));
 
             finish();
         }
