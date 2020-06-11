@@ -91,11 +91,17 @@ namespace WFInfo
                 sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
         }
 
-        public static void StatusUpdate(string message, int serverity)
+        /// <summary>
+        /// Sets the status on the main window
+        /// </summary>
+        /// <param name="message">The string to be displayed</param>
+        /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
+        public static void StatusUpdate(string message, int severity) 
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, serverity); });
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
         }
 
+        //todo: Implement a 15 minute timer that if there hasn't been any input to set the status to "offline"
         public void OnMouseAction(MouseButton key)
         {
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
@@ -154,7 +160,8 @@ namespace WFInfo
             }
         }
 
-		public void OnKeyAction(Key key)
+        //todo: Implement a 15 minute timer that if there hasn't been any input to set the status to "offline"
+        public void OnKeyAction(Key key)
 		{
 		    // close the snapit overlay when *any* key is pressed down
 		    if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)

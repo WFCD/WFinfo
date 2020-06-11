@@ -213,6 +213,7 @@ namespace WFInfo
         {
             hider.Stop();
             Hide();
+            Main.StatusUpdate("WFinfo is ready",0);
         }
     }
 }

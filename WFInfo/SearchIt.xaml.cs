@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -37,14 +38,26 @@ namespace WFInfo
             searchField.Focusable = true;
         }
 
-        private async void Search(object sender, RoutedEventArgs e)
+        private void Search(object sender, RoutedEventArgs e)
         {
-            //Main.AddLog(searchField.Text);
             var closest = Main.dataBase.GetPartNameHuman(searchField.Text, out _);
-            var primeRewards = new List<string> { closest, "Saryn Prime Blueprint", "Volt Prime Chassis", "Vectis Prime Barrel" }; 
-            var rewardCollection = await Main.listingHelper.GetRewardCollection(primeRewards);
-            Console.WriteLine(rewardCollection.ToHumanString());
-            //Console.WriteLine(await Main.dataBase.GetCurrentListing(closest));
+            var primeRewards = new List<string> { closest, "Saryn Prime Blueprint", "Volt Prime Chassis", "Vectis Prime Barrel" };
+            var primeRewards2 = new List<string> { "Atlas Prime Systems", "Carrier Prime Carapace", "Akstiletto Prime Blueprint", "" };
+            var primeRewards3 = new List<string> { "", "Akbronco Prime Blueprint", "Nekros Prime Chassis" };
+
+            var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
+            var rewardCollection2 = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
+            var rewardCollection3 = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
+            
+
+            Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+            Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection2));
+            Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection3));
+
+
+            Main.listingHelper.SetScreen(0);
+            Main.listingHelper.Show();
+
 
             finish();
         }

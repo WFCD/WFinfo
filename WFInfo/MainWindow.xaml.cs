@@ -190,11 +190,16 @@ namespace WFInfo
             }
         }
 
-        public void ChangeStatus(string status, int serverity)
+        /// <summary>
+        /// Sets the status
+        /// </summary>
+        /// <param name="status">The string to be displayed</param>
+        /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
+        public void ChangeStatus(string status, int severity)
         {
             Console.WriteLine("Status message: " + status);
             Status.Text = status;
-            switch (serverity)
+            switch (severity)
             {
                 case 0: //default, no problem
                     Status.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));

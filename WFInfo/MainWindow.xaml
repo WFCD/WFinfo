@@ -222,6 +222,26 @@
             <ComboBoxItem Content="Offline"/>
             <ComboBoxItem Content="Log out"/>
         </ComboBox>
-        <Button x:Name="Login" Content="Login to WFM" Grid.Column="1" HorizontalAlignment="Left" Margin="128,0,0,0" VerticalAlignment="Top" Width="89" Height="26" Background="{x:Null}" Foreground="#FFB1D0D9" Click="SpawnLogin"/>
+        <Button x:Name="Login" Content="Login to WFM" Grid.Column="1" HorizontalAlignment="Left" Margin="129,1,0,0" VerticalAlignment="Top" Width="87" Height="24" Background="{x:Null}" Foreground="#FFB1D0D9" Click="SpawnLogin">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Border x:Name="Border" Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#1b1b1b" TargetName="Border" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Button.Style>
+        </Button>
+        <Rectangle Grid.Column="1" HorizontalAlignment="Left" Height="26" Margin="128,0,0,0" Stroke="#FF646464" VerticalAlignment="Top" Width="89"/>
     </Grid>
 </Window>

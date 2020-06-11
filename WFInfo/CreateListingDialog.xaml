@@ -5,71 +5,130 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo"
         mc:Ignorable="d"
-        Title="CreateListing" Height="250" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" Background="#FF1B1B1B">
+        Title="CreateListing" Height="255" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" MouseDown="OnMouseDown" WindowStyle="None" BorderBrush="#FF707070" Background="#FF1B1B1B">
     <Grid>
-        <Grid x:Name="Tittle_bar" Height="27" VerticalAlignment="Top" Panel.ZIndex="500">
-            <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top"/>
+        <Grid Height="27" VerticalAlignment="Top" Panel.ZIndex="500">
+            <Rectangle Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top"/>
             <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="24" RenderTransformOrigin="-1.263,-0.625" Source="Resources/WFLogo.png" Margin="1,0,0,0" />
             <TextBlock Text="Confirm listing" Margin="31,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" Width="237" />
-            <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Width="27" Height="27" VerticalAlignment="Top"/>
+            <Label MouseLeftButtonDown="Hide" Content="x" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Width="27" Height="27" VerticalAlignment="Top"/>
         </Grid>
         <Grid x:Name="Content" Margin="0,26,0,0">
             <Rectangle Stroke="#FF646464"/>
-            <Grid x:Name="Values" HorizontalAlignment="Left" Height="38" VerticalAlignment="Top" Width="300" Margin="0,39,0,0">
-                <TextBox x:Name="PlatinumTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="20,15,0,0" TextWrapping="Wrap" Text="Platinum" VerticalAlignment="Top" Width="100" BorderBrush="#FF646464"/>
-                <TextBox x:Name="AmountTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="23" Margin="0,15,20,0" TextWrapping="Wrap" Text="Amount" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" d:IsHidden="True"/>
-                <Label IsEnabled="False" Padding="0" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Center" Content="Platinum" Margin="20,0,0,0" VerticalAlignment="Top" Height="15" FontSize="10" HorizontalAlignment="Left" Width="100"/>
-                <Label IsEnabled="False" Padding="0" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Center" Content="Amount" Margin="0,0,20,0" FontSize="10" Height="15" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" d:IsHidden="True"/>
-                <Label HorizontalContentAlignment="Center" Content="Confirm listing" Margin="0,14,25,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}" HorizontalAlignment="Right" Width="105"/>
-                <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Top" Margin="0,14,25,0" HorizontalAlignment="Right" Width="105"/>
+            <ComboBox x:Name="ComboBox" x:FieldModifier="private" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="10,10,0,0" VerticalAlignment="Top" Width="280" Height="24"  Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Background="{x:Null}" SelectionChanged="ComboBox_SelectionChanged"/>
+                <Grid x:Name="Values" HorizontalAlignment="Left" Height="38" VerticalAlignment="Top" Width="300" Margin="0,39,0,0">
+                <TextBox x:FieldModifier="private" x:Name="PlatinumTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="20,15,0,0" TextWrapping="Wrap" Text="Platinum" VerticalAlignment="Top" Width="100" BorderBrush="#FF646464"/>
+                <Label Padding="0" Foreground="#FF6D6D6D" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Center" Content="Platinum" Margin="20,0,0,0" VerticalAlignment="Top" Height="15" FontSize="10" HorizontalAlignment="Left" Width="100"/>
+                <Button x:Name="ConfirmListingLabel" x:FieldModifier="private" HorizontalContentAlignment="Center" Content="Confirm listing" Margin="0,14,20,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}" HorizontalAlignment="Right" Width="100" MouseDown="ConfirmListing" Foreground="#FFB1D0D9" Height="24"/>
             </Grid>
-            <Grid x:Name="Listing_1" HorizontalAlignment="Left" Width="300" Margin="0,85,0,0" Height="20" VerticalAlignment="Top">
-                <Label Padding="0" Content="1# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
-                <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
-                <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
-                <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="170,3,0,0" VerticalAlignment="Top"/>
-                <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
-                <Label Padding="0" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
+            <Label x:Name="Status" x:FieldModifier="private" HorizontalContentAlignment="Center" Content="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,85,0,0" Width="280" d:IsHidden="True"/>
+            <Grid x:Name="ListingGrid" x:FieldModifier="private" HorizontalAlignment="Left" Width="300" Margin="0,0,0,40" Height="110" VerticalAlignment="Bottom">
+                <Grid x:Name="Listing0" HorizontalAlignment="Left" Width="300" Margin="0,8,0,0" Height="20" VerticalAlignment="Top">
+                    <Label Padding="0" Content="1# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Platinum0" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
+                    <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Amount0" Content="999" HorizontalAlignment="Left" Margin="170,3,0,0" VerticalAlignment="Top"/>
+                    <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Reputation0" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
+                </Grid>
+                <Grid x:Name="Listing1" HorizontalAlignment="Left" Width="300" Margin="0,28,0,0" Height="20" VerticalAlignment="Top">
+                    <Label Padding="0" Content="2# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Platinum1" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
+                    <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Amount1" Content="999" HorizontalAlignment="Left" Margin="170,3,0,0" VerticalAlignment="Top"/>
+                    <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Reputation1" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
+                </Grid>
+                <Grid x:Name="Listing2" HorizontalAlignment="Left" Width="300" Margin="0,48,0,0" Height="20" VerticalAlignment="Top">
+                    <Label Padding="0" Content="3# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Platinum2" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
+                    <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Amount2" Content="999" HorizontalAlignment="Left" Margin="170,3,0,0" VerticalAlignment="Top"/>
+                    <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Reputation2" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
+                </Grid>
+                <Grid x:Name="Listing3" HorizontalAlignment="Left" Width="300" Margin="0,68,0,0" Height="20" VerticalAlignment="Top">
+                    <Label Padding="0" Content="4# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Platinum3" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
+                    <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Amount3" Content="999" HorizontalAlignment="Left" Margin="170,3,0,0" VerticalAlignment="Top"/>
+                    <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Reputation3" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
+                </Grid>
+                <Grid x:Name="Listing4" HorizontalAlignment="Left" Width="300" Margin="0,88,0,0" Height="20" VerticalAlignment="Top">
+                    <Label Padding="0" Content="5# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Platinum4" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
+                    <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Amount4" Content="999" HorizontalAlignment="Left" Margin="170,3,0,0" VerticalAlignment="Top"/>
+                    <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
+                    <Label Padding="0" x:FieldModifier="private" x:Name="Reputation4" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
+                </Grid>
             </Grid>
-            <Grid x:Name="Listing_2" HorizontalAlignment="Left" Width="300" Margin="0,105,0,0" Height="20" VerticalAlignment="Top">
-                <Label Padding="0" Content="2# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
-                <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
-                <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
-                <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="170,3,0,0" VerticalAlignment="Top"/>
-                <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
-                <Label Padding="0" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
+            <Grid HorizontalAlignment="Left" Width="300" Margin="0,0,0,1" Height="39" VerticalAlignment="Bottom">
+                <Rectangle HorizontalAlignment="Left" Height="24" Stroke="#FF646464" VerticalAlignment="Top" Width="40" Margin="40,5,0,0"/>
+                <Rectangle HorizontalAlignment="Left" Height="24" Stroke="#FF646464" VerticalAlignment="Top" Width="50" Margin="125,5,0,0"/>
+                <Rectangle HorizontalAlignment="Left" Stroke="#FF646464" Width="40" Margin="220,5,0,0" Height="24" VerticalAlignment="Top"/>
+                <Button x:Name="Back" HorizontalContentAlignment="Center" Content="Back" Margin="40,0,220,10" VerticalAlignment="Bottom" BorderBrush="#FF646464" Background="{x:Null}" Height="24" Foreground="#FFB1D0D9" Click="PreviousScreen">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border x:Name="Border" Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FF0F0F0F" TargetName="Border" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button x:Name="Next" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="Next" Margin="220,0,40,10" BorderBrush="#FF646464" Background="{x:Null}" Click="NextScreen" Foreground="#FFB1D0D9" Height="24" VerticalAlignment="Bottom">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border x:Name="Border" Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FF0F0F0F" TargetName="Border" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button HorizontalContentAlignment="Center" Content="Cancel" Margin="125,0,125,10" VerticalAlignment="Bottom" BorderBrush="#FF646464" Background="{x:Null}" Click="Cancel" Height="24" Foreground="#FFB1D0D9">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border x:Name="Border" Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FF0F0F0F" TargetName="Border" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Grid>
-            <Grid x:Name="Listing_3" HorizontalAlignment="Left" Width="300" Margin="0,125,0,0" Height="20" VerticalAlignment="Top">
-                <Label Padding="0" Content="3# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
-                <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
-                <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
-                <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="170,3,0,0" VerticalAlignment="Top"/>
-                <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
-                <Label Padding="0" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
-            </Grid>
-            <Grid x:Name="Listing_4" HorizontalAlignment="Left" Width="300" Margin="0,145,0,0" Height="20" VerticalAlignment="Top">
-                <Label Padding="0" Content="4# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
-                <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
-                <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
-                <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="170,3,0,0" VerticalAlignment="Top"/>
-                <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
-                <Label Padding="0" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
-            </Grid>
-            <Grid x:Name="Listing_5" HorizontalAlignment="Left" Width="300" Margin="0,165,0,0" Height="20" VerticalAlignment="Top">
-                <Label Padding="0" Content="5# Platinum:" HorizontalAlignment="Left" Margin="15,3,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.377,0.5" Width="67"/>
-                <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="87,3,0,0" VerticalAlignment="Top"/>
-                <Label Padding="0" Content="Amount: " HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" Width="45"/>
-                <Label Padding="0" Content="999" HorizontalAlignment="Left" Margin="170,3,0,0" VerticalAlignment="Top"/>
-                <Label Padding="0" Content="Reputation: " HorizontalAlignment="Left" Margin="200,3,0,0" VerticalAlignment="Top" Width="60"/>
-                <Label Padding="0" Content="999" Margin="265,3,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20"/>
-            </Grid>
-            <ComboBox HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="10,10,0,0" VerticalAlignment="Top" Width="280" Height="24"  Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Background="{x:Null}"/>
-            <Label HorizontalContentAlignment="Center" Content="Back" Margin="40,190,220,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
-            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Bottom" Margin="40,0,0,10" HorizontalAlignment="Left" Width="40"/>
-            <Label HorizontalContentAlignment="Center" Content="Next" Margin="220,190,40,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
-            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Top" Margin="220,190,40,0"/>
-            <Label HorizontalContentAlignment="Center" Content="Cancel" Margin="125,190,125,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}"/>
-            <Rectangle Height="24" Stroke="#FF646464" VerticalAlignment="Bottom" Margin="125,0,0,10" HorizontalAlignment="Left" Width="50"/>
         </Grid>
     </Grid>
 </Window>

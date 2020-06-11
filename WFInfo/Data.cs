@@ -319,6 +319,7 @@ namespace WFInfo {
 		public bool Update() {
 			Main.AddLog("Checking for Updates to Databases");
 			JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
+			//todo: fix Exception thrown: 'System.IO.FileNotFoundException' in mscorlib.dll being thrown here
 			bool saveDatabases = LoadMarket(allFiltered);
 
 			foreach (KeyValuePair<string, JToken> elem in marketItems) {
@@ -712,17 +713,16 @@ namespace WFInfo {
 
 				OCR.UpdateWindow();
 
-				while (watch.ElapsedMilliseconds < stop) {
-					if (watch.ElapsedMilliseconds > wait) {
-						wait += Settings.autoDelay;
-						OCR.GetThemeWeighted(out double diff);
-						if (diff > 100) {
-							while (watch.ElapsedMilliseconds < wait) ;
-							Main.AddLog("started auto processing");
-							OCR.ProcessRewardScreen();
-							break;
-						}
-					}
+				while (watch.ElapsedMilliseconds < stop)
+				{
+					if (watch.ElapsedMilliseconds <= wait) continue;
+					wait += Settings.autoDelay;
+					OCR.GetThemeWeighted(out double diff);
+					if (!(diff > 100)) continue;
+					while (watch.ElapsedMilliseconds < wait) ;
+					Main.AddLog("started auto processing");
+					OCR.ProcessRewardScreen();
+					break;
 				}
 				watch.Stop();
 			}
@@ -741,29 +741,27 @@ namespace WFInfo {
 		/// <param name="password">Users password</param>
 		/// <exception cref="Exception">Connection exception JSON formated</exception>
 		/// <returns>A task to be awaited</returns>
-		public async Task GetUserLogin(string email, string password) {
-			var request = new HttpRequestMessage() {
-				RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
-				Method = HttpMethod.Post,
-			};
-			var content = "{ \"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
-			request.Content = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
-			request.Headers.Add("Authorization", "JWT");
-			request.Headers.Add("language", "en");
-			request.Headers.Add("accept", "application/json");
-			request.Headers.Add("platform", "pc");
-			request.Headers.Add("auth_type", "header");
-			var response = await client.SendAsync(request);
-			var responseBody = await response.Content.ReadAsStringAsync();
-			if (response.IsSuccessStatusCode) {
-				setJWT(response.Headers);
-				await openSocket();
-			} else {
-				throw new Exception(responseBody);
+			public async Task GetUserLogin(string email, string password) {
+				var request = new HttpRequestMessage() {
+					RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
+					Method = HttpMethod.Post,
+				};
+				var content = "{ \"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+				request.Content = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
+				request.Headers.Add("Authorization", "JWT");
+				request.Headers.Add("language", "en");
+				request.Headers.Add("accept", "application/json");
+				request.Headers.Add("platform", "pc");
+				request.Headers.Add("auth_type", "header");
+				var response = await client.SendAsync(request);
+				var responseBody = await response.Content.ReadAsStringAsync();
+				if (response.IsSuccessStatusCode) {
+					setJWT(response.Headers);
+					await openSocket();
+				} else {
+					throw new Exception(responseBody);
+				}
 			}
-
-
-		}
 
 		/// <summary>
 		/// Attempts to connect the user's account to the websocket
@@ -822,6 +820,7 @@ namespace WFInfo {
 		/// <param name="primeItem">Human friendly for prime item</param>
 		/// <param name="platinum">The amount of platinum the user entered for the listing</param>
 		/// <param name="quantity">The quantity of items the user listed.</param>
+		/// <returns>The success of the method</returns>
 		public async Task<bool> ListItem(string primeItem, int platinum, int quantity) {
 			try {
 				var request = new HttpRequestMessage() {
@@ -853,12 +852,17 @@ namespace WFInfo {
 			}
 		}
 
-		public async Task<bool> updateListing(string primeItem, int platinum, int quantity)
+		/// <summary>
+		/// Updates a listing with given variables
+		/// </summary>
+		/// <param name="listingId">The listingID of which the listing is going to be updated</param>
+		/// <param name="platinum">The new platinum value</param>
+		/// <param name="quantity">The new quantity</param>
+		/// <returns>The success of the method</returns>
+		public async Task<bool> updateListing(string listingId, int platinum, int quantity)
 		{
 			try
 			{
-				var listing = await GetCurrentListing(primeItem);
-				var listingId = (string)listing?["id"];
 				var request = new HttpRequestMessage() {
 					RequestUri = new Uri("https://api.warframe.market/v1/profile/orders/" + listingId),
 					Method = HttpMethod.Put,
@@ -1008,15 +1012,21 @@ namespace WFInfo {
 			}
 
 		}
-		
+
 		/// <summary>
 		/// Queries the current account for the amount of the CURRENT listed items
+		/// To get the amount of a listing use:
+		/// var listing = await Main.dataBase.GetCurrentListing(primeItem);
+		/// var amount = (int) listing?["quantity"];
+		/// To get the ID of a listing use:
+		/// var listing = await Main.dataBase.GetCurrentListing(primeItem);
+		/// var amount = (int) listing?["id"];
 		/// </summary>
 		/// <param name="primeName"></param>
 		/// <returns>Quantity of prime named listed on the site</returns>
 		public async Task<JToken> GetCurrentListing(string primeName) {
 			try {
-				if (!inGameName.IsNullOrEmpty())
+				if (inGameName.IsNullOrEmpty())
 				{
 					await SetIngameName();
 				}
@@ -1031,9 +1041,9 @@ namespace WFInfo {
 				request.Headers.Add("platform", "pc");
 				request.Headers.Add("auth_type", "header");
 				var response = await client.SendAsync(request);
-				var payload = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
+				var body = await response.Content.ReadAsStringAsync();
+				var payload = JsonConvert.DeserializeObject<JObject>(body);
 				var sellOrders = (JArray)payload?["payload"]?["sell_orders"];
-				setJWT(response.Headers);
 
 				if (sellOrders != null)
 				{
@@ -1042,6 +1052,8 @@ namespace WFInfo {
 						if (primeName == (string) listing?["item"]?["en"]?["item_name"])
 							return listing;
 					}
+
+					return null; //The requested item was not found, but don't throw
 				}
 				else
 				{
@@ -1053,7 +1065,6 @@ namespace WFInfo {
 				Main.AddLog("Message : " + e.Message);
 				return null;
 			}
-			return null;
 		}
 
 		/// <summary>
