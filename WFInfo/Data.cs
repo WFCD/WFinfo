@@ -24,10 +24,10 @@ namespace WFInfo {
 		private readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
 		private readonly string marketItemsPath;
 		private readonly string marketDataPath;
-		private readonly string eqmtDataPath;
+		private readonly string equipmentDataPath;
 		private readonly string relicDataPath;
 		private readonly string nameDataPath;
-		public string JWT; // JWT is the securty key, store this as email+pw combo
+		public string JWT; // JWT is the security key, store this as email+pw combo
 		private WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
 		private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
 
@@ -42,7 +42,7 @@ namespace WFInfo {
 			Main.AddLog("Initializing Databases");
 			marketItemsPath = applicationDirectory + @"\market_items.json";
 			marketDataPath = applicationDirectory + @"\market_data.json";
-			eqmtDataPath = applicationDirectory + @"\eqmt_data.json";
+			equipmentDataPath = applicationDirectory + @"\eqmt_data.json";
 			relicDataPath = applicationDirectory + @"\relic_data.json";
 			nameDataPath = applicationDirectory + @"\name_data.json";
 
@@ -56,7 +56,7 @@ namespace WFInfo {
 			sheetsApi = new Sheets();
 		}
 
-		public void EnableLogcapture() {
+		public void EnableLogCapture() {
 			if (EElogWatcher == null) {
 				try {
 					EElogWatcher = new LogCapture();
@@ -91,7 +91,7 @@ namespace WFInfo {
 				JsonConvert.DeserializeObject<JObject>(
 					WebClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases/latest"));
 			if (github.ContainsKey("tag_name")) {
-				githubVersion = github["tag_name"].ToObject<string>();
+				githubVersion = github["tag_name"]?.ToObject<string>();
 				return Main.VersionToInteger(githubVersion);
 			}
 			return Main.VersionToInteger(Main.BuildVersion);
@@ -186,7 +186,7 @@ namespace WFInfo {
 
 		private bool LoadEqmtData(JObject allFiltered, bool force = false) {
 			if (equipmentData == null)
-				equipmentData = File.Exists(eqmtDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(eqmtDataPath)) : new JObject();
+				equipmentData = File.Exists(equipmentDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(equipmentDataPath)) : new JObject();
 			if (relicData == null)
 				relicData = File.Exists(relicDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(relicDataPath)) : new JObject();
 			if (nameData == null)
@@ -380,7 +380,7 @@ namespace WFInfo {
 		}
 
 		public void SaveAllJSONs() {
-			SaveDatabase(eqmtDataPath, equipmentData);
+			SaveDatabase(equipmentDataPath, equipmentData);
 			SaveDatabase(relicDataPath, relicData);
 			SaveDatabase(nameDataPath, nameData);
 			SaveDatabase(marketItemsPath, marketItems);
@@ -822,16 +822,17 @@ namespace WFInfo {
 		/// <summary>
 		/// Lists an item under an account. Expected to be called after being logged in thus no login attempts.
 		/// </summary>
-		/// <param name="itemID">Warframe.market's ID for the item</param>
+		/// <param name="primeItem">Human friendly for prime item</param>
 		/// <param name="platinum">The amount of platinum the user entered for the listing</param>
 		/// <param name="quantity">The quantity of items the user listed.</param>
-		public async void ListItem(string itemID, int platinum, int quantity) {
+		public async void ListItem(string primeItem, int platinum, int quantity) {
 			try {
 				var request = new HttpRequestMessage() {
 					RequestUri = new Uri("https://api.warframe.market/v1/profile/orders"),
 					Method = HttpMethod.Post,
 				};
-				var json = "{\"order_type\":\"sell\",\"item_id\":\"" + itemID + "\",\"platinum\":" + platinum + ",\"quantity\":" + quantity + "}";
+				var itemId = PrimeItemToItemID(primeItem);
+				var json = "{\"order_type\":\"sell\",\"item_id\":\"" + itemId + "\",\"platinum\":" + platinum + ",\"quantity\":" + quantity + "}";
 				Console.WriteLine(json);
 				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 				request.Headers.Add("Authorization", "JWT " + JWT);
@@ -851,6 +852,20 @@ namespace WFInfo {
 			}
 		}
 
+		/// <summary>
+		/// Converts the human friendly name to warframe.market's ID
+		/// </summary>
+		/// <param name="primeItem">Human friendly name of prime item</param>
+		/// <returns>Warframe.market prime item ID</returns>
+		public string PrimeItemToItemID(string primeItem)
+		{
+			foreach (var marketItem in marketItems)
+			{
+				if (marketItem.Value.Contains("primeItem"))
+					return marketItem.Key;
+			}
+			throw new Exception($"Prime item {primeItem} does not exist in marketItem");
+		}
 
 		/// <summary>
 		/// Sets the status of WFM websocket. Will try to reconnect if it is not already connected.
@@ -964,7 +979,7 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="primeName"></param>
 		/// <returns>Quantity of prime named listed on the site</returns>
-		public async Task<int> GetCurrentListedAmount(string primeName) {               //todo get the current user name and then probe  https://api.warframe.market/v1/profile/ <-username-> /orders to get quantaties
+		public async Task<int> GetCurrentListedAmount(string primeName) {
 			try {
 				var request = new HttpRequestMessage() {
 					RequestUri = new Uri("https://api.warframe.market/v1/profile"),

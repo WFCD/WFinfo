@@ -150,7 +150,7 @@ namespace WFInfo
                 MessageBoxResult messageBoxResult = MessageBox.Show(message, "Automation Mode Opt-In", MessageBoxButton.YesNo);
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
-                    Main.dataBase.EnableLogcapture();
+                    Main.dataBase.EnableLogCapture();
                 }
                 else
                 {

@@ -55,7 +55,7 @@ namespace WFInfo
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
                 if ((bool)Settings.settingsObj["Auto"])
-                    dataBase.EnableLogcapture();
+                    dataBase.EnableLogCapture();
             }
             catch (Exception ex)
             {
