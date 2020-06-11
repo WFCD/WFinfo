@@ -53,6 +53,7 @@ namespace WFInfo {
 			updating = true;
 			SetListings(0);
 			ComboBox.Items.Clear();
+			ComboBox.SelectedIndex = 0;
 			foreach (var primeItem in screen.Value.primeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
 				ComboBox.Items.Add(primeItem);
 			updating = false;
@@ -212,7 +213,6 @@ namespace WFInfo {
 		/// <param name="index">the currently selected prime item</param>
 		private void SetListings(int index)
 		{
-			ComboBox.SelectedIndex = 0;
 			PlatinumTextBox.Text = screensList[pageIndex].Value.platinumValues[index].ToString();
 
 			Platinum0.Content = screensList[pageIndex].Value.marketListings[index][0].platinum;
