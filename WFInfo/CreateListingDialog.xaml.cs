@@ -50,10 +50,10 @@ namespace WFInfo {
 			}
 
 			var screen = screensList[index];
-
+			updating = true;
 			SetListings(0);
 			ComboBox.Items.Clear();
-			foreach (var primeItem in screensList[pageIndex].Value.primeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
+			foreach (var primeItem in screen.Value.primeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
 				ComboBox.Items.Add(primeItem);
 			updating = false;
 		}
@@ -202,6 +202,7 @@ namespace WFInfo {
 		private void ComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
 			if (!ComboBox.IsLoaded || updating) //Prevent firing off to early
 				return;
+			Console.WriteLine(ComboBox.SelectedIndex );
 			SetListings(ComboBox.SelectedIndex);
 		}
 
@@ -211,10 +212,7 @@ namespace WFInfo {
 		/// <param name="index">the currently selected prime item</param>
 		private void SetListings(int index)
 		{
-			if (index < 0 || index > 4) //reached the end of the list
-			{
-				Console.WriteLine("Shits fucked yo");
-			}
+			ComboBox.SelectedIndex = 0;
 			PlatinumTextBox.Text = screensList[pageIndex].Value.platinumValues[index].ToString();
 
 			Platinum0.Content = screensList[pageIndex].Value.marketListings[index][0].platinum;
