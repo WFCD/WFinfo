@@ -43,6 +43,8 @@ namespace WFInfo {
 		/// <param name="index">The index needed for the screen</param>
 		public void SetScreen(int index)
 		{
+			SetCurrentStatus();
+
 			if (screensList.Count < index || 0 > index )
 			{
 				Console.WriteLine($"Screen list is {screensList.Count} long and is: {screensList.Count}");
@@ -55,7 +57,10 @@ namespace WFInfo {
 			ComboBox.Items.Clear();
 			ComboBox.SelectedIndex = 0;
 			foreach (var primeItem in screen.Value.primeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
+			{
 				ComboBox.Items.Add(primeItem);
+			}
+
 			updating = false;
 		}
 		/// <summary>
@@ -63,7 +68,6 @@ namespace WFInfo {
 		/// </summary>
 		public void NextScreen(object sender, RoutedEventArgs e)
 		{
-			Console.WriteLine($"On page: {pageIndex} and on screen {screensList.Count}");
 			Back.IsEnabled = true;
 			pageIndex++;
 			SetScreen(pageIndex);
@@ -78,7 +82,6 @@ namespace WFInfo {
 		/// </summary>
 		public void PreviousScreen(object sender, RoutedEventArgs e)
 		{
-			Console.WriteLine($"Going back from page: {pageIndex} and on screen {screensList.Count}");
 			Next.IsEnabled = true;
 			pageIndex--;
 			SetScreen(pageIndex);
@@ -203,7 +206,6 @@ namespace WFInfo {
 		private void ComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
 			if (!ComboBox.IsLoaded || updating) //Prevent firing off to early
 				return;
-			Console.WriteLine(ComboBox.SelectedIndex );
 			SetListings(ComboBox.SelectedIndex);
 		}
 
@@ -281,8 +283,13 @@ namespace WFInfo {
 			var msg = "Reward collection screen:\n";
 			foreach (var item in primeNames)
 			{
+				if (item.IsNullOrEmpty())
+					continue;
 				var index = primeNames.IndexOf(item);
+
 				msg += $"Prime item: \"{item}\", Platinum value: \"{platinumValues[index]}\",  Market listings: \n";
+				
+
 				msg = marketListings[index].Aggregate(msg, (current, listing) => current + (listing.ToHumanString() + "\n"));
 			}
 			return msg;

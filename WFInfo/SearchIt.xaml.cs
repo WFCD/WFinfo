@@ -42,12 +42,12 @@ namespace WFInfo
         {
             var closest = Main.dataBase.GetPartNameHuman(searchField.Text, out _);
             var primeRewards = new List<string> { closest, "Saryn Prime Blueprint", "Volt Prime Chassis", "Vectis Prime Barrel" };
-            var primeRewards2 = new List<string> { "Atlas Prime Systems", "Carrier Prime Carapace", "Akstiletto Prime Blueprint", "" };
-            var primeRewards3 = new List<string> { "", "Akbronco Prime Blueprint", "Nekros Prime Chassis" };
+            var primeRewards2 = new List<string> { "Atlas Prime Systems", "Carrier Prime Carapace", "Akstiletto Prime Blueprint"};
+            var primeRewards3 = new List<string> { "Akbronco Prime Blueprint", "Nekros Prime Chassis" };
 
             var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
-            var rewardCollection2 = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
-            var rewardCollection3 = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
+            var rewardCollection2 = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards2)).Result;
+            var rewardCollection3 = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards3)).Result;
             
 
             Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
