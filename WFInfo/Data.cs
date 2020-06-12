@@ -803,11 +803,11 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="headers">Response headers from the original Login call</param>
 		public void setJWT(HttpResponseHeaders headers) {
-			foreach (var item in headers.GetValues("Set-Cookie")) {
-				if (item.Contains("JWT=")) {
-					int a = item.LastIndexOf("JWT=") + "JWT=".Length;
-					int b = item.LastIndexOf("; Domain=.warframe.market;");
-					JWT = item.Substring(a, (b - a));
+			foreach (var item in headers) {
+				if (item.Key.Contains("JWT=")) {
+					int a = item.Key.LastIndexOf("JWT=") + "JWT=".Length;
+					int b = item.Key.LastIndexOf("; Domain=.warframe.market;");
+					JWT = item.Key.Substring(a, (b - a));
 					if (Settings.settingsObj["JWT"].ToString().Length > 10)  //update the cashed JWT if it exists
 						Settings.settingsObj["JWT"] = JWT;
 				}
@@ -828,7 +828,7 @@ namespace WFInfo {
 					Method = HttpMethod.Post,
 				};
 				var itemId = PrimeItemToItemID(primeItem);
-				var json = $"{{\"order_type\":\"sell\",\"item_id\":\"{itemId}\",\"platinum\":{platinum},\"quantity\":{quantity}";
+				var json = $"{{\"order_type\":\"sell\",\"item_id\":\"{itemId}\",\"platinum\":{platinum},\"quantity\":{quantity}}}";
 				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 				request.Headers.Add("Authorization", "JWT " + JWT);
 				request.Headers.Add("language", "en");
@@ -838,9 +838,9 @@ namespace WFInfo {
 
 				var response = await client.SendAsync(request);
 				var responseBody = await response.Content.ReadAsStringAsync();
+				Console.WriteLine(response.Headers.ToString());
 
 				if (!response.IsSuccessStatusCode) throw new Exception(responseBody);
-
 				setJWT(response.Headers);
 				return true;
 
@@ -867,7 +867,7 @@ namespace WFInfo {
 					RequestUri = new Uri("https://api.warframe.market/v1/profile/orders/" + listingId),
 					Method = HttpMethod.Put,
 				};
-				var json = $"\"order_id\":\"{listingId}\", \"platinum\": {platinum}, \"quantity\":{quantity}, \"visible\":true";
+				var json = $"{{\"order_id\":\"{listingId}\", \"platinum\": {platinum}, \"quantity\":{quantity+1}, \"visible\":true}}";
 				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 				request.Headers.Add("Authorization", "JWT " + JWT);
 				request.Headers.Add("language", "en");
@@ -899,10 +899,10 @@ namespace WFInfo {
 		{
 			foreach (var marketItem in marketItems)
 			{
-				if (marketItem.Value.Contains("primeItem"))
+				if (marketItem.Value.ToString().Contains(primeItem))
 					return marketItem.Key;
 			}
-			throw new Exception($"Prime item {primeItem} does not exist in marketItem");
+			throw new Exception($"Prime item \"{primeItem}\" does not exist in marketItem");
 		}
 
 		/// <summary>
@@ -913,7 +913,7 @@ namespace WFInfo {
 		/// online, set's player status to be online on the site.   
 		/// in game, set's player status to be online and ingame on the site
 		/// </param>
-		public async Task SetStatus(string status) {
+		public async Task SetWebsocketStatus(string status) {
 			if (!IsJwtAvailable())
 				return;
 

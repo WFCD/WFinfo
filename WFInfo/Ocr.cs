@@ -1336,13 +1336,13 @@ namespace WFInfo
                     HandleRef = new HandleRef(process, process.MainWindowHandle);
                     Warframe = process;
                     if (Main.dataBase.IsJwtAvailable())
-                        Main.dataBase.SetStatus("ingame");
+                        Main.dataBase.SetWebsocketStatus("ingame");
                     Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
                     return true;
                 }
             }
             if (Main.dataBase.IsJwtAvailable())
-                Main.dataBase.SetStatus("online");
+                Main.dataBase.SetWebsocketStatus("online");
             if (!Settings.debug)
             {
                 Main.AddLog("Did Not Detect Warframe Process");

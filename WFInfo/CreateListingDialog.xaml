@@ -16,10 +16,30 @@
         <Grid x:Name="Content" Margin="0,26,0,0">
             <Rectangle Stroke="#FF646464"/>
             <ComboBox x:Name="ComboBox" x:FieldModifier="private" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="10,10,0,0" VerticalAlignment="Top" Width="280" Height="24"  Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Background="{x:Null}" SelectionChanged="ComboBox_SelectionChanged"/>
-                <Grid x:Name="Values" HorizontalAlignment="Left" Height="38" VerticalAlignment="Top" Width="300" Margin="0,39,0,0">
+            <Grid x:Name="Values" HorizontalAlignment="Left" Height="38" VerticalAlignment="Top" Width="300" Margin="0,39,0,0">
                 <TextBox x:FieldModifier="private" x:Name="PlatinumTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="20,15,0,0" TextWrapping="Wrap" Text="Platinum" VerticalAlignment="Top" Width="100" BorderBrush="#FF646464"/>
                 <Label Padding="0" Foreground="#FF6D6D6D" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Center" Content="Platinum" Margin="20,0,0,0" VerticalAlignment="Top" Height="15" FontSize="10" HorizontalAlignment="Left" Width="100"/>
-                <Button x:Name="ConfirmListingLabel" x:FieldModifier="private" HorizontalContentAlignment="Center" Content="Confirm listing" Margin="0,14,20,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}" HorizontalAlignment="Right" Width="100" MouseDown="ConfirmListing" Foreground="#FFB1D0D9" Height="24"/>
+                <Rectangle HorizontalAlignment="Left" Height="24" Stroke="#FF646464" VerticalAlignment="Top" Width="100" Margin="180,14,0,0"/>
+                <Button x:Name="ConfirmListingButton" x:FieldModifier="private" HorizontalContentAlignment="Center" Content="Confirm listing" Margin="0,14,20,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}" HorizontalAlignment="Right" Width="100" Click="ConfirmListing" Foreground="#FFB1D0D9" Height="24">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border x:Name="Border" Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FF0F0F0F" TargetName="Border" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Grid>
             <Label x:Name="Status" x:FieldModifier="private" HorizontalContentAlignment="Center" Content="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,85,0,0" Width="280" d:IsHidden="True"/>
             <Grid x:Name="ListingGrid" x:FieldModifier="private" HorizontalAlignment="Left" Width="300" Margin="0,0,0,40" Height="110" VerticalAlignment="Bottom">

@@ -36,7 +36,8 @@ namespace WFInfo {
 		}
 		#endregion
 
-
+		#region frontend
+		
 		/// <summary>
 		/// Sets the screen to one of the screen-lists indicated by it's index
 		/// </summary>
@@ -89,7 +90,9 @@ namespace WFInfo {
 				Back.IsEnabled = false;
 			SetCurrentStatus();
 		}
-
+		/// <summary>
+		/// Updates the screen to reflect status
+		/// </summary>
 		private void SetCurrentStatus()
 		{
 			switch (screensList[pageIndex].Key)
@@ -98,7 +101,7 @@ namespace WFInfo {
 				case "successful":
 					ListingGrid.Visibility = Visibility.Collapsed;
 					Height = 180;
-					ConfirmListingLabel.IsEnabled = false;
+					ConfirmListingButton.IsEnabled = false;
 					Status.Content = "Listing already successfully posted";
 					Status.Visibility = Visibility.Visible;
 					break;
@@ -115,55 +118,16 @@ namespace WFInfo {
 		}
 
 		/// <summary>
-		/// returns the data for an entire "Create listing" screen
-		/// </summary>
-		/// <param name="primeNames">The human friendly name to search listings for</param>
-		/// <returns>the data for an entire "Create listing" screen</returns>
-		public RewardCollection GetRewardCollection(List<string> primeNames)
-		{
-			var platinumValues = new List<int>(4);
-			var marketListings = new List<List<MarketListing>>(5);
-
-			foreach (var primeItem in primeNames)
-			{
-				if(primeItem.IsNullOrEmpty())
-					continue;
-				var tempListings = GetMarketListing(primeItem);
-				marketListings.Add(tempListings);
-				platinumValues.Add(tempListings[1].platinum);
-			}
-			return new RewardCollection(primeNames, platinumValues, marketListings);
-		}
-		/// <summary>
-		/// Gets the top 5 current market listings
-		/// </summary>
-		/// <param name="primeName">The human friendly name to search listings for</param>
-		/// <returns>the top 5 current market listings</returns>
-		public List<MarketListing> GetMarketListing(string primeName) 
-		{
-			var results = Main.dataBase.GetTopListings(primeName);
-			var listings = new List<MarketListing>();
-			var sellOrders = new JArray(results["payload"]["sell_orders"].Children());
-			foreach (var item in sellOrders)
-			{
-				var platinum = item.Value<int>("platinum");
-				var amount = item.Value<int>("quantity");
-				var reputation = item["user"].Value<int>("reputation");
-				listings.Add(new MarketListing(platinum, amount, reputation));
-			}
-			return listings;
-		}
-		
-		/// <summary>
 		/// List the current selected prime item with it's currently filled in plat value.
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
-		private void ConfirmListing(object sender, MouseButtonEventArgs e)
-		{
+		private void ConfirmListing(object sender, RoutedEventArgs e) {
 			try
 			{
-				var success = Task.Run(async () => await PlaceListing()).Result;
+				var primeItem = (string) ComboBox.Items[ComboBox.SelectedIndex];
+				var platinum = int.Parse(PlatinumTextBox.Text);
+				var success = Task.Run(async () => await PlaceListing(primeItem, platinum)).Result;
 				if (success) {
 					var newEntry = new KeyValuePair<string, RewardCollection>("", screensList[pageIndex].Value);
 					screensList.RemoveAt(pageIndex);
@@ -174,8 +138,8 @@ namespace WFInfo {
 					screensList.Insert(pageIndex, newEntry);
 				}
 			}
-			catch (Exception exception)
-			{
+			catch (Exception exception) {
+				Console.WriteLine(exception);
 				var newEntry = new KeyValuePair<string, RewardCollection>(exception.ToString(), screensList[pageIndex].Value);
 				screensList.RemoveAt(pageIndex);
 				screensList.Insert(pageIndex, newEntry);
@@ -183,26 +147,11 @@ namespace WFInfo {
 
 		}
 
-		private async Task<bool> PlaceListing()
-		{
-			try
-			{
-				var screen = screensList[pageIndex];
-				var primeItem = screen.Value.primeNames[ComboBox.SelectedIndex];
-				var listing = await Main.dataBase.GetCurrentListing(primeItem);
-				var platinum = int.Parse(PlatinumTextBox.Text);
-				if (listing != null) return await Main.dataBase.ListItem(primeItem, platinum, 1);
-				//listing already exists, thus update it
-				var listingId = (string)listing?["id"];
-				var quantity = (int)listing?["quantity"];
-				return await Main.dataBase.updateListing(listingId, platinum, quantity);
-			}
-			catch (Exception e)
-			{
-				throw e;
-			}
-		}
-
+		/// <summary>
+		/// Changes the top 5 listings when the user selects a new item
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void ComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
 			if (!ComboBox.IsLoaded || updating) //Prevent firing off to early
 				return;
@@ -213,8 +162,7 @@ namespace WFInfo {
 		/// Sets the listing to the current selected prime item
 		/// </summary>
 		/// <param name="index">the currently selected prime item</param>
-		private void SetListings(int index)
-		{
+		private void SetListings(int index) {
 			PlatinumTextBox.Text = screensList[pageIndex].Value.platinumValues[index].ToString();
 
 			Platinum0.Content = screensList[pageIndex].Value.marketListings[index][0].platinum;
@@ -250,11 +198,74 @@ namespace WFInfo {
 			{
 				SetScreen(1);
 				screensList.RemoveAt(0);
-			}else
-			{
+			} else {
 				screensList.RemoveAt(pageIndex);
 				--pageIndex;
 				SetScreen(pageIndex);
+			}
+		}
+
+		#endregion
+
+		/// <summary>
+		/// returns the data for an entire "Create listing" screen
+		/// </summary>
+		/// <param name="primeNames">The human friendly name to search listings for</param>
+		/// <returns>the data for an entire "Create listing" screen</returns>
+		public RewardCollection GetRewardCollection(List<string> primeNames)
+		{
+			var platinumValues = new List<int>(4);
+			var marketListings = new List<List<MarketListing>>(5);
+
+			foreach (var primeItem in primeNames)
+			{
+				if(primeItem.IsNullOrEmpty())
+					continue;
+				var tempListings = GetMarketListing(primeItem);
+				marketListings.Add(tempListings);
+				platinumValues.Add(tempListings[1].platinum);
+			}
+			return new RewardCollection(primeNames, platinumValues, marketListings);
+		}
+		
+		/// <summary>
+		/// Gets the top 5 current market listings
+		/// </summary>
+		/// <param name="primeName">The human friendly name to search listings for</param>
+		/// <returns>the top 5 current market listings</returns>
+		public List<MarketListing> GetMarketListing(string primeName) 
+		{
+			var results = Main.dataBase.GetTopListings(primeName);
+			var listings = new List<MarketListing>();
+			var sellOrders = new JArray(results["payload"]["sell_orders"].Children());
+			foreach (var item in sellOrders)
+			{
+				var platinum = item.Value<int>("platinum");
+				var amount = item.Value<int>("quantity");
+				var reputation = item["user"].Value<int>("reputation");
+				listings.Add(new MarketListing(platinum, amount, reputation));
+			}
+			return listings;
+		}
+
+		/// <summary>
+		/// Tries to post the current screen to wfm
+		/// </summary>
+		/// <returns>if it succeeded</returns>
+		private async Task<bool> PlaceListing(string primeItem, int platinum)
+		{
+			try
+			{
+				var listing = await Main.dataBase.GetCurrentListing(primeItem);
+				if (listing == null) return await Main.dataBase.ListItem(primeItem, platinum, 1);
+				//listing already exists, thus update it
+				var listingId = (string)listing["id"];
+				var quantity = (int)listing["quantity"];
+				return await Main.dataBase.updateListing(listingId, platinum, quantity);
+			}
+			catch (Exception e)
+			{
+				throw e;
 			}
 		}
 	}

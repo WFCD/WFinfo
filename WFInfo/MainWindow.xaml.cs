@@ -374,19 +374,19 @@ namespace WFInfo
 		        case 0: //Online in game
 			        Task.Run(() =>
 			        {
-				        Main.dataBase.SetStatus("in game");
+				        Main.dataBase.SetWebsocketStatus("in game");
 			        });
 			        break;
 		        case 1: //Online
 			        Task.Run(() =>
 			        {
-				        Main.dataBase.SetStatus("online");
+				        Main.dataBase.SetWebsocketStatus("online");
 			        });
 			        break;
 		        case 2: //Invisible
 			        Task.Run(() =>
 			        {
-				        Main.dataBase.SetStatus("offline");
+				        Main.dataBase.SetWebsocketStatus("offline");
 			        });
 			        break;
 		        case 3: //Sign out
