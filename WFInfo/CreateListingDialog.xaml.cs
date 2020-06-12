@@ -104,15 +104,20 @@ namespace WFInfo {
 					ConfirmListingButton.IsEnabled = false;
 					Status.Content = "Listing already successfully posted";
 					Status.Visibility = Visibility.Visible;
+					ComboBox.IsEnabled = false;
 					break;
 				case "": //listing is not yet assigned anything
 					Height = 255;
 					Status.Visibility = Visibility.Collapsed;
+					ListingGrid.Visibility = Visibility.Visible;
+					ComboBox.IsEnabled = true;
 					break;
 				default: //an error occured.
 					Height = 270;
 					Status.Content = screensList[pageIndex].Key;
 					Status.Visibility = Visibility.Visible;
+					ListingGrid.Visibility = Visibility.Visible;
+					ComboBox.IsEnabled = true;
 					break;
 			}
 		}
@@ -129,7 +134,7 @@ namespace WFInfo {
 				var platinum = int.Parse(PlatinumTextBox.Text);
 				var success = Task.Run(async () => await PlaceListing(primeItem, platinum)).Result;
 				if (success) {
-					var newEntry = new KeyValuePair<string, RewardCollection>("", screensList[pageIndex].Value);
+					var newEntry = new KeyValuePair<string, RewardCollection>("successful", screensList[pageIndex].Value);
 					screensList.RemoveAt(pageIndex);
 					screensList.Insert(pageIndex, newEntry);
 				} else {
@@ -137,6 +142,7 @@ namespace WFInfo {
 					screensList.RemoveAt(pageIndex);
 					screensList.Insert(pageIndex, newEntry);
 				}
+				SetCurrentStatus();
 			}
 			catch (Exception exception) {
 				Console.WriteLine(exception);

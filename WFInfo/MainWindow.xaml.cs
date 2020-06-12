@@ -81,103 +81,112 @@ namespace WFInfo
 
         private void InitializeSettings()
         {
-            if (!Settings.settingsObj.TryGetValue("Display", out _))
-                Settings.settingsObj["Display"] = "Overlay";
-            Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
-            Settings.isLightSlected = Settings.settingsObj.GetValue("Display").ToString() == "Light";
+	        if (!Settings.settingsObj.TryGetValue("Display", out _))
+		        Settings.settingsObj["Display"] = "Overlay";
+	        Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
+	        Settings.isLightSlected = Settings.settingsObj.GetValue("Display").ToString() == "Light";
 
-            if (!Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
-                Settings.settingsObj["MainWindowLocation_X"] = 300;
-            if (!Settings.settingsObj.TryGetValue("MainWindowLocation_Y", out _))
-                Settings.settingsObj["MainWindowLocation_Y"] = 300;
-            Settings.mainWindowLocation = new Point(Settings.settingsObj.GetValue("MainWindowLocation_X").ToObject<Int32>(), Settings.settingsObj.GetValue("MainWindowLocation_Y").ToObject<Int32>());
+	        if (!Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
+		        Settings.settingsObj["MainWindowLocation_X"] = 300;
+	        if (!Settings.settingsObj.TryGetValue("MainWindowLocation_Y", out _))
+		        Settings.settingsObj["MainWindowLocation_Y"] = 300;
+	        Settings.mainWindowLocation =
+		        new Point(Settings.settingsObj.GetValue("MainWindowLocation_X").ToObject<Int32>(),
+			        Settings.settingsObj.GetValue("MainWindowLocation_Y").ToObject<Int32>());
 
-            if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
-                Settings.settingsObj["ActivationKey"] = "Snapshot";
-            try
-            {
-                Settings.ActivationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
-            }
-            catch
-            {
-                try
-                {
-                    Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton), Settings.settingsObj.GetValue("ActivationKey").ToString());
-                }
-                catch
-                {
-                    Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
-                    Settings.settingsObj["ActivationKey"] = "Snapshot";
-                    Settings.ActivationKey = Key.Snapshot;
-                }
-            }
+	        if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
+		        Settings.settingsObj["ActivationKey"] = "Snapshot";
+	        try
+	        {
+		        Settings.ActivationKey =
+			        (Key) Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+	        }
+	        catch
+	        {
+		        try
+		        {
+			        Settings.ActivationMouseButton = (MouseButton) Enum.Parse(typeof(MouseButton),
+				        Settings.settingsObj.GetValue("ActivationKey").ToString());
+		        }
+		        catch
+		        {
+			        Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
+			        Settings.settingsObj["ActivationKey"] = "Snapshot";
+			        Settings.ActivationKey = Key.Snapshot;
+		        }
+	        }
 
-            if (!Settings.settingsObj.TryGetValue("DebugModifierKey", out _))
-                Settings.settingsObj["DebugModifierKey"] = Key.LeftShift.ToString();
-            Settings.DebugModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("DebugModifierKey").ToString());
+	        if (!Settings.settingsObj.TryGetValue("DebugModifierKey", out _))
+		        Settings.settingsObj["DebugModifierKey"] = Key.LeftShift.ToString();
+	        Settings.DebugModifierKey =
+		        (Key) Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("DebugModifierKey").ToString());
 
-            if (!Settings.settingsObj.TryGetValue("SearchItModifierKey", out _))
-                Settings.settingsObj["SearchItModifierKey"] = Key.OemTilde.ToString();
-            Settings.SearchItModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SearchItModifierKey").ToString());
+	        if (!Settings.settingsObj.TryGetValue("SearchItModifierKey", out _))
+		        Settings.settingsObj["SearchItModifierKey"] = Key.OemTilde.ToString();
+	        Settings.SearchItModifierKey = (Key) Enum.Parse(typeof(Key),
+		        Settings.settingsObj.GetValue("SearchItModifierKey").ToString());
 
-            if (!Settings.settingsObj.TryGetValue("SnapitModifierKey", out _))
-                Settings.settingsObj["SnapitModifierKey"] = Key.LeftCtrl.ToString();
-            Settings.SnapitModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SnapitModifierKey").ToString());
+	        if (!Settings.settingsObj.TryGetValue("SnapitModifierKey", out _))
+		        Settings.settingsObj["SnapitModifierKey"] = Key.LeftCtrl.ToString();
+	        Settings.SnapitModifierKey =
+		        (Key) Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SnapitModifierKey").ToString());
 
-            if (!Settings.settingsObj.TryGetValue("Debug", out _))
-                Settings.settingsObj["Debug"] = false;
-            Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
+	        if (!Settings.settingsObj.TryGetValue("Debug", out _))
+		        Settings.settingsObj["Debug"] = false;
+	        Settings.debug = (bool) Settings.settingsObj.GetValue("Debug");
 
-            if (!Settings.settingsObj.TryGetValue("Clipboard", out _))
-                Settings.settingsObj["Clipboard"] = false;
-            Settings.clipboard = (bool)Settings.settingsObj.GetValue("Clipboard");
+	        if (!Settings.settingsObj.TryGetValue("Clipboard", out _))
+		        Settings.settingsObj["Clipboard"] = false;
+	        Settings.clipboard = (bool) Settings.settingsObj.GetValue("Clipboard");
 
-            if (!Settings.settingsObj.TryGetValue("AutoDelay", out _))
-                Settings.settingsObj["AutoDelay"] = 250L;
-            Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");
+	        if (!Settings.settingsObj.TryGetValue("AutoDelay", out _))
+		        Settings.settingsObj["AutoDelay"] = 250L;
+	        Settings.autoDelay = (long) Settings.settingsObj.GetValue("AutoDelay");
 
-            if (!Settings.settingsObj.TryGetValue("Auto", out _))
-                Settings.settingsObj["Auto"] = 250L;
-            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
+	        if (!Settings.settingsObj.TryGetValue("Auto", out _))
+		        Settings.settingsObj["Auto"] = 250L;
+	        Settings.auto = (bool) Settings.settingsObj.GetValue("Auto");
 
-            if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
-                Settings.settingsObj["ImageRetentionTime"] = 12;
-            Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"));
+	        if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
+		        Settings.settingsObj["ImageRetentionTime"] = 12;
+	        Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"));
 
-            if (!Settings.settingsObj.TryGetValue("ClipboardTemplate", out _))
-                Settings.settingsObj["ClipboardTemplate"] = "-- by WFInfo (smart OCR with pricecheck)";
-            Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"));
+	        if (!Settings.settingsObj.TryGetValue("ClipboardTemplate", out _))
+		        Settings.settingsObj["ClipboardTemplate"] = "-- by WFInfo (smart OCR with pricecheck)";
+	        Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"));
 
-            if (!Settings.settingsObj.TryGetValue("SnapitExport", out _))
-                Settings.settingsObj["SnapitExport"] = false;
-            Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"));
+	        if (!Settings.settingsObj.TryGetValue("SnapitExport", out _))
+		        Settings.settingsObj["SnapitExport"] = false;
+	        Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"));
 
-            if (!Settings.settingsObj.TryGetValue("Delay", out _))
-                Settings.settingsObj["Delay"] = 10000;
-            Settings.delay = Convert.ToInt32(Settings.settingsObj.GetValue("Delay"));
+	        if (!Settings.settingsObj.TryGetValue("Delay", out _))
+		        Settings.settingsObj["Delay"] = 10000;
+	        Settings.delay = Convert.ToInt32(Settings.settingsObj.GetValue("Delay"));
 
-            if (!Settings.settingsObj.TryGetValue("HighlightRewards", out _))
-                Settings.settingsObj["HighlightRewards"] = true;
-            Settings.Highlight = Convert.ToBoolean(Settings.settingsObj.GetValue("HighlightRewards"));
+	        if (!Settings.settingsObj.TryGetValue("HighlightRewards", out _))
+		        Settings.settingsObj["HighlightRewards"] = true;
+	        Settings.Highlight = Convert.ToBoolean(Settings.settingsObj.GetValue("HighlightRewards"));
 
-            if (!Settings.settingsObj.TryGetValue("ClipboardVaulted", out _))
-                Settings.settingsObj["ClipboardVaulted"] = false;
-            Settings.ClipboardVaulted = (bool)Settings.settingsObj.GetValue("ClipboardVaulted");
+	        if (!Settings.settingsObj.TryGetValue("ClipboardVaulted", out _))
+		        Settings.settingsObj["ClipboardVaulted"] = false;
+	        Settings.ClipboardVaulted = (bool) Settings.settingsObj.GetValue("ClipboardVaulted");
 
-            if (!Settings.settingsObj.TryGetValue("Auto", out _))
-                Settings.settingsObj["Auto"] = false;
-            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
+	        if (!Settings.settingsObj.TryGetValue("Auto", out _))
+		        Settings.settingsObj["Auto"] = false;
+	        Settings.auto = (bool) Settings.settingsObj.GetValue("Auto");
 
-            if (!Settings.settingsObj.TryGetValue("JWT", out _))
-	            Settings.settingsObj["JWT"] = null;
-            Settings.JWT = (string)Settings.settingsObj.GetValue("JWT");
-            Main.dataBase.JWT = (string)Settings.settingsObj.GetValue("JWT");
+	        if (!Settings.settingsObj.TryGetValue("JWT", out _))
+	        {
+		        Settings.settingsObj["JWT"] = null;
+		        Settings.JWT = (string) Settings.settingsObj.GetValue("JWT");
+		        Main.dataBase.JWT = (string) Settings.settingsObj.GetValue("JWT");
 
-            if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
-                Settings.settingsObj["HighContrast"] = false;
-            Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
+		        if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
+			        Settings.settingsObj["HighContrast"] = false;
+		        Settings.highContrast = (bool) Settings.settingsObj.GetValue("HighContrast");
 
-            Settings.Save();
+		        Settings.Save();
+	        }
         }
 
         public void OnContentRendered(object sender, EventArgs e)
