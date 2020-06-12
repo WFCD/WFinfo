@@ -45,8 +45,9 @@ namespace WFInfo {
 				}
 				catch (Exception ex)
 				{
-					Main.dataBase.JWT = null;
-					Main.AddLog("Couldn't login: " + ex.Message);
+					Settings.settingsObj["JWT"] = null;
+					Settings.Save();
+					Main.AddLog("Couldn't login: " + ex);
 					if (ex.Message.Contains("email")) {
 						if (ex.Message.Contains("app.form.invalid")) {
 							Main.StatusUpdate("Invalid email form", 2);

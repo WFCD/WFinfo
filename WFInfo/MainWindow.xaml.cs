@@ -332,36 +332,14 @@ namespace WFInfo
         }
 
         /// <summary>
-        /// Prompts user to log in or sets JWT if remember me was ticked.
+        /// Prompts user to log in
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void SpawnLogin(object sender, RoutedEventArgs e)
+        private void SpawnLogin(object sender, RoutedEventArgs e)
         {
-            if (Settings.settingsObj["JWT"].ToString().Length < 10)
-	        {
-		        Main.login.MoveLogin(Left + Width, Top);
-	        }
-	        else
-	        {
-		        Main.AddLog("Got JWT already trying to log in with it");
-                try
-                {
-	                await Task.Run(async () => {
-                        await Main.dataBase.openSocket();
-	                });
-	                LoggedIn();
-	                Main.dataBase.JWT = (string)Settings.settingsObj["JWT"];
-                }
-                catch (Exception exception)
-                {
-	                Main.AddLog("Was unable to log in with old JWT: " +exception.Message);
-                    Main.StatusUpdate("Old session expired, please log in again", 2);
-                    Settings.settingsObj["JWT"] = null;
-                    signOut();
-                }
+	        Main.login.MoveLogin(Left + Width, Top);
 
-            }
         }
 
         public void signOut()

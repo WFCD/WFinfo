@@ -746,7 +746,7 @@ namespace WFInfo {
 					RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
 					Method = HttpMethod.Post,
 				};
-				var content = "{ \"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+				var content = $"{{ \"email\":\"{email}\",\"password\":\"{password}\" \"auth_type\": \"header\"}}";
 				request.Content = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
 				request.Headers.Add("Authorization", "JWT");
 				request.Headers.Add("language", "en");
@@ -757,7 +757,7 @@ namespace WFInfo {
 				var responseBody = await response.Content.ReadAsStringAsync();
 				if (response.IsSuccessStatusCode) {
 					setJWT(response.Headers);
-					await openSocket();
+					await openWebSocket();
 				} else {
 					throw new Exception(responseBody);
 				}
@@ -767,7 +767,7 @@ namespace WFInfo {
 		/// Attempts to connect the user's account to the websocket
 		/// </summary>
 		/// <returns>A task to be awaited</returns>
-		public async Task openSocket() {
+		public async Task openWebSocket() {
 
 			if (marketSocket.IsAlive) {
 				return;
@@ -776,12 +776,13 @@ namespace WFInfo {
 			marketSocket.OnMessage += (sender, e) =>
 				Console.WriteLine("warframe.market: " + e.Data);
 			marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
-			try {
-				marketSocket.SetCookie(new WebSocketSharp.Net.Cookie("JWT", JWT));
+			try
+			{
+				marketSocket.SetCookie(new WebSocketSharp.Net.Cookie("JWT", (string)Settings.settingsObj["JWT"]));
 				marketSocket.ConnectAsync();
 			}
 			catch (Exception e) {
-				Console.WriteLine(e.Data);
+				Console.WriteLine(e.Message);
 				throw;
 			}
 
@@ -790,6 +791,8 @@ namespace WFInfo {
 				{
 					Main.AddLog(e.Data);
 					JWT = null; //assume authentication is invalid
+					Settings.JWT = null;
+					Settings.Save();
 					Main.signOut();
 				}
 			};
@@ -804,8 +807,8 @@ namespace WFInfo {
 		/// <param name="headers">Response headers from the original Login call</param>
 		public void setJWT(HttpResponseHeaders headers) {
 			foreach (var item in headers) {
-				if (item.Key.Contains("JWT=")) {
-					int a = item.Key.LastIndexOf("JWT=") + "JWT=".Length;
+				if (item.Key.Contains("JWTop")) {
+					int a = item.Key.LastIndexOf("JWT") + "JWT".Length+1;
 					int b = item.Key.LastIndexOf("; Domain=.warframe.market;");
 					JWT = item.Key.Substring(a, (b - a));
 					if (Settings.settingsObj["JWT"].ToString().Length > 10)  //update the cashed JWT if it exists
