@@ -768,7 +768,7 @@ namespace WFInfo
             }
         }
 
-        private void IncrementPartThreaded(TreeNode Parent)
+        private void IncrementPartThreaded(TreeNode Parent) //todo: Fix that when the set is completed, the parent node will close
         {
             JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
             int count = job["count"].ToObject<int>();

@@ -351,12 +351,33 @@ namespace WFInfo
         }
 
         /// <summary>
+        /// Changes the online selector. Used for websocket lisening to see if the status changed externally (i.e from the site)
+        /// </summary>
+        /// <param name="status">The status to change to</param>
+        public void updateMarketStatus(string status)
+        {
+	        switch (status)
+	        {
+                case "online":
+	                ComboBox.SelectedIndex = 1;
+	                break;
+                case "offline":
+	                ComboBox.SelectedIndex = 2;
+	                break;
+                case "invisible":
+	                ComboBox.SelectedIndex = 0;
+	                break;
+            }
+        }
+
+        /// <summary>
         /// Allows the user to overwrite the current websocket status
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            Console.WriteLine($"Sender is {sender.ToString()} and is type {sender.GetType()}");
 	        if (!ComboBox.IsLoaded) //Prevent firing off to early
 		        return;
 	        switch (ComboBox.SelectedIndex) {

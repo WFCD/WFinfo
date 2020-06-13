@@ -776,7 +776,16 @@ namespace WFInfo {
 			}
 
 			marketSocket.OnMessage += (sender, e) =>
+			{
 				Main.AddLog("warframe.market: " + e.Data);
+				if (!e.Data.Contains("SET_STATUS")) return;
+				JObject message = JsonConvert.DeserializeObject<JObject>(e.Data);
+				Main.RunOnUIThread(() =>
+				{
+					Main.updateMarketStatus(message.GetValue("payload").ToString());
+				});
+
+			};
 			marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 			try
 			{

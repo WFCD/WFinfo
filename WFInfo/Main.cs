@@ -324,6 +324,11 @@ namespace WFInfo
 	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
         }
 
+        public static void updateMarketStatus(string msg)
+        {
+	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.updateMarketStatus(msg); });
+        }
+
         public static string BuildVersion { get => buildVersion; }
 
         public static int VersionToInteger(string vers)
