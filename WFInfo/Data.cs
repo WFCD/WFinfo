@@ -700,6 +700,8 @@ namespace WFInfo {
 					autoThread = null;
 				}
 
+				Main.AddLog(line);
+
 				if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
 					autoThread = Task.Factory.StartNew(AutoTriggered);
 			}
@@ -746,7 +748,7 @@ namespace WFInfo {
 					RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
 					Method = HttpMethod.Post,
 				};
-				var content = $"{{ \"email\":\"{email}\",\"password\":\"{password}\" \"auth_type\": \"header\"}}";
+				var content = $"{{ \"email\":\"{email}\",\"password\":\"{password}\", \"auth_type\": \"header\"}}";
 				request.Content = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
 				request.Headers.Add("Authorization", "JWT");
 				request.Headers.Add("language", "en");
@@ -759,7 +761,7 @@ namespace WFInfo {
 					setJWT(response.Headers);
 					await openWebSocket();
 				} else {
-					throw new Exception(responseBody);
+					throw new Exception(responseBody + $"Email: {email}, Pw length: {password.Length}");
 				}
 			}
 
@@ -774,15 +776,15 @@ namespace WFInfo {
 			}
 
 			marketSocket.OnMessage += (sender, e) =>
-				Console.WriteLine("warframe.market: " + e.Data);
+				Main.AddLog("warframe.market: " + e.Data);
 			marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 			try
 			{
-				marketSocket.SetCookie(new WebSocketSharp.Net.Cookie("JWT", (string)Settings.settingsObj["JWT"]));
+				marketSocket.SetCookie(new WebSocketSharp.Net.Cookie("JWT", JWT));
 				marketSocket.ConnectAsync();
 			}
 			catch (Exception e) {
-				Console.WriteLine(e.Message);
+				Main.AddLog(e.Message);
 				throw;
 			}
 
@@ -790,9 +792,7 @@ namespace WFInfo {
 				if (e.Data.Contains("@WS/ERROR")) // error checking, report back to main.status
 				{
 					Main.AddLog(e.Data);
-					JWT = null; //assume authentication is invalid
-					Settings.JWT = null;
-					Settings.Save();
+					Disconnect();
 					Main.signOut();
 				}
 			};
@@ -806,14 +806,12 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="headers">Response headers from the original Login call</param>
 		public void setJWT(HttpResponseHeaders headers) {
-			foreach (var item in headers) {
-				if (item.Key.Contains("JWTop")) {
-					int a = item.Key.LastIndexOf("JWT") + "JWT".Length+1;
-					int b = item.Key.LastIndexOf("; Domain=.warframe.market;");
-					JWT = item.Key.Substring(a, (b - a));
-					if (Settings.settingsObj["JWT"].ToString().Length > 10)  //update the cashed JWT if it exists
-						Settings.settingsObj["JWT"] = JWT;
-				}
+			foreach (var item in headers)
+			{
+				if (!item.Key.Contains("Authorization")) continue;
+				var temp = item.Value.First();
+				JWT = temp.Substring(4);
+				return;
 			}
 		}
 
@@ -841,16 +839,14 @@ namespace WFInfo {
 
 				var response = await client.SendAsync(request);
 				var responseBody = await response.Content.ReadAsStringAsync();
-				Console.WriteLine(response.Headers.ToString());
 
 				if (!response.IsSuccessStatusCode) throw new Exception(responseBody);
 				setJWT(response.Headers);
 				return true;
 
 			}
-			catch (HttpRequestException e) {
-				Console.WriteLine("\nException Caught!");
-				Console.WriteLine("Message :{0} ", e.Message);
+			catch (Exception e) {
+				Main.AddLog($"Exception Caught!\n Message :{e.Message} ");
 				return false;
 			}
 		}
@@ -886,9 +882,8 @@ namespace WFInfo {
 				setJWT(response.Headers);
 				return true;
 			}
-			catch (HttpRequestException e) {
-				Console.WriteLine("\nException Caught!");
-				Console.WriteLine("Message :{0} ", e.Message);
+			catch (Exception e) {
+				Main.AddLog($"Exception Caught!\n Message :{e.Message} ");
 				return false;
 			}
 		}
@@ -958,6 +953,7 @@ namespace WFInfo {
 			SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
 			JWT = null;
 			inGameName = string.Empty;
+			Settings.JWT = null;
 			Settings.settingsObj["JWT"] = null;
 			Settings.Save();
 			marketSocket.Close(1006);
@@ -983,8 +979,7 @@ namespace WFInfo {
 				return topListings;
 			}
 			catch (Exception e) {
-				Console.WriteLine("\nException Caught!");
-				Console.WriteLine("Message :{0} ", e.Message);
+				Main.AddLog($"Exception Caught!\n Message :{e.Message} ");
 			}
 
 			return null;
@@ -996,6 +991,9 @@ namespace WFInfo {
 		/// <returns>bool of which answers the question "Is the user JWT valid?"</returns>
 		public async Task<bool> checkIfJWTisValid()
 		{
+			if (JWT == null)
+				return false;
+
 			try {
 				var request = new HttpRequestMessage() {
 					RequestUri = new Uri("https://api.warframe.market/v1/profile"),
@@ -1005,12 +1003,10 @@ namespace WFInfo {
 				var response = await client.SendAsync(request);
 				setJWT(response.Headers);
 				var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-				Console.WriteLine(profile.GetValue("role"));
 				return (string)profile.GetValue("role") != "anonymous";
 			}
 			catch (Exception e) {
-				Console.WriteLine("\nException Caught!");
-				Console.WriteLine("Message :{0} ", e.Message);
+				Main.AddLog($"Exception Caught!\n Message :{e.Message} ");
 				return false;
 			}
 

@@ -48,7 +48,7 @@ namespace WFInfo {
 
 			if (screensList.Count < index || 0 > index )
 			{
-				Console.WriteLine($"Screen list is {screensList.Count} long and is: {screensList.Count}");
+				Main.AddLog($"Screen list is {screensList.Count} long and is: {screensList.Count}");
 				throw new Exception("Tried setting screen to an item that didn't exist");
 			}
 
@@ -67,7 +67,7 @@ namespace WFInfo {
 		/// <summary>
 		/// changes screen over if there is a follow up screen
 		/// </summary>
-		public void NextScreen(object sender, RoutedEventArgs e)
+		public void NextScreen(object sender, RoutedEventArgs e) //todo throwing out of range error
 		{
 			Back.IsEnabled = true;
 			pageIndex++;
@@ -145,7 +145,7 @@ namespace WFInfo {
 				SetCurrentStatus();
 			}
 			catch (Exception exception) {
-				Console.WriteLine(exception);
+				Main.AddLog(exception.ToString());
 				var newEntry = new KeyValuePair<string, RewardCollection>(exception.ToString(), screensList[pageIndex].Value);
 				screensList.RemoveAt(pageIndex);
 				screensList.Insert(pageIndex, newEntry);
@@ -198,8 +198,13 @@ namespace WFInfo {
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
 		private void Cancel(object sender, RoutedEventArgs e) {
-			if (screensList.Count == 1) // if it's the last item
+			if (screensList.Count == 1)
+			{
+				// if it's the last item
 				Hide(null, null);
+				return;
+			}
+
 			if (pageIndex == 0) // if looking at the first screen
 			{
 				SetScreen(1);

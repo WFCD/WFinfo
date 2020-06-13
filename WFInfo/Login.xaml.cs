@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Input;
+using Google.Apis.Auth;
 
 namespace WFInfo {
 	/// <summary>
@@ -64,8 +65,15 @@ namespace WFInfo {
 				Main.loggedIn();
 				Email.Text = "Email";
 				Password.Password = "";
-				Settings.settingsObj["JWT"] = RememberMe.IsChecked != null && RememberMe.IsChecked.Value ? Main.dataBase.JWT : null; //set JWT cashed if checked else remove it.
-				Settings.Save();
+				if (RememberMe.IsChecked.Value)
+				{
+					Settings.settingsObj["JWT"] = Main.dataBase.JWT;
+					Settings.Save();
+				}
+				else
+				{
+					Settings.settingsObj["JWT"] = null;
+				}
 			}
 			Hide(); //dispose of window once done
 			if (Main.searchBox.IsActive) {

@@ -56,9 +56,12 @@ namespace WFInfo
                 AddLog("WFInfo has launched successfully");
                 if ((bool)Settings.settingsObj["Auto"])
                     dataBase.EnableLogCapture();
-                if (!dataBase.checkIfJWTisValid().Result) return;
-                loggedIn();
-                dataBase.openWebSocket();
+                if (dataBase.checkIfJWTisValid().Result)
+                {
+	                loggedIn();
+	                dataBase.openWebSocket();
+                }
+
             }
             catch (Exception ex)
             {

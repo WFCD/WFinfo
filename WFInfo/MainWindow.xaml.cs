@@ -178,15 +178,17 @@ namespace WFInfo
 	        if (!Settings.settingsObj.TryGetValue("JWT", out _))
 	        {
 		        Settings.settingsObj["JWT"] = null;
-		        Settings.JWT = (string) Settings.settingsObj.GetValue("JWT");
-		        Main.dataBase.JWT = (string) Settings.settingsObj.GetValue("JWT");
-
-		        if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
-			        Settings.settingsObj["HighContrast"] = false;
-		        Settings.highContrast = (bool) Settings.settingsObj.GetValue("HighContrast");
-
-		        Settings.Save();
 	        }
+	        else
+	        {
+		        Settings.JWT = (string)Settings.settingsObj.GetValue("JWT");
+		        Main.dataBase.JWT = (string)Settings.settingsObj.GetValue("JWT");
+            }
+	        if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
+		        Settings.settingsObj["HighContrast"] = false;
+	        Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
+
+	        Settings.Save();
         }
 
         public void OnContentRendered(object sender, EventArgs e)
