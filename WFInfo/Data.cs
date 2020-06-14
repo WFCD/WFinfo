@@ -777,7 +777,7 @@ namespace WFInfo {
 
 			marketSocket.OnMessage += (sender, e) =>
 			{
-				Main.AddLog("warframe.market: " + e.Data);
+				Console.WriteLine("warframe.market: " + e.Data);
 				if (!e.Data.Contains("SET_STATUS")) return;
 				var message = JsonConvert.DeserializeObject<JObject>(e.Data);
 				Main.RunOnUIThread(() =>
@@ -950,7 +950,7 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="data">The JSON string of data being sent over websocket</param>
 		private void SendMessage(string data) {
-			Main.AddLog("Sending: " + data + " to websocket.");
+			Console.WriteLine("Sending: " + data + " to websocket.");
 			marketSocket.Send(data);
 		}
 		/// <summary>
@@ -992,7 +992,6 @@ namespace WFInfo {
 				var response = await client.SendAsync(request);
 				var body = await response.Content.ReadAsStringAsync();
 				var payload = JsonConvert.DeserializeObject<JObject>(body);
-				Console.WriteLine($"Response is : {response}\n body is: {body}\n payload is: {payload}");
 				if (body.Length < 3)
 					throw new Exception("No sell orders found: " + payload);
 				return JsonConvert.DeserializeObject<JObject>(body);

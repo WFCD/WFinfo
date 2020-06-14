@@ -276,6 +276,7 @@ namespace WFInfo
 		        else
 		        {
 		            StatusUpdate("Failed to load image", 1);
+		            OCR.processingActive = false;
 		        }
 		    }
 		}

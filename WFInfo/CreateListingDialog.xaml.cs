@@ -26,8 +26,6 @@ namespace WFInfo {
 		}
 
 		private void Hide(object sender, RoutedEventArgs e) {
-			screensList = new List<KeyValuePair<string, RewardCollection>>();
-			pageIndex = 0;
 			Hide();
 		}
 
@@ -46,13 +44,13 @@ namespace WFInfo {
 		/// <param name="index">The index needed for the screen</param>
 		public void SetScreen(int index)
 		{
-			SetCurrentStatus();
+			Main.AddLog($"Screen list is {screensList.Count} long and setting to index: {index}");
 
 			if (screensList.Count < index || 0 > index )
 			{
-				Main.AddLog($"Screen list is {screensList.Count} long and is: {screensList.Count}");
 				throw new Exception("Tried setting screen to an item that didn't exist");
 			}
+			SetCurrentStatus();
 
 			var screen = screensList[index];
 			updating = true;
@@ -72,25 +70,30 @@ namespace WFInfo {
 		public void NextScreen(object sender, RoutedEventArgs e) //todo throwing out of range error
 		{
 			Back.IsEnabled = true;
+
+			if (screensList.Count - 1 == pageIndex) //reached the end of the list
+			{
+				Next.IsEnabled = false;
+				return;
+			}
+
 			pageIndex++;
 			SetScreen(pageIndex);
-			if (screensList.Count - 1 == pageIndex) //reached the end of the list
-				Next.IsEnabled = false;
-			SetCurrentStatus();
-			updating = true;
 		}
 
 		/// <summary>
 		/// changes screen back if there is a previous screen
 		/// </summary>
-		public void PreviousScreen(object sender, RoutedEventArgs e)
-		{
+		public void PreviousScreen(object sender, RoutedEventArgs e) {
+			
 			Next.IsEnabled = true;
+			if (pageIndex == 0) {//reached start of the list
+				Back.IsEnabled = false;
+				return;
+			}
 			pageIndex--;
 			SetScreen(pageIndex);
-			if (pageIndex == 0) //reached start of the list
-				Back.IsEnabled = false;
-			SetCurrentStatus();
+
 		}
 		/// <summary>
 		/// Updates the screen to reflect status
@@ -204,6 +207,8 @@ namespace WFInfo {
 			{
 				// if it's the last item
 				Hide(null, null);
+				screensList = new List<KeyValuePair<string, RewardCollection>>();
+				pageIndex = 0;
 				return;
 			}
 

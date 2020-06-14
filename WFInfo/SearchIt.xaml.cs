@@ -54,16 +54,17 @@ namespace WFInfo
             //Main.listingHelper.SetScreen(0);
             try
             {
-	            foreach (var rewardscreen in Main.listingHelper.primeRewards) {
+                foreach (var rewardscreen in Main.listingHelper.primeRewards) {
 		            var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
 		            Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
 	            }
+                Main.listingHelper.primeRewards.Clear();
 	            Main.listingHelper.SetScreen(0);
 	            Main.listingHelper.Show();
             }
             catch (Exception exception)
             {
-	            Console.WriteLine(exception);
+	            Main.AddLog(exception.ToString());
             }
             finish();
         }

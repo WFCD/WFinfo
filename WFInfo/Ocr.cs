@@ -119,7 +119,7 @@ namespace WFInfo
         public const int pixelRewardLineHeight = 44;
 
         public const int SCALING_LIMIT = 100;
-        private static bool processingActive = false;
+        public static bool processingActive = false;
 
         private static Bitmap bigScreenshot;
         private static Bitmap partialScreenshot;
@@ -301,10 +301,8 @@ namespace WFInfo
                 var end = watch.ElapsedMilliseconds;
                 Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
-                if (Main.listingHelper.primeRewards.Count == 0 || Main.listingHelper.primeRewards.Last() != primeRewards)
+                if (Main.listingHelper.primeRewards.Count == 0 || Main.listingHelper.primeRewards.Last().Except(primeRewards).ToList().Count() != 0)
                 {
-	                var msg = primeRewards.Aggregate("Adding items: ", (current, item) => current + $"{item}, ");
-                    Main.AddLog(msg);
 	                Main.listingHelper.primeRewards.Add(primeRewards);
                 }
 
