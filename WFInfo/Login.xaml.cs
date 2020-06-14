@@ -8,10 +8,12 @@ namespace WFInfo {
 	/// Interaction logic for Login.xaml
 	/// </summary>
 	public partial class Login : Window {
-
+		
+		#region default methods
 		public Login() {
 			InitializeComponent();
 		}
+
 		/// <summary>
 		/// Hides the window 
 		/// </summary>
@@ -31,6 +33,8 @@ namespace WFInfo {
 			if (e.ChangedButton == MouseButton.Left)
 				DragMove();
 		}
+		#endregion
+
 		/// <summary>
 		/// Attempts to log in with the filled in credentials.
 		/// </summary>
@@ -82,6 +86,7 @@ namespace WFInfo {
 				Main.searchBox.searchField.Focusable = true;
 			}
 		}
+
 		/// <summary>
 		/// Clears the email field if it's not been used yet.
 		/// </summary>
@@ -91,6 +96,7 @@ namespace WFInfo {
 			if (Email.Text == "Email")
 				Email.Text = "";
 		}
+
 		/// <summary>
 		/// Allow the window to be spawned in an appropriate place.
 		/// </summary>
@@ -101,11 +107,5 @@ namespace WFInfo {
 			Top = y;
 			Show();
 		}
-
-		//private void MakeListing_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-		//{
-		// //{"order_type":"sell","item_id":"54a73e65e779893a797fff58","platinum":30,"quantity":1}
-		// Main.dataBase.ListItem("54a73e65e779893a797fff58", 30, 1);
-		//}
 	}
 }

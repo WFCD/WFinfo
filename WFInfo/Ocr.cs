@@ -156,6 +156,10 @@ namespace WFInfo
 	            Main.StatusUpdate("Still Processing Reward Screen", 2);
 	            return;
             }
+
+            var primeRewards = new List<string>();
+
+
             processingActive = true;
             Main.StatusUpdate("Processing...", 0);
             Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
@@ -220,9 +224,8 @@ namespace WFInfo
                     string part = firstChecks[i];
                     if (part.Replace(" ", "").Length > 6)
                     {
-
-
-                        string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
+	                    string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
+                        primeRewards.Add(correctName);
                         JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
                         string ducats = job["ducats"].ToObject<string>();
                         if (int.Parse(ducats) == 0)
@@ -299,6 +302,8 @@ namespace WFInfo
                 }
                 var end = watch.ElapsedMilliseconds;
                 Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
+
+                Main.listingHelper.primeRewards.Add(primeRewards);
 
                 if (Settings.Highlight)
                 {

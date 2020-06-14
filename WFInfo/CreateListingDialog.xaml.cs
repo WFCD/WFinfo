@@ -16,6 +16,8 @@ namespace WFInfo {
 		//public List<RewardCollection> screensList = new List<RewardCollection>();
 		public List<KeyValuePair<string, RewardCollection>> screensList = new List<KeyValuePair<string, RewardCollection>>();
 		//KVP is for sucess status, 0 = initial, 1 = successful 2+ = error
+		public List<List<string>> primeRewards = new List<List<string>>();
+		//Helper, allowing to store the rewards until needed to be processed
 		public int pageIndex = 0;
 		private bool updating;
 		#region default methods

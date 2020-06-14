@@ -995,10 +995,10 @@ namespace WFInfo {
 		}
 		
 		/// <summary>
-		/// Untested, might not work
+		/// Tries to get the profile page with the current JWT token
 		/// </summary>
 		/// <returns>bool of which answers the question "Is the user JWT valid?"</returns>
-		public async Task<bool> checkIfJWTisValid()
+		public async Task<bool> IsJWTvalid()
 		{
 			if (JWT == null)
 				return false;

@@ -377,7 +377,6 @@ namespace WFInfo
         /// <param name="e"></param>
         private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Console.WriteLine($"Sender is {sender.ToString()} and is type {sender.GetType()}");
 	        if (!ComboBox.IsLoaded) //Prevent firing off to early
 		        return;
 	        switch (ComboBox.SelectedIndex) {
