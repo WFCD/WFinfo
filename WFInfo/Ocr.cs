@@ -159,7 +159,6 @@ namespace WFInfo
 
             var primeRewards = new List<string>();
 
-
             processingActive = true;
             Main.StatusUpdate("Processing...", 0);
             Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
@@ -225,13 +224,12 @@ namespace WFInfo
                     if (part.Replace(" ", "").Length > 6)
                     {
 	                    string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
-                        primeRewards.Add(correctName);
                         JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
                         string ducats = job["ducats"].ToObject<string>();
-                        if (int.Parse(ducats) == 0)
-                        {
-                            hideRewardInfo = true;
-                        }
+                        if (int.Parse(ducats) == 0) {
+	                        hideRewardInfo = true;
+                        } else
+	                        primeRewards.Add(correctName);
                         string plat = job["plat"].ToObject<string>();
                         double platinum = double.Parse(plat, styles, provider);
                         string volume = job["volume"].ToObject<string>();
@@ -303,7 +301,12 @@ namespace WFInfo
                 var end = watch.ElapsedMilliseconds;
                 Main.StatusUpdate("Completed Processing (" + (end - start) + "ms)", 0);
 
-                Main.listingHelper.primeRewards.Add(primeRewards);
+                if (Main.listingHelper.primeRewards.Count == 0 || Main.listingHelper.primeRewards.Last() != primeRewards)
+                {
+	                var msg = primeRewards.Aggregate("Adding items: ", (current, item) => current + $"{item}, ");
+                    Main.AddLog(msg);
+	                Main.listingHelper.primeRewards.Add(primeRewards);
+                }
 
                 if (Settings.Highlight)
                 {
@@ -391,7 +394,7 @@ namespace WFInfo
             newFilter.Save(Main.appPath + @"\Debug\PartShotUpscaledFiltered " + timestamp + ".png");
             Main.AddLog(("----  SECOND OCR CHECK  ------------------------------------------------------------------------------------------").Substring(0, 108));
             secondChecks = SeparatePlayers(newFilter, secondEngine);
-            List<int> comparisions = new List<int>();
+            var primeRewards = new List<string>();
 
             if (secondChecks != null && firstChecks.Length != secondChecks.Count)
             {
@@ -413,12 +416,16 @@ namespace WFInfo
                         string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
                         if (secondProximity[i] < firstProximity[i])
                         {
+
                             JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
                             string ducats = job["ducats"].ToObject<string>();
                             if (int.Parse(ducats) == 0)
                             {
                                 hideRewardInfo = true;
                             }
+                            else
+	                            primeRewards.Add(secondName);
+                            
                             string plat = job["plat"].ToObject<string>();
                             string volume = job["volume"].ToObject<string>();
                             bool vaulted = Main.dataBase.IsPartVaulted(secondName);
@@ -441,11 +448,19 @@ namespace WFInfo
                                 }
                             });
 
+
                         }
                         hideRewardInfo = false;
                         partNumber++;
                     }
                 }
+                if (Main.listingHelper.primeRewards.Last() == primeRewards || primeRewards.Count == 0) return;
+
+                Main.listingHelper.primeRewards.RemoveAt(Main.listingHelper.primeRewards.Count-1);
+                var msg = primeRewards.Aggregate("", (current, item) => current + $"{item}, ");
+
+                Main.AddLog($"Replacing the last entry as slow processing found another rewards: {msg} to list");
+                Main.listingHelper.primeRewards.Add(primeRewards);
             }
             catch (Exception ex)
             {
@@ -1341,13 +1356,17 @@ namespace WFInfo
                     HandleRef = new HandleRef(process, process.MainWindowHandle);
                     Warframe = process;
                     if (Main.dataBase.IsJwtAvailable())
-                        Main.dataBase.SetWebsocketStatus("ingame");
+	                    Task.Run(async () => {
+		                    await Main.dataBase.SetWebsocketStatus("ingame");
+	                    });
                     Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
                     return true;
                 }
             }
             if (Main.dataBase.IsJwtAvailable())
-                Main.dataBase.SetWebsocketStatus("online");
+	            Task.Run(async () => {
+		            await Main.dataBase.SetWebsocketStatus("online");
+	            });
             if (!Settings.debug)
             {
                 Main.AddLog("Did Not Detect Warframe Process");

@@ -52,13 +52,19 @@ namespace WFInfo
             //var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
             //Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
             //Main.listingHelper.SetScreen(0);
-
-            foreach (var rewardscreen in Main.listingHelper.primeRewards) {
-                var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-                Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+            try
+            {
+	            foreach (var rewardscreen in Main.listingHelper.primeRewards) {
+		            var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+		            Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+	            }
+	            Main.listingHelper.SetScreen(0);
+	            Main.listingHelper.Show();
             }
-            Main.listingHelper.SetScreen(0);
-            Main.listingHelper.Show();
+            catch (Exception exception)
+            {
+	            Console.WriteLine(exception);
+            }
             finish();
         }
 

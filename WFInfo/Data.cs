@@ -779,7 +779,7 @@ namespace WFInfo {
 			{
 				Main.AddLog("warframe.market: " + e.Data);
 				if (!e.Data.Contains("SET_STATUS")) return;
-				JObject message = JsonConvert.DeserializeObject<JObject>(e.Data);
+				var message = JsonConvert.DeserializeObject<JObject>(e.Data);
 				Main.RunOnUIThread(() =>
 				{
 					Main.updateMarketStatus(message.GetValue("payload").ToString());
@@ -926,17 +926,15 @@ namespace WFInfo {
 
 			var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
 			switch (status) {
-				case "offline":
-				message += "invisible\"}";
-				break;
+				case "offline": 
+					message += "invisible\"}";
+					break;
 				case "online":
-				message += "online\"}";
-				break;
+					message += "online\"}";
+					break;
 				case "in game":
-				message += "ingame\"}";
-				break;
-				default:
-				throw new Exception("Tried setting status to something else");
+					message += "ingame\"}";
+					break;
 			}
 			try {
 				SendMessage(message);
@@ -977,21 +975,34 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="primeName"></param>
 		/// <returns></returns>
-		public JObject GetTopListings(string primeName) //https://api.warframe.market/v1/items/ prime_name /orders/top
+		public async Task<JObject> GetTopListings(string primeName) //https://api.warframe.market/v1/items/ prime_name /orders/top
 		{
 			var urlName = GetUrlName(primeName);
-			var RequestUri = new Uri("https://api.warframe.market/v1/items/" + urlName + "/orders/top");
 
 			try {
-				JObject topListings = JsonConvert.DeserializeObject<JObject>(
-						WebClient.DownloadString(RequestUri));
-				return topListings;
+				var request = new HttpRequestMessage() {
+					RequestUri = new Uri("https://api.warframe.market/v1/items/" + urlName + "/orders/top"),
+					Method = HttpMethod.Get
+				};
+				request.Headers.Add("Authorization", "JWT " + JWT);
+				request.Headers.Add("language", "en");
+				request.Headers.Add("accept", "application/json");
+				request.Headers.Add("platform", "pc");
+				request.Headers.Add("auth_type", "header");
+				var response = await client.SendAsync(request);
+				var body = await response.Content.ReadAsStringAsync();
+				var payload = JsonConvert.DeserializeObject<JObject>(body);
+				Console.WriteLine($"Response is : {response}\n body is: {body}\n payload is: {payload}");
+				if (body.Length < 3)
+					throw new Exception("No sell orders found: " + payload);
+				return JsonConvert.DeserializeObject<JObject>(body);
+
 			}
 			catch (Exception e) {
-				Main.AddLog($"Exception Caught!\n Message :{e.Message} ");
+				Main.AddLog("\nException Caught!");
+				Main.AddLog("Message : " + e.Message);
+				return null;
 			}
-
-			return null;
 		}
 		
 		/// <summary>

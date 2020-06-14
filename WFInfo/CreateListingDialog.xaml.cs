@@ -246,9 +246,9 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="primeName">The human friendly name to search listings for</param>
 		/// <returns>the top 5 current market listings</returns>
-		public List<MarketListing> GetMarketListing(string primeName) 
+		public List<MarketListing> GetMarketListing(string primeName)
 		{
-			var results = Main.dataBase.GetTopListings(primeName);
+			var results = Task.Run(async () => await Main.dataBase.GetTopListings(primeName)).Result;
 			var listings = new List<MarketListing>();
 			var sellOrders = new JArray(results["payload"]["sell_orders"].Children());
 			foreach (var item in sellOrders)
