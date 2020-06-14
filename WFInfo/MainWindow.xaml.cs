@@ -26,6 +26,7 @@ namespace WFInfo {
 				Close();
 			}
 
+
 			INSTANCE = this;
 			main = new Main();
 
@@ -67,6 +68,8 @@ namespace WFInfo {
 				Main.AddLog("An error occured while loading the main window: " + e.Message);
 			}
 		}
+
+
 
 		private void InitializeSettings() {
 			if (!Settings.settingsObj.TryGetValue("Display", out _))

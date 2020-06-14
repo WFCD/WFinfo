@@ -223,6 +223,20 @@ namespace WFInfo {
 			}
 		}
 
+		public void ShowLoading()
+		{
+			CancelButton.Content = "loading";
+			Next.IsEnabled = false;
+			Back.IsEnabled = false;
+		}
+
+		public void showFinished()
+		{
+			CancelButton.Content = "Cancel";
+			Next.IsEnabled = true;
+			Back.IsEnabled = true;
+		}
+
 		#endregion
 
 		/// <summary>

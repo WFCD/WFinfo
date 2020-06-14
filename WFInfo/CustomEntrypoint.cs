@@ -15,6 +15,7 @@ namespace WFInfo
 {
     public class CustomEntrypoint
     {
+
         private const string traineddata = "engbest.traineddata";
         private const string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/" + traineddata;
         private const string traineddata_md5 = "7af2ad02d11702c7092a5f8dd044d52f";
@@ -65,6 +66,9 @@ namespace WFInfo
         [STAThreadAttribute]
         public static void Main()
         {
+	        AppDomain currentDomain = AppDomain.CurrentDomain;
+	        currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
+
             Directory.CreateDirectory(appPath);
             Directory.CreateDirectory(app_data_tesseract_catalog);
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x86");
@@ -140,6 +144,23 @@ namespace WFInfo
         // Source code can be found on https://github.com/dimon222/CustomCPUID
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool isAVX2supported();
+
+        static void MyHandler(object sender, UnhandledExceptionEventArgs args) {
+	        Exception e = (Exception)args.ExceptionObject;
+	        AddLog("MyHandler caught : " + e.Message);
+	        AddLog("Runtime terminating: ," + args.IsTerminating);
+            AddLog(e.StackTrace);
+            AddLog(e.InnerException.Message);
+            AddLog(e.InnerException.StackTrace);
+
+        }
+
+        public static void AddLog(string argm) { //write to the debug file, includes version and UTCtime
+	        Console.WriteLine(argm);
+	        Directory.CreateDirectory(appPath);
+	        using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+		        sw.WriteLineAsync("[" + DateTime.UtcNow + "Still in custom entery point" +  "]   " + argm);
+        }
 
         public static bool isAVX2Available()
         {

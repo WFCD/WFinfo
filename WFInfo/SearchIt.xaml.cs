@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -52,15 +53,28 @@ namespace WFInfo
             //var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
             //Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
             //Main.listingHelper.SetScreen(0);
+
+
             try
             {
-                foreach (var rewardscreen in Main.listingHelper.primeRewards) {
-		            var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-		            Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-	            }
-                Main.listingHelper.primeRewards.Clear();
+                Main.listingHelper.ShowLoading(); //todo:This shit ain't working
+	            var rewardCollection = Task.Factory.StartNew(() => Main.listingHelper.GetRewardCollection(Main.listingHelper.primeRewards.First())).Result;
+	            Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
 	            Main.listingHelper.SetScreen(0);
 	            Main.listingHelper.Show();
+
+	            Task.Run(() =>
+	            {
+		            foreach (var rewardscreen in Main.listingHelper.primeRewards) {
+                        if(Main.listingHelper.primeRewards.First() == rewardscreen)
+                            continue;
+			            rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+			            Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+		            }
+                });
+                Main.listingHelper.SetScreen(0);
+	            Main.listingHelper.primeRewards.Clear();
+	            Main.listingHelper.showFinished();
             }
             catch (Exception exception)
             {
