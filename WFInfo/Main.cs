@@ -49,7 +49,9 @@ namespace WFInfo
             try
             {
                 StatusUpdate("Updating Databases...", 0);
+
                 dataBase.Update();
+
                 //RelicsWindow.LoadNodesOnThread();
                 OCR.init();
                 StatusUpdate("WFInfo Initialization Complete", 0);
@@ -68,7 +70,10 @@ namespace WFInfo
                 AddLog("LOADING FAILED");
                 AddLog(ex.ToString());
                 StatusUpdate("Launch Failure - Please Restart", 0);
-                new ErrorDialogue(DateTime.Now, 0);
+                RunOnUIThread(() =>
+                {
+                    new ErrorDialogue(DateTime.Now, 0);
+                });
             }
         }
 
@@ -93,8 +98,14 @@ namespace WFInfo
         { //write to the debug file, includes version and UTCtime
             Console.WriteLine(argm);
             Directory.CreateDirectory(appPath);
-            using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
-                sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
+            try
+            {
+                using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         /// <summary>

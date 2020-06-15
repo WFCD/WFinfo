@@ -25,8 +25,17 @@ namespace WFInfo
 
         public IList<IList<object>> GetSheet(string range)
         {
-            ValueRange response = service.Spreadsheets.Values.Get(SheetID, range).Execute();
+            ValueRange response;
+            try
+            {
+                response = service.Spreadsheets.Values.Get(SheetID, range).Execute();
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
             return response.Values;
+
         }
     }
 }

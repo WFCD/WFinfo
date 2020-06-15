@@ -102,7 +102,8 @@ namespace WFInfo {
 			marketItems = new JObject();
 
 			IList<IList<object>> sheet = sheetsApi.GetSheet("items!A:C");
-			foreach (IList<object> row in sheet) {
+			foreach (IList<object> row in sheet)
+			{
 				string name = row[1].ToString();
 				if (name.Contains("Prime "))
 					marketItems[row[0].ToString()] = name + "|" + row[2].ToString();
@@ -130,8 +131,11 @@ namespace WFInfo {
 			}
 			ReloadItems();
 			marketData = new JObject();
+			IList<IList<object>> sheet;
 
-			IList<IList<object>> sheet = sheetsApi.GetSheet("prices!A:I");
+			sheet = sheetsApi.GetSheet("prices!A:I");
+
+
 			foreach (IList<object> row in sheet) {
 				string name = row[0].ToString();
 				if (name.Contains("Prime ")) {
@@ -333,6 +337,15 @@ namespace WFInfo {
 					}
 				}
 			}
+
+			if (marketData["timestamp"] == null)
+            {
+				Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "VERRIFY"; });
+				Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "TIME"; });
+
+				return false;
+			}
+
 			Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm"); });
 
 			saveDatabases = LoadEqmtData(allFiltered, saveDatabases);
