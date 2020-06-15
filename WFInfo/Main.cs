@@ -88,9 +88,11 @@ namespace WFInfo
         }
         private static async void TimeoutCheck()
         {
+            if (!await dataBase.IsJWTvalid())
+                return;
             var now = DateTime.UtcNow;
             Console.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {Main.latestActive}");
-            if (now > Main.latestActive)
+            if (now > latestActive)
             {
                 await dataBase.SetWebsocketStatus("offline");
             }
