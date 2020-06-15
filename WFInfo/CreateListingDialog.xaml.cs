@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -300,12 +301,17 @@ namespace WFInfo {
 				throw e;
 			}
 		}
-	}
 
-	/// <summary>
-	/// Class to represent a single "sheet" of the create listing screen, consisting of up to 4 possible rewards for which are unique plat, quantity and market listings 
-	/// </summary>
-	public class RewardCollection
+        private void PlatinumTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+			PlatinumTextBox.Text = Regex.Replace(PlatinumTextBox.Text, "[^0-9.]", "");
+		}
+    }
+
+    /// <summary>
+    /// Class to represent a single "sheet" of the create listing screen, consisting of up to 4 possible rewards for which are unique plat, quantity and market listings 
+    /// </summary>
+    public class RewardCollection
 	{
 		public List<string> primeNames = new List<string>(4); // the reward items in case user wants to change selection
 		public List<int> platinumValues = new List<int>(4);

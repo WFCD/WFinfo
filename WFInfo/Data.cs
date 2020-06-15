@@ -712,6 +712,9 @@ namespace WFInfo {
 					autoThread.Dispose();
 					autoThread = null;
 				}
+
+				Console.WriteLine(line);
+
 				if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
 					autoThread = Task.Factory.StartNew(AutoTriggered);
 			}
@@ -758,7 +761,7 @@ namespace WFInfo {
 					RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
 					Method = HttpMethod.Post,
 				};
-				var content = $"{{ \"email\":\"{email}\",\"password\":\"{password}\", \"auth_type\": \"header\"}}";
+				var content = $"{{ \"email\":\"{email}\",\"password\":\"{password.Replace(@"\", @"\\")}\", \"auth_type\": \"header\"}}";
 				request.Content = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
 				request.Headers.Add("Authorization", "JWT");
 				request.Headers.Add("language", "en");
@@ -819,7 +822,10 @@ namespace WFInfo {
 			marketSocket.OnOpen += (sender, e) => {
 				marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}"); //
 			};
+
 		}
+
+
 		/// <summary>
 		/// Sets the JWT to be used for future calls
 		/// </summary>
@@ -924,11 +930,12 @@ namespace WFInfo {
 
 		/// <summary>
 		/// Sets the status of WFM websocket. Will try to reconnect if it is not already connected.
-		/// </summary>
-		/// <param name="status">Accepts the following values:
+		/// Accepts the following values:
 		/// offline, set's player status to be hidden on the site.  
 		/// online, set's player status to be online on the site.   
 		/// in game, set's player status to be online and ingame on the site
+		/// </summary>
+		/// <param name="status">
 		/// </param>
 		public async Task SetWebsocketStatus(string status) {
 			if (!IsJwtAvailable())

@@ -1361,10 +1361,6 @@ namespace WFInfo
                     return true;
                 }
             }
-            if (Main.dataBase.IsJwtAvailable())
-	            Task.Run(async () => {
-		            await Main.dataBase.SetWebsocketStatus("online");
-	            });
             if (!Settings.debug)
             {
                 Main.AddLog("Did Not Detect Warframe Process");

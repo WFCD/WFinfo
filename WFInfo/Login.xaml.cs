@@ -60,6 +60,8 @@ namespace WFInfo {
 							Main.StatusUpdate("Unknown email", 1);
 					} else if (ex.Message.Contains("password")) {
 						Main.StatusUpdate("Wrong password", 1);
+					} else if (ex.Message.Contains("could not understand")){
+						Main.StatusUpdate("Severe issue, server did not understand request", 1);
 					} else {
 						Main.StatusUpdate("Too many requests", 1); //default to too many requests
 					}

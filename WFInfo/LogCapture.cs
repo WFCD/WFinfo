@@ -41,46 +41,42 @@ namespace WFInfo
                 return;
             }
 
-            Task.Factory.StartNew(Run);
+            var startTimeSpan = TimeSpan.Zero;
+            var periodTimeSpan = TimeSpan.FromMinutes(1);
+
+            var timer = new Timer((e) =>
+            {
+                getProc();
+            }, null, startTimeSpan, periodTimeSpan);
         }
 
-        private void Run()
-        {
 
+        private void getProc()
+        {
+            Console.WriteLine("Testing to get warframe");
             try
             {
-                TimeSpan timeout = TimeSpan.FromSeconds(1.0);
-                bufferReadyEvent.Set();
-                while (!token.IsCancellationRequested)
+                if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
                 {
-                    if (!dataReadyEvent.WaitOne(timeout))
-                    {
-                        continue;
-                    }
+                    OCR.VerifyWarframe();
+                }
 
-                    if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
+                if (OCR.Warframe != null)
+                {
+                    using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
                     {
-                        OCR.VerifyWarframe();
-                    }
-
-                    if (OCR.Warframe != null)
-                    {
-                        using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
+                        using (BinaryReader reader = new BinaryReader(stream, Encoding.Default))
                         {
-                            using (BinaryReader reader = new BinaryReader(stream, Encoding.Default))
+                            uint processId = reader.ReadUInt32();
+                            if (processId == OCR.Warframe.Id)
                             {
-                                uint processId = reader.ReadUInt32();
-                                if (processId == OCR.Warframe.Id)
-                                {
-                                    char[] chars = reader.ReadChars(4092);
-                                    int index = Array.IndexOf(chars, '\0');
-                                    string message = new string(chars, 0, index);
-                                    TextChanged(this, message.Trim());
-                                }
+                                char[] chars = reader.ReadChars(4092);
+                                int index = Array.IndexOf(chars, '\0');
+                                string message = new string(chars, 0, index);
+                                TextChanged(this, message.Trim());
                             }
                         }
                     }
-                    bufferReadyEvent.Set();
                 }
             }
             catch (Exception ex)

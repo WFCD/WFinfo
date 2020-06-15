@@ -27,6 +27,7 @@ namespace WFInfo
         public static SearchIt searchBox = new SearchIt();
         public static Login login = new Login();
         public static CreateListing listingHelper = new CreateListing();
+        public static DateTime latestActive = new DateTime();
         public Main()
         {
             INSTANCE = this;
@@ -60,8 +61,17 @@ namespace WFInfo
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
-	                loggedIn();
+                    latestActive = DateTime.UtcNow.AddMinutes(15);
+                    loggedIn();
 	                dataBase.openWebSocket();
+
+                    var startTimeSpan = TimeSpan.Zero;
+                    var periodTimeSpan = TimeSpan.FromMinutes(1);
+
+                    var timer = new System.Threading.Timer((e) =>
+                    {
+                        TimeoutCheck();
+                    }, null, startTimeSpan, periodTimeSpan);
                 }
                 finishedLoading();
             }
@@ -74,6 +84,15 @@ namespace WFInfo
                 {
                     new ErrorDialogue(DateTime.Now, 0);
                 });
+            }
+        }
+        private static async void TimeoutCheck()
+        {
+            var now = DateTime.UtcNow;
+            Console.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {Main.latestActive}");
+            if (now > Main.latestActive)
+            {
+                await dataBase.SetWebsocketStatus("offline");
             }
         }
 
@@ -118,9 +137,10 @@ namespace WFInfo
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
         }
 
-        //todo: Implement a 15 minute timer that if there hasn't been any input to set the status to "offline"
         public void OnMouseAction(MouseButton key)
         {
+            latestActive = DateTime.UtcNow.AddMinutes(15);
+
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
                 if (Keyboard.IsKeyDown(Key.Delete))
@@ -180,8 +200,10 @@ namespace WFInfo
         //todo: Implement a 15 minute timer that if there hasn't been any input to set the status to "offline"
         public void OnKeyAction(Key key)
 		{
-		    // close the snapit overlay when *any* key is pressed down
-		    if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
+            latestActive = DateTime.UtcNow.AddMinutes(15);
+
+            // close the snapit overlay when *any* key is pressed down
+            if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
 		    {
 		        snapItOverlayWindow.closeOverlay();
 		        StatusUpdate("Closed snapit", 0);
