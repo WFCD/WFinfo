@@ -712,9 +712,6 @@ namespace WFInfo {
 					autoThread.Dispose();
 					autoThread = null;
 				}
-
-				Main.AddLog(line);
-
 				if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
 					autoThread = Task.Factory.StartNew(AutoTriggered);
 			}

@@ -63,7 +63,7 @@ namespace WFInfo
 	                loggedIn();
 	                dataBase.openWebSocket();
                 }
-
+                finishedLoading();
             }
             catch (Exception ex)
             {
@@ -336,6 +336,11 @@ namespace WFInfo
 	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
         }
 
+
+        public static void finishedLoading()
+        {
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.FinishedLoading(); });
+        }
         public static void updateMarketStatus(string msg)
         {
 	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.updateMarketStatus(msg); });

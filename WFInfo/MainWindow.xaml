@@ -223,7 +223,7 @@
             <ComboBoxItem Content="Offline"/>
             <ComboBoxItem Content="Log out"/>
         </ComboBox>
-        <Button x:Name="Login" Content="Login to WFM" Grid.Column="1" HorizontalAlignment="Left" Margin="129,1,0,0" VerticalAlignment="Top" Width="87" Height="24" Background="{x:Null}" Foreground="#FFB1D0D9" Click="SpawnLogin">
+        <Button x:Name="Login" IsEnabled="False" Content="Login to WFM" Grid.Column="1" HorizontalAlignment="Left" Margin="129,1,0,0" VerticalAlignment="Top" Width="87" Height="24" Background="{x:Null}" Foreground="#FFB1D0D9" Click="SpawnLogin">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Template">

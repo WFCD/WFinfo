@@ -360,5 +360,10 @@ namespace WFInfo {
 				break;
 			}
 		}
-	}
+
+        internal void FinishedLoading()
+        {
+			Login.IsEnabled = true;
+        }
+    }
 }
