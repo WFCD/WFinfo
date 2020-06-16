@@ -59,25 +59,43 @@ namespace WFInfo
                 if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
                 {
                     OCR.VerifyWarframe();
+                    return;
                 }
+                var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                //using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
+                //{
+                //    using (BinaryReader reader = new BinaryReader(stream, Encoding.Default))
+                //    {
+                //        uint processId = reader.ReadUInt32();
+                //        if (processId == OCR.Warframe.Id)
+                //        {
+                //            char[] chars = reader.ReadChars(4092);
+                //            int index = Array.IndexOf(chars, '\0');
+                //            string message = new string(chars, 0, index);
+                //            TextChanged(this, message.Trim());
+                //        }
+                //    }
+                //}
 
-                if (OCR.Warframe != null)
+
+                using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(appdata + @"\..\Local\Warframe\EE.log", FileMode.Open))
                 {
-                    using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
+                    using (MemoryMappedViewStream stream = mmf.CreateViewStream())
                     {
                         using (BinaryReader reader = new BinaryReader(stream, Encoding.Default))
                         {
                             uint processId = reader.ReadUInt32();
-                            if (processId == OCR.Warframe.Id)
-                            {
+                            Main.AddLog($"Proces ID: {processId}, and warframe id: {OCR.Warframe.Id}");
+
                                 char[] chars = reader.ReadChars(4092);
                                 int index = Array.IndexOf(chars, '\0');
                                 string message = new string(chars, 0, index);
                                 TextChanged(this, message.Trim());
-                            }
+                            
                         }
                     }
                 }
+
             }
             catch (Exception ex)
             {
