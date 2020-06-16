@@ -943,14 +943,14 @@ namespace WFInfo {
 
 			var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
 			switch (status) {
-				case "offline": 
-					message += "invisible\"}";
+				case "in game": 
+					message += "ingame\"}";
 					break;
 				case "online":
 					message += "online\"}";
 					break;
-				case "in game":
-					message += "ingame\"}";
+				default:
+					message += "invisible\"}";
 					break;
 			}
 			try {

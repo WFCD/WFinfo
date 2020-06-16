@@ -145,7 +145,7 @@ namespace WFInfo
         public void OnMouseAction(MouseButton key)
         {
             latestActive = DateTime.UtcNow.AddMinutes(15);
-            Console.WriteLine(System.Windows.Forms.Cursor.Position);
+            //Console.WriteLine(System.Windows.Forms.Cursor.Position);
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
                 if (Keyboard.IsKeyDown(Key.Delete))
