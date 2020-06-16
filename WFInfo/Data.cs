@@ -35,7 +35,7 @@ namespace WFInfo {
 		readonly WebClient WebClient;
 		private readonly Sheets sheetsApi;
 		private string githubVersion;
-
+		public bool rememberMe;
 		private LogCapture EElogWatcher;
 
 		public Data() {
@@ -976,10 +976,8 @@ namespace WFInfo {
 		public void Disconnect() {
 			SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
 			JWT = null;
+			rememberMe = false;
 			inGameName = string.Empty;
-			Settings.JWT = null;
-			Settings.settingsObj["JWT"] = null;
-			Settings.Save();
 			marketSocket.Close(1006);
 		}
 

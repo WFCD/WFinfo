@@ -1,3 +1,4 @@
+using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
@@ -162,17 +163,19 @@ namespace WFInfo {
 				Settings.settingsObj["Auto"] = false;
 			Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
 
-			if (!Settings.settingsObj.TryGetValue("JWT", out _)) {
-				Settings.settingsObj["JWT"] = null;
-			} else {
-				Settings.JWT = (string)Settings.settingsObj.GetValue("JWT");
-				Main.dataBase.JWT = (string)Settings.settingsObj.GetValue("JWT");
-			}
 			if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
 				Settings.settingsObj["HighContrast"] = false;
 			Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
 
 			Settings.Save();
+
+			RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
+			if (key.GetValue("JWT") != null) // if the key exists then update it, else ignore it.
+			{
+				Main.dataBase.JWT = (string)key.GetValue("JWT");
+				key.Close();
+			}
+
 		}
 
 		public void OnContentRendered(object sender, EventArgs e) {
@@ -209,6 +212,12 @@ namespace WFInfo {
 
 		public void Exit(object sender, RoutedEventArgs e) {
 			notifyIcon.Dispose();
+			RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
+			if (Main.dataBase.rememberMe) // if rememberme was checked then save it
+			{
+				key.SetValue("JWT", Main.dataBase.JWT);
+				key.Close();
+			}
 			Application.Current.Shutdown();
 		}
 

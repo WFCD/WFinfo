@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using Google.Apis.Auth;
+using Microsoft.Win32;
 
 namespace WFInfo {
 	/// <summary>
@@ -50,7 +51,7 @@ namespace WFInfo {
 				}
 				catch (Exception ex)
 				{
-					Settings.settingsObj["JWT"] = null;
+					Main.dataBase.JWT = null;
 					Settings.Save();
 					Main.AddLog("Couldn't login: " + ex);
 					if (ex.Message.Contains("email")) {
@@ -71,16 +72,8 @@ namespace WFInfo {
 				Main.loggedIn();
 				Email.Text = "Email";
 				Password.Password = "";
-				if (RememberMe.IsChecked.Value)
-				{
-					Settings.settingsObj["JWT"] = Main.dataBase.JWT;
-					Settings.Save();
-				}
-				else
-				{
-					Settings.settingsObj["JWT"] = null;
-				}
-			}
+				Main.dataBase.rememberMe = RememberMe.IsChecked.Value;
+            }
 			Hide(); //dispose of window once done
 			if (Main.searchBox.IsActive) {
 				Main.searchBox.placeholder.Content = "Logged in";
