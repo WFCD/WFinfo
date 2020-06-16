@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Text.RegularExpressions;
 using AutoUpdaterDotNET;
 using System.Windows;
+using System.Windows.Forms;
 
 namespace WFInfo
 {
@@ -90,11 +91,13 @@ namespace WFInfo
         {
             if (!await dataBase.IsJWTvalid())
                 return;
+
             var now = DateTime.UtcNow;
             Console.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {Main.latestActive}");
             if (now > latestActive)
             {
                 await dataBase.SetWebsocketStatus("offline");
+                StatusUpdate("User has been inactive for 15 minutes", 0);
             }
         }
 
@@ -142,7 +145,7 @@ namespace WFInfo
         public void OnMouseAction(MouseButton key)
         {
             latestActive = DateTime.UtcNow.AddMinutes(15);
-
+            Console.WriteLine(System.Windows.Forms.Cursor.Position);
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
                 if (Keyboard.IsKeyDown(Key.Delete))

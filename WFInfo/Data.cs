@@ -340,7 +340,7 @@ namespace WFInfo {
 
 			if (marketData["timestamp"] == null)
             {
-				Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "VERRIFY"; });
+				Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "VERIFY"; });
 				Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "TIME"; });
 
 				return false;
