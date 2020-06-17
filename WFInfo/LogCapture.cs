@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.MemoryMappedFiles;
 using System.Text;
 using System.Threading;
 using WebSocketSharp;
@@ -10,7 +11,12 @@ namespace WFInfo
 
     class LogCapture : IDisposable
     {
-        private static string appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+        private readonly MemoryMappedFile memoryMappedFile;
+        private readonly EventWaitHandle bufferReadyEvent;
+        private readonly EventWaitHandle dataReadyEvent;
+        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+        private CancellationToken token;
         private static Timer timer;
         public event LogWatcherEventHandler TextChanged;
         private FileStream fileStream;
@@ -19,16 +25,35 @@ namespace WFInfo
         {
             Main.AddLog("Starting LogCapture");
 
+            memoryMappedFile = MemoryMappedFile.CreateOrOpen("DBWIN_BUFFER", 4096L);
+            bufferReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_BUFFER_READY", out Boolean createdBuffer);
+
+            if (!createdBuffer)
+            {
+                Main.AddLog("The DBWIN_BUFFER_READY event exists.");
+                return;
+            }
+
+            dataReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_DATA_READY", out Boolean createdData);
+
+            if (!createdData)
+            {
+                Main.AddLog("The DBWIN_DATA_READY event exists.");
+                return;
+            }
+
             var startTimeSpan = TimeSpan.Zero;
             var periodTimeSpan = TimeSpan.FromSeconds(1);
 
             timer = new Timer((e) =>
             {
-                checkLog();
+                getProc();
             }, null, startTimeSpan, periodTimeSpan);
+
+            token = tokenSource.Token;
         }
 
-        private void checkLog()
+        private void getProc()
         {
             try
             {
@@ -38,22 +63,7 @@ namespace WFInfo
                 }
                 if (OCR.Warframe != null)
                 {
-                    var message = string.Empty;
-
-                    if (fileStream == null)
-                    {
-                        fileStream = new FileStream(appdata + @"\..\Local\Warframe\EE.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                    }
-                    if(streamReader == null)
-                    {
-                        streamReader = new StreamReader(fileStream, Encoding.Default);
-                        message = streamReader.ReadToEnd();
-                    }
-
-                    message = streamReader.ReadLine();
-                    Console.WriteLine(message);
-                    if(!message.IsNullOrEmpty())
-                        TextChanged(this, message.Trim());
+                    getStream();
                 }
 
             }
@@ -63,11 +73,69 @@ namespace WFInfo
             }
         }
 
+        private void getStream()
+        {
+            try
+            {
+                Console.WriteLine("Getting the stream");
+                bufferReadyEvent.Set();
+                while (!token.IsCancellationRequested)
+                {             
+                    using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
+                    {
+                        using (BinaryReader reader = new BinaryReader(stream, Encoding.Default))
+                        {
+                            uint processId = reader.ReadUInt32();
+                            if (processId == OCR.Warframe.Id)
+                            {
+                                if(timer != null)
+                                    timer.Dispose();
+                                char[] chars = reader.ReadChars(4092);
+                                int index = Array.IndexOf(chars, '\0');
+                                string message = new string(chars, 0, index);
+                                TextChanged(this, message.Trim());
+                                Console.WriteLine(message.Trim());
+                            }
+                        }
+                    }
+                    
+                    bufferReadyEvent.Set();
+                }
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog(ex.ToString());
+                new ErrorDialogue(DateTime.Now, 0);
+            }
+            finally
+            {
+                if (memoryMappedFile != null)
+                    memoryMappedFile.Dispose();
+
+                if (bufferReadyEvent != null)
+                    bufferReadyEvent.Dispose();
+
+                if (dataReadyEvent != null)
+                    dataReadyEvent.Dispose();
+            }
+        }
+
         public void Dispose()
         {
             fileStream.Dispose();
             streamReader.Dispose();
             timer.Dispose();
+            if (memoryMappedFile != null)
+                memoryMappedFile.Dispose();
+
+            if (bufferReadyEvent != null)
+                bufferReadyEvent.Dispose();
+
+            if (dataReadyEvent != null)
+                dataReadyEvent.Dispose();
+
+            tokenSource.Cancel();
+            tokenSource.Dispose();
             Main.AddLog("Stoping LogCapture");
         }
     }

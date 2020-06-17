@@ -712,8 +712,9 @@ namespace WFInfo {
 					autoThread.Dispose();
 					autoThread = null;
 				}
-
-				Console.WriteLine(line);
+				Console.WriteLine(line + (line.Contains("Pause countdown done") || line.Contains("Got rewards")));
+				if (line.Contains("Pause countdown done"))
+					Console.WriteLine("MATCH ENDING");
 
 				if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
 					autoThread = Task.Factory.StartNew(AutoTriggered);
@@ -733,7 +734,7 @@ namespace WFInfo {
 					if (watch.ElapsedMilliseconds <= wait) continue;
 					wait += Settings.autoDelay;
 					OCR.GetThemeWeighted(out double diff);
-					if (!(diff > 100)) continue;
+					if (!(diff > 40)) continue;
 					while (watch.ElapsedMilliseconds < wait) ;
 					Main.AddLog("started auto processing");
 					OCR.ProcessRewardScreen();

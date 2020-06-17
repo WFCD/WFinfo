@@ -1355,7 +1355,7 @@ namespace WFInfo
                     Warframe = process;
                     if (Main.dataBase.IsJwtAvailable())
 	                    Task.Run(async () => {
-		                    await Main.dataBase.SetWebsocketStatus("ingame");
+		                    await Main.dataBase.SetWebsocketStatus("in game");
 	                    });
                     Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
                     return true;
