@@ -6,45 +6,25 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="WFInfo.MainWindow"
         mc:Ignorable="d"
-        Title="WFInfo" Height="130" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
+        Title="WFInfo" Height="105" Width="335" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
 
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="27"/>
-            <ColumnDefinition Width="244"/>
-            <ColumnDefinition Width="29"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="26"/>
-            <RowDefinition Height="78"/>
-            <RowDefinition Height="26"/>
-        </Grid.RowDefinitions>
-        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Grid.ColumnSpan="3" Margin="0,0,0,0"/>
-        <Rectangle Grid.RowSpan="3" Stroke="#FF646464" Grid.ColumnSpan="3" Margin="0,0,0,0"/>
-        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Grid.ColumnSpan="2" Margin="0,0,-1,0" Grid.Row="2"/>
-        <Rectangle Grid.Row="1"     Stroke="#FF646464" Margin="0,-1,-1,-1"/>
-        <Rectangle Grid.RowSpan="2" Stroke="#FF646464" Margin="0,-1,0,0" Grid.Row="1" Grid.Column="2"/>
+        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="0,-1,0,0" Height="22" VerticalAlignment="Top"/>
+        <Rectangle Stroke="#FF646464" Margin="0,-1,0,0"/>
+        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="0,0,42,0" Height="20" VerticalAlignment="Bottom"/>
+        <Rectangle Stroke="#FF646464" Margin="0,20,0,0" HorizontalAlignment="Right" Width="43"/>
+        <Rectangle Stroke="#FF414141" Margin="313,20,21,0"/>
 
-        <Image Margin="2,0,2,2" Source="Resources/WFLogo.png" >
-            <Image.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform Y="0.25"/>
-                </TransformGroup>
-            </Image.RenderTransform>
-        </Image>
-        <TextBlock Text="WFInfo" Margin="7,0,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="16" FontFamily="{StaticResource Roboto_Black}" Height="22" FontWeight="Bold" Width="51"
-                   Grid.Row="0" Grid.Column="1"/>
-        <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="60,3,0,2" FontSize="11" FontWeight="Bold" Width="43" Height="21" Grid.Column="1"/>
-        <Label x:Name="minimise" MouseLeftButtonDown="Minimise" Content="_" Grid.Column="1" Margin="216,0,-1,0" Style="{StaticResource Label_Button}" Padding="0,0,0,3"/>
-        <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" Grid.Column="2" Style="{StaticResource Label_Button}"/>
-        <Label x:Name="Website" ToolTip="Opens WFinfo discord" MouseLeftButtonDown="websiteClick" Margin="0,0,0,52" Grid.Column="2" Grid.Row="1" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0,1,0,0">
+        <Image Margin="1,-1,0,0" Source="Resources/WFLogo.png" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="19" />
+        <TextBlock Text="WFInfo" Margin="25,0,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" Height="20" FontWeight="Bold" Width="55"/>
+        <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="77,0,0,0" FontSize="11" FontWeight="Bold" Width="43" Height="21"/>
+        <Label x:Name="minimise" MouseLeftButtonDown="Minimise" Content="_" Margin="0,-1,21,0" Style="{StaticResource Label_Button}" Padding="0,0,0,3" Height="22" VerticalAlignment="Top" HorizontalAlignment="Right" Width="22"/>
+        <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" Style="{StaticResource Label_Button}" Margin="0,-1,0,0" Height="22" VerticalAlignment="Top" HorizontalAlignment="Right" Width="22"/>
+        <Label x:Name="Website" ToolTip="Opens WFinfo discord" MouseLeftButtonDown="websiteClick" Margin="0,21,1,0" Padding="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0,1,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="Label.Content">
@@ -68,7 +48,7 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="Relics" ToolTip="Relics, search for what relic you need to use" MouseLeftButtonDown="relicsClick" Margin="0,26,0,26" Grid.Column="2" Grid.Row="1" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+        <Label x:Name="Relics" ToolTip="Relics, search for what relic you need to use" MouseLeftButtonDown="relicsClick" Margin="0,21,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="Label.Content">
@@ -92,7 +72,7 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="Gear" ToolTip="Equpiment, see which items you own" MouseLeftButtonDown="equipmentClick" Grid.Row="1" Grid.Column="2"  Margin="0,52,0,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+        <Label x:Name="Gear" ToolTip="Equpiment, see which items you own" MouseLeftButtonDown="equipmentClick"  Margin="0,41,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="Label.Content">
@@ -116,7 +96,7 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="Settings_Button" ToolTip="Settings" MouseLeftButtonDown="Settings_click" Grid.Row="2" Grid.Column="2" Margin="0,0,0,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+        <Label x:Name="Settings_Button" ToolTip="Settings" MouseLeftButtonDown="Settings_click" Margin="0,41,1,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="Label.Content">
@@ -140,7 +120,7 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="ReloadMarket" ToolTip="Reloads market data" Grid.Row="1" Grid.Column="0" Foreground="{x:Null}" MouseLeftButtonDown="ReloadMarketClick" Margin="0,12,0,39" Padding="3">
+        <Label x:Name="ReloadMarket" ToolTip="Reloads market data" Grid.Column="0" Foreground="{x:Null}" MouseLeftButtonDown="ReloadMarketClick" Margin="6,29,0,0" Padding="3" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="Label.Content">
@@ -164,7 +144,7 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="ReloadDrop" ToolTip="Reloads prime data" Grid.Row="1" Grid.Column="0" Foreground="{x:Null}" MouseLeftButtonDown="ReloadDropClick" Margin="0,39,0,12" Padding="3">
+        <Label x:Name="ReloadDrop" ToolTip="Reloads prime data" Grid.Column="0" Foreground="{x:Null}" MouseLeftButtonDown="ReloadDropClick" Margin="6,53,0,0" Padding="3" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="Label.Content">
@@ -188,17 +168,17 @@
                 </Style>
             </Label.Style>
         </Label>
-        <TextBlock                 Text="Status:"    FontSize="13" Margin=" 5,5,0,0" Grid.Row="2" Grid.ColumnSpan="2"
-                                   Grid.Column="0" FontFamily="{StaticResource Roboto_Condensed_Bold}"/>
-        <TextBlock x:Name="Status" Text="Loading..." FontSize="13" Margin="19,5,0,0" Grid.Row="2" Grid.Column="1"     FontFamily="{StaticResource Roboto_Condensed}"/>
-        <Label x:Name="Market_Data_Label" Content="Market Data:" Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="0,13,122,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1" Height="26" Width="101"/>
-        <Label x:Name="Market_Data"       Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="117,13,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Column="1" Height="26" Width="127"/>
-        <Label x:Name="Drop_Data_Label"   Content="Prime Data:"  Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="0,40,122,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1" Height="26" Width="93"/>
-        <Label x:Name="Drop_Data"         Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="117,40,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Column="1" Height="26" Width="127"/>
-        <Label x:Name="Wiki_Data_Label"   Content="Wiki Data:"   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="0,52,122,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="Hidden" Grid.Column="1" Height="26" Width="81"/>
-        <Label x:Name="Wiki_Data"         Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="117,52,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Hidden" Grid.Column="1" Height="26" Width="80"/>
+        <TextBlock                 Text="Status:"    FontSize="13" Margin="3,0,0,1"
+                                   Grid.Column="0" FontFamily="{StaticResource Roboto_Condensed_Bold}" Height="17" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="41"/>
+        <TextBlock x:Name="Status" Text="Loading..." FontSize="13" Margin="44,0,43,1"     FontFamily="{StaticResource Roboto_Condensed}" Height="17" VerticalAlignment="Bottom"/>
+        <Label x:Name="Market_Data_Label" Content="Market Data:" Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="26,27,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="24" Width="101"/>
+        <Label x:Name="Market_Data"       Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="132,27,0,0" VerticalAlignment="Top" Height="26" HorizontalAlignment="Left" Width="156"/>
+        <Label x:Name="Drop_Data_Label"   Content="Prime Data:"  Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="26,53,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="23" Width="101"/>
+        <Label x:Name="Drop_Data"         Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="132,53,0,0" VerticalAlignment="Top" Height="26" HorizontalAlignment="Left" Width="156"/>
+        <Label x:Name="Wiki_Data_Label"   Content="Wiki Data:"   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="0,52,109,0" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="Hidden" Height="26" Width="81" d:IsHidden="True"/>
+        <Label x:Name="Wiki_Data"         Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="117,52,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Hidden" Height="26" Width="80" d:IsHidden="True"/>
 
-        <tb:TaskbarIcon x:Name="notifyIcon" Visibility="Visible" ToolTipText="Warframe info" IconSource="Resources\WFLogo.ico" TrayMouseDoubleClick="ToForeground">
+        <tb:TaskbarIcon x:Name="notifyIcon" Visibility="Visible" ToolTipText="Warframe info" IconSource="Resources\WFLogo.ico" TrayMouseDoubleClick="ToForeground" Grid.ColumnSpan="2">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu Style="{StaticResource WFInfo_ContextMenu}">
                     <ContextMenu.Resources>
@@ -215,15 +195,15 @@
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
 
-
-
-        <ComboBox x:Name="ComboBox" SelectionChanged="ComboBoxOnSelectionChanged" Visibility="Collapsed" Grid.Column="1" HorizontalAlignment="Left" Margin="128,0,0,0" VerticalAlignment="Top" Width="89" Height="26" Background="#FF0F0F0F" Foreground="#FFAFD0D9" BorderBrush="{x:Null}" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" >
+        <ComboBox x:Name="ComboBox"  SelectionChanged="ComboBoxOnSelectionChanged" Visibility="Visible" HorizontalAlignment="Left" VerticalAlignment="Top" Width="65" Height="22" Background="#FF0F0F0F" Foreground="#FFAFD0D9" BorderBrush="{x:Null}" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Margin="228,-1,0,0" >
             <ComboBoxItem Content="In game"/>
             <ComboBoxItem IsSelected="True" Content="Online"/>
             <ComboBoxItem Content="Offline"/>
             <ComboBoxItem Content="Log out"/>
         </ComboBox>
-        <Button x:Name="Login" IsEnabled="False" Content="Login to WFM" Grid.Column="1" HorizontalAlignment="Left" Margin="129,1,0,0" VerticalAlignment="Top" Width="87" Height="24" Background="{x:Null}" Foreground="#FFB1D0D9" Click="SpawnLogin">
+
+
+        <Button x:Name="Login" IsEnabled="False" Content="Login to WFM" HorizontalAlignment="Left" Margin="129,1,0,0" VerticalAlignment="Top" Width="87" Height="24" Background="{x:Null}" Foreground="#FFB1D0D9" Click="SpawnLogin" d:IsHidden="True">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Template">
@@ -243,6 +223,30 @@
                 </Style>
             </Button.Style>
         </Button>
-        <Rectangle Grid.Column="1" HorizontalAlignment="Left" Height="26" Margin="128,0,0,0" Stroke="#FF646464" VerticalAlignment="Top" Width="89"/>
+        <Rectangle HorizontalAlignment="Left" Height="26" Margin="128,0,0,0" Stroke="#FF646464" VerticalAlignment="Top" Width="89" d:IsHidden="True"/>
+        <Label x:Name="CreateListing" ToolTip="Create listings from previous rewards" MouseLeftButtonDown="CreateListing_MouseLeftButtonDown" Margin="0,61,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+            <Label.Style>
+                <Style>
+                    <Setter Property="ContentControl.Content">
+                        <Setter.Value>
+                            <Image Source="Resources/tressure.png" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                <Condition Property="UIElement.IsEnabled" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="ContentControl.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/tressure_h.png" Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
     </Grid>
 </Window>

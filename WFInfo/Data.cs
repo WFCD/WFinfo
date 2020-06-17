@@ -712,7 +712,6 @@ namespace WFInfo {
 					autoThread.Dispose();
 					autoThread = null;
 				}
-				Console.WriteLine(line + (line.Contains("Pause countdown done") || line.Contains("Got rewards")));
 				if (line.Contains("Pause countdown done"))
 					Console.WriteLine("MATCH ENDING");
 

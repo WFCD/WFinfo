@@ -1,6 +1,7 @@
 using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -374,5 +375,26 @@ namespace WFInfo {
         {
 			Login.IsEnabled = true;
         }
+
+        private void CreateListing_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+			if(Main.listingHelper.primeRewards == null || Main.listingHelper.primeRewards.Count == 0)
+            {
+				ChangeStatus("Couldn't create listing helper because there where no recoded rewards", 2);
+				return;
+            }
+
+			Task.Run(() =>
+			{
+				foreach (var rewardscreen in Main.listingHelper.primeRewards)
+				{
+					var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+					Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+				}
+			});
+			Main.listingHelper.SetScreen(0);
+			Main.listingHelper.primeRewards.Clear();
+			Main.listingHelper.Show();
+		}
     }
 }

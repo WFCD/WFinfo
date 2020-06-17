@@ -77,7 +77,6 @@ namespace WFInfo
         {
             try
             {
-                Console.WriteLine("Getting the stream");
                 bufferReadyEvent.Set();
                 while (!token.IsCancellationRequested)
                 {             
@@ -94,7 +93,6 @@ namespace WFInfo
                                 int index = Array.IndexOf(chars, '\0');
                                 string message = new string(chars, 0, index);
                                 TextChanged(this, message.Trim());
-                                Console.WriteLine(message.Trim());
                             }
                         }
                     }

@@ -27,19 +27,19 @@ namespace WFInfo
         public async void Start()
         {
 	        Search(null, null);
-	        //     Main.searchBox.Show();
-	        //     MainWindow.INSTANCE.Topmost = true;
-	        //     Main.searchBox.placeholder.Content = "Search for warframe.market Items";
-	        //        if (!await Main.dataBase.IsJWTvalid())
-	        //        {
-	        //            Main.searchBox.placeholder.Content = "Please log in first";
-	        //Main.login.MoveLogin(Left, Main.searchBox.Top - 130);
-	        //            return;
-	        //     }
-	        //        MainWindow.INSTANCE.Topmost = false;
-	        //        isInUse = true;
-	        //        Main.searchBox.Show();
-	        //        searchField.Focusable = true;
+            Main.searchBox.Show();
+            MainWindow.INSTANCE.Topmost = true;
+            Main.searchBox.placeholder.Content = "Search for warframe.market Items";
+            if (!Main.dataBase.IsJwtAvailable())
+            {
+                Main.searchBox.placeholder.Content = "Please log in first";
+                Main.login.MoveLogin(Left, Main.searchBox.Top - 130);
+                return;
+            }
+            MainWindow.INSTANCE.Topmost = false;
+            isInUse = true;
+            Main.searchBox.Show();
+            searchField.Focusable = true;
         }
         /// <summary>
         /// Stats a search, it will try to get the closest item from the search box and spawn a create listing screen
@@ -48,33 +48,13 @@ namespace WFInfo
         /// <param name="e"></param>
         private void Search(object sender, RoutedEventArgs e)
         {
-            //var closest = Main.dataBase.GetPartNameHuman(searchField.Text, out _);
-            //var primeRewards = new List<string> { closest };
-            //var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
-            //Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-            //Main.listingHelper.SetScreen(0);
-
-
             try
             {
-                Main.listingHelper.ShowLoading(); //todo:This shit ain't working
-	            var rewardCollection = Task.Factory.StartNew(() => Main.listingHelper.GetRewardCollection(Main.listingHelper.primeRewards.First())).Result;
-	            Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-	            Main.listingHelper.SetScreen(0);
-	            Main.listingHelper.Show();
-
-	            Task.Run(() =>
-	            {
-		            foreach (var rewardscreen in Main.listingHelper.primeRewards) {
-                        if(Main.listingHelper.primeRewards.First() == rewardscreen)
-                            continue;
-			            rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-			            Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-		            }
-                });
-                Main.listingHelper.SetScreen(0);
-	            Main.listingHelper.primeRewards.Clear();
-	            Main.listingHelper.showFinished();
+                var closest = Main.dataBase.GetPartNameHuman(searchField.Text, out _);
+                var primeRewards = new List<string> { closest };
+                var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
+                Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                Main.listingHelper.SetScreen(Main.listingHelper.screensList.Count-1);
             }
             catch (Exception exception)
             {
