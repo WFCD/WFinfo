@@ -43,7 +43,7 @@ namespace WFInfo
             }
 
             var startTimeSpan = TimeSpan.Zero;
-            var periodTimeSpan = TimeSpan.FromSeconds(1);
+            var periodTimeSpan = TimeSpan.FromMinutes(1);
 
             timer = new Timer((e) =>
             {
