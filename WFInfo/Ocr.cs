@@ -1349,7 +1349,6 @@ namespace WFInfo
             }
             foreach (Process process in Process.GetProcesses())
             {
-                Console.WriteLine(process.MainWindowTitle == "Warframe");
                 if (process.MainWindowTitle == "Warframe")
                 {
                     HandleRef = new HandleRef(process, process.MainWindowHandle);

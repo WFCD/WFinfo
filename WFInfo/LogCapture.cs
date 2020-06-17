@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using WebSocketSharp;
 
 namespace WFInfo
 {
@@ -53,7 +52,8 @@ namespace WFInfo
 
                     message = streamReader.ReadLine();
                     Console.WriteLine(message);
-                    TextChanged(this, message.Trim());
+                    if(!message.IsNullOrEmpty())
+                        TextChanged(this, message.Trim());
                 }
 
             }
