@@ -712,8 +712,29 @@ namespace WFInfo {
 					autoThread.Dispose();
 					autoThread = null;
 				}
-				if (line.Contains("Pause countdown done"))
-					Console.WriteLine("MATCH ENDING");
+
+				if (line.Contains("MatchingService::EndSession"))
+                {
+					if (Main.listingHelper.primeRewards == null || Main.listingHelper.primeRewards.Count == 0)
+					{
+						return;
+					}
+
+					Task.Run(() =>
+					{
+						foreach (var rewardscreen in Main.listingHelper.primeRewards)
+						{
+							var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+							Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+						}
+					});
+					Main.RunOnUIThread(() =>
+					{
+						Main.listingHelper.SetScreen(0);
+						Main.listingHelper.primeRewards.Clear();
+						Main.listingHelper.Show();
+					}); 
+				}
 
 				if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
 					autoThread = Task.Factory.StartNew(AutoTriggered);

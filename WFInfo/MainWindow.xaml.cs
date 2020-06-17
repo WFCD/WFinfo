@@ -380,7 +380,7 @@ namespace WFInfo {
         {
 			if(Main.listingHelper.primeRewards == null || Main.listingHelper.primeRewards.Count == 0)
             {
-				ChangeStatus("Couldn't create listing helper because there where no recoded rewards", 2);
+				ChangeStatus("No recorded rewards found", 2);
 				return;
             }
 

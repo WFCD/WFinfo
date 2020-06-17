@@ -6,28 +6,29 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="WFInfo.MainWindow"
         mc:Ignorable="d"
-        Title="WFInfo" Height="105" Width="335" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
+        Title="WFInfo" Height="105" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
 
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
 
-        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="0,-1,0,0" Height="22" VerticalAlignment="Top"/>
-        <Rectangle Stroke="#FF646464" Margin="0,-1,0,0"/>
-        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="0,0,42,0" Height="20" VerticalAlignment="Bottom"/>
-        <Rectangle Stroke="#FF646464" Margin="0,20,0,0" HorizontalAlignment="Right" Width="43"/>
-        <Rectangle Stroke="#FF414141" Margin="313,20,21,0"/>
 
-        <Image Margin="1,-1,0,0" Source="Resources/WFLogo.png" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="19" />
-        <TextBlock Text="WFInfo" Margin="25,0,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" Height="20" FontWeight="Bold" Width="55"/>
-        <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="77,0,0,0" FontSize="11" FontWeight="Bold" Width="43" Height="21"/>
-        <Label x:Name="minimise" MouseLeftButtonDown="Minimise" Content="_" Margin="0,-1,21,0" Style="{StaticResource Label_Button}" Padding="0,0,0,3" Height="22" VerticalAlignment="Top" HorizontalAlignment="Right" Width="22"/>
-        <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" Style="{StaticResource Label_Button}" Margin="0,-1,0,0" Height="22" VerticalAlignment="Top" HorizontalAlignment="Right" Width="22"/>
-        <Label x:Name="Website" ToolTip="Opens WFinfo discord" MouseLeftButtonDown="websiteClick" Margin="0,21,1,0" Padding="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0,1,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Height="22" VerticalAlignment="Top"/>
+        <Rectangle Stroke="#FF646464"/>
+        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="0,0,42,0" Height="20" VerticalAlignment="Bottom"/>
+        <Rectangle Stroke="#FF646464" Margin="0,21,0,0" HorizontalAlignment="Right" Width="43"/>
+        <Rectangle Stroke="#FF414141" Margin="313,22,21,1"/>
+
+        <Image Margin="1,0,0,0" Source="Resources/WFLogo.png" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="19" />
+        <TextBlock Text="WFInfo" Margin="25,1,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" Height="20" FontWeight="Bold" Width="55"/>
+        <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="77,1,0,0" FontSize="11" FontWeight="Bold" Width="43" Height="21"/>
+        <Label x:Name="minimise" MouseLeftButtonDown="Minimise" Content="_" Margin="0,0,21,0" Style="{StaticResource Label_Button}" Padding="0,0,0,3" Height="22" VerticalAlignment="Top" HorizontalAlignment="Right" Width="22" BorderBrush="{x:Null}"/>
+        <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" Style="{StaticResource Label_Button}" Height="22" VerticalAlignment="Top" HorizontalAlignment="Right" Width="22"/>
+        <Label x:Name="Website" ToolTip="Opens WFinfo discord" MouseLeftButtonDown="websiteClick" Margin="0,22,1,0" Padding="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0,1,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
-                    <Setter Property="Label.Content">
+                    <Setter Property="ContentControl.Content">
                         <Setter.Value>
                             <Image Source="Resources/discord.png" Stretch="Uniform" />
                         </Setter.Value>
@@ -35,10 +36,10 @@
                     <Style.Triggers>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
-                                <Condition Property="Label.IsMouseOver" Value="True"/>
-                                <Condition Property="Label.IsEnabled" Value="True"/>
+                                <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                <Condition Property="UIElement.IsEnabled" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter Property="Label.Content">
+                            <Setter Property="ContentControl.Content">
                                 <Setter.Value>
                                     <Image Source="Resources/discord_h.png" Stretch="Uniform" />
                                 </Setter.Value>
@@ -48,10 +49,10 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="Relics" ToolTip="Relics, search for what relic you need to use" MouseLeftButtonDown="relicsClick" Margin="0,21,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label x:Name="Relics" ToolTip="Relics, search for what relic you need to use" MouseLeftButtonDown="relicsClick" Margin="0,22,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
-                    <Setter Property="Label.Content">
+                    <Setter Property="ContentControl.Content">
                         <Setter.Value>
                             <Image Source="Resources/Relic.png" Stretch="Uniform" />
                         </Setter.Value>
@@ -59,10 +60,10 @@
                     <Style.Triggers>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
-                                <Condition Property="Label.IsMouseOver" Value="True"/>
-                                <Condition Property="Label.IsEnabled" Value="True"/>
+                                <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                <Condition Property="UIElement.IsEnabled" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter Property="Label.Content">
+                            <Setter Property="ContentControl.Content">
                                 <Setter.Value>
                                     <Image Source="Resources/Relic_h.png" Stretch="Uniform" />
                                 </Setter.Value>
@@ -72,10 +73,10 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="Gear" ToolTip="Equpiment, see which items you own" MouseLeftButtonDown="equipmentClick"  Margin="0,41,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label x:Name="Gear" ToolTip="Equpiment, see which items you own" MouseLeftButtonDown="equipmentClick"  Margin="0,42,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
-                    <Setter Property="Label.Content">
+                    <Setter Property="ContentControl.Content">
                         <Setter.Value>
                             <Image Source="Resources/gear.png" Stretch="Uniform" />
                         </Setter.Value>
@@ -83,10 +84,10 @@
                     <Style.Triggers>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
-                                <Condition Property="Label.IsMouseOver" Value="True"/>
-                                <Condition Property="Label.IsEnabled" Value="True"/>
+                                <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                <Condition Property="UIElement.IsEnabled" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter Property="Label.Content">
+                            <Setter Property="ContentControl.Content">
                                 <Setter.Value>
                                     <Image Source="Resources/gear_h.png" Stretch="Uniform" />
                                 </Setter.Value>
@@ -96,10 +97,10 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="Settings_Button" ToolTip="Settings" MouseLeftButtonDown="Settings_click" Margin="0,41,1,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label x:Name="Settings_Button" ToolTip="Settings" MouseLeftButtonDown="Settings_click" Margin="0,42,1,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
-                    <Setter Property="Label.Content">
+                    <Setter Property="ContentControl.Content">
                         <Setter.Value>
                             <Image Source="Resources/Settings.png" Stretch="Uniform" />
                         </Setter.Value>
@@ -107,10 +108,10 @@
                     <Style.Triggers>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
-                                <Condition Property="Label.IsMouseOver" Value="True"/>
-                                <Condition Property="Label.IsEnabled" Value="True"/>
+                                <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                <Condition Property="UIElement.IsEnabled" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter Property="Label.Content">
+                            <Setter Property="ContentControl.Content">
                                 <Setter.Value>
                                     <Image Source="Resources/Settings_h.png" Stretch="Uniform" />
                                 </Setter.Value>
@@ -123,7 +124,7 @@
         <Label x:Name="ReloadMarket" ToolTip="Reloads market data" Grid.Column="0" Foreground="{x:Null}" MouseLeftButtonDown="ReloadMarketClick" Margin="6,29,0,0" Padding="3" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20">
             <Label.Style>
                 <Style>
-                    <Setter Property="Label.Content">
+                    <Setter Property="ContentControl.Content">
                         <Setter.Value>
                             <Image Source="Resources/Reload.png" Stretch="Uniform" />
                         </Setter.Value>
@@ -131,10 +132,10 @@
                     <Style.Triggers>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
-                                <Condition Property="Label.IsMouseOver" Value="True"/>
-                                <Condition Property="Label.IsEnabled" Value="True"/>
+                                <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                <Condition Property="UIElement.IsEnabled" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter Property="Label.Content">
+                            <Setter Property="ContentControl.Content">
                                 <Setter.Value>
                                     <Image Source="Resources/Reload_h.png" Stretch="Uniform" />
                                 </Setter.Value>
@@ -147,7 +148,7 @@
         <Label x:Name="ReloadDrop" ToolTip="Reloads prime data" Grid.Column="0" Foreground="{x:Null}" MouseLeftButtonDown="ReloadDropClick" Margin="6,53,0,0" Padding="3" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20">
             <Label.Style>
                 <Style>
-                    <Setter Property="Label.Content">
+                    <Setter Property="ContentControl.Content">
                         <Setter.Value>
                             <Image Source="Resources/Reload.png" Stretch="Uniform" />
                         </Setter.Value>
@@ -155,10 +156,10 @@
                     <Style.Triggers>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
-                                <Condition Property="Label.IsMouseOver" Value="True"/>
-                                <Condition Property="Label.IsEnabled" Value="True"/>
+                                <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                <Condition Property="UIElement.IsEnabled" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter Property="Label.Content">
+                            <Setter Property="ContentControl.Content">
                                 <Setter.Value>
                                     <Image Source="Resources/Reload_h.png" Stretch="Uniform" />
                                 </Setter.Value>
@@ -175,17 +176,18 @@
         <Label x:Name="Market_Data"       Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="132,27,0,0" VerticalAlignment="Top" Height="26" HorizontalAlignment="Left" Width="156"/>
         <Label x:Name="Drop_Data_Label"   Content="Prime Data:"  Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="26,53,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="23" Width="101"/>
         <Label x:Name="Drop_Data"         Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="132,53,0,0" VerticalAlignment="Top" Height="26" HorizontalAlignment="Left" Width="156"/>
-        <Label x:Name="Wiki_Data_Label"   Content="Wiki Data:"   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="0,52,109,0" VerticalAlignment="Top" HorizontalAlignment="Right" Visibility="Hidden" Height="26" Width="81" d:IsHidden="True"/>
-        <Label x:Name="Wiki_Data"         Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="117,52,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Hidden" Height="26" Width="80" d:IsHidden="True"/>
 
         <tb:TaskbarIcon x:Name="notifyIcon" Visibility="Visible" ToolTipText="Warframe info" IconSource="Resources\WFLogo.ico" TrayMouseDoubleClick="ToForeground" Grid.ColumnSpan="2">
             <tb:TaskbarIcon.ContextMenu>
-                <ContextMenu Style="{StaticResource WFInfo_ContextMenu}">
+                <ContextMenu>
                     <ContextMenu.Resources>
-                        <Style TargetType="MenuItem" BasedOn="{StaticResource baseStyle}">
+                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource baseStyle}">
                             <Setter Property="Template" Value="{StaticResource WFInfo_MenuItem}" />
                         </Style>
                     </ContextMenu.Resources>
+                    <ContextMenu.Style>
+                        <StaticResource ResourceKey="WFInfo_ContextMenu"/>
+                    </ContextMenu.Style>
                     <MenuItem Header="Show" Click="ToForeground" FontWeight="Heavy"/>
                     <MenuItem Header="Relics" Click="relicsClick" />
                     <MenuItem Header="Equipment" Click="equipmentClick" />
@@ -194,37 +196,7 @@
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
-
-        <ComboBox x:Name="ComboBox"  SelectionChanged="ComboBoxOnSelectionChanged" Visibility="Visible" HorizontalAlignment="Left" VerticalAlignment="Top" Width="65" Height="22" Background="#FF0F0F0F" Foreground="#FFAFD0D9" BorderBrush="{x:Null}" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Margin="228,-1,0,0" >
-            <ComboBoxItem Content="In game"/>
-            <ComboBoxItem IsSelected="True" Content="Online"/>
-            <ComboBoxItem Content="Offline"/>
-            <ComboBoxItem Content="Log out"/>
-        </ComboBox>
-
-
-        <Button x:Name="Login" IsEnabled="False" Content="Login to WFM" HorizontalAlignment="Left" Margin="129,1,0,0" VerticalAlignment="Top" Width="87" Height="24" Background="{x:Null}" Foreground="#FFB1D0D9" Click="SpawnLogin" d:IsHidden="True">
-            <Button.Style>
-                <Style TargetType="{x:Type Button}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type Button}">
-                                <Border x:Name="Border" Background="{TemplateBinding Background}">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#1b1b1b" TargetName="Border" />
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </Button.Style>
-        </Button>
-        <Rectangle HorizontalAlignment="Left" Height="26" Margin="128,0,0,0" Stroke="#FF646464" VerticalAlignment="Top" Width="89" d:IsHidden="True"/>
-        <Label x:Name="CreateListing" ToolTip="Create listings from previous rewards" MouseLeftButtonDown="CreateListing_MouseLeftButtonDown" Margin="0,61,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label x:Name="CreateListing" ToolTip="Create listings from previous rewards" MouseLeftButtonDown="CreateListing_MouseLeftButtonDown" Margin="0,62,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="ContentControl.Content">
@@ -248,5 +220,32 @@
                 </Style>
             </Label.Style>
         </Label>
+        <Rectangle Stroke="#FF646464" Margin="209,0,42,0" Height="22" VerticalAlignment="Top"/>
+        <Button x:Name="Login" IsEnabled="False" Content="Login to WFM" HorizontalAlignment="Left" Margin="210,1,0,0" VerticalAlignment="Top" Width="81" Height="20" Background="{x:Null}" Foreground="#FFB1D0D9" Click="SpawnLogin">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Border x:Name="Border" Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#1b1b1b" TargetName="Border" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Button.Style>
+        </Button>
+        <ComboBox x:Name="ComboBox"  SelectionChanged="ComboBoxOnSelectionChanged" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top" Width="82" Height="22" Background="#FF0F0F0F" Foreground="#FFAFD0D9" BorderBrush="{x:Null}" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Margin="210,0,0,0" >
+            <ComboBoxItem Content="In game"/>
+            <ComboBoxItem IsSelected="True" Content="Online"/>
+            <ComboBoxItem Content="Offline"/>
+            <ComboBoxItem Content="Log out"/>
+        </ComboBox>
     </Grid>
 </Window>
