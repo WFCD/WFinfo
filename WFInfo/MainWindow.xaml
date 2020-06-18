@@ -196,7 +196,7 @@
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
-        <Label x:Name="CreateListing" ToolTip="Create listings from previous rewards" MouseLeftButtonDown="CreateListing_MouseLeftButtonDown" Margin="0,62,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label Visibility="Collapsed" x:Name="CreateListing" ToolTip="Create listings from previous rewards" MouseLeftButtonDown="CreateListing_MouseLeftButtonDown" Margin="0,62,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="ContentControl.Content">
@@ -241,7 +241,7 @@
                 </Style>
             </Button.Style>
         </Button>
-        <Label x:Name="plusOne" ToolTip="Create listings from previous rewards" MouseLeftButtonDown="plusOne_MouseLeftButtonDown" Margin="0,82,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label x:Name="plusOne" Visibility="Collapsed" ToolTip="Create listings from previous rewards" MouseLeftButtonDown="plusOne_MouseLeftButtonDown" Margin="0,82,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="ContentControl.Content">

@@ -303,6 +303,10 @@ namespace WFInfo {
 			Login.Visibility = Visibility.Collapsed;
 			ComboBox.SelectedIndex = 1;
 			ComboBox.Visibility = Visibility.Visible;
+			plusOne.Visibility = Visibility.Visible;
+			CreateListing.Visibility = Visibility.Visible;
+			OCR.VerifyWarframe();
+
 			ChangeStatus("Logged in", 0);
 		}
 
@@ -366,6 +370,8 @@ namespace WFInfo {
 				case 3: //Sign out
 				Login.Visibility = Visibility.Visible;
 				ComboBox.Visibility = Visibility.Hidden;
+				plusOne.Visibility = Visibility.Hidden;
+				CreateListing.Visibility = Visibility.Hidden;
 				Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
 				break;
 			}
