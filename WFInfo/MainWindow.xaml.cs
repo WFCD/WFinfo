@@ -394,7 +394,13 @@ namespace WFInfo {
 			});
 			Main.listingHelper.SetScreen(0);
 			Main.listingHelper.primeRewards.Clear();
+			WindowState = WindowState.Normal;
 			Main.listingHelper.Show();
 		}
+
+        private void plusOne_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+			Main.plusOne.Show();
+        }
     }
 }

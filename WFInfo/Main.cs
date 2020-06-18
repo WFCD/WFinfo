@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using AutoUpdaterDotNET;
 using System.Windows;
 using System.Windows.Forms;
+using System.Threading;
+using WFInfo.Resources;
 
 namespace WFInfo
 {
@@ -29,6 +31,7 @@ namespace WFInfo
         public static Login login = new Login();
         public static CreateListing listingHelper = new CreateListing();
         public static DateTime latestActive = new DateTime();
+        public static PlusOne plusOne = new PlusOne();
         public Main()
         {
             INSTANCE = this;
@@ -62,9 +65,13 @@ namespace WFInfo
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
+                    Task.Run(async () =>
+                    {
+                        await dataBase.openWebSocket();
+
+                    });
                     latestActive = DateTime.UtcNow.AddMinutes(15);
                     loggedIn();
-	                dataBase.openWebSocket();
 
                     var startTimeSpan = TimeSpan.Zero;
                     var periodTimeSpan = TimeSpan.FromMinutes(1);
@@ -279,7 +286,7 @@ namespace WFInfo
 		private void LoadScreenshot()
 		{
 		    // Using WinForms for the openFileDialog because it's simpler and much easier
-		    using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
+		    using (OpenFileDialog openFileDialog = new OpenFileDialog())
 		    {
 		        openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
 		        openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
@@ -321,7 +328,7 @@ namespace WFInfo
 
         private void LoadScreenshotSnap()
         {
-            using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
                 openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";

@@ -194,6 +194,9 @@
       <DependentUpon>CreateListingDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="CustomEntrypoint.cs" />
+    <Compile Include="PlusOne.xaml.cs">
+      <DependentUpon>PlusOne.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SearchIt.xaml.cs">
       <DependentUpon>SearchIt.xaml</DependentUpon>
     </Compile>
@@ -238,6 +241,10 @@
       <DependentUpon>RewardWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="CreateListingDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PlusOne.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -483,6 +490,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\tressure_h.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\plusone.png" />
+    <Resource Include="Resources\plusone_h.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EmbedReferencedAssemblies" AfterTargets="ResolveAssemblyReferences">

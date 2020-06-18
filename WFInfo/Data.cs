@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using WebSocketSharp;
 
@@ -720,14 +721,14 @@ namespace WFInfo {
 						return;
 					}
 
-					Task.Run(() =>
+					Console.WriteLine($"There are {Main.listingHelper.primeRewards.Count} elements in prime rewards");
+
+					foreach (var rewardscreen in Main.listingHelper.primeRewards)
 					{
-						foreach (var rewardscreen in Main.listingHelper.primeRewards)
-						{
-							var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-							Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-						}
-					});
+						var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+						Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+					}
+
 					Main.RunOnUIThread(() =>
 					{
 						Main.listingHelper.SetScreen(0);
@@ -803,10 +804,10 @@ namespace WFInfo {
 		/// Attempts to connect the user's account to the websocket
 		/// </summary>
 		/// <returns>A task to be awaited</returns>
-		public async Task openWebSocket() {
+		public async Task<bool> openWebSocket() {
 
 			if (marketSocket.IsAlive) {
-				return;
+				return false;
 			}
 
 			marketSocket.OnMessage += (sender, e) =>
@@ -843,7 +844,7 @@ namespace WFInfo {
 			marketSocket.OnOpen += (sender, e) => {
 				marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}"); //
 			};
-
+			return true;
 		}
 
 
@@ -958,9 +959,9 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="status">
 		/// </param>
-		public async Task SetWebsocketStatus(string status) {
+		public async Task<bool> SetWebsocketStatus(string status) {
 			if (!IsJwtAvailable())
-				return;
+				return false;
 
 			var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
 			switch (status) {
@@ -981,6 +982,7 @@ namespace WFInfo {
 				Main.AddLog("Was unable to set status due to: " + e);
 				throw;
 			}
+			return true;
 		}
 
 		/// <summary>
@@ -1118,6 +1120,38 @@ namespace WFInfo {
 				Main.AddLog("\nException Caught!");
 				Main.AddLog("Message : " + e.Message);
 				return null;
+			}
+		}
+
+		public async Task<bool> postReview(List<string> developers, string message = "Thank you for WFinfo!")
+        {
+			var msg = $"{{\"text\":\"{message}\",\"review_type\":\"1\"}}";
+			if (developers == null || developers.Count == 0)
+				developers.Add("Dapal003");
+			try
+			{
+                foreach (var developer in developers)
+                {
+					var request = new HttpRequestMessage()
+					{
+						RequestUri = new Uri("https://api.warframe.market/v1/profile/" + developer + "/review"),
+						Method = HttpMethod.Post
+					};
+					request.Headers.Add("Authorization", "JWT " + JWT);
+					request.Headers.Add("language", "en");
+					request.Headers.Add("accept", "application/json");
+					request.Headers.Add("platform", "pc");
+					request.Headers.Add("auth_type", "header");
+					request.Content = new StringContent(msg, System.Text.Encoding.UTF8, "application/json");
+					var response = await client.SendAsync(request);
+				}
+				return true;
+			}
+			catch (Exception e)
+			{
+				Main.AddLog("\nException Caught!");
+				Main.AddLog("Message : " + e.Message);
+				return false;
 			}
 		}
 

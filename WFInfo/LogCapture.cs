@@ -19,8 +19,6 @@ namespace WFInfo
         private CancellationToken token;
         private static Timer timer;
         public event LogWatcherEventHandler TextChanged;
-        private FileStream fileStream;
-        private StreamReader streamReader;
         public LogCapture()
         {
             Main.AddLog("Starting LogCapture");
@@ -120,8 +118,6 @@ namespace WFInfo
 
         public void Dispose()
         {
-            fileStream.Dispose();
-            streamReader.Dispose();
             timer.Dispose();
             if (memoryMappedFile != null)
                 memoryMappedFile.Dispose();

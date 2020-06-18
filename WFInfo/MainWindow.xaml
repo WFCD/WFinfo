@@ -6,7 +6,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="WFInfo.MainWindow"
         mc:Ignorable="d"
-        Title="WFInfo" Height="105" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
+        Title="WFInfo" Height="103.25" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
@@ -16,7 +16,7 @@
 
         <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Height="22" VerticalAlignment="Top"/>
         <Rectangle Stroke="#FF646464"/>
-        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="0,0,42,0" Height="20" VerticalAlignment="Bottom"/>
+        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="0,0,42,0" Height="21" VerticalAlignment="Bottom"/>
         <Rectangle Stroke="#FF646464" Margin="0,21,0,0" HorizontalAlignment="Right" Width="43"/>
         <Rectangle Stroke="#FF414141" Margin="313,22,21,1"/>
 
@@ -170,8 +170,8 @@
             </Label.Style>
         </Label>
         <TextBlock                 Text="Status:"    FontSize="13" Margin="3,0,0,1"
-                                   Grid.Column="0" FontFamily="{StaticResource Roboto_Condensed_Bold}" Height="17" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="41"/>
-        <TextBlock x:Name="Status" Text="Loading..." FontSize="13" Margin="44,0,43,1"     FontFamily="{StaticResource Roboto_Condensed}" Height="17" VerticalAlignment="Bottom"/>
+                                   Grid.Column="0" FontFamily="{StaticResource Roboto_Condensed_Bold}" Height="18" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="41"/>
+        <TextBlock x:Name="Status" Text="Loading..." FontSize="13" Margin="44,0,43,1"     FontFamily="{StaticResource Roboto_Condensed}" Height="18" VerticalAlignment="Bottom"/>
         <Label x:Name="Market_Data_Label" Content="Market Data:" Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="26,27,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="24" Width="101"/>
         <Label x:Name="Market_Data"       Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="132,27,0,0" VerticalAlignment="Top" Height="26" HorizontalAlignment="Left" Width="156"/>
         <Label x:Name="Drop_Data_Label"   Content="Prime Data:"  Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="26,53,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="23" Width="101"/>
@@ -220,8 +220,8 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Rectangle Stroke="#FF646464" Margin="209,0,42,0" Height="22" VerticalAlignment="Top"/>
-        <Button x:Name="Login" IsEnabled="False" Content="Login to WFM" HorizontalAlignment="Left" Margin="210,1,0,0" VerticalAlignment="Top" Width="81" Height="20" Background="{x:Null}" Foreground="#FFB1D0D9" Click="SpawnLogin">
+        <Rectangle Stroke="#FF646464" Margin="210,0,42,0" Height="22" VerticalAlignment="Top"/>
+        <Button x:Name="Login" IsEnabled="False" Content="Login to WFM" HorizontalAlignment="Left" Margin="211,1,0,0" VerticalAlignment="Top" Width="80" Height="20" Background="{x:Null}" Foreground="#FFB1D0D9" Click="SpawnLogin">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Template">
@@ -241,6 +241,30 @@
                 </Style>
             </Button.Style>
         </Button>
+        <Label x:Name="plusOne" ToolTip="Create listings from previous rewards" MouseLeftButtonDown="plusOne_MouseLeftButtonDown" Margin="0,82,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+            <Label.Style>
+                <Style>
+                    <Setter Property="ContentControl.Content">
+                        <Setter.Value>
+                            <Image Source="Resources/plusone.png" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                <Condition Property="UIElement.IsEnabled" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="ContentControl.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/plusone_h.png" Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
         <ComboBox x:Name="ComboBox"  SelectionChanged="ComboBoxOnSelectionChanged" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top" Width="82" Height="22" Background="#FF0F0F0F" Foreground="#FFAFD0D9" BorderBrush="{x:Null}" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Margin="210,0,0,0" >
             <ComboBoxItem Content="In game"/>
             <ComboBoxItem IsSelected="True" Content="Online"/>

@@ -26,8 +26,15 @@ namespace WFInfo {
 			InitializeComponent();
 		}
 
-		private void Hide(object sender, RoutedEventArgs e) {
+		private void Minimize(object sender, RoutedEventArgs e) {
+			WindowState = WindowState.Minimized;
+		}
+
+		private void Close(object sender, RoutedEventArgs e)
+		{
 			Hide();
+			screensList = new List<KeyValuePair<string, RewardCollection>>();
+			pageIndex = 0;
 		}
 
 		// Allows the draging of the window
@@ -47,7 +54,7 @@ namespace WFInfo {
 		{
 			Main.AddLog($"Screen list is {screensList.Count} long and setting to index: {index}");
 
-			if (screensList.Count < index || 0 > index )
+			if (screensList.Count < index || 0 > index  || screensList.Count == 0)
 			{
 				throw new Exception("Tried setting screen to an item that didn't exist");
 			}
@@ -207,7 +214,7 @@ namespace WFInfo {
 			if (screensList.Count == 1)
 			{
 				// if it's the last item
-				Hide(null, null);
+				Minimize(null, null);
 				screensList = new List<KeyValuePair<string, RewardCollection>>();
 				pageIndex = 0;
 				return;
@@ -256,7 +263,7 @@ namespace WFInfo {
 					continue;
 				var tempListings = GetMarketListing(primeItem);
 				marketListings.Add(tempListings);
-				platinumValues.Add(tempListings[1].platinum);
+				platinumValues.Add(tempListings[0].platinum);
 			}
 			return new RewardCollection(primeNames, platinumValues, marketListings);
 		}

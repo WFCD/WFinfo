@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
@@ -88,6 +89,9 @@ namespace WFInfo
         private static Stopwatch watch = new Stopwatch();
         public static Point center;
         public static Rectangle window;
+
+        private static NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
+        private static IFormatProvider provider = CultureInfo.CreateSpecificCulture("en-GB");
 
         //public static float dpi;
         //private static double ScreenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
@@ -204,8 +208,7 @@ namespace WFInfo
             int bestDucatItem = 0;
             List<int> unownedItems = new List<int>();
 
-            NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
-            IFormatProvider provider = CultureInfo.CreateSpecificCulture("en-GB");
+
 
             if (firstChecks.Length > 0)
             {
@@ -386,6 +389,7 @@ namespace WFInfo
 
         public static void SlowSecondProcess()
         {
+            var tempclipboard = "";
 
             Bitmap newFilter = ScaleUpAndFilter(partialScreenshot, activeTheme);
             partialScreenshotExpanded.Save(Main.appPath + @"\Debug\PartShotUpscaled " + timestamp + ".png");
@@ -424,25 +428,46 @@ namespace WFInfo
                             else
 	                            primeRewards.Add(secondName);
                             
-                            string plat = job["plat"].ToObject<string>();
+                            string platinum = job["plat"].ToObject<string>();
                             string volume = job["volume"].ToObject<string>();
                             bool vaulted = Main.dataBase.IsPartVaulted(secondName);
                             string partsOwned = Main.dataBase.PartsOwned(secondName);
                             string partsCount = Main.dataBase.PartsCount(secondName);
 
+
+
+                            if (double.Parse(platinum, styles, provider) > 0)
+                            {
+                                if (tempclipboard != String.Empty) { tempclipboard += "-  "; }
+
+                                tempclipboard += "[" + secondName.Replace(" Blueprint", "") + "]: " + platinum + ":platinum: ";
+
+                                if (Settings.ClipboardVaulted)
+                                {
+                                    tempclipboard += ducats + ":ducats:";
+                                    if (vaulted)
+                                        tempclipboard += "(V)";
+                                }
+                            }
+
+                            if ((partNumber == firstChecks.Length - 1) && (tempclipboard != String.Empty))
+                            {
+                                tempclipboard += Settings.ClipboardTemplate;
+                            }
+
                             Main.RunOnUIThread(() =>
                             {
                                 if (Settings.isOverlaySelected)
                                 {
-                                    Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                    Main.overlays[partNumber].LoadTextData(secondName, platinum, ducats, volume, vaulted, partsOwned, hideRewardInfo);
                                 }
                                 else if (!Settings.isLightSlected)
                                 {
-                                    Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, partsOwned + "/" + partsCount, hideRewardInfo);
+                                    Main.overlays[partNumber].LoadTextData(secondName, platinum, ducats, volume, vaulted, partsOwned + "/" + partsCount, hideRewardInfo);
                                 }
                                 else
                                 {
-                                    Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
+                                    Main.window.loadTextData(secondName, platinum, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
                                 }
                             });
 
@@ -452,6 +477,15 @@ namespace WFInfo
                         partNumber++;
                     }
                 }
+
+                if (Settings.clipboard && tempclipboard != string.Empty)
+                {
+                    Main.RunOnUIThread(() =>
+                    {
+                        Clipboard.SetText(tempclipboard);
+                    });
+                }
+
                 if (Main.listingHelper.primeRewards.Last() == primeRewards || primeRewards.Count == 0) return;
 
                 Main.listingHelper.primeRewards.RemoveAt(Main.listingHelper.primeRewards.Count-1);
@@ -470,7 +504,7 @@ namespace WFInfo
                 Main.AddLog(ex.ToString());
                 Main.RunOnUIThread(() =>
                 {
-	                Main.SpawnErrorPopup(time);
+                    Main.SpawnErrorPopup(time);
                 });
                 throw;
             }

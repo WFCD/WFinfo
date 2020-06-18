@@ -24,7 +24,7 @@ namespace WFInfo
         /// <summary>
         /// Launch snapit, prompts user if not logged in
         /// </summary>
-        public async void Start()
+        public void Start()
         {
 	        Search(null, null);
             Main.searchBox.Show();
