@@ -229,10 +229,12 @@ namespace WFInfo
 	                    string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
                         JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
                         string ducats = job["ducats"].ToObject<string>();
-                        if (int.Parse(ducats) == 0) {
-	                        hideRewardInfo = true;
-                        } else
-	                        primeRewards.Add(correctName);
+                        if (int.Parse(ducats) == 0)
+                        {
+                            hideRewardInfo = true;
+                        }
+                        else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
+                            primeRewards.Add(correctName);
                         string plat = job["plat"].ToObject<string>();
                         double platinum = double.Parse(plat, styles, provider);
                         string volume = job["volume"].ToObject<string>();
@@ -425,7 +427,7 @@ namespace WFInfo
                             {
                                 hideRewardInfo = true;
                             }
-                            else
+                            else if(secondName != "Kuva" || secondName != "Exilus Weapon Adapter Blueprint" || secondName != "Riven Sliver" || secondName != "Ayatan Amber Star")
 	                            primeRewards.Add(secondName);
                             
                             string platinum = job["plat"].ToObject<string>();
