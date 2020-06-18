@@ -726,6 +726,8 @@ namespace WFInfo {
 					foreach (var rewardscreen in Main.listingHelper.primeRewards)
 					{
 						var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+						if (rewardCollection.primeNames.Count == 0)
+							return;
 						Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
 					}
 

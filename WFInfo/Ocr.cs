@@ -400,13 +400,13 @@ namespace WFInfo
             secondChecks = SeparatePlayers(newFilter, secondEngine);
             var primeRewards = new List<string>();
 
-            if (secondChecks != null && firstChecks.Length != secondChecks.Count)
-            {
-                //Whelp, we fucked bois
-                Main.AddLog("Second check didn't find the same amount of part names");
-                Main.StatusUpdate("Verification of items failed", 2);
-                return;
-            }
+            //if (secondChecks != null && firstChecks.Length != secondChecks.Count)
+            //{
+            //    //Whelp, we fucked bois
+            //    Main.AddLog("Second check didn't find the same amount of part names");
+            //    Main.StatusUpdate("Verification of items failed", 2);
+            //    return;
+            //}
             bool hideRewardInfo = false;
             int partNumber = 0;
             try
