@@ -390,7 +390,7 @@ namespace WFInfo {
 				return;
             }
 
-			Task.Run(() =>
+			var t = Task.Run(() =>
 			{
 				foreach (var rewardscreen in Main.listingHelper.primeRewards)
 				{
@@ -398,6 +398,7 @@ namespace WFInfo {
 					Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
 				}
 			});
+			t.Wait();
 			Main.listingHelper.SetScreen(0);
 			Main.listingHelper.primeRewards.Clear();
 			WindowState = WindowState.Normal;
