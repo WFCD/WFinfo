@@ -798,7 +798,7 @@ namespace WFInfo {
 					setJWT(response.Headers);
 					await openWebSocket();
 				} else {
-					throw new Exception(responseBody + $"Email: {email}, Pw length: {password.Length}");
+					throw new Exception("GetUserLogin, " + responseBody + $"Email: {email}, Pw length: {password.Length}");
 				}
 			}
 
@@ -895,7 +895,7 @@ namespace WFInfo {
 
 			}
 			catch (Exception e) {
-				Main.AddLog($"Exception Caught!\n Message :{e.Message} ");
+				Main.AddLog($"ListItem: {e.Message} ");
 				return false;
 			}
 		}
@@ -932,7 +932,7 @@ namespace WFInfo {
 				return true;
 			}
 			catch (Exception e) {
-				Main.AddLog($"Exception Caught!\n Message :{e.Message} ");
+				Main.AddLog($"updateListing: {e.Message} ");
 				return false;
 			}
 		}
@@ -949,7 +949,7 @@ namespace WFInfo {
 				if (marketItem.Value.ToString().Contains(primeItem))
 					return marketItem.Key;
 			}
-			throw new Exception($"Prime item \"{primeItem}\" does not exist in marketItem");
+			throw new Exception($"PrimeItemToItemID, Prime item \"{primeItem}\" does not exist in marketItem");
 		}
 
 		/// <summary>
@@ -981,7 +981,7 @@ namespace WFInfo {
 				SendMessage(message);
 			}
 			catch (Exception e) {
-				Main.AddLog("Was unable to set status due to: " + e);
+				Main.AddLog("SetWebsocketStatus, Was unable to set status due to: " + e);
 				throw;
 			}
 			return true;
@@ -1038,8 +1038,7 @@ namespace WFInfo {
 
 			}
 			catch (Exception e) {
-				Main.AddLog("\nException Caught!");
-				Main.AddLog("Message : " + e.Message);
+				Main.AddLog("GetTopListings: " + e.Message);
 				return null;
 			}
 		}
@@ -1065,7 +1064,7 @@ namespace WFInfo {
 				return (string)profile.GetValue("role") != "anonymous";
 			}
 			catch (Exception e) {
-				Main.AddLog($"Exception Caught!\n Message :{e.Message} ");
+				Main.AddLog($"IsJWTvalid: {e.Message} ");
 				return false;
 			}
 
@@ -1119,21 +1118,18 @@ namespace WFInfo {
 				}
 			}
 			catch (Exception e) {
-				Main.AddLog("\nException Caught!");
-				Main.AddLog("Message : " + e.Message);
+				Main.AddLog("GetCurrentListing: " + e.Message);
 				return null;
 			}
 		}
 
-		public async Task<bool> postReview(List<string> developers, string message = "Thank you for WFinfo!")
+		public async Task<bool> postReview(string message = "Thank you for WFinfo!")
         {
 			var msg = $"{{\"text\":\"{message}\",\"review_type\":\"1\"}}";
-			if (developers == null || developers.Count == 0)
-				developers.Add("Dapal003");
-			try
+			var developers = new List<string> { "dimon222", "Dapal003", "Kekasi" };
+			foreach (var developer in developers)
 			{
-                foreach (var developer in developers)
-                {
+				try {
 					var request = new HttpRequestMessage()
 					{
 						RequestUri = new Uri("https://api.warframe.market/v1/profile/" + developer + "/review"),
@@ -1146,15 +1142,16 @@ namespace WFInfo {
 					request.Headers.Add("auth_type", "header");
 					request.Content = new StringContent(msg, System.Text.Encoding.UTF8, "application/json");
 					var response = await client.SendAsync(request);
+					var body = await response.Content.ReadAsStringAsync();
+					Console.WriteLine($"Body: {body}, Content: {msg}");
 				}
-				return true;
+				catch (Exception e)
+				{
+					Main.AddLog("PostReview: " + e.Message);
+					return false;
+				}
 			}
-			catch (Exception e)
-			{
-				Main.AddLog("\nException Caught!");
-				Main.AddLog("Message : " + e.Message);
-				return false;
-			}
+			return true;
 		}
 
 		/// <summary>

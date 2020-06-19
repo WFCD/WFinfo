@@ -395,10 +395,18 @@ namespace WFInfo {
 				foreach (var rewardscreen in Main.listingHelper.primeRewards)
 				{
 					var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+					if(rewardCollection.primeNames.Count == 0)
+						continue;
 					Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
 				}
 			});
 			t.Wait();
+			if(Main.listingHelper.screensList.Count == 0)
+            {
+				ChangeStatus("No recorded rewards found", 2);
+				return;
+				
+			}
 			Main.listingHelper.SetScreen(0);
 			Main.listingHelper.primeRewards.Clear();
 			WindowState = WindowState.Normal;
