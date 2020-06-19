@@ -59,17 +59,17 @@ namespace WFInfo
 
                 //RelicsWindow.LoadNodesOnThread();
                 OCR.init();
-                StatusUpdate("WFInfo Initialization Complete", 0);
-                AddLog("WFInfo has launched successfully");
+
                 if ((bool)Settings.settingsObj["Auto"])
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
-                    Task.Run(async () =>
+                    var t = Task.Run(async () =>
                     {
                         await dataBase.openWebSocket();
 
                     });
+                    t.Wait();
                     latestActive = DateTime.UtcNow.AddMinutes(15);
                     loggedIn();
 
@@ -81,7 +81,14 @@ namespace WFInfo
                         TimeoutCheck();
                     }, null, startTimeSpan, periodTimeSpan);
                 }
+                StatusUpdate("WFInfo Initialization Complete", 0);
+                AddLog("WFInfo has launched successfully");
                 finishedLoading();
+                var t2 = Task.Run(() =>
+                {
+                    Thread.Sleep(5000);
+                    OCR.VerifyWarframe();
+                });
             }
             catch (Exception ex)
             {
@@ -98,7 +105,6 @@ namespace WFInfo
         {
             if (!await dataBase.IsJWTvalid())
                 return;
-
             var now = DateTime.UtcNow;
             Console.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {Main.latestActive}");
             if (now > latestActive)

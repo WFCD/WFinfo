@@ -1389,7 +1389,7 @@ namespace WFInfo
                 {
                     HandleRef = new HandleRef(process, process.MainWindowHandle);
                     Warframe = process;
-                    if (Main.dataBase.IsJwtAvailable())
+                    if (Main.dataBase.getSocketAliveStatus())
 	                    Task.Run(async () => {
 		                    await Main.dataBase.SetWebsocketStatus("in game");
 	                    });

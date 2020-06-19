@@ -812,6 +812,15 @@ namespace WFInfo {
 				return false;
 			}
 
+			marketSocket.OnMessage += (sender, e) => {
+				if (e.Data.Contains("@WS/ERROR")) // error checking, report back to main.status
+				{
+					Main.AddLog(e.Data);
+					Disconnect();
+					Main.signOut();
+				}
+			};
+
 			marketSocket.OnMessage += (sender, e) =>
 			{
 				Console.WriteLine("warframe.market: " + e.Data);
@@ -823,6 +832,17 @@ namespace WFInfo {
 				});
 
 			};
+
+			marketSocket.OnOpen += (sender, e) => {
+				if (OCR.VerifyWarframe())
+				{
+					marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}");
+				}
+				else
+					marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
+
+			};
+
 			marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 			try
 			{
@@ -833,19 +853,6 @@ namespace WFInfo {
 				Main.AddLog(e.Message);
 				throw;
 			}
-
-			marketSocket.OnMessage += (sender, e) => {
-				if (e.Data.Contains("@WS/ERROR")) // error checking, report back to main.status
-				{
-					Main.AddLog(e.Data);
-					Disconnect();
-					Main.signOut();
-				}
-			};
-
-			marketSocket.OnOpen += (sender, e) => {
-				marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}"); //
-			};
 			return true;
 		}
 
@@ -1123,6 +1130,17 @@ namespace WFInfo {
 			}
 		}
 
+
+		public bool getSocketAliveStatus()
+        {
+			return marketSocket.IsAlive;
+        }
+
+		/// <summary>
+		/// Post a review on the developers page
+		/// </summary>
+		/// <param name="message">The content of the review</param>
+		/// <returns></returns>
 		public async Task<bool> postReview(string message = "Thank you for WFinfo!")
         {
 			var msg = $"{{\"text\":\"{message}\",\"review_type\":\"1\"}}";

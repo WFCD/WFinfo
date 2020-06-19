@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -64,6 +65,7 @@ namespace WFInfo {
 				Settings.settingsObj["MainWindowLocation_Y"] = Top;
 
 				Settings.Save();
+
 
 			}
 			catch (Exception e) {
@@ -305,7 +307,6 @@ namespace WFInfo {
 			ComboBox.Visibility = Visibility.Visible;
 			plusOne.Visibility = Visibility.Visible;
 			CreateListing.Visibility = Visibility.Visible;
-			OCR.VerifyWarframe();
 
 			ChangeStatus("Logged in", 0);
 		}
