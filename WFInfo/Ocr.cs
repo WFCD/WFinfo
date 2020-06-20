@@ -432,13 +432,11 @@ namespace WFInfo
                             string platinum = job["plat"].ToObject<string>();
                             string volume = job["volume"].ToObject<string>();
                             bool vaulted = Main.dataBase.IsPartVaulted(secondName);
-                            string partsOwned = Main.dataBase.PartsOwned(secondName);
-                            string partsCount = Main.dataBase.PartsCount(secondName);
-
+                            var parts = $"{Main.dataBase.PartsOwned(secondName)} / {Main.dataBase.PartsCount(secondName)}";
 
                             if (!secondName.Contains("Forma"))
                             {
-                                if (tempclipboard != String.Empty) { tempclipboard += "-  "; }
+                                if (tempclipboard != string.Empty) { tempclipboard += "-  "; }
 
                                 tempclipboard += "[" + secondName.Replace(" Blueprint", "") + "]: " + platinum + ":platinum: ";
 
@@ -459,15 +457,15 @@ namespace WFInfo
                             {
                                 if (Settings.isOverlaySelected)
                                 {
-                                    Main.overlays[partNumber].LoadTextData(secondName, platinum, ducats, volume, vaulted, partsOwned, hideRewardInfo);
+                                    Main.overlays[partNumber].LoadTextData(secondName, platinum, ducats, volume, vaulted, parts, hideRewardInfo);
                                 }
                                 else if (!Settings.isLightSlected)
                                 {
-                                    Main.overlays[partNumber].LoadTextData(secondName, platinum, ducats, volume, vaulted, partsOwned + "/" + partsCount, hideRewardInfo);
+                                    Main.overlays[partNumber].LoadTextData(secondName, platinum, ducats, volume, vaulted, parts, hideRewardInfo);
                                 }
                                 else
                                 {
-                                    Main.window.loadTextData(secondName, platinum, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
+                                    Main.window.loadTextData(secondName, platinum, ducats, volume, vaulted, parts, partNumber, false, hideRewardInfo);
                                 }
 
                                 if (Settings.clipboard && tempclipboard != string.Empty)
