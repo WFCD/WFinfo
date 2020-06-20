@@ -419,8 +419,8 @@ namespace WFInfo
                     {
                         string second = secondChecks[i];
                         string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
-                        if (secondProximity[i] < firstProximity[i])
-                        {
+                        //if (secondProximity[i] < firstProximity[i])
+                        //{
                             JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
                             string ducats = job["ducats"].ToObject<string>();
                             string plat = job["plat"].ToObject<string>();
@@ -436,8 +436,10 @@ namespace WFInfo
                                 hideRewardInfo = true;
                             }
                             else if (secondName != "Kuva" || secondName != "Exilus Weapon Adapter Blueprint" || secondName != "Riven Sliver" || secondName != "Ayatan Amber Star")
+                            {
+                                Console.WriteLine($"Adding : {secondName}");
                                 primeRewards.Add(secondName);
-
+                            }
                             #region clipboard
                             if (platinum > 0)
                             {
@@ -502,7 +504,7 @@ namespace WFInfo
                             #endregion
 
 
-                        }
+                        //}
                         hideRewardInfo = false;
                         partNumber++;
                     }
