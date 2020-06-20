@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
@@ -86,7 +85,6 @@ namespace WFInfo
         }
         public static HandleRef HandleRef { get; private set; }
         public static Process Warframe = null;
-        private static Stopwatch watch = new Stopwatch();
         public static Point center;
         public static Rectangle window;
 
@@ -169,6 +167,8 @@ namespace WFInfo
 
             DateTime time = DateTime.UtcNow;
             timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff");
+            var watch = new Stopwatch();
+            watch.Start();
             long start = watch.ElapsedMilliseconds;
 
             List<Bitmap> parts;
@@ -650,7 +650,8 @@ namespace WFInfo
         /// <param name="snapItImage"></param>
         internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot, Point snapItOrigin)
         {
-            watch.Restart();
+            var watch = new Stopwatch();
+            watch.Start();
             long start = watch.ElapsedMilliseconds;
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff");
@@ -922,7 +923,8 @@ namespace WFInfo
         private static readonly int[] TextSegments = new int[] { 2, 4, 16, 21 };
         private static List<Bitmap> ExtractPartBoxAutomatically(out double scaling, out WFtheme active, Bitmap fullScreen = null)
         {
-            watch.Restart();
+            var watch = new Stopwatch();
+            watch.Start();
             long start = watch.ElapsedMilliseconds;
             long beginning = start;
 
