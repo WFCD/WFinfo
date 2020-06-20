@@ -227,14 +227,14 @@ namespace WFInfo
 		        StatusUpdate("Closed snapit", 0);
 		        return;
 		    }
-		    if (searchBox.isInUse)
-		    { //if key is pressed and searchbox is active then rederect keystokes to it.
-		        if (key == Key.Escape)
-		        { // close it if esc is used.
-		            searchBox.finish();
-		            return;
-		        }
-		        searchBox.searchField.Focus();
+            if (searchBox.isInUse)
+            { //if key is pressed and searchbox is active then rederect keystokes to it.
+                if (key == Key.Escape)
+                { // close it if esc is used.
+                    searchBox.finish();
+                    return;
+                }
+                searchBox.searchField.Focus();
 		        return;
 		    }
 

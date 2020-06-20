@@ -389,10 +389,10 @@ namespace WFInfo
 
         }
 
-        public static void SlowSecondProcess()
+        public static void SlowSecondProcess() //todo: Fix bug where main.listinghelper.primeitems latest entery is not being updated.
         {
             var tempclipboard = "";
-
+            var changedRewards = false;
             Bitmap newFilter = ScaleUpAndFilter(partialScreenshot, activeTheme);
             partialScreenshotExpanded.Save(Main.appPath + @"\Debug\PartShotUpscaled " + timestamp + ".png");
             newFilter.Save(Main.appPath + @"\Debug\PartShotUpscaledFiltered " + timestamp + ".png");
@@ -420,7 +420,7 @@ namespace WFInfo
                         string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
                         if (secondProximity[i] < firstProximity[i])
                         {
-
+                            changedRewards = true;
                             JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
                             string ducats = job["ducats"].ToObject<string>();
                             if (int.Parse(ducats) == 0)
@@ -437,8 +437,7 @@ namespace WFInfo
                             string partsCount = Main.dataBase.PartsCount(secondName);
 
 
-
-                            if (double.Parse(platinum, styles, provider) > 0)
+                            if (!secondName.Contains("Forma"))
                             {
                                 if (tempclipboard != String.Empty) { tempclipboard += "-  "; }
 
@@ -451,11 +450,11 @@ namespace WFInfo
                                         tempclipboard += "(V)";
                                 }
                             }
-
                             if ((partNumber == firstChecks.Length - 1) && (tempclipboard != String.Empty))
                             {
                                 tempclipboard += Settings.ClipboardTemplate;
                             }
+
 
                             Main.RunOnUIThread(() =>
                             {
@@ -471,6 +470,9 @@ namespace WFInfo
                                 {
                                     Main.window.loadTextData(secondName, platinum, ducats, volume, vaulted, partsOwned, partNumber, false, hideRewardInfo);
                                 }
+
+                                if (Settings.clipboard && tempclipboard != string.Empty)
+                                    Clipboard.SetText(tempclipboard);
                             });
 
 
@@ -480,15 +482,8 @@ namespace WFInfo
                     }
                 }
 
-                if (Settings.clipboard && tempclipboard != string.Empty)
-                {
-                    Main.RunOnUIThread(() =>
-                    {
-                        Clipboard.SetText(tempclipboard);
-                    });
-                }
 
-                if (Main.listingHelper.primeRewards.Last() == primeRewards || primeRewards.Count == 0) return;
+                if (!changedRewards) return;
 
                 Main.listingHelper.primeRewards.RemoveAt(Main.listingHelper.primeRewards.Count-1);
                 var msg = primeRewards.Aggregate("", (current, item) => current + $"{item}, ");

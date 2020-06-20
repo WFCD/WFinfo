@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,7 +26,6 @@ namespace WFInfo
         /// </summary>
         public void Start()
         {
-	        Search(null, null);
             Main.searchBox.Show();
             MainWindow.INSTANCE.Topmost = true;
             Main.searchBox.placeholder.Content = "Search for warframe.market Items";
@@ -40,6 +39,8 @@ namespace WFInfo
             isInUse = true;
             Main.searchBox.Show();
             searchField.Focusable = true;
+            Main.searchBox.Topmost = true;
+            Win32.BringToFront(Process.GetCurrentProcess());
         }
         /// <summary>
         /// Stats a search, it will try to get the closest item from the search box and spawn a create listing screen
@@ -83,7 +84,7 @@ namespace WFInfo
         {
             if (searchField.Text != "")
                 placeholder.Visibility = Visibility.Hidden;
-            
+            Console.WriteLine(e.Changes);
         }
     }
 }

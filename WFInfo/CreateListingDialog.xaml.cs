@@ -183,15 +183,6 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="index">the currently selected prime item</param>
 		private void SetListings(int index) {
-
-			if(index > 2)
-            {
-				RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
-				if (key.GetValue("review") != null)
-					Main.dataBase.postReview();
-				key.Close();
-			}
-
 			PlatinumTextBox.Text = screensList[pageIndex].Value.platinumValues[index].ToString();
 
 			Platinum0.Content = screensList[pageIndex].Value.marketListings[index][0].platinum;

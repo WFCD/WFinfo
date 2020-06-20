@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -36,6 +37,14 @@ namespace WFInfo
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        public static void BringToFront(Process pTemp)
+        {
+            SetForegroundWindow(pTemp.MainWindowHandle);
+        }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct r
