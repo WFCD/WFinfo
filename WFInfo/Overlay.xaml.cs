@@ -35,11 +35,13 @@ namespace WFInfo
         public static double ducatImageMarginLeft = 172.0;
         public static double ducatImageMarginBottom = 44.0;
         public static double ducatImageHeightWidth = 20.0;
-
+        
         public static double large_font = 18.0;
         public static double mediumFont = 17.0;
         public static double smallFont = 14.0;
 
+        private static Color blu = Color.FromRgb(177, 208, 217);
+        private static SolidColorBrush bluBrush = new SolidColorBrush(blu);
 
         private DispatcherTimer hider = new DispatcherTimer();
 
@@ -76,13 +78,13 @@ namespace WFInfo
 
         public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, bool hideRewardInfo)
         {
-            ducatText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
-            platText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
-            ownedText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
-            partText.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
-            platText.FontWeight = FontWeights.Normal;
-            ownedText.FontWeight = FontWeights.Normal;
+            ducatText.Foreground = bluBrush;
             ducatText.FontWeight = FontWeights.Normal;
+            platText.Foreground = bluBrush;
+            platText.FontWeight = FontWeights.Normal;
+            ownedText.Foreground = bluBrush;
+            ownedText.FontWeight = FontWeights.Normal;
+            partText.Foreground = bluBrush;
             partText.FontWeight = FontWeights.Normal;
 
             if (Settings.highContrast)
@@ -126,6 +128,18 @@ namespace WFInfo
                 else
                     ownedText.Text = "";
             }
+        }
+
+        public void clear()
+        {
+            ducatText.Foreground = bluBrush;
+            ducatText.FontWeight = FontWeights.Normal;
+            platText.Foreground = bluBrush;
+            platText.FontWeight = FontWeights.Normal;
+            ownedText.Foreground = bluBrush;
+            ownedText.FontWeight = FontWeights.Normal;
+            partText.Foreground = bluBrush;
+            partText.FontWeight = FontWeights.Normal;
         }
 
         public void Resize(int wid)
