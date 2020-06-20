@@ -79,7 +79,15 @@ namespace WFInfo {
 		public void NextScreen(object sender, RoutedEventArgs e) //todo throwing out of range error
 		{
 			Back.IsEnabled = true;
-
+			if (primeRewards.Count > 0)
+			{ // if there are new prime rewards
+				Next.Content = "...";
+				var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards.First())).Result;
+				if (rewardCollection.primeNames.Count != 0)
+					Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+				primeRewards.RemoveAt(0);
+				Next.Content = "Next";
+			}
 			if (screensList.Count - 1 == pageIndex) //reached the end of the list
 			{
 				Next.IsEnabled = false;
@@ -96,6 +104,9 @@ namespace WFInfo {
 		public void PreviousScreen(object sender, RoutedEventArgs e) {
 			
 			Next.IsEnabled = true;
+
+			Console.WriteLine($"There are {screensList.Count} screens and: {primeRewards} prime rewards. Currently on screen {pageIndex} and trying to go to the previous screen");
+
 			if (pageIndex == 0) {//reached start of the list
 				Back.IsEnabled = false;
 				return;
@@ -109,6 +120,8 @@ namespace WFInfo {
 		/// </summary>
 		private void SetCurrentStatus()
 		{
+
+			Console.WriteLine($"Current status is: {screensList[pageIndex].Key}");
 			switch (screensList[pageIndex].Key)
 			{
 				//listing already successfully posted
@@ -119,6 +132,7 @@ namespace WFInfo {
 					Status.Content = "Listing already successfully posted";
 					Status.Visibility = Visibility.Visible;
 					ComboBox.IsEnabled = false;
+					ConfirmListingButton.IsEnabled = true;
 					break;
 				case "": //listing is not yet assigned anything
 					Height = 255;
@@ -132,6 +146,7 @@ namespace WFInfo {
 					Status.Visibility = Visibility.Visible;
 					ListingGrid.Visibility = Visibility.Visible;
 					ComboBox.IsEnabled = true;
+					ConfirmListingButton.IsEnabled = true;
 					break;
 			}
 		}
@@ -142,6 +157,7 @@ namespace WFInfo {
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
 		private void ConfirmListing(object sender, RoutedEventArgs e) {
+			Main.AddLog("Trying to place listing");
 			try
 			{
 				var primeItem = (string) ComboBox.Items[ComboBox.SelectedIndex];

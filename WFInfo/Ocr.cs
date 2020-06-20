@@ -420,7 +420,6 @@ namespace WFInfo
                         string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
                         if (secondProximity[i] < firstProximity[i])
                         {
-                            changedRewards = true;
                             JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
                             string ducats = job["ducats"].ToObject<string>();
                             if (int.Parse(ducats) == 0)
@@ -484,7 +483,6 @@ namespace WFInfo
 
 
                 if (!changedRewards) return;
-
                 Main.listingHelper.primeRewards.RemoveAt(Main.listingHelper.primeRewards.Count-1);
                 var msg = primeRewards.Aggregate("", (current, item) => current + $"{item}, ");
 

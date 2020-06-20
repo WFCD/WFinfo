@@ -21,7 +21,7 @@
                 <TextBox x:FieldModifier="private" x:Name="PlatinumTextBox" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="20,15,0,0" TextWrapping="Wrap" Text="Platinum" VerticalAlignment="Top" Width="100" BorderBrush="#FF646464" TextChanged="PlatinumTextBox_TextChanged"/>
                 <Label Padding="0" Foreground="#FF6D6D6D" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Center" Content="Platinum" Margin="20,0,0,0" VerticalAlignment="Top" Height="15" FontSize="10" HorizontalAlignment="Left" Width="100"/>
                 <Rectangle HorizontalAlignment="Left" Height="24" Stroke="#FF646464" VerticalAlignment="Top" Width="100" Margin="180,14,0,0"/>
-                <Button x:Name="ConfirmListingButton" x:FieldModifier="private" HorizontalContentAlignment="Center" Content="Confirm listing" Margin="0,14,20,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}" HorizontalAlignment="Right" Width="100" Click="ConfirmListing" Foreground="#FFB1D0D9" Height="24">
+                <Button x:Name="ConfirmListingButton" VerticalContentAlignment="Center" x:FieldModifier="private" HorizontalContentAlignment="Center" Content="Confirm listing" Margin="0,15,21,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}" HorizontalAlignment="Right" Width="98" Click="ConfirmListing" Foreground="#FFB1D0D9" Height="22">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
                             <Setter Property="Template">

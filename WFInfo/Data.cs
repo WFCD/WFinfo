@@ -714,8 +714,11 @@ namespace WFInfo {
 					autoThread = null;
 				}
 
+				if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
+					autoThread = Task.Factory.StartNew(AutoTriggered);
+
 				if (line.Contains("MatchingService::EndSession"))
-                {
+				{
 					if (Main.listingHelper.primeRewards == null || Main.listingHelper.primeRewards.Count == 0)
 					{
 						return;
@@ -736,11 +739,9 @@ namespace WFInfo {
 						Main.listingHelper.SetScreen(0);
 						Main.listingHelper.primeRewards.Clear();
 						Main.listingHelper.Show();
-					}); 
+					});
 				}
 
-				if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
-					autoThread = Task.Factory.StartNew(AutoTriggered);
 			}
 		}
 
@@ -1041,6 +1042,7 @@ namespace WFInfo {
 				var payload = JsonConvert.DeserializeObject<JObject>(body);
 				if (body.Length < 3)
 					throw new Exception("No sell orders found: " + payload);
+				Console.WriteLine(body);
 				return JsonConvert.DeserializeObject<JObject>(body);
 
 			}

@@ -85,8 +85,7 @@ namespace WFInfo
                             uint processId = reader.ReadUInt32();
                             if (processId == OCR.Warframe.Id)
                             {
-                                if(timer != null)
-                                    timer.Dispose();
+                                timer.Dispose();
                                 char[] chars = reader.ReadChars(4092);
                                 int index = Array.IndexOf(chars, '\0');
                                 string message = new string(chars, 0, index);
