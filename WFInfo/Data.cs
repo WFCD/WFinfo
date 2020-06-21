@@ -724,8 +724,6 @@ namespace WFInfo {
 						return;
 					}
 
-					Console.WriteLine($"There are {Main.listingHelper.primeRewards.Count} elements in prime rewards");
-
 					foreach (var rewardscreen in Main.listingHelper.primeRewards)
 					{
 						var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
@@ -736,9 +734,11 @@ namespace WFInfo {
 
 					Main.RunOnUIThread(() =>
 					{
-						Main.listingHelper.SetScreen(0);
+						if (Main.listingHelper.Visibility == System.Windows.Visibility.Hidden)
+							Main.listingHelper.SetScreen(0);
 						Main.listingHelper.primeRewards.Clear();
 						Main.listingHelper.Show();
+						
 					});
 				}
 
