@@ -248,13 +248,6 @@ namespace WFInfo
                     foreach (KeyValuePair<string, JToken> part in prime.Value["parts"].ToObject<JObject>())
                     {
                         string partName = part.Key;
-                        if (prime.Key.Contains("Collar"))
-                        {
-                            if (partName.Contains("Kubrow"))
-                                partName = partName.Replace(" Kubrow", "");
-                            else
-                                partName = partName.Replace("Prime", "Prime Collar");
-                        }
                         if (!equipmentData[primeName]["parts"].ToObject<JObject>().TryGetValue(partName, out _))
                             equipmentData[primeName]["parts"][partName] = new JObject();
                         if (!equipmentData[primeName]["parts"][partName].ToObject<JObject>().TryGetValue("owned", out _))
