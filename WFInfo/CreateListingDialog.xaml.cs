@@ -54,8 +54,9 @@ namespace WFInfo {
 		public void SetScreen(int index)
 		{
 			Main.AddLog($"Screen list is {screensList.Count} long and setting to index: {index}");
-
-			if (screensList.Count < index || 0 > index  || screensList.Count == 0)
+			if (screensList.Count == 0)
+				Close();
+			if (screensList.Count < index || 0 > index)
 			{
 				throw new Exception("Tried setting screen to an item that didn't exist");
 			}

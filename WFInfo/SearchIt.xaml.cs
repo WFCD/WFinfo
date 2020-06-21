@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Navigation;
 
 namespace WFInfo
 {
@@ -56,6 +57,7 @@ namespace WFInfo
                 var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
                 Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
                 Main.listingHelper.SetScreen(Main.listingHelper.screensList.Count-1);
+                Main.listingHelper.Show();
             }
             catch (Exception exception)
             {
@@ -84,7 +86,6 @@ namespace WFInfo
         {
             if (searchField.Text != "")
                 placeholder.Visibility = Visibility.Hidden;
-            Console.WriteLine(e.Changes);
         }
     }
 }
