@@ -2,6 +2,7 @@ using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -66,7 +67,7 @@ namespace WFInfo {
 
 				Settings.Save();
 
-
+				Closing += new CancelEventHandler(loggOut);
 			}
 			catch (Exception e) {
 				Main.AddLog("An error occured while loading the main window: " + e.Message);
@@ -344,38 +345,48 @@ namespace WFInfo {
 			}
 		}
 
-		/// <summary>
-		/// Allows the user to overwrite the current websocket status
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e) {
-			if (!ComboBox.IsLoaded) //Prevent firing off to early
-				return;
-			switch (ComboBox.SelectedIndex) {
-				case 0: //Online in game
-				Task.Run(async () => {
-					await Main.dataBase.SetWebsocketStatus("in game");
-				});
-				break;
-				case 1: //Online
-				Task.Run(async () => {
-					await Main.dataBase.SetWebsocketStatus("online");
-				});
-				break;
-				case 2: //Invisible
-				Task.Run(async () => {
-					await Main.dataBase.SetWebsocketStatus("offline");
-				});
-				break;
-				case 3: //Sign out
-				Login.Visibility = Visibility.Visible;
-				ComboBox.Visibility = Visibility.Hidden;
-				plusOne.Visibility = Visibility.Hidden;
-				CreateListing.Visibility = Visibility.Hidden;
-				Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
-				break;
-			}
+        /// <summary>
+        /// Allows the user to overwrite the current websocket status
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!ComboBox.IsLoaded) //Prevent firing off to early
+                return;
+            switch (ComboBox.SelectedIndex)
+            {
+                case 0: //Online in game
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("in game");
+                    });
+                    break;
+                case 1: //Online
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("online");
+                    });
+                    break;
+                case 2: //Invisible
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("offline");
+                    });
+                    break;
+                case 3: //Sign out
+					loggOut(null, null);
+					break;
+            }
+        }
+
+		internal void loggOut(object sender, CancelEventArgs e)
+        {
+			Login.Visibility = Visibility.Visible;
+			ComboBox.Visibility = Visibility.Hidden;
+			plusOne.Visibility = Visibility.Hidden;
+			CreateListing.Visibility = Visibility.Hidden;
+			Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
 		}
 
         internal void FinishedLoading()
