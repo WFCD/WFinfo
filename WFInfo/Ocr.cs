@@ -1356,7 +1356,7 @@ namespace WFInfo
             if (Warframe != null && !Warframe.HasExited) { return true; }
             foreach (Process process in Process.GetProcesses())
             {
-                if (process.MainWindowTitle == "Warframe")
+                if (process.ProcessName == "Warframe.x64")
                 {
                     HandleRef = new HandleRef(process, process.MainWindowHandle);
                     Warframe = process;
