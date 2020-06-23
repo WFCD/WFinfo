@@ -32,6 +32,7 @@ namespace WFInfo
         public static DateTime latestActive = new DateTime();
         public static PlusOne plusOne = new PlusOne();
         public static System.Threading.Timer timer;
+        public static System.Drawing.Point lastClick;
         public Main()
         {
             INSTANCE = this;
@@ -153,7 +154,7 @@ namespace WFInfo
         public void OnMouseAction(MouseButton key)
         {
             latestActive = DateTime.UtcNow.AddMinutes(15);
-            //Console.WriteLine(System.Windows.Forms.Cursor.Position);
+            
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
                 if (Keyboard.IsKeyDown(Key.Delete))
@@ -207,6 +208,11 @@ namespace WFInfo
                 {
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
+            }else if (key== MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited)
+            {
+                lastClick = System.Windows.Forms.Cursor.Position;
+                OCR.GetSelectedReward(lastClick);
+                Console.WriteLine(OCR.window.ToString());
             }
         }
 

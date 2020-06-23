@@ -376,6 +376,106 @@ namespace WFInfo
 
         }
 
+        internal static void GetSelectedReward(Point lastClick)
+        {
+            var img = CaptureScreenshot();
+            //var img = Image.FromFile(@"F:\s.png");
+            //OCR.UpdateWindow((Bitmap)img);
+            uiScaling = 1;
+            int width = window.Width * (int)dpiScaling;
+            int height = window.Height * (int)dpiScaling;
+            var mostWidth = (int)(pixleRewardWidth * screenScaling * uiScaling);
+            var mostLeft = (width / 2) - (mostWidth / 2);
+            var bottom = height / 2 - (int)(pixleRewardYDisplay * screenScaling * 0.5 * uiScaling);
+            var top = height / 2 - (int)((pixleRewardYDisplay) * screenScaling * uiScaling);
+            var selectionRectangle = new Rectangle(mostLeft, top, mostWidth, bottom / 2);
+            if (selectionRectangle.Contains(lastClick))
+                Console.WriteLine("Contianed!");
+            var middelHeight = top + bottom / 4;
+            var length = mostWidth / 8;
+
+            lastClick.Offset(-window.X, -window.Y);
+
+            var RewardPoints4 = new List<Point>() {
+            new Point(mostLeft + length, middelHeight),
+            new Point(mostLeft + 3 * length, middelHeight),
+            new Point(mostLeft + 5 * length, middelHeight),
+            new Point(mostLeft + 7 * length, middelHeight)};
+
+            var RewardPoints3 = new List<Point>() {
+            new Point(mostLeft + 2 * length, middelHeight),
+            new Point(mostLeft + 4 * length, middelHeight),
+            new Point(mostLeft + 6 * length, middelHeight)};
+
+            var lowestDistance = int.MaxValue;
+            var lowestDistancePoint = new Point();
+            if (true) //todo: Find a way to distinguish between 3 pnts and 4 pnts
+            {
+                foreach (var pnt in RewardPoints4)
+                {
+                    var distanceToLastClick = ((lastClick.X - pnt.X) * (lastClick.X - pnt.X) + (lastClick.Y - pnt.Y) * (lastClick.Y - pnt.Y));
+                    Console.WriteLine($"current point: {pnt}, with distance: {distanceToLastClick}");
+
+                    if (distanceToLastClick < lowestDistance)
+                    {
+                        lowestDistance = distanceToLastClick;
+                        lowestDistancePoint = pnt;
+                    }
+                }
+            }
+            else
+            {
+                foreach (var pnt in RewardPoints3)
+                {
+                    var distanceToLastClick = ((lastClick.X - pnt.X) * (lastClick.X - pnt.X) + (lastClick.Y - pnt.Y) * (lastClick.Y - pnt.Y));
+                    Console.WriteLine($"current point: {pnt}, with distance: {distanceToLastClick}");
+
+                    if (distanceToLastClick < lowestDistance)
+                    {
+                        lowestDistance = distanceToLastClick;
+                        lowestDistancePoint = pnt;
+                    }
+                }
+            }
+
+            Console.WriteLine($"Cloestst point: {lowestDistancePoint}, with distance: {lowestDistance}");
+
+            timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
+
+            var pinkP = new Pen(Brushes.Pink);
+            var blackP = new Pen(Brushes.Black);
+            using (Graphics g = Graphics.FromImage(img))
+            {
+                g.DrawRectangle(blackP, selectionRectangle);
+                if (true) //todo: Find a way to distinguish between 3 pnts and 4 pnts
+                {
+                    foreach (var pnt in RewardPoints4)
+                    {
+                        pnt.Offset(-5, -5);
+                        g.DrawEllipse(blackP, new Rectangle(pnt, new Size(10, 10)));
+                    }
+                }
+                else
+                {
+                    foreach (var pnt in RewardPoints3)
+                    {
+                        pnt.Offset(-5, -5);
+                        g.DrawEllipse(blackP, new Rectangle(pnt, new Size(10, 10)));
+                    }
+                }
+                g.DrawLine(pinkP, lastClick, lowestDistancePoint);
+                lastClick.Offset(-5, -5);
+
+                g.DrawEllipse(pinkP, new Rectangle(lastClick, new Size(10, 10)));
+            }
+            img.Save(Main.AppPath + @"\Debug\GetSelectedReward " + timestamp + ".png");
+            pinkP.Dispose();
+            blackP.Dispose();
+            img.Dispose();
+
+            //todo: Export this to listinghelper so that it knows which reward to selkect.
+        }
+
         private const double ERROR_DETECTION_THRESH = 0.25;
         private static bool CheckIfError()
         {
