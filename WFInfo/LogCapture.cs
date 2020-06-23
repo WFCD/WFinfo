@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Text;
 using System.Threading;
-using WebSocketSharp;
+using System.Threading.Tasks;
 
 namespace WFInfo
 {
@@ -11,19 +12,20 @@ namespace WFInfo
 
     class LogCapture : IDisposable
     {
-
         private readonly MemoryMappedFile memoryMappedFile;
         private readonly EventWaitHandle bufferReadyEvent;
-        private readonly EventWaitHandle dataReadyEvent;
+        private EventWaitHandle dataReadyEvent;
         readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
         private CancellationToken token;
-        private static Timer timer;
+        private readonly Timer timer;
         public event LogWatcherEventHandler TextChanged;
+
         public LogCapture()
         {
+            token = tokenSource.Token;
             Main.AddLog("Starting LogCapture");
-
             memoryMappedFile = MemoryMappedFile.CreateOrOpen("DBWIN_BUFFER", 4096L);
+
             bufferReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_BUFFER_READY", out Boolean createdBuffer);
 
             if (!createdBuffer)
@@ -32,75 +34,59 @@ namespace WFInfo
                 return;
             }
 
-            dataReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_DATA_READY", out Boolean createdData);
-
-            if (!createdData)
-            {
-                Main.AddLog("The DBWIN_DATA_READY event exists.");
-                return;
-            }
-
             var startTimeSpan = TimeSpan.Zero;
-            var periodTimeSpan = TimeSpan.FromMinutes(1);
+            var periodTimeSpan = TimeSpan.FromSeconds(10);
 
             timer = new Timer((e) =>
             {
-                getProc();
+                GetProcess();
             }, null, startTimeSpan, periodTimeSpan);
 
-            token = tokenSource.Token;
         }
 
-        private void getProc()
+        private void Run()
         {
+
             try
             {
-                if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
-                {
-                    OCR.VerifyWarframe();
-                }
-                if (OCR.Warframe != null)
-                {
-                    getStream();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog(ex.ToString());
-            }
-        }
-
-        private void getStream()
-        {
-            try
-            {
+                TimeSpan timeout = TimeSpan.FromSeconds(1.0);
                 bufferReadyEvent.Set();
                 while (!token.IsCancellationRequested)
-                {             
-                    using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
+                {
+
+
+                    if (!dataReadyEvent.WaitOne(timeout))
                     {
-                        using (BinaryReader reader = new BinaryReader(stream, Encoding.Default))
+                        continue;
+                    }
+
+                    if (OCR.Warframe != null)
+                    {
+                        using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
                         {
-                            uint processId = reader.ReadUInt32();
-                            if (processId == OCR.Warframe.Id)
+                            using (BinaryReader reader = new BinaryReader(stream, Encoding.Default))
                             {
-                                timer.Dispose();
-                                char[] chars = reader.ReadChars(4092);
-                                int index = Array.IndexOf(chars, '\0');
-                                string message = new string(chars, 0, index);
-                                TextChanged(this, message.Trim());
+                                uint processId = reader.ReadUInt32();
+                                if (processId == OCR.Warframe.Id)
+                                {
+                                    char[] chars = reader.ReadChars(4092);
+                                    int index = Array.IndexOf(chars, '\0');
+                                    string message = new string(chars, 0, index);
+                                    TextChanged(this, message.Trim());
+                                }
                             }
                         }
                     }
-                    
                     bufferReadyEvent.Set();
                 }
             }
             catch (Exception ex)
             {
                 Main.AddLog(ex.ToString());
-                new ErrorDialogue(DateTime.Now, 0);
+                Main.RunOnUIThread(() =>
+                {
+                    _ = new ErrorDialogue(DateTime.Now, 0);
+                });
             }
             finally
             {
@@ -115,9 +101,27 @@ namespace WFInfo
             }
         }
 
+        private void GetProcess()
+        {
+            if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
+            {
+                if (!OCR.VerifyWarframe())
+                    return;
+            }
+            dataReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_DATA_READY", out Boolean createdData);
+
+            if (!createdData)
+            {
+                Main.AddLog("The DBWIN_DATA_READY event exists.");
+                return;
+            }
+
+            Task.Factory.StartNew(Run);
+            timer.Dispose();
+        }
+
         public void Dispose()
         {
-            timer.Dispose();
             if (memoryMappedFile != null)
                 memoryMappedFile.Dispose();
 

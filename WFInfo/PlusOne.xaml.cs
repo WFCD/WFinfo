@@ -48,7 +48,7 @@ namespace WFInfo.Resources
             {
                 var t = Task.Run(async () =>
                 {
-                    await Main.dataBase.postReview(message);
+                    await Main.dataBase.PostReview(message);
                 });
                 t.Wait();
             }

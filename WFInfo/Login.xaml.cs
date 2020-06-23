@@ -66,10 +66,10 @@ namespace WFInfo {
 					} else {
 						Main.StatusUpdate("Too many requests", 1); //default to too many requests
 					}
-					Main.signOut();
+					Main.SignOut();
 					return;
 				}
-				Main.loggedIn();
+				Main.LoggedIn();
 				Email.Text = "Email";
 				Password.Password = "";
 				Main.dataBase.rememberMe = RememberMe.IsChecked.Value;
@@ -77,7 +77,7 @@ namespace WFInfo {
 			Hide(); //dispose of window once done
 			if (Main.searchBox.IsActive) {
 				Main.searchBox.placeholder.Content = "Logged in";
-				Main.searchBox.isInUse = true;
+				Main.searchBox.IsInUse = true;
 				Main.searchBox.searchField.Focusable = true;
 			}
 		}

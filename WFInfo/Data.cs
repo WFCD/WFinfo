@@ -15,7 +15,8 @@ using WebSocketSharp;
 
 namespace WFInfo {
 
-	class Data {
+	class Data : IDisposable
+    {
 		public JObject marketItems; // Warframe.market item listing           {<id>: "<name>|<url_name>", ...}
 		public JObject marketData; // Contains warframe.market ducatonator listing     {<partName>: {"ducats": <ducat_val>,"plat": <plat_val>}, ...}
 		public JObject relicData; // Contains relicData from Warframe PC Drops        {<Era>: {"A1":{"vaulted": true,<rare1/uncommon[12]/common[123]>: <part>}, ...}, "Meso": ..., "Neo": ..., "Axi": ...}
@@ -29,7 +30,7 @@ namespace WFInfo {
 		private readonly string relicDataPath;
 		private readonly string nameDataPath;
 		public string JWT; // JWT is the security key, store this as email+pw combo
-		private WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
+		private readonly WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
 		private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
 		public string inGameName = string.Empty;
 		static readonly HttpClient client = new HttpClient();
@@ -122,7 +123,7 @@ namespace WFInfo {
 				if (marketItems == null)
 					marketItems = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(marketItemsPath));
 
-				if (marketData.TryGetValue("version", out JToken version) && (marketData["version"].ToObject<string>() == Main.BuildVersion)) {
+				if (marketData.TryGetValue("version", out _) && (marketData["version"].ToObject<string>() == Main.BuildVersion)) {
 					DateTime timestamp = marketData["timestamp"].ToObject<DateTime>();
 					if (timestamp > DateTime.Now.AddHours(-12)) {
 						Main.AddLog("Market Databases are up to date");
@@ -144,7 +145,7 @@ namespace WFInfo {
 					{
 						{"plat", double.Parse(row[8].ToString(), Main.culture)},
 						{"ducats", 0},
-						{"volume", int.Parse(row[4].ToString()) + int.Parse(row[6].ToString())}
+						{"volume", int.Parse(row[4].ToString(), Main.culture) + int.Parse(row[6].ToString(), Main.culture)}
 					};
 				}
 			}
@@ -206,9 +207,11 @@ namespace WFInfo {
 
 			if (force || eqmtDate.CompareTo(filteredDate) <= 0) {
 				equipmentData["timestamp"] = DateTime.Now;
-				relicData = new JObject();
-				relicData["timestamp"] = DateTime.Now;
-				nameData = new JObject();
+                relicData = new JObject
+                {
+                    ["timestamp"] = DateTime.Now
+                };
+                nameData = new JObject();
 
 				foreach (KeyValuePair<string, JToken> era in allFiltered["relics"].ToObject<JObject>()) {
 					relicData[era.Key] = new JObject();
@@ -252,7 +255,7 @@ namespace WFInfo {
 						}
 						if (marketData.TryGetValue(partName, out _)) {
 							nameData[gameName] = partName;
-							marketData[partName]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString());
+							marketData[partName]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
 						}
 					}
 				}
@@ -275,51 +278,51 @@ namespace WFInfo {
 				if (prime.Key != "timestamp")
 					foreach (KeyValuePair<string, JToken> part in equipmentData[prime.Key]["parts"].ToObject<JObject>())
 						if (marketData.TryGetValue(part.Key, out _))
-							marketData[part.Key]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString());
+							marketData[part.Key]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
 		}
 
-		private void MarkAllEquipmentVaulted() {
-			foreach (KeyValuePair<string, JToken> kvp in equipmentData) {
-				if (kvp.Key.Contains("Prime")) {
-					equipmentData[kvp.Key]["vaulted"] = true;
-					foreach (KeyValuePair<string, JToken> part in kvp.Value["parts"].ToObject<JObject>()) {
-						equipmentData[kvp.Key]["parts"][part.Key]["vaulted"] = true;
-					}
-				}
-			}
-		}
+		//private void MarkAllEquipmentVaulted() {
+		//	foreach (KeyValuePair<string, JToken> kvp in equipmentData) {
+		//		if (kvp.Key.Contains("Prime")) {
+		//			equipmentData[kvp.Key]["vaulted"] = true;
+		//			foreach (KeyValuePair<string, JToken> part in kvp.Value["parts"].ToObject<JObject>()) {
+		//				equipmentData[kvp.Key]["parts"][part.Key]["vaulted"] = true;
+		//			}
+		//		}
+		//	}
+		//}
 
-		private void GetSetVaultStatus() {
-			foreach (KeyValuePair<string, JToken> keyValuePair in equipmentData) {
-				if (keyValuePair.Key.Contains("Prime")) {
-					bool vaulted = false;
-					foreach (KeyValuePair<string, JToken> part in keyValuePair.Value["parts"].ToObject<JObject>()) {
-						if (part.Value["vaulted"].ToObject<bool>()) {
-							vaulted = true;
-							break;
-						}
-					}
+		//private void GetSetVaultStatus() {
+		//	foreach (KeyValuePair<string, JToken> keyValuePair in equipmentData) {
+		//		if (keyValuePair.Key.Contains("Prime")) {
+		//			bool vaulted = false;
+		//			foreach (KeyValuePair<string, JToken> part in keyValuePair.Value["parts"].ToObject<JObject>()) {
+		//				if (part.Value["vaulted"].ToObject<bool>()) {
+		//					vaulted = true;
+		//					break;
+		//				}
+		//			}
 
-					equipmentData[keyValuePair.Key]["vaulted"] = vaulted;
-				}
-			}
-		}
+		//			equipmentData[keyValuePair.Key]["vaulted"] = vaulted;
+		//		}
+		//	}
+		//}
 
-		private void MarkEquipmentUnvaulted(string era, string name) {
-			JObject job = relicData[era][name].ToObject<JObject>();
-			foreach (KeyValuePair<string, JToken> keyValuePair in job) {
-				string str = keyValuePair.Value.ToObject<string>();
-				if (str.IndexOf("Prime") != -1) {
-					// Cut the name of actual part without Prime prefix ??
-					string eqmt = str.Substring(0, str.IndexOf("Prime") + 5);
-					if (equipmentData.TryGetValue(eqmt, out JToken temp)) {
-						equipmentData[eqmt]["parts"][str]["vaulted"] = false;
-					} else {
-						Main.AddLog("Cannot find: " + eqmt + " in equipmentData");
-					}
-				}
-			}
-		}
+		//private void MarkEquipmentUnvaulted(string era, string name) {
+		//	JObject job = relicData[era][name].ToObject<JObject>();
+		//	foreach (KeyValuePair<string, JToken> keyValuePair in job) {
+		//		string str = keyValuePair.Value.ToObject<string>();
+		//		if (str.IndexOf("Prime") != -1) {
+		//			// Cut the name of actual part without Prime prefix ??
+		//			string eqmt = str.Substring(0, str.IndexOf("Prime") + 5);
+		//			if (equipmentData.TryGetValue(eqmt, out JToken temp)) {
+		//				equipmentData[eqmt]["parts"][str]["vaulted"] = false;
+		//			} else {
+		//				Main.AddLog("Cannot find: " + eqmt + " in equipmentData");
+		//			}
+		//		}
+		//	}
+		//}
 
 		public bool Update() {
 			Main.AddLog("Checking for Updates to Databases");
@@ -347,10 +350,10 @@ namespace WFInfo {
 				return false;
 			}
 
-			Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm"); });
+			Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
 
 			saveDatabases = LoadEqmtData(allFiltered, saveDatabases);
-			Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm"); });
+			Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
 
 			if (saveDatabases)
 				SaveAllJSONs();
@@ -380,7 +383,7 @@ namespace WFInfo {
 				SaveDatabase(marketItemsPath, marketItems);
 				SaveDatabase(marketDataPath, marketData);
 				Main.RunOnUIThread(() => {
-					MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm");
+					MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
 					Main.StatusUpdate("Market Update Complete", 0);
 					MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
 					MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
@@ -390,7 +393,10 @@ namespace WFInfo {
 				Main.AddLog("Market Update Failed");
 				Main.AddLog(ex.ToString());
 				Main.StatusUpdate("Market Update Failed", 0);
-				new ErrorDialogue(DateTime.Now, 0);
+				Main.RunOnUIThread(() =>
+				{
+					_ = new ErrorDialogue(DateTime.Now, 0);
+				});
 			}
 		}
 
@@ -409,7 +415,7 @@ namespace WFInfo {
 				LoadEqmtData(allFiltered, true);
 				SaveAllJSONs();
 				Main.RunOnUIThread(() => {
-					MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm");
+					MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
 					Main.StatusUpdate("Prime Update Complete", 0);
 
 					MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
@@ -420,7 +426,10 @@ namespace WFInfo {
 				Main.AddLog("Prime Update Failed");
 				Main.AddLog(ex.ToString());
 				Main.StatusUpdate("Prime Update Failed", 0);
-				new ErrorDialogue(DateTime.Now, 0);
+				Main.RunOnUIThread(() =>
+				{
+					_ = new ErrorDialogue(DateTime.Now, 0);
+				});
 			}
 		}
 
@@ -489,8 +498,8 @@ namespace WFInfo {
 			// Levenshtein Distance determines how many character changes it takes to form a known result
 			// For example: Nuvo Prime is closer to Nova Prime (2) then Ash Prime (4)
 			// For more info see: https://en.wikipedia.org/wiki/Levenshtein_distance
-			s = s.ToLower();
-			t = t.ToLower();
+			s = s.ToLower(Main.culture);
+			t = t.ToLower(Main.culture);
 			int n = s.Length;
 			int m = t.Length;
 			int[,] d = new int[n + 1, m + 1];
@@ -537,8 +546,8 @@ namespace WFInfo {
 			Boolean maxY;
 			int temp;
 			Boolean maxX;
-			string s = str1.ToLower();
-			string t = str2.ToLower();
+			string s = str1.ToLower(Main.culture);
+			string t = str2.ToLower(Main.culture);
 			int n = s.Length;
 			int m = t.Length;
 			if (!(n == 0 || m == 0)) {
@@ -594,9 +603,9 @@ namespace WFInfo {
 			return num;
 		}
 
-		public string ClosestAutoComplete(string searchQuery, int maxResults) {
-			return GetPartNameHuman(searchQuery, out _);
-		}
+		//public string ClosestAutoComplete(string searchQuery) {
+		//	return GetPartNameHuman(searchQuery, out _);
+		//}
 
 		public string GetPartName(string name, out int low) { // Checks the Levenshtein Distance of a string and returns the index in Names() of the closest part
 			string lowest = null;
@@ -621,7 +630,7 @@ namespace WFInfo {
 			string lowest_unfiltered = null;
 			low = 9999;
 			foreach (KeyValuePair<string, JToken> prop in nameData) {
-				if (prop.Value.ToString().ToLower().Contains(name.ToLower())) {
+				if (prop.Value.ToString().ToLower(Main.culture).Contains(name.ToLower(Main.culture))) {
 					int val = LevenshteinDistance(prop.Value.ToString(), name);
 					if (val < low) {
 						low = val;
@@ -646,7 +655,7 @@ namespace WFInfo {
 		}
 
 		public string GetSetName(string name) {
-			string result = name.ToLower();
+			string result = name.ToLower(Main.culture);
 			result = result.Replace("lower limb", "");
 			result = result.Replace("upper limb", "");
 			result = result.Replace("neuroptics", "");
@@ -678,7 +687,7 @@ namespace WFInfo {
 		public string GetRelicName(string string1) {
 			string lowest = null;
 			int low = 999;
-			int temp = 0;
+			int temp;
 			string eraName = null;
 			JObject job = null;
 
@@ -714,29 +723,31 @@ namespace WFInfo {
 					autoThread = null;
 				}
 
+				Console.WriteLine(line);
+
 				if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
 					autoThread = Task.Factory.StartNew(AutoTriggered);
 
 				if (line.Contains("MatchingService::EndSession"))
 				{
-					if (Main.listingHelper.primeRewards == null || Main.listingHelper.primeRewards.Count == 0)
+					if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
 					{
 						return;
 					}
 
-					foreach (var rewardscreen in Main.listingHelper.primeRewards)
+					foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
 					{
 						var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-						if (rewardCollection.primeNames.Count == 0)
+						if (rewardCollection.PrimeNames.Count == 0)
 							return;
-						Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+						Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
 					}
 
 					Main.RunOnUIThread(() =>
 					{
 						if (Main.listingHelper.Visibility == System.Windows.Visibility.Hidden)
 							Main.listingHelper.SetScreen(0);
-						Main.listingHelper.primeRewards.Clear();
+						Main.listingHelper.PrimeRewards.Clear();
 						Main.listingHelper.Show();
 						
 					});
@@ -770,7 +781,10 @@ namespace WFInfo {
 				Main.AddLog("AUTO FAILED");
 				Main.AddLog(ex.ToString());
 				Main.StatusUpdate("Auto Detection Failed", 0);
-				new ErrorDialogue(DateTime.Now, 0);
+				Main.RunOnUIThread(() =>
+				{
+					_ = new ErrorDialogue(DateTime.Now, 0);
+				});
 			}
 		}
 
@@ -796,18 +810,21 @@ namespace WFInfo {
 				var response = await client.SendAsync(request);
 				var responseBody = await response.Content.ReadAsStringAsync();
 				if (response.IsSuccessStatusCode) {
-					setJWT(response.Headers);
-					await openWebSocket();
+					SetJWT(response.Headers);
+					await OpenWebSocket();
 				} else {
 					throw new Exception("GetUserLogin, " + responseBody + $"Email: {email}, Pw length: {password.Length}");
 				}
+			request.Dispose();
 			}
 
 		/// <summary>
 		/// Attempts to connect the user's account to the websocket
 		/// </summary>
 		/// <returns>A task to be awaited</returns>
-		public async Task<bool> openWebSocket() {
+		#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+		public async Task<bool> OpenWebSocket() {
+		#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
 			if (marketSocket.IsAlive) {
 				return false;
@@ -818,7 +835,7 @@ namespace WFInfo {
 				{
 					Main.AddLog(e.Data);
 					Disconnect();
-					Main.signOut();
+					Main.SignOut();
 				}
 			};
 
@@ -829,7 +846,7 @@ namespace WFInfo {
 				var message = JsonConvert.DeserializeObject<JObject>(e.Data);
 				Main.RunOnUIThread(() =>
 				{
-					Main.updateMarketStatus(message.GetValue("payload").ToString());
+					Main.UpdateMarketStatus(message.GetValue("payload").ToString());
 				});
 
 			};
@@ -862,7 +879,7 @@ namespace WFInfo {
 		/// Sets the JWT to be used for future calls
 		/// </summary>
 		/// <param name="headers">Response headers from the original Login call</param>
-		public void setJWT(HttpResponseHeaders headers) {
+		public void SetJWT(HttpResponseHeaders headers) {
 			foreach (var item in headers)
 			{
 				if (!item.Key.Contains("Authorization")) continue;
@@ -881,31 +898,34 @@ namespace WFInfo {
 		/// <returns>The success of the method</returns>
 		public async Task<bool> ListItem(string primeItem, int platinum, int quantity) {
 			try {
-				var request = new HttpRequestMessage() {
+				using (var request = new HttpRequestMessage()
+				{
 					RequestUri = new Uri("https://api.warframe.market/v1/profile/orders"),
 					Method = HttpMethod.Post,
-				};
-				var itemId = PrimeItemToItemID(primeItem);
-				var json = $"{{\"order_type\":\"sell\",\"item_id\":\"{itemId}\",\"platinum\":{platinum},\"quantity\":{quantity}}}";
-				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-				request.Headers.Add("Authorization", "JWT " + JWT);
-				request.Headers.Add("language", "en");
-				request.Headers.Add("accept", "application/json");
-				request.Headers.Add("platform", "pc");
-				request.Headers.Add("auth_type", "header");
+				})
+				{
+					var itemId = PrimeItemToItemID(primeItem);
+					var json = $"{{\"order_type\":\"sell\",\"item_id\":\"{itemId}\",\"platinum\":{platinum},\"quantity\":{quantity}}}";
+					request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+					request.Headers.Add("Authorization", "JWT " + JWT);
+					request.Headers.Add("language", "en");
+					request.Headers.Add("accept", "application/json");
+					request.Headers.Add("platform", "pc");
+					request.Headers.Add("auth_type", "header");
 
-				var response = await client.SendAsync(request);
-				var responseBody = await response.Content.ReadAsStringAsync();
+					var response = await client.SendAsync(request);
+					var responseBody = await response.Content.ReadAsStringAsync();
 
-				if (!response.IsSuccessStatusCode) throw new Exception(responseBody);
-				setJWT(response.Headers);
-				return true;
-
+					if (!response.IsSuccessStatusCode) throw new Exception(responseBody);
+					SetJWT(response.Headers);
+					return true;
+				}
 			}
 			catch (Exception e) {
 				Main.AddLog($"ListItem: {e.Message} ");
 				return false;
 			}
+
 		}
 
 		/// <summary>
@@ -915,28 +935,32 @@ namespace WFInfo {
 		/// <param name="platinum">The new platinum value</param>
 		/// <param name="quantity">The new quantity</param>
 		/// <returns>The success of the method</returns>
-		public async Task<bool> updateListing(string listingId, int platinum, int quantity)
+		public async Task<bool> UpdateListing(string listingId, int platinum, int quantity)
 		{
 			try
 			{
-				var request = new HttpRequestMessage() {
+				using (var request = new HttpRequestMessage()
+				{
 					RequestUri = new Uri("https://api.warframe.market/v1/profile/orders/" + listingId),
 					Method = HttpMethod.Put,
-				};
-				var json = $"{{\"order_id\":\"{listingId}\", \"platinum\": {platinum}, \"quantity\":{quantity+1}, \"visible\":true}}";
-				request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-				request.Headers.Add("Authorization", "JWT " + JWT);
-				request.Headers.Add("language", "en");
-				request.Headers.Add("accept", "application/json");
-				request.Headers.Add("platform", "pc");
-				request.Headers.Add("auth_type", "header");
+				})
+				{
+					var json = $"{{\"order_id\":\"{listingId}\", \"platinum\": {platinum}, \"quantity\":{quantity + 1}, \"visible\":true}}";
+					request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+					request.Headers.Add("Authorization", "JWT " + JWT);
+					request.Headers.Add("language", "en");
+					request.Headers.Add("accept", "application/json");
+					request.Headers.Add("platform", "pc");
+					request.Headers.Add("auth_type", "header");
 
-				var response = await client.SendAsync(request);
-				var responseBody = await response.Content.ReadAsStringAsync();
+					var response = await client.SendAsync(request);
+					var responseBody = await response.Content.ReadAsStringAsync();
 
-				if (!response.IsSuccessStatusCode) throw new Exception(responseBody);
+					if (!response.IsSuccessStatusCode) throw new Exception(responseBody);
 
-				setJWT(response.Headers);
+					SetJWT(response.Headers);
+					request.Dispose();
+				}
 				return true;
 			}
 			catch (Exception e) {
@@ -969,7 +993,9 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="status">
 		/// </param>
+		#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 		public async Task<bool> SetWebsocketStatus(string status) {
+		#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 			if (!IsJwtAvailable())
 				return false;
 
@@ -1015,7 +1041,7 @@ namespace WFInfo {
 		}
 
 		public string GetUrlName(string primeName) {
-			return primeName.ToLower().Replace(' ', '_'); //seems to work for now but might need to be changed.
+			return primeName.ToLower(Main.culture).Replace(' ', '_'); //seems to work for now but might need to be changed.
 		}
 
 		/// <summary>
@@ -1027,24 +1053,28 @@ namespace WFInfo {
 		{
 			var urlName = GetUrlName(primeName);
 
-			try {
-				var request = new HttpRequestMessage() {
+			try
+			{
+				using (var request = new HttpRequestMessage()
+				{
 					RequestUri = new Uri("https://api.warframe.market/v1/items/" + urlName + "/orders/top"),
 					Method = HttpMethod.Get
-				};
-				request.Headers.Add("Authorization", "JWT " + JWT);
-				request.Headers.Add("language", "en");
-				request.Headers.Add("accept", "application/json");
-				request.Headers.Add("platform", "pc");
-				request.Headers.Add("auth_type", "header");
-				var response = await client.SendAsync(request);
-				var body = await response.Content.ReadAsStringAsync();
-				var payload = JsonConvert.DeserializeObject<JObject>(body);
-				if (body.Length < 3)
-					throw new Exception("No sell orders found: " + payload);
-				Console.WriteLine(body);
-				return JsonConvert.DeserializeObject<JObject>(body);
+				})
+				{
+					request.Headers.Add("Authorization", "JWT " + JWT);
+					request.Headers.Add("language", "en");
+					request.Headers.Add("accept", "application/json");
+					request.Headers.Add("platform", "pc");
+					request.Headers.Add("auth_type", "header");
+					var response = await client.SendAsync(request);
+					var body = await response.Content.ReadAsStringAsync();
+					var payload = JsonConvert.DeserializeObject<JObject>(body);
+					if (body.Length < 3)
+						throw new Exception("No sell orders found: " + payload);
+					Console.WriteLine(body);
 
+					return JsonConvert.DeserializeObject<JObject>(body);
+				}
 			}
 			catch (Exception e) {
 				Main.AddLog("GetTopListings: " + e.Message);
@@ -1062,15 +1092,17 @@ namespace WFInfo {
 				return false;
 
 			try {
-				var request = new HttpRequestMessage() {
+				using (var request = new HttpRequestMessage() {
 					RequestUri = new Uri("https://api.warframe.market/v1/profile"),
 					Method = HttpMethod.Get,
-				};
-				request.Headers.Add("Authorization", "JWT " + JWT);
-				var response = await client.SendAsync(request);
-				setJWT(response.Headers);
-				var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-				return (string)profile.GetValue("role") != "anonymous";
+                }){
+					request.Headers.Add("Authorization", "JWT " + JWT);
+					var response = await client.SendAsync(request);
+					SetJWT(response.Headers);
+					var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
+
+					return (string)profile.GetValue("role") != "anonymous";
+				}
 			}
 			catch (Exception e) {
 				Main.AddLog($"IsJWTvalid: {e.Message} ");
@@ -1097,33 +1129,39 @@ namespace WFInfo {
 					await SetIngameName();
 				}
 
-				var request = new HttpRequestMessage() {
+				using (var request = new HttpRequestMessage()
+				{
 					RequestUri = new Uri("https://api.warframe.market/v1/profile/" + inGameName + "/orders"),
 					Method = HttpMethod.Get
-				};
-				request.Headers.Add("Authorization", "JWT " + JWT);
-				request.Headers.Add("language", "en");
-				request.Headers.Add("accept", "application/json");
-				request.Headers.Add("platform", "pc");
-				request.Headers.Add("auth_type", "header");
-				var response = await client.SendAsync(request);
-				var body = await response.Content.ReadAsStringAsync();
-				var payload = JsonConvert.DeserializeObject<JObject>(body);
-				var sellOrders = (JArray)payload?["payload"]?["sell_orders"];
-
-				if (sellOrders != null)
+				})
 				{
-					foreach (var listing in sellOrders)
+					request.Headers.Add("Authorization", "JWT " + JWT);
+					request.Headers.Add("language", "en");
+					request.Headers.Add("accept", "application/json");
+					request.Headers.Add("platform", "pc");
+					request.Headers.Add("auth_type", "header");
+					var response = await client.SendAsync(request);
+					var body = await response.Content.ReadAsStringAsync();
+					var payload = JsonConvert.DeserializeObject<JObject>(body);
+					var sellOrders = (JArray)payload?["payload"]?["sell_orders"];
+
+					if (sellOrders != null)
 					{
-						if (primeName == (string) listing?["item"]?["en"]?["item_name"])
-							return listing;
-					}
+						foreach (var listing in sellOrders)
+						{
+							if (primeName == (string)listing?["item"]?["en"]?["item_name"])
+							{
+								request.Dispose();
+								return listing;
+							}
+						}
 
-					return null; //The requested item was not found, but don't throw
-				}
-				else
-				{
-					throw new Exception("No sell orders found: " + payload);
+						return null; //The requested item was not found, but don't throw
+					}
+					else
+					{
+						throw new Exception("No sell orders found: " + payload);
+					}
 				}
 			}
 			catch (Exception e) {
@@ -1133,7 +1171,7 @@ namespace WFInfo {
 		}
 
 
-		public bool getSocketAliveStatus()
+		public bool GetSocketAliveStatus()
         {
 			return marketSocket.IsAlive;
         }
@@ -1143,27 +1181,29 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="message">The content of the review</param>
 		/// <returns></returns>
-		public async Task<bool> postReview(string message = "Thank you for WFinfo!")
+		public async Task<bool> PostReview(string message = "Thank you for WFinfo!")
         {
 			var msg = $"{{\"text\":\"{message}\",\"review_type\":\"1\"}}";
 			var developers = new List<string> { "dimon222", "Dapal003", "Kekasi" };
 			foreach (var developer in developers)
 			{
 				try {
-					var request = new HttpRequestMessage()
+					using (var request = new HttpRequestMessage()
 					{
 						RequestUri = new Uri("https://api.warframe.market/v1/profile/" + developer + "/review"),
 						Method = HttpMethod.Post
-					};
-					request.Headers.Add("Authorization", "JWT " + JWT);
-					request.Headers.Add("language", "en");
-					request.Headers.Add("accept", "application/json");
-					request.Headers.Add("platform", "pc");
-					request.Headers.Add("auth_type", "header");
-					request.Content = new StringContent(msg, System.Text.Encoding.UTF8, "application/json");
-					var response = await client.SendAsync(request);
-					var body = await response.Content.ReadAsStringAsync();
-					Console.WriteLine($"Body: {body}, Content: {msg}");
+					})
+					{
+						request.Headers.Add("Authorization", "JWT " + JWT);
+						request.Headers.Add("language", "en");
+						request.Headers.Add("accept", "application/json");
+						request.Headers.Add("platform", "pc");
+						request.Headers.Add("auth_type", "header");
+						request.Content = new StringContent(msg, System.Text.Encoding.UTF8, "application/json");
+						var response = await client.SendAsync(request);
+						var body = await response.Content.ReadAsStringAsync();
+						Console.WriteLine($"Body: {body}, Content: {msg}");
+					}
 				}
 				catch (Exception e)
 				{
@@ -1180,19 +1220,27 @@ namespace WFInfo {
 		/// <returns></returns>
 		public async Task SetIngameName()
 		{
-			var request = new HttpRequestMessage() {
+			using (var request = new HttpRequestMessage()
+			{
 				RequestUri = new Uri("https://api.warframe.market/v1/profile"),
 				Method = HttpMethod.Get
-			};
-			request.Headers.Add("Authorization", "JWT " + JWT);
-			request.Headers.Add("language", "en");
-			request.Headers.Add("accept", "application/json");
-			request.Headers.Add("platform", "pc");
-			request.Headers.Add("auth_type", "header");
-			var response = await client.SendAsync(request);
-			//setJWT(response.Headers);
-			var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-			inGameName = profile["profile"]?.Value<string>("ingame_name");
+			})
+			{
+				request.Headers.Add("Authorization", "JWT " + JWT);
+				request.Headers.Add("language", "en");
+				request.Headers.Add("accept", "application/json");
+				request.Headers.Add("platform", "pc");
+				request.Headers.Add("auth_type", "header");
+				var response = await client.SendAsync(request);
+				//setJWT(response.Headers);
+				var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
+				inGameName = profile["profile"]?.Value<string>("ingame_name");
+			}
 		}
-	}
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

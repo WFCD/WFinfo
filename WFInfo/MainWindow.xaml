@@ -25,7 +25,7 @@
         <Label x:Name="Version" Content="vX.X.X" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="77,1,0,0" FontSize="11" FontWeight="Bold" Width="43" Height="21"/>
         <Label x:Name="minimise" MouseLeftButtonDown="Minimise" Content="_" Margin="0,0,21,0" Style="{StaticResource Label_Button}" Padding="0,0,0,3" Height="22" VerticalAlignment="Top" HorizontalAlignment="Right" Width="22" BorderBrush="{x:Null}"/>
         <Label x:Name="exit" MouseLeftButtonDown="Exit" Content="x" Style="{StaticResource Label_Button}" Height="22" VerticalAlignment="Top" HorizontalAlignment="Right" Width="22"/>
-        <Label x:Name="Website" ToolTip="Opens WFinfo discord" MouseLeftButtonDown="websiteClick" Margin="0,22,1,0" Padding="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0,1,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label x:Name="Website" ToolTip="Opens WFinfo discord" MouseLeftButtonDown="WebsiteClick" Margin="0,22,1,0" Padding="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0,1,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="ContentControl.Content">
@@ -49,7 +49,7 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="Relics" ToolTip="Relics, search for what relic you need to use" MouseLeftButtonDown="relicsClick" Margin="0,22,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label x:Name="Relics" ToolTip="Relics, search for what relic you need to use" MouseLeftButtonDown="RelicsClick" Margin="0,22,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="ContentControl.Content">
@@ -73,7 +73,7 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="Gear" ToolTip="Equpiment, see which items you own" MouseLeftButtonDown="equipmentClick"  Margin="0,42,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label x:Name="Gear" ToolTip="Equpiment, see which items you own" MouseLeftButtonDown="EquipmentClick"  Margin="0,42,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="ContentControl.Content">
@@ -189,8 +189,8 @@
                         <StaticResource ResourceKey="WFInfo_ContextMenu"/>
                     </ContextMenu.Style>
                     <MenuItem Header="Show" Click="ToForeground" FontWeight="Heavy"/>
-                    <MenuItem Header="Relics" Click="relicsClick" />
-                    <MenuItem Header="Equipment" Click="equipmentClick" />
+                    <MenuItem Header="Relics" Click="RelicsClick" />
+                    <MenuItem Header="Equipment" Click="EquipmentClick" />
                     <Separator Style="{StaticResource WFInfo_Separator}"/>
                     <MenuItem Header="Exit" Click="Exit" />
                 </ContextMenu>
@@ -241,7 +241,7 @@
                 </Style>
             </Button.Style>
         </Button>
-        <Label x:Name="plusOne" Visibility="Collapsed" ToolTip="Post a review for the developers" MouseLeftButtonDown="plusOne_MouseLeftButtonDown" Margin="0,82,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label x:Name="plusOne" Visibility="Collapsed" ToolTip="Post a review for the developers" MouseLeftButtonDown="PlusOne" Margin="0,82,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="ContentControl.Content">

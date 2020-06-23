@@ -15,8 +15,8 @@ namespace WFInfo
     public partial class ErrorDialogue : Window
     {
 
-        string startPath = Main.appPath + @"\Debug";
-        string zipPath = Main.appPath + @"\generatedZip";
+        string startPath = Main.AppPath + @"\Debug";
+        string zipPath = Main.AppPath + @"\generatedZip";
 
         private int distance;
         private DateTime closest;
@@ -35,7 +35,7 @@ namespace WFInfo
         {
             Directory.CreateDirectory(zipPath);
 
-            List<FileInfo> files = (new DirectoryInfo(Main.appPath + @"\Debug\")).GetFiles()
+            List<FileInfo> files = (new DirectoryInfo(Main.AppPath + @"\Debug\")).GetFiles()
                 .Where(f => f.CreationTimeUtc > closest.AddSeconds(-1 * distance))
                 .Where(f => f.CreationTimeUtc < closest.AddSeconds(distance))
                 .ToList();
@@ -95,7 +95,7 @@ namespace WFInfo
                 throw;
             }
 
-            Process.Start(Main.appPath + @"\generatedZip");
+            Process.Start(Main.AppPath + @"\generatedZip");
             Close();
         }
 

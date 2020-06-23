@@ -13,17 +13,15 @@ namespace WFInfo {
 	/// <summary>
 	/// Interaction logic for CreateListing.xaml
 	/// </summary>
-	public partial class CreateListing : Window {
+	public partial class ListingHelper : Window {
 
-		//public List<RewardCollection> screensList = new List<RewardCollection>();
-		public List<KeyValuePair<string, RewardCollection>> screensList = new List<KeyValuePair<string, RewardCollection>>();
-		//KVP is for sucess status, 0 = initial, 1 = successful 2+ = error
-		public List<List<string>> primeRewards = new List<List<string>>();
+		public List<KeyValuePair<string, RewardCollection>> ScreensList { get; set; } = new List<KeyValuePair<string, RewardCollection>>();
+		public List<List<string>> PrimeRewards { get; set; } = new List<List<string>>();
 		//Helper, allowing to store the rewards until needed to be processed
-		public int pageIndex = 0;
+		public int PageIndex { get; set; } = 0;
 		private bool updating;
 		#region default methods
-		public CreateListing() {
+		public ListingHelper() {
 			InitializeComponent();
 		}
 
@@ -34,8 +32,8 @@ namespace WFInfo {
 		private void Close(object sender, RoutedEventArgs e)
 		{
 			Hide();
-			screensList = new List<KeyValuePair<string, RewardCollection>>();
-			pageIndex = 0;
+			ScreensList = new List<KeyValuePair<string, RewardCollection>>();
+			PageIndex = 0;
 		}
 
 		// Allows the draging of the window
@@ -53,21 +51,21 @@ namespace WFInfo {
 		/// <param name="index">The index needed for the screen</param>
 		public void SetScreen(int index)
 		{
-			Main.AddLog($"Screen list is {screensList.Count} long and setting to index: {index}");
-			if (screensList.Count == 0)
+			Main.AddLog($"Screen list is {ScreensList.Count} long and setting to index: {index}");
+			if (ScreensList.Count == 0)
 				Close();
-			if (screensList.Count < index || 0 > index)
+			if (ScreensList.Count < index || 0 > index)
 			{
 				throw new Exception("Tried setting screen to an item that didn't exist");
 			}
 			SetCurrentStatus();
 
-			var screen = screensList[index];
+			var screen = ScreensList[index];
 			updating = true;
 			SetListings(0);
 			ComboBox.Items.Clear();
 			ComboBox.SelectedIndex = 0;
-			foreach (var primeItem in screen.Value.primeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
+			foreach (var primeItem in screen.Value.PrimeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
 			{
 				ComboBox.Items.Add(primeItem);
 			}
@@ -80,23 +78,23 @@ namespace WFInfo {
 		public void NextScreen(object sender, RoutedEventArgs e) //todo throwing out of range error
 		{
 			Back.IsEnabled = true;
-			if (primeRewards.Count > 0)
+			if (PrimeRewards.Count > 0)
 			{ // if there are new prime rewards
 				Next.Content = "...";
-				var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards.First())).Result;
-				if (rewardCollection.primeNames.Count != 0)
-					Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-				primeRewards.RemoveAt(0);
+				var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(PrimeRewards.First())).Result;
+				if (rewardCollection.PrimeNames.Count != 0)
+					Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+				PrimeRewards.RemoveAt(0);
 				Next.Content = "Next";
 			}
-			if (screensList.Count - 1 == pageIndex) //reached the end of the list
+			if (ScreensList.Count - 1 == PageIndex) //reached the end of the list
 			{
 				Next.IsEnabled = false;
 				return;
 			}
 
-			pageIndex++;
-			SetScreen(pageIndex);
+			PageIndex++;
+			SetScreen(PageIndex);
 		}
 
 		/// <summary>
@@ -106,14 +104,14 @@ namespace WFInfo {
 			
 			Next.IsEnabled = true;
 
-			Console.WriteLine($"There are {screensList.Count} screens and: {primeRewards} prime rewards. Currently on screen {pageIndex} and trying to go to the previous screen");
+			Console.WriteLine($"There are {ScreensList.Count} screens and: {PrimeRewards} prime rewards. Currently on screen {PageIndex} and trying to go to the previous screen");
 
-			if (pageIndex == 0) {//reached start of the list
+			if (PageIndex == 0) {//reached start of the list
 				Back.IsEnabled = false;
 				return;
 			}
-			pageIndex--;
-			SetScreen(pageIndex);
+			PageIndex--;
+			SetScreen(PageIndex);
 
 		}
 		/// <summary>
@@ -122,8 +120,8 @@ namespace WFInfo {
 		private void SetCurrentStatus()
 		{
 
-			Console.WriteLine($"Current status is: {screensList[pageIndex].Key}");
-			switch (screensList[pageIndex].Key)
+			Console.WriteLine($"Current status is: {ScreensList[PageIndex].Key}");
+			switch (ScreensList[PageIndex].Key)
 			{
 				//listing already successfully posted
 				case "successful":
@@ -143,7 +141,7 @@ namespace WFInfo {
 					break;
 				default: //an error occured.
 					Height = 270;
-					Status.Content = screensList[pageIndex].Key;
+					Status.Content = ScreensList[PageIndex].Key;
 					Status.Visibility = Visibility.Visible;
 					ListingGrid.Visibility = Visibility.Visible;
 					ComboBox.IsEnabled = true;
@@ -162,24 +160,24 @@ namespace WFInfo {
 			try
 			{
 				var primeItem = (string) ComboBox.Items[ComboBox.SelectedIndex];
-				var platinum = int.Parse(PlatinumTextBox.Text);
+				var platinum = int.Parse(PlatinumTextBox.Text, Main.culture);
 				var success = Task.Run(async () => await PlaceListing(primeItem, platinum)).Result;
 				if (success) {
-					var newEntry = new KeyValuePair<string, RewardCollection>("successful", screensList[pageIndex].Value);
-					screensList.RemoveAt(pageIndex);
-					screensList.Insert(pageIndex, newEntry);
+					var newEntry = new KeyValuePair<string, RewardCollection>("successful", ScreensList[PageIndex].Value);
+					ScreensList.RemoveAt(PageIndex);
+					ScreensList.Insert(PageIndex, newEntry);
 				} else {
-					var newEntry = new KeyValuePair<string, RewardCollection>("Something uncaught went wrong", screensList[pageIndex].Value);
-					screensList.RemoveAt(pageIndex);
-					screensList.Insert(pageIndex, newEntry);
+					var newEntry = new KeyValuePair<string, RewardCollection>("Something uncaught went wrong", ScreensList[PageIndex].Value);
+					ScreensList.RemoveAt(PageIndex);
+					ScreensList.Insert(PageIndex, newEntry);
 				}
 				SetCurrentStatus();
 			}
 			catch (Exception exception) {
 				Main.AddLog(exception.ToString());
-				var newEntry = new KeyValuePair<string, RewardCollection>(exception.ToString(), screensList[pageIndex].Value);
-				screensList.RemoveAt(pageIndex);
-				screensList.Insert(pageIndex, newEntry);
+				var newEntry = new KeyValuePair<string, RewardCollection>(exception.ToString(), ScreensList[PageIndex].Value);
+				ScreensList.RemoveAt(PageIndex);
+				ScreensList.Insert(PageIndex, newEntry);
 			}
 
 		}
@@ -200,27 +198,27 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="index">the currently selected prime item</param>
 		private void SetListings(int index) {
-			PlatinumTextBox.Text = screensList[pageIndex].Value.platinumValues[index].ToString();
+			PlatinumTextBox.Text = ScreensList[PageIndex].Value.PlatinumValues[index].ToString(Main.culture);
 
-			Platinum0.Content = screensList[pageIndex].Value.marketListings[index][0].platinum;
-			Amount0.Content = screensList[pageIndex].Value.marketListings[index][0].amount;
-			Reputation0.Content = screensList[pageIndex].Value.marketListings[index][0].reputation;
+			Platinum0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Platinum;
+			Amount0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Amount;
+			Reputation0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Reputation;
 
-			Platinum1.Content = screensList[pageIndex].Value.marketListings[index][1].platinum;
-			Amount1.Content = screensList[pageIndex].Value.marketListings[index][1].amount;
-			Reputation1.Content = screensList[pageIndex].Value.marketListings[index][1].reputation;
+			Platinum1.Content = ScreensList[PageIndex].Value.MarketListings[index][1].Platinum;
+			Amount1.Content = ScreensList[PageIndex].Value.MarketListings[index][1].Amount;
+			Reputation1.Content = ScreensList[PageIndex].Value.MarketListings[index][1].Reputation;
 
-			Platinum2.Content = screensList[pageIndex].Value.marketListings[index][2].platinum;
-			Amount2.Content = screensList[pageIndex].Value.marketListings[index][2].amount;
-			Reputation2.Content = screensList[pageIndex].Value.marketListings[index][2].reputation;
+			Platinum2.Content = ScreensList[PageIndex].Value.MarketListings[index][2].Platinum;
+			Amount2.Content = ScreensList[PageIndex].Value.MarketListings[index][2].Amount;
+			Reputation2.Content = ScreensList[PageIndex].Value.MarketListings[index][2].Reputation;
 
-			Platinum3.Content = screensList[pageIndex].Value.marketListings[index][3].platinum;
-			Amount3.Content = screensList[pageIndex].Value.marketListings[index][3].amount;
-			Reputation3.Content = screensList[pageIndex].Value.marketListings[index][3].reputation;
+			Platinum3.Content = ScreensList[PageIndex].Value.MarketListings[index][3].Platinum;
+			Amount3.Content = ScreensList[PageIndex].Value.MarketListings[index][3].Amount;
+			Reputation3.Content = ScreensList[PageIndex].Value.MarketListings[index][3].Reputation;
 
-			Platinum4.Content = screensList[pageIndex].Value.marketListings[index][4].platinum;
-			Amount4.Content = screensList[pageIndex].Value.marketListings[index][4].amount;
-			Reputation4.Content = screensList[pageIndex].Value.marketListings[index][4].reputation;
+			Platinum4.Content = ScreensList[PageIndex].Value.MarketListings[index][4].Platinum;
+			Amount4.Content = ScreensList[PageIndex].Value.MarketListings[index][4].Amount;
+			Reputation4.Content = ScreensList[PageIndex].Value.MarketListings[index][4].Reputation;
 		}
 
 		/// <summary>
@@ -229,23 +227,23 @@ namespace WFInfo {
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
 		private void Cancel(object sender, RoutedEventArgs e) {
-			if (screensList.Count == 1)
+			if (ScreensList.Count == 1)
 			{
 				// if it's the last item
 				Minimize(null, null);
-				screensList = new List<KeyValuePair<string, RewardCollection>>();
-				pageIndex = 0;
+				ScreensList = new List<KeyValuePair<string, RewardCollection>>();
+				PageIndex = 0;
 				return;
 			}
 
-			if (pageIndex == 0) // if looking at the first screen
+			if (PageIndex == 0) // if looking at the first screen
 			{
 				SetScreen(1);
-				screensList.RemoveAt(0);
+				ScreensList.RemoveAt(0);
 			} else {
-				screensList.RemoveAt(pageIndex);
-				--pageIndex;
-				SetScreen(pageIndex);
+				ScreensList.RemoveAt(PageIndex);
+				--PageIndex;
+				SetScreen(PageIndex);
 			}
 		}
 
@@ -256,7 +254,7 @@ namespace WFInfo {
 			Back.IsEnabled = false;
 		}
 
-		public void showFinished()
+		public void ShowFinished()
 		{
 			CancelButton.Content = "Cancel";
 			Next.IsEnabled = true;
@@ -275,13 +273,18 @@ namespace WFInfo {
 			var platinumValues = new List<int>(4);
 			var marketListings = new List<List<MarketListing>>(5);
 
+			if (primeNames == null)
+			{
+				throw new ArgumentNullException(nameof(primeNames));
+			}
+
 			foreach (var primeItem in primeNames)
 			{
 				if(primeItem.IsNullOrEmpty())
 					continue;
 				var tempListings = GetMarketListing(primeItem);
 				marketListings.Add(tempListings);
-				platinumValues.Add(tempListings[0].platinum);
+				platinumValues.Add(tempListings[0].Platinum);
 			}
 			return new RewardCollection(primeNames, platinumValues, marketListings);
 		}
@@ -291,7 +294,7 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="primeName">The human friendly name to search listings for</param>
 		/// <returns>the top 5 current market listings</returns>
-		public List<MarketListing> GetMarketListing(string primeName)
+		public static List<MarketListing> GetMarketListing(string primeName)
 		{
 			var results = Task.Run(async () => await Main.dataBase.GetTopListings(primeName)).Result;
 			var listings = new List<MarketListing>();
@@ -312,19 +315,12 @@ namespace WFInfo {
 		/// <returns>if it succeeded</returns>
 		private async Task<bool> PlaceListing(string primeItem, int platinum)
 		{
-			try
-			{
-				var listing = await Main.dataBase.GetCurrentListing(primeItem);
-				if (listing == null) return await Main.dataBase.ListItem(primeItem, platinum, 1);
-				//listing already exists, thus update it
-				var listingId = (string)listing["id"];
-				var quantity = (int)listing["quantity"];
-				return await Main.dataBase.updateListing(listingId, platinum, quantity);
-			}
-			catch (Exception e)
-			{
-				throw e;
-			}
+			var listing = await Main.dataBase.GetCurrentListing(primeItem);
+			if (listing == null) return await Main.dataBase.ListItem(primeItem, platinum, 1);
+			//listing already exists, thus update it
+			var listingId = (string)listing["id"];
+			var quantity = (int)listing["quantity"];
+			return await Main.dataBase.UpdateListing(listingId, platinum, quantity);
 		}
 
         private void PlatinumTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -338,15 +334,15 @@ namespace WFInfo {
     /// </summary>
     public class RewardCollection
 	{
-		public List<string> primeNames = new List<string>(4); // the reward items in case user wants to change selection
-		public List<int> platinumValues = new List<int>(4);
-		public List<List<MarketListing>> marketListings = new List<List<MarketListing>>(5);
+		public List<string> PrimeNames { get; set; } = new List<string>(4); // the reward items in case user wants to change selection
+		public List<int> PlatinumValues { get; set; } = new List<int>(4);
+		public List<List<MarketListing>> MarketListings { get; set; } = new List<List<MarketListing>>(5);
 
 		public RewardCollection(List<string> primeNames, List<int> platinumValues, List<List<MarketListing>> marketListings)
 		{
-			this.primeNames = primeNames;
-			this.platinumValues = platinumValues;
-			this.marketListings = marketListings;
+			this.PrimeNames = primeNames;
+			this.PlatinumValues = platinumValues;
+			this.MarketListings = marketListings;
 		}
 		/// <summary>
 		/// Gets a human friendly version back for logging.
@@ -355,16 +351,16 @@ namespace WFInfo {
 		public string ToHumanString()
 		{
 			var msg = "Reward collection screen:\n";
-			foreach (var item in primeNames)
+			foreach (var item in PrimeNames)
 			{
 				if (item.IsNullOrEmpty())
 					continue;
-				var index = primeNames.IndexOf(item);
+				var index = PrimeNames.IndexOf(item);
 
-				msg += $"Prime item: \"{item}\", Platinum value: \"{platinumValues[index]}\",  Market listings: \n";
+				msg += $"Prime item: \"{item}\", Platinum value: \"{PlatinumValues[index]}\",  Market listings: \n";
 				
 
-				msg = marketListings[index].Aggregate(msg, (current, listing) => current + (listing.ToHumanString() + "\n"));
+				msg = MarketListings[index].Aggregate(msg, (current, listing) => current + (listing.ToHumanString() + "\n"));
 			}
 			return msg;
 		}
@@ -374,15 +370,15 @@ namespace WFInfo {
 	/// </summary>
 	public class MarketListing
 	{
-		public int platinum; // plat amount of listing
-		public int amount; //amount user lists
-		public int reputation; // user's reputation
+		public int Platinum { get; set; } // plat amount of listing
+		public int Amount { get; set; } //amount user lists
+		public int Reputation { get; set; } // user's reputation
 
 		public MarketListing(int platinum, int amount, int reputation)
 		{
-			this.platinum = platinum;
-			this.amount = amount;
-			this.reputation = reputation;
+			this.Platinum = platinum;
+			this.Amount = amount;
+			this.Reputation = reputation;
 		}
 
 		/// <summary>
@@ -391,7 +387,7 @@ namespace WFInfo {
 		/// <returns></returns>
 		public string ToHumanString()
 		{
-			return "Platinum: " + platinum + " Amount: " + amount + " Reputation: " + reputation;
+			return "Platinum: " + Platinum + " Amount: " + Amount + " Reputation: " + Reputation;
 		}
 	}
 }

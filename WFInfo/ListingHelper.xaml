@@ -1,11 +1,11 @@
-﻿<Window x:Class="WFInfo.CreateListing"
+﻿<Window x:Class="WFInfo.ListingHelper"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo"
         mc:Ignorable="d"
-        Title="CreateListing" Height="255" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" MouseDown="OnMouseDown" WindowStyle="None" BorderBrush="#FF707070" Background="#FF1B1B1B">
+        Title="ListingHelper" Height="255" Width="300" ResizeMode="NoResize" Icon="Resources/WFLogo.png" MouseDown="OnMouseDown" WindowStyle="None" BorderBrush="#FF707070" Background="#FF1B1B1B">
     <Grid>
         <Grid Height="27" VerticalAlignment="Top" Panel.ZIndex="500">
             <Rectangle Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top"/>
@@ -14,7 +14,7 @@
             <Label MouseLeftButtonDown="Close" Content="x" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Width="27" Height="27" VerticalAlignment="Top"/>
             <Label MouseLeftButtonDown="Minimize" Content="_" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Width="27" Height="27" VerticalAlignment="Top" Margin="0,0,27,0"/>
         </Grid>
-        <Grid x:Name="Content" Margin="0,26,0,0">
+        <Grid Margin="0,26,0,0">
             <Rectangle Stroke="#FF646464"/>
             <ComboBox x:Name="ComboBox" x:FieldModifier="private" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="10,10,0,0" VerticalAlignment="Top" Width="280" Height="24"  Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Background="{x:Null}" SelectionChanged="ComboBox_SelectionChanged"/>
             <Grid x:Name="Values" HorizontalAlignment="Left" Height="38" VerticalAlignment="Top" Width="300" Margin="0,39,0,0">

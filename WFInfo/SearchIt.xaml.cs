@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
+using WebSocketSharp;
 
 namespace WFInfo
 {
@@ -21,7 +22,7 @@ namespace WFInfo
             InitializeComponent();
         }
 
-        public bool isInUse = false;
+        public bool IsInUse { get; set; } = false;
         /// <summary>
         /// Launch snapit, prompts user if not logged in
         /// </summary>
@@ -37,7 +38,7 @@ namespace WFInfo
                 return;
             }
             MainWindow.INSTANCE.Topmost = false;
-            isInUse = true;
+            IsInUse = true;
             Main.searchBox.Show();
             searchField.Focusable = true;
             Main.searchBox.Topmost = true;
@@ -55,26 +56,26 @@ namespace WFInfo
                 var closest = Main.dataBase.GetPartNameHuman(searchField.Text, out _);
                 var primeRewards = new List<string> { closest };
                 var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
-                Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-                Main.listingHelper.SetScreen(Main.listingHelper.screensList.Count-1);
+                Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                Main.listingHelper.SetScreen(Main.listingHelper.ScreensList.Count-1);
                 Main.listingHelper.Show();
             }
             catch (Exception exception)
             {
 	            Main.AddLog(exception.ToString());
             }
-            finish();
+            Finish();
         }
 
         /// <summary>
         /// Reset the search box back to original status and then hide it
         /// </summary>
-        internal void finish()
+        internal void Finish()
         {
             searchField.Text = "";
             placeholder.Visibility = Visibility.Visible;
             searchField.Focusable = false;
-            isInUse = false;
+            IsInUse = false;
             Hide();
         }
         /// <summary>
@@ -82,9 +83,9 @@ namespace WFInfo
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void textChanged(object sender, TextChangedEventArgs e)
+        private void TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (searchField.Text != "")
+            if (!searchField.Text.IsNullOrEmpty())
                 placeholder.Visibility = Visibility.Hidden;
         }
     }

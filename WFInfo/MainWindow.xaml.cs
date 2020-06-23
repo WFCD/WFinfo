@@ -67,7 +67,7 @@ namespace WFInfo {
 
 				Settings.Save();
 
-				Closing += new CancelEventHandler(loggOut);
+				Closing += new CancelEventHandler(LoggOut);
 			}
 			catch (Exception e) {
 				Main.AddLog("An error occured while loading the main window: " + e.Message);
@@ -141,23 +141,23 @@ namespace WFInfo {
 
 			if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
 				Settings.settingsObj["ImageRetentionTime"] = 12;
-			Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"));
+			Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"), Main.culture);
 
 			if (!Settings.settingsObj.TryGetValue("ClipboardTemplate", out _))
 				Settings.settingsObj["ClipboardTemplate"] = "-- by WFInfo (smart OCR with pricecheck)";
-			Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"));
+			Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"), Main.culture);
 
 			if (!Settings.settingsObj.TryGetValue("SnapitExport", out _))
 				Settings.settingsObj["SnapitExport"] = false;
-			Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"));
+			Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"), Main.culture);
 
 			if (!Settings.settingsObj.TryGetValue("Delay", out _))
 				Settings.settingsObj["Delay"] = 10000;
-			Settings.delay = Convert.ToInt32(Settings.settingsObj.GetValue("Delay"));
+			Settings.delay = Convert.ToInt32(Settings.settingsObj.GetValue("Delay"), Main.culture);
 
 			if (!Settings.settingsObj.TryGetValue("HighlightRewards", out _))
 				Settings.settingsObj["HighlightRewards"] = true;
-			Settings.Highlight = Convert.ToBoolean(Settings.settingsObj.GetValue("HighlightRewards"));
+			Settings.Highlight = Convert.ToBoolean(Settings.settingsObj.GetValue("HighlightRewards"), Main.culture);
 
 			if (!Settings.settingsObj.TryGetValue("ClipboardVaulted", out _))
 				Settings.settingsObj["ClipboardVaulted"] = false;
@@ -229,17 +229,17 @@ namespace WFInfo {
 			Visibility = Visibility.Hidden;
 		}
 
-		private void websiteClick(object sender, RoutedEventArgs e) {
+		private void WebsiteClick(object sender, RoutedEventArgs e) {
 			Process.Start("https://discord.gg/N8S5zfw");
 		}
 
-		private void relicsClick(object sender, RoutedEventArgs e) {
+		private void RelicsClick(object sender, RoutedEventArgs e) {
 			if (Main.dataBase.relicData == null) { ChangeStatus("Relic data not yet loaded in", 2); return; }
 			Main.relicWindow.Show();
 			Main.relicWindow.Focus();
 		}
 
-		private void equipmentClick(object sender, RoutedEventArgs e) {
+		private void EquipmentClick(object sender, RoutedEventArgs e) {
 			if (Main.dataBase.equipmentData == null) { ChangeStatus("Equipment data not yet loaded in", 2); return; }
 			Main.equipmentWindow.Show();
 		}
@@ -322,7 +322,7 @@ namespace WFInfo {
 
 		}
 
-		public void signOut() {
+		public void SignOut() {
 			Login.Visibility = Visibility.Visible;
 			ComboBox.Visibility = Visibility.Collapsed;
 		}
@@ -331,7 +331,7 @@ namespace WFInfo {
 		/// Changes the online selector. Used for websocket lisening to see if the status changed externally (i.e from the site)
 		/// </summary>
 		/// <param name="status">The status to change to</param>
-		public void updateMarketStatus(string status) {
+		public void UpdateMarketStatus(string status) {
 			switch (status) {
 				case "online":
 				ComboBox.SelectedIndex = 1;
@@ -375,12 +375,12 @@ namespace WFInfo {
                     });
                     break;
                 case 3: //Sign out
-					loggOut(null, null);
+					LoggOut(null, null);
 					break;
             }
         }
 
-		internal void loggOut(object sender, CancelEventArgs e)
+		internal void LoggOut(object sender, CancelEventArgs e)
         {
 			Login.Visibility = Visibility.Visible;
 			ComboBox.Visibility = Visibility.Hidden;
@@ -396,7 +396,7 @@ namespace WFInfo {
 
         private void CreateListing_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-			if(Main.listingHelper.primeRewards == null || Main.listingHelper.primeRewards.Count == 0)
+			if(Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
 				ChangeStatus("No recorded rewards found", 2);
 				return;
@@ -404,28 +404,28 @@ namespace WFInfo {
 
 			var t = Task.Run(() =>
 			{
-				foreach (var rewardscreen in Main.listingHelper.primeRewards)
+				foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
 				{
 					var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-					if(rewardCollection.primeNames.Count == 0)
+					if(rewardCollection.PrimeNames.Count == 0)
 						continue;
-					Main.listingHelper.screensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+					Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
 				}
 			});
 			t.Wait();
-			if(Main.listingHelper.screensList.Count == 0)
+			if(Main.listingHelper.ScreensList.Count == 0)
             {
 				ChangeStatus("No recorded rewards found", 2);
 				return;
 				
 			}
 			Main.listingHelper.SetScreen(0);
-			Main.listingHelper.primeRewards.Clear();
+			Main.listingHelper.PrimeRewards.Clear();
 			WindowState = WindowState.Normal;
 			Main.listingHelper.Show();
 		}
 
-        private void plusOne_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void PlusOne(object sender, MouseButtonEventArgs e)
         {
 			Main.plusOne.Show();
         }

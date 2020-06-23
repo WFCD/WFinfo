@@ -11,7 +11,7 @@
         <ImageBrush ImageSource="Resources/background.jpg"/>
     </Window.Background>
     <Grid>
-        <TextBox x:Name="searchField" HorizontalAlignment="Center" Height="50" TextWrapping="Wrap" VerticalAlignment="Center" Width="300" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="textChanged"/>
+        <TextBox x:Name="searchField" HorizontalAlignment="Center" Height="50" TextWrapping="Wrap" VerticalAlignment="Center" Width="300" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="TextChanged"/>
         <Button Content="Button" Width="0" Height="0" IsDefault="True" Click="Search"/>
         <Label x:Name="placeholder" Content="Search for warframe.market Items" HorizontalAlignment="Center" VerticalAlignment="Center"/>
     </Grid>

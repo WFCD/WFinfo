@@ -9,7 +9,9 @@ using System.Windows.Media.Imaging;
 
 namespace WFInfo
 {
+    #pragma warning disable CA1060 // Move pinvokes to native methods class
     class Win32
+    #pragma warning restore CA1060 // Move pinvokes to native methods class
     {
         //If you get 'dllimport unknown'-, then add 'using System.Runtime.InteropServices;'
         [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
@@ -27,7 +29,7 @@ namespace WFInfo
         }
 
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool GetWindowRect(HandleRef hwnd, out r lpRect);
+        public static extern bool GetWindowRect(HandleRef hwnd, out R lpRect);
 
         [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
         public static extern uint GetWindowLongPtr(HandleRef hwnd, int nIndex);
@@ -47,7 +49,7 @@ namespace WFInfo
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct r
+        public struct R
         {
             public int Left;
             public int Top;

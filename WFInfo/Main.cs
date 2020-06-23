@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using AutoUpdaterDotNET;
 using System.Windows;
 using System.Windows.Forms;
-using System.Threading;
 using WFInfo.Resources;
 
 namespace WFInfo
@@ -16,7 +15,7 @@ namespace WFInfo
     class Main
     {
         public static Main INSTANCE;
-        public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
+        public static string AppPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static Data dataBase = new Data();
         public static RewardWindow window = new RewardWindow();
@@ -29,9 +28,10 @@ namespace WFInfo
         public static SnapItOverlay snapItOverlayWindow = new SnapItOverlay();
         public static SearchIt searchBox = new SearchIt();
         public static Login login = new Login();
-        public static CreateListing listingHelper = new CreateListing();
+        public static ListingHelper listingHelper = new ListingHelper();
         public static DateTime latestActive = new DateTime();
         public static PlusOne plusOne = new PlusOne();
+        public static System.Threading.Timer timer;
         public Main()
         {
             INSTANCE = this;
@@ -58,7 +58,7 @@ namespace WFInfo
                 dataBase.Update();
 
                 //RelicsWindow.LoadNodesOnThread();
-                OCR.init();
+                OCR.Init();
 
                 if ((bool)Settings.settingsObj["Auto"])
                     dataBase.EnableLogCapture();
@@ -66,29 +66,24 @@ namespace WFInfo
                 {
                     var t = Task.Run(async () =>
                     {
-                        await dataBase.openWebSocket();
+                        await dataBase.OpenWebSocket();
 
                     });
                     t.Wait();
                     latestActive = DateTime.UtcNow.AddMinutes(15);
-                    loggedIn();
+                    LoggedIn();
 
                     var startTimeSpan = TimeSpan.Zero;
                     var periodTimeSpan = TimeSpan.FromMinutes(1);
 
-                    var timer = new System.Threading.Timer((e) =>
+                    timer = new System.Threading.Timer((e) =>
                     {
                         TimeoutCheck();
                     }, null, startTimeSpan, periodTimeSpan);
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
-                finishedLoading();
-                var t2 = Task.Run(() =>
-                {
-                    Thread.Sleep(5000);
-                    OCR.VerifyWarframe();
-                });
+                FinishedLoading();
             }
             catch (Exception ex)
             {
@@ -97,7 +92,7 @@ namespace WFInfo
                 StatusUpdate("Launch Failure - Please Restart", 0);
                 RunOnUIThread(() =>
                 {
-                    new ErrorDialogue(DateTime.Now, 0);
+                    _ = new ErrorDialogue(DateTime.Now, 0);
                 });
             }
         }
@@ -107,7 +102,7 @@ namespace WFInfo
                 return;
             var now = DateTime.UtcNow;
             Console.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {Main.latestActive}");
-            if (now > latestActive)
+            if (now > latestActive || OCR.Warframe != null && OCR.Warframe.HasExited)
             {
                 await dataBase.SetWebsocketStatus("offline");
                 StatusUpdate("User has been inactive for 15 minutes", 0);
@@ -121,9 +116,9 @@ namespace WFInfo
 
         public static void StartMessage()
         {
-            Directory.CreateDirectory(appPath);
-            Directory.CreateDirectory(appPath + @"\debug");
-            using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+            Directory.CreateDirectory(AppPath);
+            Directory.CreateDirectory(AppPath + @"\debug");
+            using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
             {
                 sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
                 sw.WriteLineAsync("   STARTING WFINFO " + buildVersion + " at " + DateTime.UtcNow);
@@ -134,10 +129,10 @@ namespace WFInfo
         public static void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
             Console.WriteLine(argm);
-            Directory.CreateDirectory(appPath);
+            Directory.CreateDirectory(AppPath);
             try
             {
-                using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+                using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
                     sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
             }
             catch (Exception)
@@ -173,11 +168,11 @@ namespace WFInfo
                     return;
                 }
 
-                if (searchBox.isInUse)
+                if (searchBox.IsInUse)
                 { //if key is pressed and searchbox is active then rederect keystokes to it.
                     if (Keyboard.IsKeyDown(Key.Escape))
                     { // close it if esc is used.
-                        searchBox.finish();
+                        searchBox.Finish();
                         return;
                     }
                     searchBox.searchField.Focus();
@@ -227,11 +222,11 @@ namespace WFInfo
 		        StatusUpdate("Closed snapit", 0);
 		        return;
 		    }
-            if (searchBox.isInUse)
+            if (searchBox.IsInUse)
             { //if key is pressed and searchbox is active then rederect keystokes to it.
                 if (key == Key.Escape)
                 { // close it if esc is used.
-                    searchBox.finish();
+                    searchBox.Finish();
                     return;
                 }
                 searchBox.searchField.Focus();
@@ -308,7 +303,7 @@ namespace WFInfo
 		                {
 		                    foreach (string file in openFileDialog.FileNames)
 		                    {
-		                        AddLog("Testing file: " + file.ToString());
+		                        AddLog("Testing file: " + file);
 
 		                        //Get the path of specified file
 		                        Bitmap image = new Bitmap(file);
@@ -350,7 +345,7 @@ namespace WFInfo
                         {
                             foreach (string file in openFileDialog.FileNames)
                             {
-                                AddLog("Testing snapit on file: " + file.ToString());
+                                AddLog("Testing snapit on file: " + file);
 
                                 Bitmap image = new Bitmap(file);
                                 OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
@@ -371,19 +366,19 @@ namespace WFInfo
             }
         }
 
-        public static void loggedIn()
+        public static void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
 	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
         }
 
 
-        public static void finishedLoading()
+        public static void FinishedLoading()
         {
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.FinishedLoading(); });
         }
-        public static void updateMarketStatus(string msg)
+        public static void UpdateMarketStatus(string msg)
         {
-	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.updateMarketStatus(msg); });
+	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.UpdateMarketStatus(msg); });
         }
 
         public static string BuildVersion { get => buildVersion; }
@@ -397,7 +392,7 @@ namespace WFInfo
                 {
                     if (versParts[i].Length == 0)
                         return -1;
-                    ret += Convert.ToInt32(int.Parse(versParts[i]) * Math.Pow(100, 2 - i));
+                    ret += Convert.ToInt32(int.Parse(versParts[i], Main.culture) * Math.Pow(100, 2 - i));
                 }
 
             return ret;
@@ -406,21 +401,21 @@ namespace WFInfo
         // Glob
         public static System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("en");
 
-        public static void signOut()
+        public static void SignOut()
         {
-	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.signOut(); });
+	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
         }
     }
 
     public class Status
     {
-        public string message;
-        public int severity;
+        public string Message { get; set; }
+        public int Severity { get; set; }
 
         public Status(string msg, int ser)
         {
-            message = msg;
-            severity = ser;
+            Message = msg;
+            Severity = ser;
         }
     }
 

@@ -40,10 +40,10 @@ namespace WFInfo
         public static double mediumFont = 17.0;
         public static double smallFont = 14.0;
 
-        private static Color blu = Color.FromRgb(177, 208, 217);
-        private static SolidColorBrush bluBrush = new SolidColorBrush(blu);
+        private static readonly Color blu = Color.FromRgb(177, 208, 217);
+        private static readonly SolidColorBrush bluBrush = new SolidColorBrush(blu);
 
-        private DispatcherTimer hider = new DispatcherTimer();
+        private readonly DispatcherTimer hider = new DispatcherTimer();
 
         public Overlay()
         {
@@ -52,7 +52,7 @@ namespace WFInfo
             InitializeComponent();
         }
 
-        public void bestPlatChoice()
+        public void BestPlatChoice()
         {
             platText.FontWeight = FontWeights.Bold;
             partText.FontWeight = FontWeights.Bold;
@@ -60,7 +60,7 @@ namespace WFInfo
             partText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 0));
         }
 
-        public void bestDucatChoice()
+        public void BestDucatChoice()
         {
             ducatText.FontWeight = FontWeights.Bold;
             partText.FontWeight = FontWeights.Bold;
@@ -68,7 +68,7 @@ namespace WFInfo
             partText.Foreground = new SolidColorBrush(Color.FromRgb(255, 215, 0));
         }
 
-        public void bestOwnedChoice()
+        public void BestOwnedChoice()
         {
             ownedText.FontWeight = FontWeights.Bold;
             partText.FontWeight = FontWeights.Bold;
@@ -94,7 +94,7 @@ namespace WFInfo
             }
             else
             {
-                new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+                BackgroundGrid.Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
             }
 
             partText.Text = name;
@@ -123,6 +123,10 @@ namespace WFInfo
                     vaultedMargin.Visibility = Visibility.Visible;
                 else
                     vaultedMargin.Visibility = Visibility.Hidden;
+                if (owned == null)
+                {
+                    throw new ArgumentNullException(nameof(owned));
+                }
                 if (owned.Length > 0)
                     ownedText.Text = owned + " OWNED";
                 else
@@ -130,7 +134,7 @@ namespace WFInfo
             }
         }
 
-        public void clear()
+        public void Clear()
         {
             ducatText.Foreground = bluBrush;
             ducatText.FontWeight = FontWeights.Normal;
