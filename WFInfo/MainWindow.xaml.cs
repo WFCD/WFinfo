@@ -247,8 +247,8 @@ namespace WFInfo {
 		private void Settings_click(object sender, RoutedEventArgs e) {
 			if (Main.settingsWindow == null) { ChangeStatus("Settings window not yet loaded in", 2); return; }
 			Main.settingsWindow.populate();
-			Main.settingsWindow.Left = Left + 320;
-			Main.settingsWindow.Top = Top;
+			Main.settingsWindow.Left = Left;
+			Main.settingsWindow.Top = Top+Height;
 			Main.settingsWindow.Show();
 		}
 
@@ -428,6 +428,8 @@ namespace WFInfo {
         private void PlusOne(object sender, MouseButtonEventArgs e)
         {
 			Main.plusOne.Show();
+			Main.plusOne.Left = Left+Width;
+			Main.plusOne.Top = Top;
         }
     }
 }
