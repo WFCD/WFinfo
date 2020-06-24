@@ -390,7 +390,7 @@ namespace WFInfo
             var top = height / 2 - (int)((pixleRewardYDisplay) * screenScaling * uiScaling);
             var selectionRectangle = new Rectangle(mostLeft, top, mostWidth, bottom / 2);
             if (selectionRectangle.Contains(lastClick))
-                Console.WriteLine("Contianed!");
+                Debug.WriteLine("Contianed!");
             var middelHeight = top + bottom / 4;
             var length = mostWidth / 8;
 
@@ -414,7 +414,7 @@ namespace WFInfo
                 foreach (var pnt in RewardPoints4)
                 {
                     var distanceToLastClick = ((lastClick.X - pnt.X) * (lastClick.X - pnt.X) + (lastClick.Y - pnt.Y) * (lastClick.Y - pnt.Y));
-                    Console.WriteLine($"current point: {pnt}, with distance: {distanceToLastClick}");
+                    Debug.WriteLine($"current point: {pnt}, with distance: {distanceToLastClick}");
 
                     if (distanceToLastClick < lowestDistance)
                     {
@@ -428,7 +428,7 @@ namespace WFInfo
                 foreach (var pnt in RewardPoints3)
                 {
                     var distanceToLastClick = ((lastClick.X - pnt.X) * (lastClick.X - pnt.X) + (lastClick.Y - pnt.Y) * (lastClick.Y - pnt.Y));
-                    Console.WriteLine($"current point: {pnt}, with distance: {distanceToLastClick}");
+                    Debug.WriteLine($"current point: {pnt}, with distance: {distanceToLastClick}");
 
                     if (distanceToLastClick < lowestDistance)
                     {
@@ -438,7 +438,7 @@ namespace WFInfo
                 }
             }
 
-            Console.WriteLine($"Cloestst point: {lowestDistancePoint}, with distance: {lowestDistance}");
+            Debug.WriteLine($"Cloestst point: {lowestDistancePoint}, with distance: {lowestDistance}");
 
             timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
 
@@ -538,7 +538,7 @@ namespace WFInfo
                             }
                             else if (secondName != "Kuva" || secondName != "Exilus Weapon Adapter Blueprint" || secondName != "Riven Sliver" || secondName != "Ayatan Amber Star")
                             {
-                                Console.WriteLine($"Adding : {secondName}");
+                                Debug.WriteLine($"Adding : {secondName}");
                                 primeRewards.Add(secondName);
                             }
                             #region clipboard
@@ -629,11 +629,11 @@ namespace WFInfo
                         foreach (int item in unownedItems)
                         {
                             Main.overlays[item].BestOwnedChoice();
-                            Console.WriteLine($"nr: {item} is unowned");
+                            Debug.WriteLine($"nr: {item} is unowned");
                         }
                         Main.overlays[bestDucatItem].BestDucatChoice();
                         Main.overlays[bestPlatItem].BestPlatChoice();
-                        Console.WriteLine($"Best ducat: {bestDucatItem}, Best plat: {bestPlatItem}");
+                        Debug.WriteLine($"Best ducat: {bestDucatItem}, Best plat: {bestPlatItem}");
                     });
                 }
                 newFilter.Dispose();
@@ -704,7 +704,7 @@ namespace WFInfo
             WFtheme active = WFtheme.UNKNOWN;
             for (int i = 0; i < weights.Length; i++)
             {
-                Console.Write(weights[i].ToString("F2", Main.culture) + " ");
+                Debug.Write(weights[i].ToString("F2", Main.culture) + " ");
                 if (weights[i] > max)
                 {
                     max = weights[i];
@@ -1107,7 +1107,7 @@ namespace WFInfo
             active = WFtheme.UNKNOWN;
             for (int i = 0; i < weights.Length; i++)
             {
-                Console.Write(weights[i].ToString("F2", Main.culture) + " ");
+                Debug.Write(weights[i].ToString("F2", Main.culture) + " ");
                 if (weights[i] > max)
                 {
                     max = weights[i];
@@ -1138,7 +1138,7 @@ namespace WFInfo
                     } //else
                       //  postFilter.SetPixel(x, y, Color.White);
                 }
-                //Console.Write(rows[y] + " ");
+                //Debug.Write(rows[y] + " ");
             }
 
 
@@ -1551,7 +1551,7 @@ namespace WFInfo
                         HandleRef = new HandleRef(process, process.MainWindowHandle);
                         Warframe = process;
                         if (Main.dataBase.GetSocketAliveStatus())
-                            Console.WriteLine("Socket was open in verrify warframe");
+                            Debug.WriteLine("Socket was open in verrify warframe");
                             Task.Run(async () =>
                             {
                                 await Main.dataBase.SetWebsocketStatus("in game");

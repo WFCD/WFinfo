@@ -344,16 +344,16 @@ namespace WFInfo {
 
 			if (marketData["timestamp"] == null)
             {
-				Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = "VERIFY"; });
-				Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = "TIME"; });
+				Main.RunOnUIThread(() => { MainWindow.INSTANCE.MarketData.Content = "VERIFY"; });
+				Main.RunOnUIThread(() => { MainWindow.INSTANCE.DropData.Content = "TIME"; });
 
 				return false;
 			}
 
-			Main.RunOnUIThread(() => { MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
+			Main.RunOnUIThread(() => { MainWindow.INSTANCE.MarketData.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
 
 			saveDatabases = LoadEqmtData(allFiltered, saveDatabases);
-			Main.RunOnUIThread(() => { MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
+			Main.RunOnUIThread(() => { MainWindow.INSTANCE.DropData.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
 
 			if (saveDatabases)
 				SaveAllJSONs();
@@ -383,7 +383,7 @@ namespace WFInfo {
 				SaveDatabase(marketItemsPath, marketItems);
 				SaveDatabase(marketDataPath, marketData);
 				Main.RunOnUIThread(() => {
-					MainWindow.INSTANCE.Market_Data.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+					MainWindow.INSTANCE.MarketData.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
 					Main.StatusUpdate("Market Update Complete", 0);
 					MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
 					MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
@@ -415,7 +415,7 @@ namespace WFInfo {
 				LoadEqmtData(allFiltered, true);
 				SaveAllJSONs();
 				Main.RunOnUIThread(() => {
-					MainWindow.INSTANCE.Drop_Data.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+					MainWindow.INSTANCE.DropData.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
 					Main.StatusUpdate("Prime Update Complete", 0);
 
 					MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
@@ -839,7 +839,7 @@ namespace WFInfo {
 
 			marketSocket.OnMessage += (sender, e) =>
 			{
-				Console.WriteLine("warframe.market: " + e.Data);
+				Debug.WriteLine("warframe.market: " + e.Data);
 				if (!e.Data.Contains("SET_STATUS")) return;
 				var message = JsonConvert.DeserializeObject<JObject>(e.Data);
 				Main.RunOnUIThread(() =>
@@ -1024,7 +1024,7 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="data">The JSON string of data being sent over websocket</param>
 		private void SendMessage(string data) {
-			Console.WriteLine("Sending: " + data + " to websocket.");
+			Debug.WriteLine("Sending: " + data + " to websocket.");
 			marketSocket.Send(data);
 		}
 		/// <summary>
@@ -1069,7 +1069,7 @@ namespace WFInfo {
 					var payload = JsonConvert.DeserializeObject<JObject>(body);
 					if (body.Length < 3)
 						throw new Exception("No sell orders found: " + payload);
-					Console.WriteLine(body);
+					Debug.WriteLine(body);
 
 					return JsonConvert.DeserializeObject<JObject>(body);
 				}
@@ -1200,7 +1200,7 @@ namespace WFInfo {
 						request.Content = new StringContent(msg, System.Text.Encoding.UTF8, "application/json");
 						var response = await client.SendAsync(request);
 						var body = await response.Content.ReadAsStringAsync();
-						Console.WriteLine($"Body: {body}, Content: {msg}");
+						Debug.WriteLine($"Body: {body}, Content: {msg}");
 					}
 				}
 				catch (Exception e)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -156,7 +157,7 @@ namespace WFInfo
         }
 
         public static void AddLog(string argm) { //write to the debug file, includes version and UTCtime
-	        Console.WriteLine(argm);
+	        Debug.WriteLine(argm);
 	        Directory.CreateDirectory(appPath);
 	        using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
 		        sw.WriteLineAsync("[" + DateTime.UtcNow + "Still in custom entery point" +  "]   " + argm);

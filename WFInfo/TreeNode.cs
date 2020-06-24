@@ -404,7 +404,7 @@ namespace WFInfo
             return prnt;
         }
 
-        private void ConsolePrintBullshit(Dictionary<string, bool> matchedText)
+        private void PrintItemToConsole(Dictionary<string, bool> matchedText)
         {
             string prnt = Name + ": ";
             TreeNode temp = Parent;

@@ -24,6 +24,7 @@ namespace WFInfo {
 		public static LowLevelListener listener;
 
 		public MainWindow() {
+		
 			string thisprocessname = Process.GetCurrentProcess().ProcessName;
 			if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1) {
 				Main.AddLog("Duplicate process found");
@@ -196,7 +197,7 @@ namespace WFInfo {
 		/// <param name="status">The string to be displayed</param>
 		/// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
 		public void ChangeStatus(string status, int severity) {
-			Console.WriteLine("Status message: " + status);
+			Debug.WriteLine("Status message: " + status);
 			Status.Text = status;
 			switch (severity) {
 				case 0: //default, no problem
@@ -215,7 +216,7 @@ namespace WFInfo {
 		}
 
 		public void Exit(object sender, RoutedEventArgs e) {
-			notifyIcon.Dispose();
+			NotifyIcon.Dispose();
 			RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
 			if (Main.dataBase.rememberMe) // if rememberme was checked then save it
 			{
@@ -255,7 +256,7 @@ namespace WFInfo {
 		private void ReloadMarketClick(object sender, RoutedEventArgs e) {
 			ReloadDrop.IsEnabled = false;
 			ReloadMarket.IsEnabled = false;
-			Market_Data.Content = "Loading...";
+			MarketData.Content = "Loading...";
 			Main.StatusUpdate("Forcing Market Update", 0);
 			Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
 		}
@@ -263,7 +264,7 @@ namespace WFInfo {
 		private void ReloadDropClick(object sender, RoutedEventArgs e) {
 			ReloadDrop.IsEnabled = false;
 			ReloadMarket.IsEnabled = false;
-			Drop_Data.Content = "Loading...";
+			DropData.Content = "Loading...";
 			Main.StatusUpdate("Forcing Prime Update", 0);
 			Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
 		}
@@ -306,7 +307,7 @@ namespace WFInfo {
 			Login.Visibility = Visibility.Collapsed;
 			ComboBox.SelectedIndex = 1;
 			ComboBox.Visibility = Visibility.Visible;
-			plusOne.Visibility = Visibility.Visible;
+			PlusOneButton.Visibility = Visibility.Visible;
 			CreateListing.Visibility = Visibility.Visible;
 
 			ChangeStatus("Logged in", 0);
@@ -384,7 +385,7 @@ namespace WFInfo {
         {
 			Login.Visibility = Visibility.Visible;
 			ComboBox.Visibility = Visibility.Hidden;
-			plusOne.Visibility = Visibility.Hidden;
+			PlusOneButton.Visibility = Visibility.Hidden;
 			CreateListing.Visibility = Visibility.Hidden;
 			Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
 		}

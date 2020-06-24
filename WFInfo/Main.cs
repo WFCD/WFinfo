@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -102,7 +103,7 @@ namespace WFInfo
             if (!await dataBase.IsJWTvalid())
                 return;
             var now = DateTime.UtcNow;
-            Console.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {Main.latestActive}");
+            Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {Main.latestActive}");
             if (now > latestActive || OCR.Warframe != null && OCR.Warframe.HasExited)
             {
                 await dataBase.SetWebsocketStatus("offline");
@@ -129,7 +130,7 @@ namespace WFInfo
 
         public static void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
-            Console.WriteLine(argm);
+            Debug.WriteLine(argm);
             Directory.CreateDirectory(AppPath);
             try
             {
@@ -212,7 +213,7 @@ namespace WFInfo
             {
                 lastClick = System.Windows.Forms.Cursor.Position;
                 OCR.GetSelectedReward(lastClick);
-                Console.WriteLine(OCR.window.ToString());
+                Debug.WriteLine(OCR.window.ToString());
             }
         }
 

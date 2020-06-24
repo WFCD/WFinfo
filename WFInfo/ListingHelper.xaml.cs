@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -104,7 +105,7 @@ namespace WFInfo {
 			
 			Next.IsEnabled = true;
 
-			Console.WriteLine($"There are {ScreensList.Count} screens and: {PrimeRewards} prime rewards. Currently on screen {PageIndex} and trying to go to the previous screen");
+			Debug.WriteLine($"There are {ScreensList.Count} screens and: {PrimeRewards} prime rewards. Currently on screen {PageIndex} and trying to go to the previous screen");
 
 			if (PageIndex == 0) {//reached start of the list
 				Back.IsEnabled = false;
@@ -120,7 +121,7 @@ namespace WFInfo {
 		private void SetCurrentStatus()
 		{
 
-			Console.WriteLine($"Current status is: {ScreensList[PageIndex].Key}");
+			Debug.WriteLine($"Current status is: {ScreensList[PageIndex].Key}");
 			switch (ScreensList[PageIndex].Key)
 			{
 				//listing already successfully posted

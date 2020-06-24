@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -89,7 +90,7 @@ namespace WFInfo
 
             if (Settings.highContrast)
             {
-                Console.WriteLine("Turning high contrast on");
+                Debug.WriteLine("Turning high contrast on");
                 BackgroundGrid.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
             }
             else
