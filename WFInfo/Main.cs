@@ -211,9 +211,9 @@ namespace WFInfo
                 }
             }else if (key== MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited)
             {
-                lastClick = System.Windows.Forms.Cursor.Position;
-                OCR.GetSelectedReward(lastClick);
-                Debug.WriteLine(OCR.window.ToString());
+                //lastClick = System.Windows.Forms.Cursor.Position;
+                //OCR.GetSelectedReward(lastClick);
+                //Debug.WriteLine(OCR.window.ToString());
             }
         }
 

@@ -673,22 +673,21 @@ namespace WFInfo
 
             if (image == null)
             {
-                try
-                {
-                    using (image = new Bitmap(mostWidth, mostBot - mostTop))
-                        using (Graphics graphics = Graphics.FromImage(image))
-                            graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(image.Width, image.Height));
-                }
-                catch (Exception ex)
-                {
-                    Main.AddLog("Something went wrong with getting the starting image: " + ex.ToString());
-                    throw;
-                }
+                // using (image = new Bitmap(mostWidth, mostBot - mostTop))
+                //     using (Graphics graphics = Graphics.FromImage(image))
+                //         graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(image.Width, image.Height));
+                image = CaptureScreenshot();
             }
+
+            
 
             double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             int minWidth = mostWidth / 4;
 
+            if (image == null || image.Height == 0)
+            {
+                throw new Exception("Image height was 0");
+            }
             for (int y = lineHeight; y < image.Height; y++)
             {
                 double perc = (y - lineHeight) / (image.Height - lineHeight);
@@ -716,8 +715,8 @@ namespace WFInfo
             return active;
         }
         #pragma warning disable IDE0044 // Add readonly modifier
-        private static byte[,,] GetThemeCache = new byte[255, 255, 255];
-        private static byte[,,] GetThresholdCache = new byte[255, 255, 255];
+        private static short[,,] GetThemeCache = new short[256, 256, 256];
+        private static short[,,] GetThresholdCache = new short[256, 256, 256];
         #pragma warning disable IDE0044 // Add readonly modifier
 
         private static WFtheme GetClosestTheme(Color clr, out int threshold)

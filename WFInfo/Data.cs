@@ -1023,7 +1023,9 @@ namespace WFInfo {
 		/// Dummy method to make it so that you log send messages
 		/// </summary>
 		/// <param name="data">The JSON string of data being sent over websocket</param>
-		private void SendMessage(string data) {
+		private void SendMessage(string data)
+		{
+			if (!GetSocketAliveStatus()) return;
 			Debug.WriteLine("Sending: " + data + " to websocket.");
 			marketSocket.Send(data);
 		}
