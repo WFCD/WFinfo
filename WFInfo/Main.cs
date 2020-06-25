@@ -106,7 +106,8 @@ namespace WFInfo
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {Main.latestActive}");
             if (now > latestActive || OCR.Warframe != null && OCR.Warframe.HasExited)
             {
-                await dataBase.SetWebsocketStatus("offline");
+                await dataBase.SetWebsocketStatus("invisible");
+                UpdateMarketStatus("invisible");
                 StatusUpdate("User has been inactive for 15 minutes", 0);
             }
         }

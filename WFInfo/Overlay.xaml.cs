@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -51,6 +52,13 @@ namespace WFInfo
             hider.Interval = TimeSpan.FromSeconds(10);
             hider.Tick += HideOverlay;
             InitializeComponent();
+        }
+        
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            var hwnd = new WindowInteropHelper(this).Handle;
+            Win32.SetWindowExTransparent(hwnd);
         }
 
         public void BestPlatChoice()

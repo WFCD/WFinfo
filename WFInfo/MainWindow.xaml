@@ -272,5 +272,29 @@
             <ComboBoxItem Content="Offline"/>
             <ComboBoxItem Content="Log out"/>
         </ComboBox>
+        <Label x:Name="SearchItButton" ToolTip="Launch search it" MouseLeftButtonDown="SearchItButton_MouseLeftButtonDown" Margin="0,62,1,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" Visibility="Collapsed" HorizontalAlignment="Right" Width="20">
+            <Label.Style>
+                <Style>
+                    <Setter Property="ContentControl.Content">
+                        <Setter.Value>
+                            <Image Source="Resources/SearchIcon.png" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                <Condition Property="UIElement.IsEnabled" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="ContentControl.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/SearchIcon_h.png" Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
     </Grid>
 </Window>

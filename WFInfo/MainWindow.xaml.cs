@@ -309,7 +309,7 @@ namespace WFInfo {
 			ComboBox.Visibility = Visibility.Visible;
 			PlusOneButton.Visibility = Visibility.Visible;
 			CreateListing.Visibility = Visibility.Visible;
-
+			SearchItButton.Visibility = Visibility.Visible;
 			ChangeStatus("Logged in", 0);
 		}
 
@@ -325,7 +325,10 @@ namespace WFInfo {
 
 		public void SignOut() {
 			Login.Visibility = Visibility.Visible;
-			ComboBox.Visibility = Visibility.Collapsed;
+            ComboBox.Visibility = Visibility.Collapsed;
+			PlusOneButton.Visibility = Visibility.Collapsed;
+			CreateListing.Visibility = Visibility.Collapsed;
+			SearchItButton.Visibility = Visibility.Collapsed;
 		}
 
 		/// <summary>
@@ -431,6 +434,13 @@ namespace WFInfo {
 			Main.plusOne.Show();
 			Main.plusOne.Left = Left+Width;
 			Main.plusOne.Top = Top;
+        }
+
+        private void SearchItButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+	        Main.AddLog("Starting search it");
+	        Main.StatusUpdate("Starting search it", 0);
+	        Main.searchBox.Start();
         }
     }
 }

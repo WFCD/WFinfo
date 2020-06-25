@@ -132,13 +132,14 @@ namespace WFInfo {
 					Status.Content = "Listing already successfully posted";
 					Status.Visibility = Visibility.Visible;
 					ComboBox.IsEnabled = false;
-					ConfirmListingButton.IsEnabled = true;
+					ConfirmListingButton.IsEnabled = false;
 					break;
 				case "": //listing is not yet assigned anything
 					Height = 255;
 					Status.Visibility = Visibility.Collapsed;
 					ListingGrid.Visibility = Visibility.Visible;
 					ComboBox.IsEnabled = true;
+					ConfirmListingButton.IsEnabled = true;
 					break;
 				default: //an error occured.
 					Height = 270;
@@ -167,6 +168,7 @@ namespace WFInfo {
 					var newEntry = new KeyValuePair<string, RewardCollection>("successful", ScreensList[PageIndex].Value);
 					ScreensList.RemoveAt(PageIndex);
 					ScreensList.Insert(PageIndex, newEntry);
+					ConfirmListingButton.IsEnabled = true;
 				} else {
 					var newEntry = new KeyValuePair<string, RewardCollection>("Something uncaught went wrong", ScreensList[PageIndex].Value);
 					ScreensList.RemoveAt(PageIndex);
@@ -227,8 +229,8 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
-		private void Cancel(object sender, RoutedEventArgs e) {
-			if (ScreensList.Count == 1)
+		private void Cancel(object sender, RoutedEventArgs e) { //todo:fix the fact that canceling resets status of page from sold to default.
+			if (ScreensList.Count == 1 || ScreensList.Count == 0)
 			{
 				// if it's the last item
 				Minimize(null, null);
@@ -283,9 +285,21 @@ namespace WFInfo {
 			{
 				if(primeItem.IsNullOrEmpty())
 					continue;
-				var tempListings = GetMarketListing(primeItem);
-				marketListings.Add(tempListings);
-				platinumValues.Add(tempListings[0].Platinum);
+				try
+				{
+					var tempListings = GetMarketListing(primeItem);
+					marketListings.Add(tempListings);
+					platinumValues.Add(tempListings[0].Platinum);
+				}
+				catch (Exception e)
+				{
+					Main.RunOnUIThread(() =>
+					{
+						Main.searchBox.placeholder.Content = $"Could not find {primeItem}";
+						Main.searchBox.searchField.Text = string.Empty;
+					});
+					Debug.WriteLine(e);
+				}
 			}
 			return new RewardCollection(primeNames, platinumValues, marketListings);
 		}
@@ -297,6 +311,9 @@ namespace WFInfo {
 		/// <returns>the top 5 current market listings</returns>
 		public static List<MarketListing> GetMarketListing(string primeName)
 		{
+			if(primeName.Contains("forma") || primeName.Contains("Kuva"))
+				throw new ArgumentException($"Prime name is on the black list: {primeName}");
+			
 			var results = Task.Run(async () => await Main.dataBase.GetTopListings(primeName)).Result;
 			var listings = new List<MarketListing>();
 			var sellOrders = new JArray(results["payload"]["sell_orders"].Children());

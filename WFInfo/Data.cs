@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
 
@@ -743,7 +744,7 @@ namespace WFInfo {
 
 					Main.RunOnUIThread(() =>
 					{
-						if (Main.listingHelper.Visibility == System.Windows.Visibility.Hidden)
+						if (Main.listingHelper.ScreensList.Count == 1 )
 							Main.listingHelper.SetScreen(0);
 						Main.listingHelper.PrimeRewards.Clear();
 						Main.listingHelper.Show();
@@ -867,7 +868,7 @@ namespace WFInfo {
 			}
 			catch (Exception e) {
 				Main.AddLog(e.Message);
-				throw;
+				return false;
 			}
 			return true;
 		}
@@ -1025,9 +1026,17 @@ namespace WFInfo {
 		/// <param name="data">The JSON string of data being sent over websocket</param>
 		private void SendMessage(string data)
 		{
-			if (!GetSocketAliveStatus()) return;
 			Debug.WriteLine("Sending: " + data + " to websocket.");
-			marketSocket.Send(data);
+			try
+			{
+				while(marketSocket.ReadyState == WebSocketState.Connecting) //Make sure that the socket is actually connected before sending any data.
+					Thread.Sleep(1);
+				marketSocket.Send(data);
+			}
+			catch (InvalidOperationException e)
+			{
+				Debug.WriteLine($"Was unable to send message due to: {e}");
+			}
 		}
 		/// <summary>
 		/// Disconnects the user from websocket and sets JWT to null
