@@ -126,7 +126,7 @@ namespace WFInfo
 
         private static Bitmap bigScreenshot;
         private static Bitmap partialScreenshot;
-        //private static Bitmap[] partScreenshots;
+        public static Bitmap RewarIndexScreenshot;
         private static Bitmap partialScreenshotExpanded;
 
         private static WFtheme activeTheme;
@@ -177,7 +177,15 @@ namespace WFInfo
             List<Bitmap> parts;
 
             bigScreenshot = file ?? CaptureScreenshot();
-            parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, file);
+            try
+            {
+                parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, file);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }
 
 
             firstChecks = new string[parts.Count];
@@ -296,6 +304,8 @@ namespace WFInfo
                         #region display part
                         Main.RunOnUIThread(() =>
                         {
+                            Overlay.rewardsDisplaying = true;
+
                             if (Settings.isOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", hideRewardInfo);
@@ -364,6 +374,7 @@ namespace WFInfo
             if (bigScreenshot != null)
             {
                 bigScreenshot.Save(Main.AppPath + @"\Debug\FullScreenShot " + timestamp + ".png");
+                RewarIndexScreenshot = bigScreenshot;
                 bigScreenshot.Dispose();
                 bigScreenshot = null;
             }
@@ -380,16 +391,11 @@ namespace WFInfo
 
         internal static int GetSelectedReward(Point lastClick)
         {
-            // var img = CaptureScreenshot();
             Debug.WriteLine(lastClick.ToString());
-            var img = Image.FromFile(@"F:\q.png");
-            OCR.UpdateWindow((Bitmap)img);
             var primeRewardIndex = 0;
             lastClick.Offset(-window.X, -window.Y);
-            numberOfRewardsDisplayed = 3;
-            uiScaling = 1; 
-            int width = window.Width * (int)dpiScaling;
-            int height = window.Height * (int)dpiScaling;
+            var width = window.Width * (int)dpiScaling;
+            var height = window.Height * (int)dpiScaling;
             var mostWidth = (int)(pixleRewardWidth * screenScaling * uiScaling);
             var mostLeft = (width / 2) - (mostWidth / 2);
             var bottom = height / 2 - (int) ((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5 * uiScaling);
@@ -459,7 +465,7 @@ namespace WFInfo
             Debug.WriteLine($"Closest point: {lowestDistancePoint}, with distance: {lowestDistance}");
             
             timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-
+            var img = CaptureScreenshot();
             var pinkP = new Pen(Brushes.Pink);
             var blackP = new Pen(Brushes.Black);
             using (Graphics g = Graphics.FromImage(img))
@@ -1066,13 +1072,13 @@ namespace WFInfo
             long start = watch.ElapsedMilliseconds;
             long beginning = start;
 
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
+            int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling * (int)dpiScaling);
 
             Color clr;
             int width = fullScreen == null ? window.Width * (int)dpiScaling : fullScreen.Width;
             int height = fullScreen == null ? window.Height * (int)dpiScaling : fullScreen.Height;
-            int mostWidth = (int)(pixleRewardWidth * screenScaling);
-            int mostLeft = (width / 2) - (mostWidth / 2);
+            int mostWidth = (int)(pixleRewardWidth * screenScaling * (int)dpiScaling);
+            int mostLeft = (width / 2) - (mostWidth / 2 * (int)dpiScaling);
             // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
             //                   (316          -        235        +       44)    *    1.1    =    137
             int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
@@ -1222,6 +1228,7 @@ namespace WFInfo
             }
 
             end = watch.ElapsedMilliseconds;
+            
             Main.AddLog("Got scaling " + (end - start) + "ms");
 
             int[] topFive = new int[] { -1, -1, -1, -1, -1 };
@@ -1258,21 +1265,25 @@ namespace WFInfo
 
             //postFilter.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
             preFilter.Save(Main.AppPath + @"\Debug\FullPartArea " + timestamp + ".png");
+            scaling = topFive[4] + 50; //scaling was sometimes going to 50 despite being set to 100, so taking the value from above that seems to be accurate.
 
-            scaling /= 100;
+            scaling /= 100; //todo: not getting dpi scaling correctly
             double highScaling = scaling < 1.0 ? scaling + 0.01 : scaling;
             double lowScaling = scaling > 0.5 ? scaling - 0.01 : scaling;
-
+            
             int cropWidth = (int)(pixleRewardWidth * screenScaling * highScaling);
             int cropLeft = (preFilter.Width / 2) - (cropWidth / 2);
-            int cropTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling * highScaling);
-            int cropBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * lowScaling);
+            int cropTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling * highScaling );
+            int cropBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * lowScaling );
             int cropHei = cropBot - cropTop;
             cropTop -= mostTop;
             try
             {
                 Rectangle rect = new Rectangle(cropLeft, cropTop, cropWidth, cropHei);
                 partialScreenshot = preFilter.Clone(rect, System.Drawing.Imaging.PixelFormat.DontCare);
+                partialScreenshot.Save(Main.AppPath + @"\Debug\DEBBUGGINGBOI" + timestamp + ".png");
+                if (partialScreenshot.Height == 0 || partialScreenshot.Width == 0)
+                    throw new ArithmeticException("New image was null");
             }
             catch (Exception ex)
             {
@@ -1321,7 +1332,8 @@ namespace WFInfo
                 else if (sinVal > 0)
                     totalOdd += sinVal * count;
             }
-
+            if(totalEven == 0 || totalOdd == 0)
+                throw new Exception("Unable to find any parts");
             double total = totalEven + totalOdd;
             Main.AddLog("EVEN DISTRIBUTION: " + (totalEven / total * 100).ToString("F2", Main.culture) + "%");
             Main.AddLog("ODD DISTRIBUTION: " + (totalOdd / total * 100).ToString("F2", Main.culture) + "%");

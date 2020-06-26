@@ -210,13 +210,15 @@ namespace WFInfo
                 {
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
-            }else if (key== MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited) //todo: Fix this condition so it only activates after auto has been triggered and stops triggering after auto detects enf of mission
+            }else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying) //todo: Fix this condition so it only activates after auto has been triggered and stops triggering after auto detects enf of mission
             {
                 Task.Run((() =>
                 {
                     lastClick = System.Windows.Forms.Cursor.Position;
-                    OCR.GetSelectedReward(lastClick);
-                    Debug.WriteLine(OCR.window.ToString());
+                    var index = OCR.GetSelectedReward(lastClick);
+                    if (index < 0) return;
+                    listingHelper.SelectedRewardIndex = index;
+                    Debug.WriteLine(listingHelper.SelectedRewardIndex);
                 }));
             }
         }

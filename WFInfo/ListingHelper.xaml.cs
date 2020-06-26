@@ -19,8 +19,9 @@ namespace WFInfo {
 		public List<KeyValuePair<string, RewardCollection>> ScreensList { get; set; } = new List<KeyValuePair<string, RewardCollection>>();
 		public List<List<string>> PrimeRewards { get; set; } = new List<List<string>>();
 		//Helper, allowing to store the rewards until needed to be processed
-		public int PageIndex { get; set; } = 0;
+		private int PageIndex { get; set; } = 0;
 		private bool updating;
+		public int SelectedRewardIndex = 0;
 		#region default methods
 		public ListingHelper() {
 			InitializeComponent();
@@ -60,12 +61,12 @@ namespace WFInfo {
 				throw new Exception("Tried setting screen to an item that didn't exist");
 			}
 			SetCurrentStatus();
-
+			
 			var screen = ScreensList[index];
 			updating = true;
 			SetListings(0);
 			ComboBox.Items.Clear();
-			ComboBox.SelectedIndex = 0;
+			ComboBox.SelectedIndex = screen.Value.RewardIndex;
 			foreach (var primeItem in screen.Value.PrimeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
 			{
 				ComboBox.Items.Add(primeItem);
@@ -301,7 +302,7 @@ namespace WFInfo {
 					Debug.WriteLine(e);
 				}
 			}
-			return new RewardCollection(primeNames, platinumValues, marketListings);
+			return new RewardCollection(primeNames, platinumValues, marketListings, SelectedRewardIndex);
 		}
 		
 		/// <summary>
@@ -346,7 +347,7 @@ namespace WFInfo {
 			PlatinumTextBox.Text = Regex.Replace(PlatinumTextBox.Text, "[^0-9.]", "");
 		}
     }
-
+	
     /// <summary>
     /// Class to represent a single "sheet" of the create listing screen, consisting of up to 4 possible rewards for which are unique plat, quantity and market listings 
     /// </summary>
@@ -355,12 +356,14 @@ namespace WFInfo {
 		public List<string> PrimeNames { get; set; } = new List<string>(4); // the reward items in case user wants to change selection
 		public List<int> PlatinumValues { get; set; } = new List<int>(4);
 		public List<List<MarketListing>> MarketListings { get; set; } = new List<List<MarketListing>>(5);
+		public int RewardIndex{ get; set; } = 0;
 
-		public RewardCollection(List<string> primeNames, List<int> platinumValues, List<List<MarketListing>> marketListings)
+		public RewardCollection(List<string> primeNames, List<int> platinumValues, List<List<MarketListing>> marketListings, int rewardIndex)
 		{
-			this.PrimeNames = primeNames;
-			this.PlatinumValues = platinumValues;
-			this.MarketListings = marketListings;
+			PrimeNames = primeNames;
+			PlatinumValues = platinumValues;
+			MarketListings = marketListings;
+			RewardIndex = rewardIndex;
 		}
 		/// <summary>
 		/// Gets a human friendly version back for logging.

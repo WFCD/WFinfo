@@ -47,6 +47,9 @@ namespace WFInfo
 
         private readonly DispatcherTimer hider = new DispatcherTimer();
 
+        public static bool rewardsDisplaying;
+
+        
         public Overlay()
         {
             hider.Interval = TimeSpan.FromSeconds(10);
@@ -241,6 +244,8 @@ namespace WFInfo
             hider.Stop();
             Hide();
             Main.StatusUpdate("WFinfo is ready",0);
+            if(!(bool)Settings.settingsObj["Auto"]) //if auto is not used, then relay on the overlay disapearing to stop tracking clicks
+                rewardsDisplaying = false;
         }
     }
 }

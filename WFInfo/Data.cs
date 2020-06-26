@@ -16,7 +16,7 @@ using WebSocketSharp;
 
 namespace WFInfo {
 
-	class Data : IDisposable
+	class Data
     {
 		public JObject marketItems; // Warframe.market item listing           {<id>: "<name>|<url_name>", ...}
 		public JObject marketData; // Contains warframe.market ducatonator listing     {<partName>: {"ducats": <ducat_val>,"plat": <plat_val>}, ...}
@@ -725,7 +725,10 @@ namespace WFInfo {
 				}
 
 				if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
+				{
 					autoThread = Task.Factory.StartNew(AutoTriggered);
+					Overlay.rewardsDisplaying = true;
+				}
 
 				if (line.Contains("MatchingService::EndSession"))
 				{
@@ -733,6 +736,8 @@ namespace WFInfo {
 					{
 						return;
 					}
+
+					Overlay.rewardsDisplaying = false;
 
 					foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
 					{
@@ -1246,10 +1251,6 @@ namespace WFInfo {
 				inGameName = profile["profile"]?.Value<string>("ingame_name");
 			}
 		}
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+			
     }
 }
