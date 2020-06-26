@@ -75,7 +75,8 @@ namespace WFInfo
         public static Stream audioStream = assembly.GetManifestResourceStream("WFInfo.Resources.achievment_03.wav");
         public static System.Media.SoundPlayer player = new System.Media.SoundPlayer(audioStream);
 
-
+        private static int numberOfRewardsDisplayed;
+        
         public static WindowStyle currentStyle;
         public enum WindowStyle
         {
@@ -246,6 +247,7 @@ namespace WFInfo
                         string partsOwned = Main.dataBase.PartsOwned(correctName);
                         string partsCount = Main.dataBase.PartsCount(correctName);
                         int duc = int.Parse(ducats, Main.culture);
+                        numberOfRewardsDisplayed++;
                         #endregion
 
                         #region hilighting
@@ -376,25 +378,34 @@ namespace WFInfo
 
         }
 
-        internal static void GetSelectedReward(Point lastClick)
+        internal static int GetSelectedReward(Point lastClick)
         {
-            var img = CaptureScreenshot();
-            //var img = Image.FromFile(@"F:\s.png");
-            //OCR.UpdateWindow((Bitmap)img);
-            uiScaling = 1;
+            // var img = CaptureScreenshot();
+            Debug.WriteLine(lastClick.ToString());
+            var img = Image.FromFile(@"F:\q.png");
+            OCR.UpdateWindow((Bitmap)img);
+            var primeRewardIndex = 0;
+            lastClick.Offset(-window.X, -window.Y);
+            numberOfRewardsDisplayed = 3;
+            uiScaling = 1; 
             int width = window.Width * (int)dpiScaling;
             int height = window.Height * (int)dpiScaling;
             var mostWidth = (int)(pixleRewardWidth * screenScaling * uiScaling);
             var mostLeft = (width / 2) - (mostWidth / 2);
-            var bottom = height / 2 - (int)(pixleRewardYDisplay * screenScaling * 0.5 * uiScaling);
+            var bottom = height / 2 - (int) ((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5 * uiScaling);
             var top = height / 2 - (int)((pixleRewardYDisplay) * screenScaling * uiScaling);
             var selectionRectangle = new Rectangle(mostLeft, top, mostWidth, bottom / 2);
-            if (selectionRectangle.Contains(lastClick))
-                Debug.WriteLine("Contianed!");
+            if (numberOfRewardsDisplayed == 3)
+            {
+                var offset = selectionRectangle.Width / 8;
+                selectionRectangle = new Rectangle(selectionRectangle.X+offset, selectionRectangle.Y, selectionRectangle.Width - offset*2, selectionRectangle.Height);
+            }
+
+            if (!selectionRectangle.Contains(lastClick))
+                return -1;
             var middelHeight = top + bottom / 4;
             var length = mostWidth / 8;
 
-            lastClick.Offset(-window.X, -window.Y);
 
             var RewardPoints4 = new List<Point>() {
             new Point(mostLeft + length, middelHeight),
@@ -409,18 +420,25 @@ namespace WFInfo
 
             var lowestDistance = int.MaxValue;
             var lowestDistancePoint = new Point();
-            if (true) //todo: Find a way to distinguish between 3 pnts and 4 pnts
+            if (numberOfRewardsDisplayed != 3) //todo: Find a way to distinguish between 3 pnts and 4 pnts
             {
                 foreach (var pnt in RewardPoints4)
                 {
                     var distanceToLastClick = ((lastClick.X - pnt.X) * (lastClick.X - pnt.X) + (lastClick.Y - pnt.Y) * (lastClick.Y - pnt.Y));
                     Debug.WriteLine($"current point: {pnt}, with distance: {distanceToLastClick}");
 
-                    if (distanceToLastClick < lowestDistance)
-                    {
-                        lowestDistance = distanceToLastClick;
-                        lowestDistancePoint = pnt;
-                    }
+                    if (distanceToLastClick >= lowestDistance) continue;
+                    lowestDistance = distanceToLastClick;
+                    lowestDistancePoint = pnt;
+                    primeRewardIndex = RewardPoints4.IndexOf(pnt);
+                }
+
+                if (numberOfRewardsDisplayed == 2)
+                {
+                    if (primeRewardIndex == 1)
+                        primeRewardIndex = 0;
+                    if (primeRewardIndex == 3)
+                        primeRewardIndex = 2;
                 }
             }
             else
@@ -430,16 +448,16 @@ namespace WFInfo
                     var distanceToLastClick = ((lastClick.X - pnt.X) * (lastClick.X - pnt.X) + (lastClick.Y - pnt.Y) * (lastClick.Y - pnt.Y));
                     Debug.WriteLine($"current point: {pnt}, with distance: {distanceToLastClick}");
 
-                    if (distanceToLastClick < lowestDistance)
-                    {
-                        lowestDistance = distanceToLastClick;
-                        lowestDistancePoint = pnt;
-                    }
+                    if (distanceToLastClick >= lowestDistance) continue;
+                    lowestDistance = distanceToLastClick;
+                    lowestDistancePoint = pnt;
+                    primeRewardIndex = RewardPoints3.IndexOf(pnt);
                 }
             }
 
-            Debug.WriteLine($"Cloestst point: {lowestDistancePoint}, with distance: {lowestDistance}");
-
+            #region  debuging image
+            Debug.WriteLine($"Closest point: {lowestDistancePoint}, with distance: {lowestDistance}");
+            
             timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
 
             var pinkP = new Pen(Brushes.Pink);
@@ -447,7 +465,7 @@ namespace WFInfo
             using (Graphics g = Graphics.FromImage(img))
             {
                 g.DrawRectangle(blackP, selectionRectangle);
-                if (true) //todo: Find a way to distinguish between 3 pnts and 4 pnts
+                if (numberOfRewardsDisplayed != 3) //todo: Find a way to distinguish between 3 pnts and 4 pnts
                 {
                     foreach (var pnt in RewardPoints4)
                     {
@@ -463,6 +481,8 @@ namespace WFInfo
                         g.DrawEllipse(blackP, new Rectangle(pnt, new Size(10, 10)));
                     }
                 }
+                
+                g.DrawString($"User selected reward nr{primeRewardIndex}",new Font(FontFamily.GenericMonospace, 16), Brushes.Chartreuse, lastClick );
                 g.DrawLine(pinkP, lastClick, lowestDistancePoint);
                 lastClick.Offset(-5, -5);
 
@@ -472,8 +492,10 @@ namespace WFInfo
             pinkP.Dispose();
             blackP.Dispose();
             img.Dispose();
+            #endregion
 
             //todo: Export this to listinghelper so that it knows which reward to selkect.
+            return primeRewardIndex;
         }
 
         private const double ERROR_DETECTION_THRESH = 0.25;
@@ -503,6 +525,7 @@ namespace WFInfo
             secondChecks = SeparatePlayers(newFilter, secondEngine);
             var primeRewards = new List<string>();
 
+            var tempAmountOfRewardsDisplayed = 0;
             double bestPlat = 0;
             var bestDucat = 0;
             var bestPlatItem = 0;
@@ -531,7 +554,8 @@ namespace WFInfo
                             string partsCount = Main.dataBase.PartsCount(secondName); 
                             double platinum = double.Parse(plat, styles, provider);
                             int duc = int.Parse(ducats, Main.culture);
-
+                            tempAmountOfRewardsDisplayed++;
+                            
                             if (duc == 0)
                             {
                                 hideRewardInfo = true;
@@ -611,7 +635,7 @@ namespace WFInfo
                     }
                 }
 
-
+                numberOfRewardsDisplayed = tempAmountOfRewardsDisplayed;
                 Main.listingHelper.PrimeRewards.RemoveAt(Main.listingHelper.PrimeRewards.Count-1);
                 var msg = primeRewards.Aggregate("", (current, item) => current + $"{item}, ");
 
@@ -664,12 +688,12 @@ namespace WFInfo
         public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
             int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
-            int width = image == null ? window.Width * (int)dpiScaling : image.Width;
-            int height = image == null ? window.Height * (int)dpiScaling : image.Height;
+            // int width = image == null ? window.Width * (int)dpiScaling : image.Width;
+            // int height = image == null ? window.Height * (int)dpiScaling : image.Height;
             int mostWidth = (int)(pixleRewardWidth * screenScaling);
-            int mostLeft = (width / 2) - (mostWidth / 2);
-            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
-            int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
+            // int mostLeft = (width / 2) - (mostWidth / 2);
+            // int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
+            // int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
 
             if (image == null)
             {

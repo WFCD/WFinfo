@@ -210,11 +210,14 @@ namespace WFInfo
                 {
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
-            }else if (key== MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited)
+            }else if (key== MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited) //todo: Fix this condition so it only activates after auto has been triggered and stops triggering after auto detects enf of mission
             {
-                //lastClick = System.Windows.Forms.Cursor.Position;
-                //OCR.GetSelectedReward(lastClick);
-                //Debug.WriteLine(OCR.window.ToString());
+                Task.Run((() =>
+                {
+                    lastClick = System.Windows.Forms.Cursor.Position;
+                    OCR.GetSelectedReward(lastClick);
+                    Debug.WriteLine(OCR.window.ToString());
+                }));
             }
         }
 
