@@ -9,11 +9,11 @@ WFinfo is designed to provide quick access to both Platinum and Ducat prices for
 WFInfo does this by screenshotting the game window, cropping out the part text, then passing it to an Optical Character Recognition Engine, specifically Google's Tesseract. The OCR Engine will then send back the text it found, and we will pull out the part name from that text. From there, we display the stats for each part in an overlay or on a separate window.
 
 # Usage
-
+0. Download Microsoft Visual C++ Redistributable 2019 from microsoft [x64](https://aka.ms/vs/16/release/VC_redist.x64.exe) [x84](https://aka.ms/vs/16/release/VC_redist.x86.exe)
 1. Download the [latest release](https://github.com/WFCD/WFinfo/releases/latest)
-1. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
-1. Click the Cog Icon to open Settings, and configure your hotkey, scaling, etc
-1. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)
+2. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
+3. Click the Cog Icon to open Settings, and configure your hotkey, scaling, etc
+4. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)
 
 # Will I get Banned?
 
