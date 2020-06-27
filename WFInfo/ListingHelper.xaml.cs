@@ -121,7 +121,6 @@ namespace WFInfo {
 		/// </summary>
 		private void SetCurrentStatus()
 		{
-
 			Debug.WriteLine($"Current status is: {ScreensList[PageIndex].Key}");
 			switch (ScreensList[PageIndex].Key)
 			{
@@ -195,6 +194,14 @@ namespace WFInfo {
 			if (!ComboBox.IsLoaded || updating) //Prevent firing off to early
 				return;
 			SetListings(ComboBox.SelectedIndex);
+			SetCurrentStatus();
+			if (!IsItemBanned(ScreensList[PageIndex].Value.PrimeNames[ComboBox.SelectedIndex])) return;
+			ListingGrid.Visibility = Visibility.Collapsed;
+			Height = 180;
+			Status.Content = "Cannot list this item";
+			Status.Visibility = Visibility.Visible;
+			ComboBox.IsEnabled = true;
+			ConfirmListingButton.IsEnabled = false;
 		}
 
 		/// <summary>
@@ -203,8 +210,7 @@ namespace WFInfo {
 		/// <param name="index">the currently selected prime item</param>
 		private void SetListings(int index) {
 			Debug.WriteLine($"There are {ScreensList[PageIndex].Value.PlatinumValues.Count} of plat values, Setting index to: {index}");
-			if (index >= ScreensList[PageIndex].Value.PlatinumValues.Count)
-				index = 0;
+			
 			PlatinumTextBox.Text = ScreensList[PageIndex].Value.PlatinumValues[index].ToString(Main.culture);
 
 			Platinum0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Platinum;
@@ -279,7 +285,7 @@ namespace WFInfo {
 		{
 			var platinumValues = new List<int>(4);
 			var marketListings = new List<List<MarketListing>>(5);
-
+			
 			if (primeNames == null)
 			{
 				throw new ArgumentNullException(nameof(primeNames));
@@ -287,11 +293,16 @@ namespace WFInfo {
 
 			foreach (var primeItem in primeNames)
 			{
-				if (primeItem.IsNullOrEmpty())
+				if (IsItemBanned(primeItem))
 				{
-					if(SelectedRewardIndex != 0)
-						SelectedRewardIndex--;
-					continue;
+					platinumValues.Add(0);
+					var tempListings = new List<MarketListing>();
+					for (int i = 0; i < 5; i++)
+					{
+						tempListings.Add(new MarketListing(0, 0, 0));
+					}
+					marketListings.Add(tempListings);
+					return new RewardCollection(primeNames, platinumValues, marketListings, SelectedRewardIndex);
 				}
 				try
 				{
@@ -308,10 +319,20 @@ namespace WFInfo {
 					});
 					Debug.WriteLine(e);
 				}
+				
 			}
 			return new RewardCollection(primeNames, platinumValues, marketListings, SelectedRewardIndex);
 		}
-		
+
+		private bool IsItemBanned(string item)
+		{
+			return item.ToLower(Main.culture).Contains("kuva") ||
+			       item.ToLower(Main.culture).Contains("exilus") ||
+			       item.ToLower(Main.culture).Contains("riven") ||
+			       item.ToLower(Main.culture).Contains("ayatan") ||
+			       item.ToLower(Main.culture).Contains("forma");
+		}
+
 		/// <summary>
 		/// Gets the top 5 current market listings
 		/// </summary>
@@ -319,8 +340,6 @@ namespace WFInfo {
 		/// <returns>the top 5 current market listings</returns>
 		public static List<MarketListing> GetMarketListing(string primeName)
 		{
-			if(primeName.Contains("forma") || primeName.Contains("Kuva"))
-				throw new ArgumentException($"Prime name is on the black list: {primeName}");
 			Debug.WriteLine($"Getting listing for {primeName}");
 			var results = Task.Run(async () => await Main.dataBase.GetTopListings(primeName)).Result;
 			var listings = new List<MarketListing>();

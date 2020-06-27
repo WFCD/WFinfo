@@ -400,6 +400,12 @@ namespace WFInfo {
 
         private void CreateListing_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+	        if (OCR.processingActive)
+	        {
+		        Main.StatusUpdate("Still Processing Reward Screen", 2);
+		        return;
+	        }
+	        
 			if(Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
 				ChangeStatus("No recorded rewards found", 2);
@@ -438,6 +444,11 @@ namespace WFInfo {
 
         private void SearchItButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+	        if (OCR.processingActive)
+	        {
+		        Main.StatusUpdate("Still Processing Reward Screen", 2);
+		        return;
+	        }
 	        Main.AddLog("Starting search it");
 	        Main.StatusUpdate("Starting search it", 0);
 	        Main.searchBox.Start();

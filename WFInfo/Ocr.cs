@@ -247,7 +247,7 @@ namespace WFInfo
                         {
                             hideRewardInfo = true;
                         }
-                        else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
+                        //else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
                             primeRewards.Add(correctName);
                         string plat = job["plat"].ToObject<string>();
                         double platinum = double.Parse(plat, styles, provider);
@@ -567,11 +567,11 @@ namespace WFInfo
                             {
                                 hideRewardInfo = true;
                             }
-                            else if (secondName != "Kuva" || secondName != "Exilus Weapon Adapter Blueprint" || secondName != "Riven Sliver" || secondName != "Ayatan Amber Star")
-                            {
+                            //else if (secondName != "Kuva" || secondName != "Exilus Weapon Adapter Blueprint" || secondName != "Riven Sliver" || secondName != "Ayatan Amber Star")
+                            //{
                                 Debug.WriteLine($"Adding : {secondName}");
                                 primeRewards.Add(secondName);
-                            }
+                            //}
                             #region clipboard
                             if (platinum > 0)
                             {
