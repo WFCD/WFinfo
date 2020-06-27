@@ -218,7 +218,6 @@ namespace WFInfo
                     var index = OCR.GetSelectedReward(lastClick);
                     if (index < 0) return;
                     listingHelper.SelectedRewardIndex = index;
-                    Debug.WriteLine(listingHelper.SelectedRewardIndex);
                 }));
             }
         }

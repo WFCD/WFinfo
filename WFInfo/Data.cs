@@ -753,7 +753,8 @@ namespace WFInfo {
 							Main.listingHelper.SetScreen(0);
 						Main.listingHelper.PrimeRewards.Clear();
 						Main.listingHelper.Show();
-						
+						Main.listingHelper.Topmost = true;
+						Main.listingHelper.Topmost = false;
 					});
 				}
 

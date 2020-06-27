@@ -183,6 +183,7 @@ namespace WFInfo
             }
             catch (Exception e)
             {
+                processingActive = false;
                 Debug.WriteLine(e);
                 throw;
             }
@@ -673,9 +674,8 @@ namespace WFInfo
 	            DateTime time = DateTime.UtcNow;
 	            timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
                 processingActive = false;
-                Main.AddLog("Couldn't process second check");
+                Main.AddLog($"Couldn't process second check {ex.ToString()}");
                 Main.StatusUpdate("Couldn't process second check", 1);
-                Main.AddLog(ex.ToString());
                 Main.RunOnUIThread(() =>
                 {
                     Main.SpawnErrorPopup(time);
@@ -1090,7 +1090,6 @@ namespace WFInfo
             {
                 if (fullScreen != null)
                 {
-                    Main.AddLog(fullScreen.ToString());
                     preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
                 }
                 else
@@ -1668,7 +1667,6 @@ namespace WFInfo
             { // checks if old window size is the right size if not change it
                 window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
                                                                                                                          // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
-                Main.AddLog("Detected Warframe Process - Window Bounds: " + window.ToString());
                 int GWL_style = -16;
                 uint WS_BORDER = 0x00800000;
                 uint WS_POPUP = 0x80000000;
@@ -1679,19 +1677,19 @@ namespace WFInfo
                 {
                     // Borderless, don't do anything
                     currentStyle = WindowStyle.BORDERLESS;
-                    Main.AddLog("Borderless detected (0x" + styles.ToString("X8", Main.culture) + ")");
+                    Main.AddLog($"Borderless detected (0x{styles.ToString("X8", Main.culture)}, {window.ToString()}");
                 }
                 else if ((styles & WS_BORDER) != 0)
                 {
                     // Windowed, adjust for thicc border
                     window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
-                    Main.AddLog("Windowed detected (0x" + styles.ToString("X8", Main.culture) + "), adjusting window to: " + window.ToString());
+                    Main.AddLog($"Windowed detected (0x{styles.ToString("X8", Main.culture)}, adjusting window to: {window.ToString()}");
                     currentStyle = WindowStyle.WINDOWED;
                 }
                 else
                 {
                     // Assume Fullscreen, don't do anything
-                    Main.AddLog("Fullscreen detected (0x" + styles.ToString("X8", Main.culture) + ")");
+                    Main.AddLog($"Fullscreen detected (0x{styles.ToString("X8", Main.culture)}, {window.ToString()}");
                     currentStyle = WindowStyle.FULLSCREEN;
                 }
                 center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);

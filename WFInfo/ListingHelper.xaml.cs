@@ -64,7 +64,7 @@ namespace WFInfo {
 			
 			var screen = ScreensList[index];
 			updating = true;
-			SetListings(0);
+			SetListings(screen.Value.RewardIndex);
 			ComboBox.Items.Clear();
 			ComboBox.SelectedIndex = screen.Value.RewardIndex;
 			foreach (var primeItem in screen.Value.PrimeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
@@ -202,6 +202,9 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="index">the currently selected prime item</param>
 		private void SetListings(int index) {
+			Debug.WriteLine($"There are {ScreensList[PageIndex].Value.PlatinumValues.Count} of plat values, Setting index to: {index}");
+			if (index >= ScreensList[PageIndex].Value.PlatinumValues.Count)
+				index = 0;
 			PlatinumTextBox.Text = ScreensList[PageIndex].Value.PlatinumValues[index].ToString(Main.culture);
 
 			Platinum0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Platinum;
@@ -284,8 +287,12 @@ namespace WFInfo {
 
 			foreach (var primeItem in primeNames)
 			{
-				if(primeItem.IsNullOrEmpty())
+				if (primeItem.IsNullOrEmpty())
+				{
+					if(SelectedRewardIndex != 0)
+						SelectedRewardIndex--;
 					continue;
+				}
 				try
 				{
 					var tempListings = GetMarketListing(primeItem);
@@ -314,7 +321,7 @@ namespace WFInfo {
 		{
 			if(primeName.Contains("forma") || primeName.Contains("Kuva"))
 				throw new ArgumentException($"Prime name is on the black list: {primeName}");
-			
+			Debug.WriteLine($"Getting listing for {primeName}");
 			var results = Task.Run(async () => await Main.dataBase.GetTopListings(primeName)).Result;
 			var listings = new List<MarketListing>();
 			var sellOrders = new JArray(results["payload"]["sell_orders"].Children());
@@ -323,7 +330,9 @@ namespace WFInfo {
 				var platinum = item.Value<int>("platinum");
 				var amount = item.Value<int>("quantity");
 				var reputation = item["user"].Value<int>("reputation");
-				listings.Add(new MarketListing(platinum, amount, reputation));
+				var listing = new MarketListing(platinum, amount, reputation);
+				Debug.WriteLine($"Getting listing for {listing.ToHumanString()}");
+				listings.Add(listing);
 			}
 			return listings;
 		}
