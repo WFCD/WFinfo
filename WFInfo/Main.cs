@@ -217,7 +217,7 @@ namespace WFInfo
                     lastClick = System.Windows.Forms.Cursor.Position;
                     var index = OCR.GetSelectedReward(lastClick);
                     if (index < 0) return;
-                    listingHelper.SelectedRewardIndex = index;
+                    listingHelper.SelectedRewardIndex = (short)index;
                 }));
             }
         }

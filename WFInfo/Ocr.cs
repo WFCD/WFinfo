@@ -545,6 +545,7 @@ namespace WFInfo
             {
                 for (int i = 0; i < firstChecks.Length; i++)
                 {
+                    Debug.WriteLine(firstChecks[i]);
                     string first = firstChecks[i];
                     if (first.Replace(" ", "").Length > 6)
                     {

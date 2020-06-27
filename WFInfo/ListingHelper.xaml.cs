@@ -21,7 +21,11 @@ namespace WFInfo {
 		//Helper, allowing to store the rewards until needed to be processed
 		private int PageIndex { get; set; } = 0;
 		private bool updating;
-		public int SelectedRewardIndex = 0;
+		public short SelectedRewardIndex = 0;
+		private static readonly int SucsesHeight = 180; 
+		private static readonly int FailedHeight = 270; 
+		private static readonly int NormalHeight = 255; 
+
 		#region default methods
 		public ListingHelper() {
 			InitializeComponent();
@@ -127,7 +131,7 @@ namespace WFInfo {
 				//listing already successfully posted
 				case "successful":
 					ListingGrid.Visibility = Visibility.Collapsed;
-					Height = 180;
+					Height = SucsesHeight;
 					ConfirmListingButton.IsEnabled = false;
 					Status.Content = "Listing already successfully posted";
 					Status.Visibility = Visibility.Visible;
@@ -135,14 +139,14 @@ namespace WFInfo {
 					ConfirmListingButton.IsEnabled = false;
 					break;
 				case "": //listing is not yet assigned anything
-					Height = 255;
+					Height = NormalHeight;
 					Status.Visibility = Visibility.Collapsed;
 					ListingGrid.Visibility = Visibility.Visible;
 					ComboBox.IsEnabled = true;
 					ConfirmListingButton.IsEnabled = true;
 					break;
 				default: //an error occured.
-					Height = 270;
+					Height = FailedHeight;
 					Status.Content = ScreensList[PageIndex].Key;
 					Status.Visibility = Visibility.Visible;
 					ListingGrid.Visibility = Visibility.Visible;
@@ -194,14 +198,6 @@ namespace WFInfo {
 			if (!ComboBox.IsLoaded || updating) //Prevent firing off to early
 				return;
 			SetListings(ComboBox.SelectedIndex);
-			SetCurrentStatus();
-			if (!IsItemBanned(ScreensList[PageIndex].Value.PrimeNames[ComboBox.SelectedIndex])) return;
-			ListingGrid.Visibility = Visibility.Collapsed;
-			Height = 180;
-			Status.Content = "Cannot list this item";
-			Status.Visibility = Visibility.Visible;
-			ComboBox.IsEnabled = true;
-			ConfirmListingButton.IsEnabled = false;
 		}
 
 		/// <summary>
@@ -209,9 +205,19 @@ namespace WFInfo {
 		/// </summary>
 		/// <param name="index">the currently selected prime item</param>
 		private void SetListings(int index) {
-			Debug.WriteLine($"There are {ScreensList[PageIndex].Value.PlatinumValues.Count} of plat values, Setting index to: {index}");
+			Debug.WriteLine($"There are {ScreensList[PageIndex].Value.PrimeNames.Count} of plat values, Setting index to: {index}");
 			
 			PlatinumTextBox.Text = ScreensList[PageIndex].Value.PlatinumValues[index].ToString(Main.culture);
+
+			if (IsItemBanned(ScreensList[PageIndex].Value.PrimeNames[index])){
+				ListingGrid.Visibility = Visibility.Collapsed;
+				Height = 180;
+				Status.Content = "Cannot list this item";
+				Status.Visibility = Visibility.Visible;
+				ComboBox.IsEnabled = true;
+				ConfirmListingButton.IsEnabled = false;
+				return;
+			}
 
 			Platinum0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Platinum;
 			Amount0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Amount;
@@ -283,9 +289,10 @@ namespace WFInfo {
 		/// <returns>the data for an entire "Create listing" screen</returns>
 		public RewardCollection GetRewardCollection(List<string> primeNames)
 		{
-			var platinumValues = new List<int>(4);
+			var platinumValues = new List<short>(4);
 			var marketListings = new List<List<MarketListing>>(5);
-			
+			var index = SelectedRewardIndex;
+			SelectedRewardIndex = 0;
 			if (primeNames == null)
 			{
 				throw new ArgumentNullException(nameof(primeNames));
@@ -293,17 +300,6 @@ namespace WFInfo {
 
 			foreach (var primeItem in primeNames)
 			{
-				if (IsItemBanned(primeItem))
-				{
-					platinumValues.Add(0);
-					var tempListings = new List<MarketListing>();
-					for (int i = 0; i < 5; i++)
-					{
-						tempListings.Add(new MarketListing(0, 0, 0));
-					}
-					marketListings.Add(tempListings);
-					return new RewardCollection(primeNames, platinumValues, marketListings, SelectedRewardIndex);
-				}
 				try
 				{
 					var tempListings = GetMarketListing(primeItem);
@@ -321,10 +317,10 @@ namespace WFInfo {
 				}
 				
 			}
-			return new RewardCollection(primeNames, platinumValues, marketListings, SelectedRewardIndex);
+			return new RewardCollection(primeNames, platinumValues, marketListings, index);
 		}
 
-		private bool IsItemBanned(string item)
+		private static bool IsItemBanned(string item)
 		{
 			return item.ToLower(Main.culture).Contains("kuva") ||
 			       item.ToLower(Main.culture).Contains("exilus") ||
@@ -340,15 +336,26 @@ namespace WFInfo {
 		/// <returns>the top 5 current market listings</returns>
 		public static List<MarketListing> GetMarketListing(string primeName)
 		{
+			if (IsItemBanned(primeName))
+			{
+				var bannedListing = new List<MarketListing>();
+				for (var i = 0; i < 5; i++)
+				{
+					bannedListing.Add(new MarketListing(0, 0, 0));
+				}
+				return bannedListing;
+			}
+			
+			
 			Debug.WriteLine($"Getting listing for {primeName}");
 			var results = Task.Run(async () => await Main.dataBase.GetTopListings(primeName)).Result;
 			var listings = new List<MarketListing>();
 			var sellOrders = new JArray(results["payload"]["sell_orders"].Children());
 			foreach (var item in sellOrders)
 			{
-				var platinum = item.Value<int>("platinum");
-				var amount = item.Value<int>("quantity");
-				var reputation = item["user"].Value<int>("reputation");
+				var platinum = item.Value<short>("platinum");
+				var amount = item.Value<short>("quantity");
+				var reputation = item["user"].Value<short>("reputation");
 				var listing = new MarketListing(platinum, amount, reputation);
 				Debug.WriteLine($"Getting listing for {listing.ToHumanString()}");
 				listings.Add(listing);
@@ -382,11 +389,11 @@ namespace WFInfo {
     public class RewardCollection
 	{
 		public List<string> PrimeNames { get; set; } = new List<string>(4); // the reward items in case user wants to change selection
-		public List<int> PlatinumValues { get; set; } = new List<int>(4);
+		public List<short> PlatinumValues { get; set; } = new List<short>(4);
 		public List<List<MarketListing>> MarketListings { get; set; } = new List<List<MarketListing>>(5);
-		public int RewardIndex{ get; set; } = 0;
+		public short RewardIndex{ get; set; } = 0;
 
-		public RewardCollection(List<string> primeNames, List<int> platinumValues, List<List<MarketListing>> marketListings, int rewardIndex)
+		public RewardCollection(List<string> primeNames, List<short> platinumValues, List<List<MarketListing>> marketListings, short rewardIndex)
 		{
 			PrimeNames = primeNames;
 			PlatinumValues = platinumValues;
@@ -419,15 +426,15 @@ namespace WFInfo {
 	/// </summary>
 	public class MarketListing
 	{
-		public int Platinum { get; set; } // plat amount of listing
-		public int Amount { get; set; } //amount user lists
-		public int Reputation { get; set; } // user's reputation
+		public short Platinum { get; set; } // plat amount of listing
+		public short Amount { get; set; } //amount user lists
+		public short Reputation { get; set; } // user's reputation
 
-		public MarketListing(int platinum, int amount, int reputation)
+		public MarketListing(short platinum, short amount, short reputation)
 		{
-			this.Platinum = platinum;
-			this.Amount = amount;
-			this.Reputation = reputation;
+			Platinum = platinum;
+			Amount = amount;
+			Reputation = reputation;
 		}
 
 		/// <summary>
