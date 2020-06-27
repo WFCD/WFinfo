@@ -185,7 +185,7 @@ namespace WFInfo
             {
                 processingActive = false;
                 Debug.WriteLine(e);
-                throw;
+                return;
             }
 
 
