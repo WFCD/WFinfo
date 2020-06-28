@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:WFInfo"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d" 
-        Title="Settings" Height="151.333" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+        Title="Settings" Height="258" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
@@ -30,13 +30,15 @@
             <Label Content="Rewards display" VerticalAlignment="Top" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="335" Height="31" FontSize="{DynamicResource FontSize}" FontFamily="{StaticResource Roboto}" Margin="0,0,-1,0"/>
             <RadioButton x:Name="LightRadio" Margin="27,33,218,5" Content="Light" ToolTip="Do not display any window at all"  VerticalContentAlignment="Center" Checked="LightRadioChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}"/>
         </Grid>
-        <Grid x:Name="Activation_key" Height="38" VerticalAlignment="Top" Margin="0,85,0,0">
-            <Rectangle x:Name="First_window2" Stroke="#FF646464" Height="39" VerticalAlignment="Top" Margin="0,-1,0,0"/>
-            <Label Content="Activation key" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="126" Padding="5,5,5,0"/>
-            <TextBox x:Name="Activation_key_box" ToolTip="Key to activate the processing. Hold ctrl down plus this key to activate multi-item Snap it!" Margin="190,5,24,5" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="ActivationDown" Cursor="Arrow" GotFocus="ActivationFocus" KeyUp="ActivationUp" LostFocus="ActivationLost"/>
-            <TextBlock x:Name="hidden" Focusable="True" Visibility="Visible" IsEnabled="True" HorizontalAlignment="Left" Margin="333,101,0,-64" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="1" Width="1" RenderTransformOrigin="0.5,0.5" >
-
-            </TextBlock>
+        <Grid x:Name="Activation_key" Height="117" VerticalAlignment="Top" Margin="0,85,0,0">
+            <Rectangle x:Name="First_window2" Stroke="#FF646464" Margin="0,-1,0,0"/>
+            <Label Content="Activation key" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="126" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
+            <TextBox x:Name="Activation_key_box" ToolTip="Key to activate the processing. Use modifiers below to achive other actions" Margin="190,5,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="ActivationDown" Cursor="Arrow" GotFocus="ActivationFocus" KeyUp="ActivationUp" LostFocus="ActivationLost" VerticalAlignment="Top"/>
+            <TextBlock x:Name="hidden" Focusable="True" Visibility="Visible" IsEnabled="True" HorizontalAlignment="Left" Margin="333,101,0,-64" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="1" Width="1" RenderTransformOrigin="0.5,0.5" d:IsHidden="True" />
+            <Label Content="Search it modifier" Margin="24,41,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="152" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
+            <TextBox x:Name="Searchit_key_box" ToolTip="Modifier to hold down to start search it" Margin="190,43,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="Searchit_key_box_KeyDown" Cursor="Arrow" GotFocus="Searchit_key_box_GotFocus" KeyUp="Searchit_key_box_KeyUp" LostFocus="Searchit_key_box_GotFocus" VerticalAlignment="Top"/>
+            <Label Content="Snap it modifier" Margin="24,81,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="138" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
+            <TextBox x:Name="Snapit_key_box" ToolTip="Modifier to hold down to start Snap it" Margin="190,83,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="Snapit_key_box_KeyDown" Cursor="Arrow" GotFocus="Snapit_key_box_GotFocus" KeyUp="Snapit_key_box_KeyUp" LostFocus="Snapit_key_box_LostFocus" VerticalAlignment="Top"/>
         </Grid>
         <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Height="28" VerticalAlignment="Bottom">
             <Rectangle x:Name="First_window3" Stroke="#FF646464" Margin="0,-1,0,0"/>
@@ -50,6 +52,17 @@
             </Viewbox>
 
 
+        </Grid>
+        <Grid HorizontalAlignment="Left" Height="28" Margin="0,202,0,0" VerticalAlignment="Top" Width="334">
+            <Viewbox Margin="12,5,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="91" >
+                <CheckBox x:Name="HighlightCheckbox" Content="Highlight" ToolTip="Highlight the best rewards on the overlay." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="HighlightRewardCheckbox_Click"/>
+            </Viewbox>
+
+
+            <Rectangle Stroke="#FF646464" Margin="0,-1,0,0"/>
+            <Viewbox Margin="108,5,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="123" >
+                <CheckBox x:Name="HighContrastCheckbox" Content="High contrast" ToolTip="Enable High contrast for the overlay." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="HighContrastCheckbox_Click"/>
+            </Viewbox>
         </Grid>
 
     </Grid>

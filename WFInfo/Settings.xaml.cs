@@ -92,6 +92,12 @@ namespace WFInfo
             if (Convert.ToBoolean(settingsObj.GetValue("Clipboard")))
                 clipboardCheckbox.IsChecked = true;
 
+            if (Convert.ToBoolean(settingsObj.GetValue("HighlightRewards")))
+                HighlightCheckbox.IsChecked = true;
+
+            if (Convert.ToBoolean(settingsObj.GetValue("HighContrast")))
+                HighContrastCheckbox.IsChecked = true;
+
             ResetActivationKeyText();
             Focus();
         }
@@ -218,6 +224,12 @@ namespace WFInfo
             //Set mouse button to disabled (never gonna use left as a trigger)
             ActivationMouseButton = MouseButton.Left;
 
+            if (e.Key == SearchItModifierKey || e.Key == SnapitModifierKey)
+            {
+                Activation_key_box.Text = GetKeyName(ActivationKey);
+                hidden.Focus();
+                return;
+            }
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
             ActivationKey = key;
@@ -239,6 +251,9 @@ namespace WFInfo
                 activeMouseVal = backupMouseVal;
                 Activation_key_box.Text = ActivationMouseButton.ToString();
             }
+
+            Searchit_key_box.Text = GetKeyName(SearchItModifierKey);
+            Snapit_key_box.Text = GetKeyName(SnapitModifierKey);
         }
 
         private void ActivationLost(object sender, RoutedEventArgs e)
@@ -357,6 +372,89 @@ namespace WFInfo
             clipboard = true;
             clipboardCheckbox.IsChecked = true;
             clipboardCheckbox.IsEnabled = false;
+            Save();
+        }
+
+        private void HighlightRewardCheckbox_Click(object sender, RoutedEventArgs e)
+        {
+            settingsObj["HighlightRewards"] = HighlightCheckbox.IsChecked.Value;
+            Highlight = HighlightCheckbox.IsChecked.Value;
+            Save();
+        }
+
+        private void Searchit_key_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            SearchItModifierKey = Key.None;
+            Searchit_key_box.Text = "";
+            backupKeyVal = activeKeyVal;
+            activeKeyVal = Key.NoName;
+        }
+
+        private void Searchit_key_box_KeyUp(object sender, KeyEventArgs e) //todo this doesn't fucking work. I don't know why, but it just does not
+        {
+            //e.Handled = true;
+
+            //if(e.Key == SnapitModifierKey || e.Key == activeKeyVal)
+            //{
+            //    Searchit_key_box.Text = GetKeyName(SearchItModifierKey);
+            //    hidden.Focus();
+            //    return;
+            //}
+
+            //Key key = e.Key != Key.System ? e.Key : e.SystemKey;
+            //SearchItModifierKey = key;
+            //Searchit_key_box.Text = GetKeyName(SearchItModifierKey);
+            //settingsObj["SearchItModifierKey"] = key.ToString();
+            //hidden.Focus();
+            //Save();
+        }
+
+        private void Snapit_key_box_LostFocus(object sender, RoutedEventArgs e)
+        {
+            //ResetActivationKeyText();
+        }
+
+        private void Snapit_key_box_KeyUp(object sender, KeyEventArgs e)
+        {
+            //e.Handled = true;
+
+            //if (e.Key == SearchItModifierKey || e.Key == activeKeyVal)
+            //{
+            //    Searchit_key_box.Text = GetKeyName(SnapitModifierKey);
+            //    hidden.Focus();
+            //    return;
+            //}
+
+            //Key key = e.Key != Key.System ? e.Key : e.SystemKey;
+            //SnapitModifierKey = key;
+            //Snapit_key_box.Text = GetKeyName(key);
+            //settingsObj["SnapitModifierKey"] = key.ToString();
+            //hidden.Focus();
+            //Save();
+        }
+
+        private void Snapit_key_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            SnapitModifierKey = Key.None;
+            Snapit_key_box.Text = "";
+            backupKeyVal = activeKeyVal;
+            activeKeyVal = Key.NoName;
+        }
+
+        private void Snapit_key_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void Searchit_key_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void HighContrastCheckbox_Click(object sender, RoutedEventArgs e)
+        {
+            settingsObj["HighContrast"] = HighContrastCheckbox.IsChecked.Value;
+            highContrast = HighContrastCheckbox.IsChecked.Value;
             Save();
         }
     }

@@ -116,13 +116,11 @@ namespace WFInfo {
 
 			if (!Settings.settingsObj.TryGetValue("SearchItModifierKey", out _))
 				Settings.settingsObj["SearchItModifierKey"] = Key.OemTilde.ToString();
-			Settings.SearchItModifierKey = (Key)Enum.Parse(typeof(Key),
-				Settings.settingsObj.GetValue("SearchItModifierKey").ToString());
+			Settings.SearchItModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SearchItModifierKey").ToString());
 
 			if (!Settings.settingsObj.TryGetValue("SnapitModifierKey", out _))
 				Settings.settingsObj["SnapitModifierKey"] = Key.LeftCtrl.ToString();
-			Settings.SnapitModifierKey =
-				(Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SnapitModifierKey").ToString());
+			Settings.SnapitModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SnapitModifierKey").ToString());
 
 			if (!Settings.settingsObj.TryGetValue("Debug", out _))
 				Settings.settingsObj["Debug"] = false;
