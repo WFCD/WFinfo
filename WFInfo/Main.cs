@@ -103,7 +103,7 @@ namespace WFInfo
             if (!await dataBase.IsJWTvalid())
                 return;
             var now = DateTime.UtcNow;
-            Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {Main.latestActive}");
+            Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
             if (now > latestActive || OCR.Warframe != null && OCR.Warframe.HasExited)
             {
                 await dataBase.SetWebsocketStatus("invisible");

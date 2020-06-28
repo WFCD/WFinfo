@@ -717,48 +717,51 @@ namespace WFInfo {
 
 		private Task autoThread;
 
-		private void LogChanged(object sender, string line) {
-			if (autoThread == null || autoThread.IsCompleted) {
-				if (autoThread != null) {
-					autoThread.Dispose();
-					autoThread = null;
-				}
-
-				if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
-				{
-					autoThread = Task.Factory.StartNew(AutoTriggered);
-					Overlay.rewardsDisplaying = true;
-				}
-
-				if (line.Contains("MatchingService::EndSession"))
-				{
-					if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
-					{
-						return;
-					}
-
-					Overlay.rewardsDisplaying = false;
-
-					foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
-					{
-						var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-						if (rewardCollection.PrimeNames.Count == 0)
-							return;
-						Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-					}
-
-					Main.RunOnUIThread(() =>
-					{
-						if (Main.listingHelper.ScreensList.Count == 1 )
-							Main.listingHelper.SetScreen(0);
-						Main.listingHelper.PrimeRewards.Clear();
-						Main.listingHelper.Show();
-						Main.listingHelper.Topmost = true;
-						Main.listingHelper.Topmost = false;
-					});
-				}
-
+		private async void LogChanged(object sender, string line)
+		{
+			if (autoThread != null && !autoThread.IsCompleted) return;
+			if (autoThread != null) {
+				autoThread.Dispose();
+				autoThread = null;
 			}
+
+			if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
+			{
+				autoThread = Task.Factory.StartNew(AutoTriggered);
+				Overlay.rewardsDisplaying = true;
+			}
+
+			if (!line.Contains("MatchingService::EndSession") || !IsJwtAvailable()) return;
+			
+			if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
+			{
+				return;
+			}
+			if(inGameName.IsNullOrEmpty())
+				if (!await IsJWTvalid())
+				{
+					Disconnect();
+				}
+					
+			Overlay.rewardsDisplaying = false;
+
+			foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
+			{
+				var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+				if (rewardCollection.PrimeNames.Count == 0)
+					return;
+				Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+			}
+
+			Main.RunOnUIThread(() =>
+			{
+				if (Main.listingHelper.ScreensList.Count == 1 )
+					Main.listingHelper.SetScreen(0);
+				Main.listingHelper.PrimeRewards.Clear();
+				Main.listingHelper.Show();
+				Main.listingHelper.Topmost = true;
+				Main.listingHelper.Topmost = false;
+			});
 		}
 
 		public static void AutoTriggered() {
@@ -1035,6 +1038,8 @@ namespace WFInfo {
 			Debug.WriteLine("Sending: " + data + " to websocket.");
 			try
 			{
+				if (marketSocket.ReadyState == WebSocketState.Closed)
+					OpenWebSocket();
 				while(marketSocket.ReadyState == WebSocketState.Connecting) //Make sure that the socket is actually connected before sending any data.
 					Thread.Sleep(1);
 				marketSocket.Send(data);
