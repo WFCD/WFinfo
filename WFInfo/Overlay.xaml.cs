@@ -12,35 +12,46 @@ namespace WFInfo
     /// </summary>
     public partial class Overlay : Window
     {
-        public static double window_wid = 243.0;
-        public static double window_hei = 141.0;
-        public static double part_line_hei = 20.0; // TBD
-        public static double partMarginTop = 39.0;
-        public static double partMarginBottom = 80.0;
-        public static double volumeMarginTop = 104.0;
-        public static double volumeMarginBottom = 17.0;
-        //public static double platMarginLeft = 76.0;
-        public static double platMarginRight = 163.0;
-        public static double platMarginTop = 77.0;
-        public static double platMarginBottom = 43.0;
-        //public static double ducatMarginLeft = 162.0;
-        public static double ducatMarginRight = 78.0;
-        public static double ducatMarginTop = 77.0;
-        public static double ducatMarginbottom = 43.0;
-        public static double cornerMarginSide = 23.0;
-        public static double cornerMarginTop = 15.0;
-        public static double cornerMarginBottom = 110.0;
+        private static double window_wid = 243.0;
+        private static double window_hei = 141.0;
+        private static double part_line_hei = 20.0; // TBD
+        private static double partMarginTop = 39.0;
+        private static double partMarginBottom = 80.0;
+        private static double volumeMarginTop = 104.0;
+        private static double volumeMarginBottom = 17.0;
+        private static double platMarginRight = 163.0;
+        private static double platMarginTop = 77.0;
+        private static double platMarginBottom = 43.0;
+        private static double ducatMarginRight = 67.0;
+        private static double ducatMarginTop = 77.0;
+        private static double ducatMarginbottom = 43.0;
+        private static double cornerMarginSide = 23.0;
+        private static double cornerMarginTop = 15.0;
+        private static double cornerMarginBottom = 110.0;
 
-        public static double platImageMarginLeft = 88.0;
-        public static double platImageMarginBottom = 44.0;
-        public static double platImageHeightWidth = 20.0;
-        public static double ducatImageMarginLeft = 172.0;
-        public static double ducatImageMarginBottom = 44.0;
-        public static double ducatImageHeightWidth = 20.0;
-        
-        public static double large_font = 18.0;
-        public static double mediumFont = 17.0;
-        public static double smallFont = 14.0;
+        private static double platImageMarginLeft = 88.0;
+        private static double platImageMarginBottom = 44.0;
+        private static double platImageHeightWidth = 20.0;
+        private static double ducatImageMarginLeft = 172.0;
+        private static double ducatImageMarginBottom = 44.0;
+        private static double ducatImageHeightWidth = 20.0;
+
+        private static double platMarginRightSanpit = 187;
+        private static double ducatMargineRightSanpit = 119;
+        private static double EfficencyMarginRight = 51;
+
+        private static double platImageMarginLeftSanpit = 61;
+        private static double ducatImageMarginLeftSanpit = 130;
+        private static double EfficencyplatImageMarginLeft = 206.0;
+        private static double EfficencyplatImageMarginBottom = 44.0;
+        private static double EfficencyplatImageHeightWidth = 12.0;
+        private static double EfficencyducatImageMarginLeft = 197.0;
+        private static double EfficencyducatImageMarginBottom = 52.0;
+        private static double EfficencyducatImageHeightWidth = 12.0;
+
+        private static double largefont = 18.0;
+        private static double mediumFont = 17.0;
+        private static double smallFont = 14.0;
 
         private static readonly Color blu = Color.FromRgb(177, 208, 217);
         private static readonly SolidColorBrush bluBrush = new SolidColorBrush(blu);
@@ -227,6 +238,63 @@ namespace WFInfo
             ducatImage.Margin = margin;
             ducatImage.Height = ducatImageHeightWidth * scale;
             ducatImage.Width = ducatImage.Height;
+            
+            //snapit plat text
+            margin = PlatMargineSnap.Margin;
+            margin.Top = platMarginTop * scale;
+            margin.Bottom = platMarginBottom * scale;
+            margin.Right = platMarginRightSanpit * scale;
+            PlatMargineSnap.Margin = margin;
+            PlatTextSnap.FontSize = mediumFont * scale;
+            
+            //snapit ducat text
+            margin = DucatMargineSnap.Margin;
+            margin.Top = platMarginTop * scale;
+            margin.Bottom = platMarginBottom * scale;
+            margin.Right = ducatMargineRightSanpit * scale;
+            DucatMargineSnap.Margin = margin;
+            DucatTextSnap.FontSize = mediumFont * scale;
+            
+            //snapit efficency text
+            margin = EfficencyMargin.Margin;
+            margin.Top = platMarginTop * scale;
+            margin.Bottom = platMarginBottom * scale;
+            margin.Right = EfficencyMarginRight * scale;
+            EfficencyMargin.Margin = margin;
+            EfficencyText.FontSize = mediumFont * scale;
+
+            //snapit ducat image
+            margin = DucatImageSnap.Margin;
+            margin.Top = platMarginTop * scale;
+            margin.Bottom = ducatImageMarginBottom * scale;
+            margin.Left = ducatImageMarginLeftSanpit * scale;
+            DucatImageSnap.Margin = margin;
+            DucatImageSnap.Height = platImageHeightWidth * scale;
+            DucatImageSnap.Width = ducatImage.Height;
+            
+            //snapit plat image
+            margin = platImage.Margin;
+            margin.Bottom = platImageMarginBottom * scale;
+            margin.Left = 61 * scale;
+            PlatImageSnap.Margin = margin;
+            PlatImageSnap.Height = platImageHeightWidth * scale;
+            PlatImageSnap.Width = platImage.Height;
+            
+            //snapit plat efficency image
+            margin = EfficencyPlatinumImage.Margin;
+            margin.Bottom = EfficencyplatImageMarginBottom * scale;
+            margin.Left = EfficencyplatImageMarginLeft * scale;
+            EfficencyPlatinumImage.Margin = margin;
+            EfficencyPlatinumImage.Height = EfficencyplatImageHeightWidth * scale;
+            EfficencyPlatinumImage.Width = ducatImage.Height;
+                
+            //snapit ducat efficency image
+            margin = EfficencyDucatImage.Margin;
+            margin.Bottom = EfficencyducatImageMarginBottom * scale;
+            margin.Left = EfficencyducatImageMarginLeft * scale;
+            EfficencyDucatImage.Margin = margin;
+            EfficencyDucatImage.Height = EfficencyducatImageHeightWidth * scale;
+            EfficencyDucatImage.Width = ducatImage.Height;
         }
 
         public void Display(int x, int y, int wait = 10000)
@@ -239,12 +307,35 @@ namespace WFInfo
             hider.Start();
         }
 
-        public void HideOverlay(object sender, EventArgs e)
+        private void HideOverlay(object sender, EventArgs e)
         {
             hider.Stop();
             Hide();
             Main.StatusUpdate("WFinfo is ready",0);
             rewardsDisplaying = false;
+        }
+
+        public void toSnapit(string efficiency, SolidColorBrush color)
+        {
+            platImage.Visibility = Visibility.Collapsed;
+            platMargin.Visibility = Visibility.Collapsed;
+            
+            ducatImage.Visibility = Visibility.Collapsed;
+            ducatMargin.Visibility = Visibility.Collapsed;
+
+            DucatTextSnap.Visibility = Visibility.Visible;
+            DucatImageSnap.Visibility = Visibility.Visible;
+            
+            PlatTextSnap.Visibility = Visibility.Visible;
+            PlatImageSnap.Visibility = Visibility.Visible;
+            
+            EfficencyMargin.Visibility = Visibility.Visible;
+            EfficencyDucatImage.Visibility = Visibility.Visible;
+            EfficencyPlatinumImage.Visibility = Visibility.Visible;
+            EfficencyText.Text = efficiency;
+            DucatTextSnap.Text = ducatText.Text;
+            PlatTextSnap.Text = platText.Text;
+            EfficencyText.Foreground = color;
         }
     }
 }

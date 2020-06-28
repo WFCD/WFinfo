@@ -12,7 +12,13 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
+using System.Windows.Media;
 using Tesseract;
+using Brushes = System.Drawing.Brushes;
+using Color = System.Drawing.Color;
+using FontFamily = System.Drawing.FontFamily;
+using Pen = System.Drawing.Pen;
 
 namespace WFInfo
 {
@@ -813,7 +819,9 @@ namespace WFInfo
                 string volume = job["volume"].ToObject<string>();
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
-
+                double platinum = double.Parse(plat, styles, provider);
+                int duc = int.Parse(ducats, Main.culture);
+                string efficiency = $"{Math.Round(duc / platinum, 1)}";
                 if (Settings.SnapitExport)
                 {
                     var owned = string.IsNullOrEmpty(partsOwned) ? "0" : partsOwned;
@@ -832,13 +840,24 @@ namespace WFInfo
                     width = 160;
                 }
 
+                var color = System.Windows.Media.Color.FromArgb(100, 174, 199, 206);
 
+                if (duc / platinum > Settings.maximumEfficiencyValue)
+                {
+                    color = Colors.LawnGreen;
+                } else if (duc / platinum < Settings.minimumEfficiencyValue)
+                {
+                    color = Colors.DarkRed;
+                }
+                var brush = new SolidColorBrush(color);
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
                     itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
+                    itemOverlay.toSnapit(efficiency, brush);
+                    itemOverlay.DucatTextSnap.Foreground = System.Windows.Media.Brushes.Red;
                 });
             }
             Main.snapItOverlayWindow.tempImage.Dispose();

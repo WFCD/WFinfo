@@ -172,6 +172,14 @@ namespace WFInfo {
 				Settings.settingsObj["HighContrast"] = false;
 			Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
 
+			if (!Settings.settingsObj.TryGetValue("MaximumEfficiencyValue", out _))
+				Settings.settingsObj["MaximumEfficiencyValue"] = 9.5;
+			Settings.maximumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MaximumEfficiencyValue"), Main.culture);
+			
+			if (!Settings.settingsObj.TryGetValue("MinimumEfficiencyValue", out _))
+				Settings.settingsObj["MinimumEfficiencyValue"] = 4.5;
+			Settings.minimumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MinimumEfficiencyValue"), Main.culture);
+			
 			Settings.Save();
 
 			RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
