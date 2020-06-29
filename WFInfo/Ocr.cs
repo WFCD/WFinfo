@@ -857,7 +857,6 @@ namespace WFInfo
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
                     itemOverlay.toSnapit(efficiency, brush);
-                    itemOverlay.DucatTextSnap.Foreground = System.Windows.Media.Brushes.Red;
                 });
             }
             Main.snapItOverlayWindow.tempImage.Dispose();

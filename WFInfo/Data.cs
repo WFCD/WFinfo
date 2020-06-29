@@ -731,7 +731,7 @@ namespace WFInfo {
 				Overlay.rewardsDisplaying = true;
 			}
 
-			if (!line.Contains("MatchingService::EndSession") || !IsJwtAvailable()) return;
+			if (!line.Contains("MatchingService::EndSession") || !IsJwtAvailable() || !Settings.automaticListing) return;
 			
 			if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
 			{

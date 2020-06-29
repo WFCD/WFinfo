@@ -27,28 +27,28 @@
         <Viewbox x:Name="ownedMargin" Margin="23,15,0,110" HorizontalAlignment="Left" >
             <TextBlock x:Name="ownedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{StaticResource Roboto}"/>
         </Viewbox>
-        <Viewbox x:Name="platMargin" Margin="0,77,162,43" HorizontalAlignment="Right" d:IsHidden="True">
+        <Viewbox x:Name="platMargin" Margin="0,77,162,43" HorizontalAlignment="Right">
             <TextBlock x:Name="platText" Text="100"/>
         </Viewbox>
-        <Viewbox x:Name="ducatMargin" Margin="0,77,78,43" HorizontalAlignment="Right" d:IsHidden="True">
+        <Viewbox x:Name="ducatMargin" Margin="0,77,78,43" HorizontalAlignment="Right">
             <TextBlock x:Name="ducatText" Text="100"/>
         </Viewbox>
-        <Image x:Name="ducatImage" Source="Resources/ducat_w.gif" Margin="172,0,0,44" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" d:IsHidden="True"/>
-        <Image x:Name="platImage"  Source="Resources/plat.gif"     Margin="88,0,0,44" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" d:IsHidden="True"/>
-        <Viewbox x:Name="PlatMargineSnap" Margin="0,77,187,43" HorizontalAlignment="Right" Width="26">
+        <Image x:Name="ducatImage" Source="Resources/ducat_w.gif" Margin="172,0,0,44" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+        <Image x:Name="platImage"  Source="Resources/plat.gif"     Margin="88,0,0,44" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+        <Viewbox x:Name="PlatMargineSnap" Visibility="Collapsed" Margin="0,77,187,43" HorizontalAlignment="Right" Width="26">
             <TextBlock x:Name="PlatTextSnap" Text="090"/>
         </Viewbox>
-        <Image x:Name="PlatImageSnap"  Source="Resources/plat.gif"     Margin="61,0,0,44" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="20"/>
-        <Viewbox x:Name="DucatMargineSnap" Margin="0,77,119,43" HorizontalAlignment="Right" Width="26">
-            <TextBlock x:Name="DucatTextSnap" Text="090" Foreground="#FFB1D0D2"/>
+        <Image x:Name="PlatImageSnap" Visibility="Collapsed"  Source="Resources/plat.gif"     Margin="61,0,0,44" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="20"/>
+        <Viewbox x:Name="DucatMargineSnap" Visibility="Collapsed"  Margin="0,77,119,43" HorizontalAlignment="Right" Width="26">
+            <TextBlock x:Name="DucatTextSnap" Visibility="Collapsed" Text="090" Foreground="#FFB1D0D2"/>
         </Viewbox>
 
 
-        <Image x:Name="DucatImageSnap" Source="Resources/ducat_w.gif" Margin="130,0,0,44" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="20"/>
-        <Viewbox x:Name="EfficencyMargin" Margin="0,77,51,43" HorizontalAlignment="Right" Width="28">
+        <Image x:Name="DucatImageSnap" Visibility="Collapsed" Source="Resources/ducat_w.gif" Margin="130,0,0,44" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="20"/>
+        <Viewbox x:Name="EfficencyMargin" Visibility="Collapsed" Margin="0,77,51,43" HorizontalAlignment="Right" Width="28">
             <TextBlock x:Name="EfficencyText" Text="009" Foreground="#FFB1D0D2"/>
         </Viewbox>
-        <Image x:Name="EfficencyDucatImage" Source="Resources/ducat_w.gif" Margin="198,0,0,52" Height="12" Width="12" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
-        <Image x:Name="EfficencyPlatinumImage"  Source="Resources/plat.gif"     Margin="206,0,0,44" Height="12" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="12"/>
+        <Image x:Name="EfficencyDucatImage" Visibility="Collapsed" Source="Resources/ducat_w.gif" Margin="198,0,0,52" Height="12" Width="12" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+        <Image x:Name="EfficencyPlatinumImage" Visibility="Collapsed"  Source="Resources/plat.gif"     Margin="206,0,0,44" Height="12" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="12"/>
     </Grid>
 </Window>

@@ -169,6 +169,10 @@ namespace WFInfo {
 			if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
 				Settings.settingsObj["HighContrast"] = false;
 			Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
+			
+			if (!Settings.settingsObj.TryGetValue("AutoList", out _))
+				Settings.settingsObj["AutoList"] = false;
+			Settings.automaticListing = (bool)Settings.settingsObj.GetValue("AutoList");
 
 			if (!Settings.settingsObj.TryGetValue("MaximumEfficiencyValue", out _))
 				Settings.settingsObj["MaximumEfficiencyValue"] = 9.5;
