@@ -219,6 +219,14 @@ namespace WFInfo {
 				return;
 			}
 
+			ListingGrid.Visibility = Visibility.Visible;
+			Height = 255;
+			Status.Content = ScreensList[PageIndex].Key;
+			Status.Visibility = Visibility.Collapsed;
+			ComboBox.IsEnabled = true;
+			ConfirmListingButton.IsEnabled = true;
+		
+
 			Platinum0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Platinum;
 			Amount0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Amount;
 			Reputation0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Reputation;

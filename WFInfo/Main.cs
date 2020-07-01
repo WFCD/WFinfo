@@ -104,12 +104,10 @@ namespace WFInfo
                 return;
             var now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
-            if (now > latestActive || OCR.Warframe != null && OCR.Warframe.HasExited)
-            {
-                await dataBase.SetWebsocketStatus("invisible");
-                UpdateMarketStatus("invisible");
-                StatusUpdate("User has been inactive for 15 minutes", 0);
-            }
+            if (now <= latestActive) return;
+            await dataBase.SetWebsocketStatus("invisible");
+            //UpdateMarketStatus("invisible");
+            StatusUpdate("User has been inactive for 15 minutes", 0);
         }
 
         public static void RunOnUIThread(Action act)
@@ -216,6 +214,7 @@ namespace WFInfo
                 {
                     lastClick = System.Windows.Forms.Cursor.Position;
                     var index = OCR.GetSelectedReward(lastClick);
+                    Debug.WriteLine(index);
                     if (index < 0) return;
                     listingHelper.SelectedRewardIndex = (short)index;
                 }));

@@ -717,7 +717,7 @@ namespace WFInfo {
 
 		private Task autoThread;
 
-		private async void LogChanged(object sender, string line)
+		private void LogChanged(object sender, string line)
 		{
 			if (autoThread != null && !autoThread.IsCompleted) return;
 			if (autoThread != null) {
@@ -737,30 +737,33 @@ namespace WFInfo {
 			{
 				return;
 			}
-			if(inGameName.IsNullOrEmpty())
-				if (!await IsJWTvalid())
+
+			Task.Run(async () => { 
+				if(inGameName.IsNullOrEmpty())
+					if (!await IsJWTvalid())
+					{
+						Disconnect();
+					}
+						
+				Overlay.rewardsDisplaying = false;
+
+				foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
 				{
-					Disconnect();
+					var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+					if (rewardCollection.PrimeNames.Count == 0)
+						return;
+					Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
 				}
-					
-			Overlay.rewardsDisplaying = false;
 
-			foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
-			{
-				var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-				if (rewardCollection.PrimeNames.Count == 0)
-					return;
-				Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-			}
-
-			Main.RunOnUIThread(() =>
-			{
-				if (Main.listingHelper.ScreensList.Count == 1 )
-					Main.listingHelper.SetScreen(0);
-				Main.listingHelper.PrimeRewards.Clear();
-				Main.listingHelper.Show();
-				Main.listingHelper.Topmost = true;
-				Main.listingHelper.Topmost = false;
+				Main.RunOnUIThread(() =>
+				{
+					if (Main.listingHelper.ScreensList.Count == 1 )
+						Main.listingHelper.SetScreen(0);
+					Main.listingHelper.PrimeRewards.Clear();
+					Main.listingHelper.Show();
+					Main.listingHelper.Topmost = true;
+					Main.listingHelper.Topmost = false;
+				});
 			});
 		}
 
@@ -1038,8 +1041,11 @@ namespace WFInfo {
 			Debug.WriteLine("Sending: " + data + " to websocket.");
 			try
 			{
-				if (marketSocket.ReadyState == WebSocketState.Closed)
+				if (marketSocket.ReadyState == WebSocketState.Closed || marketSocket.ReadyState != WebSocketState.Open)
+				{
+					marketSocket.Close();
 					OpenWebSocket();
+				}
 				while(marketSocket.ReadyState == WebSocketState.Connecting) //Make sure that the socket is actually connected before sending any data.
 					Thread.Sleep(1);
 				marketSocket.Send(data);

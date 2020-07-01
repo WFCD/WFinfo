@@ -450,8 +450,8 @@ namespace WFInfo
                 {
                     if (primeRewardIndex == 1)
                         primeRewardIndex = 0;
-                    if (primeRewardIndex == 3)
-                        primeRewardIndex = 2;
+                    if (primeRewardIndex >= 2)
+                        primeRewardIndex = 1;
                 }
             }
             else
@@ -555,6 +555,7 @@ namespace WFInfo
                     string first = firstChecks[i];
                     if (first.Replace(" ", "").Length > 6)
                     {
+                        Debug.WriteLine(secondChecks[i]);
                         string second = secondChecks[i];
                         string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
                         //if (secondProximity[i] < firstProximity[i])
@@ -811,7 +812,7 @@ namespace WFInfo
             {
                 if (part.Name.Length < 13) // if part name is smaller than "Bo prime handle" skip current part
                     continue;
-
+                Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0]);
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
                 string plat = job["plat"].ToObject<string>();
@@ -819,9 +820,7 @@ namespace WFInfo
                 string volume = job["volume"].ToObject<string>();
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
-                double platinum = double.Parse(plat, styles, provider);
-                int duc = int.Parse(ducats, Main.culture);
-                string efficiency = $"{Math.Round(duc / platinum, 1)}";
+
                 if (Settings.SnapitExport)
                 {
                     var owned = string.IsNullOrEmpty(partsOwned) ? "0" : partsOwned;
@@ -840,23 +839,14 @@ namespace WFInfo
                     width = 160;
                 }
 
-                var color = System.Windows.Media.Color.FromArgb(100, 174, 199, 206);
-
-                if (duc / platinum > Settings.maximumEfficiencyValue)
-                {
-                    color = Colors.LawnGreen;
-                } else if (duc / platinum < Settings.minimumEfficiencyValue)
-                {
-                    color = Colors.DarkRed;
-                }
-                var brush = new SolidColorBrush(color);
+                
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
                     itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
+                    itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
-                    itemOverlay.toSnapit(efficiency, brush);
                 });
             }
             Main.snapItOverlayWindow.tempImage.Dispose();

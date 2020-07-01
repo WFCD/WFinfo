@@ -109,6 +109,9 @@ namespace WFInfo
 
             if (Convert.ToBoolean(settingsObj.GetValue("HighContrast")))
                 HighContrastCheckbox.IsChecked = true;
+            
+            if (Convert.ToBoolean(settingsObj.GetValue("AutoList")))
+                Autolist.IsChecked = true;
 
             EfficencyMax_number_box_Copy.Text = maximumEfficiencyValue.ToString(Main.culture);
             EfficencyMin_number_box_Copy.Text = minimumEfficiencyValue.ToString(Main.culture);

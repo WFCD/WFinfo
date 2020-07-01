@@ -35,12 +35,12 @@
         </Viewbox>
         <Image x:Name="ducatImage" Source="Resources/ducat_w.gif" Margin="172,0,0,44" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
         <Image x:Name="platImage"  Source="Resources/plat.gif"     Margin="88,0,0,44" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
-        <Viewbox x:Name="PlatMargineSnap" Visibility="Collapsed" Margin="0,77,187,43" HorizontalAlignment="Right" Width="26">
+        <Viewbox x:Name="PlatMargineSnap" Visibility="Collapsed" Margin="30,77,0,43" HorizontalAlignment="Left" Width="26">
             <TextBlock x:Name="PlatTextSnap" Text="090"/>
         </Viewbox>
         <Image x:Name="PlatImageSnap" Visibility="Collapsed"  Source="Resources/plat.gif"     Margin="61,0,0,44" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="20"/>
-        <Viewbox x:Name="DucatMargineSnap" Visibility="Collapsed"  Margin="0,77,119,43" HorizontalAlignment="Right" Width="26">
-            <TextBlock x:Name="DucatTextSnap" Visibility="Collapsed" Text="090" Foreground="#FFB1D0D2"/>
+        <Viewbox x:Name="DucatMargineSnap" Visibility="Collapsed"  Margin="98,77,0,43" HorizontalAlignment="Left" Width="26">
+            <TextBlock x:Name="DucatTextSnap" Text="090" Foreground="#FFB1D0D2"/>
         </Viewbox>
 
 
