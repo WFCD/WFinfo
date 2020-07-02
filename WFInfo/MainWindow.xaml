@@ -73,7 +73,7 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="Gear" ToolTip="Equpiment, see which items you own" MouseLeftButtonDown="EquipmentClick"  Margin="0,42,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+        <Label x:Name="Gear" ToolTip="Equipment, see which items you own" MouseLeftButtonDown="EquipmentClick"  Margin="0,42,22,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="ContentControl.Content">
