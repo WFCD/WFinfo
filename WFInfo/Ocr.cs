@@ -1340,8 +1340,17 @@ namespace WFInfo
                 else if (sinVal > 0)
                     totalOdd += sinVal * count;
             }
-            if(totalEven == 0 || totalOdd == 0)
+
+            if (totalEven == 0 || totalOdd == 0)
+            {
+                Main.RunOnUIThread(() =>
+                {
+                    Main.StatusUpdate("Could not find any rewards, mistake? Report to dev", 1);
+                });
+                processingActive = false;
                 throw new Exception("Unable to find any parts");
+            }
+
             double total = totalEven + totalOdd;
             Main.AddLog("EVEN DISTRIBUTION: " + (totalEven / total * 100).ToString("F2", Main.culture) + "%");
             Main.AddLog("ODD DISTRIBUTION: " + (totalOdd / total * 100).ToString("F2", Main.culture) + "%");
