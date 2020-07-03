@@ -273,49 +273,6 @@ namespace WFInfo {
 							marketData[part.Key]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
 		}
 
-		private void MarkAllEquipmentVaulted() {
-			foreach (KeyValuePair<string, JToken> kvp in equipmentData) {
-				if (kvp.Key.Contains("Prime")) {
-					equipmentData[kvp.Key]["vaulted"] = true;
-					foreach (KeyValuePair<string, JToken> part in kvp.Value["parts"].ToObject<JObject>()) {
-						equipmentData[kvp.Key]["parts"][part.Key]["vaulted"] = true;
-					}
-				}
-			}
-		}
-
-		private void GetSetVaultStatus() {
-			foreach (KeyValuePair<string, JToken> keyValuePair in equipmentData) {
-				if (keyValuePair.Key.Contains("Prime")) {
-					bool vaulted = false;
-					foreach (KeyValuePair<string, JToken> part in keyValuePair.Value["parts"].ToObject<JObject>()) {
-						if (part.Value["vaulted"].ToObject<bool>()) {
-							vaulted = true;
-							break;
-						}
-					}
-
-					equipmentData[keyValuePair.Key]["vaulted"] = vaulted;
-				}
-			}
-		}
-
-		private void MarkEquipmentUnvaulted(string era, string name) {
-			JObject job = relicData[era][name].ToObject<JObject>();
-			foreach (KeyValuePair<string, JToken> keyValuePair in job) {
-				string str = keyValuePair.Value.ToObject<string>();
-				if (str.IndexOf("Prime") != -1) {
-					// Cut the name of actual part without Prime prefix ??
-					string eqmt = str.Substring(0, str.IndexOf("Prime") + 5);
-					if (equipmentData.TryGetValue(eqmt, out JToken temp)) {
-						equipmentData[eqmt]["parts"][str]["vaulted"] = false;
-					} else {
-						Main.AddLog("Cannot find: " + eqmt + " in equipmentData");
-					}
-				}
-			}
-		}
-
 		public bool Update() {
 			Main.AddLog("Checking for Updates to Databases");
 			JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));

@@ -1595,8 +1595,7 @@ namespace WFInfo
             }
             Task.Factory.StartNew(() =>
             {
-                var col = Process.GetProcesses();
-                foreach (Process process in col)
+                foreach (Process process in Process.GetProcesses())
                 {
                     if (process.MainWindowTitle == "Warframe")
                     {
