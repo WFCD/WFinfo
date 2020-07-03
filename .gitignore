@@ -251,3 +251,6 @@ Launcher/Launcher.csproj
 Launcher/packages.config
 
 WFInfo/WFInfo.csproj
+
+.idea/.idea.WFInfo/.idea/
+.idea/.idea.WFInfo/

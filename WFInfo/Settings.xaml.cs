@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using WebSocketSharp;
 
 namespace WFInfo
 {
@@ -42,6 +43,9 @@ namespace WFInfo
                 backupKeyVal = value;
             }
         }
+        public static Key DebugModifierKey;
+        public static Key SnapitModifierKey;
+        public static Key SearchItModifierKey;
         public static KeyConverter converter = new KeyConverter();
         public static Point mainWindowLocation;
         public static bool isOverlaySelected;
@@ -52,9 +56,11 @@ namespace WFInfo
         public static string ClipboardTemplate;
         internal static int delay;
         public static bool Highlight;
-		internal static bool highContrast;
-
-		public static bool auto { get; internal set; }
+        internal static bool highContrast;
+        public static double maximumEfficiencyValue;
+        public static double minimumEfficiencyValue;
+        public static bool automaticListing;
+        public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
         public static bool SnapitExport { get; internal set; }
@@ -72,22 +78,44 @@ namespace WFInfo
             if (settingsObj.GetValue("Display").ToString() == "Overlay")
             {
                 OverlayRadio.IsChecked = true;
+                Height = 392;
             }
             else if (settingsObj.GetValue("Display").ToString() == "Light")
             {
                 LightRadio.IsChecked = true;
+                Height = 328;
             }
             else
             {
                 WindowRadio.IsChecked = true;
+                Height = 328;
             }
 
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
+            {
                 autoCheckbox.IsChecked = true;
+                Autolist.IsEnabled = true;
+            }
+            else
+            {
+                Autolist.IsEnabled = false;
+            }
 
             if (Convert.ToBoolean(settingsObj.GetValue("Clipboard")))
                 clipboardCheckbox.IsChecked = true;
 
+            if (Convert.ToBoolean(settingsObj.GetValue("HighlightRewards")))
+                HighlightCheckbox.IsChecked = true;
+
+            if (Convert.ToBoolean(settingsObj.GetValue("HighContrast")))
+                HighContrastCheckbox.IsChecked = true;
+
+            if (Convert.ToBoolean(settingsObj.GetValue("AutoList")))
+                Autolist.IsChecked = true;
+
+            EfficencyMax_number_box_Copy.Text = maximumEfficiencyValue.ToString(Main.culture);
+            EfficencyMin_number_box_Copy.Text = minimumEfficiencyValue.ToString(Main.culture);
+            Displaytime_number_box.Text = delay.ToString(Main.culture);
             ResetActivationKeyText();
             Focus();
         }
@@ -118,6 +146,7 @@ namespace WFInfo
             isLightSlected = false;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
+            Height = 328;
             Save();
         }
 
@@ -128,6 +157,7 @@ namespace WFInfo
             isLightSlected = false;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
+            Height = 392;
             Save();
         }
 
@@ -147,7 +177,8 @@ namespace WFInfo
                 MessageBoxResult messageBoxResult = MessageBox.Show(message, "Automation Mode Opt-In", MessageBoxButton.YesNo);
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
-                    Main.dataBase.EnableLogcapture();
+                    Main.dataBase.EnableLogCapture();
+                    Autolist.IsEnabled = true;
                 }
                 else
                 {
@@ -155,6 +186,7 @@ namespace WFInfo
                     auto = false;
                     autoCheckbox.IsChecked = false;
                     Main.dataBase.DisableLogCapture();
+                    Autolist.IsEnabled = false;
                 }
             }
             else
@@ -214,6 +246,12 @@ namespace WFInfo
             //Set mouse button to disabled (never gonna use left as a trigger)
             ActivationMouseButton = MouseButton.Left;
 
+            if (e.Key == SearchItModifierKey || e.Key == SnapitModifierKey)
+            {
+                Activation_key_box.Text = GetKeyName(ActivationKey);
+                hidden.Focus();
+                return;
+            }
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
             ActivationKey = key;
@@ -235,6 +273,9 @@ namespace WFInfo
                 activeMouseVal = backupMouseVal;
                 Activation_key_box.Text = ActivationMouseButton.ToString();
             }
+
+            Searchit_key_box.Text = GetKeyName(SearchItModifierKey);
+            Snapit_key_box.Text = GetKeyName(SnapitModifierKey);
         }
 
         private void ActivationLost(object sender, RoutedEventArgs e)
@@ -353,6 +394,171 @@ namespace WFInfo
             clipboard = true;
             clipboardCheckbox.IsChecked = true;
             clipboardCheckbox.IsEnabled = false;
+            Height = 328;
+            Save();
+        }
+
+        private void HighlightRewardCheckbox_Click(object sender, RoutedEventArgs e)
+        {
+            settingsObj["HighlightRewards"] = HighlightCheckbox.IsChecked.Value;
+            Highlight = HighlightCheckbox.IsChecked.Value;
+            Save();
+        }
+
+        private void Searchit_key_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            SearchItModifierKey = Key.None;
+            Searchit_key_box.Text = "";
+            backupKeyVal = activeKeyVal;
+            activeKeyVal = Key.NoName;
+        }
+
+        private void Searchit_key_box_KeyUp(object sender, KeyEventArgs e) //todo this doesn't fucking work. I don't know why, but it just does not
+        {
+            e.Handled = true;
+
+            if (e.Key == backupKeyVal || e.Key == SnapitModifierKey)
+            {
+                Searchit_key_box.Text = GetKeyName(SearchItModifierKey);
+                hidden.Focus();
+                return;
+            }
+
+            Key key = e.Key != Key.System ? e.Key : e.SystemKey;
+            SearchItModifierKey = key;
+            Searchit_key_box.Text = GetKeyName(key);
+            settingsObj["SearchItModifierKey"] = key.ToString();
+            hidden.Focus();
+            Save();
+        }
+
+        private void Snapit_key_box_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ResetActivationKeyText();
+        }
+
+        private void Searchit_key_box_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ResetActivationKeyText();
+        }
+
+        private void Snapit_key_box_KeyUp(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+
+            if (e.Key == backupKeyVal || e.Key == SearchItModifierKey)
+            {
+                Snapit_key_box.Text = GetKeyName(SnapitModifierKey);
+                hidden.Focus();
+                return;
+            }
+
+            Key key = e.Key != Key.System ? e.Key : e.SystemKey;
+            SnapitModifierKey = key;
+            Snapit_key_box.Text = GetKeyName(key);
+            settingsObj["SnapitModifierKey"] = key.ToString();
+            hidden.Focus();
+            Save();
+        }
+
+        private void Snapit_key_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            SnapitModifierKey = Key.None;
+            Snapit_key_box.Text = "";
+            backupKeyVal = activeKeyVal;
+            activeKeyVal = Key.NoName;
+        }
+
+        private void Snapit_key_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void Searchit_key_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+            if (e.Key != Key.Enter) return;
+            Displaytime_number_box_KeyUp(sender, e);
+            hidden.Focus();
+        }
+
+        private void HighContrastCheckbox_Click(object sender, RoutedEventArgs e)
+        {
+            settingsObj["HighContrast"] = HighContrastCheckbox.IsChecked.Value;
+            highContrast = HighContrastCheckbox.IsChecked.Value;
+            Save();
+        }
+
+        private void Autolist_Click(object sender, RoutedEventArgs e)
+        {
+            settingsObj["AutoList"] = Autolist.IsChecked.Value;
+            automaticListing = Autolist.IsChecked.Value;
+            Save();
+        }
+
+        private void Displaytime_number_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                hidden.Focus();
+            }
+            var num = Regex.Replace(Displaytime_number_box.Text, "[^0-9.]", "");
+            Displaytime_number_box.Text = num;
+        }
+
+        private void Displaytime_number_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            Displaytime_number_box.Text = "";
+        }
+
+        private void Displaytime_number_box_KeyUp(object sender, KeyEventArgs e)
+        {
+            delay = int.Parse(Displaytime_number_box.Text);
+            settingsObj["Delay"] = delay;
+            Save();
+        }
+
+        private void EfficencyMin_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                hidden.Focus();
+            }
+            var num = Regex.Replace(EfficencyMin_number_box_Copy.Text, "[^0-9.]", "");
+            EfficencyMin_number_box_Copy.Text = num;
+        }
+
+        private void EfficencyMax_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                hidden.Focus();
+            }
+            var num = Regex.Replace(EfficencyMax_number_box_Copy.Text, "[^0-9.]", "");
+            EfficencyMax_number_box_Copy.Text = num;
+        }
+
+        private void EfficencyMin_number_box_Copy_GotFocus(object sender, RoutedEventArgs e)
+        {
+            EfficencyMin_number_box_Copy.Text = "";
+        }
+
+        private void EfficencyMax_number_box_Copy_GotFocus(object sender, RoutedEventArgs e)
+        {
+            EfficencyMax_number_box_Copy.Text = "";
+        }
+
+        private void EfficencyMin_number_box_Copy_KeyUp(object sender, KeyEventArgs e)
+        {
+            minimumEfficiencyValue = double.Parse(EfficencyMin_number_box_Copy.Text);
+            settingsObj["MinimumEfficiencyValue"] = minimumEfficiencyValue;
+            Save();
+        }
+
+        private void EfficencyMax_number_box_Copy_KeyUp(object sender, KeyEventArgs e)
+        {
+            maximumEfficiencyValue = double.Parse(EfficencyMax_number_box_Copy.Text);
+            settingsObj["MaximumEfficiencyValue"] = maximumEfficiencyValue;
             Save();
         }
     }

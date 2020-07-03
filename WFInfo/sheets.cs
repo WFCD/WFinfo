@@ -2,7 +2,6 @@
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace WFInfo
@@ -26,8 +25,17 @@ namespace WFInfo
 
         public IList<IList<object>> GetSheet(string range)
         {
-            ValueRange response = service.Spreadsheets.Values.Get(SheetID, range).Execute();
+            ValueRange response;
+            try
+            {
+                response = service.Spreadsheets.Values.Get(SheetID, range).Execute();
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
             return response.Values;
+
         }
     }
 }

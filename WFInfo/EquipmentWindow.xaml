@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" 
         xmlns:local="clr-namespace:WFInfo"
         x:Class="WFInfo.EquipmentWindow"
         Title="Equipment" Height="400" Width="400" WindowStyle="None" AllowsTransparency="True" Loaded="WindowLoaded" ResizeMode="CanResizeWithGrip" MinWidth="400" MaxWidth="400" MinHeight="110">

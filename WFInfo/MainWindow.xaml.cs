@@ -1,10 +1,15 @@
+using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -22,12 +27,14 @@ namespace WFInfo
 
         public MainWindow()
         {
+
             string thisprocessname = Process.GetCurrentProcess().ProcessName;
             if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
             {
                 Main.AddLog("Duplicate process found");
                 Close();
             }
+
 
             INSTANCE = this;
             main = new Main();
@@ -68,14 +75,18 @@ namespace WFInfo
                 }
                 Settings.settingsObj["MainWindowLocation_X"] = Left;
                 Settings.settingsObj["MainWindowLocation_Y"] = Top;
+
                 Settings.Save();
 
+                Closing += new CancelEventHandler(LoggOut);
             }
             catch (Exception e)
             {
                 Main.AddLog("An error occured while loading the main window: " + e.Message);
             }
         }
+
+
 
         private void InitializeSettings()
         {
@@ -88,19 +99,23 @@ namespace WFInfo
                 Settings.settingsObj["MainWindowLocation_X"] = 300;
             if (!Settings.settingsObj.TryGetValue("MainWindowLocation_Y", out _))
                 Settings.settingsObj["MainWindowLocation_Y"] = 300;
-            Settings.mainWindowLocation = new Point(Settings.settingsObj.GetValue("MainWindowLocation_X").ToObject<Int32>(), Settings.settingsObj.GetValue("MainWindowLocation_Y").ToObject<Int32>());
+            Settings.mainWindowLocation =
+                new Point(Settings.settingsObj.GetValue("MainWindowLocation_X").ToObject<Int32>(),
+                    Settings.settingsObj.GetValue("MainWindowLocation_Y").ToObject<Int32>());
 
             if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
                 Settings.settingsObj["ActivationKey"] = "Snapshot";
             try
             {
-                Settings.ActivationKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                Settings.ActivationKey =
+                    (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
             }
             catch
             {
                 try
                 {
-                    Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                    Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton),
+                        Settings.settingsObj.GetValue("ActivationKey").ToString());
                 }
                 catch
                 {
@@ -109,6 +124,19 @@ namespace WFInfo
                     Settings.ActivationKey = Key.Snapshot;
                 }
             }
+
+            if (!Settings.settingsObj.TryGetValue("DebugModifierKey", out _))
+                Settings.settingsObj["DebugModifierKey"] = Key.LeftShift.ToString();
+            Settings.DebugModifierKey =
+                (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("DebugModifierKey").ToString());
+
+            if (!Settings.settingsObj.TryGetValue("SearchItModifierKey", out _))
+                Settings.settingsObj["SearchItModifierKey"] = Key.OemTilde.ToString();
+            Settings.SearchItModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SearchItModifierKey").ToString());
+
+            if (!Settings.settingsObj.TryGetValue("SnapitModifierKey", out _))
+                Settings.settingsObj["SnapitModifierKey"] = Key.LeftCtrl.ToString();
+            Settings.SnapitModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SnapitModifierKey").ToString());
 
             if (!Settings.settingsObj.TryGetValue("Debug", out _))
                 Settings.settingsObj["Debug"] = false;
@@ -122,25 +150,29 @@ namespace WFInfo
                 Settings.settingsObj["AutoDelay"] = 250L;
             Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");
 
+            if (!Settings.settingsObj.TryGetValue("Auto", out _))
+                Settings.settingsObj["Auto"] = 250L;
+            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
+
             if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
                 Settings.settingsObj["ImageRetentionTime"] = 12;
-            Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"));
+            Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("ClipboardTemplate", out _))
                 Settings.settingsObj["ClipboardTemplate"] = "-- by WFInfo (smart OCR with pricecheck)";
-            Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"));
+            Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("SnapitExport", out _))
                 Settings.settingsObj["SnapitExport"] = false;
-            Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"));
+            Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("Delay", out _))
                 Settings.settingsObj["Delay"] = 10000;
-            Settings.delay = Convert.ToInt32(Settings.settingsObj.GetValue("Delay"));
+            Settings.delay = Convert.ToInt32(Settings.settingsObj.GetValue("Delay"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("HighlightRewards", out _))
                 Settings.settingsObj["HighlightRewards"] = true;
-            Settings.Highlight = Convert.ToBoolean(Settings.settingsObj.GetValue("HighlightRewards"));
+            Settings.Highlight = Convert.ToBoolean(Settings.settingsObj.GetValue("HighlightRewards"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("ClipboardVaulted", out _))
                 Settings.settingsObj["ClipboardVaulted"] = false;
@@ -154,7 +186,27 @@ namespace WFInfo
                 Settings.settingsObj["HighContrast"] = false;
             Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
 
+            if (!Settings.settingsObj.TryGetValue("AutoList", out _))
+                Settings.settingsObj["AutoList"] = false;
+            Settings.automaticListing = (bool)Settings.settingsObj.GetValue("AutoList");
+
+            if (!Settings.settingsObj.TryGetValue("MaximumEfficiencyValue", out _))
+                Settings.settingsObj["MaximumEfficiencyValue"] = 9.5;
+            Settings.maximumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MaximumEfficiencyValue"), Main.culture);
+
+            if (!Settings.settingsObj.TryGetValue("MinimumEfficiencyValue", out _))
+                Settings.settingsObj["MinimumEfficiencyValue"] = 4.5;
+            Settings.minimumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MinimumEfficiencyValue"), Main.culture);
+
             Settings.Save();
+
+            RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
+            if (key.GetValue("JWT") != null) // if the key exists then update it, else ignore it.
+            {
+                Main.dataBase.JWT = (string)key.GetValue("JWT");
+                key.Close();
+            }
+
         }
 
         public void OnContentRendered(object sender, EventArgs e)
@@ -167,11 +219,16 @@ namespace WFInfo
             }
         }
 
-        public void ChangeStatus(string status, int serverity)
+        /// <summary>
+        /// Sets the status
+        /// </summary>
+        /// <param name="status">The string to be displayed</param>
+        /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
+        public void ChangeStatus(string status, int severity)
         {
-            Console.WriteLine("Status message: " + status);
+            Debug.WriteLine("Status message: " + status);
             Status.Text = status;
-            switch (serverity)
+            switch (severity)
             {
                 case 0: //default, no problem
                     Status.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
@@ -190,7 +247,13 @@ namespace WFInfo
 
         public void Exit(object sender, RoutedEventArgs e)
         {
-            notifyIcon.Dispose();
+            NotifyIcon.Dispose();
+            RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
+            if (Main.dataBase.rememberMe) // if rememberme was checked then save it
+            {
+                key.SetValue("JWT", Main.dataBase.JWT);
+                key.Close();
+            }
             Application.Current.Shutdown();
         }
 
@@ -199,19 +262,19 @@ namespace WFInfo
             Visibility = Visibility.Hidden;
         }
 
-        private void websiteClick(object sender, RoutedEventArgs e)
+        private void WebsiteClick(object sender, RoutedEventArgs e)
         {
             Process.Start("https://discord.gg/N8S5zfw");
         }
 
-        private void relicsClick(object sender, RoutedEventArgs e)
+        private void RelicsClick(object sender, RoutedEventArgs e)
         {
             if (Main.dataBase.relicData == null) { ChangeStatus("Relic data not yet loaded in", 2); return; }
             Main.relicWindow.Show();
             Main.relicWindow.Focus();
         }
 
-        private void equipmentClick(object sender, RoutedEventArgs e)
+        private void EquipmentClick(object sender, RoutedEventArgs e)
         {
             if (Main.dataBase.equipmentData == null) { ChangeStatus("Equipment data not yet loaded in", 2); return; }
             Main.equipmentWindow.Show();
@@ -221,8 +284,8 @@ namespace WFInfo
         {
             if (Main.settingsWindow == null) { ChangeStatus("Settings window not yet loaded in", 2); return; }
             Main.settingsWindow.populate();
-            Main.settingsWindow.Left = Left + 320;
-            Main.settingsWindow.Top = Top;
+            Main.settingsWindow.Left = Left;
+            Main.settingsWindow.Top = Top + Height;
             Main.settingsWindow.Show();
         }
 
@@ -230,7 +293,7 @@ namespace WFInfo
         {
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
-            Market_Data.Content = "Loading...";
+            MarketData.Content = "Loading...";
             Main.StatusUpdate("Forcing Market Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
         }
@@ -239,7 +302,7 @@ namespace WFInfo
         {
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
-            Drop_Data.Content = "Loading...";
+            DropData.Content = "Loading...";
             Main.StatusUpdate("Forcing Prime Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
         }
@@ -279,11 +342,167 @@ namespace WFInfo
 
         public void ToForeground(object sender, RoutedEventArgs e)
         {
-            MainWindow.INSTANCE.Visibility = Visibility.Visible;
-            MainWindow.INSTANCE.Activate();
-            MainWindow.INSTANCE.Topmost = true;  // important
-            MainWindow.INSTANCE.Topmost = false; // important
-            MainWindow.INSTANCE.Focus();         // important
+            INSTANCE.Visibility = Visibility.Visible;
+            INSTANCE.Activate();
+            INSTANCE.Topmost = true;  // important
+            INSTANCE.Topmost = false; // important
+            INSTANCE.Focus();         // important
+        }
+
+        public void LoggedIn()
+        {
+            Login.Visibility = Visibility.Collapsed;
+            ComboBox.SelectedIndex = 1;
+            ComboBox.Visibility = Visibility.Visible;
+            PlusOneButton.Visibility = Visibility.Visible;
+            CreateListing.Visibility = Visibility.Visible;
+            SearchItButton.Visibility = Visibility.Visible;
+            ChangeStatus("Logged in", 0);
+        }
+
+        /// <summary>
+        /// Prompts user to log in
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SpawnLogin(object sender, RoutedEventArgs e)
+        {
+            Main.login.MoveLogin(Left + Width, Top);
+
+        }
+
+        public void SignOut()
+        {
+            Login.Visibility = Visibility.Visible;
+            ComboBox.Visibility = Visibility.Collapsed;
+            PlusOneButton.Visibility = Visibility.Collapsed;
+            CreateListing.Visibility = Visibility.Collapsed;
+            SearchItButton.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// Changes the online selector. Used for websocket lisening to see if the status changed externally (i.e from the site)
+        /// </summary>
+        /// <param name="status">The status to change to</param>
+        public void UpdateMarketStatus(string status)
+        {
+            switch (status)
+            {
+                case "online":
+                    ComboBox.SelectedIndex = 1;
+                    break;
+                case "invisible":
+                    ComboBox.SelectedIndex = 2;
+                    break;
+                case "ingame":
+                    ComboBox.SelectedIndex = 0;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Allows the user to overwrite the current websocket status
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!ComboBox.IsLoaded) //Prevent firing off to early
+                return;
+            switch (ComboBox.SelectedIndex)
+            {
+                case 0: //Online in game
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("in game");
+                    });
+                    break;
+                case 1: //Online
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("online");
+                    });
+                    break;
+                case 2: //Invisible
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("offline");
+                    });
+                    break;
+                case 3: //Sign out
+                    LoggOut(null, null);
+                    break;
+            }
+        }
+
+        internal void LoggOut(object sender, CancelEventArgs e)
+        {
+            Login.Visibility = Visibility.Visible;
+            ComboBox.Visibility = Visibility.Hidden;
+            PlusOneButton.Visibility = Visibility.Hidden;
+            CreateListing.Visibility = Visibility.Hidden;
+            Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
+        }
+
+        internal void FinishedLoading()
+        {
+            Login.IsEnabled = true;
+        }
+
+        private void CreateListing_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (OCR.processingActive)
+            {
+                Main.StatusUpdate("Still Processing Reward Screen", 2);
+                return;
+            }
+
+            if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
+            {
+                ChangeStatus("No recorded rewards found", 2);
+                return;
+            }
+
+            var t = Task.Run(() =>
+            {
+                foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
+                {
+                    var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+                    if (rewardCollection.PrimeNames.Count == 0)
+                        continue;
+                    Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                }
+            });
+            t.Wait();
+            if (Main.listingHelper.ScreensList.Count == 0)
+            {
+                ChangeStatus("No recorded rewards found", 2);
+                return;
+
+            }
+            Main.listingHelper.SetScreen(0);
+            Main.listingHelper.PrimeRewards.Clear();
+            WindowState = WindowState.Normal;
+            Main.listingHelper.Show();
+        }
+
+        private void PlusOne(object sender, MouseButtonEventArgs e)
+        {
+            Main.plusOne.Show();
+            Main.plusOne.Left = Left + Width;
+            Main.plusOne.Top = Top;
+        }
+
+        private void SearchItButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (OCR.processingActive)
+            {
+                Main.StatusUpdate("Still Processing Reward Screen", 2);
+                return;
+            }
+            Main.AddLog("Starting search it");
+            Main.StatusUpdate("Starting search it", 0);
+            Main.searchBox.Start();
         }
     }
 }

@@ -1,48 +1,44 @@
-﻿using System;
-using System.Threading;
+using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Text.RegularExpressions;
-using System.Net;
 using AutoUpdaterDotNET;
 using System.Windows;
-using System.Diagnostics;
+using System.Windows.Forms;
+using WFInfo.Resources;
 
 namespace WFInfo
 {
     class Main
     {
         public static Main INSTANCE;
-        public static string appPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
-        public static string buildVersion;
-        public static Data dataBase;
-        public static RewardWindow window;
-        public static Overlay[] overlays;
-        public static RelicsWindow relicWindow;
-        public static EquipmentWindow equipmentWindow;
-        public static Settings settingsWindow;
+        public static string AppPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
+        public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static Data dataBase = new Data();
+        public static RewardWindow window = new RewardWindow();
+        public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
+        public static RelicsWindow relicWindow = new RelicsWindow();
+        public static EquipmentWindow equipmentWindow = new EquipmentWindow();
+        public static Settings settingsWindow = new Settings();
         public static ErrorDialogue popup;
         public static UpdateDialogue update;
-        public static SnapItOverlay snapItOverlayWindow;
-        public static Stopwatch watch;
-
+        public static SnapItOverlay snapItOverlayWindow = new SnapItOverlay();
+        public static SearchIt searchBox = new SearchIt();
+        public static Login login = new Login();
+        public static ListingHelper listingHelper = new ListingHelper();
+        public static DateTime latestActive = new DateTime();
+        public static PlusOne plusOne = new PlusOne();
+        public static System.Threading.Timer timer;
+        public static System.Drawing.Point lastClick;
         public Main()
         {
             INSTANCE = this;
             StartMessage();
-            buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
-            overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
-            window = new RewardWindow();
-            dataBase = new Data();
-            relicWindow = new RelicsWindow();
-            equipmentWindow = new EquipmentWindow();
-            settingsWindow = new Settings();
-            snapItOverlayWindow = new SnapItOverlay();
-            watch = Stopwatch.StartNew();
 
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
@@ -60,26 +56,58 @@ namespace WFInfo
             try
             {
                 StatusUpdate("Updating Databases...", 0);
+
                 dataBase.Update();
+
                 //RelicsWindow.LoadNodesOnThread();
-                OCR.init();
+                OCR.Init();
+
+                if ((bool)Settings.settingsObj["Auto"])
+                    dataBase.EnableLogCapture();
+                if (dataBase.IsJWTvalid().Result)
+                {
+                    var t = Task.Run(async () =>
+                    {
+                        await dataBase.OpenWebSocket();
+
+                    });
+                    t.Wait();
+                    latestActive = DateTime.UtcNow.AddMinutes(15);
+                    LoggedIn();
+
+                    var startTimeSpan = TimeSpan.Zero;
+                    var periodTimeSpan = TimeSpan.FromMinutes(1);
+
+                    timer = new System.Threading.Timer((e) =>
+                    {
+                        TimeoutCheck();
+                    }, null, startTimeSpan, periodTimeSpan);
+                }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
-                if ((bool)Settings.settingsObj["Auto"])
-                    dataBase.EnableLogcapture();
+                FinishedLoading();
             }
             catch (Exception ex)
             {
                 AddLog("LOADING FAILED");
                 AddLog(ex.ToString());
                 StatusUpdate("Launch Failure - Please Restart", 0);
-                new ErrorDialogue(DateTime.Now, 0);
+                RunOnUIThread(() =>
+                {
+                    _ = new ErrorDialogue(DateTime.Now, 0);
+                });
             }
         }
-
-        public static T CreateOnUIThread<T>(Func<T> act)
+        private static async void TimeoutCheck()
         {
-            return MainWindow.INSTANCE.Dispatcher.Invoke(act);
+            if (!await dataBase.IsJWTvalid())
+                return;
+            var now = DateTime.UtcNow;
+            Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
+            if (now <= latestActive) return;
+            await dataBase.SetWebsocketStatus("invisible");
+            //UpdateMarketStatus("invisible");
+            StatusUpdate("User has been inactive for 15 minutes", 0);
         }
 
         public static void RunOnUIThread(Action act)
@@ -89,9 +117,9 @@ namespace WFInfo
 
         public static void StartMessage()
         {
-            Directory.CreateDirectory(appPath);
-            Directory.CreateDirectory(appPath + @"\debug");
-            using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+            Directory.CreateDirectory(AppPath);
+            Directory.CreateDirectory(AppPath + @"\debug");
+            using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
             {
                 sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
                 sw.WriteLineAsync("   STARTING WFINFO " + buildVersion + " at " + DateTime.UtcNow);
@@ -101,177 +129,165 @@ namespace WFInfo
 
         public static void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
-            Console.WriteLine(argm);
-            Directory.CreateDirectory(appPath);
-            using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
-                sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
+            Debug.WriteLine(argm);
+            Directory.CreateDirectory(AppPath);
+            try
+            {
+                using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
+            }
+            catch (Exception)
+            {
+            }
         }
 
-        public static void StatusUpdate(string message, int serverity)
+        /// <summary>
+        /// Sets the status on the main window
+        /// </summary>
+        /// <param name="message">The string to be displayed</param>
+        /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
+        public static void StatusUpdate(string message, int severity)
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, serverity); });
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
         }
 
         public void OnMouseAction(MouseButton key)
         {
-            //Close all overlays if hotkey + delete is held down
-
-            if (key == Settings.ActivationMouseButton && Keyboard.IsKeyDown(Key.Delete))
-            {
-                foreach (Window overlay in App.Current.Windows)
-                {
-                    if (overlay.GetType().ToString() == "WFInfo.Overlay")
-                    {
-                        overlay.Hide();
-                    }
-                }
-                return;
-            }
+            latestActive = DateTime.UtcNow.AddMinutes(15);
 
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
-                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                {
-                    using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
+                if (Keyboard.IsKeyDown(Key.Delete))
+                { //Close all overlays if hotkey + delete is held down
+                    foreach (Window overlay in App.Current.Windows)
                     {
-                        openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-                        openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
-                        openFileDialog.FilterIndex = 2;
-                        openFileDialog.RestoreDirectory = true;
-                        openFileDialog.Multiselect = true;
-
-                        if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                        if (overlay.GetType().ToString() == "WFInfo.Overlay")
                         {
-                            Task.Factory.StartNew(() =>
-                            {
-                                try
-                                {
-                                    foreach (string file in openFileDialog.FileNames)
-                                    {
-                                        Main.AddLog("Testing fullscreen file: " + file.ToString());
-
-                                        Bitmap image = new Bitmap(file);
-                                        OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
-                                    }
-
-                                }
-                                catch (Exception e)
-                                {
-                                    AddLog(e.Message);
-                                    StatusUpdate("Failed to load image", 1);
-                                }
-                            });
-                        }
-                        else
-                        {
-                            StatusUpdate("Failed to load image", 1);
+                            overlay.Hide();
                         }
                     }
+                    return;
                 }
-                else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-                {
+
+                if (searchBox.IsInUse)
+                { //if key is pressed and searchbox is active then rederect keystokes to it.
+                    if (Keyboard.IsKeyDown(Key.Escape))
+                    { // close it if esc is used.
+                        searchBox.Finish();
+                        return;
+                    }
+                    searchBox.searchField.Focus();
+                    return;
+                }
+
+                if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+                { //snapit debug
+                    AddLog("Loading screenshot from file for snapit");
+                    StatusUpdate("Offline testing with screenshot for snapit", 0);
+                    LoadScreenshotSnap();
+                }
+                else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
+                {//normal debug
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
                 }
-                else if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                {
+                else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+                {//snapit
                     AddLog("Starting snap it");
                     StatusUpdate("Starting snap it", 0);
                     OCR.SnapScreenshot();
+                }
+                else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
+                { //Searchit  
+                    AddLog("Starting search it");
+                    StatusUpdate("Starting search it", 0);
+                    searchBox.Start();
                 }
                 else if (Settings.debug || OCR.VerifyWarframe())
                 {
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
+            else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying) //todo: Fix this condition so it only activates after auto has been triggered and stops triggering after auto detects enf of mission
+            {
+                Task.Run((() =>
+                {
+                    lastClick = System.Windows.Forms.Cursor.Position;
+                    var index = OCR.GetSelectedReward(lastClick);
+                    Debug.WriteLine(index);
+                    if (index < 0) return;
+                    listingHelper.SelectedRewardIndex = (short)index;
+                }));
+            }
         }
 
+        //todo: Implement a 15 minute timer that if there hasn't been any input to set the status to "offline"
         public void OnKeyAction(Key key)
         {
+            latestActive = DateTime.UtcNow.AddMinutes(15);
+
             // close the snapit overlay when *any* key is pressed down
             if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
             {
                 snapItOverlayWindow.closeOverlay();
-                Main.StatusUpdate("Closed snapit", 0);
+                StatusUpdate("Closed snapit", 0);
                 return;
             }
-
-            //Close all overlays if hotkey + delete is held down
-            if (key == Settings.ActivationKey && Keyboard.IsKeyDown(Key.Delete))
-            {
-                foreach (Window overlay in App.Current.Windows)
-                {
-                    if (overlay.GetType().ToString() == "WFInfo.Overlay")
-                    {
-                        overlay.Hide();
-                    }
+            if (searchBox.IsInUse)
+            { //if key is pressed and searchbox is active then rederect keystokes to it.
+                if (key == Key.Escape)
+                { // close it if esc is used.
+                    searchBox.Finish();
+                    return;
                 }
-                Main.StatusUpdate("Overlays dissmissed", 1);
+                searchBox.searchField.Focus();
                 return;
             }
 
             if (key == Settings.ActivationKey)
             { //check if user pressed activation key
-                if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                {
-                    using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
+                if (Keyboard.IsKeyDown(Key.Delete))
+                { //Close all overlays if hotkey + delete is held down
+                    foreach (Window overlay in App.Current.Windows)
                     {
-                        openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-                        openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
-                        openFileDialog.FilterIndex = 2;
-                        openFileDialog.RestoreDirectory = true;
-                        openFileDialog.Multiselect = true;
-
-                        if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                        if (overlay.GetType().ToString() == "WFInfo.Overlay")
                         {
-                            Task.Factory.StartNew(() =>
-                            {
-                                try
-                                {
-                                    foreach (string file in openFileDialog.FileNames)
-                                    {
-                                        Main.AddLog("Testing snapit on file: " + file.ToString());
-
-                                        Bitmap image = new Bitmap(file);
-                                        OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
-                                    }
-
-                                }
-                                catch (Exception e)
-                                {
-                                    AddLog(e.Message);
-                                    StatusUpdate("Failed to load image", 1);
-                                }
-                            });
-                        }
-                        else
-                        {
-                            StatusUpdate("Failed to load image", 1);
+                            overlay.Hide();
                         }
                     }
+                    StatusUpdate("Overlays dismissed", 1);
+                    return;
                 }
-                else if (Settings.debug && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-                {
+                if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+                { //snapit debug
+                    AddLog("Loading screenshot from file for snapit");
+                    StatusUpdate("Offline testing with screenshot for snapit", 0);
+                    LoadScreenshotSnap();
+                }
+                else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
+                {//normal debug
                     AddLog("Loading screenshot from file");
                     StatusUpdate("Offline testing with screenshot", 0);
                     LoadScreenshot();
                 }
-                else if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                {
+                else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+                {//snapit
                     AddLog("Starting snap it");
                     StatusUpdate("Starting snap it", 0);
                     OCR.SnapScreenshot();
                 }
+                else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
+                { //Searchit  
+                    AddLog("Starting search it");
+                    StatusUpdate("Starting search it", 0);
+                    searchBox.Start();
+                }
                 else if (Settings.debug || OCR.VerifyWarframe())
                 {
-                    //if (Ocr.verifyFocus()) 
-                    //   Removing because a player may focus on the app during selection if they're using the window style, or they have issues, or they only have one monitor and want to see status
-                    //   There's a lot of reasons why the focus won't be too useful, IMO -- Kekasi
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
-
         }
 
         // timestamp is the time to look for, and gap is the threshold of seconds different
@@ -283,7 +299,7 @@ namespace WFInfo
         private void LoadScreenshot()
         {
             // Using WinForms for the openFileDialog because it's simpler and much easier
-            using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
                 openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
@@ -299,7 +315,7 @@ namespace WFInfo
                         {
                             foreach (string file in openFileDialog.FileNames)
                             {
-                                Main.AddLog("Testing file: " + file.ToString());
+                                AddLog("Testing file: " + file);
 
                                 //Get the path of specified file
                                 Bitmap image = new Bitmap(file);
@@ -318,14 +334,66 @@ namespace WFInfo
                 else
                 {
                     StatusUpdate("Failed to load image", 1);
+                    OCR.processingActive = false;
                 }
             }
         }
 
-        //getters, boring shit
-        //    you're boring shit
+        private void LoadScreenshotSnap()
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 2;
+                openFileDialog.RestoreDirectory = true;
+                openFileDialog.Multiselect = true;
+
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        try
+                        {
+                            foreach (string file in openFileDialog.FileNames)
+                            {
+                                AddLog("Testing snapit on file: " + file);
+
+                                Bitmap image = new Bitmap(file);
+                                OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            AddLog(e.Message);
+                            StatusUpdate("Failed to load image", 1);
+                        }
+                    });
+                }
+                else
+                {
+                    StatusUpdate("Failed to load image", 1);
+                }
+            }
+        }
+
+        public static void LoggedIn()
+        { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
+        }
+
+
+        public static void FinishedLoading()
+        {
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.FinishedLoading(); });
+        }
+        public static void UpdateMarketStatus(string msg)
+        {
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.UpdateMarketStatus(msg); });
+        }
+
         public static string BuildVersion { get => buildVersion; }
-        public string AppPath { get => appPath; }
 
         public static int VersionToInteger(string vers)
         {
@@ -336,7 +404,7 @@ namespace WFInfo
                 {
                     if (versParts[i].Length == 0)
                         return -1;
-                    ret += Convert.ToInt32(int.Parse(versParts[i]) * Math.Pow(100, 2 - i));
+                    ret += Convert.ToInt32(int.Parse(versParts[i], Main.culture) * Math.Pow(100, 2 - i));
                 }
 
             return ret;
@@ -344,17 +412,22 @@ namespace WFInfo
 
         // Glob
         public static System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("en");
+
+        public static void SignOut()
+        {
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
+        }
     }
 
     public class Status
     {
-        public string message;
-        public int severity;
+        public string Message { get; set; }
+        public int Severity { get; set; }
 
         public Status(string msg, int ser)
         {
-            message = msg;
-            severity = ser;
+            Message = msg;
+            Severity = ser;
         }
     }
 

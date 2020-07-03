@@ -14,10 +14,10 @@ namespace WFInfo
     {
         private readonly MemoryMappedFile memoryMappedFile;
         private readonly EventWaitHandle bufferReadyEvent;
-        private readonly EventWaitHandle dataReadyEvent;
+        private EventWaitHandle dataReadyEvent;
         readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
         private CancellationToken token;
-
+        private readonly Timer timer;
         public event LogWatcherEventHandler TextChanged;
 
         public LogCapture()
@@ -34,15 +34,14 @@ namespace WFInfo
                 return;
             }
 
-            dataReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_DATA_READY", out Boolean createdData);
+            var startTimeSpan = TimeSpan.Zero;
+            var periodTimeSpan = TimeSpan.FromSeconds(10);
 
-            if (!createdData)
+            timer = new Timer((e) =>
             {
-                Main.AddLog("The DBWIN_DATA_READY event exists.");
-                return;
-            }
+                GetProcess();
+            }, null, startTimeSpan, periodTimeSpan);
 
-            Task.Factory.StartNew(Run);
         }
 
         private void Run()
@@ -54,14 +53,11 @@ namespace WFInfo
                 bufferReadyEvent.Set();
                 while (!token.IsCancellationRequested)
                 {
+
+
                     if (!dataReadyEvent.WaitOne(timeout))
                     {
                         continue;
-                    }
-
-                    if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
-                    {
-                        OCR.VerifyWarframe();
                     }
 
                     if (OCR.Warframe != null)
@@ -87,7 +83,10 @@ namespace WFInfo
             catch (Exception ex)
             {
                 Main.AddLog(ex.ToString());
-                new ErrorDialogue(DateTime.Now, 0);
+                Main.RunOnUIThread(() =>
+                {
+                    _ = new ErrorDialogue(DateTime.Now, 0);
+                });
             }
             finally
             {
@@ -100,6 +99,25 @@ namespace WFInfo
                 if (dataReadyEvent != null)
                     dataReadyEvent.Dispose();
             }
+        }
+
+        private void GetProcess()
+        {
+            if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
+            {
+                if (!OCR.VerifyWarframe())
+                    return;
+            }
+            dataReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_DATA_READY", out Boolean createdData);
+
+            if (!createdData)
+            {
+                Main.AddLog("The DBWIN_DATA_READY event exists.");
+                return;
+            }
+
+            Task.Factory.StartNew(Run);
+            timer.Dispose();
         }
 
         public void Dispose()
