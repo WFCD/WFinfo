@@ -208,10 +208,7 @@ namespace WFInfo {
 
 			if (force || eqmtDate.CompareTo(filteredDate) <= 0) {
 				equipmentData["timestamp"] = DateTime.Now;
-                relicData = new JObject
-                {
-                    ["timestamp"] = DateTime.Now
-                };
+                relicData["timestamp"] = DateTime.Now;
                 nameData = new JObject();
 
 				foreach (KeyValuePair<string, JToken> era in allFiltered["relics"].ToObject<JObject>()) {
@@ -233,12 +230,6 @@ namespace WFInfo {
 
 					foreach (KeyValuePair<string, JToken> part in prime.Value["parts"].ToObject<JObject>()) {
 						string partName = part.Key;
-						if (prime.Key.Contains("Collar")) {
-							if (partName.Contains("Kubrow"))
-								partName = partName.Replace(" Kubrow", "");
-							else
-								partName = partName.Replace("Prime", "Prime Collar");
-						}
 						if (!equipmentData[primeName]["parts"].ToObject<JObject>().TryGetValue(partName, out _))
 							equipmentData[primeName]["parts"][partName] = new JObject();
 						if (!equipmentData[primeName]["parts"][partName].ToObject<JObject>().TryGetValue("owned", out _))
