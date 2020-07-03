@@ -21,7 +21,7 @@ namespace WFInfo
         public static Data dataBase = new Data();
         public static RewardWindow window = new RewardWindow();
         public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
-		public static RelicsWindow relicWindow = new RelicsWindow();
+        public static RelicsWindow relicWindow = new RelicsWindow();
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
         public static Settings settingsWindow = new Settings();
         public static ErrorDialogue popup;
@@ -146,7 +146,7 @@ namespace WFInfo
         /// </summary>
         /// <param name="message">The string to be displayed</param>
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
-        public static void StatusUpdate(string message, int severity) 
+        public static void StatusUpdate(string message, int severity)
         {
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
         }
@@ -154,7 +154,7 @@ namespace WFInfo
         public void OnMouseAction(MouseButton key)
         {
             latestActive = DateTime.UtcNow.AddMinutes(15);
-            
+
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
                 if (Keyboard.IsKeyDown(Key.Delete))
@@ -208,7 +208,8 @@ namespace WFInfo
                 {
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
-            }else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying) //todo: Fix this condition so it only activates after auto has been triggered and stops triggering after auto detects enf of mission
+            }
+            else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying) //todo: Fix this condition so it only activates after auto has been triggered and stops triggering after auto detects enf of mission
             {
                 Task.Run((() =>
                 {
@@ -223,16 +224,16 @@ namespace WFInfo
 
         //todo: Implement a 15 minute timer that if there hasn't been any input to set the status to "offline"
         public void OnKeyAction(Key key)
-		{
+        {
             latestActive = DateTime.UtcNow.AddMinutes(15);
 
             // close the snapit overlay when *any* key is pressed down
             if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
-		    {
-		        snapItOverlayWindow.closeOverlay();
-		        StatusUpdate("Closed snapit", 0);
-		        return;
-		    }
+            {
+                snapItOverlayWindow.closeOverlay();
+                StatusUpdate("Closed snapit", 0);
+                return;
+            }
             if (searchBox.IsInUse)
             { //if key is pressed and searchbox is active then rederect keystokes to it.
                 if (key == Key.Escape)
@@ -241,53 +242,53 @@ namespace WFInfo
                     return;
                 }
                 searchBox.searchField.Focus();
-		        return;
-		    }
+                return;
+            }
 
-		    if (key == Settings.ActivationKey)
-		    { //check if user pressed activation key
-		        if (Keyboard.IsKeyDown(Key.Delete))
-		        { //Close all overlays if hotkey + delete is held down
-		            foreach (Window overlay in App.Current.Windows)
-		            {
-		                if (overlay.GetType().ToString() == "WFInfo.Overlay")
-		                {
-		                    overlay.Hide();
-		                }
-		            }
-		            StatusUpdate("Overlays dismissed", 1);
-		            return;
-		        }
-		        if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
-		        { //snapit debug
-		            AddLog("Loading screenshot from file for snapit");
-		            StatusUpdate("Offline testing with screenshot for snapit", 0);
-		            LoadScreenshotSnap();
-		        }
-		        else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
-		        {//normal debug
-		            AddLog("Loading screenshot from file");
-		            StatusUpdate("Offline testing with screenshot", 0);
-		            LoadScreenshot();
-		        }
-		        else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
-		        {//snapit
-		            AddLog("Starting snap it");
-		            StatusUpdate("Starting snap it", 0);
-		            OCR.SnapScreenshot();
-		        }
-		        else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
-		        { //Searchit  
-		            AddLog("Starting search it");
-		            StatusUpdate("Starting search it", 0);
-		            searchBox.Start();
-		        }
-		        else if (Settings.debug || OCR.VerifyWarframe())
-		        {
-		            Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
-		        }
-		    }
-		}
+            if (key == Settings.ActivationKey)
+            { //check if user pressed activation key
+                if (Keyboard.IsKeyDown(Key.Delete))
+                { //Close all overlays if hotkey + delete is held down
+                    foreach (Window overlay in App.Current.Windows)
+                    {
+                        if (overlay.GetType().ToString() == "WFInfo.Overlay")
+                        {
+                            overlay.Hide();
+                        }
+                    }
+                    StatusUpdate("Overlays dismissed", 1);
+                    return;
+                }
+                if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+                { //snapit debug
+                    AddLog("Loading screenshot from file for snapit");
+                    StatusUpdate("Offline testing with screenshot for snapit", 0);
+                    LoadScreenshotSnap();
+                }
+                else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
+                {//normal debug
+                    AddLog("Loading screenshot from file");
+                    StatusUpdate("Offline testing with screenshot", 0);
+                    LoadScreenshot();
+                }
+                else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+                {//snapit
+                    AddLog("Starting snap it");
+                    StatusUpdate("Starting snap it", 0);
+                    OCR.SnapScreenshot();
+                }
+                else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
+                { //Searchit  
+                    AddLog("Starting search it");
+                    StatusUpdate("Starting search it", 0);
+                    searchBox.Start();
+                }
+                else if (Settings.debug || OCR.VerifyWarframe())
+                {
+                    Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
+                }
+            }
+        }
 
         // timestamp is the time to look for, and gap is the threshold of seconds different
         public static void SpawnErrorPopup(DateTime timeStamp, int gap = 30)
@@ -295,48 +296,48 @@ namespace WFInfo
             popup = new ErrorDialogue(timeStamp, gap);
         }
 
-		private void LoadScreenshot()
-		{
-		    // Using WinForms for the openFileDialog because it's simpler and much easier
-		    using (OpenFileDialog openFileDialog = new OpenFileDialog())
-		    {
-		        openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-		        openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
-		        openFileDialog.FilterIndex = 2;
-		        openFileDialog.RestoreDirectory = true;
-		        openFileDialog.Multiselect = true;
+        private void LoadScreenshot()
+        {
+            // Using WinForms for the openFileDialog because it's simpler and much easier
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 2;
+                openFileDialog.RestoreDirectory = true;
+                openFileDialog.Multiselect = true;
 
-		        if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-		        {
-		            Task.Factory.StartNew(() =>
-		            {
-		                try
-		                {
-		                    foreach (string file in openFileDialog.FileNames)
-		                    {
-		                        AddLog("Testing file: " + file);
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        try
+                        {
+                            foreach (string file in openFileDialog.FileNames)
+                            {
+                                AddLog("Testing file: " + file);
 
-		                        //Get the path of specified file
-		                        Bitmap image = new Bitmap(file);
-		                        OCR.UpdateWindow(image);
-		                        OCR.ProcessRewardScreen(image);
-		                    }
+                                //Get the path of specified file
+                                Bitmap image = new Bitmap(file);
+                                OCR.UpdateWindow(image);
+                                OCR.ProcessRewardScreen(image);
+                            }
 
-		                }
-		                catch (Exception e)
-		                {
-		                    AddLog(e.Message);
-		                    StatusUpdate("Failed to load image", 1);
-		                }
-		            });
-		        }
-		        else
-		        {
-		            StatusUpdate("Failed to load image", 1);
-		            OCR.processingActive = false;
-		        }
-		    }
-		}
+                        }
+                        catch (Exception e)
+                        {
+                            AddLog(e.Message);
+                            StatusUpdate("Failed to load image", 1);
+                        }
+                    });
+                }
+                else
+                {
+                    StatusUpdate("Failed to load image", 1);
+                    OCR.processingActive = false;
+                }
+            }
+        }
 
         private void LoadScreenshotSnap()
         {
@@ -379,7 +380,7 @@ namespace WFInfo
 
         public static void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
-	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
         }
 
 
@@ -389,7 +390,7 @@ namespace WFInfo
         }
         public static void UpdateMarketStatus(string msg)
         {
-	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.UpdateMarketStatus(msg); });
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.UpdateMarketStatus(msg); });
         }
 
         public static string BuildVersion { get => buildVersion; }
@@ -414,7 +415,7 @@ namespace WFInfo
 
         public static void SignOut()
         {
-	        MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
+            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
         }
     }
 

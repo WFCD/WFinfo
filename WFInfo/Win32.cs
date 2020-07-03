@@ -9,9 +9,9 @@ using System.Windows.Media.Imaging;
 
 namespace WFInfo
 {
-    #pragma warning disable CA1060 // Move pinvokes to native methods class
+#pragma warning disable CA1060 // Move pinvokes to native methods class
     class Win32
-    #pragma warning restore CA1060 // Move pinvokes to native methods class
+#pragma warning restore CA1060 // Move pinvokes to native methods class
     {
         //If you get 'dllimport unknown'-, then add 'using System.Runtime.InteropServices;'
         [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
@@ -67,7 +67,7 @@ namespace WFInfo
             public Int32 X;
             public Int32 Y;
         };
-        
+
 
         const int WS_EX_TRANSPARENT = 0x00000020;
         const int GWL_EXSTYLE = (-20);
@@ -83,6 +83,6 @@ namespace WFInfo
             var extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
             SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT);
         }
-       
+
     }
 }

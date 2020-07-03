@@ -57,12 +57,12 @@ namespace WFInfo
                 var primeRewards = new List<string> { closest };
                 var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(primeRewards)).Result;
                 Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-                Main.listingHelper.SetScreen(Main.listingHelper.ScreensList.Count-1);
+                Main.listingHelper.SetScreen(Main.listingHelper.ScreensList.Count - 1);
                 Main.listingHelper.Show();
             }
             catch (Exception exception)
             {
-	            Main.AddLog(exception.ToString());
+                Main.AddLog(exception.ToString());
             }
             Finish();
         }

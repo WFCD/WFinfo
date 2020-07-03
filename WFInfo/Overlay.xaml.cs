@@ -64,14 +64,14 @@ namespace WFInfo
 
         public static bool rewardsDisplaying;
 
-        
+
         public Overlay()
         {
             hider.Interval = TimeSpan.FromSeconds(10);
             hider.Tick += HideOverlay;
             InitializeComponent();
         }
-        
+
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
@@ -159,7 +159,7 @@ namespace WFInfo
                 else
                     ownedText.Text = "";
             }
-            
+
             double.TryParse(plat, out var platinum);
             int.TryParse(ducats, out var duc);
             var efficiency = $"{Math.Round(duc / platinum, 1)}";
@@ -168,12 +168,13 @@ namespace WFInfo
             if (duc / platinum > Settings.maximumEfficiencyValue)
             {
                 color = Colors.LawnGreen;
-            } else if (duc / platinum < Settings.minimumEfficiencyValue)
+            }
+            else if (duc / platinum < Settings.minimumEfficiencyValue)
             {
                 color = Colors.DarkRed;
             }
             var brush = new SolidColorBrush(color);
-            
+
             EfficencyText.Text = efficiency;
             EfficencyText.Foreground = brush;
         }
@@ -259,7 +260,7 @@ namespace WFInfo
             ducatImage.Margin = margin;
             ducatImage.Height = ducatImageHeightWidth * scale;
             ducatImage.Width = ducatImage.Height;
-            
+
             //snapit plat text
             margin = PlatMargineSnap.Margin;
             margin.Top = platMarginTop * scale;
@@ -267,7 +268,7 @@ namespace WFInfo
             margin.Left = platMarginLeftSanpit * scale;
             PlatMargineSnap.Margin = margin;
             PlatTextSnap.FontSize = mediumFont * scale;
-            
+
             //snapit ducat text
             margin = DucatMargineSnap.Margin;
             margin.Top = platMarginTop * scale;
@@ -275,7 +276,7 @@ namespace WFInfo
             margin.Left = ducatMargineLeftSanpit * scale;
             DucatMargineSnap.Margin = margin;
             DucatTextSnap.FontSize = mediumFont * scale;
-            
+
             //snapit efficency text
             margin = EfficencyMargin.Margin;
             margin.Top = platMarginTop * scale;
@@ -292,7 +293,7 @@ namespace WFInfo
             DucatImageSnap.Margin = margin;
             DucatImageSnap.Height = platImageHeightWidth * scale;
             DucatImageSnap.Width = ducatImage.Height;
-            
+
             //snapit plat image
             margin = platImage.Margin;
             margin.Bottom = platImageMarginBottom * scale;
@@ -300,7 +301,7 @@ namespace WFInfo
             PlatImageSnap.Margin = margin;
             PlatImageSnap.Height = platImageHeightWidth * scale;
             PlatImageSnap.Width = platImage.Height;
-            
+
             //snapit plat efficency image
             margin = EfficencyPlatinumImage.Margin;
             margin.Bottom = EfficencyplatImageMarginBottom * scale;
@@ -308,7 +309,7 @@ namespace WFInfo
             EfficencyPlatinumImage.Margin = margin;
             EfficencyPlatinumImage.Height = EfficencyplatImageHeightWidth * scale;
             EfficencyPlatinumImage.Width = ducatImage.Height;
-                
+
             //snapit ducat efficency image
             margin = EfficencyDucatImage.Margin;
             margin.Bottom = EfficencyducatImageMarginBottom * scale;
@@ -332,7 +333,7 @@ namespace WFInfo
         {
             hider.Stop();
             Hide();
-            Main.StatusUpdate("WFinfo is ready",0);
+            Main.StatusUpdate("WFinfo is ready", 0);
             rewardsDisplaying = false;
         }
 
@@ -340,20 +341,20 @@ namespace WFInfo
         {
             platImage.Visibility = Visibility.Collapsed;
             platMargin.Visibility = Visibility.Collapsed;
-            
+
             ducatImage.Visibility = Visibility.Collapsed;
             ducatMargin.Visibility = Visibility.Collapsed;
 
             DucatMargineSnap.Visibility = Visibility.Visible;
             DucatImageSnap.Visibility = Visibility.Visible;
-            
+
             PlatMargineSnap.Visibility = Visibility.Visible;
             PlatImageSnap.Visibility = Visibility.Visible;
-            
+
             EfficencyMargin.Visibility = Visibility.Visible;
             EfficencyDucatImage.Visibility = Visibility.Visible;
             EfficencyPlatinumImage.Visibility = Visibility.Visible;
-            
+
             PlatTextSnap.Text = platText.Text;
             DucatTextSnap.Text = ducatText.Text;
         }

@@ -31,7 +31,7 @@ namespace WFInfo
         }
 
         public void populate()
-        { 
+        {
 
             primeTypes = new Dictionary<string, TreeNode>();
             foreach (KeyValuePair<string, JToken> prime in Main.dataBase.equipmentData)

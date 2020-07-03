@@ -67,8 +67,8 @@ namespace WFInfo
         [STAThreadAttribute]
         public static void Main()
         {
-	        AppDomain currentDomain = AppDomain.CurrentDomain;
-	        currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
+            AppDomain currentDomain = AppDomain.CurrentDomain;
+            currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
 
             Directory.CreateDirectory(appPath);
             Directory.CreateDirectory(app_data_tesseract_catalog);
@@ -146,21 +146,23 @@ namespace WFInfo
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool isAVX2supported();
 
-        static void MyHandler(object sender, UnhandledExceptionEventArgs args) {
-	        Exception e = (Exception)args.ExceptionObject;
-	        AddLog("MyHandler caught : " + e.Message);
-	        AddLog("Runtime terminating: ," + args.IsTerminating);
+        static void MyHandler(object sender, UnhandledExceptionEventArgs args)
+        {
+            Exception e = (Exception)args.ExceptionObject;
+            AddLog("MyHandler caught : " + e.Message);
+            AddLog("Runtime terminating: ," + args.IsTerminating);
             AddLog(e.StackTrace);
             AddLog(e.InnerException.Message);
             AddLog(e.InnerException.StackTrace);
 
         }
 
-        public static void AddLog(string argm) { //write to the debug file, includes version and UTCtime
-	        Debug.WriteLine(argm);
-	        Directory.CreateDirectory(appPath);
-	        using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
-		        sw.WriteLineAsync("[" + DateTime.UtcNow + "Still in custom entery point" +  "]   " + argm);
+        public static void AddLog(string argm)
+        { //write to the debug file, includes version and UTCtime
+            Debug.WriteLine(argm);
+            Directory.CreateDirectory(appPath);
+            using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+                sw.WriteLineAsync("[" + DateTime.UtcNow + "Still in custom entery point" + "]   " + argm);
         }
 
         public static bool isAVX2Available()

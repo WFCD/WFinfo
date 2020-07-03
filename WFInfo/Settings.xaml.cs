@@ -109,7 +109,7 @@ namespace WFInfo
 
             if (Convert.ToBoolean(settingsObj.GetValue("HighContrast")))
                 HighContrastCheckbox.IsChecked = true;
-            
+
             if (Convert.ToBoolean(settingsObj.GetValue("AutoList")))
                 Autolist.IsChecked = true;
 
@@ -416,8 +416,8 @@ namespace WFInfo
         private void Searchit_key_box_KeyUp(object sender, KeyEventArgs e) //todo this doesn't fucking work. I don't know why, but it just does not
         {
             e.Handled = true;
-            
-            if(e.Key == backupKeyVal || e.Key == SnapitModifierKey)
+
+            if (e.Key == backupKeyVal || e.Key == SnapitModifierKey)
             {
                 Searchit_key_box.Text = GetKeyName(SearchItModifierKey);
                 hidden.Focus();
@@ -445,8 +445,8 @@ namespace WFInfo
         private void Snapit_key_box_KeyUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
-            
-            if(e.Key == backupKeyVal || e.Key == SearchItModifierKey)
+
+            if (e.Key == backupKeyVal || e.Key == SearchItModifierKey)
             {
                 Snapit_key_box.Text = GetKeyName(SnapitModifierKey);
                 hidden.Focus();

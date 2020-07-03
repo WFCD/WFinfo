@@ -54,7 +54,7 @@ namespace WFInfo
                     else
                         Main.AddLog("eqmt_data.json didn't exist.");
                     if (File.Exists(startPath + @"\..\market_data.json"))
-                    { 
+                    {
                         zip.AddFile(startPath + @"\..\market_data.json", "");
                     }
                     else
