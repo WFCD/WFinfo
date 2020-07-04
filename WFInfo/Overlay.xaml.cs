@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -160,8 +161,8 @@ namespace WFInfo
                     ownedText.Text = "";
             }
 
-            double.TryParse(plat, out var platinum);
-            int.TryParse(ducats, out var duc);
+            double.TryParse(plat, NumberStyles.Any , Main.culture, out var platinum );
+            int.TryParse(ducats, NumberStyles.Any , Main.culture, out var duc);
             var efficiency = $"{Math.Round(duc / platinum, 1)}";
             var color = Color.FromArgb(100, 174, 199, 206);
 
