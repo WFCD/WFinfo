@@ -10,10 +10,11 @@ WFInfo does this by screenshotting the game window, cropping out the part text, 
 
 # Usage
 0. Download Microsoft Visual C++ Redistributable 2019 from microsoft [x64](https://aka.ms/vs/16/release/VC_redist.x64.exe) [x84](https://aka.ms/vs/16/release/VC_redist.x86.exe)
-1. Download the [latest release](https://github.com/WFCD/WFinfo/releases/latest)
-2. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
-3. Click the Cog Icon to open Settings, and configure your hotkey, scaling, etc
-4. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)
+1. If you have OS **before** Windows 10, ensure you have installed [.NET Framework Runtime 4.8](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer)
+2. Download the [latest release](https://github.com/WFCD/WFinfo/releases/latest)
+3. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
+4. Click the Cog Icon to open Settings, and configure your hotkey, scaling, etc
+5. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)
 
 # Will I get Banned?
 
