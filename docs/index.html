@@ -4,7 +4,7 @@
     templated.co @templatedco
     Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
 -->
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 
 <head>
     <title>WFInfo</title>
@@ -49,7 +49,7 @@
             <div class="inner">
                 <header class="align-center">
                     <h2>WFInfo gives you info on each reward</h2>
-                    <p>Current version 9.2.2</p>--
+                    <p>Current version 9.3.0</p>--
                 </header>
                 <!-- 2 Column Image Section -->
                 <div class="flex flex-2">
@@ -85,9 +85,10 @@
                     <div class="flex flex-tabs">
                         <ul class="tab-list">
                             <li><a href="#" data-tab="tab-1" class="active">Display mode</a></li>
-                            <li><a href="#" data-tab="tab-2">Activation and scaling</a></li>
-                            <li><a href="#" data-tab="tab-3">Additional options</a></li>
-                            <li><a href="#" data-tab="tab-4">Debug zip</a></li>
+                            <li><a href="#" data-tab="tab-2">Overlay options</a></li>
+                            <li><a href="#" data-tab="tab-3">Activation hotkeys</a></li>
+                            <li><a href="#" data-tab="tab-4">Snap it efficiency</a></li>
+                            <li><a href="#" data-tab="tab-5">Miscellaneous</a></li>
                         </ul>
                         <div class="tabs">
 
@@ -95,7 +96,7 @@
                             <div class="tab tab-1 active" style="justify-content:center">
                                 <div class="image highlight">
                                     <div class="image fit">
-                                        <img src="images/WFInfo_2020-06-16_18-22-54.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                        <img src="images/WFInfo_2020-07-04_01-34-51.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
                                     </div>
                                     <p class="caption">
                                         Choose between the rewards showing up as an overlay on top of Warframe
@@ -109,10 +110,10 @@
                             <div class="tab tab-2" style="justify-content:center">
                                 <div class="image highlight">
                                     <div class="image fit">
-                                        <img src="images/WFInfo_2020-06-16_18-23-09.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                        <img src="images/WFInfo_2020-07-04_01-35-01.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
                                     </div>
                                     <p class="caption">
-                                        Choose your preferred hotkey to activate WFInfo's reward detection. We recomend printscreen by default but you can use almost any keyobard kety and even some mouse buttons!
+                                        Change how long the overlay stays displayed. Change to high contrast mode to improve readability and change weather or not items get highlighted. 
                                     </p>
                                 </div>
                             </div>
@@ -121,11 +122,10 @@
                             <div class="tab tab-3" style="justify-content:center">
                                 <div class="image highlight">
                                     <div class="image fit">
-                                        <img src="images/WFInfo_2020-06-16_18-23-23.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                        <img src="images/WFInfo_2020-07-04_01-35-09.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
                                     </div>
                                     <p class="caption">
-                                        Auto will use the logs created by warframe to detect when the reward screen is being displayed and run the program for you!
-                                        Clipboard will copy the results into your clipboard allowing you to paste it into the chat for other players (Ctrl + V)
+                                        Choose your preferred hotkey to activate WFInfo's reward detection. We recomend printscreen by default but you can use almost any keyobard kety and even some mouse buttons!
                                     </p>
                                 </div>
                             </div>
@@ -134,9 +134,27 @@
                             <div class="tab tab-4" style="justify-content:center">
                                 <div class="image highlight">
                                     <div class="image fit">
-                                        <img src="images/WFInfo_2020-06-16_18-23-31.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                        <img src="images/WFInfo_2020-07-04_01-35-18.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
                                     </div>
                                     <p class="caption">
+                                        Snap it efficency, these are ducats per plat values. Anything under the min value will display as read and anything above the max value will display as green.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 5 -->
+                            <div class="tab tab-5" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/WFInfo_2020-07-04_01-35-29.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        Auto will use the logs created by warframe to detect when the reward screen is being displayed and run the program for you! </br>
+                                        
+                                        Clipboard will copy the results into your clipboard allowing you to paste it into the chat for other players (Ctrl + V)</br>
+                                        
+                                        Auto list will only work with auto enabled, it wil spawn a listing screen whenever it detected rewards and an end of mission</br>
+                                        
                                         If you ever run into a problem running WFinfo then you might be asked by the developers for a "Debug zip", this contains information usefull to the developers for debugging what went wrong.
                                         This button will generate a series of zip files that can be sent over discord (All are under 8mb)
                                     </p>
@@ -184,6 +202,63 @@
                                 <b>Is this safe to use?</b><br />
                                 This software is <a href="https://github.com/WFCD/WFinfo" style="text-decoration: underline">Open-Source</a> so if you're concerned you can have a look at the code.
                             </li>
+                            <li>
+                                <b>How do I use warframe.market inside of warframe info?</b> <br />
+                                    <div class="align-center">
+                                        <!-- Tabbed Video Section -->
+                                        <div class="flex flex-tabs">
+                                            <ul class="tab-list">
+                                                <li><a href="#" data-tab="tab-1" class="active">Loggin in</a></li>
+                                                <li><a href="#" data-tab="tab-2">Adding items</a></li>
+                                                <li><a href="#" data-tab="tab-3">Creating listings</a></li>
+                                            </ul>
+                                            <div class="tabs">
+
+                                                <!-- Tab 1 -->
+                                                <div class="tab tab-1 active" style="justify-content:center">
+                                                    <div class="image highlight">
+                                                        <div class="image fit">
+                                                            <img src="images/WFInfo_2020-07-04_01-53-00.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                                        </div>
+                                                        <p class="caption">
+                                                            In order to create a listing you first need to log into warframe.market. You need to have a dedicated password for this. 
+                                                            If you use another login method (i.e. steam/xbox ect.) you will need to add an email to your account. You can do that under <a href="https://warframe.market/settings/account">settings -> account</a>
+                                                            Enabling "remember me" will save an authentication token in your system registry. No email or passwords are saved!
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tab 2 -->
+                                                <div class="tab tab-2" style="justify-content:center">
+                                                    <div class="image highlight">
+                                                        <div class="image fit">
+                                                            <img src="images/rider64_2020-07-04_02-02-36.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                                        </div>
+                                                        <p class="caption">
+                                                            By running a fissure mission wfinfo will store the results from the rewardscreen till you activate it by clicking the chest icon or having auto list triger. A dialog with the top 5 current sellers is listed, allowing you to make an informed desission on price.
+                                                            It is also possible to spawn this screen without running missions, helpfull if you're listing from your inventory!
+                                                            Either by clicking the search icon or combining the search it keybinding with the hotkey will spawn a search box. Type in any prime item and hit enter. A similair dialoug will spawn but with only the item you searched.
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tab 3 -->
+                                                <div class="tab tab-3" style="justify-content:center">
+                                                    <div class="image highlight">
+                                                        <div class="image fit">
+                                                            <img src="images/firefox_2020-07-04_02-00-32.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                                        </div>
+                                                        <p class="caption">
+                                                            If you already had an active listing for the item it will be updated to the new price and one will be added to the quantity. 
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                            </li>
+                            
                         </ul>
                     </div>
                 </div>
@@ -198,6 +273,30 @@
                         <h2>WFInfo change log</h2>
                         <p>What was added in the latest releases?</p>
                     </header>
+                    <div class="inner" id="9.3.0">
+                        <div class="align-center">
+                            <h2 style="margin-bottom: 0px">9.3.0</h2>
+                        </div>
+                        <div class="flex flex-2">
+                            <div class="image col">
+                                <div class="image fit">
+                                    <img src="images/WFInfo_2020-07-04_01-26-57.png" alt="" style="padding-top:4em" />
+                                </div>
+                                <p class="caption">
+                                    Warframe.market integration, allowing you to make listings
+                                </p>
+                            </div>
+                            <div class="image col">
+                                <div class="image fit">
+                                    <img src="images/WFInfo_2020-07-04_01-27-29.png" alt="" style="" />
+                                </div>
+                                <p class="caption">
+                                    Allowed more settings to be tweaked in app.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
                     <div class="inner" id="9.2.2">
                         <div class="align-center">
                             <h2 style="margin-bottom: 0px">9.2.2</h2>
