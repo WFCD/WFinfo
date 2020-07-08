@@ -389,12 +389,15 @@ namespace WFInfo
             switch (status)
             {
                 case "online":
+                    if (ComboBox.SelectedIndex == 1) break;
                     ComboBox.SelectedIndex = 1;
                     break;
                 case "invisible":
+                    if (ComboBox.SelectedIndex == 2) break;
                     ComboBox.SelectedIndex = 2;
                     break;
                 case "ingame":
+                    if (ComboBox.SelectedIndex == 0) break;
                     ComboBox.SelectedIndex = 0;
                     break;
             }

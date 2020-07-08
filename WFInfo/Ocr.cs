@@ -185,7 +185,7 @@ namespace WFInfo
             bigScreenshot = file ?? CaptureScreenshot();
             try
             {
-                parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, file);
+                parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
             }
             catch (Exception e)
             {
@@ -1074,7 +1074,7 @@ namespace WFInfo
         // The top bit (upper case and dots/strings, bdfhijklt) > the juicy bit (lower case, acemnorsuvwxz) > the tails (gjpqy)
         // we ignore the "tippy top" because it has a lot of variance, so we just look at the "bottom half of the top"
         private static readonly int[] TextSegments = new int[] { 2, 4, 16, 21 };
-        private static List<Bitmap> ExtractPartBoxAutomatically(out double scaling, out WFtheme active, Bitmap fullScreen = null)
+        private static List<Bitmap> ExtractPartBoxAutomatically(out double scaling, out WFtheme active, Bitmap fullScreen)
         {
             var watch = new Stopwatch();
             watch.Start();
@@ -1084,8 +1084,8 @@ namespace WFInfo
             int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling * (int)dpiScaling);
 
             Color clr;
-            int width = fullScreen == null ? window.Width * (int)dpiScaling : fullScreen.Width;
-            int height = fullScreen == null ? window.Height * (int)dpiScaling : fullScreen.Height;
+            int width = window.Width * (int)dpiScaling;
+            int height = window.Height * (int)dpiScaling;
             int mostWidth = (int)(pixleRewardWidth * screenScaling * (int)dpiScaling);
             int mostLeft = (width / 2) - (mostWidth / 2 * (int)dpiScaling);
             // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
@@ -1097,23 +1097,7 @@ namespace WFInfo
 
             try
             {
-                if (fullScreen != null)
-                {
-                    preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
-                }
-                else
-                {
-                    preFilter = new Bitmap(mostWidth, mostBot - mostTop);
-                    Main.AddLog("Pre filter: " + preFilter.ToString());
-                    Main.AddLog("window.Left: " + window.Left);
-                    Main.AddLog("mostLeft: " + mostLeft);
-                    Main.AddLog("window.Top: " + window.Top);
-                    Main.AddLog("mostTop: " + mostTop);
-                    Main.AddLog("preFilter.Width: " + preFilter.Width);
-                    Main.AddLog("preFilter.Height: " + preFilter.Height);
-                    using (Graphics graphics = Graphics.FromImage(preFilter))
-                        graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(preFilter.Width, preFilter.Height));
-                }
+                preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
             }
             catch (Exception ex)
             {
@@ -1625,8 +1609,10 @@ namespace WFInfo
 
         private static void RefreshDPIScaling()
         {
-            using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
-                dpiScaling = graphics.DpiX / 96; //assuming that y and x axis dpi scaling will be uniform. So only need to check one value
+            var mon = Win32.MonitorFromPoint(window.Location, 2);
+            Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
+            Debug.WriteLine($"Effective dpi, X:{dpiXEffective}");
+            dpiScaling = dpiXEffective / 96.0; // assuming that y and x axis dpi scaling will be uniform. So only need to check one value
         }
 
         private static void RefreshScaling()
