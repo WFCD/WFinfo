@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,7 +23,7 @@ namespace WFInfo
         public static MainWindow INSTANCE;
         public static WelcomeDialogue hai;
         public static LowLevelListener listener;
-
+        private static bool updatesupression;
         public MainWindow()
         {
 
@@ -386,6 +385,7 @@ namespace WFInfo
         /// <param name="status">The status to change to</param>
         public void UpdateMarketStatus(string status)
         {
+            updatesupression = true;
             switch (status)
             {
                 case "online":
@@ -401,6 +401,7 @@ namespace WFInfo
                     ComboBox.SelectedIndex = 0;
                     break;
             }
+            updatesupression = false;
         }
 
         /// <summary>
@@ -410,7 +411,7 @@ namespace WFInfo
         /// <param name="e"></param>
         private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!ComboBox.IsLoaded) //Prevent firing off to early
+            if (!ComboBox.IsLoaded || updatesupression) //Prevent firing off to early
                 return;
             switch (ComboBox.SelectedIndex)
             {

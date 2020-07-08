@@ -1329,7 +1329,7 @@ namespace WFInfo
             {
                 Main.RunOnUIThread(() =>
                 {
-                    Main.StatusUpdate("Could not find any rewards, mistake? Report to dev", 1);
+                    Main.StatusUpdate("Filter and separate failed, report to dev", 1);
                 });
                 processingActive = false;
                 throw new Exception("Unable to find any parts");
@@ -1578,7 +1578,7 @@ namespace WFInfo
             { // don't update status
                 return true;
             }
-            Task.Factory.StartNew(() =>
+            Task.Run(() =>
             {
             foreach (Process process in Process.GetProcesses())
                 if (process.ProcessName == "Warframe.x64")
@@ -1588,7 +1588,7 @@ namespace WFInfo
                         HandleRef = new HandleRef(process, process.MainWindowHandle);
                         Warframe = process;
                         if (Main.dataBase.GetSocketAliveStatus())
-                            Debug.WriteLine("Socket was open in verrify warframe");
+                            Debug.WriteLine("Socket was open in verify warframe");
                         Task.Run(async () =>
                         {
                             await Main.dataBase.SetWebsocketStatus("in game");

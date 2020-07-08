@@ -887,8 +887,8 @@ namespace WFInfo
         public async Task<bool> OpenWebSocket()
         {
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-
-            if (marketSocket.IsAlive)
+            Debug.WriteLine("Connecting to websocket");
+            if (marketSocket.IsAlive || marketSocket.ReadyState == WebSocketState.Connecting)
             {
                 return false;
             }
@@ -1064,10 +1064,10 @@ namespace WFInfo
         /// </summary>
         /// <param name="status">
         /// </param>
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> SetWebsocketStatus(string status)
         {
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             if (!IsJwtAvailable())
                 return false;
 
