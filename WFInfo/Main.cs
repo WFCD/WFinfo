@@ -243,7 +243,7 @@ namespace WFInfo
             
             if (key == Settings.ActivationKey)
             { //check if user pressed activation key
-                Debug.WriteLine($"User is activating with pressing key: {key} and is holding down:\n" +
+                Main.AddLog($"User is activating with pressing key: {key} and is holding down:\n" +
                                 $"Delete:{Keyboard.IsKeyDown(Key.Delete)}\n" +
                                 $"Snapit, {Settings.SnapitModifierKey}:{Keyboard.IsKeyDown(Settings.SnapitModifierKey)}\n" +
                                 $"Searchit, {Settings.SearchItModifierKey}:{Keyboard.IsKeyDown(Settings.SearchItModifierKey)}\n" +

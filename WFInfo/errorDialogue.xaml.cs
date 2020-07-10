@@ -71,9 +71,9 @@ namespace WFInfo
                     }
                     else
                         Main.AddLog("name_data.json didn't exist.");
-                    if (File.Exists(startPath + @"\..\relic_data.json.json"))
+                    if (File.Exists(startPath + @"\..\relic_data.json"))
                     {
-                        zip.AddFile(startPath + @"\..\relic_data.json.json", "");
+                        zip.AddFile(startPath + @"\..\relic_data.json", "");
                     }
                     else
                         Main.AddLog("relic_data.json didn't exist.");

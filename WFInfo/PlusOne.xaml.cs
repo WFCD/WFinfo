@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,6 +12,7 @@ namespace WFInfo.Resources
     /// </summary>
     public partial class PlusOne : Window
     {
+        int counter;
         public PlusOne()
         {
             InitializeComponent();
@@ -69,6 +71,21 @@ namespace WFInfo.Resources
             TextBox.IsEnabled = false;
             postReview.Content = "Thank you!";
             postReview.IsEnabled = false;
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (TextBox.Text.Contains("Give me sliders") || TextBox.Text.Contains("more sliders"))
+            {
+                Height += 58;
+            }
+        }
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (counter == 9) return;
+            Height += 22;
+            counter ++;
         }
     }
 }

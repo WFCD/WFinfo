@@ -6,19 +6,25 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Management.Instrumentation;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Media;
 using Tesseract;
 using Brushes = System.Drawing.Brushes;
+using Clipboard = System.Windows.Forms.Clipboard;
 using Color = System.Drawing.Color;
 using FontFamily = System.Drawing.FontFamily;
 using Pen = System.Drawing.Pen;
+using Point = System.Drawing.Point;
+using Rect = Tesseract.Rect;
+using Size = System.Drawing.Size;
 
 namespace WFInfo
 {
@@ -125,7 +131,7 @@ namespace WFInfo
         public const int pixleRewardWidth = 968;
         public const int pixleRewardHeight = 235;
         public const int pixleRewardYDisplay = 316;
-        public const int pixelRewardLineHeight = 44;
+        public const int pixelRewardLineHeight = 48;
 
         public const int SCALING_LIMIT = 100;
         public static bool processingActive = false;
@@ -1086,17 +1092,19 @@ namespace WFInfo
             Color clr;
             int width = window.Width * (int)dpiScaling;
             int height = window.Height * (int)dpiScaling;
-            int mostWidth = (int)(pixleRewardWidth * screenScaling * (int)dpiScaling);
+            int mostWidth = (int)(pixleRewardWidth * screenScaling);
             int mostLeft = (width / 2) - (mostWidth / 2 * (int)dpiScaling);
             // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
             //                   (316          -        235        +       44)    *    1.1    =    137
             int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
             int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
             //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
+            var rectangle = new Rectangle((int)(mostLeft/screenScaling), (int)(mostTop/screenScaling), mostWidth, mostBot - mostTop);
             Bitmap preFilter;
 
             try
             {
+                Main.AddLog($"Fullscreen is {fullScreen.Size}:, trying to clone: {rectangle.Size.ToString()} at {rectangle.Location.ToString()}");
                 preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
             }
             catch (Exception ex)
@@ -1109,33 +1117,9 @@ namespace WFInfo
             long end = watch.ElapsedMilliseconds;
             Main.AddLog("Grabbed images " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
-
-            double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            int minWidth = mostWidth / 4;
-
-            for (int y = lineHeight; y < preFilter.Height; y++)
-            {
-                double perc = (y - lineHeight) / (preFilter.Height - lineHeight);
-                int totWidth = (int)(minWidth * perc + minWidth);
-                for (int x = 0; x < totWidth; x++)
-                {
-                    int match = (int)GetClosestTheme(preFilter.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
-                    weights[match] += 1 / Math.Pow(thresh + 1, 4);
-                }
-            }
-
-            double max = 0;
-            active = WFtheme.UNKNOWN;
-            for (int i = 0; i < weights.Length; i++)
-            {
-                Debug.Write(weights[i].ToString("F2", Main.culture) + " ");
-                if (weights[i] > max)
-                {
-                    max = weights[i];
-                    active = (WFtheme)i;
-                }
-            }
-            Main.AddLog("CLOSEST THEME(" + max.ToString("F2", Main.culture) + "): " + active.ToString());
+            
+            active = GetThemeWeighted(out var closest, fullScreen);
+            Main.AddLog("CLOSEST THEME(" + closest.ToString("F2", Main.culture) + "): " + active);
 
             end = watch.ElapsedMilliseconds;
             Main.AddLog("Got theme " + (end - start) + "ms");
@@ -1146,6 +1130,7 @@ namespace WFInfo
 
 
             //Main.AddLog("ROWS: 0 to " + preFilter.Height);
+            //var postFilter = preFilter;
             for (int y = 0; y < preFilter.Height; y++)
             {
                 rows[y] = 0;
@@ -1153,15 +1138,16 @@ namespace WFInfo
                 {
                     clr = preFilter.GetPixel(x, y);
                     if (ThemeThresholdFilter(clr, active))
-                    {
+                    //{
                         rows[y]++;
                         //postFilter.SetPixel(x, y, Color.Black);
-                    } //else
-                      //  postFilter.SetPixel(x, y, Color.White);
+                    //} else
+                        //postFilter.SetPixel(x, y, Color.White);
                 }
                 //Debug.Write(rows[y] + " ");
             }
 
+            //postFilter.Save(Main.AppPath + @"\Debug\PostFilter" + timestamp + ".png");
 
             end = watch.ElapsedMilliseconds;
             Main.AddLog("Filtered Image " + (end - start) + "ms");
@@ -1177,7 +1163,7 @@ namespace WFInfo
 
             scaling = -1;
             double lowestWeight = 0;
-
+            Rectangle uidebug = new Rectangle((topLine_100 - topLine_50) / 50 + topLine_50,preFilter.Height, preFilter.Width,50);
             for (int i = 0; i <= 50; i++)
             {
                 int yFromTop = preFilter.Height - (i * (topLine_100 - topLine_50) / 50 + topLine_50);
@@ -1241,18 +1227,15 @@ namespace WFInfo
 
             for (int i = 0; i < 5; i++)
             {
-                //int yFromTop = preFilter.Height - (topFive[i] * (topLine_100 - topLine_50) / 50 + topLine_50);
-
-                //int scale = (50 + topFive[i]);
-
-                //int textTop = (int)(screenScaling * TextSegments[0] * scale / 100);
-                //int textTopBot = (int)(screenScaling * TextSegments[1] * scale / 100);
-                //int textBothBot = (int)(screenScaling * TextSegments[2] * scale / 100);
-                //int textTailBot = (int)(screenScaling * TextSegments[3] * scale / 100);
-
                 Main.AddLog("RANK " + (5 - i) + " SCALE: " + (topFive[i] + 50) + "%\t\t" + percWeights[topFive[i]].ToString("F2", Main.culture) + " -- " + topWeights[topFive[i]].ToString("F2", Main.culture) + ", " + midWeights[topFive[i]].ToString("F2", Main.culture) + ", " + botWeights[topFive[i]].ToString("F2", Main.culture));
-                //Main.AddLog("\t" + yFromTop + " - " + textTop + " - " + textTopBot + " - " + textBothBot + " - " + textTailBot);
             }
+
+            using (Graphics g = Graphics.FromImage(fullScreen))
+            {
+                g.DrawRectangle(Pens.Red, rectangle);
+                g.DrawRectangle(Pens.Chartreuse, uidebug);
+            }
+            fullScreen.Save(Main.AppPath + @"\Debug\DEBBUGGINGBOI" + timestamp + ".png");
 
 
             //postFilter.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
@@ -1273,7 +1256,6 @@ namespace WFInfo
             {
                 Rectangle rect = new Rectangle(cropLeft, cropTop, cropWidth, cropHei);
                 partialScreenshot = preFilter.Clone(rect, System.Drawing.Imaging.PixelFormat.DontCare);
-                partialScreenshot.Save(Main.AppPath + @"\Debug\DEBBUGGINGBOI" + timestamp + ".png");
                 if (partialScreenshot.Height == 0 || partialScreenshot.Width == 0)
                     throw new ArithmeticException("New image was null");
             }
@@ -1287,7 +1269,7 @@ namespace WFInfo
 
             end = watch.ElapsedMilliseconds;
             Main.AddLog("Finished function " + (end - beginning) + "ms");
-
+            partialScreenshot.Save(Main.AppPath + @"\Debug\PartialScreenshot" + timestamp + ".png");
             return FilterAndSeparatePartsFromPartBox(partialScreenshot, active);
         }
 
@@ -1609,9 +1591,15 @@ namespace WFInfo
 
         private static void RefreshDPIScaling()
         {
-            var mon = Win32.MonitorFromPoint(window.Location, 2);
+            var mon = Win32.MonitorFromPoint(new Point(Screen.PrimaryScreen.Bounds.Left+1, Screen.PrimaryScreen.Bounds.Top+1), 2);
             Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
-            Debug.WriteLine($"Effective dpi, X:{dpiXEffective}");
+            Win32.GetDpiForMonitor(mon, Win32.DpiType.Angular, out var dpiXAngular, out _);
+            Win32.GetDpiForMonitor(mon, Win32.DpiType.Raw, out var dpiXRaw, out _);
+
+            Main.AddLog($"Effective dpi, X:{dpiXEffective}\n Which is %: {dpiXEffective / 96.0}");
+            Main.AddLog($"Raw dpi, X:{dpiXRaw}\n Which is %: {dpiXRaw / 96.0}");
+            Main.AddLog($"Angular dpi, X:{dpiXAngular}\n Which is %: {dpiXAngular / 96.0}");
+
             dpiScaling = dpiXEffective / 96.0; // assuming that y and x axis dpi scaling will be uniform. So only need to check one value
         }
 

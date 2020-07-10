@@ -883,11 +883,11 @@ namespace WFInfo
         /// Attempts to connect the user's account to the websocket
         /// </summary>
         /// <returns>A task to be awaited</returns>
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> OpenWebSocket()
         {
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            Debug.WriteLine("Connecting to websocket");
+        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+            Main.AddLog("Connecting to websocket");
             if (marketSocket.IsAlive || marketSocket.ReadyState == WebSocketState.Connecting)
             {
                 return false;
@@ -934,7 +934,7 @@ namespace WFInfo
             }
             catch (Exception e)
             {
-                Main.AddLog(e.Message);
+                Main.AddLog("Unable to connect to socket: " + e.Message);
                 return false;
             }
             return true;
