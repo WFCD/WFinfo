@@ -1099,7 +1099,7 @@ namespace WFInfo
             int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
             int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
             //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
-            var rectangle = new Rectangle((int)(mostLeft/screenScaling), (int)(mostTop/screenScaling), mostWidth, mostBot - mostTop);
+            var rectangle = new Rectangle((int)(mostLeft), (int)(mostTop), mostWidth, mostBot - mostTop);
             Bitmap preFilter;
 
             try
