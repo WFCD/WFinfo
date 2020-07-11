@@ -66,12 +66,7 @@ namespace WFInfo
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
-                    var t = Task.Run(async () =>
-                    {
-                        await dataBase.OpenWebSocket();
-
-                    });
-                    t.Wait();
+                    OCR.VerifyWarframe();
                     latestActive = DateTime.UtcNow.AddMinutes(15);
                     LoggedIn();
 
@@ -245,8 +240,14 @@ namespace WFInfo
                 return;
             }
 
+            
             if (key == Settings.ActivationKey)
             { //check if user pressed activation key
+                Main.AddLog($"User is activating with pressing key: {key} and is holding down:\n" +
+                                $"Delete:{Keyboard.IsKeyDown(Key.Delete)}\n" +
+                                $"Snapit, {Settings.SnapitModifierKey}:{Keyboard.IsKeyDown(Settings.SnapitModifierKey)}\n" +
+                                $"Searchit, {Settings.SearchItModifierKey}:{Keyboard.IsKeyDown(Settings.SearchItModifierKey)}\n" +
+                                $"debug, {Settings.DebugModifierKey}:{Keyboard.IsKeyDown(Settings.DebugModifierKey)}");
                 if (Keyboard.IsKeyDown(Key.Delete))
                 { //Close all overlays if hotkey + delete is held down
                     foreach (Window overlay in App.Current.Windows)

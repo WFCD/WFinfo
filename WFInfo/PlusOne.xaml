@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo.Resources"
         mc:Ignorable="d"
-        Title="PlusOne" Height="325.5" Width="407.5" ResizeMode="NoResize" Icon="Resources/WFLogo.png" MouseDown="OnMouseDown" WindowStyle="None" BorderBrush="#FF707070" Background="#FF1B1B1B">
+        Title="PlusOne" Height="325" Width="407.5" ResizeMode="NoResize" Icon="Resources/WFLogo.png" MouseDown="OnMouseDown" WindowStyle="None" BorderBrush="#FF707070" Background="#FF1B1B1B">
     <Grid>
         <Rectangle Stroke="#FF646464"/>
         <Grid Height="27" VerticalAlignment="Top" Panel.ZIndex="500">
@@ -16,7 +16,7 @@
             <Label MouseLeftButtonDown="Minimize" Content="_" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Width="27" Height="27" VerticalAlignment="Top" Margin="0,0,27,0"/>
         </Grid>
         <TextBlock Margin="10,32,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Height="190" Width="388"><Run Text="Thank you for using WFinfo"/><LineBreak/><LineBreak/><Run Text="Without you this program would have never continued development."/><LineBreak/><Run Text="We currently do not have a patreon or similar set up for this project as we do not feel right receiving money for something that doesn't cost us."/><LineBreak/><LineBreak/><Run Text="However, if you do still wish to support us you can do so in a few ways!"/><LineBreak/><Run Text="* Tell your friends about us"/><LineBreak/><Run Text="* Use clipboard when running public fissures"/><LineBreak/><Run Text="* Join the discord"/><LineBreak/><Run Text="* Leave a review on warframe.market"/><LineBreak/><LineBreak/><Run Text="If you want you can leave a review right here!"/></TextBlock>
-        <Button x:Name="postReview" HorizontalContentAlignment="Center" Content="Post review" Margin="313,0,11,105" VerticalAlignment="Bottom" BorderBrush="#FF646464" Background="{x:Null}" Height="22" Foreground="#FFB1D0D9" Click="post">
+        <Button x:Name="postReview" HorizontalContentAlignment="Center" Content="Post review" Margin="313,199,11,0" VerticalAlignment="Top" BorderBrush="#FF646464" Background="{x:Null}" Height="22" Foreground="#FFB1D0D9" Click="post">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Template">
@@ -36,7 +36,19 @@
                 </Style>
             </Button.Style>
         </Button>
-        <TextBox x:Name="TextBox" HorizontalAlignment="Left" Height="89" Margin="10,227,0,0" TextWrapping="Wrap" Text="Optional comment field" VerticalAlignment="Top" Width="388" BorderBrush="#FF646464" GotFocus="TextboxGotFocus"/>
+        <TextBox x:Name="TextBox" HorizontalAlignment="Left" Height="89" Margin="10,227,0,0" TextWrapping="Wrap" Text="Optional comment field" VerticalAlignment="Top" Width="388" BorderBrush="#FF646464" TextChanged="TextBox_TextChanged" GotFocus="TextboxGotFocus"/>
         <Rectangle HorizontalAlignment="Left" Height="24" Stroke="#FF646464" VerticalAlignment="Top" Width="86" Margin="312,198,0,0"/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,329,0,0" TextWrapping="Wrap" Text="Welcom to the slider easter egg, these don't really do anything" VerticalAlignment="Top" Width="387"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,348,0,0" Width="388"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,371,0,0" Width="388"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,394,0,0" Width="388"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,417,0,0" Width="388"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,348,0,0" Width="388"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,440,0,0" Width="388"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,486,0,0" Width="388"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,509,0,0" Width="388"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,532,0,0" Width="388"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,463,0,0" Width="388"/>
+        <Slider HorizontalAlignment="Left" ValueChanged="Slider_ValueChanged" VerticalAlignment="Top" Margin="10,555,0,0" Width="388"/>
     </Grid>
 </Window>

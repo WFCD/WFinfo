@@ -762,7 +762,7 @@ namespace WFInfo
                 Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
                 Main.RunOnUIThread(() =>
                 {
-                    EquipmentWindow.INSTANCE.SortBoxChanged(null, null);
+                    EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
                 });
 
             }
@@ -785,7 +785,7 @@ namespace WFInfo
                 Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
                 Main.RunOnUIThread(() =>
                 {
-                    EquipmentWindow.INSTANCE.SortBoxChanged(null, null);
+                    EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
                 });
             }
         }

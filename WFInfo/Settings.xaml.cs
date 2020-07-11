@@ -60,6 +60,7 @@ namespace WFInfo
         public static double maximumEfficiencyValue;
         public static double minimumEfficiencyValue;
         public static bool automaticListing;
+        public static bool doDoubleCheck;
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }

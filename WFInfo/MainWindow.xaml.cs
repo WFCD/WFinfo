@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,7 +23,7 @@ namespace WFInfo
         public static MainWindow INSTANCE;
         public static WelcomeDialogue hai;
         public static LowLevelListener listener;
-
+        private static bool updatesupression;
         public MainWindow()
         {
 
@@ -190,6 +189,10 @@ namespace WFInfo
                 Settings.settingsObj["AutoList"] = false;
             Settings.automaticListing = (bool)Settings.settingsObj.GetValue("AutoList");
 
+            if (!Settings.settingsObj.TryGetValue("DoAutoCheck", out _))
+                Settings.settingsObj["DoAutoCheck"] = true;
+            Settings.doDoubleCheck = (bool)Settings.settingsObj.GetValue("DoAutoCheck");
+            
             if (!Settings.settingsObj.TryGetValue("MaximumEfficiencyValue", out _))
                 Settings.settingsObj["MaximumEfficiencyValue"] = 9.5;
             Settings.maximumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MaximumEfficiencyValue"), Main.culture);
@@ -386,18 +389,23 @@ namespace WFInfo
         /// <param name="status">The status to change to</param>
         public void UpdateMarketStatus(string status)
         {
+            updatesupression = true;
             switch (status)
             {
                 case "online":
+                    if (ComboBox.SelectedIndex == 1) break;
                     ComboBox.SelectedIndex = 1;
                     break;
                 case "invisible":
+                    if (ComboBox.SelectedIndex == 2) break;
                     ComboBox.SelectedIndex = 2;
                     break;
                 case "ingame":
+                    if (ComboBox.SelectedIndex == 0) break;
                     ComboBox.SelectedIndex = 0;
                     break;
             }
+            updatesupression = false;
         }
 
         /// <summary>
@@ -407,7 +415,7 @@ namespace WFInfo
         /// <param name="e"></param>
         private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!ComboBox.IsLoaded) //Prevent firing off to early
+            if (!ComboBox.IsLoaded || updatesupression) //Prevent firing off to early
                 return;
             switch (ComboBox.SelectedIndex)
             {
