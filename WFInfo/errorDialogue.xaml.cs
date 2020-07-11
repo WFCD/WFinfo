@@ -53,36 +53,42 @@ namespace WFInfo
                     }
                     else
                         Main.AddLog("eqmt_data.json didn't exist.");
+                    
                     if (File.Exists(startPath + @"\..\market_data.json"))
                     {
                         zip.AddFile(startPath + @"\..\market_data.json", "");
                     }
                     else
                         Main.AddLog("market_data.json didn't exist.");
+                    
                     if (File.Exists(@"\..\market_items.json"))
                     {
                         zip.AddFile(startPath + @"\..\market_items.json", "");
                     }
                     else
                         Main.AddLog("market_items.json didn't exist.");
+                    
                     if (File.Exists(startPath + @"\..\name_data.json"))
                     {
                         zip.AddFile(startPath + @"\..\name_data.json", "");
                     }
                     else
                         Main.AddLog("name_data.json didn't exist.");
+                    
                     if (File.Exists(startPath + @"\..\relic_data.json"))
                     {
                         zip.AddFile(startPath + @"\..\relic_data.json", "");
                     }
                     else
                         Main.AddLog("relic_data.json didn't exist.");
+                    
                     if (File.Exists(startPath + @"\..\settings.json"))
                     {
                         zip.AddFile(startPath + @"\..\settings.json", "");
                     }
                     else
                         Main.AddLog("settings.json didn't exist.");
+                    
                     zip.AddFile(startPath + @"\..\debug.log", "");
                     zip.Comment = "This zip was created at " + closest.ToString("yyyy-MM-dd HH-mm-ssff");
                     zip.MaxOutputSegmentSize64 = 8000 * 1024; // 8m segments

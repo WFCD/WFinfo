@@ -363,7 +363,7 @@ namespace WFInfo
                     });
                 }
 
-                if (partialScreenshot.Height < 70)
+                if (partialScreenshot.Height < 70 && Settings.doDoubleCheck)
                 {
                     SlowSecondProcess();
                     end = watch.ElapsedMilliseconds;
@@ -475,7 +475,7 @@ namespace WFInfo
             }
 
             #region  debuging image
-            Debug.WriteLine($"Closest point: {lowestDistancePoint}, with distance: {lowestDistance}");
+            /*Debug.WriteLine($"Closest point: {lowestDistancePoint}, with distance: {lowestDistance}");
 
             timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
             var img = CaptureScreenshot();
@@ -510,10 +510,8 @@ namespace WFInfo
             img.Save(Main.AppPath + @"\Debug\GetSelectedReward " + timestamp + ".png");
             pinkP.Dispose();
             blackP.Dispose();
-            img.Dispose();
+            img.Dispose();*/
             #endregion
-
-            //todo: Export this to listinghelper so that it knows which reward to selkect.
             return primeRewardIndex;
         }
 
@@ -533,7 +531,7 @@ namespace WFInfo
 
         }
 
-        public static void SlowSecondProcess() //todo: Fix bug where main.listinghelper.primeitems latest entery is not being updated.
+        public static void SlowSecondProcess()
         {
             #region initilizers
             var tempclipboard = "";
@@ -559,6 +557,7 @@ namespace WFInfo
                 {
                     Debug.WriteLine(firstChecks[i]);
                     string first = firstChecks[i];
+                    Main.AddLog($"First proximity {firstProximity[i]}, Second proximity {secondProximity[i]} Is the newer closer?: {secondProximity[i] > firstProximity[i]}");
                     if (first.Replace(" ", "").Length > 6)
                     {
                         Debug.WriteLine(secondChecks[i]);
@@ -1087,13 +1086,13 @@ namespace WFInfo
             long start = watch.ElapsedMilliseconds;
             long beginning = start;
 
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling * (int)dpiScaling);
+            int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
 
             Color clr;
-            int width = window.Width * (int)dpiScaling;
-            int height = window.Height * (int)dpiScaling;
+            int width = window.Width;
+            int height = window.Height;
             int mostWidth = (int)(pixleRewardWidth * screenScaling);
-            int mostLeft = (width / 2) - (mostWidth / 2 * (int)dpiScaling);
+            int mostLeft = (width / 2) - (mostWidth / 2 );
             // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
             //                   (316          -        235        +       44)    *    1.1    =    137
             int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
@@ -1618,8 +1617,8 @@ namespace WFInfo
             RefreshDPIScaling();
             if (image != null || !VerifyWarframe())
             {
-                int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width * (int)dpiScaling;
-                int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
+                int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width;
+                int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height;
                 window = new Rectangle(0, 0, width, height);
                 center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
                 if (image != null)
