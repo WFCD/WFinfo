@@ -10,7 +10,7 @@ WFInfo does this by screenshotting the game window, cropping out the part text, 
 
 # Usage
 0. Download Microsoft Visual C++ Redistributable 2019 from microsoft [x64](https://aka.ms/vs/16/release/VC_redist.x64.exe) [x86](https://aka.ms/vs/16/release/VC_redist.x86.exe)
-1. If you have OS **before** Windows 10, ensure you have installed [.NET Framework Runtime 4.8](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer)
+1. If you have an older version of Windows 10, ensure you have installed [.NET Framework Runtime 4.8](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer) Note: Windows 7 is no longer supported due to dpi detection issues.
 2. Download the [latest release](https://github.com/WFCD/WFinfo/releases/latest)
 3. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
 4. Click the Cog Icon to open Settings, and configure your hotkey, scaling, etc
