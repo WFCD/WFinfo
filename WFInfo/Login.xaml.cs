@@ -62,8 +62,8 @@ namespace WFInfo
                     Main.dataBase.JWT = null;
                     Settings.Save();
                     Main.AddLog("Couldn't login: " + ex);
-                    var StatusMessage = "Status"; //StatusMessage = text to display on StatusUpdate() AND the error box under login 
-                    var StatusSeverity = 0; //StatusSeverity = Severity for StatusUpdate()
+                    string StatusMessage; //StatusMessage = text to display on StatusUpdate() AND the error box under login 
+                    byte StatusSeverity; //StatusSeverity = Severity for StatusUpdate()
                     if (ex.Message.Contains("email"))
                     {
                         if (ex.Message.Contains("app.form.invalid"))
@@ -73,8 +73,10 @@ namespace WFInfo
 
                         }
                         else
+                        {
                             StatusMessage = "Unknown email";
                             StatusSeverity = 1;
+                        }
                     }
                     else if (ex.Message.Contains("password"))
                     {
@@ -96,9 +98,6 @@ namespace WFInfo
 
                     switch (StatusSeverity)
                     { // copy/paste from Main.cs (statusChange())
-                        case 0: //default, no problem
-                            Error.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
-                            break;
                         case 1: //severe, red text
                             Error.Foreground = Brushes.Red;
                             break;
@@ -113,8 +112,6 @@ namespace WFInfo
                     if(Error.Visibility != Visibility.Visible)
                     {
                         Height += 20;
-                        BackupButton.VerticalAlignment = VerticalAlignment.Center;
-                        RememberMe.VerticalAlignment = VerticalAlignment.Center;
                     }
                     Error.Visibility = Visibility.Visible;
                     return;
