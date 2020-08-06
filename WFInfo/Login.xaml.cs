@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using Google.Apis.Auth;
 using Microsoft.Win32;
+using System.Windows.Media;
 
 namespace WFInfo
 {
@@ -60,28 +62,61 @@ namespace WFInfo
                     Main.dataBase.JWT = null;
                     Settings.Save();
                     Main.AddLog("Couldn't login: " + ex);
+                    var StatusMessage = "Status"; //StatusMessage = text to display on StatusUpdate() AND the error box under login 
+                    var StatusSeverity = 0; //StatusSeverity = Severity for StatusUpdate()
                     if (ex.Message.Contains("email"))
                     {
                         if (ex.Message.Contains("app.form.invalid"))
                         {
-                            Main.StatusUpdate("Invalid email form", 2);
+                            StatusMessage = "Invalid email form";
+                            StatusSeverity = 2;
+
                         }
                         else
-                            Main.StatusUpdate("Unknown email", 1);
+                            StatusMessage = "Unknown email";
+                            StatusSeverity = 1;
                     }
                     else if (ex.Message.Contains("password"))
                     {
-                        Main.StatusUpdate("Wrong password", 1);
+                        StatusMessage = "Wrong password";
+                        StatusSeverity = 1;
                     }
                     else if (ex.Message.Contains("could not understand"))
                     {
-                        Main.StatusUpdate("Severe issue, server did not understand request", 1);
+                        StatusMessage = "Severe issue, server did not understand request";
+                        StatusSeverity = 1;
                     }
                     else
                     {
-                        Main.StatusUpdate("Too many requests", 1); //default to too many requests
+                        StatusMessage = "Too many requests";
+                        StatusSeverity = 1; //default to too many requests
                     }
                     Main.SignOut();
+                    Main.StatusUpdate(StatusMessage, StatusSeverity); //Changing WFinfo status
+
+                    switch (StatusSeverity)
+                    { // copy/paste from Main.cs (statusChange())
+                        case 0: //default, no problem
+                            Error.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
+                            break;
+                        case 1: //severe, red text
+                            Error.Foreground = Brushes.Red;
+                            break;
+                        case 2: //warning, orange text
+                            Error.Foreground = Brushes.Orange;
+                            break;
+                        default: //Uncaught, big problem
+                            Error.Foreground = Brushes.Yellow;
+                            break;
+                    }
+                    Error.Text = StatusMessage; //Displaying the error under the text fields
+                    if(Error.Visibility != Visibility.Visible)
+                    {
+                        Height += 20;
+                        BackupButton.VerticalAlignment = VerticalAlignment.Center;
+                        RememberMe.VerticalAlignment = VerticalAlignment.Center;
+                    }
+                    Error.Visibility = Visibility.Visible;
                     return;
                 }
                 Main.LoggedIn();
