@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.CodeDom;
+using System.Windows;
 using System.Windows.Input;
 
 namespace WFInfo
@@ -9,13 +10,16 @@ namespace WFInfo
     public partial class RewardWindow : Window
     {
 
+        private Point lastKnownSpot; //The last know possition, most left top spot.
+        
         public RewardWindow()
         {
             InitializeComponent();
         }
         public void loadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, int partNumber, bool resize = true, bool hideReward = false)
         {
-            Top = MainWindow.INSTANCE.Top + 150;
+            Top = lastKnownSpot.Y;
+            Left = lastKnownSpot.X;
             Show();
             Topmost = true;
             switch (partNumber)
@@ -126,12 +130,11 @@ namespace WFInfo
                     Main.StatusUpdate("something went wrong while displaying: " + name + " in window", 1);
                     break;
             }
-            if (resize)
-                Left = MainWindow.INSTANCE.Left + 150 - (Width / 2);
         }
         private void Exit(object sender, RoutedEventArgs e)
         {
             Topmost = false;
+            lastKnownSpot = new Point(Top, Left);
             Hide();
         }
         // Allows the draging of the window

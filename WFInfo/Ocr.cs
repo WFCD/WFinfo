@@ -330,8 +330,8 @@ namespace WFInfo
                             {
                                 Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
-                            else
-                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
+                            //else
+                                //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
 
                             if (Settings.clipboard && !string.IsNullOrEmpty(clipboard))
                                 Clipboard.SetText(clipboard);
