@@ -51,10 +51,9 @@ namespace WFInfo
             UNKNOWN = -1
         }
 
-        //TODO: DARK_LOTUS needs colors, and well, the rest need confirmations
         // Colors for the top left "profile bar"
         public static Color[] ThemePrimary = new Color[] {  Color.FromArgb(190, 169, 102),		//VITRUVIAN		
-															Color.FromArgb(153,  31,  35), 		//STALKER		
+															Color.FromArgb(153,  31,  35), 	//STALKER		
 															Color.FromArgb(238, 193, 105),  	//BARUUK		
 															Color.FromArgb( 35, 201, 245),  	//CORPUS		
 															Color.FromArgb( 57, 105, 192),  	//FORTUNA		
@@ -67,9 +66,9 @@ namespace WFInfo
 															Color.FromArgb(255, 255, 255),  	//LEGACY		
 															Color.FromArgb(158, 159, 167),  	//EQUINOX		
 															Color.FromArgb(140, 119, 147) };    //DARK_LOTUS
-
+        //highlight colors from selected items
         public static Color[] ThemeSecondary = new Color[] {Color.FromArgb(245, 227, 173),		//VITRUVIAN		
-															Color.FromArgb(255,  61,  51), 		//STALKER		
+															Color.FromArgb(255,  61,  51), 	//STALKER		
 															Color.FromArgb(236, 211, 162),  	//BARUUK		
 															Color.FromArgb(111, 229, 253),  	//CORPUS		
 															Color.FromArgb(255, 115, 230),  	//FORTUNA		
@@ -81,7 +80,7 @@ namespace WFInfo
 															Color.FromArgb(255, 255,   0),  	//HIGH_CONTRAST	
 															Color.FromArgb(232, 213,  93),  	//LEGACY		
 															Color.FromArgb(232, 227, 227),  	//EQUINOX		
-															Color.FromArgb(200, 169, 237) };    //DARK_LOTUS	
+															Color.FromArgb(189, 169, 237) };    //DARK_LOTUS	
 
         public static Assembly assembly = Assembly.GetExecutingAssembly();
         public static Stream audioStream = assembly.GetManifestResourceStream("WFInfo.Resources.achievment_03.wav");
@@ -439,7 +438,7 @@ namespace WFInfo
 
             var lowestDistance = int.MaxValue;
             var lowestDistancePoint = new Point();
-            if (numberOfRewardsDisplayed != 3) //todo: Find a way to distinguish between 3 pnts and 4 pnts
+            if (numberOfRewardsDisplayed != 3)
             {
                 foreach (var pnt in RewardPoints4)
                 {
@@ -484,7 +483,7 @@ namespace WFInfo
             using (Graphics g = Graphics.FromImage(img))
             {
                 g.DrawRectangle(blackP, selectionRectangle);
-                if (numberOfRewardsDisplayed != 3) //todo: Find a way to distinguish between 3 pnts and 4 pnts
+                if (numberOfRewardsDisplayed != 3)
                 {
                     foreach (var pnt in RewardPoints4)
                     {
@@ -1241,7 +1240,7 @@ namespace WFInfo
             preFilter.Save(Main.AppPath + @"\Debug\FullPartArea " + timestamp + ".png");
             scaling = topFive[4] + 50; //scaling was sometimes going to 50 despite being set to 100, so taking the value from above that seems to be accurate.
 
-            scaling /= 100; //todo: not getting dpi scaling correctly
+            scaling /= 100;
             double highScaling = scaling < 1.0 ? scaling + 0.01 : scaling;
             double lowScaling = scaling > 0.5 ? scaling - 0.01 : scaling;
 
@@ -1590,16 +1589,23 @@ namespace WFInfo
 
         private static void RefreshDPIScaling()
         {
-            var mon = Win32.MonitorFromPoint(new Point(Screen.PrimaryScreen.Bounds.Left+1, Screen.PrimaryScreen.Bounds.Top+1), 2);
-            Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
-            Win32.GetDpiForMonitor(mon, Win32.DpiType.Angular, out var dpiXAngular, out _);
-            Win32.GetDpiForMonitor(mon, Win32.DpiType.Raw, out var dpiXRaw, out _);
+            try
+            {
+                var mon = Win32.MonitorFromPoint(new Point(Screen.PrimaryScreen.Bounds.Left+1, Screen.PrimaryScreen.Bounds.Top+1), 2);
+                Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
+                //Win32.GetDpiForMonitor(mon, Win32.DpiType.Angular, out var dpiXAngular, out _);
+                //Win32.GetDpiForMonitor(mon, Win32.DpiType.Raw, out var dpiXRaw, out _);
 
-            Main.AddLog($"Effective dpi, X:{dpiXEffective}\n Which is %: {dpiXEffective / 96.0}");
-            Main.AddLog($"Raw dpi, X:{dpiXRaw}\n Which is %: {dpiXRaw / 96.0}");
-            Main.AddLog($"Angular dpi, X:{dpiXAngular}\n Which is %: {dpiXAngular / 96.0}");
-
-            dpiScaling = dpiXEffective / 96.0; // assuming that y and x axis dpi scaling will be uniform. So only need to check one value
+                Main.AddLog($"Effective dpi, X:{dpiXEffective}\n Which is %: {dpiXEffective / 96.0}");
+                //Main.AddLog($"Raw dpi, X:{dpiXRaw}\n Which is %: {dpiXRaw / 96.0}");
+                //Main.AddLog($"Angular dpi, X:{dpiXAngular}\n Which is %: {dpiXAngular / 96.0}");
+                dpiScaling = dpiXEffective / 96.0; // assuming that y and x axis dpi scaling will be uniform. So only need to check one value
+            }
+            catch (Exception e)
+            {
+                Main.AddLog($"Was unable to set a new dpi scaling, defaulting to 100% zoom, exception: {e}");
+                dpiScaling = 1;
+            }
         }
 
         private static void RefreshScaling()

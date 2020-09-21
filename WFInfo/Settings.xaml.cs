@@ -414,7 +414,7 @@ namespace WFInfo
             activeKeyVal = Key.NoName;
         }
 
-        private void Searchit_key_box_KeyUp(object sender, KeyEventArgs e) //todo this doesn't fucking work. I don't know why, but it just does not
+        private void Searchit_key_box_KeyUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
 

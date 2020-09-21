@@ -33,7 +33,7 @@ namespace WFInfo
         private readonly string nameDataPath;
         public string JWT; // JWT is the security key, store this as email+pw combo
         private readonly WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
-        private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
+        private readonly string filterAllJSON = "https://docs.google.com/uc?id=1w_cSmhsULIoSt4tyNgnh7xY2N98Mfpbf&export=download";
         public string inGameName = string.Empty;
         static readonly HttpClient client = new HttpClient();
         readonly WebClient WebClient;
@@ -41,6 +41,8 @@ namespace WFInfo
         private string githubVersion;
         public bool rememberMe;
         private LogCapture EElogWatcher;
+        private Task autoThread;
+
 
         public Data()
         {
@@ -753,10 +755,7 @@ namespace WFInfo
 
             return lowest;
         }
-
-        private Task autoThread;
-        public string WFMStatus;
-
+        
         private void LogChanged(object sender, string line)
         {
             if (autoThread != null && !autoThread.IsCompleted) return;

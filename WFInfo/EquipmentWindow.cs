@@ -47,15 +47,16 @@ namespace WFInfo
 
                     if (!primeTypes.ContainsKey(primeType))
                     {
-                        TreeNode newType = new TreeNode(primeType, "");
+                        TreeNode newType = new TreeNode(primeType, "", 0);
                         if (!types.Contains(primeType))
                             types.Add(primeType);
                         newType.SortNum = types.IndexOf(primeType);
                         primeTypes[primeType] = newType;
                     }
                     TreeNode type = primeTypes[primeType];
-                    TreeNode primeNode = new TreeNode(primeName, prime.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "");
+                    TreeNode primeNode = new TreeNode(primeName, prime.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "", 1);
                     primeNode.MakeClickable(prime.Key);
+                    primeNode.MakeParentClickable(prime.Key);
                     foreach (KeyValuePair<string, JToken> primePart in prime.Value["parts"].ToObject<JObject>())
                     {
                         string partName = primePart.Key;
@@ -64,8 +65,9 @@ namespace WFInfo
 
                         if (partName.Contains("Kubrow"))
                             partName = partName.Substring(partName.IndexOf(" Blueprint") + 1);
-                        TreeNode partNode = new TreeNode(partName, primePart.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "");
+                        TreeNode partNode = new TreeNode(partName, primePart.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "", 0);
                         partNode.MakeClickable(primePart.Key);
+                        primeNode.MakeParentClickable(prime.Key);
                         if (Main.dataBase.marketData.TryGetValue(primePart.Key.ToString(), out JToken marketValues))
                             partNode.SetPrimePart(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
                         else if (Main.dataBase.equipmentData.TryGetValue(primePart.Key, out JToken job))
@@ -79,9 +81,6 @@ namespace WFInfo
                                     plat += temp * subMarketValues["plat"].ToObject<double>();
                                 }
                             }
-
-
-
                             partNode.SetPrimeEqmt(plat, primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
                         }
                         else
@@ -319,5 +318,6 @@ namespace WFInfo
         {
             populate();
         }
+        
     }
 }

@@ -35,6 +35,8 @@ namespace WFInfo
         public static PlusOne plusOne = new PlusOne();
         public static System.Threading.Timer timer;
         public static System.Drawing.Point lastClick;
+        private static bool UserAway { get; set; }
+
         public Main()
         {
             INSTANCE = this;
@@ -102,16 +104,18 @@ namespace WFInfo
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
             if (latestActive <= now)
             {
+                UserAway = true;
                 await dataBase.SetWebsocketStatus("invisible");
                 StatusUpdate("User has been inactive for 15 minutes", 0);
-            }
-            else if (dataBase.WFMStatus == "invisible")
+            }else if (UserAway)
             {
+                UserAway = false;
                 await dataBase.SetWebsocketStatus("online");
                 var user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
-                StatusUpdate($"Welcome back{user}, we've put you online", 0);
+                StatusUpdate($"Welcome back {user}, we've put you online", 0);
             }
         }
+
 
         public static void RunOnUIThread(Action act)
         {
@@ -225,7 +229,6 @@ namespace WFInfo
             }
         }
 
-        //todo: Implement a 15 minute timer that if there hasn't been any input to set the status to "offline"
         public void OnKeyAction(Key key)
         {
             latestActive = DateTime.UtcNow.AddMinutes(15);

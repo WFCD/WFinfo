@@ -390,7 +390,6 @@ namespace WFInfo
         public void UpdateMarketStatus(string status)
         {
             updatesupression = true;
-            Main.dataBase.WFMStatus = status;
             switch (status)
             {
                 case "online":
