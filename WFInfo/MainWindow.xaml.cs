@@ -21,9 +21,10 @@ namespace WFInfo
     {
         readonly Main main; //subscriber
         public static MainWindow INSTANCE;
-        public static WelcomeDialogue hai;
+        public static WelcomeDialogue welcomeDialogue;
         public static LowLevelListener listener;
         private static bool updatesupression;
+
         public MainWindow()
         {
 
@@ -37,7 +38,6 @@ namespace WFInfo
 
             INSTANCE = this;
             main = new Main();
-
             listener = new LowLevelListener(); //publisher
             try
             {
@@ -49,7 +49,7 @@ namespace WFInfo
                 else
                 {
                     Settings.settingsObj = new JObject();
-                    hai = new WelcomeDialogue();
+                    welcomeDialogue = new WelcomeDialogue();
                 }
                 InitializeSettings();
 
@@ -214,11 +214,11 @@ namespace WFInfo
 
         public void OnContentRendered(object sender, EventArgs e)
         {
-            if (hai != null)
+            if (welcomeDialogue != null)
             {
-                hai.Left = Left + Width + 30;
-                hai.Top = Top + Height / 2 - hai.Height / 2;
-                hai.Show();
+                welcomeDialogue.Left = Left + Width + 30;
+                welcomeDialogue.Top = Top + Height / 2 - welcomeDialogue.Height / 2;
+                welcomeDialogue.Show();
             }
         }
 
@@ -264,7 +264,7 @@ namespace WFInfo
         {
             Visibility = Visibility.Hidden;
         }
-
+        
         private void WebsiteClick(object sender, RoutedEventArgs e)
         {
             Process.Start("https://discord.gg/N8S5zfw");
@@ -390,6 +390,7 @@ namespace WFInfo
         public void UpdateMarketStatus(string status)
         {
             updatesupression = true;
+            Main.dataBase.WFMStatus = status;
             switch (status)
             {
                 case "online":

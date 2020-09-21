@@ -312,7 +312,6 @@ namespace WFInfo
         {
             Main.AddLog("Checking for Updates to Databases");
             JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
-            //todo: fix Exception thrown: 'System.IO.FileNotFoundException' in mscorlib.dll being thrown here
             bool saveDatabases = LoadMarket(allFiltered);
 
             foreach (KeyValuePair<string, JToken> elem in marketItems)
@@ -756,6 +755,7 @@ namespace WFInfo
         }
 
         private Task autoThread;
+        public string WFMStatus;
 
         private void LogChanged(object sender, string line)
         {
@@ -888,6 +888,8 @@ namespace WFInfo
         {
         #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             Main.AddLog("Connecting to websocket");
+            marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
+
             if (marketSocket.IsAlive || marketSocket.ReadyState == WebSocketState.Connecting)
             {
                 return false;
@@ -917,16 +919,11 @@ namespace WFInfo
 
             marketSocket.OnOpen += (sender, e) =>
             {
-                if (OCR.VerifyWarframe())
-                {
-                    marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}");
-                }
-                else
-                    marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
-
+                marketSocket.Send(OCR.VerifyWarframe()
+                    ? "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}"
+                    : "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
             };
 
-            marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
             try
             {
                 marketSocket.SetCookie(new WebSocketSharp.Net.Cookie("JWT", JWT));

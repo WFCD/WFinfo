@@ -64,39 +64,46 @@ namespace WFInfo
         {
             Main.AddLog($"Screen list is {ScreensList.Count} long and setting to index: {index}");
             if (ScreensList.Count == 0)
-                Close();
+                Hide();
             if (ScreensList.Count < index || 0 > index)
             {
                 throw new Exception("Tried setting screen to an item that didn't exist");
             }
-            SetCurrentStatus();
 
             var screen = ScreensList[index];
             updating = true;
-            SetListings(screen.Value.RewardIndex);
             ComboBox.Items.Clear();
             ComboBox.SelectedIndex = screen.Value.RewardIndex;
             foreach (var primeItem in screen.Value.PrimeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
             {
                 ComboBox.Items.Add(primeItem);
             }
-
+            SetCurrentStatus();
+            SetListings(screen.Value.RewardIndex);
             updating = false;
         }
         /// <summary>
         /// changes screen over if there is a follow up screen
         /// </summary>
-        public void NextScreen(object sender, RoutedEventArgs e) //todo throwing out of range error
+        public void NextScreen(object sender, RoutedEventArgs e)
         {
             Back.IsEnabled = true;
             if (PrimeRewards.Count > 0)
             { // if there are new prime rewards
-                Next.Content = "...";
-                var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(PrimeRewards.First())).Result;
-                if (rewardCollection.PrimeNames.Count != 0)
-                    Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-                PrimeRewards.RemoveAt(0);
-                Next.Content = "Next";
+                try
+                {
+                    Next.Content = "...";
+                    var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(PrimeRewards.First())).Result;
+                    if (rewardCollection.PrimeNames.Count != 0)
+                        Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                    PrimeRewards.RemoveAt(0);
+                    Next.Content = "Next";
+                }
+                catch (Exception exception)
+                {
+                    Main.AddLog($"Error thrown in NextScreen in ListingHelper.xaml.cs: {exception}, Primerewarwds.count: {PrimeRewards.Count}, SelectedRewardIndex {SelectedRewardIndex}");
+                    throw;
+                }
             }
             if (ScreensList.Count - 1 == PageIndex) //reached the end of the list
             {
@@ -223,24 +230,13 @@ namespace WFInfo
 
             PlatinumTextBox.Text = ScreensList[PageIndex].Value.PlatinumValues[index].ToString(Main.culture);
 
-            if (IsItemBanned(ScreensList[PageIndex].Value.PrimeNames[index]))
-            {
-                ListingGrid.Visibility = Visibility.Collapsed;
-                Height = 180;
-                Status.Content = "Cannot list this item";
-                Status.Visibility = Visibility.Visible;
-                ComboBox.IsEnabled = true;
-                ConfirmListingButton.IsEnabled = false;
-                return;
-            }
-
             ListingGrid.Visibility = Visibility.Visible;
             Height = 255;
             Status.Content = ScreensList[PageIndex].Key;
             Status.Visibility = Visibility.Collapsed;
             ComboBox.IsEnabled = true;
             ConfirmListingButton.IsEnabled = true;
-
+            PlatinumTextBox.IsEnabled = true;
 
             Platinum0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Platinum;
             Amount0.Content = ScreensList[PageIndex].Value.MarketListings[index][0].Amount;
@@ -261,6 +257,15 @@ namespace WFInfo
             Platinum4.Content = ScreensList[PageIndex].Value.MarketListings[index][4].Platinum;
             Amount4.Content = ScreensList[PageIndex].Value.MarketListings[index][4].Amount;
             Reputation4.Content = ScreensList[PageIndex].Value.MarketListings[index][4].Reputation;
+
+            if (!IsItemBanned(ScreensList[PageIndex].Value.PrimeNames[index])) return;
+            ListingGrid.Visibility = Visibility.Collapsed;
+            Height = 180;
+            Status.Content = "Cannot list this item";
+            Status.Visibility = Visibility.Visible;
+            ComboBox.IsEnabled = true;
+            PlatinumTextBox.IsEnabled = false;
+            ConfirmListingButton.IsEnabled = false;
         }
 
         /// <summary>
@@ -269,7 +274,7 @@ namespace WFInfo
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Cancel(object sender, RoutedEventArgs e)
-        { //todo:fix the fact that canceling resets status of page from sold to default.
+        {
             if (ScreensList.Count == 1 || ScreensList.Count == 0)
             {
                 // if it's the last item

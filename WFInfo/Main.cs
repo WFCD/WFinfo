@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using AutoUpdaterDotNET;
 using System.Windows;
 using System.Windows.Forms;
+using WebSocketSharp;
 using WFInfo.Resources;
 
 namespace WFInfo
@@ -30,7 +31,7 @@ namespace WFInfo
         public static SearchIt searchBox = new SearchIt();
         public static Login login = new Login();
         public static ListingHelper listingHelper = new ListingHelper();
-        public static DateTime latestActive = new DateTime();
+        public static DateTime latestActive;
         public static PlusOne plusOne = new PlusOne();
         public static System.Threading.Timer timer;
         public static System.Drawing.Point lastClick;
@@ -67,7 +68,7 @@ namespace WFInfo
                 if (dataBase.IsJWTvalid().Result)
                 {
                     OCR.VerifyWarframe();
-                    latestActive = DateTime.UtcNow.AddMinutes(15);
+                    latestActive = DateTime.UtcNow.AddMinutes(1);
                     LoggedIn();
 
                     var startTimeSpan = TimeSpan.Zero;
@@ -99,10 +100,17 @@ namespace WFInfo
                 return;
             var now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
-            if (now <= latestActive) return;
-            await dataBase.SetWebsocketStatus("invisible");
-            //UpdateMarketStatus("invisible");
-            StatusUpdate("User has been inactive for 15 minutes", 0);
+            if (latestActive <= now)
+            {
+                await dataBase.SetWebsocketStatus("invisible");
+                StatusUpdate("User has been inactive for 15 minutes", 0);
+            }
+            else if (dataBase.WFMStatus == "invisible")
+            {
+                await dataBase.SetWebsocketStatus("online");
+                var user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
+                StatusUpdate($"Welcome back{user}, we've put you online", 0);
+            }
         }
 
         public static void RunOnUIThread(Action act)
@@ -204,7 +212,7 @@ namespace WFInfo
                     Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
                 }
             }
-            else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying) //todo: Fix this condition so it only activates after auto has been triggered and stops triggering after auto detects enf of mission
+            else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying)
             {
                 Task.Run((() =>
                 {
