@@ -278,9 +278,7 @@ namespace WFInfo
             if (ScreensList.Count == 1 || ScreensList.Count == 0)
             {
                 // if it's the last item
-                Minimize(null, null);
-                ScreensList = new List<KeyValuePair<string, RewardCollection>>();
-                PageIndex = 0;
+                Close(null, null);
                 return;
             }
 
@@ -344,7 +342,6 @@ namespace WFInfo
                         Main.searchBox.placeholder.Content = $"Could not find {primeItem}";
                         Main.searchBox.searchField.Text = string.Empty;
                     });
-                    Debug.WriteLine(e);
                 }
 
             }
@@ -376,8 +373,7 @@ namespace WFInfo
                 }
                 return bannedListing;
             }
-
-
+            
             Debug.WriteLine($"Getting listing for {primeName}");
             var results = Task.Run(async () => await Main.dataBase.GetTopListings(primeName)).Result;
             var listings = new List<MarketListing>();
