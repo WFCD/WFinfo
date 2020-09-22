@@ -736,14 +736,9 @@ namespace WFInfo
             dataRef = eqmtRef;
             DecrementPart = new SimpleCommand(DecrementPartFunc);
             IncrementPart = new SimpleCommand(IncrementPartFunc);
-        }
-
-        public void MakeParentClickable(string equipmentReference)
-        {
-            dataRef = equipmentReference;
             MarkComplete = new SimpleCommand(MarkCompleteFunc);
         }
-
+        
         public async void DecrementPartFunc()
         {
             if (current.dataRef != null)
@@ -762,7 +757,7 @@ namespace WFInfo
         
         public async void MarkCompleteFunc()
         {
-            await System.Threading.Tasks.Task.Run(() => MarkSetAsComplete(current));
+            await System.Threading.Tasks.Task.Run(() => MarkSetAsComplete(this));
 
             /*Main.AddLog("test");
             Main.AddLog(current.dataRef);
@@ -779,7 +774,6 @@ namespace WFInfo
             if (owned > 0)
             {
                 job["owned"] = owned - 1;
-                Main.dataBase.SaveAllJSONs();
                 Owned_Val--;
                 Parent.Owned_Val--;
                 Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
@@ -790,14 +784,13 @@ namespace WFInfo
                 {
                     EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
                 });
-
+                Main.dataBase.SaveAllJSONs();
             }
         }
 
         private void IncrementPartThreaded(TreeNode Parent)
         {
             JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
-            Debug.WriteLine(Main.dataBase.equipmentData[Parent.dataRef].ToString());
             int count = job["count"].ToObject<int>();
             int owned = job["owned"].ToObject<int>();
             if (owned < count)
@@ -817,43 +810,37 @@ namespace WFInfo
             }
         }
 
-        private void MarkSetAsComplete(TreeNode current)
+        private void MarkSetAsComplete(TreeNode Parent)
         {
-            string testing = current.dataRef;
-            Main.AddLog(testing);
-            Main.AddLog(Main.dataBase.equipmentData["Kavasa Prime"].ToString());
-            Main.AddLog(Main.dataBase.equipmentData[testing].ToString());
-            Main.AddLog(Main.dataBase.equipmentData[current.dataRef]["parts"][dataRef].ToString());
+            JObject primeParent = Main.dataBase.equipmentData[Parent.dataRef]["parts"] as JObject;
 
-            JObject parrent = Main.dataBase.equipmentData[current.dataRef]["parts"] as JObject;
-
-            foreach (var part in parrent)
+            foreach (var part in primeParent)
             {
-                var item = parrent[dataRef];
-                int count = item["count"].ToObject<int>();
-                int owned = item.ToObject<int>();
+                int count = part.Value["count"].ToObject<int>();
+                int owned = part.Value["owned"].ToObject<int>();
                 if (owned < count)
                 {
-                    item["owned"] = owned + 1;
-                    Main.dataBase.SaveAllJSONs();
-                    Owned_Val++;
+                    part.Value["owned"] = count;
+                    Owned_Val = (int)Count_Val;
+                    Debug.WriteLine(part.Key);
+                    primeParent[part.Key]["owned"] = count;
                     Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
                     Col1_Text1 = Owned_Val + "/" + Count_Val;
-                    foreach (var currentChild in current.Children)
+                    foreach (var currentChild in Parent.Children)
                     {
-                        if (currentChild.Name != part.Key) continue;
-                        currentChild.Owned_Val++;
-                        currentChild.Diff_Val = currentChild.Owned_Val / currentChild.Count_Val -
-                                                0.01 * currentChild.Count_Val;
+                        if (!part.Key.Contains(currentChild.Name)) continue;
+                        currentChild.Owned_Val = count;
+                        currentChild.Diff_Val = currentChild.Owned_Val / currentChild.Count_Val - 0.01 * currentChild.Count_Val;
                         currentChild.Col1_Text1 = currentChild.Owned_Val + "/" + currentChild.Count_Val;
+                        break;
                     }
-                    
-                    Main.RunOnUIThread(() =>
-                    {
-                        EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
-                    });
                 }
             }
+            Main.dataBase.SaveAllJSONs();
+            Main.RunOnUIThread(() =>
+            {
+                EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
+            });
         }
     }
 }
