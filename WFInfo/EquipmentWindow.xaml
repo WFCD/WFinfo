@@ -103,7 +103,7 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 
-                                <Label Content="＋" Foreground="#506464" FontSize="13" Padding="0,-13,0,0">
+                                <Label Content="✓" Foreground="#506464" FontSize="13" Padding="0,-13,0,0">
                                     <Label.InputBindings>
                                         <MouseBinding MouseAction="LeftClick" Command="{Binding MarkComplete}" />
                                     </Label.InputBindings>
