@@ -787,9 +787,10 @@ namespace WFInfo
                     }
 
                 Overlay.rewardsDisplaying = false;
-
+                Main.AddLog("Looping through rewards");
                 foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
                 {
+                    Main.AddLog(rewardscreen.ToString());
                     var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
                     if (rewardCollection.PrimeNames.Count == 0)
                         return;

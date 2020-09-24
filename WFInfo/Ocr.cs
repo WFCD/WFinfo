@@ -1553,7 +1553,7 @@ namespace WFInfo
 
         public static bool VerifyWarframe()
         {
-
+    
             if (Warframe != null && !Warframe.HasExited)
             { // don't update status
                 return true;

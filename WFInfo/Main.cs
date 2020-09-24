@@ -35,6 +35,8 @@ namespace WFInfo
         public static PlusOne plusOne = new PlusOne();
         public static System.Threading.Timer timer;
         public static System.Drawing.Point lastClick;
+        private static int minutesTillAfk = 7;
+
         private static bool UserAway { get; set; }
 
         public Main()
@@ -102,17 +104,35 @@ namespace WFInfo
                 return;
             var now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
+            
+            if (OCR.Warframe.HasExited)
+            {//set user offline if Warframe has closed but no new game was found
+                await Task.Run(async () =>
+                {
+                    if (!await dataBase.IsJWTvalid())
+                        return;
+                    await dataBase.SetWebsocketStatus("invisible");
+                    StatusUpdate("Could not find warframe.exe setting user offline", 0);
+                });
+            }
             if (latestActive <= now)
-            {
+            {//set users offline if afk for longer than set timer
+                await Task.Run(async () =>
+                {
                 UserAway = true;
                 await dataBase.SetWebsocketStatus("invisible");
-                StatusUpdate("User has been inactive for 15 minutes", 0);
-            }else if (UserAway)
+                StatusUpdate($"User has been inactive for {minutesTillAfk} minutes", 0);
+                });
+            }
+            if (UserAway)
             {
+                await Task.Run(async () =>
+                {
                 UserAway = false;
                 await dataBase.SetWebsocketStatus("online");
                 var user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
                 StatusUpdate($"Welcome back {user}, we've put you online", 0);
+                });
             }
         }
 
@@ -160,7 +180,7 @@ namespace WFInfo
 
         public void OnMouseAction(MouseButton key)
         {
-            latestActive = DateTime.UtcNow.AddMinutes(15);
+            latestActive = DateTime.UtcNow.AddMinutes(minutesTillAfk);
 
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
@@ -231,7 +251,7 @@ namespace WFInfo
 
         public void OnKeyAction(Key key)
         {
-            latestActive = DateTime.UtcNow.AddMinutes(15);
+            latestActive = DateTime.UtcNow.AddMinutes(minutesTillAfk);
 
             // close the snapit overlay when *any* key is pressed down
             if (snapItOverlayWindow.isEnabled && KeyInterop.KeyFromVirtualKey((int)key) != Key.None)
@@ -319,7 +339,7 @@ namespace WFInfo
                 openFileDialog.RestoreDirectory = true;
                 openFileDialog.Multiselect = true;
 
-                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     Task.Factory.StartNew(() =>
                     {
@@ -361,7 +381,7 @@ namespace WFInfo
                 openFileDialog.RestoreDirectory = true;
                 openFileDialog.Multiselect = true;
 
-                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     Task.Factory.StartNew(() =>
                     {
