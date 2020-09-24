@@ -104,17 +104,18 @@ namespace WFInfo
                 return;
             var now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
-            
-            if (OCR.Warframe.HasExited)
+
+            if (OCR.Warframe != null && OCR.Warframe.HasExited)
             {//set user offline if Warframe has closed but no new game was found
                 await Task.Run(async () =>
                 {
                     if (!await dataBase.IsJWTvalid())
                         return;
                     await dataBase.SetWebsocketStatus("invisible");
-                    StatusUpdate("Could not find warframe.exe setting user offline", 0);
+                    StatusUpdate("WFM status set offline, Warframe was closed", 0);
                 });
             }
+            
             if (latestActive <= now)
             {//set users offline if afk for longer than set timer
                 await Task.Run(async () =>
@@ -128,9 +129,9 @@ namespace WFInfo
             {
                 await Task.Run(async () =>
                 {
-                UserAway = false;
-                await dataBase.SetWebsocketStatus("online");
-                var user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
+                    UserAway = false;
+                    await dataBase.SetWebsocketStatus("online");
+                    var user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
                 StatusUpdate($"Welcome back {user}, we've put you online", 0);
                 });
             }
