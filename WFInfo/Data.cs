@@ -33,7 +33,7 @@ namespace WFInfo
         private readonly string nameDataPath;
         public string JWT; // JWT is the security key, store this as email+pw combo
         private readonly WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
-        private readonly string filterAllJSON = "https://docs.google.com/uc?id=1zqI55GqcXMfbvZgBjASC34ad71GDTkta&export=download";
+        private readonly string filterAllJSON = "https://docs.google.com/uc?id=1w_cSmhsULIoSt4tyNgnh7xY2N98Mfpbf&export=download";
         public string inGameName = string.Empty;
         static readonly HttpClient client = new HttpClient();
         readonly WebClient WebClient;
@@ -41,6 +41,8 @@ namespace WFInfo
         private string githubVersion;
         public bool rememberMe;
         private LogCapture EElogWatcher;
+        private Task autoThread;
+
 
         public Data()
         {
@@ -312,7 +314,6 @@ namespace WFInfo
         {
             Main.AddLog("Checking for Updates to Databases");
             JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
-            //todo: fix Exception thrown: 'System.IO.FileNotFoundException' in mscorlib.dll being thrown here
             bool saveDatabases = LoadMarket(allFiltered);
 
             foreach (KeyValuePair<string, JToken> elem in marketItems)
@@ -754,9 +755,7 @@ namespace WFInfo
 
             return lowest;
         }
-
-        private Task autoThread;
-
+        
         private void LogChanged(object sender, string line)
         {
             if (autoThread != null && !autoThread.IsCompleted) return;
@@ -788,9 +787,10 @@ namespace WFInfo
                     }
 
                 Overlay.rewardsDisplaying = false;
-
+                Main.AddLog("Looping through rewards");
                 foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
                 {
+                    Main.AddLog(rewardscreen.ToString());
                     var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
                     if (rewardCollection.PrimeNames.Count == 0)
                         return;
@@ -888,6 +888,8 @@ namespace WFInfo
         {
         #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             Main.AddLog("Connecting to websocket");
+            marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
+
             if (marketSocket.IsAlive || marketSocket.ReadyState == WebSocketState.Connecting)
             {
                 return false;
@@ -917,16 +919,11 @@ namespace WFInfo
 
             marketSocket.OnOpen += (sender, e) =>
             {
-                if (OCR.VerifyWarframe())
-                {
-                    marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}");
-                }
-                else
-                    marketSocket.Send("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
-
+                marketSocket.Send(OCR.VerifyWarframe()
+                    ? "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}"
+                    : "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
             };
 
-            marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
             try
             {
                 marketSocket.SetCookie(new WebSocketSharp.Net.Cookie("JWT", JWT));

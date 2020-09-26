@@ -414,7 +414,7 @@ namespace WFInfo
             activeKeyVal = Key.NoName;
         }
 
-        private void Searchit_key_box_KeyUp(object sender, KeyEventArgs e) //todo this doesn't fucking work. I don't know why, but it just does not
+        private void Searchit_key_box_KeyUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
 
@@ -514,9 +514,19 @@ namespace WFInfo
 
         private void Displaytime_number_box_KeyUp(object sender, KeyEventArgs e)
         {
-            delay = int.Parse(Displaytime_number_box.Text);
-            settingsObj["Delay"] = delay;
-            Save();
+            try
+            {
+                var num = Regex.Replace(Displaytime_number_box.Text, "[^0-9.]", "");
+                delay = int.Parse(num);
+                settingsObj["Delay"] = delay;
+                Save();
+            }
+            catch (Exception exception)
+            {
+                Main.AddLog($"Unable to parse display time change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
+                Displaytime_number_box.Text = settingsObj["Delay"].ToString();
+            }
+
         }
 
         private void EfficencyMin_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
@@ -551,16 +561,41 @@ namespace WFInfo
 
         private void EfficencyMin_number_box_Copy_KeyUp(object sender, KeyEventArgs e)
         {
-            minimumEfficiencyValue = double.Parse(EfficencyMin_number_box_Copy.Text);
-            settingsObj["MinimumEfficiencyValue"] = minimumEfficiencyValue;
-            Save();
+            try
+            {
+                var num = Regex.Replace(EfficencyMin_number_box_Copy.Text, "[^0-9.]", "");
+                minimumEfficiencyValue = double.Parse(EfficencyMin_number_box_Copy.Text);
+                if (minimumEfficiencyValue > maximumEfficiencyValue)
+                    throw new Exception("Minimum efficiency can not be more than maximum.");
+                EfficencyMin_number_box_Copy.Text = num;
+                settingsObj["MinimumEfficiencyValue"] = minimumEfficiencyValue;
+                Save();
+            }
+            catch (Exception exception)
+            {
+                Main.AddLog($"Unable to parse display time change, new val would have been: {EfficencyMin_number_box_Copy.Text} Exception: {exception}");
+                EfficencyMin_number_box_Copy.Text = settingsObj["MinimumEfficiencyValue"].ToString();
+            }
         }
 
         private void EfficencyMax_number_box_Copy_KeyUp(object sender, KeyEventArgs e)
         {
-            maximumEfficiencyValue = double.Parse(EfficencyMax_number_box_Copy.Text);
-            settingsObj["MaximumEfficiencyValue"] = maximumEfficiencyValue;
-            Save();
+            try
+            {
+                var num = Regex.Replace(EfficencyMax_number_box_Copy.Text, "[^0-9.]", "");
+                maximumEfficiencyValue = double.Parse(EfficencyMax_number_box_Copy.Text);
+                if (maximumEfficiencyValue < minimumEfficiencyValue)
+                    throw new Exception("Maximum efficiency can not be less than minimum.");
+                EfficencyMax_number_box_Copy.Text = num;
+                settingsObj["MaximumEfficiencyValue"] = maximumEfficiencyValue;
+                Save();
+            }
+            catch (Exception exception)
+            {
+                Main.AddLog($"Unable to parse display time change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
+                EfficencyMax_number_box_Copy.Text = settingsObj["MaximumEfficiencyValue"].ToString();
+            }
+            
         }
     }
 }

@@ -234,10 +234,10 @@ namespace WFInfo
             #region Populate grouped collection
             RelicNodes = new List<TreeNode>();
 
-            TreeNode lith = new TreeNode("Lith", "");
-            TreeNode meso = new TreeNode("Meso", "");
-            TreeNode neo = new TreeNode("Neo", "");
-            TreeNode axi = new TreeNode("Axi", "");
+            TreeNode lith = new TreeNode("Lith", "", 0);
+            TreeNode meso = new TreeNode("Meso", "", 0);
+            TreeNode neo = new TreeNode("Neo", "", 0);
+            TreeNode axi = new TreeNode("Axi", "", 0);
             RelicNodes.AddRange(new[] { lith, meso, neo, axi });
             int eraNum = 0;
             foreach (TreeNode head in RelicNodes)
@@ -247,13 +247,13 @@ namespace WFInfo
                 {
                     JObject primeItems = (JObject)Main.dataBase.relicData[head.Name][prop.Name];
                     string vaulted = primeItems["vaulted"].ToObject<bool>() ? "vaulted" : "";
-                    TreeNode relic = new TreeNode(prop.Name, vaulted);
+                    TreeNode relic = new TreeNode(prop.Name, vaulted, 0);
                     relic.Era = head.Name;
                     foreach (KeyValuePair<string, JToken> kvp in primeItems)
                     {
                         if (kvp.Key != "vaulted" && Main.dataBase.marketData.TryGetValue(kvp.Value.ToString(), out JToken marketValues))
                         {
-                            TreeNode part = new TreeNode(kvp.Value.ToString(), "");
+                            TreeNode part = new TreeNode(kvp.Value.ToString(), "", 0);
                             part.SetPartText(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), kvp.Key);
                             relic.AddChild(part);
                         }

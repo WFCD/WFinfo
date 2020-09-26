@@ -95,15 +95,64 @@
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Foreground="{Binding NameBrush}"/>
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Foreground="#506464" Padding="5,2,0,0" FontWeight="Normal" />
                             </StackPanel>
-
+                            
                             <Grid Grid.Column="1" Margin="5,0,5,0" Background="Transparent">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0" Margin="-13,0,0,0">
+                                
+                                <Label Content="✓" Foreground="#506464" FontSize="13" Padding="0,-13,0,0">
+                                    <Label.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick" Command="{Binding MarkComplete}" />
+                                    </Label.InputBindings>
+                                    <Label.Style>
+                                        <Style>
+                                            <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                        <Condition Binding="{Binding Children.Count}" Value="2" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                        <Condition Binding="{Binding Children.Count}" Value="3" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                        <Condition Binding="{Binding Children.Count}" Value="4" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                        <Condition Binding="{Binding Children.Count}" Value="5" />
+                                                        <Condition Binding="{Binding ShowAll}" Value="1"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                        <Condition Binding="{Binding Children.Count}" Value="6" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Label.Style>
+                                    </Label>
+                                
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0" Margin="0,0,0,0">
                                     <StackPanel.Style>
                                         <Style>
                                             <Style.Triggers>
@@ -113,7 +162,9 @@
                                             </Style.Triggers>
                                         </Style>
                                     </StackPanel.Style>
-                                    <Label Content="＋" Foreground="#506464" FontSize="13" Padding="0,2,0,0">
+                                    
+                                    
+                                    <Label Content="＋" Foreground="#506464" FontSize="13" Padding="0,-13,0,0">
                                         <Label.InputBindings>
                                             <MouseBinding MouseAction="LeftClick" Command="{Binding IncrementPart}" />
                                         </Label.InputBindings>
@@ -124,7 +175,7 @@
                                                     <MultiDataTrigger>
                                                         <MultiDataTrigger.Conditions>
                                                             <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
-                                                            <Condition  Binding="{Binding Children.Count}" Value="0" />
+                                                            <Condition Binding="{Binding Children.Count}" Value="0" />
                                                         </MultiDataTrigger.Conditions>
                                                         <Setter Property="TextBlock.Visibility" Value="Visible" />
                                                     </MultiDataTrigger>
@@ -132,6 +183,8 @@
                                             </Style>
                                         </Label.Style>
                                     </Label>
+                                    
+
                                     <TextBlock x:Name="OwnedTextBlock" Text="{Binding Col1_Text1}" Foreground="{Binding NameBrush}" />
                                     <Label Content="－" Foreground="#506464" FontSize="13" Padding="0,2,0,0">
                                         <Label.InputBindings>

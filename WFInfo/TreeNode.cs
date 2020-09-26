@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -90,15 +91,17 @@ namespace WFInfo
         public static Brush BACK_BRUSH = new SolidColorBrush(BACK_COLOR);
         public static Brush BACK_U_BRUSH = new SolidColorBrush(BACK_U_COLOR);
 
-        public TreeNode(string name, string vaulted)
+        public TreeNode(string name, string vaulted, byte showAll)
         {
             Name = name;
             Vaulted = vaulted;
-
+            ShowAll = showAll;
             ChildrenFiltered = new List<TreeNode>();
             Children = new List<TreeNode>();
             SetSilent();
         }
+
+        public object ShowAll { get; set; }
 
         public bool topLevel = false;
 
@@ -124,7 +127,7 @@ namespace WFInfo
         }
         public string Name_Sort
         {
-            get { return Parent != null ? Parent.SortNum + _era + " " + _name : SortNum + _name; }
+            get { return current != null ? current.SortNum + _era + " " + _name : SortNum + _name; }
             set { SetField(ref _name, value); }
         }
         public string EqmtName_Sort
@@ -395,11 +398,11 @@ namespace WFInfo
         public string GetFullName()
         {
             string prnt = Name;
-            TreeNode temp = Parent;
+            TreeNode temp = current;
             while (temp != null)
             {
                 prnt = temp.Name + "/" + prnt;
-                temp = temp.Parent;
+                temp = temp.current;
             }
             return prnt;
         }
@@ -407,11 +410,11 @@ namespace WFInfo
         private void PrintItemToConsole(Dictionary<string, bool> matchedText)
         {
             string prnt = Name + ": ";
-            TreeNode temp = Parent;
+            TreeNode temp = current;
             while (temp != null)
             {
                 prnt = temp.Name + "/" + prnt;
-                temp = temp.Parent;
+                temp = temp.current;
             }
             foreach (KeyValuePair<string, bool> kvp in matchedText)
             {
@@ -653,7 +656,7 @@ namespace WFInfo
 
         public Visibility IsVisible
         {
-            get { return (_forceVisibility || Parent == null || Parent.IsExpanded || topLevel) ? Visibility.Visible : Visibility.Collapsed; }
+            get { return (_forceVisibility || current == null || current.IsExpanded || topLevel) ? Visibility.Visible : Visibility.Collapsed; }
         }
 
         private bool _forceVisibility = false;
@@ -693,10 +696,10 @@ namespace WFInfo
             private set { SetField(ref _children, value); }
         }
 
-        public TreeNode Parent;
+        public TreeNode current;
         public void AddChild(TreeNode kid)
         {
-            kid.Parent = this;
+            kid.current = this;
             Children.Add(kid);
         }
 
@@ -718,6 +721,13 @@ namespace WFInfo
             get { return _increment; }
             private set { SetField(ref _increment, value); }
         }
+        
+        private ICommand _markcomplete;
+        public ICommand MarkComplete
+        {
+            get { return _markcomplete; }
+            private set { SetField(ref _markcomplete, value); }
+        }
 
         private string dataRef;
 
@@ -726,24 +736,35 @@ namespace WFInfo
             dataRef = eqmtRef;
             DecrementPart = new SimpleCommand(DecrementPartFunc);
             IncrementPart = new SimpleCommand(IncrementPartFunc);
+            MarkComplete = new SimpleCommand(MarkCompleteFunc);
         }
-
+        
         public async void DecrementPartFunc()
         {
-            if (Parent.dataRef != null)
+            if (current.dataRef != null)
             {
-                await System.Threading.Tasks.Task.Run(() => DecrementPartThreaded(Parent));
-
-
+                await System.Threading.Tasks.Task.Run(() => DecrementPartThreaded(current));
             }
         }
 
         public async void IncrementPartFunc()
         {
-            if (Parent.dataRef != null)
+            if (current.dataRef != null)
             {
-                await System.Threading.Tasks.Task.Run(() => IncrementPartThreaded(Parent));
+                await System.Threading.Tasks.Task.Run(() => IncrementPartThreaded(current));
             }
+        }
+        
+        public async void MarkCompleteFunc()
+        {
+            await System.Threading.Tasks.Task.Run(() => MarkSetAsComplete(this));
+
+            /*Main.AddLog("test");
+            Main.AddLog(current.dataRef);
+            if (current.dataRef != null)
+            {
+                Main.AddLog("test");
+            }*/
         }
 
         private void DecrementPartThreaded(TreeNode Parent)
@@ -753,7 +774,6 @@ namespace WFInfo
             if (owned > 0)
             {
                 job["owned"] = owned - 1;
-                Main.dataBase.SaveAllJSONs();
                 Owned_Val--;
                 Parent.Owned_Val--;
                 Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
@@ -764,11 +784,11 @@ namespace WFInfo
                 {
                     EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
                 });
-
+                Main.dataBase.SaveAllJSONs();
             }
         }
 
-        private void IncrementPartThreaded(TreeNode Parent) //todo: Fix that when the set is completed, the parent node will close
+        private void IncrementPartThreaded(TreeNode Parent)
         {
             JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
             int count = job["count"].ToObject<int>();
@@ -788,6 +808,39 @@ namespace WFInfo
                     EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
                 });
             }
+        }
+
+        private void MarkSetAsComplete(TreeNode Parent)
+        {
+            JObject primeParent = Main.dataBase.equipmentData[Parent.dataRef]["parts"] as JObject;
+
+            foreach (var part in primeParent)
+            {
+                int count = part.Value["count"].ToObject<int>();
+                int owned = part.Value["owned"].ToObject<int>();
+                if (owned < count)
+                {
+                    part.Value["owned"] = count;
+                    Owned_Val = (int)Count_Val;
+                    Debug.WriteLine(part.Key);
+                    primeParent[part.Key]["owned"] = count;
+                    Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
+                    Col1_Text1 = Owned_Val + "/" + Count_Val;
+                    foreach (var currentChild in Parent.Children)
+                    {
+                        if (!part.Key.Contains(currentChild.Name)) continue;
+                        currentChild.Owned_Val = count;
+                        currentChild.Diff_Val = currentChild.Owned_Val / currentChild.Count_Val - 0.01 * currentChild.Count_Val;
+                        currentChild.Col1_Text1 = currentChild.Owned_Val + "/" + currentChild.Count_Val;
+                        break;
+                    }
+                }
+            }
+            Main.dataBase.SaveAllJSONs();
+            Main.RunOnUIThread(() =>
+            {
+                EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
+            });
         }
     }
 }
