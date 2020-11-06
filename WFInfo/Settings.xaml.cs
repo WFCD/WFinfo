@@ -57,6 +57,8 @@ namespace WFInfo
         internal static int delay;
         public static bool Highlight;
         internal static bool highContrast;
+        public static int overlayXOffsetValue;
+        public static int overlayYOffsetValue;
         public static double maximumEfficiencyValue;
         public static double minimumEfficiencyValue;
         public static bool automaticListing;
@@ -76,10 +78,13 @@ namespace WFInfo
         {
             DataContext = this;
 
+            Overlay_sliders.Visibility = Visibility.Collapsed; // default hidden for the majority of states
+
             if (settingsObj.GetValue("Display").ToString() == "Overlay")
             {
                 OverlayRadio.IsChecked = true;
-                Height = 392;
+                Overlay_sliders.Visibility = Visibility.Visible;
+                Height = 488;
             }
             else if (settingsObj.GetValue("Display").ToString() == "Light")
             {
@@ -114,6 +119,11 @@ namespace WFInfo
             if (Convert.ToBoolean(settingsObj.GetValue("AutoList")))
                 Autolist.IsChecked = true;
 
+            OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
+            OverlayYOffset_number_box.Text = overlayYOffsetValue.ToString(Main.culture);
+            OverlayXOffset_slider.Value = (double)settingsObj["OverlayXOffsetValue"];
+            OverlayYOffset_slider.Value = (double)settingsObj["OverlayYOffsetValue"];
+
             EfficencyMax_number_box_Copy.Text = maximumEfficiencyValue.ToString(Main.culture);
             EfficencyMin_number_box_Copy.Text = minimumEfficiencyValue.ToString(Main.culture);
             Displaytime_number_box.Text = delay.ToString(Main.culture);
@@ -145,6 +155,7 @@ namespace WFInfo
             settingsObj["Display"] = "Window";
             isOverlaySelected = false;
             isLightSlected = false;
+            Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
             Height = 328;
@@ -156,9 +167,10 @@ namespace WFInfo
             settingsObj["Display"] = "Overlay";
             isOverlaySelected = true;
             isLightSlected = false;
+            Overlay_sliders.Visibility = Visibility.Visible;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 392;
+            Height = 488;
             Save();
         }
 
@@ -392,6 +404,7 @@ namespace WFInfo
             settingsObj["Display"] = "Light";
             isOverlaySelected = false;
             isLightSlected = true;
+            Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboard = true;
             clipboardCheckbox.IsChecked = true;
             clipboardCheckbox.IsEnabled = false;
@@ -526,7 +539,102 @@ namespace WFInfo
                 Main.AddLog($"Unable to parse display time change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
                 Displaytime_number_box.Text = settingsObj["Delay"].ToString();
             }
+        }
 
+        private void OverlayXOffset_number_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                hidden.Focus();
+            }
+            var numStr = Regex.Replace(OverlayXOffset_number_box.Text, @"[^-?\d]+$", "");
+            OverlayXOffset_number_box.Text = numStr;
+        }
+
+        private void OverlayXOffset_number_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            OverlayXOffset_number_box.Text = "";
+        }
+        
+        private void OverlayXOffset_number_box_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (IsValidOverlayOffset(OverlayXOffset_number_box.Text))
+            {
+                int num = ParseOverlayOffsetStringToInt(OverlayXOffset_number_box.Text);
+                UpdateOverlayXOffset(num);
+            }
+        }
+
+        private void OverlayYOffset_number_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                hidden.Focus();
+            }
+            var numStr = Regex.Replace(OverlayYOffset_number_box.Text, @"[^-?\d]+$", "");
+            OverlayYOffset_number_box.Text = numStr;
+        }
+
+        private void OverlayYOffset_number_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            OverlayYOffset_number_box.Text = "";
+        }
+
+        private void OverlayYOffset_number_box_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (IsValidOverlayOffset(OverlayYOffset_number_box.Text))
+            {
+                int num = ParseOverlayOffsetStringToInt(OverlayYOffset_number_box.Text);
+                UpdateOverlayYOffset(num);
+            }
+        }
+
+        private bool IsValidOverlayOffset(string offsetValue)
+        {
+            string pattern = @"[^\d]+$";
+            return !Regex.IsMatch(offsetValue, pattern);
+        }
+
+        private int ParseOverlayOffsetStringToInt(string offset)
+        {
+            try
+            {
+                var num = Regex.Replace(offset, @"[^-?\d]+$", "");
+                return int.Parse(num, Main.culture);
+            }
+            catch (Exception exception)
+            {
+                Main.AddLog($"Unable to parse overlay offset value, new val would have been: {offset} Exception: {exception}");
+                return 0;
+            }
+        }
+
+        private void UpdateOverlayXOffset(int xOffset)
+        {
+            overlayXOffsetValue = xOffset;
+            settingsObj["OverlayXOffsetValue"] = overlayXOffsetValue;
+            OverlayXOffset_slider.Value = overlayXOffsetValue;
+            OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
+            Save();
+        }
+
+        private void UpdateOverlayYOffset(int yOffset)
+        {
+            overlayYOffsetValue = yOffset;
+            settingsObj["OverlayYOffsetValue"] = overlayYOffsetValue;
+            OverlayYOffset_slider.Value = overlayYOffsetValue;
+            OverlayYOffset_number_box.Text = overlayYOffsetValue.ToString(Main.culture);
+            Save();
+        }
+
+        private void OverlayXOffset_slider_Updated(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateOverlayXOffset((int)e.NewValue);
+        }
+
+        private void OverlayYOffset_slider_Updated(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateOverlayYOffset((int)e.NewValue);
         }
 
         private void EfficencyMin_number_box_Copy_KeyDown(object sender, KeyEventArgs e)

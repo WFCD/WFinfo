@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:WFInfo"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d" 
-        Title="Settings" Height="392" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+        Title="Settings" Height="488" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
@@ -40,6 +40,16 @@
             <Viewbox Margin="188,39,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="123" >
                 <CheckBox x:Name="HighContrastCheckbox" Content="High contrast" ToolTip="Enable High contrast for the overlay." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="HighContrastCheckbox_Click"/>
             </Viewbox>
+        </Grid>
+        <Grid x:Name="Overlay_sliders" HorizontalAlignment="Left" Margin="0,149,0,0" Width="334" Height="96" VerticalAlignment="Top">
+          <Rectangle Stroke="#FF646464" Margin="0,-1,0,0"/>
+          <Label Content="Overlay Offset" VerticalAlignment="Top" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="335" Height="31" FontSize="{DynamicResource FontSize}" FontFamily="{StaticResource Roboto}" Margin="0,0,-1,0"/>
+          <Label Content="X" Margin="0,30,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="32" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
+          <Slider x:Name="OverlayXOffset_slider" Margin="32,36,0,0" Width="180" Height="16" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom" VerticalAlignment="Top" Maximum="1000" Minimum="-1000" TickFrequency="10" TickPlacement="None" Value="0" IsSnapToTickEnabled="True" ValueChanged="OverlayXOffset_slider_Updated" ToolTip="The X Offset of the overlay. Increasing from left to right of the screen."/>
+          <TextBox x:Name="OverlayXOffset_number_box" ToolTip="The X Offset of the overlay. Increasing from left to right of the screen." Margin="217,30,10,0" TextWrapping="Wrap" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="OverlayXOffset_number_box_KeyDown" Cursor="Arrow" GotFocus="OverlayXOffset_number_box_GotFocus" KeyUp="OverlayXOffset_number_box_KeyUp" VerticalAlignment="Top" Text="0"/>
+          <Label Content="Y" Margin="0,60,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="32" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
+          <Slider x:Name="OverlayYOffset_slider" Margin="32,66,0,0" Width="180" Height="16" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom" VerticalAlignment="Top" Maximum="1000" Minimum="-1000" TickFrequency="10" TickPlacement="None" Value="0" IsSnapToTickEnabled="True" ValueChanged="OverlayYOffset_slider_Updated" ToolTip="The Y Offset of the overlay. Increasing from top to bottom of the screen."/>
+            <TextBox x:Name="OverlayYOffset_number_box" ToolTip="The Y Offset of the overlay. Increasing from top to bottom of the screen." Margin="217,60,10,0" TextWrapping="Wrap" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="OverlayYOffset_number_box_KeyDown" Cursor="Arrow" GotFocus="OverlayYOffset_number_box_GotFocus" KeyUp="OverlayYOffset_number_box_KeyUp" VerticalAlignment="Top" Text="0"/>
         </Grid>
         <Grid x:Name="Activation_key" Margin="0,0,0,126" Height="117" VerticalAlignment="Bottom">
             <Rectangle x:Name="First_window2" Stroke="#FF646464" Margin="0,-1,0,0" Fill="#FF1B1B1B"/>
