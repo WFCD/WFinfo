@@ -559,6 +559,18 @@ namespace WFInfo
             if (IsValidOverlayOffset(OverlayXOffset_number_box.Text))
             {
                 overlayXOffsetValue = ParseOverlayOffsetStringToInt(OverlayXOffset_number_box.Text);
+
+                int width = 2000; // presume bounding
+                if (OCR.VerifyWarframe())
+                {
+                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
+                    {
+                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
+                    }
+                    width = OCR.window.Width;
+                }
+                overlayXOffsetValue = (overlayXOffsetValue <= -1 * width / 2) ? (-1 * width / 2) : (overlayXOffsetValue >= width / 2) ? (width / 2) : overlayXOffsetValue; // clamp value to valid bound
+
                 settingsObj["OverlayXOffsetValue"] = overlayXOffsetValue;
                 OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
                 Save();
@@ -586,6 +598,18 @@ namespace WFInfo
             {
                 // -1 is for inverting the y-coord so that the user is presented with an increasing value from bottom to top
                 overlayYOffsetValue = (-1) * ParseOverlayOffsetStringToInt(OverlayYOffset_number_box.Text);
+
+                int height = 2000; // presume bounding
+                if (OCR.VerifyWarframe())
+                {
+                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
+                    {
+                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
+                    }
+                    height = OCR.window.Height;
+                }
+                overlayYOffsetValue = (overlayYOffsetValue <= -1 * height / 2) ? (-1 * height / 2) : (overlayYOffsetValue >= height / 2) ? (height / 2) : overlayYOffsetValue; // clamp value to valid bound
+
                 settingsObj["OverlayYOffsetValue"] = overlayYOffsetValue;
                 OverlayYOffset_number_box.Text = (-1 * overlayYOffsetValue).ToString(Main.culture);
                 Save();
