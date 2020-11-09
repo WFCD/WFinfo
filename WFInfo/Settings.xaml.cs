@@ -84,7 +84,7 @@ namespace WFInfo
             {
                 OverlayRadio.IsChecked = true;
                 Overlay_sliders.Visibility = Visibility.Visible;
-                Height = 488;
+                Height = 462;
             }
             else if (settingsObj.GetValue("Display").ToString() == "Light")
             {
@@ -120,9 +120,7 @@ namespace WFInfo
                 Autolist.IsChecked = true;
 
             OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
-            OverlayYOffset_number_box.Text = overlayYOffsetValue.ToString(Main.culture);
-            OverlayXOffset_slider.Value = (double)settingsObj["OverlayXOffsetValue"];
-            OverlayYOffset_slider.Value = (double)settingsObj["OverlayYOffsetValue"];
+            OverlayYOffset_number_box.Text = (-1 * overlayYOffsetValue).ToString(Main.culture);
 
             EfficencyMax_number_box_Copy.Text = maximumEfficiencyValue.ToString(Main.culture);
             EfficencyMin_number_box_Copy.Text = minimumEfficiencyValue.ToString(Main.culture);
@@ -170,7 +168,7 @@ namespace WFInfo
             Overlay_sliders.Visibility = Visibility.Visible;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 488;
+            Height = 462;
             Save();
         }
 
@@ -560,8 +558,10 @@ namespace WFInfo
         {
             if (IsValidOverlayOffset(OverlayXOffset_number_box.Text))
             {
-                int num = ParseOverlayOffsetStringToInt(OverlayXOffset_number_box.Text);
-                UpdateOverlayXOffset(num);
+                overlayXOffsetValue = ParseOverlayOffsetStringToInt(OverlayXOffset_number_box.Text);
+                settingsObj["OverlayXOffsetValue"] = overlayXOffsetValue;
+                OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
+                Save();
             }
         }
 
@@ -584,8 +584,11 @@ namespace WFInfo
         {
             if (IsValidOverlayOffset(OverlayYOffset_number_box.Text))
             {
-                int num = ParseOverlayOffsetStringToInt(OverlayYOffset_number_box.Text);
-                UpdateOverlayYOffset(num);
+                // -1 is for inverting the y-coord so that the user is presented with an increasing value from bottom to top
+                overlayYOffsetValue = (-1) * ParseOverlayOffsetStringToInt(OverlayYOffset_number_box.Text);
+                settingsObj["OverlayYOffsetValue"] = overlayYOffsetValue;
+                OverlayYOffset_number_box.Text = (-1 * overlayYOffsetValue).ToString(Main.culture);
+                Save();
             }
         }
 
@@ -607,34 +610,6 @@ namespace WFInfo
                 Main.AddLog($"Unable to parse overlay offset value, new val would have been: {offset} Exception: {exception}");
                 return 0;
             }
-        }
-
-        private void UpdateOverlayXOffset(int xOffset)
-        {
-            overlayXOffsetValue = xOffset;
-            settingsObj["OverlayXOffsetValue"] = overlayXOffsetValue;
-            OverlayXOffset_slider.Value = overlayXOffsetValue;
-            OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
-            Save();
-        }
-
-        private void UpdateOverlayYOffset(int yOffset)
-        {
-            overlayYOffsetValue = yOffset;
-            settingsObj["OverlayYOffsetValue"] = overlayYOffsetValue;
-            OverlayYOffset_slider.Value = overlayYOffsetValue;
-            OverlayYOffset_number_box.Text = overlayYOffsetValue.ToString(Main.culture);
-            Save();
-        }
-
-        private void OverlayXOffset_slider_Updated(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            UpdateOverlayXOffset((int)e.NewValue);
-        }
-
-        private void OverlayYOffset_slider_Updated(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            UpdateOverlayYOffset((int)e.NewValue);
         }
 
         private void EfficencyMin_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
