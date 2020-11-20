@@ -149,6 +149,10 @@ namespace WFInfo
                 Settings.settingsObj["AutoDelay"] = 250L;
             Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");
 
+            if (!Settings.settingsObj.TryGetValue("Auto", out _))
+                Settings.settingsObj["Auto"] = 250L;
+            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
+
             if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
                 Settings.settingsObj["ImageRetentionTime"] = 12;
             Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"), Main.culture);
@@ -180,6 +184,14 @@ namespace WFInfo
             if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
                 Settings.settingsObj["HighContrast"] = false;
             Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
+
+            if (!Settings.settingsObj.TryGetValue("OverlayXOffsetValue", out _))
+                Settings.settingsObj["OverlayXOffsetValue"] = 0;
+            Settings.overlayXOffsetValue = Convert.ToInt32(Settings.settingsObj.GetValue("OverlayXOffsetValue"), Main.culture);
+
+            if (!Settings.settingsObj.TryGetValue("OverlayYOffsetValue", out _))
+                Settings.settingsObj["OverlayYOffsetValue"] = 0;
+            Settings.overlayYOffsetValue = Convert.ToInt32(Settings.settingsObj.GetValue("OverlayYOffsetValue"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("AutoList", out _))
                 Settings.settingsObj["AutoList"] = false;

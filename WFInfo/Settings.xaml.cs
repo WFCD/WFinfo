@@ -57,6 +57,8 @@ namespace WFInfo
         internal static int delay;
         public static bool Highlight;
         internal static bool highContrast;
+        public static int overlayXOffsetValue;
+        public static int overlayYOffsetValue;
         public static double maximumEfficiencyValue;
         public static double minimumEfficiencyValue;
         public static bool automaticListing;
@@ -76,10 +78,13 @@ namespace WFInfo
         {
             DataContext = this;
 
+            Overlay_sliders.Visibility = Visibility.Collapsed; // default hidden for the majority of states
+
             if (settingsObj.GetValue("Display").ToString() == "Overlay")
             {
                 OverlayRadio.IsChecked = true;
-                Height = 392;
+                Overlay_sliders.Visibility = Visibility.Visible;
+                Height = 462;
             }
             else if (settingsObj.GetValue("Display").ToString() == "Light")
             {
@@ -114,6 +119,9 @@ namespace WFInfo
             if (Convert.ToBoolean(settingsObj.GetValue("AutoList")))
                 Autolist.IsChecked = true;
 
+            OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
+            OverlayYOffset_number_box.Text = (-1 * overlayYOffsetValue).ToString(Main.culture);
+
             EfficencyMax_number_box_Copy.Text = maximumEfficiencyValue.ToString(Main.culture);
             EfficencyMin_number_box_Copy.Text = minimumEfficiencyValue.ToString(Main.culture);
             Displaytime_number_box.Text = delay.ToString(Main.culture);
@@ -145,6 +153,7 @@ namespace WFInfo
             settingsObj["Display"] = "Window";
             isOverlaySelected = false;
             isLightSlected = false;
+            Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
             Height = 328;
@@ -156,9 +165,10 @@ namespace WFInfo
             settingsObj["Display"] = "Overlay";
             isOverlaySelected = true;
             isLightSlected = false;
+            Overlay_sliders.Visibility = Visibility.Visible;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 392;
+            Height = 462;
             Save();
         }
 
@@ -392,6 +402,7 @@ namespace WFInfo
             settingsObj["Display"] = "Light";
             isOverlaySelected = false;
             isLightSlected = true;
+            Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboard = true;
             clipboardCheckbox.IsChecked = true;
             clipboardCheckbox.IsEnabled = false;
@@ -526,7 +537,103 @@ namespace WFInfo
                 Main.AddLog($"Unable to parse display time change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
                 Displaytime_number_box.Text = settingsObj["Delay"].ToString();
             }
+        }
 
+        private void OverlayXOffset_number_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                hidden.Focus();
+            }
+            var numStr = Regex.Replace(OverlayXOffset_number_box.Text, @"[^-?\d]+$", "");
+            OverlayXOffset_number_box.Text = numStr;
+        }
+
+        private void OverlayXOffset_number_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            OverlayXOffset_number_box.Text = "";
+        }
+        
+        private void OverlayXOffset_number_box_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (IsValidOverlayOffset(OverlayXOffset_number_box.Text))
+            {
+                overlayXOffsetValue = ParseOverlayOffsetStringToInt(OverlayXOffset_number_box.Text);
+
+                int width = 2000; // presume bounding
+                if (OCR.VerifyWarframe())
+                {
+                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
+                    {
+                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
+                    }
+                    width = OCR.window.Width;
+                }
+                overlayXOffsetValue = (overlayXOffsetValue <= -1 * width / 2) ? (-1 * width / 2) : (overlayXOffsetValue >= width / 2) ? (width / 2) : overlayXOffsetValue; // clamp value to valid bound
+
+                settingsObj["OverlayXOffsetValue"] = overlayXOffsetValue;
+                OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
+                Save();
+            }
+        }
+
+        private void OverlayYOffset_number_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                hidden.Focus();
+            }
+            var numStr = Regex.Replace(OverlayYOffset_number_box.Text, @"[^-?\d]+$", "");
+            OverlayYOffset_number_box.Text = numStr;
+        }
+
+        private void OverlayYOffset_number_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            OverlayYOffset_number_box.Text = "";
+        }
+
+        private void OverlayYOffset_number_box_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (IsValidOverlayOffset(OverlayYOffset_number_box.Text))
+            {
+                // -1 is for inverting the y-coord so that the user is presented with an increasing value from bottom to top
+                overlayYOffsetValue = (-1) * ParseOverlayOffsetStringToInt(OverlayYOffset_number_box.Text);
+
+                int height = 2000; // presume bounding
+                if (OCR.VerifyWarframe())
+                {
+                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
+                    {
+                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
+                    }
+                    height = OCR.window.Height;
+                }
+                overlayYOffsetValue = (overlayYOffsetValue <= -1 * height / 2) ? (-1 * height / 2) : (overlayYOffsetValue >= height / 2) ? (height / 2) : overlayYOffsetValue; // clamp value to valid bound
+
+                settingsObj["OverlayYOffsetValue"] = overlayYOffsetValue;
+                OverlayYOffset_number_box.Text = (-1 * overlayYOffsetValue).ToString(Main.culture);
+                Save();
+            }
+        }
+
+        private bool IsValidOverlayOffset(string offsetValue)
+        {
+            string pattern = @"[^\d]+$";
+            return !Regex.IsMatch(offsetValue, pattern);
+        }
+
+        private int ParseOverlayOffsetStringToInt(string offset)
+        {
+            try
+            {
+                var num = Regex.Replace(offset, @"[^-?\d]+$", "");
+                return int.Parse(num, Main.culture);
+            }
+            catch (Exception exception)
+            {
+                Main.AddLog($"Unable to parse overlay offset value, new val would have been: {offset} Exception: {exception}");
+                return 0;
+            }
         }
 
         private void EfficencyMin_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
