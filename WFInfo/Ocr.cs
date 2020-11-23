@@ -1688,7 +1688,7 @@ namespace WFInfo
                     // Assume Fullscreen, don't do anything
                     Main.AddLog($"Fullscreen detected (0x{styles.ToString("X8", Main.culture)}, {window.ToString()}");
                     currentStyle = WindowStyle.FULLSCREEN;
-                    //Show the Fullscreen prompt  ICILEFULLSCREEN
+                    //Show the Fullscreen prompt
                     if (Settings.isOverlaySelected)
                     {
                         Main.AddLog($"Showing the Fullscreen Reminder");
