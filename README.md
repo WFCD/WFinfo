@@ -13,7 +13,7 @@ WFInfo does this by screenshotting the game window, cropping out the part text, 
 1. If you have an older version of Windows 10, ensure you have installed [.NET Framework Runtime 4.8](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer) Note: Windows 7 is no longer supported due to dpi detection issues.
 2. Download the [latest release](https://github.com/WFCD/WFinfo/releases/latest)
 3. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
-4. Click the Cog Icon to open Settings, and configure your hotkey, scaling, etc
+4. Click the Cog Icon to open Settings, and configure your hotkey, etc
 5. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)
 
 # Will I get Banned?
@@ -59,7 +59,7 @@ Here's a quick highlight of the information shown:
 * Clipboard Copy
   * When enabled, WFInfo will copy the plat prices and the part names into the clipboard so you can just paste them into Warframe's Chat for your party-mates.
   * This does attempt to link the parts themselves so that it's easier to see.
-
+  
 ![AutoUpdate](https://wfinfo.warframestat.us/images/Github/Auto_Update.PNG)
 
 * Auto Update!
@@ -85,6 +85,18 @@ The Equipment window allows you to look at each prime equipment and its parts. I
 If you mark an item here, it will show up during a fissure reward screen.
 
 ##### Note: For both of these info panels, there are several sorting options that allow you to find what is best for you. Also they have grouping features that allow you to see and sort all relics, or to only sort from one era, i.e. Lith.
+
+### Snap-it
+
+When looking at your Prime inventory, you can scan it to see how many plats, ducats or even plats/ducats is worth each items, really usefull for baro's ducats, or just take a quick look at what items you can sell on WFM.
+The scanned items list can even be exported to a CSV file, allowing you to see them from a different angle and maths.
+  
+### Warframe.Market connectivity
+
+Manange your Warframe.Market online status automatically by detecting if your game is running or by detecting your AFK status.
+Search for specific items on the go with the press of 2 keys, you even can add them to your listings without quitting your game.
+List your choosen prime rewards at the end of your mission by clicking the "Confirm Listing" buttons, even for multiple items.
+If you really like this software, you even can post a review on the devs profile by the press of one button !
 
 # Credits/Contact:
 
