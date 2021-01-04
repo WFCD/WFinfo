@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -16,9 +18,7 @@ namespace WFInfo
 {
     public class CustomEntrypoint
     {
-
-        private const string traineddata = "engbest.traineddata";
-        private const string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/" + traineddata;
+        private static string traineddata_hotlink = "https://raw.githubusercontent.com/zoo-hyeon/WFinfo/master/WFInfo/tessdata/";
         private const string traineddata_md5 = "7af2ad02d11702c7092a5f8dd044d52f";
 
         private const string liblept = "liblept1760";
@@ -56,13 +56,14 @@ namespace WFInfo
         private static string tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
         private static readonly string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
 
-        private const string tessdata_local = @"tessdata\" + traineddata;
         private static readonly string appdata_tessdata_folder = appPath + @"\tessdata";
-        private static readonly string app_data_traineddata = appdata_tessdata_folder + @"\" + traineddata;
 
         private static readonly InitialDialogue dialogue = new InitialDialogue();
         private static bool AvxSupport = true;
         public static CancellationTokenSource stopDownloadTask;
+
+        private static string tessdata_local = @"tessdata\ko.traineddata";
+        private static string app_data_traineddata = appdata_tessdata_folder + @"\ko.traineddata";
 
         [STAThreadAttribute]
         public static void Main()
@@ -90,6 +91,9 @@ namespace WFInfo
                 tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/vb-archive/WFInfo/lib";
             }
 
+            // @TODO : Setting initializing in MainWindow but don't know use Setting Option in CustomEntryPoint
+            //tessdata_local = @"tessdata\" + Settings.locale + ".traineddata";
+            //app_data_traineddata = appdata_tessdata_folder + @"\" + Settings.locale + ".traineddata";
             int filesNeeded = 0;
             if (!File.Exists(app_data_traineddata) || GetMD5hash(app_data_traineddata) != traineddata_md5)
                 filesNeeded++;
@@ -246,7 +250,7 @@ namespace WFInfo
             webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgressCallback);
             token.Register(webClient.CancelAsync);
 
-            if (!File.Exists(app_data_traineddata) || GetMD5hash(app_data_traineddata) != traineddata_md5)
+            if (!File.Exists(app_data_traineddata))
             {
                 if (Directory.Exists("tessdata") && File.Exists(tessdata_local))
                 {
@@ -256,7 +260,9 @@ namespace WFInfo
                 {
                     try
                     {
-                        await webClient.DownloadFileTaskAsync(traineddata_hotlink, app_data_traineddata);
+                        // @TODO : Setting initializing in MainWindow but don't know use Setting Option in CustomEntryPoint
+                        string hotlink = traineddata_hotlink + "ko.traineddata";
+                        await webClient.DownloadFileTaskAsync(hotlink, app_data_traineddata);
                     }
                     catch (Exception) when (stopDownloadTask.Token.IsCancellationRequested) { }
                 }

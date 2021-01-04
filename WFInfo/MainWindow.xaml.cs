@@ -41,16 +41,6 @@ namespace WFInfo
             listener = new LowLevelListener(); //publisher
             try
             {
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"))
-                {
-                    Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
-
-                }
-                else
-                {
-                    Settings.settingsObj = new JObject();
-                    welcomeDialogue = new WelcomeDialogue();
-                }
                 InitializeSettings();
 
                 LowLevelListener.KeyEvent += main.OnKeyAction;
@@ -87,8 +77,20 @@ namespace WFInfo
 
 
 
-        private void InitializeSettings()
+        public void InitializeSettings()
         {
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json") && Settings.settingsObj == null)
+            {
+                Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
+
+            }
+            else
+            {
+                if (Settings.settingsObj == null)
+                    Settings.settingsObj = new JObject();
+                welcomeDialogue = new WelcomeDialogue();
+            }
+
             if (!Settings.settingsObj.TryGetValue("Display", out _))
                 Settings.settingsObj["Display"] = "Overlay";
             Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
@@ -140,6 +142,10 @@ namespace WFInfo
             if (!Settings.settingsObj.TryGetValue("Debug", out _))
                 Settings.settingsObj["Debug"] = false;
             Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
+
+            if (!Settings.settingsObj.TryGetValue("Locale", out _))
+                Settings.settingsObj["Locale"] = "ko";
+            Settings.locale = Settings.settingsObj.GetValue("Locale").ToString();
 
             if (!Settings.settingsObj.TryGetValue("Clipboard", out _))
                 Settings.settingsObj["Clipboard"] = false;

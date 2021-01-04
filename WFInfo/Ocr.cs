@@ -114,17 +114,17 @@ namespace WFInfo
         // Screen / Resolution Scaling - Used to adjust pixel values to each person's monitor
         public static double screenScaling;
 
-        public static TesseractEngine firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
+        public static TesseractEngine firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
         {
             DefaultPageSegMode = PageSegMode.SingleBlock
         };
-        public static TesseractEngine secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
+        public static TesseractEngine secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
         {
             DefaultPageSegMode = PageSegMode.SingleBlock
         };
 
         public static TesseractEngine[] engines = new TesseractEngine[4];
-        public static Regex RE = new Regex("[^a-z&// ]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static Regex RE = new Regex("[^a-z°¡-ÆR&//]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
         public const int pixleRewardWidth = 968;
@@ -157,7 +157,7 @@ namespace WFInfo
 
             for (int i = 0; i < 4; i++)
             {
-                engines[i] = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
+                engines[i] = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
                 {
                     DefaultPageSegMode = PageSegMode.SingleBlock
                 };
@@ -559,7 +559,7 @@ namespace WFInfo
                     if (first.Replace(" ", "").Length > 6)
                     {
                         Debug.WriteLine(secondChecks[i]);
-                        string second = secondChecks[i];
+                        string second = secondChecks[i].Replace(" ", "");
                         string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
                         //if (secondProximity[i] < firstProximity[i])
                         //{
@@ -852,7 +852,8 @@ namespace WFInfo
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
                 });
             }
-            Main.snapItOverlayWindow.tempImage.Dispose();
+            if (Main.snapItOverlayWindow.tempImage != null)
+                Main.snapItOverlayWindow.tempImage.Dispose();
             end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
             watch.Stop();
@@ -1015,7 +1016,7 @@ namespace WFInfo
                 case WFtheme.HIGH_CONTRAST:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.35; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
                 case WFtheme.LEGACY:
-                    return (test.GetBrightness() >= 0.75 && test.GetSaturation() <= 0.2)
+                    return (test.GetBrightness() >= 0.65)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
                 case WFtheme.NIDUS:
                     return (Math.Abs(test.GetHue() - (primary.GetHue() + 6)) < 8 && test.GetSaturation() >= 0.30)
@@ -1371,7 +1372,7 @@ namespace WFInfo
             string ret = "";
             using (Page page = engine.Process(image))
                 ret = page.GetText().Trim();
-            return RE.Replace(ret, "").Trim();
+            return RE.Replace(ret, "").Replace(" ", "").Trim();
         }
 
         internal static List<string> SeparatePlayers(Bitmap image, TesseractEngine engine)

@@ -43,6 +43,7 @@ namespace WFInfo
                 backupKeyVal = value;
             }
         }
+        public static string locale;
         public static Key DebugModifierKey;
         public static Key SnapitModifierKey;
         public static Key SearchItModifierKey;
