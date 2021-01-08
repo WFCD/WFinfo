@@ -150,7 +150,7 @@ namespace WFInfo
         }
 
         // Load item list from Sheets
-        private void ReloadItems()
+        public void ReloadItems()
         {
             marketItems = new JObject();
 
@@ -583,12 +583,18 @@ namespace WFInfo
 
         public int LevenshteinDistance(string s, string t)
         {
-            // for korean
-            if(Settings.locale.Equals("ko"))
+            switch(Settings.locale)
             {
-                return LevenshteinDistanceKorean(s, t);
+                case "ko":
+                    // for korean
+                    return LevenshteinDistanceKorean(s, t);
+                default:
+                    return LevenshteinDistanceDefault(s, t);
             }
+        }
 
+        public int LevenshteinDistanceDefault(string s, string t)
+        {
             // Levenshtein Distance determines how many character changes it takes to form a known result
             // For example: Nuvo Prime is closer to Nova Prime (2) then Ash Prime (4)
             // For more info see: https://en.wikipedia.org/wiki/Levenshtein_distance
@@ -635,6 +641,7 @@ namespace WFInfo
 
             return d[n, m];
         }
+
         public static bool isKorean(String str)
         {
             char c = str[0];
@@ -645,52 +652,24 @@ namespace WFInfo
         }
         public string getLocaleNameData(string s)
         {
-            bool foundLocaleName = false;
             bool saveDatabases = false;
             string localeName = "";
             foreach (var marketItem in marketItems)
             {
-                if (marketItem.Key.ToString() == "version")
+                if (marketItem.Key == "version")
                     continue;
                 string[] split = marketItem.Value.ToString().Split('|');
-                if (split.Length == 3)
+                if (split[0] == s)
                 {
-                    //Locale Item data exists
-                    if (split[0] == s)
+                    if (split.Length == 3)
                     {
                         localeName = split[2];
-                        break;
                     }
-                }
-                else
-                {
-                    //Locale Item data not exists
-                    try
+                    else
                     {
-                        JObject item = JsonConvert.DeserializeObject<JObject>(
-                            WebClient.DownloadString("https://api.warframe.market/v1/items/" + split[1]));
-                        item = item["payload"]["item"].ToObject<JObject>();
-                        foreach (var partItem in item["items_in_set"])
-                        {
-                            if (partItem["en"]["item_name"].ToString() == split[0])
-                            {
-                                saveDatabases = true;
-                                marketItems[marketItem.Key] = marketItem.Value.ToString() + "|" + partItem[Settings.locale]["item_name"];
-                                if (partItem[Settings.locale]["item_name"].ToString() == s)
-                                {
-                                    foundLocaleName = true;
-                                    localeName = partItem[Settings.locale]["item_name"].ToString();
-                                }
-                                break;
-                            }
-                        }
-
-                        if (foundLocaleName)
-                            break;
+                        localeName = split[0];
                     }
-                    catch (WebException)
-                    {
-                    }
+                    break;
                 }
             }
             if (saveDatabases)

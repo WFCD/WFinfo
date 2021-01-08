@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using WebSocketSharp;
 
@@ -85,17 +86,17 @@ namespace WFInfo
             {
                 OverlayRadio.IsChecked = true;
                 Overlay_sliders.Visibility = Visibility.Visible;
-                Height = 462;
+                Height = 490;
             }
             else if (settingsObj.GetValue("Display").ToString() == "Light")
             {
                 LightRadio.IsChecked = true;
-                Height = 328;
+                Height = 356;
             }
             else
             {
                 WindowRadio.IsChecked = true;
-                Height = 328;
+                Height = 356;
             }
 
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
@@ -119,6 +120,15 @@ namespace WFInfo
 
             if (Convert.ToBoolean(settingsObj.GetValue("AutoList")))
                 Autolist.IsChecked = true;
+
+            string settingLocale = Convert.ToString(settingsObj.GetValue("Locale"));
+            foreach (ComboBoxItem localeItem in localeCombobox.Items)
+            {
+                if(settingLocale.Equals(localeItem.Tag.ToString()))
+                {
+                    localeItem.IsSelected = true;
+                }
+            }
 
             OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
             OverlayYOffset_number_box.Text = (-1 * overlayYOffsetValue).ToString(Main.culture);
@@ -157,7 +167,7 @@ namespace WFInfo
             Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 328;
+            Height = 356;
             Save();
         }
 
@@ -169,7 +179,7 @@ namespace WFInfo
             Overlay_sliders.Visibility = Visibility.Visible;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 462;
+            Height = 490;
             Save();
         }
 
@@ -306,6 +316,18 @@ namespace WFInfo
             clipboard = clipboardCheckbox.IsChecked.Value;
             Save();
         }
+        private void localeComboboxSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            ComboBoxItem item = (ComboBoxItem) localeCombobox.SelectedItem;
+            
+            string selectedLocale = item.Tag.ToString();
+            settingsObj["Locale"] = selectedLocale;
+            locale = selectedLocale;
+            Save();
+
+            _ = OCR.updateEngineAsync();
+            Main.dataBase.ReloadItems();
+        }
 
         public static string GetKeyName(Key key)
         {
@@ -407,7 +429,7 @@ namespace WFInfo
             clipboard = true;
             clipboardCheckbox.IsChecked = true;
             clipboardCheckbox.IsEnabled = false;
-            Height = 328;
+            Height = 356;
             Save();
         }
 

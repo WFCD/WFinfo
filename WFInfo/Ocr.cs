@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management.Instrumentation;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -157,6 +158,10 @@ namespace WFInfo
 
             for (int i = 0; i < 4; i++)
             {
+                if(engines[i] != null)
+                {
+                    engines[i].Dispose();
+                }
                 engines[i] = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
                 {
                     DefaultPageSegMode = PageSegMode.SingleBlock
@@ -1549,6 +1554,36 @@ namespace WFInfo
             Main.snapItOverlayWindow.Topmost = true;
             Main.snapItOverlayWindow.Focusable = true;
             Main.snapItOverlayWindow.Focus();
+        }
+
+        public static async Task updateEngineAsync()
+        {
+            // get trainned data
+            string traineddata_hotlink = CustomEntrypoint.traineddata_hotlink + Settings.locale + ".traineddata";
+            string app_data_traineddata_path = CustomEntrypoint.appdata_tessdata_folder + @"\" + Settings.locale + ".traineddata";
+
+            WebClient webClient = new WebClient();
+
+            if (!File.Exists(app_data_traineddata_path))
+            {
+                try
+                {
+                    await webClient.DownloadFileTaskAsync(traineddata_hotlink, app_data_traineddata_path);
+                }
+                catch (Exception) { }
+            }
+
+            OCR.Init();
+            firstEngine.Dispose();
+            firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
+            {
+                DefaultPageSegMode = PageSegMode.SingleBlock
+            };
+            secondEngine.Dispose();
+            secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
+            {
+                DefaultPageSegMode = PageSegMode.SingleBlock
+            };
         }
 
         public static bool VerifyWarframe()
