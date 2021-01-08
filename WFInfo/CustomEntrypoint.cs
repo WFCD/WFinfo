@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -11,19 +10,22 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Management;
 
 namespace WFInfo
 {
     public class CustomEntrypoint
     {
-        private static string traineddata_hotlink = "https://raw.githubusercontent.com/zoo-hyeon/WFinfo/master/WFInfo/tessdata/";
-        private const string traineddata_md5 = "7af2ad02d11702c7092a5f8dd044d52f";
+        // for /WFCD/Wfinfo
+        //public static string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/";
+        // for /zoo-hyeon/Wfinfo
+        public static string traineddata_hotlink = "https://raw.githubusercontent.com/zoo-hyeon/WFinfo/master/WFInfo/tessdata/";
 
         private const string liblept = "liblept1760";
         private const string libtesseract = "libtesseract400";
         private const string tesseract_version_folder = "tesseract4";
+
+        private static string[] list_of_traineddata;
 
         private static string[] list_of_dlls = new string[]
         {
@@ -56,14 +58,11 @@ namespace WFInfo
         private static string tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
         private static readonly string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
 
-        private static readonly string appdata_tessdata_folder = appPath + @"\tessdata";
+        public static readonly string appdata_tessdata_folder = appPath + @"\tessdata";
 
         private static readonly InitialDialogue dialogue = new InitialDialogue();
         private static bool AvxSupport = true;
         public static CancellationTokenSource stopDownloadTask;
-
-        private static string tessdata_local = @"tessdata\ko.traineddata";
-        private static string app_data_traineddata = appdata_tessdata_folder + @"\ko.traineddata";
 
         [STAThreadAttribute]
         public static void Main()
@@ -91,12 +90,33 @@ namespace WFInfo
                 tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/vb-archive/WFInfo/lib";
             }
 
-            // @TODO : Setting initializing in MainWindow but don't know use Setting Option in CustomEntryPoint
-            //tessdata_local = @"tessdata\" + Settings.locale + ".traineddata";
-            //app_data_traineddata = appdata_tessdata_folder + @"\" + Settings.locale + ".traineddata";
+            // for /WFCD/Wfinfo
+            //JObject obj =
+            //    JsonConvert.DeserializeObject<JObject>(
+            //        webClient.DownloadString("https://api.github.com/repos/WFCD/WFinfo/git/trees/2b1bc31cb069a7f358551dd2a55f95b347039fa5"));
+            // for /zoo-hyeon/Wfinfo
+            WebClient webClient = new WebClient();
+            JObject obj =
+                JsonConvert.DeserializeObject<JObject>(
+                    webClient.DownloadString("https://api.github.com/repos/zoo-hyeon/WFinfo/git/trees/18cb5be682159f9fbf17cfa2feb76ad244a1bd3b"));
+            
+            JArray entries = JArray.FromObject(obj["tree"]);
+            list_of_traineddata = new string[entries.Count];
+
             int filesNeeded = 0;
-            if (!File.Exists(app_data_traineddata) || GetMD5hash(app_data_traineddata) != traineddata_md5)
-                filesNeeded++;
+            for (int i = 0; i < entries.Count; i++)
+            {
+                var entry = entries[i];
+                string path = entry["path"].ToString();
+                list_of_traineddata[i] = path;
+            
+                string filePath = appdata_tessdata_folder + @"\" + list_of_traineddata[i];
+                string fileUrl  = traineddata_hotlink + list_of_traineddata[i];
+                if (!File.Exists(filePath) || GetMD5hash(filePath) != GetMD5hashByURL(fileUrl))
+                {
+                    filesNeeded++;
+                }
+            }
 
             for (int i = 0; i < list_of_dlls.Length; i++)
             {
@@ -237,6 +257,16 @@ namespace WFInfo
                 }
             }
         }
+        public static string GetMD5hashByURL(string url)
+        {
+            WebClient webClient = new WebClient();
+            using (var md5 = MD5.Create())
+            {
+                byte[] stream = webClient.DownloadData(url);
+                byte[] hash = md5.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+        }
 
         private static void DownloadProgressCallback(object sender, DownloadProgressChangedEventArgs e)
         {
@@ -250,23 +280,28 @@ namespace WFInfo
             webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgressCallback);
             token.Register(webClient.CancelAsync);
 
-            if (!File.Exists(app_data_traineddata))
+            for (int i = 0; i < list_of_traineddata.Length; i++)
             {
-                if (Directory.Exists("tessdata") && File.Exists(tessdata_local))
+                string localPath = @"tessdata\" + list_of_traineddata[i];
+                string filePath  = appdata_tessdata_folder + @"\" + list_of_traineddata[i];
+                string fileUrl   = traineddata_hotlink + list_of_traineddata[i];
+
+                if (!File.Exists(filePath))
                 {
-                    File.Copy(tessdata_local, app_data_traineddata);
-                }
-                else
-                {
-                    try
+                    if (Directory.Exists("tessdata") && File.Exists(localPath))
                     {
-                        // @TODO : Setting initializing in MainWindow but don't know use Setting Option in CustomEntryPoint
-                        string hotlink = traineddata_hotlink + "ko.traineddata";
-                        await webClient.DownloadFileTaskAsync(hotlink, app_data_traineddata);
+                        File.Copy(localPath, filePath);
                     }
-                    catch (Exception) when (stopDownloadTask.Token.IsCancellationRequested) { }
+                    else
+                    {
+                        try
+                        {
+                            await webClient.DownloadFileTaskAsync(fileUrl, filePath);
+                        }
+                        catch (Exception) when (stopDownloadTask.Token.IsCancellationRequested) { }
+                    }
+                    dialogue.Dispatcher.Invoke(() => { dialogue.FileComplete(); });
                 }
-                dialogue.Dispatcher.Invoke(() => { dialogue.FileComplete(); });
             }
 
             for (int i = 0; i < list_of_dlls.Length; i++)
