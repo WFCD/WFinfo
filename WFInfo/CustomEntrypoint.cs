@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -25,7 +23,11 @@ namespace WFInfo
         private const string libtesseract = "libtesseract400";
         private const string tesseract_version_folder = "tesseract4";
 
-        private static string[] list_of_traineddata;
+        private static string[] list_of_traineddata = new string[]
+        {
+            "en.traineddata",
+            "ko.traineddata"
+        };
 
         private static string[] list_of_dlls = new string[]
         {
@@ -90,34 +92,18 @@ namespace WFInfo
                 tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/vb-archive/WFInfo/lib";
             }
 
-            // for /WFCD/Wfinfo
-            //JObject obj =
-            //    JsonConvert.DeserializeObject<JObject>(
-            //        webClient.DownloadString("https://api.github.com/repos/WFCD/WFinfo/git/trees/2b1bc31cb069a7f358551dd2a55f95b347039fa5"));
-            // for /zoo-hyeon/Wfinfo
-            WebClient webClient = new WebClient();
-            JObject obj =
-                JsonConvert.DeserializeObject<JObject>(
-                    webClient.DownloadString("https://api.github.com/repos/zoo-hyeon/WFinfo/git/trees/18cb5be682159f9fbf17cfa2feb76ad244a1bd3b"));
-            
-            JArray entries = JArray.FromObject(obj["tree"]);
-            list_of_traineddata = new string[entries.Count];
-
             int filesNeeded = 0;
-            for (int i = 0; i < entries.Count; i++)
+            for (int i = 0; i < list_of_traineddata.Length; i++)
             {
-                var entry = entries[i];
-                string path = entry["path"].ToString();
-                list_of_traineddata[i] = path;
-            
-                string filePath = appdata_tessdata_folder + @"\" + list_of_traineddata[i];
-                string fileUrl  = traineddata_hotlink + list_of_traineddata[i];
+                string fileName = list_of_traineddata[i];
+                string filePath = appdata_tessdata_folder + @"\" + fileName;
+                string fileUrl  = traineddata_hotlink + fileName;
                 if (!File.Exists(filePath) || GetMD5hash(filePath) != GetMD5hashByURL(fileUrl))
                 {
                     filesNeeded++;
                 }
             }
-
+            
             for (int i = 0; i < list_of_dlls.Length; i++)
             {
                 string dll = list_of_dlls[i];

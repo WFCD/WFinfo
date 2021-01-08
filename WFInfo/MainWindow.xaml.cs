@@ -144,7 +144,7 @@ namespace WFInfo
             Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
 
             if (!Settings.settingsObj.TryGetValue("Locale", out _))
-                Settings.settingsObj["Locale"] = "ko";
+                Settings.settingsObj["Locale"] = "en";
             Settings.locale = Settings.settingsObj.GetValue("Locale").ToString();
 
             if (!Settings.settingsObj.TryGetValue("Clipboard", out _))
