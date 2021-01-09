@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -326,7 +327,11 @@ namespace WFInfo
             Save();
 
             _ = OCR.updateEngineAsync();
-            Main.dataBase.ReloadItems();
+
+            _ = Task.Run(async () =>
+              {
+                  Main.dataBase.ReloadItems();
+              });
         }
 
         public static string GetKeyName(Key key)
