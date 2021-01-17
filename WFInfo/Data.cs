@@ -27,36 +27,23 @@ namespace WFInfo
 
         private static List<Dictionary<int, List<int>>> korean = new List<Dictionary<int, List<int>>>() {
             new Dictionary<int, List<int>>() {
-//		        { 0, new List<Character>{'け', 'げ', 'こ', 'そ'}) },
-//		        { 1, new List<Character>{'い', 'ぇ', 'え', 'ぜ', 'ぉ', 'さ', 'ざ'}) },
-//		        { 2, new List<Character>{'じ', 'す', 'ず'}) },
-//		        { 3, new List<Character>{'ぁ', 'あ', 'せ', 'し', 'ぞ'}) },
-                { 0, new List<int>{ 6, 7, 8, 16 } },
-                { 1, new List<int>{ 2, 3, 4, 16, 5, 9, 10 } },
-                { 2, new List<int>{ 12, 13, 14 } },
-                { 3, new List<int>{ 0, 1, 15, 11, 18 } }
+                { 0, new List<int>{ 6, 7, 8, 16 } }, // け, げ, こ, そ
+                { 1, new List<int>{ 2, 3, 4, 16, 5, 9, 10 } }, // い, ぇ, え, ぜ, ぉ, さ, ざ
+                { 2, new List<int>{ 12, 13, 14 } }, // じ, す, ず
+                { 3, new List<int>{ 0, 1, 15, 11, 18 } } // ぁ, あ, せ, し, ぞ
             },
             new Dictionary<int, List<int>>() {
-//		        { 0, new List<Character>{'び', 'つ', 'だ', 'て', 'ぢ', 'ひ'}) },
-//		        { 1, new List<Character>{'は', 'な', 'の', 'ど'}) },
-//		        { 2, new List<Character>{'っ', 'た', 'づ', 'ち', 'ね', 'と'}) },
-//		        { 3, new List<Character>{'ぱ', 'ぬ', 'で', 'ば', 'に'}) },
-                { 0, new List<int>{ 20, 5, 1, 7, 3, 19 } },
-                { 1, new List<int>{ 16, 11, 15, 10 } },
-                { 2, new List<int>{ 4, 0, 6, 2, 14, 9 } },
-                { 3, new List<int>{ 18, 13, 8, 17, 12 } },
+                { 0, new List<int>{ 20, 5, 1, 7, 3, 19 } }, // び, つ, だ, て, ぢ, ひ
+                { 1, new List<int>{ 16, 11, 15, 10 } }, // は, な, の, ど
+                { 2, new List<int>{ 4, 0, 6, 2, 14, 9 } }, // っ, た, づ, ち, ね, と
+                { 3, new List<int>{ 18, 13, 8, 17, 12 } } // ぱ, ぬ, で, ば, に
             },
             new Dictionary<int, List<int>>() {
-//		        { 0, new List<Character>({'け', 'げ', 'ご', 'そ'}) },
-//		        { 1, new List<Character>({'い', 'ぅ', 'う', 'ぇ', 'ぉ', 'お', 'か', 'が', 'き', 'ぎ', 'く', 'ぐ', 'さ', 'ざ', 'ぜ'}) },
-//		        { 2, new List<Character>({'じ', 'ず'}) },
-//		        { 3, new List<Character>({'ぁ', 'あ', 'ぃ', 'せ', 'し', 'ぞ'}) },
-//		        { 4, new List<Character>({' '}) },
-                { 0, new List<int>{ 16, 17, 18, 26 } },
-                { 1, new List<int>{ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19, 20, 25 } },
-                { 2, new List<int>{ 22, 23 } },
-                { 3, new List<int>{ 1, 2, 3, 24, 21, 27 } },
-                { 4, new List<int>{ 0 } },
+                { 0, new List<int>{ 16, 17, 18, 26 } }, // け, げ, ご, そ
+                { 1, new List<int>{ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19, 20, 25 } }, // い, ぅ, う, ぇ, ぉ, お, か, が, き, ぎ, く, ぐ, さ, ざ, ぜ
+                { 2, new List<int>{ 22, 23 } }, // じ, ず
+                { 3, new List<int>{ 1, 2, 3, 24, 21, 27 } }, // ぁ, あ, ぃ, せ, ち, ぞ
+                { 4, new List<int>{ 0 } }, // 
             }
         };
 

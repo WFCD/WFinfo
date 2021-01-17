@@ -564,7 +564,7 @@ namespace WFInfo
                     if (first.Replace(" ", "").Length > 6)
                     {
                         Debug.WriteLine(secondChecks[i]);
-                        string second = secondChecks[i].Replace(" ", "");
+                        string second = secondChecks[i];
                         string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
                         //if (secondProximity[i] < firstProximity[i])
                         //{
@@ -1377,7 +1377,7 @@ namespace WFInfo
             string ret = "";
             using (Page page = engine.Process(image))
                 ret = page.GetText().Trim();
-            return RE.Replace(ret, "").Replace(" ", "").Trim();
+            return RE.Replace(ret, "").Trim();
         }
 
         internal static List<string> SeparatePlayers(Bitmap image, TesseractEngine engine)

@@ -15,9 +15,7 @@ namespace WFInfo
     public class CustomEntrypoint
     {
         // for /WFCD/Wfinfo
-        //public static string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/";
-        // for /zoo-hyeon/Wfinfo
-        public static string traineddata_hotlink = "https://raw.githubusercontent.com/zoo-hyeon/WFinfo/master/WFInfo/tessdata/";
+        public static string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/";
 
         private const string liblept = "liblept1760";
         private const string libtesseract = "libtesseract400";
