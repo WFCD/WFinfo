@@ -203,9 +203,9 @@ namespace WFInfo
                 Settings.settingsObj["AutoList"] = false;
             Settings.automaticListing = (bool)Settings.settingsObj.GetValue("AutoList");
 
-            if (!Settings.settingsObj.TryGetValue("DoAutoCheck", out _))
-                Settings.settingsObj["DoAutoCheck"] = true;
-            Settings.doDoubleCheck = (bool)Settings.settingsObj.GetValue("DoAutoCheck");
+            if (!Settings.settingsObj.TryGetValue("DoDoubleCheck", out _))
+                Settings.settingsObj["DoDoubleCheck"] = true;
+            Settings.doDoubleCheck = (bool)Settings.settingsObj.GetValue("DoDoubleCheck");
             
             if (!Settings.settingsObj.TryGetValue("MaximumEfficiencyValue", out _))
                 Settings.settingsObj["MaximumEfficiencyValue"] = 9.5;

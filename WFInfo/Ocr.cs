@@ -146,7 +146,7 @@ namespace WFInfo
         private static List<string> secondChecks;
 #pragma warning disable IDE0044 // Add readonly modifier
         private static int[] firstProximity = { -1, -1, -1, -1 };
-        private static int[] secondProximity = { -1, -1, -1, -1 };
+        private static int[] secondProximity = { -1, -1, -1, -1 }; //TODO is never being written to, essentialy dissabling slow processing
 #pragma warning restore IDE0044 // Add readonly modifier
         private static string timestamp;
 
@@ -195,7 +195,7 @@ namespace WFInfo
             bigScreenshot = file ?? CaptureScreenshot();
             try
             {
-                parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
+				parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
             }
             catch (Exception e)
             {
@@ -210,13 +210,12 @@ namespace WFInfo
             for (int i = 0; i < parts.Count; i++)
             {
                 int tempI = i;
-                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]); });
+                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]);});
             }
             Task.WaitAll(tasks);
 
             // Remove any empty items from the array
             firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s)).ToArray();
-
             if (firstChecks == null || firstChecks.Length == 0 || CheckIfError())
             {
                 processingActive = false;
@@ -368,7 +367,7 @@ namespace WFInfo
 
                 if (partialScreenshot.Height < 70 && Settings.doDoubleCheck)
                 {
-                    SlowSecondProcess();
+                    // SlowSecondProcess(); secondProximity is never being written to, thus this will always result in that there is no change in the first scan. I've commented this out to increase preformance. @Dapal
                     end = watch.ElapsedMilliseconds;
                     Main.StatusUpdate("Completed second pass(" + (end - start) + "ms)", 0);
                 }
@@ -387,13 +386,6 @@ namespace WFInfo
                 .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
                 .ToList().ForEach(f => f.Delete());
 
-            if (bigScreenshot != null)
-            {
-                bigScreenshot.Save(Main.AppPath + @"\Debug\FullScreenShot " + timestamp + ".png");
-                RewarIndexScreenshot = bigScreenshot;
-                bigScreenshot.Dispose();
-                bigScreenshot = null;
-            }
             if (partialScreenshot != null)
             {
                 partialScreenshot.Save(Main.AppPath + @"\Debug\PartBox " + timestamp + ".png");
@@ -560,7 +552,12 @@ namespace WFInfo
                 {
                     Debug.WriteLine(firstChecks[i]);
                     string first = firstChecks[i];
-                    Main.AddLog($"First proximity {firstProximity[i]}, Second proximity {secondProximity[i]} Is the newer closer?: {secondProximity[i] > firstProximity[i]}");
+                    if (secondProximity[i] == -1) {
+                        Main.AddLog("Second proximity was not set");
+                        continue;
+                    } else {
+                        Main.AddLog($"First proximity {firstProximity[i]}, Second proximity {secondProximity[i]} Is the newer closer?: {secondProximity[i] > firstProximity[i]}");
+                    }
                     if (first.Replace(" ", "").Length > 6)
                     {
                         Debug.WriteLine(secondChecks[i]);
@@ -1107,7 +1104,7 @@ namespace WFInfo
 
             try
             {
-                Main.AddLog($"Fullscreen is {fullScreen.Size}:, trying to clone: {rectangle.Size.ToString()} at {rectangle.Location.ToString()}");
+                Main.AddLog($"Fullscreen is {fullScreen.Size}:, trying to clone: {rectangle.Size} at {rectangle.Location}");
                 preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
             }
             catch (Exception ex)
@@ -1166,7 +1163,7 @@ namespace WFInfo
 
             scaling = -1;
             double lowestWeight = 0;
-            Rectangle uidebug = new Rectangle((topLine_100 - topLine_50) / 50 + topLine_50,preFilter.Height, preFilter.Width,50);
+            Rectangle uidebug = new Rectangle((topLine_100 - topLine_50) / 50 + topLine_50, (int)(preFilter.Height/screenScaling), preFilter.Width, 50);
             for (int i = 0; i <= 50; i++)
             {
                 int yFromTop = preFilter.Height - (i * (topLine_100 - topLine_50) / 50 + topLine_50);
@@ -1238,7 +1235,7 @@ namespace WFInfo
                 g.DrawRectangle(Pens.Red, rectangle);
                 g.DrawRectangle(Pens.Chartreuse, uidebug);
             }
-            fullScreen.Save(Main.AppPath + @"\Debug\DEBBUGGINGBOI" + timestamp + ".png");
+            fullScreen.Save(Main.AppPath + @"\Debug\BorderScreenshot " + timestamp + ".png");
 
 
             //postFilter.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
@@ -1377,7 +1374,7 @@ namespace WFInfo
             string ret = "";
             using (Page page = engine.Process(image))
                 ret = page.GetText().Trim();
-            return RE.Replace(ret, "").Trim();
+            return Regex.Replace(ret, @"\s+", "");
         }
 
         internal static List<string> SeparatePlayers(Bitmap image, TesseractEngine engine)
@@ -1539,7 +1536,7 @@ namespace WFInfo
             Size FullscreenSize = new Size(image.Width, image.Height);
             using (Graphics graphics = Graphics.FromImage(image))
                 graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
-
+            image.Save(Main.AppPath + @"\Debug\FullScreenShot " + timestamp + ".png");
             return image;
         }
 

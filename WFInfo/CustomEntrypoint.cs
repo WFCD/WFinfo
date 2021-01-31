@@ -15,7 +15,7 @@ namespace WFInfo
     public class CustomEntrypoint
     {
         // for /WFCD/Wfinfo
-        public static string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/";
+        public static string traineddata_hotlink = "https://raw.githubusercontent.com/zoo-hyeon/WFinfo/master/WFInfo/tessdata/";
 
         private const string liblept = "liblept1760";
         private const string libtesseract = "libtesseract400";
@@ -243,6 +243,7 @@ namespace WFInfo
         }
         public static string GetMD5hashByURL(string url)
         {
+            Debug.WriteLine(url);
             WebClient webClient = new WebClient();
             using (var md5 = MD5.Create())
             {
