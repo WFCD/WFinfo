@@ -26,6 +26,8 @@ Reference:
 
 https://forums.warframe.com/topic/875096-wfinfo-in-game-ducats-and-platinum-prices/?do=findComment&comment=9176107
 
+(However, he is now retired member, and no longer part of DE)
+
 # Features
 
 ### Expansive Part Information
@@ -60,7 +62,7 @@ Here's a quick highlight of the information shown:
   * When enabled, WFInfo will copy the plat prices and the part names into the clipboard so you can just paste them into Warframe's Chat for your party-mates.
   * This does attempt to link the parts themselves so that it's easier to see.
   
-![AutoUpdate](https://wfinfo.warframestat.us/images/Github/Auto_Update.PNG)
+![AutoUpdate](https://i.imgur.com/jnk0nXA.png)
 
 * Auto Update!
   * During the initial load of WFInfo, it will query our site to check for any updates available.
