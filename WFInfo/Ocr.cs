@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+ï»¿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -125,7 +125,7 @@ namespace WFInfo
         };
 
         public static TesseractEngine[] engines = new TesseractEngine[4];
-        public static Regex RE = new Regex("[^a-z°¡-ÆR&//]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static Regex RE = new Regex("[^a-zê°€-íž£]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
         public const int pixleRewardWidth = 968;
@@ -812,10 +812,10 @@ namespace WFInfo
             snapItImageFiltered.Dispose();
             if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
                 csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned," + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
-
             foreach (var part in foundParts)
             {
-                if (part.Name.Length < 13) // if part name is smaller than "Bo prime handle" skip current part
+                if (part.Name.Length < 13 && Settings.locale == "en" || part.Name.Length < 2 && Settings.locale == "ko") // if part name is smaller than "Bo prime handle" skip current part 
+                    //TODO: Add a min character for other locale here. I don't know what the shortest korean prime part is named.
                     continue;
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0]);
@@ -918,7 +918,7 @@ namespace WFInfo
                                             continue;
                                         }
                                     }
-                                    else if (currentWord.Length < 2)
+                                    else if (currentWord.Length < 2 && Settings.locale == "en")
                                     {
                                         g.FillRectangle(green, paddedBounds);
                                         numberTooFewCharacters++;
@@ -1374,7 +1374,7 @@ namespace WFInfo
             string ret = "";
             using (Page page = engine.Process(image))
                 ret = page.GetText().Trim();
-            return Regex.Replace(ret, @"\s+", "");
+            return RE.Replace(ret, "").Trim();
         }
 
         internal static List<string> SeparatePlayers(Bitmap image, TesseractEngine engine)
