@@ -26,6 +26,7 @@ namespace WFInfo
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
         public static Settings settingsWindow = new Settings();
         public static ErrorDialogue popup;
+        public static FullscreenReminder fullscreenpopup;
         public static UpdateDialogue update;
         public static SnapItOverlay snapItOverlayWindow = new SnapItOverlay();
         public static SearchIt searchBox = new SearchIt();
@@ -327,6 +328,11 @@ namespace WFInfo
         public static void SpawnErrorPopup(DateTime timeStamp, int gap = 30)
         {
             popup = new ErrorDialogue(timeStamp, gap);
+        }
+        
+        public static void SpawnFullscreenReminder()
+        {
+            fullscreenpopup = new FullscreenReminder();
         }
 
         private void LoadScreenshot()
