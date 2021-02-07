@@ -18,11 +18,11 @@ namespace WFInfo
     {
 
         private const string traineddata = "engbest.traineddata";
-        private const string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/" + traineddata;
+        private const string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/libs/tessdata/eng/" + traineddata;
         private const string traineddata_md5 = "7af2ad02d11702c7092a5f8dd044d52f";
 
-        private const string liblept = "liblept1760";
-        private const string libtesseract = "libtesseract400";
+        private const string liblept = "leptonica-1.80.0";
+        private const string libtesseract = "tesseract41";
         private const string tesseract_version_folder = "tesseract4";
 
         private static string[] list_of_dlls = new string[]
@@ -36,24 +36,26 @@ namespace WFInfo
 
         private static string[] list_of_checksums = new string[]
         {
-                "e5254009fce68dc5ace9307cb5e0ee5f",     //  x86/libtesseract400
-                "99d45c6347e46c35ece6d735df42f7f1",     //  x86/liblept1760  
-                "bfbaf1f36f4767648a229c65e46ec338",     //  x64/libtesseract400 
-                "bd2b84e121f1a3e7786f2cfa2d351eea",     //  x64/liblept1760 
-                "7849c3e838444e696fcfaa5e8b9b5c1e"      //  Tesseract
+                "f236077a6e5c1a558d5461841245a3d0",     //  x86/tesseract41
+                "bfc156ebfe3b86fbce3f24b475c19f20",     //  x86/leptonica-1.80.0
+                "a5dbd2c4a232f03913c206ed27eacb40",     //  x64/tesseract41
+                "35e3f58d3d868e244b103f901fb2c66d",     //  x64/leptonica-1.80.0
+                "02633504a3bb24517de50530bf6bc57c"      //  Tesseract
         };
 
         private static string[] list_of_checksums_AVX_free = new string[]
         {
-                "b03b474606c397c716bd509f19fb8a2d",     //  x86/libtesseract400
-                "99d45c6347e46c35ece6d735df42f7f1",     //  x86/liblept1760  
-                "cf729c20c0fe44f27b235f8ca5efe6b3",     //  x64/libtesseract400 
-                "bd2b84e121f1a3e7786f2cfa2d351eea",     //  x64/liblept1760 
-                "7849c3e838444e696fcfaa5e8b9b5c1e"      //  Tesseract
+                "298c0d71957cb2d82654373582c2313d",     //  x86/tesseract41
+                "bfc156ebfe3b86fbce3f24b475c19f20",     //  x86/leptonica-1.80.0
+                "3255fefb5dda0bb81adfbb1722fe45ef",     //  x64/tesseract41
+                "35e3f58d3d868e244b103f901fb2c66d",     //  x64/leptonica-1.80.0
+                "02633504a3bb24517de50530bf6bc57c"      //  Tesseract
         };
 
         private static readonly string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
-        private static string tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
+        private static readonly string libs_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/libs";
+        private static readonly string tesseract_hotlink_prefix = libs_hotlink_prefix + @"/tesseract41/";
+        private static string tesseract_hotlink_platform_specific_prefix;
         private static readonly string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
 
         private const string tessdata_local = @"tessdata\" + traineddata;
@@ -61,8 +63,32 @@ namespace WFInfo
         private static readonly string app_data_traineddata = appdata_tessdata_folder + @"\" + traineddata;
 
         private static readonly InitialDialogue dialogue = new InitialDialogue();
-        private static bool AvxSupport = true;
         public static CancellationTokenSource stopDownloadTask;
+
+
+        public static void cleanLegacyTesseractIfNeeded()
+        {
+            string[] legacy_dll_names = new string[]
+            {
+                @"\x86\libtesseract400.dll",
+                @"\x86\liblept1760.dll",
+                @"\x64\libtesseract400.dll",
+                @"\x64\liblept1760.dll"
+            };
+            using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+            {
+                string path_to_check;
+                foreach (string legacy_ddl_name in legacy_dll_names)
+                {
+                    path_to_check = app_data_tesseract_catalog + legacy_ddl_name;
+                    if (File.Exists(path_to_check))
+                    {
+                        sw.WriteLineAsync("Cleaning legacy leftover - " + legacy_ddl_name);
+                        File.Delete(path_to_check);
+                    }
+                }
+            }
+        }
 
         [STAThreadAttribute]
         public static void Main()
@@ -77,7 +103,8 @@ namespace WFInfo
 
             Directory.CreateDirectory(appdata_tessdata_folder);
 
-            AvxSupport = isAVX2Available();
+            cleanLegacyTesseractIfNeeded();
+            bool AvxSupport = isAVX2Available();
 
             if (!AvxSupport || File.Exists(appPath + @"\useSSE.txt"))
             {
@@ -87,7 +114,11 @@ namespace WFInfo
                 }
 
                 // SSE2 version without AVX optimizations - for very old pre-2013 CPUs
-                tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/vb-archive/WFInfo/lib";
+                tesseract_hotlink_platform_specific_prefix = tesseract_hotlink_prefix + @"/sse2";
+            }
+            else
+            {
+                tesseract_hotlink_platform_specific_prefix = tesseract_hotlink_prefix + @"/avx2";
             }
 
             int filesNeeded = 0;
@@ -110,7 +141,7 @@ namespace WFInfo
                 {
                     try
                     {
-                        RefreshTesseractDlls(stopDownloadTask.Token);
+                        RefreshTesseractDlls(stopDownloadTask.Token, AvxSupport);
                     }
                     catch (Exception ex)
                     {
@@ -184,7 +215,7 @@ namespace WFInfo
                 {
                     sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL is missing or corrupted, downloading");
                     WebClient webClient = new WebClient();
-                    webClient.DownloadFile(tesseract_hotlink_prefix + "/" + dll, path);
+                    webClient.DownloadFile(libs_hotlink_prefix + "/" + dll, path);
                 }
 
                 // Import DLL that includes low level check for AVX2 support
@@ -240,7 +271,7 @@ namespace WFInfo
             dialogue.Dispatcher.Invoke(() => { dialogue.UpdatePercentage(e.ProgressPercentage); });
         }
 
-        private static async void RefreshTesseractDlls(CancellationToken token)
+        private static async void RefreshTesseractDlls(CancellationToken token, bool AvxSupport)
         {
             WebClient webClient = new WebClient();
             webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgressCallback);
@@ -301,7 +332,14 @@ namespace WFInfo
                     {
                         try
                         {
-                            await webClient.DownloadFileTaskAsync(tesseract_hotlink_prefix + dll.Replace("\\", "/"), app_data_tesseract_catalog + dll);
+                            if (dll != @"\Tesseract.dll")
+                            {
+                                await webClient.DownloadFileTaskAsync(tesseract_hotlink_platform_specific_prefix + dll.Replace("\\", "/"), app_data_tesseract_catalog + dll);
+                            }
+                            else
+                            {
+                                await webClient.DownloadFileTaskAsync(tesseract_hotlink_prefix + dll.Replace("\\", "/"), app_data_tesseract_catalog + dll);
+                            }
                         }
                         catch (Exception) when (stopDownloadTask.Token.IsCancellationRequested) { }
                     }
