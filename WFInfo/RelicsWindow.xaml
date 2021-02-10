@@ -83,7 +83,7 @@
                         <HierarchicalDataTemplate.Resources>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="FontSize" Value="13" />
-                                <Setter Property="FontFamily" Value="{StaticResource Roboto}" />
+                                <Setter Property="FontFamily" Value="{StaticResource Roboto_Mono}" />
                                 <Setter Property="Foreground" Value="#FFB1D0D9" />
                                 <Setter Property="Padding" Value="0,2,0,0" />
                             </Style>
