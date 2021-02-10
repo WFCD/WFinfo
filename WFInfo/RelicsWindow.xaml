@@ -6,15 +6,15 @@
         mc:Ignorable="d"
         xmlns:local="clr-namespace:WFInfo"
         x:Class="WFInfo.RelicsWindow"
-        Title="Relics" Height="400" Width="450" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="450" MinWidth="450" MinHeight="200" Loaded="WindowLoaded">
+        Title="Relics" Height="400" Width="550" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="550" MinWidth="550" MinHeight="200" Loaded="WindowLoaded">
     <Window.Resources>
 
     </Window.Resources>
 
     <Grid MouseDown="MouseDown">
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
-        <Label MouseLeftButtonDown="ExpandAll" Content="＋" FontSize="15" ToolTip="Expand All Levels" Padding="0" Margin="0,26,429,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
-        <Label MouseLeftButtonDown="CollapseAll" Content="－" FontSize="15" ToolTip="Collapse All Levels" Padding="0" Margin="20,26,409,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Label MouseLeftButtonDown="ExpandAll" Content="＋" FontSize="15" ToolTip="Expand All Levels" Padding="0" Margin="0,26,529,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Label MouseLeftButtonDown="CollapseAll" Content="－" FontSize="15" ToolTip="Collapse All Levels" Padding="0" Margin="20,26,509,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
 
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1"/>
@@ -24,7 +24,7 @@
             <Label Content="Filter:" HorizontalAlignment="Left" Margin="155,0,0,0" Padding="0" VerticalContentAlignment="Center" />
 
         </Grid>
-        <Label x:Name="relicComboButton" MouseLeftButtonDown="ToggleShowAllRelics" Content="Relic Eras" FontSize="12" FontWeight="Normal" Margin="0,45,379,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Label x:Name="relicComboButton" MouseLeftButtonDown="ToggleShowAllRelics" Content="Relic Eras" FontSize="12" FontWeight="Normal" Margin="0,45,479,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
         <Grid Margin="1,46,1,0" Height="18" VerticalAlignment="Top">
 
 
@@ -91,8 +91,8 @@
                         <Grid Visibility="{Binding Grid_Shown}" Background="{Binding Background_Color}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="80" />
-                                <ColumnDefinition Width="135" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="155" />
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">

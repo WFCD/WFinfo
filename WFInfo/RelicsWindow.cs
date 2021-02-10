@@ -265,22 +265,12 @@ namespace WFInfo
                     
                     relic.SetRelicText();
                     head.AddChild(relic);
-                    if (vaulted.Length == 0)
-                    {
-                        sumIntact += double.Parse(relic.Col1_Text2);
-                        sumRad += double.Parse(relic.Col2_Text2);
-                       
-                    }
+
                     //groupedByAll.Items.Add(relic);
                     //Search.Items.Add(relic);
                 }
-                double delta = sumRad - sumIntact;
-                head.Name = string.Format("{0, -6} INT:{1, -6} RAD:{2, -6} Delta:{3, -6}",
-                                            head.Name,
-                                            sumIntact.ToString("F1"),
-                                            sumRad.ToString("F1"),
-                                            delta.ToString("F1")
-                                         );
+
+                head.SetEraText();   
                 head.ResetFilter();
                 head.FilterOutVaulted();
                 head.RecolorChildren();

@@ -213,6 +213,42 @@ namespace WFInfo
             Col2_Img1_Shown = "Hidden";
         }
 
+        public void SetEraText()
+        {
+            _intact = 0;
+            _radiant = 0;
+
+            foreach (TreeNode node in Children)
+            {
+
+                if (node.IsVaulted())
+                {
+                    _intact += double.Parse(node.Col1_Text2);
+                    _radiant += double.Parse(node.Col2_Text2);
+
+                }
+            }
+
+            _bonus = _radiant - _intact;
+
+            Col1_Text1 = "INT:";
+            Col1_Text2 = _intact.ToString("F1");
+
+            Col1_Img1 = PLAT_SRC;
+            Col1_Img1_Shown = "Visible";
+
+            Col2_Text1 = "RAD:";
+            Col2_Text2 = _radiant.ToString("F1");
+            int tempBonus = (int)(_bonus * 10);
+            Col2_Text3 = "(";
+            if (tempBonus >= 0)
+                Col2_Text3 += "+";
+            Col2_Text3 += (tempBonus / 10.0).ToString("F1") + ")";
+
+            Col2_Img1 = PLAT_SRC;
+            Col2_Img1_Shown = "Visible";
+
+        }
         public void SetRelicText()
         {
             _intact = 0;
