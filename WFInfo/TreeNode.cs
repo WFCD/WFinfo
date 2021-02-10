@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -221,10 +222,10 @@ namespace WFInfo
             foreach (TreeNode node in Children)
             {
 
-                if (node.IsVaulted())
+                if (node.IsVaulted()) // IsVaulted is true if its not vaulted
                 {
-                    _intact += double.Parse(node.Col1_Text2);
-                    _radiant += double.Parse(node.Col2_Text2);
+                    _intact += node._intact; 
+                    _radiant += node._radiant; 
 
                 }
             }
@@ -524,8 +525,8 @@ namespace WFInfo
                                 ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._bonus).ToList();
                                 break;
                             default:
-                                Children = Children.AsParallel().OrderBy(p => p.Name).ToList();
-                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Name).ToList();
+                                Children = Children.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
+                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
                                 break;
                         }
                     }
@@ -557,13 +558,19 @@ namespace WFInfo
                         //    ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._bonus).ToList();
                         //    break;
                         default:
-                            Children = Children.AsParallel().OrderBy(p => p.Name).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Name).ToList();
+                            Children = Children.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
                             break;
                     }
                 }
             }
         }
+
+        public static string PadNumbers(string input)
+        {
+            return System.Text.RegularExpressions.Regex.Replace(input, "[0-9]+", match => match.Value.PadLeft(5, '0'));
+        }
+
 
         private string _col1_text1 = "INT:";
         public string Col1_Text1

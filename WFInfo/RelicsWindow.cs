@@ -276,6 +276,7 @@ namespace WFInfo
                 head.RecolorChildren();
                 RelicTree.Items.Add(head);
             }
+            SortBoxChanged(null, null);
             #endregion
         }
     }
