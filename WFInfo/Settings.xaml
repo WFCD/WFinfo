@@ -80,7 +80,7 @@
             <Viewbox Margin="12,28,227,32" HorizontalAlignment="Right" >
                 <CheckBox x:Name="clipboardCheckbox" Content="Clipboard" ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="clipboardCheckboxClicked"/>
             </Viewbox>
-            <Label Content="Locale" Margin="9,0,0,0" FontSize="16" FontWeight="Regular" />
+            <Label Content="Locale" Margin="12,0,245,58" FontSize="16" FontWeight="Regular" Height="28" />
             <Viewbox Margin="0,0,158,58" HorizontalAlignment="Right" Width="164" >
                 <ComboBox SelectionChanged="localeComboboxSelectionChanged" x:Name="localeCombobox" FontSize="14" FontFamily="{DynamicResource Roboto}" Background="#FF1B1B1B" BorderBrush="#FF0F0F0F" Margin="0,4" Width="93">
                     <ComboBoxItem Tag="en" Content="English" FontSize="14" Background="#FF1B1B1B"/>
