@@ -814,8 +814,8 @@ namespace WFInfo
                 csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned," + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
             foreach (var part in foundParts)
             {
-                if (part.Name.Length < 13 && Settings.locale == "en" || part.Name.Length < 2 && Settings.locale == "ko") // if part name is smaller than "Bo prime handle" skip current part 
-                    //TODO: Add a min character for other locale here. I don't know what the shortest korean prime part is named.
+                if ((part.Name.Length < 13 && Settings.locale == "en") || (part.Name.Replace(" ", "").Length < 6 && Settings.locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
+                    //TODO: Add a min character for other locale here.
                     continue;
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0]);
