@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+Ôªøusing Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -27,22 +27,22 @@ namespace WFInfo
 
         private static List<Dictionary<int, List<int>>> korean = new List<Dictionary<int, List<int>>>() {
             new Dictionary<int, List<int>>() {
-                { 0, new List<int>{ 6, 7, 8, 16 } }, // §±, §≤, §≥, §Ω
-                { 1, new List<int>{ 2, 3, 4, 16, 5, 9, 10 } }, // §§, §ß, §®, §º, §©, §µ, §∂
-                { 2, new List<int>{ 12, 13, 14 } }, // §∏, §π, §∫
-                { 3, new List<int>{ 0, 1, 15, 11, 18 } } // §°, §¢, §ª, §∑, §æ
+                { 0, new List<int>{ 6, 7, 8, 16 } }, // „ÖÅ, „ÖÇ, „ÖÉ, „Öç
+                { 1, new List<int>{ 2, 3, 4, 16, 5, 9, 10 } }, // „Ñ¥, „Ñ∑, „Ñ∏, „Öå, „Ñπ, „ÖÖ, „ÖÜ
+                { 2, new List<int>{ 12, 13, 14 } }, // „Öà, „Öâ, „Öä
+                { 3, new List<int>{ 0, 1, 15, 11, 18 } } // „Ñ±, „Ñ≤, „Öã, „Öá, „Öé
             },
             new Dictionary<int, List<int>>() {
-                { 0, new List<int>{ 20, 5, 1, 7, 3, 19 } }, // §”, §ƒ, §¿, §∆, §¬, §“
-                { 1, new List<int>{ 16, 11, 15, 10 } }, // §œ, § , §Œ, §…
-                { 2, new List<int>{ 4, 0, 6, 2, 14, 9 } }, // §√, §ø, §≈, §¡, §Õ, §»
-                { 3, new List<int>{ 18, 13, 8, 17, 12 } } // §—, §Ã, §«, §–, §À
+                { 0, new List<int>{ 20, 5, 1, 7, 3, 19 } }, // „Ö£, „Öî, „Öê, „Öñ, „Öí, „Ö¢
+                { 1, new List<int>{ 16, 11, 15, 10 } }, // „Öü, „Öö, „Öû, „Öô
+                { 2, new List<int>{ 4, 0, 6, 2, 14, 9 } }, // „Öì, „Öè, „Öï, „Öë, „Öù, „Öò
+                { 3, new List<int>{ 18, 13, 8, 17, 12 } } // „Ö°, „Öú, „Öó, „Ö†, „Öõ
             },
             new Dictionary<int, List<int>>() {
-                { 0, new List<int>{ 16, 17, 18, 26 } }, // §±, §≤, §¥, §Ω
-                { 1, new List<int>{ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19, 20, 25 } }, // §§, §•, §¶, §ß, §©, §™, §´, §¨, §≠, §Æ, §Ø, §∞, §µ, §∂, §º
-                { 2, new List<int>{ 22, 23 } }, // §∏, §∫
-                { 3, new List<int>{ 1, 2, 3, 24, 21, 27 } }, // §°, §¢, §£, §ª, §¡, §æ
+                { 0, new List<int>{ 16, 17, 18, 26 } }, // „ÖÅ, „ÖÇ, „ÖÑ, „Öç
+                { 1, new List<int>{ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19, 20, 25 } }, // „Ñ¥, „Ñµ, „Ñ∂, „Ñ∑, „Ñπ, „Ñ∫, „Ñª, „Ñº, „ÑΩ, „Ñæ, „Ñø, „ÖÄ, „ÖÖ, „ÖÜ, „Öå
+                { 2, new List<int>{ 22, 23 } }, // „Öà, „Öä
+                { 3, new List<int>{ 1, 2, 3, 24, 21, 27 } }, // „Ñ±, „Ñ≤, „Ñ≥, „Öã, „Öë, „Öé
                 { 4, new List<int>{ 0 } }, // 
             }
         };
@@ -666,12 +666,12 @@ namespace WFInfo
 
         public int LevenshteinDistanceKorean(string s, string t)
         {
-            // NameData s ∏¶ «—±€∏Ì¿∏∑Œ ∞°¡Æø»
+            // NameData s Î•º ÌïúÍ∏ÄÎ™ÖÏúºÎ°ú Í∞ÄÏ†∏Ïò¥
             s = getLocaleNameData(s);
 
             // i18n korean edit distance algorithm
-            s = " " + s.Replace(" ", "");
-            t = " " + t.Replace(" ", "");
+            s = " " + s.Replace("ÏÑ§Í≥ÑÎèÑ", "").Replace(" ", "");
+            t = " " + t.Replace("ÏÑ§Í≥ÑÎèÑ", "").Replace(" ", "");
 
             int n = s.Length;
             int m = t.Length;
