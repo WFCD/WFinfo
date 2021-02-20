@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -213,6 +214,42 @@ namespace WFInfo
             Col2_Img1_Shown = "Hidden";
         }
 
+        public void SetEraText()
+        {
+            _intact = 0;
+            _radiant = 0;
+
+            foreach (TreeNode node in Children)
+            {
+
+                if (node.IsVaulted()) // IsVaulted is true if its not vaulted
+                {
+                    _intact += node._intact; 
+                    _radiant += node._radiant; 
+
+                }
+            }
+
+            _bonus = _radiant - _intact;
+
+            Col1_Text1 = "INT:";
+            Col1_Text2 = _intact.ToString("F1");
+
+            Col1_Img1 = PLAT_SRC;
+            Col1_Img1_Shown = "Visible";
+
+            Col2_Text1 = "RAD:";
+            Col2_Text2 = _radiant.ToString("F1");
+            int tempBonus = (int)(_bonus * 10);
+            Col2_Text3 = "(";
+            if (tempBonus >= 0)
+                Col2_Text3 += "+";
+            Col2_Text3 += (tempBonus / 10.0).ToString("F1") + ")";
+
+            Col2_Img1 = PLAT_SRC;
+            Col2_Img1_Shown = "Visible";
+
+        }
         public void SetRelicText()
         {
             _intact = 0;
@@ -488,8 +525,8 @@ namespace WFInfo
                                 ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._bonus).ToList();
                                 break;
                             default:
-                                Children = Children.AsParallel().OrderBy(p => p.Name).ToList();
-                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Name).ToList();
+                                Children = Children.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
+                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
                                 break;
                         }
                     }
@@ -521,13 +558,19 @@ namespace WFInfo
                         //    ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._bonus).ToList();
                         //    break;
                         default:
-                            Children = Children.AsParallel().OrderBy(p => p.Name).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Name).ToList();
+                            Children = Children.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
                             break;
                     }
                 }
             }
         }
+
+        public static string PadNumbers(string input)
+        {
+            return System.Text.RegularExpressions.Regex.Replace(input, "[0-9]+", match => match.Value.PadLeft(5, '0'));
+        }
+
 
         private string _col1_text1 = "INT:";
         public string Col1_Text1
