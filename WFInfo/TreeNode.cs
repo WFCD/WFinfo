@@ -218,6 +218,7 @@ namespace WFInfo
         {
             _intact = 0;
             _radiant = 0;
+            int _rcount = 0;
 
             foreach (TreeNode node in Children)
             {
@@ -225,10 +226,12 @@ namespace WFInfo
                 if (node.IsVaulted()) // IsVaulted is true if its not vaulted
                 {
                     _intact += node._intact; 
-                    _radiant += node._radiant; 
-
+                    _radiant += node._radiant;
+                    _rcount++;
                 }
             }
+            _radiant = _radiant / _rcount;
+            _intact = _intact / _rcount;
 
             _bonus = _radiant - _intact;
 
