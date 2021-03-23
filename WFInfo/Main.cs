@@ -456,6 +456,11 @@ namespace WFInfo
         {
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
         }
+
+        internal static void SpawnFullscreenReminder()
+        {
+            new FullscreenReminder();
+        }
     }
 
     public class Status

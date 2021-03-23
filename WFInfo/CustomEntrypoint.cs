@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -9,21 +8,24 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Management;
 
 namespace WFInfo
 {
     public class CustomEntrypoint
     {
-
-        private const string traineddata = "engbest.traineddata";
-        private const string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/tessdata/" + traineddata;
-        private const string traineddata_md5 = "7af2ad02d11702c7092a5f8dd044d52f";
+        // for /WFCD/Wfinfo
+        public static string traineddata_hotlink = "https://raw.githubusercontent.com/zoo-hyeon/WFinfo/master/WFInfo/tessdata/";
 
         private const string liblept = "liblept1760";
         private const string libtesseract = "libtesseract400";
         private const string tesseract_version_folder = "tesseract4";
+
+        private static string[] list_of_traineddata = new string[]
+        {
+            "en.traineddata",
+            "ko.traineddata"
+        };
 
         private static string[] list_of_dlls = new string[]
         {
@@ -56,9 +58,7 @@ namespace WFInfo
         private static string tesseract_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/master/WFInfo/lib";
         private static readonly string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
 
-        private const string tessdata_local = @"tessdata\" + traineddata;
-        private static readonly string appdata_tessdata_folder = appPath + @"\tessdata";
-        private static readonly string app_data_traineddata = appdata_tessdata_folder + @"\" + traineddata;
+        public static readonly string appdata_tessdata_folder = appPath + @"\tessdata";
 
         private static readonly InitialDialogue dialogue = new InitialDialogue();
         private static bool AvxSupport = true;
@@ -91,9 +91,17 @@ namespace WFInfo
             }
 
             int filesNeeded = 0;
-            if (!File.Exists(app_data_traineddata) || GetMD5hash(app_data_traineddata) != traineddata_md5)
-                filesNeeded++;
-
+            for (int i = 0; i < list_of_traineddata.Length; i++)
+            {
+                string fileName = list_of_traineddata[i];
+                string filePath = appdata_tessdata_folder + @"\" + fileName;
+                string fileUrl  = traineddata_hotlink + fileName;
+                if (!File.Exists(filePath) || GetMD5hash(filePath) != GetMD5hashByURL(fileUrl))
+                {
+                    filesNeeded++;
+                }
+            }
+            
             for (int i = 0; i < list_of_dlls.Length; i++)
             {
                 string dll = list_of_dlls[i];
@@ -233,6 +241,17 @@ namespace WFInfo
                 }
             }
         }
+        public static string GetMD5hashByURL(string url)
+        {
+            Debug.WriteLine(url);
+            WebClient webClient = new WebClient();
+            using (var md5 = MD5.Create())
+            {
+                byte[] stream = webClient.DownloadData(url);
+                byte[] hash = md5.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+        }
 
         private static void DownloadProgressCallback(object sender, DownloadProgressChangedEventArgs e)
         {
@@ -246,21 +265,28 @@ namespace WFInfo
             webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgressCallback);
             token.Register(webClient.CancelAsync);
 
-            if (!File.Exists(app_data_traineddata) || GetMD5hash(app_data_traineddata) != traineddata_md5)
+            for (int i = 0; i < list_of_traineddata.Length; i++)
             {
-                if (Directory.Exists("tessdata") && File.Exists(tessdata_local))
+                string localPath = @"tessdata\" + list_of_traineddata[i];
+                string filePath  = appdata_tessdata_folder + @"\" + list_of_traineddata[i];
+                string fileUrl   = traineddata_hotlink + list_of_traineddata[i];
+
+                if (!File.Exists(filePath))
                 {
-                    File.Copy(tessdata_local, app_data_traineddata);
-                }
-                else
-                {
-                    try
+                    if (Directory.Exists("tessdata") && File.Exists(localPath))
                     {
-                        await webClient.DownloadFileTaskAsync(traineddata_hotlink, app_data_traineddata);
+                        File.Copy(localPath, filePath);
                     }
-                    catch (Exception) when (stopDownloadTask.Token.IsCancellationRequested) { }
+                    else
+                    {
+                        try
+                        {
+                            await webClient.DownloadFileTaskAsync(fileUrl, filePath);
+                        }
+                        catch (Exception) when (stopDownloadTask.Token.IsCancellationRequested) { }
+                    }
+                    dialogue.Dispatcher.Invoke(() => { dialogue.FileComplete(); });
                 }
-                dialogue.Dispatcher.Invoke(() => { dialogue.FileComplete(); });
             }
 
             for (int i = 0; i < list_of_dlls.Length; i++)
