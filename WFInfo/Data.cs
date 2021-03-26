@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -24,6 +24,28 @@ namespace WFInfo
         public JObject relicData; // Contains relicData from Warframe PC Drops        {<Era>: {"A1":{"vaulted": true,<rare1/uncommon[12]/common[123]>: <part>}, ...}, "Meso": ..., "Neo": ..., "Axi": ...}
         public JObject equipmentData; // Contains equipmentData from Warframe PC Drops          {<EQMT>: {"vaulted": true, "PARTS": {<NAME>:{"relic_name":<name>|"","count":<num>}, ...}},  ...}
         public JObject nameData; // Contains relic to market name translation          {<relic_name>: <market_name>}
+
+        private static List<Dictionary<int, List<int>>> korean = new List<Dictionary<int, List<int>>>() {
+            new Dictionary<int, List<int>>() {
+                { 0, new List<int>{ 6, 7, 8, 16 } }, // ㅁ, ㅂ, ㅃ, ㅍ
+                { 1, new List<int>{ 2, 3, 4, 16, 5, 9, 10 } }, // ㄴ, ㄷ, ㄸ, ㅌ, ㄹ, ㅅ, ㅆ
+                { 2, new List<int>{ 12, 13, 14 } }, // ㅈ, ㅉ, ㅊ
+                { 3, new List<int>{ 0, 1, 15, 11, 18 } } // ㄱ, ㄲ, ㅋ, ㅇ, ㅎ
+            },
+            new Dictionary<int, List<int>>() {
+                { 0, new List<int>{ 20, 5, 1, 7, 3, 19 } }, // ㅣ, ㅔ, ㅐ, ㅖ, ㅒ, ㅢ
+                { 1, new List<int>{ 16, 11, 15, 10 } }, // ㅟ, ㅚ, ㅞ, ㅙ
+                { 2, new List<int>{ 4, 0, 6, 2, 14, 9 } }, // ㅓ, ㅏ, ㅕ, ㅑ, ㅝ, ㅘ
+                { 3, new List<int>{ 18, 13, 8, 17, 12 } } // ㅡ, ㅜ, ㅗ, ㅠ, ㅛ
+            },
+            new Dictionary<int, List<int>>() {
+                { 0, new List<int>{ 16, 17, 18, 26 } }, // ㅁ, ㅂ, ㅄ, ㅍ
+                { 1, new List<int>{ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19, 20, 25 } }, // ㄴ, ㄵ, ㄶ, ㄷ, ㄹ, ㄺ, ㄻ, ㄼ, ㄽ, ㄾ, ㄿ, ㅀ, ㅅ, ㅆ, ㅌ
+                { 2, new List<int>{ 22, 23 } }, // ㅈ, ㅊ
+                { 3, new List<int>{ 1, 2, 3, 24, 21, 27 } }, // ㄱ, ㄲ, ㄳ, ㅋ, ㅑ, ㅎ
+                { 4, new List<int>{ 0 } }, // 
+            }
+        };
 
         private readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         private readonly string marketItemsPath;
@@ -115,17 +137,58 @@ namespace WFInfo
         }
 
         // Load item list from Sheets
-        private void ReloadItems()
+        public void ReloadItems()
         {
             marketItems = new JObject();
 
-            IList<IList<object>> sheet = sheetsApi.GetSheet("items!A:C");
-            foreach (IList<object> row in sheet)
+            JObject obj =
+                JsonConvert.DeserializeObject<JObject>(
+                    WebClient.DownloadString("https://api.warframe.market/v1/items"));
+
+            JArray items = JArray.FromObject(obj["payload"]["items"]);
+            foreach (var item in items)
             {
-                string name = row[1].ToString();
+                string name = item["item_name"].ToString();
                 if (name.Contains("Prime "))
-                    marketItems[row[0].ToString()] = name + "|" + row[2].ToString();
+                    marketItems[item["id"].ToString()] = name + "|" + item["url_name"];
             }
+
+            try
+            {
+                using (var request = new HttpRequestMessage()
+                {
+                    RequestUri = new Uri("https://api.warframe.market/v1/items"),
+                    Method = HttpMethod.Get
+                })
+                {
+                    request.Headers.Add("language", Settings.locale);
+                    request.Headers.Add("accept", "application/json");
+                    request.Headers.Add("platform", "pc");
+                    var task = Task.Run(() => client.SendAsync(request));
+                    task.Wait();
+                    var response = task.Result;
+
+                    var respTask = Task.Run(() => response.Content.ReadAsStringAsync());
+                    respTask.Wait();
+                    var body = respTask.Result;
+                    var payload = JsonConvert.DeserializeObject<JObject>(body);
+                    Debug.WriteLine(body);
+
+                    obj = JsonConvert.DeserializeObject<JObject>(body);
+                    items = JArray.FromObject(obj["payload"]["items"]);
+                    foreach (var item in items)
+                    {
+                        string name = item["url_name"].ToString();
+                        if (name.Contains("prime") && marketItems.ContainsKey(item["id"].ToString()))
+                            marketItems[item["id"].ToString()] = marketItems[item["id"].ToString()] + "|" + item["item_name"];
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Main.AddLog("GetTopListings: " + e.Message);
+            }
+
 
             marketItems["version"] = Main.BuildVersion;
             Main.AddLog("Item database has been downloaded");
@@ -505,7 +568,19 @@ namespace WFInfo
             return 1;
         }
 
-        public static int LevenshteinDistance(string s, string t)
+        public int LevenshteinDistance(string s, string t)
+        {
+            switch(Settings.locale)
+            {
+                case "ko":
+                    // for korean
+                    return LevenshteinDistanceKorean(s, t);
+                default:
+                    return LevenshteinDistanceDefault(s, t);
+            }
+        }
+
+        public int LevenshteinDistanceDefault(string s, string t)
         {
             // Levenshtein Distance determines how many character changes it takes to form a known result
             // For example: Nuvo Prime is closer to Nova Prime (2) then Ash Prime (4)
@@ -552,6 +627,126 @@ namespace WFInfo
 
 
             return d[n, m];
+        }
+
+        public static bool isKorean(String str)
+        {
+            char c = str[0];
+            if (0x1100 <= c && c <= 0x11FF) return true;
+            if (0x3130 <= c && c <= 0x318F) return true;
+            if (0xAC00 <= c && c <= 0xD7A3) return true;
+            return false;
+        }
+        public string getLocaleNameData(string s)
+        {
+            bool saveDatabases = false;
+            string localeName = "";
+            foreach (var marketItem in marketItems)
+            {
+                if (marketItem.Key == "version")
+                    continue;
+                string[] split = marketItem.Value.ToString().Split('|');
+                if (split[0] == s)
+                {
+                    if (split.Length == 3)
+                    {
+                        localeName = split[2];
+                    }
+                    else
+                    {
+                        localeName = split[0];
+                    }
+                    break;
+                }
+            }
+            if (saveDatabases)
+                SaveAllJSONs();
+            return localeName;
+        }
+
+        public int LevenshteinDistanceKorean(string s, string t)
+        {
+            // NameData s 를 한글명으로 가져옴
+            s = getLocaleNameData(s);
+
+            // i18n korean edit distance algorithm
+            s = " " + s.Replace("설계도", "").Replace(" ", "");
+            t = " " + t.Replace("설계도", "").Replace(" ", "");
+
+            int n = s.Length;
+            int m = t.Length;
+            int[,] d = new int[n + 1, m + 1];
+
+            if (n == 0 || m == 0)
+                return n + m;
+            int i, j;
+
+            for (i = 1; i < s.Length; i++) d[i, 0] = i * 9;
+            for (j = 1; j < t.Length; j++) d[0, j] = j * 9;
+
+            int s1, s2;
+
+            for (i = 1; i < s.Length; i++)
+            {
+                for (j = 1; j < t.Length; j++)
+                {
+                    s1 = 0;
+                    s2 = 0;
+
+                    char cha = s[i];
+                    char chb = t[j];
+                    int[] a = new int[3];
+                    int[] b = new int[3];
+                    a[0] = (((cha - 0xAC00) - (cha - 0xAC00) % 28) / 28) / 21;
+                    a[1] = (((cha - 0xAC00) - (cha - 0xAC00) % 28) / 28) % 21;
+                    a[2] = (cha - 0xAC00) % 28;
+
+                    b[0] = (((chb - 0xAC00) - (chb - 0xAC00) % 28) / 28) / 21;
+                    b[1] = (((chb - 0xAC00) - (chb - 0xAC00) % 28) / 28) % 21;
+                    b[2] = (chb - 0xAC00) % 28;
+
+                    if (a[0] != b[0] && a[1] != b[1] && a[2] != b[2])
+                    {
+                        s1 = 9;
+                    }
+                    else
+                    {
+                        for (int k = 0; k < 3; k++)
+                        {
+                            if (a[k] != b[k])
+                            {
+                                if (GroupEquals(korean[k], a[k], b[k]))
+                                {
+                                    s2 += 1;
+                                }
+                                else
+                                {
+                                    s1 += 1;
+                                }
+                            }
+
+                        }
+                        s1 *= 3;
+                        s2 *= 2;
+                    }
+
+                    d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 9, d[i, j - 1] + 9), d[i - 1, j - 1] + s1 + s2);
+                }
+            }
+
+            return d[s.Length - 1, t.Length - 1];
+        }
+
+        private bool GroupEquals(Dictionary<int, List<int>> group, int ak, int bk)
+        {
+            foreach (var entry in group)
+            {
+                if (entry.Value.Contains(ak) && entry.Value.Contains(bk))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public int LevenshteinDistanceSecond(string str1, string str2, int limit = -1)

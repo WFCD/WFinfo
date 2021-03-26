@@ -456,6 +456,7 @@ namespace WFInfo
         {
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
         }
+
     }
 
     public class Status

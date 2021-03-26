@@ -24,8 +24,8 @@
 
         <Rectangle Stroke="#FF707070"/>
         <Rectangle HorizontalAlignment="Left" Height="26" Stroke="#FF646464" VerticalAlignment="Top" Width="300" Fill="#FF0F0F0F"/>
-        <Label x:Name="errorText" Content="Installing Required Files" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Margin="0,22,0,0" Width="298" FontSize="18"/>
-        <TextBlock Margin="0,51,0,0" TextWrapping="Wrap" Text="Only happens with initial setup and major updates&#x0a;This will take a moment or two..." TextAlignment="Center"/>
+        <Label x:Name="errorText" Content="Downloading Required Files" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Margin="0,22,0,0" Width="298" FontSize="18"/>
+        <TextBlock Margin="0,51,0,0" TextWrapping="Wrap" TextAlignment="Center"><Run Text="Only happens with initial setup and major updates"/><Run Text=","/><LineBreak/><Run Text="This will take a moment or two..."/></TextBlock>
         <TextBlock Text="WFInfo" Margin="34,4,0,0" HorizontalAlignment="Left" FontSize="16" FontFamily="/WFInfo;component/Resources/Roboto/#Roboto Black" FontWeight="Bold"/>
         <Image Margin="2,0,0,0" Source="Resources/WFLogo.png" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left" Width="23" >
             <Image.RenderTransform>
