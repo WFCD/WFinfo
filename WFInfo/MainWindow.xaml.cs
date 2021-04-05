@@ -41,16 +41,6 @@ namespace WFInfo
             listener = new LowLevelListener(); //publisher
             try
             {
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"))
-                {
-                    Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
-
-                }
-                else
-                {
-                    Settings.settingsObj = new JObject();
-                    welcomeDialogue = new WelcomeDialogue();
-                }
                 InitializeSettings();
 
                 LowLevelListener.KeyEvent += main.OnKeyAction;
@@ -87,8 +77,20 @@ namespace WFInfo
 
 
 
-        private void InitializeSettings()
+        public void InitializeSettings()
         {
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json") && Settings.settingsObj == null)
+            {
+                Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
+
+            }
+            else
+            {
+                if (Settings.settingsObj == null)
+                    Settings.settingsObj = new JObject();
+                welcomeDialogue = new WelcomeDialogue();
+            }
+
             if (!Settings.settingsObj.TryGetValue("Display", out _))
                 Settings.settingsObj["Display"] = "Overlay";
             Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
@@ -140,6 +142,10 @@ namespace WFInfo
             if (!Settings.settingsObj.TryGetValue("Debug", out _))
                 Settings.settingsObj["Debug"] = false;
             Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
+
+            if (!Settings.settingsObj.TryGetValue("Locale", out _))
+                Settings.settingsObj["Locale"] = "en";
+            Settings.locale = Settings.settingsObj.GetValue("Locale").ToString();
 
             if (!Settings.settingsObj.TryGetValue("Clipboard", out _))
                 Settings.settingsObj["Clipboard"] = false;
@@ -197,9 +203,9 @@ namespace WFInfo
                 Settings.settingsObj["AutoList"] = false;
             Settings.automaticListing = (bool)Settings.settingsObj.GetValue("AutoList");
 
-            if (!Settings.settingsObj.TryGetValue("DoAutoCheck", out _))
-                Settings.settingsObj["DoAutoCheck"] = true;
-            Settings.doDoubleCheck = (bool)Settings.settingsObj.GetValue("DoAutoCheck");
+            if (!Settings.settingsObj.TryGetValue("DoDoubleCheck", out _))
+                Settings.settingsObj["DoDoubleCheck"] = true;
+            Settings.doDoubleCheck = (bool)Settings.settingsObj.GetValue("DoDoubleCheck");
             
             if (!Settings.settingsObj.TryGetValue("MaximumEfficiencyValue", out _))
                 Settings.settingsObj["MaximumEfficiencyValue"] = 9.5;
@@ -334,20 +340,22 @@ namespace WFInfo
 
         private void OnLocationChanged(object sender, EventArgs e)
         {
-
-            if (Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
+            if (Settings.settingsObj != null)
             {
-                Settings.mainWindowLocation = new Point(Left, Top);
-                Settings.settingsObj["MainWindowLocation_X"] = Left;
-                Settings.settingsObj["MainWindowLocation_Y"] = Top;
-                Settings.Save();
-            }
-            else
-            {
-                Settings.mainWindowLocation = new Point(100, 100);
-                Settings.settingsObj["MainWindowLocation_X"] = 100;
-                Settings.settingsObj["MainWindowLocation_Y"] = 100;
-                Settings.Save();
+                if (Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
+                {
+                    Settings.mainWindowLocation = new Point(Left, Top);
+                    Settings.settingsObj["MainWindowLocation_X"] = Left;
+                    Settings.settingsObj["MainWindowLocation_Y"] = Top;
+                    Settings.Save();
+                }
+                else
+                {
+                    Settings.mainWindowLocation = new Point(100, 100);
+                    Settings.settingsObj["MainWindowLocation_X"] = 100;
+                    Settings.settingsObj["MainWindowLocation_Y"] = 100;
+                    Settings.Save();
+                }
             }
         }
 

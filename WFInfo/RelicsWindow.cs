@@ -112,6 +112,7 @@ namespace WFInfo
             }
             else
                 ReapplyFilters();
+            
         }
 
         private void TextboxTextChanged(object sender, TextChangedEventArgs e)
@@ -242,6 +243,9 @@ namespace WFInfo
             int eraNum = 0;
             foreach (TreeNode head in RelicNodes)
             {
+                double sumIntact = 0;
+                double sumRad = 0;
+
                 head.SortNum = eraNum++;
                 foreach (JProperty prop in Main.dataBase.relicData[head.Name])
                 {
@@ -254,20 +258,25 @@ namespace WFInfo
                         if (kvp.Key != "vaulted" && Main.dataBase.marketData.TryGetValue(kvp.Value.ToString(), out JToken marketValues))
                         {
                             TreeNode part = new TreeNode(kvp.Value.ToString(), "", 0);
-                            part.SetPartText(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), kvp.Key);
+                            part.SetPartText(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), kvp.Key);                           
                             relic.AddChild(part);
                         }
                     }
+                    
                     relic.SetRelicText();
                     head.AddChild(relic);
+
                     //groupedByAll.Items.Add(relic);
                     //Search.Items.Add(relic);
                 }
+
+                head.SetEraText();   
                 head.ResetFilter();
                 head.FilterOutVaulted();
                 head.RecolorChildren();
                 RelicTree.Items.Add(head);
             }
+            SortBoxChanged(null, null);
             #endregion
         }
     }

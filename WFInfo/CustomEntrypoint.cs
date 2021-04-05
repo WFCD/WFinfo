@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -9,18 +8,12 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Management;
 
 namespace WFInfo
 {
     public class CustomEntrypoint
     {
-
-        private const string traineddata = "engbest.traineddata";
-        private const string traineddata_hotlink = "https://raw.githubusercontent.com/WFCD/WFinfo/libs/tessdata/eng/" + traineddata;
-        private const string traineddata_md5 = "7af2ad02d11702c7092a5f8dd044d52f";
-
         private const string liblept = "leptonica-1.80.0";
         private const string libtesseract = "tesseract41";
         private const string tesseract_version_folder = "tesseract4";
@@ -58,9 +51,7 @@ namespace WFInfo
         private static string tesseract_hotlink_platform_specific_prefix;
         private static readonly string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
 
-        private const string tessdata_local = @"tessdata\" + traineddata;
-        private static readonly string appdata_tessdata_folder = appPath + @"\tessdata";
-        private static readonly string app_data_traineddata = appdata_tessdata_folder + @"\" + traineddata;
+        public static readonly string appdata_tessdata_folder = appPath + @"\tessdata";
 
         private static readonly InitialDialogue dialogue = new InitialDialogue();
         public static CancellationTokenSource stopDownloadTask;
@@ -121,10 +112,20 @@ namespace WFInfo
                 tesseract_hotlink_platform_specific_prefix = tesseract_hotlink_prefix + @"/avx2";
             }
 
-            int filesNeeded = 0;
-            if (!File.Exists(app_data_traineddata) || GetMD5hash(app_data_traineddata) != traineddata_md5)
-                filesNeeded++;
+            // Refresh traineddata structure
+            // This is temporary, to be removed in half year from now
+            if (File.Exists(appdata_tessdata_folder + @"\engbest.traineddata"))
+            {
+                // To avoid conflicts for folks who like to experiment...
+                if (File.Exists(appdata_tessdata_folder + @"\en.traineddata"))
+                {
+                    File.Delete(appdata_tessdata_folder + @"\en.traineddata");
+                }
+                File.Move(appdata_tessdata_folder + @"\engbest.traineddata", appdata_tessdata_folder + @"\en.traineddata");
+            }
+            //
 
+            int filesNeeded = 0;
             for (int i = 0; i < list_of_dlls.Length; i++)
             {
                 string dll = list_of_dlls[i];
@@ -264,6 +265,17 @@ namespace WFInfo
                 }
             }
         }
+        public static string GetMD5hashByURL(string url)
+        {
+            Debug.WriteLine(url);
+            WebClient webClient = new WebClient();
+            using (var md5 = MD5.Create())
+            {
+                byte[] stream = webClient.DownloadData(url);
+                byte[] hash = md5.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+        }
 
         private static void DownloadProgressCallback(object sender, DownloadProgressChangedEventArgs e)
         {
@@ -276,23 +288,6 @@ namespace WFInfo
             WebClient webClient = new WebClient();
             webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgressCallback);
             token.Register(webClient.CancelAsync);
-
-            if (!File.Exists(app_data_traineddata) || GetMD5hash(app_data_traineddata) != traineddata_md5)
-            {
-                if (Directory.Exists("tessdata") && File.Exists(tessdata_local))
-                {
-                    File.Copy(tessdata_local, app_data_traineddata);
-                }
-                else
-                {
-                    try
-                    {
-                        await webClient.DownloadFileTaskAsync(traineddata_hotlink, app_data_traineddata);
-                    }
-                    catch (Exception) when (stopDownloadTask.Token.IsCancellationRequested) { }
-                }
-                dialogue.Dispatcher.Invoke(() => { dialogue.FileComplete(); });
-            }
 
             for (int i = 0; i < list_of_dlls.Length; i++)
             {

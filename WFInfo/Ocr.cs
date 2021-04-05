@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management.Instrumentation;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -114,17 +115,10 @@ namespace WFInfo
         // Screen / Resolution Scaling - Used to adjust pixel values to each person's monitor
         public static double screenScaling;
 
-        public static TesseractEngine firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
-        {
-            DefaultPageSegMode = PageSegMode.SingleBlock
-        };
-        public static TesseractEngine secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
-        {
-            DefaultPageSegMode = PageSegMode.SingleBlock
-        };
-
+        public static TesseractEngine firstEngine;
+        public static TesseractEngine secondEngine;
         public static TesseractEngine[] engines = new TesseractEngine[4];
-        public static Regex RE = new Regex("[^a-z&// ]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
         public const int pixleRewardWidth = 968;
@@ -145,19 +139,64 @@ namespace WFInfo
         private static List<string> secondChecks;
 #pragma warning disable IDE0044 // Add readonly modifier
         private static int[] firstProximity = { -1, -1, -1, -1 };
-        private static int[] secondProximity = { -1, -1, -1, -1 };
+        private static int[] secondProximity = { -1, -1, -1, -1 }; //TODO is never being written to, essentialy dissabling slow processing
 #pragma warning restore IDE0044 // Add readonly modifier
         private static string timestamp;
 
         private static string clipboard;
         #endregion
+
+        static void getLocaleTessdata()
+        {
+            string traineddata_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/libs/tessdata/";
+            JObject traineddata_checksums = new JObject
+            {
+                {"en", "7af2ad02d11702c7092a5f8dd044d52f"},
+                {"ko", "c776744205668b7e76b190cc648765da"}
+            };
+
+            // get trainned data
+            string traineddata_hotlink = traineddata_hotlink_prefix + Settings.locale + ".traineddata";
+            string app_data_traineddata_path = CustomEntrypoint.appdata_tessdata_folder + @"\" + Settings.locale + ".traineddata";
+
+            WebClient webClient = new WebClient();
+
+            if (!File.Exists(app_data_traineddata_path) || CustomEntrypoint.GetMD5hash(app_data_traineddata_path) != traineddata_checksums.GetValue(Settings.locale).ToObject<string>())
+            {
+                try
+                {
+                    webClient.DownloadFile(traineddata_hotlink, app_data_traineddata_path);
+                }
+                catch (Exception) { }
+            }
+        }
+        static OCR()
+        {
+            getLocaleTessdata();
+            firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
+            {
+                DefaultPageSegMode = PageSegMode.SingleBlock
+            };
+            
+            secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
+            {
+                DefaultPageSegMode = PageSegMode.SingleBlock
+            };
+
+            
+        }
+
         public static void Init()
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
 
             for (int i = 0; i < 4; i++)
             {
-                engines[i] = new TesseractEngine(applicationDirectory + @"\tessdata", "engbest")
+                if(engines[i] != null)
+                {
+                    engines[i].Dispose();
+                }
+                engines[i] = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
                 {
                     DefaultPageSegMode = PageSegMode.SingleBlock
                 };
@@ -190,7 +229,7 @@ namespace WFInfo
             bigScreenshot = file ?? CaptureScreenshot();
             try
             {
-                parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
+				parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
             }
             catch (Exception e)
             {
@@ -205,13 +244,12 @@ namespace WFInfo
             for (int i = 0; i < parts.Count; i++)
             {
                 int tempI = i;
-                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]); });
+                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]);});
             }
             Task.WaitAll(tasks);
 
             // Remove any empty items from the array
             firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s)).ToArray();
-
             if (firstChecks == null || firstChecks.Length == 0 || CheckIfError())
             {
                 processingActive = false;
@@ -363,7 +401,7 @@ namespace WFInfo
 
                 if (partialScreenshot.Height < 70 && Settings.doDoubleCheck)
                 {
-                    SlowSecondProcess();
+                    // SlowSecondProcess(); secondProximity is never being written to, thus this will always result in that there is no change in the first scan. I've commented this out to increase preformance. @Dapal
                     end = watch.ElapsedMilliseconds;
                     Main.StatusUpdate("Completed second pass(" + (end - start) + "ms)", 0);
                 }
@@ -382,13 +420,6 @@ namespace WFInfo
                 .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
                 .ToList().ForEach(f => f.Delete());
 
-            if (bigScreenshot != null)
-            {
-                bigScreenshot.Save(Main.AppPath + @"\Debug\FullScreenShot " + timestamp + ".png");
-                RewarIndexScreenshot = bigScreenshot;
-                bigScreenshot.Dispose();
-                bigScreenshot = null;
-            }
             if (partialScreenshot != null)
             {
                 partialScreenshot.Save(Main.AppPath + @"\Debug\PartBox " + timestamp + ".png");
@@ -555,7 +586,12 @@ namespace WFInfo
                 {
                     Debug.WriteLine(firstChecks[i]);
                     string first = firstChecks[i];
-                    Main.AddLog($"First proximity {firstProximity[i]}, Second proximity {secondProximity[i]} Is the newer closer?: {secondProximity[i] > firstProximity[i]}");
+                    if (secondProximity[i] == -1) {
+                        Main.AddLog("Second proximity was not set");
+                        continue;
+                    } else {
+                        Main.AddLog($"First proximity {firstProximity[i]}, Second proximity {secondProximity[i]} Is the newer closer?: {secondProximity[i] > firstProximity[i]}");
+                    }
                     if (first.Replace(" ", "").Length > 6)
                     {
                         Debug.WriteLine(secondChecks[i]);
@@ -810,10 +846,10 @@ namespace WFInfo
             snapItImageFiltered.Dispose();
             if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
                 csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned," + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
-
             foreach (var part in foundParts)
             {
-                if (part.Name.Length < 13) // if part name is smaller than "Bo prime handle" skip current part
+                if ((part.Name.Length < 13 && Settings.locale == "en") || (part.Name.Replace(" ", "").Length < 6 && Settings.locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
+                    //TODO: Add a min character for other locale here.
                     continue;
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0]);
@@ -852,7 +888,8 @@ namespace WFInfo
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
                 });
             }
-            Main.snapItOverlayWindow.tempImage.Dispose();
+            if (Main.snapItOverlayWindow.tempImage != null)
+                Main.snapItOverlayWindow.tempImage.Dispose();
             end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
             watch.Stop();
@@ -915,7 +952,7 @@ namespace WFInfo
                                             continue;
                                         }
                                     }
-                                    else if (currentWord.Length < 2)
+                                    else if (currentWord.Length < 2 && Settings.locale == "en")
                                     {
                                         g.FillRectangle(green, paddedBounds);
                                         numberTooFewCharacters++;
@@ -1014,8 +1051,8 @@ namespace WFInfo
                     return ((Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.35) || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.15)) && test.GetSaturation() >= 0.20;
                 case WFtheme.HIGH_CONTRAST:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.35; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
-                case WFtheme.LEGACY:
-                    return (test.GetBrightness() >= 0.75 && test.GetSaturation() <= 0.2)
+                case WFtheme.LEGACY:    // TO CHECK
+                    return (test.GetBrightness() >= 0.65)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
                 case WFtheme.NIDUS:
                     return (Math.Abs(test.GetHue() - (primary.GetHue() + 6)) < 8 && test.GetSaturation() >= 0.30)
@@ -1101,7 +1138,7 @@ namespace WFInfo
 
             try
             {
-                Main.AddLog($"Fullscreen is {fullScreen.Size}:, trying to clone: {rectangle.Size.ToString()} at {rectangle.Location.ToString()}");
+                Main.AddLog($"Fullscreen is {fullScreen.Size}:, trying to clone: {rectangle.Size} at {rectangle.Location}");
                 preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
             }
             catch (Exception ex)
@@ -1160,7 +1197,7 @@ namespace WFInfo
 
             scaling = -1;
             double lowestWeight = 0;
-            Rectangle uidebug = new Rectangle((topLine_100 - topLine_50) / 50 + topLine_50,preFilter.Height, preFilter.Width,50);
+            Rectangle uidebug = new Rectangle((topLine_100 - topLine_50) / 50 + topLine_50, (int)(preFilter.Height/screenScaling), preFilter.Width, 50);
             for (int i = 0; i <= 50; i++)
             {
                 int yFromTop = preFilter.Height - (i * (topLine_100 - topLine_50) / 50 + topLine_50);
@@ -1232,7 +1269,7 @@ namespace WFInfo
                 g.DrawRectangle(Pens.Red, rectangle);
                 g.DrawRectangle(Pens.Chartreuse, uidebug);
             }
-            fullScreen.Save(Main.AppPath + @"\Debug\DEBBUGGINGBOI" + timestamp + ".png");
+            fullScreen.Save(Main.AppPath + @"\Debug\BorderScreenshot " + timestamp + ".png");
 
 
             //postFilter.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
@@ -1533,7 +1570,7 @@ namespace WFInfo
             Size FullscreenSize = new Size(image.Width, image.Height);
             using (Graphics graphics = Graphics.FromImage(image))
                 graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
-
+            image.Save(Main.AppPath + @"\Debug\FullScreenShot " + timestamp + ".png");
             return image;
         }
 
@@ -1548,6 +1585,22 @@ namespace WFInfo
             Main.snapItOverlayWindow.Topmost = true;
             Main.snapItOverlayWindow.Focusable = true;
             Main.snapItOverlayWindow.Focus();
+        }
+
+        public static async Task updateEngineAsync()
+        {
+            getLocaleTessdata();
+            Init();
+            firstEngine.Dispose();
+            firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
+            {
+                DefaultPageSegMode = PageSegMode.SingleBlock
+            };
+            secondEngine.Dispose();
+            secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
+            {
+                DefaultPageSegMode = PageSegMode.SingleBlock
+            };
         }
 
         public static bool VerifyWarframe()
