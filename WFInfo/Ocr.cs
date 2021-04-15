@@ -49,12 +49,13 @@ namespace WFInfo
             LEGACY,
             EQUINOX,
             DARK_LOTUS,
+            ZEPHYR,
             UNKNOWN = -1
         }
 
         // Colors for the top left "profile bar"
         public static Color[] ThemePrimary = new Color[] {  Color.FromArgb(190, 169, 102),		//VITRUVIAN		
-															Color.FromArgb(153,  31,  35), 	//STALKER		
+															Color.FromArgb(153,  31,  35), 	    //STALKER		
 															Color.FromArgb(238, 193, 105),  	//BARUUK		
 															Color.FromArgb( 35, 201, 245),  	//CORPUS		
 															Color.FromArgb( 57, 105, 192),  	//FORTUNA		
@@ -66,9 +67,11 @@ namespace WFInfo
 															Color.FromArgb(  2, 127, 217),  	//HIGH_CONTRAST	
 															Color.FromArgb(255, 255, 255),  	//LEGACY		
 															Color.FromArgb(158, 159, 167),  	//EQUINOX		
-															Color.FromArgb(140, 119, 147) };    //DARK_LOTUS
-        //highlight colors from selected items
-        public static Color[] ThemeSecondary = new Color[] {Color.FromArgb(245, 227, 173),		//VITRUVIAN		
+															Color.FromArgb(140, 119, 147),      //DARK_LOTUS
+                                                            Color.FromArgb(253, 132,   2), };   //ZEPHER
+
+    //highlight colors from selected items
+    public static Color[] ThemeSecondary = new Color[] {    Color.FromArgb(245, 227, 173),		//VITRUVIAN		
 															Color.FromArgb(255,  61,  51), 	//STALKER		
 															Color.FromArgb(236, 211, 162),  	//BARUUK		
 															Color.FromArgb(111, 229, 253),  	//CORPUS		
@@ -81,9 +84,11 @@ namespace WFInfo
 															Color.FromArgb(255, 255,   0),  	//HIGH_CONTRAST	
 															Color.FromArgb(232, 213,  93),  	//LEGACY		
 															Color.FromArgb(232, 227, 227),  	//EQUINOX		
-															Color.FromArgb(189, 169, 237) };    //DARK_LOTUS	
+															Color.FromArgb(189, 169, 237),      //DARK_LOTUS	
+                                                            Color.FromArgb(255,  53,   0) };    //ZEPHER	
 
-        public static Assembly assembly = Assembly.GetExecutingAssembly();
+
+    public static Assembly assembly = Assembly.GetExecutingAssembly();
         public static Stream audioStream = assembly.GetManifestResourceStream("WFInfo.Resources.achievment_03.wav");
         public static System.Media.SoundPlayer player = new System.Media.SoundPlayer(audioStream);
 
@@ -758,13 +763,14 @@ namespace WFInfo
 
 
 
-            double[] weights = new double[14] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+			double[] weights = new double[15] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
             int minWidth = mostWidth / 4;
 
             if (image == null || image.Height == 0)
             {
                 throw new Exception("Image height was 0");
             }
+
             for (int y = lineHeight; y < image.Height; y++)
             {
                 double perc = (y - lineHeight) / (image.Height - lineHeight);
@@ -772,6 +778,7 @@ namespace WFInfo
                 for (int x = 0; x < totWidth; x++)
                 {
                     int match = (int)GetClosestTheme(image.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
+                    
                     weights[match] += 1 / Math.Pow(thresh + 1, 4);
                 }
             }
@@ -1064,6 +1071,9 @@ namespace WFInfo
                 case WFtheme.GRINEER:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() > 0.5)
                     || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() > 0.55);
+                case WFtheme.ZEPHYR:
+                return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.55)
+                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
                 default:
                     // This shouldn't be ran
                     //   Only for initial testing

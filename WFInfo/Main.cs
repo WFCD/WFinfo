@@ -399,6 +399,7 @@ namespace WFInfo
                                 AddLog("Testing snapit on file: " + file);
 
                                 Bitmap image = new Bitmap(file);
+                                OCR.UpdateWindow(image);
                                 OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
                             }
 
