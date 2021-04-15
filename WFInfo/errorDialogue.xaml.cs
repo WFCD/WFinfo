@@ -40,7 +40,7 @@ namespace WFInfo
                 .Where(f => f.CreationTimeUtc < closest.AddSeconds(distance))
                 .ToList();
 
-            var fullZipPath = zipPath + @"\WFInfoError" + closest.ToString("yyyy-MM-dd HH-mm-ssff") + ".zip";
+            var fullZipPath = zipPath + @"\WFInfoError_" + closest.ToString("yyyy-MM-dd_HH-mm-ssff");
             try
             {
                 using (ZipFile zip = new ZipFile())
@@ -90,9 +90,11 @@ namespace WFInfo
                         Main.AddLog( startPath + "settings.json didn't exist.");
                     
                     zip.AddFile(startPath + @"\..\debug.log", "");
-                    zip.Comment = "This zip was created at " + closest.ToString("yyyy-MM-dd HH-mm-ssff");
+                    zip.Comment = "This zip was created at " + closest.ToString("yyyy-MM-dd_HH-mm-ssff");
                     zip.MaxOutputSegmentSize64 = 8000 * 1024; // 8m segments
-                    zip.Save(fullZipPath);
+                    zip.Save(fullZipPath + ".zip");
+                    var fullZipPathWithParts = $"{fullZipPath}_UPLOAD_{zip.NumberOfSegmentsForMostRecentSave}_OTHER_PARTS_TOO.zip";
+                    File.Move(fullZipPath + ".zip", fullZipPathWithParts);
                 }
             }
             catch (Exception ex)
