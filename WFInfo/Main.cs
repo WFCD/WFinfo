@@ -92,7 +92,7 @@ namespace WFInfo
             {
                 AddLog("LOADING FAILED");
                 AddLog(ex.ToString());
-                StatusUpdate("Launch Failure - Please Restart", 0);
+                StatusUpdate(ex.ToString().Contains("invalid_grant") ? "System clock invalid - Please resync": "Launch Failure - Please Restart", 0);
                 RunOnUIThread(() =>
                 {
                     _ = new ErrorDialogue(DateTime.Now, 0);
@@ -399,6 +399,7 @@ namespace WFInfo
                                 AddLog("Testing snapit on file: " + file);
 
                                 Bitmap image = new Bitmap(file);
+                                OCR.UpdateWindow(image);
                                 OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
                             }
 
@@ -455,11 +456,6 @@ namespace WFInfo
         public static void SignOut()
         {
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
-        }
-
-        internal static void SpawnFullscreenReminder()
-        {
-            new FullscreenReminder();
         }
     }
 
