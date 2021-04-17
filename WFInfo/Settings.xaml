@@ -84,6 +84,7 @@
             <Viewbox Margin="0,0,158,58" HorizontalAlignment="Right" Width="164" >
                 <ComboBox SelectionChanged="localeComboboxSelectionChanged" x:Name="localeCombobox" FontSize="14" FontFamily="{DynamicResource Roboto}" Background="#FF1B1B1B" BorderBrush="#FF0F0F0F" Margin="0,4" Width="93">
                     <ComboBoxItem Tag="en" Content="English" FontSize="14" Background="#FF1B1B1B"/>
+                    <ComboBoxItem Tag="fr" Content="Français" FontSize="14" Background="#FF1B1B1B"/>
                     <ComboBoxItem Tag="ko" Content="한국어" FontSize="14" Background="#FF1B1B1B"/>
                 </ComboBox>
             </Viewbox>
