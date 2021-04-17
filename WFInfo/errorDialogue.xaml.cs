@@ -1,4 +1,4 @@
-﻿using Ionic.Zip;
+using Ionic.Zip;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -93,8 +93,6 @@ namespace WFInfo
                     zip.Comment = "This zip was created at " + closest.ToString("yyyy-MM-dd_HH-mm-ssff");
                     zip.MaxOutputSegmentSize64 = 8000 * 1024; // 8m segments
                     zip.Save(fullZipPath + ".zip");
-                    var fullZipPathWithParts = $"{fullZipPath}_UPLOAD_{zip.NumberOfSegmentsForMostRecentSave}_OTHER_PARTS_TOO.zip";
-                    File.Move(fullZipPath + ".zip", fullZipPathWithParts);
                 }
             }
             catch (Exception ex)
