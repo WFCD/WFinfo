@@ -9,6 +9,7 @@ WFinfo is designed to provide quick access to both Platinum and Ducat prices for
 WFInfo does this by screenshotting the game window, cropping out the part text, then passing it to an Optical Character Recognition Engine, specifically Google's Tesseract. The OCR Engine will then send back the text it found, and we will pull out the part name from that text. From there, we display the stats for each part in an overlay or on a separate window.
 
 # Usage
+-1. Windows 7 userse only! W10 can skip this. [Enable TLS in registry](https://docs.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings)
 0. Download Microsoft Visual C++ Redistributable 2019 from microsoft [x64](https://aka.ms/vs/16/release/VC_redist.x64.exe) [x86](https://aka.ms/vs/16/release/VC_redist.x86.exe)
 1. If you have an older version of Windows 10, ensure you have installed [.NET Framework Runtime 4.8](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer) Note: Windows 7 is no longer supported due to dpi detection issues.
 2. Download the [latest release](https://github.com/WFCD/WFinfo/releases/latest)
