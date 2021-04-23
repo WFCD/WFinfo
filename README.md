@@ -9,13 +9,13 @@ WFinfo is designed to provide quick access to both Platinum and Ducat prices for
 WFInfo does this by screenshotting the game window, cropping out the part text, then passing it to an Optical Character Recognition Engine, specifically Google's Tesseract. The OCR Engine will then send back the text it found, and we will pull out the part name from that text. From there, we display the stats for each part in an overlay or on a separate window.
 
 # Usage
--1. Windows 7 userse only! W10 can skip this. [Enable TLS in registry](https://docs.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings)
-0. Download Microsoft Visual C++ Redistributable 2019 from microsoft [x64](https://aka.ms/vs/16/release/VC_redist.x64.exe) [x86](https://aka.ms/vs/16/release/VC_redist.x86.exe)
-1. If you have an older version of Windows 10, ensure you have installed [.NET Framework Runtime 4.8](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer) Note: Windows 7 is no longer supported due to dpi detection issues.
-2. Download the [latest release](https://github.com/WFCD/WFinfo/releases/latest)
-3. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
-4. Click the Cog Icon to open Settings, and configure your hotkey, etc
-5. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)
+1. Windows 7 userse only! W10 can skip this. [Enable TLS in registry](https://docs.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings)
+2. Download Microsoft Visual C++ Redistributable 2019 from microsoft [x64](https://aka.ms/vs/16/release/VC_redist.x64.exe) [x86](https://aka.ms/vs/16/release/VC_redist.x86.exe)
+3. If you have an older version of Windows 10, ensure you have installed [.NET Framework Runtime 4.8](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer) Note: Windows 7 is no longer supported due to dpi detection issues.
+4. Download the [latest release](https://github.com/WFCD/WFinfo/releases/latest)
+5. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
+6. Go into warframe game and set your the displaymode to borderless fullscreen and under interface turn item lables on.
+7. Press the hotkey on a fissure reward screen to show the display (Or wait if you turned on auto mode)
 
 # Will I get Banned?
 
