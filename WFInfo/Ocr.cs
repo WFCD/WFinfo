@@ -941,7 +941,7 @@ namespace WFInfo
                             currentWord = RE.Replace(currentWord, "").Trim();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
-                                var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
+                                var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, (int)((bounds.Width + bounds.Height) * screenScaling), bounds.Height + bounds.Height / 2);
 
                                 using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
