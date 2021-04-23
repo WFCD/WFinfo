@@ -10,11 +10,13 @@ WFInfo does this by screenshotting the game window, cropping out the part text, 
 
 # Usage
 1. Download the [latest release](https://github.com/WFCD/WFinfo/releases/latest)
-2. For Windows 7 users: [Enable TLS in registry](https://docs.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings) and ensure you have installed [.NET Framework Runtime 4.8](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer)
-3. Download Microsoft Visual C++ Redistributable 2019 from microsoft [x64](https://aka.ms/vs/16/release/VC_redist.x64.exe) [x86](https://aka.ms/vs/16/release/VC_redist.x86.exe) 
-4. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
-5. Go into warframe game and set the displaymode to `Borderless Fullscreen` and under interface turn `Item Lables` on.
-6. Press the hotkey `print screen` on a fissure reward screen to show the display, or simply wait if you use the auto feature
+1. WFinfo requires some aditional software to function properly:
+   1. Download Microsoft Visual C++ Redistributable 2019 from microsoft [x64](https://aka.ms/vs/16/release/VC_redist.x64.exe) [x86](https://aka.ms/vs/16/release/VC_redist.x86.exe) 
+   1. For Windows 7 users: [Enable TLS in registry](https://docs.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings) and ensure you have installed [.NET Framework Runtime 4.8](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer)
+1. Run WFInfo.exe and wait for it to complete the initial load (databases + OCR data)
+1. Go into warframe game and set the displaymode to `Borderless Fullscreen` and under interface turn `Item Lables` on.
+1. Press the hotkey `print screen` on a fissure reward screen to show the display, or simply wait if you use the auto feature
+1. When the program does not seem to function, do not spam the hotkey. This will create un-nessesary noise that will make debugging more difficult
 
 # Will I get Banned?
 
