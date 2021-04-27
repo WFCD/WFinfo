@@ -363,7 +363,7 @@ namespace WFInfo
 
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                                 Main.overlays[partNumber].Resize(overWid);
                                 Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + Settings.overlayXOffsetValue) / dpiScaling), startY + (int)(Settings.overlayYOffsetValue / dpiScaling), Settings.delay);
                             }
@@ -673,11 +673,11 @@ namespace WFInfo
                         {
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else if (!Settings.isLightSlected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else
                                 Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
@@ -852,7 +852,7 @@ namespace WFInfo
             string csv = string.Empty;
             snapItImageFiltered.Dispose();
             if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
-                csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned," + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
+                csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned,partsDetected" + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
             foreach (var part in foundParts)
             {
                 if ((part.Name.Length < 13 && Settings.locale == "en") || (part.Name.Replace(" ", "").Length < 6 && Settings.locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
@@ -866,11 +866,12 @@ namespace WFInfo
                 string volume = job["volume"].ToObject<string>();
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
+                string partsDetected = ""+part.Count;
 
                 if (Settings.SnapitExport)
                 {
                     var owned = string.IsNullOrEmpty(partsOwned) ? "0" : partsOwned;
-                    csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + ", \"\"" + Environment.NewLine;
+                    csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + "," + partsDetected + ", \"\"" + Environment.NewLine;
                 }
 
                 int width = (int)(part.Bounding.Width * screenScaling);
@@ -889,7 +890,7 @@ namespace WFInfo
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
+                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, partsDetected, false);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
