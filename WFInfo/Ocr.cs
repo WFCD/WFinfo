@@ -934,15 +934,18 @@ namespace WFInfo
                     iterator.Begin();
                     do
                     {
-                        string currentWord = iterator.GetText(PageIteratorLevel.Word);
-                        iterator.TryGetBoundingBox(PageIteratorLevel.Word, out Rect tempbounds);
+                        string currentWord = iterator.GetText(PageIteratorLevel.TextLine);
+                        iterator.TryGetBoundingBox(PageIteratorLevel.TextLine, out Rect tempbounds);
                         Rectangle bounds = new Rectangle(tempbounds.X1, tempbounds.Y1, tempbounds.Width, tempbounds.Height);
                         if (currentWord != null)
                         {
                             currentWord = RE.Replace(currentWord, "").Trim();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
-                                var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
+                                int VerticalPad = bounds.Height;
+                                int HorizontalPad = bounds.Height;
+                                var paddedBounds = new Rectangle(bounds.X - HorizontalPad, bounds.Y - VerticalPad, bounds.Width + HorizontalPad * 2, bounds.Height + VerticalPad * 2);
+                                //var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
 
                                 using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
@@ -1001,7 +1004,7 @@ namespace WFInfo
                             }
                         }
                     }
-                    while (iterator.Next(PageIteratorLevel.Word));
+                    while (iterator.Next(PageIteratorLevel.TextLine));
                 }
             }
 
