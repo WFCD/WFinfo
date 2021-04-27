@@ -182,13 +182,13 @@ namespace WFInfo
             {
                 DefaultPageSegMode = PageSegMode.SingleBlock
             };
-            
+
             secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
             {
                 DefaultPageSegMode = PageSegMode.SingleBlock
             };
 
-            
+
         }
 
         public static void Init()
@@ -234,7 +234,7 @@ namespace WFInfo
             bigScreenshot = file ?? CaptureScreenshot();
             try
             {
-				parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
+				    parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
             }
             catch (Exception e)
             {
@@ -763,7 +763,7 @@ namespace WFInfo
 
 
 
-			double[] weights = new double[15] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+                    double[] weights = new double[15] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
             int minWidth = mostWidth / 4;
 
             if (image == null || image.Height == 0)
@@ -778,7 +778,7 @@ namespace WFInfo
                 for (int x = 0; x < totWidth; x++)
                 {
                     int match = (int)GetClosestTheme(image.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
-                    
+                
                     weights[match] += 1 / Math.Pow(thresh + 1, 4);
                 }
             }
@@ -1005,8 +1005,11 @@ namespace WFInfo
                 }
             }
 
-            GetItemCounts(filteredImage, filteredImageClean, foundItems, font, 4);
-            
+            if ( Settings.doSnapItCount)
+            {
+                GetItemCounts(filteredImage, filteredImageClean, foundItems, font, Settings.snapItCountThreshold);
+            }
+
             filteredImageClean.Dispose();
             red.Dispose();
             green.Dispose();
