@@ -30,6 +30,24 @@ namespace WFInfo
             Hide();
         }
 
+        public void reloadItems()
+        {
+            if (primeTypes != null) {
+                foreach (TreeNode category in primeTypes.Values)
+                {
+                    foreach (TreeNode prime in category.Children)
+                    {
+                        foreach (TreeNode part in prime.Children)
+                        {
+                            part.ReloadPartOwned(prime);
+                        }
+                        prime.GetSetInfo();
+                    }
+                }
+                EqmtTree.Items.Refresh();
+            }
+        }
+
         public void populate()
         {
 

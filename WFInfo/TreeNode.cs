@@ -298,6 +298,9 @@ namespace WFInfo
         public void GetSetInfo()
         {
             Grid_Shown = "Visible";
+            Plat_Val = 0;
+            Owned_Val = 0;
+            Count_Val = 0;
             foreach (TreeNode kid in Children)
             {
                 Plat_Val += kid.Plat_Val * kid.Count_Val;
@@ -781,7 +784,7 @@ namespace WFInfo
             IncrementPart = new SimpleCommand(IncrementPartFunc);
             MarkComplete = new SimpleCommand(MarkCompleteFunc);
         }
-        
+
         public async void DecrementPartFunc()
         {
             if (current.dataRef != null)
@@ -808,6 +811,15 @@ namespace WFInfo
             {
                 Main.AddLog("test");
             }*/
+        }
+
+        public void ReloadPartOwned(TreeNode Parent)
+        {
+            //DOES NOT UPDATE PARENT
+            JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
+            Owned_Val = job["owned"].ToObject<int>();
+            Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
+            Col1_Text1 = Owned_Val + "/" + Count_Val;
         }
 
         private void DecrementPartThreaded(TreeNode Parent)
