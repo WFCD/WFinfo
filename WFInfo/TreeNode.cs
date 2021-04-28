@@ -301,7 +301,7 @@ namespace WFInfo
             foreach (TreeNode kid in Children)
             {
                 Plat_Val += kid.Plat_Val * kid.Count_Val;
-                Owned_Val += kid.Owned_Val;
+                Owned_Val += Math.Min(kid.Owned_Val, (int)kid.Count_Val);
                 Count_Val += kid.Count_Val;
             }
             Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
@@ -818,11 +818,15 @@ namespace WFInfo
             {
                 job["owned"] = owned - 1;
                 Owned_Val--;
-                Parent.Owned_Val--;
                 Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
-                Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
                 Col1_Text1 = Owned_Val + "/" + Count_Val;
-                Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
+                int count = job["count"].ToObject<int>();
+                if (owned <= count)
+                {
+                    Parent.Owned_Val--;
+                    Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
+                    Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
+                }
                 Main.RunOnUIThread(() =>
                 {
                     EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
@@ -836,21 +840,21 @@ namespace WFInfo
             JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
             int count = job["count"].ToObject<int>();
             int owned = job["owned"].ToObject<int>();
+            job["owned"] = owned + 1;
+            Main.dataBase.SaveAllJSONs();
+            Owned_Val++;
+            Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
+            Col1_Text1 = Owned_Val + "/" + Count_Val;
             if (owned < count)
             {
-                job["owned"] = owned + 1;
-                Main.dataBase.SaveAllJSONs();
-                Owned_Val++;
-                Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
-                Col1_Text1 = Owned_Val + "/" + Count_Val;
                 Parent.Owned_Val++;
                 Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
                 Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
-                Main.RunOnUIThread(() =>
-                {
-                    EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
-                });
             }
+            Main.RunOnUIThread(() =>
+            {
+                EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
+            });
         }
 
         private void MarkSetAsComplete(TreeNode Parent)
