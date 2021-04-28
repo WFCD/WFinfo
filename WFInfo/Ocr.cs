@@ -896,6 +896,13 @@ namespace WFInfo
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
                 });
             }
+
+            if (Settings.doSnapItCount)
+                Main.RunOnUIThread(() =>
+                {
+                    VerifyCount verifyCount = new VerifyCount(foundParts);
+                 });
+
             if (Main.snapItOverlayWindow.tempImage != null)
                 Main.snapItOverlayWindow.tempImage.Dispose();
             end = watch.ElapsedMilliseconds;

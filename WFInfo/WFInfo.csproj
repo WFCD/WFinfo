@@ -199,6 +199,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="verifyCount.xaml.cs">
+      <DependentUpon>verifyCount.xaml</DependentUpon>
+    </Compile>
     <Compile Include="fullscreenReminder.xaml.cs">
       <DependentUpon>fullscreenReminder.xaml</DependentUpon>
     </Compile>
@@ -252,6 +255,10 @@
     <Compile Include="RewardWindow.xaml.cs">
       <DependentUpon>RewardWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="verifyCount.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="fullscreenReminder.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
