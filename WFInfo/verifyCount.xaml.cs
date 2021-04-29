@@ -12,22 +12,32 @@ using System.Windows.Input;
 namespace WFInfo
 {
     /// <summary>
-    /// Interaction logic for errorDialogue.xaml
+    /// Interaction logic for verifyCount.xaml
     /// </summary>
     public partial class VerifyCount : Window
     {
 
-        string itemPath = Main.AppPath + @"\eqmt_data.json";
-        string backupPath = Main.AppPath + @"\eqmt_data.json.bak";
+        private static string itemPath = Main.AppPath + @"\eqmt_data.json";
+        private static string backupPath = Main.AppPath + @"\eqmt_data.json.bak";
 
         private List<InventoryItem> latestSnap;
+        public static VerifyCount INSTANCE;
 
-        public VerifyCount( List<InventoryItem> itemList)
+        public VerifyCount()
         {
-            latestSnap = itemList;
             InitializeComponent();
-            Show();
-            Focus();
+            INSTANCE = this;
+            latestSnap = new List<InventoryItem>();
+        }
+        public static void ShowVerifyCount( List<InventoryItem> itemList)
+        {
+            if (INSTANCE != null)
+            {
+                INSTANCE.latestSnap = itemList;
+                INSTANCE.BackupButton.Visibility = Visibility.Visible;
+                INSTANCE.Show();
+                INSTANCE.Focus();
+            }
         }
 
         private void SaveClick(object sender, RoutedEventArgs e)
@@ -48,7 +58,7 @@ namespace WFInfo
             }
             Main.dataBase.SaveAllJSONs();
             EquipmentWindow.INSTANCE.reloadItems();
-            Close();
+            Hide();
         }
 
         private void BackupClick(object sender, RoutedEventArgs e)
@@ -77,7 +87,7 @@ namespace WFInfo
 
         private void CancelClick(object sender, RoutedEventArgs e)
         {
-            Close();
+            Hide();
         }
 
         // Allows the draging of the window

@@ -25,6 +25,7 @@ namespace WFInfo
         public static RelicsWindow relicWindow = new RelicsWindow();
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
         public static Settings settingsWindow = new Settings();
+        public static VerifyCount verifyCount = new VerifyCount();
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;
         public static UpdateDialogue update;

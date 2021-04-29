@@ -903,7 +903,7 @@ namespace WFInfo
             if (Settings.doSnapItCount)
                 Main.RunOnUIThread(() =>
                 {
-                    VerifyCount verifyCount = new VerifyCount(foundParts);
+                    VerifyCount.ShowVerifyCount(foundParts);
                  });
 
             if (Main.snapItOverlayWindow.tempImage != null)
