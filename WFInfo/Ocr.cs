@@ -965,7 +965,7 @@ namespace WFInfo
                             currentWord = RE.Replace(currentWord, "").Trim();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
-                                int VerticalPad = bounds.Height;
+                                int VerticalPad = bounds.Height/2;
                                 int HorizontalPad = bounds.Height;
                                 var paddedBounds = new Rectangle(bounds.X - HorizontalPad, bounds.Y - VerticalPad, bounds.Width + HorizontalPad * 2, bounds.Height + VerticalPad * 2);
                                 //var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
@@ -1171,13 +1171,19 @@ namespace WFInfo
                         //mark edges for checking
                         for (int k = cloneRect.X; k < cloneRect.Right; k++)
                         {
-                            toFilter.Push(new Point(k, cloneRect.Bottom));
+                            for (int l = 0; l <= Settings.snapItEdgeWidth; l++)
+                            {
+                                toFilter.Push(new Point(k, cloneRect.Bottom - l));
+                            }
                         }
                         for (int k = cloneRect.Y; k < cloneRect.Bottom; k++)
                         {
-                            toFilter.Push(new Point(cloneRect.Right, k));
+                            for (int l = 0; l <= Settings.snapItEdgeWidth; l++)
+                            {
+                                toFilter.Push(new Point(cloneRect.Right-l, k));
+                            }
                         }
-                        int checkRadius = 2;
+                        int checkRadius = Settings.snapItEdgeRadius;
                         while (toFilter.Count > 0)
                         {
                             Point curr = toFilter.Pop();

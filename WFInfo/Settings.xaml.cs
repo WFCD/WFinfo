@@ -68,6 +68,8 @@ namespace WFInfo
         public static bool doDoubleCheck;
         public static bool doSnapItCount;
         public static int snapItCountThreshold;
+        public static int snapItEdgeWidth;
+        public static int snapItEdgeRadius;
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }

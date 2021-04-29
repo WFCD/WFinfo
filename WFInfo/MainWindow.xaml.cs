@@ -223,6 +223,14 @@ namespace WFInfo
                 Settings.settingsObj["SnapItCountThreshold"] = 0;
             Settings.snapItCountThreshold = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItCountThreshold"), Main.culture);
 
+            if (!Settings.settingsObj.TryGetValue("SnapItEdgeWidth", out _))
+                Settings.settingsObj["SnapItEdgeWidth"] = 1;
+            Settings.snapItEdgeWidth = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItEdgeWidth"), Main.culture);
+
+            if (!Settings.settingsObj.TryGetValue("SnapItEdgeRadius", out _))
+                Settings.settingsObj["SnapItEdgeRadius"] = 1;
+            Settings.snapItEdgeRadius = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItEdgeRadius"), Main.culture);
+
             Settings.Save();
 
             RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
