@@ -1252,7 +1252,6 @@ namespace WFInfo
                                     {
                                         item.Count = itemCount;
                                         foundItems[k] = item;
-                                        break;
                                     }
                                 }
                             }
