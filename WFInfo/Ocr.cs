@@ -1159,6 +1159,36 @@ namespace WFInfo
                         Rectangle cloneRect = new Rectangle(Left, Top, Width, Height);
                         Bitmap cloneBitmap = filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat);
 
+                        //filter out parts of item icon
+                        Stack<Point> toFilter = new Stack<Point>();
+                        //mark edges for checking
+                        for (int k = cloneRect.X; k < cloneRect.Right; k++)
+                        {
+                            toFilter.Push(new Point(k, cloneRect.Bottom));
+                        }
+                        for (int k = cloneRect.Y; k < cloneRect.Bottom; k++)
+                        {
+                            toFilter.Push(new Point(cloneRect.Right, k));
+                        }
+                        int checkRadius = 2;
+                        while (toFilter.Count > 0)
+                        {
+                            Point curr = toFilter.Pop();
+                            if (filteredImageClean.GetPixel(curr.X, curr.Y).R < 200)
+                            {
+                                g.DrawRectangle(red, curr.X, curr.Y, 1, 1);
+                                filteredImageClean.SetPixel(curr.X, curr.Y, Color.White);
+                                //check neighbours
+                                for (int k = Math.Max(curr.X - checkRadius, cloneRect.X); k < Math.Min(curr.X + checkRadius, cloneRect.Right); k++)
+                                {
+                                    for (int l = Math.Max(curr.Y - checkRadius, cloneRect.Y); l < Math.Min(curr.Y + checkRadius, cloneRect.Bottom); l++)
+                                    {
+                                        toFilter.Push(new Point(k, l));
+                                    }
+                                }
+                            }
+                        }
+
                         //filter out noise
                         for (int k = 1; k < cloneRect.Width - 1; k++)
                         {
