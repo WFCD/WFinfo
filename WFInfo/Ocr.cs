@@ -1076,7 +1076,7 @@ namespace WFInfo
 
                 //features of grid system
                 List<Rectangle> Columns = new List<Rectangle>();
-                List<int> Rows = new List<int>();
+                List<Rectangle> Rows = new List<Rectangle>();
 
                 //sort for easier processing in loop below
                 List<InventoryItem> foundItemsBottom = foundItems.OrderBy(o => o.Bounding.Bottom).ToList();
@@ -1096,17 +1096,24 @@ namespace WFInfo
 
                 for (int i = 0; i < foundItemsBottom.Count; i++)
                 {
-                    int currRow = foundItemsBottom[i].Bounding.Bottom;
+                    Rectangle currRow = new Rectangle(0, foundItemsBottom[i].Bounding.Y, 10000, foundItemsBottom[i].Bounding.Height);
                     Rectangle currColumn = new Rectangle(foundItemsLeft[i].Bounding.X, 0, foundItemsLeft[i].Bounding.Width, 10000);
 
-                    //find or improve latest row
-                    if (Rows.Count == 0 || currRow - Rows.Last() > 50)
+                    //find or improve latest ColumnsRight
+                    if (Rows.Count == 0 || !currRow.IntersectsWith(Rows.Last()))
                     {
                         Rows.Add(currRow);
                     }
-                    else if (currRow - Rows.Last() < 0) 
+                    else
                     {
-                        Rows[Rows.Count - 1] = currRow;
+                        if (currRow.Bottom < Rows.Last().Bottom)
+                        {
+                            Rows[Rows.Count - 1] = new Rectangle(0, Rows.Last().Y, 10000, currRow.Bottom - Rows.Last().Top);
+                        }
+                        if (Rows.Count != 1 && currColumn.Top > Columns.Last().Top)
+                        {
+                            Rows[Rows.Count - 1] = new Rectangle(0, currRow.Y, 10000, Rows.Last().Bottom - currRow.Top);
+                        }
                     }
 
                     //find or improve latest ColumnsRight
@@ -1132,11 +1139,11 @@ namespace WFInfo
                 for (int i = 0; i < Columns.Count; i++)
                 {
                     g.DrawLine(darkCyan, Columns[i].Right, 0, Columns[i].Right, 10000);
-                    g.DrawLine(cyan, Columns[i].X, 0, Columns[i].X, 10000);
+                    g.DrawLine(darkCyan, Columns[i].X, 0, Columns[i].X, 10000);
                 }
                 for (int i = 0; i < Rows.Count; i++)
                 {
-                    g.DrawLine(darkCyan, 0, Rows[i], 10000, Rows[i]);
+                    g.DrawLine(darkCyan, 0, Rows[i].Bottom, 10000, Rows[i].Bottom);
                 }
 
 
@@ -1152,9 +1159,9 @@ namespace WFInfo
                     {
                         //edges of current area to scan
                         int Left = (j == 0 ? 0 : (Columns[j - 1].Right + Columns[j].X) / 2);
-                        int Top = (i == 0 ? 0 : Rows[i - 1]);
+                        int Top = (i == 0 ? 0 : Rows[i - 1].Bottom);
                         int Width = Math.Min((Columns[j].Right - Left) / 3, filteredImage.Size.Width - Left);
-                        int Height = Math.Min((Rows[i] - Top) / 3, filteredImage.Size.Height - Top);
+                        int Height = Math.Min((Rows[i].Bottom - Top) / 3, filteredImage.Size.Height - Top);
 
                         Rectangle cloneRect = new Rectangle(Left, Top, Width, Height);
                         Bitmap cloneBitmap = filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat);
@@ -1234,7 +1241,7 @@ namespace WFInfo
                                 g.DrawString(rawText, font, Brushes.Cyan, new Point(cloneRect.X, cloneRect.Y));
 
                                 //find what item the item belongs to
-                                Rectangle itemLabel = new Rectangle( Columns[j].X, Rows[i] - 5, Columns[j].Width , 10);
+                                Rectangle itemLabel = new Rectangle( Columns[j].X, Rows[i].Top, Columns[j].Width , Rows[i].Height);
                                 g.DrawRectangle(cyan, itemLabel);
                                 for (int k = 0; k < foundItemsBottom.Count; k++)
                                 {
@@ -1243,6 +1250,7 @@ namespace WFInfo
                                     {
                                         item.Count = itemCount;
                                         foundItems[k] = item;
+                                        break;
                                     }
                                 }
                             }
