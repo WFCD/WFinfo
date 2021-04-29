@@ -832,6 +832,19 @@ namespace WFInfo
         }
 
         /// <summary>
+        /// Checks if partName is close enough to valid to actually process
+        /// </summary>
+        /// <param name="partName">Scanned part name</param>
+        /// <returns>If part name is close enough to valid to actually process</returns>
+        internal static bool PartNameValid (string partName)
+        {
+            if ((partName.Length < 13 && Settings.locale == "en") || (partName.Replace(" ", "").Length < 6 && Settings.locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
+                //TODO: Add a min character for other locale here.
+                return false;
+            return true;
+        }
+
+        /// <summary>
         /// Processes the image the user cropped in the selection
         /// </summary>
         /// <param name="snapItImage"></param>
@@ -856,8 +869,7 @@ namespace WFInfo
             for (int i = 0; i < foundParts.Count; i++)
             {
                 var part = foundParts[i];
-                if ((part.Name.Length < 13 && Settings.locale == "en") || (part.Name.Replace(" ", "").Length < 6 && Settings.locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
-                    //TODO: Add a min character for other locale here.
+                if (!PartNameValid(part.Name))
                     continue;
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0]);
@@ -1056,28 +1068,36 @@ namespace WFInfo
         /// <returns>Nothing, but if successful <c>foundItems</c> will be modified</returns>
         private static void GetItemCounts(Bitmap filteredImage, Bitmap filteredImageClean, List<InventoryItem> foundItems, Font font, int threshold)
         {
-            Pen orange = new Pen(Brushes.Orange);
-            Pen pink = new Pen(Brushes.Orange);
+            Pen darkCyan = new Pen(Brushes.DarkCyan);
             Pen red = new Pen(Brushes.Red);
+            Pen cyan = new Pen(Brushes.Cyan);
             using (Graphics g = Graphics.FromImage(filteredImage))
             {
 
                 //features of grid system
-                List<int> ColumnsRight = new List<int>();
-                List<int> ColumnsLeft = new List<int>();
+                List<Rectangle> Columns = new List<Rectangle>();
                 List<int> Rows = new List<int>();
 
                 //sort for easier processing in loop below
                 List<InventoryItem> foundItemsBottom = foundItems.OrderBy(o => o.Bounding.Bottom).ToList();
-                List<InventoryItem> foundItemsRight = foundItems.OrderBy(o => o.Bounding.Right).ToList();
-                List<InventoryItem> foundItemsLeft = foundItems.OrderBy(o => o.Bounding.Left).ToList();
+                //filter out bad parts for more accurate grid
+                bool itemRemoved = false;
+                for (int i = 0; i < foundItemsBottom.Count; i+=(itemRemoved ? 0 : 1))
+                {
+                    itemRemoved = false;
+                    if (!PartNameValid(foundItemsBottom[i].Name))
+                    {
+                        foundItemsBottom.RemoveAt(i);
+                        itemRemoved = true;
+                    }
+                }
+                List<InventoryItem> foundItemsLeft = foundItemsBottom.OrderBy(o => o.Bounding.Left).ToList();
 
 
-                for (int i = 0; i < foundItems.Count; i++)
+                for (int i = 0; i < foundItemsBottom.Count; i++)
                 {
                     int currRow = foundItemsBottom[i].Bounding.Bottom;
-                    int currColumnRight = foundItemsRight[i].Bounding.Right;
-                    int currColumnLeft = foundItemsLeft[i].Bounding.Left;
+                    Rectangle currColumn = new Rectangle(foundItemsLeft[i].Bounding.X, 0, foundItemsLeft[i].Bounding.Width, 10000);
 
                     //find or improve latest row
                     if (Rows.Count == 0 || currRow - Rows.Last() > 50)
@@ -1090,40 +1110,33 @@ namespace WFInfo
                     }
 
                     //find or improve latest ColumnsRight
-                    if (ColumnsRight.Count == 0 || currColumnRight - ColumnsRight.Last() > 50)
+                    if (Columns.Count == 0 || !currColumn.IntersectsWith(Columns.Last()))
                     {
-                        ColumnsRight.Add(currColumnRight);
+                        Columns.Add(currColumn);
                     }
-                    else if (currColumnRight - ColumnsRight.Last() < 0) 
+                    else
                     {
-                        ColumnsRight[ColumnsRight.Count - 1] = currColumnRight;
-                    }
-
-
-                    //find or improve latest ColumnsLeft
-                    if (ColumnsLeft.Count == 0 || currColumnLeft - ColumnsLeft.Last() > 50)
-                    {
-                        ColumnsLeft.Add(currColumnLeft);
-                    }
-                    else if (currColumnLeft - ColumnsLeft.Last() < 0)
-                    {
-                        ColumnsLeft[ColumnsLeft.Count - 1] = currColumnLeft;
+                        if (currColumn.Right < Columns.Last().Right)
+                        {
+                            Columns[Columns.Count - 1] = new Rectangle(Columns.Last().X, 0, currColumn.Right - Columns.Last().X, 10000);
+                        }
+                        if (Columns.Count != 1 && currColumn.Left > Columns.Last().Left)
+                        {
+                            Columns[Columns.Count - 1] = new Rectangle(currColumn.X, 0, Columns.Last().Right - currColumn.X, 10000);
+                        }
                     }
 
                 }
 
                 //draw debug markings for grid system
-                for (int i = 0; i < ColumnsRight.Count; i++)
+                for (int i = 0; i < Columns.Count; i++)
                 {
-                    g.DrawLine(orange, ColumnsRight[i], 0, ColumnsRight[i], 10000);
-                }
-                for (int i = 0; i < ColumnsLeft.Count; i++)
-                {
-                    g.DrawLine(orange, ColumnsLeft[i], 0, ColumnsLeft[i], 10000);
+                    g.DrawLine(darkCyan, Columns[i].Right, 0, Columns[i].Right, 10000);
+                    g.DrawLine(cyan, Columns[i].X, 0, Columns[i].X, 10000);
                 }
                 for (int i = 0; i < Rows.Count; i++)
                 {
-                    g.DrawLine(orange, 0, Rows[i], 10000, Rows[i]);
+                    g.DrawLine(darkCyan, 0, Rows[i], 10000, Rows[i]);
                 }
 
 
@@ -1132,91 +1145,89 @@ namespace WFInfo
                 firstEngine.SetVariable("tessedit_char_whitelist", "0123456789");
 
                 
-                if (ColumnsRight.Count == ColumnsLeft.Count) //verify that columns seem valid (not doing this will cause exception if invalid)
+                //Process grid system
+                for (int i = 0; i < Rows.Count; i++)
                 {
-                    //Process grid system
-                    for (int i = 0; i < Rows.Count; i++)
+                    for (int j = 0; j < Columns.Count; j++)
                     {
-                        for (int j = 0; j < ColumnsLeft.Count; j++)
+                        //edges of current area to scan
+                        int Left = (j == 0 ? 0 : (Columns[j - 1].Right + Columns[j].X) / 2);
+                        int Top = (i == 0 ? 0 : Rows[i - 1]);
+                        int Width = Math.Min((Columns[j].Right - Left) / 3, filteredImage.Size.Width - Left);
+                        int Height = Math.Min((Rows[i] - Top) / 3, filteredImage.Size.Height - Top);
+
+                        Rectangle cloneRect = new Rectangle(Left, Top, Width, Height);
+                        Bitmap cloneBitmap = filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat);
+
+                        //filter out noise
+                        for (int k = 1; k < cloneRect.Width - 1; k++)
                         {
-                            //edges of current area to scan
-                            int Left = (j == 0 ? 0 : (ColumnsRight[j - 1] + ColumnsLeft[j]) / 2);
-                            int Top = (i == 0 ? 0 : Rows[i - 1]);
-                            int Width = Math.Min((ColumnsRight[j] - Left) / 3, filteredImage.Size.Width - Left);
-                            int Height = Math.Min((Rows[i] - Top) / 3, filteredImage.Size.Height - Top);
-
-                            Rectangle cloneRect = new Rectangle(Left, Top, Width, Height);
-                            Bitmap cloneBitmap = filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat);
-
-                            //filter out noise
-                            for (int k = 1; k < cloneRect.Width - 1; k++)
+                            for (int l = 1; l < cloneRect.Height - 1; l++)
                             {
-                                for (int l = 1; l < cloneRect.Height - 1; l++)
+                                if (cloneBitmap.GetPixel(k, l).R < 200)
                                 {
-                                    if (cloneBitmap.GetPixel(k, l).R < 200)
+                                    int BlackCount = 0;
+                                    for (int m = -1; m <= 1; m++)
                                     {
-                                        int BlackCount = 0;
-                                        for (int m = -1; m <= 1; m++)
+                                        for (int n = -1; n <= 1; n++)
                                         {
-                                            for (int n = -1; n <= 1; n++)
+                                            if (cloneBitmap.GetPixel(k + m, l + n).R < 200)
                                             {
-                                                if (cloneBitmap.GetPixel(k + m, l + n).R < 200)
-                                                {
-                                                    BlackCount++;
-                                                }
+                                                BlackCount++;
                                             }
                                         }
-                                        if (BlackCount < threshold)
-                                        {
-                                            g.DrawRectangle(red, k + cloneRect.X, l + cloneRect.Y, 1, 1);
-                                            filteredImageClean.SetPixel(k + cloneRect.X, l + cloneRect.Y, Color.White);
-                                        }
+                                    }
+                                    if (BlackCount < threshold)
+                                    {
+                                        g.DrawRectangle(red, k + cloneRect.X, l + cloneRect.Y, 1, 1);
+                                        filteredImageClean.SetPixel(k + cloneRect.X, l + cloneRect.Y, Color.White);
                                     }
                                 }
                             }
-
-                            cloneBitmap = filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat);
-                            g.DrawRectangle(pink, cloneRect);
-
-                            //do OCR
-                            using (var page = firstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
-                            {
-                                using (var iterator = page.GetIterator())
-                                {
-                                    iterator.Begin();
-                                    string rawText = iterator.GetText(PageIteratorLevel.TextLine);
-                                    //if no number found, 1 of item
-                                    if (!Int32.TryParse(rawText, out int itemCount))
-                                    {
-                                        itemCount = 1;
-                                    }
-                                    g.DrawString(rawText, font, Brushes.Pink, new Point(cloneRect.X, cloneRect.Y));
-
-                                    //find what item the item belongs to
-                                    Rectangle itemLabel = new Rectangle( ColumnsLeft[j], Rows[i] - 5, ColumnsRight[j] - ColumnsLeft[j] , 10);
-                                    g.DrawRectangle(pink, itemLabel);
-                                    for (int k = 0; k < foundItems.Count; k++)
-                                    {
-                                        var item = foundItems[k];
-                                        if (item.Bounding.IntersectsWith(itemLabel))
-                                        {
-                                            item.Count = itemCount;
-                                            foundItems[k] = item;
-                                        }
-                                    }
-                                }
-
-                            }
-                            cloneBitmap.Dispose();
                         }
+
+                        cloneBitmap = filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat);
+                        g.DrawRectangle(cyan, cloneRect);
+
+                        //do OCR
+                        using (var page = firstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
+                        {
+                            using (var iterator = page.GetIterator())
+                            {
+                                iterator.Begin();
+                                string rawText = iterator.GetText(PageIteratorLevel.TextLine);
+                                //if no number found, 1 of item
+                                if (!Int32.TryParse(rawText, out int itemCount))
+                                {
+                                    itemCount = 1;
+                                }
+                                g.DrawString(rawText, font, Brushes.Cyan, new Point(cloneRect.X, cloneRect.Y));
+
+                                //find what item the item belongs to
+                                Rectangle itemLabel = new Rectangle( Columns[j].X, Rows[i] - 5, Columns[j].Width , 10);
+                                g.DrawRectangle(cyan, itemLabel);
+                                for (int k = 0; k < foundItemsBottom.Count; k++)
+                                {
+                                    var item = foundItems[k];
+                                    if (item.Bounding.IntersectsWith(itemLabel))
+                                    {
+                                        item.Count = itemCount;
+                                        foundItems[k] = item;
+                                    }
+                                }
+                            }
+
+                        }
+                        cloneBitmap.Dispose();
                     }
                 }
+                
                 //return OCR to any symbols
                 firstEngine.SetVariable("tessedit_char_whitelist", "");
             }
-            orange.Dispose();
-            pink.Dispose();
+            darkCyan.Dispose();
             red.Dispose();
+            cyan.Dispose();
         }
 
 
