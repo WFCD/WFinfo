@@ -1233,6 +1233,8 @@ namespace WFInfo
                             {
                                 iterator.Begin();
                                 string rawText = iterator.GetText(PageIteratorLevel.TextLine);
+                                if (rawText != null) 
+                                    rawText = rawText.Replace(" ", "");
                                 //if no number found, 1 of item
                                 if (!Int32.TryParse(rawText, out int itemCount))
                                 {
@@ -1243,7 +1245,7 @@ namespace WFInfo
                                 //find what item the item belongs to
                                 Rectangle itemLabel = new Rectangle( Columns[j].X, Rows[i].Top, Columns[j].Width , Rows[i].Height);
                                 g.DrawRectangle(cyan, itemLabel);
-                                for (int k = 0; k < foundItemsBottom.Count; k++)
+                                for (int k = 0; k < foundItems.Count; k++)
                                 {
                                     var item = foundItems[k];
                                     if (item.Bounding.IntersectsWith(itemLabel))
