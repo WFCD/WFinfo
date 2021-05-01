@@ -367,7 +367,7 @@ namespace WFInfo
                                 Main.overlays[partNumber].Resize(overWid);
                                 Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + Settings.overlayXOffsetValue) / dpiScaling), startY + (int)(Settings.overlayYOffsetValue / dpiScaling), Settings.delay);
                             }
-                            else if (!Settings.isLightSlected)
+                            else if (!Settings.isLightSelected)
                             {
                                 Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
@@ -415,7 +415,7 @@ namespace WFInfo
             }
             #endregion 
 
-            if (Settings.isLightSlected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
+            if (Settings.isLightSelected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
             {
                 player.Play();
             }
@@ -675,7 +675,7 @@ namespace WFInfo
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
-                            else if (!Settings.isLightSlected)
+                            else if (!Settings.isLightSelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }

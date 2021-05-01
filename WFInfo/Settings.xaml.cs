@@ -52,7 +52,7 @@ namespace WFInfo
         public static KeyConverter converter = new KeyConverter();
         public static Point mainWindowLocation;
         public static bool isOverlaySelected;
-        public static bool isLightSlected;
+        public static bool isLightSelected;
         public static bool debug;
         public static long autoDelay;
         public static int imageRetentionTime;
@@ -97,12 +97,12 @@ namespace WFInfo
             else if (settingsObj.GetValue("Display").ToString() == "Light")
             {
                 LightRadio.IsChecked = true;
-                Height = 356;
+                Height = 484;
             }
             else
             {
                 WindowRadio.IsChecked = true;
-                Height = 356;
+                Height = 484;
             }
 
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
@@ -175,11 +175,11 @@ namespace WFInfo
         {
             settingsObj["Display"] = "Window";
             isOverlaySelected = false;
-            isLightSlected = false;
+            isLightSelected = false;
             Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 356;
+            Height = 484;
             Save();
         }
 
@@ -187,11 +187,11 @@ namespace WFInfo
         {
             settingsObj["Display"] = "Overlay";
             isOverlaySelected = true;
-            isLightSlected = false;
+            isLightSelected = false;
             Overlay_sliders.Visibility = Visibility.Visible;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 490;
+            Height = 554;
             Save();
         }
 
@@ -440,12 +440,12 @@ namespace WFInfo
         {
             settingsObj["Display"] = "Light";
             isOverlaySelected = false;
-            isLightSlected = true;
+            isLightSelected = true;
             Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboard = true;
             clipboardCheckbox.IsChecked = true;
             clipboardCheckbox.IsEnabled = false;
-            Height = 356;
+            Height = 484;
             Save();
         }
 
