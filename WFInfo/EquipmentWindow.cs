@@ -89,15 +89,17 @@ namespace WFInfo
                         else if (Main.dataBase.equipmentData.TryGetValue(primePart.Key, out JToken job))
                         {
                             double plat = 0.0;
+                            double ducats = 0.0;
                             foreach (KeyValuePair<string, JToken> subPartPart in job["parts"].ToObject<JObject>())
                             {
                                 if (Main.dataBase.marketData.TryGetValue(subPartPart.Key.ToString(), out JToken subMarketValues))
                                 {
                                     int temp = subPartPart.Value["count"].ToObject<int>();
                                     plat += temp * subMarketValues["plat"].ToObject<double>();
+                                    ducats += temp * subMarketValues["ducats"].ToObject<double>();
                                 }
                             }
-                            partNode.SetPrimeEqmt(plat, primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
+                            partNode.SetPrimeEqmt(plat, ducats, primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
                         }
                         else
                         {
@@ -158,9 +160,15 @@ namespace WFInfo
                         case 2:
                             EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Diff_Val", System.ComponentModel.ListSortDirection.Ascending));
                             break;
-                        //case 3:
-                        //    EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
-                        //    break;
+                        case 3:
+                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Owned_Val", System.ComponentModel.ListSortDirection.Descending));
+                            break;
+                        case 4:
+                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Owned_Plat_Val", System.ComponentModel.ListSortDirection.Descending));
+                            break;
+                        case 5:
+                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Owned_Ducat_Val", System.ComponentModel.ListSortDirection.Descending));
+                            break;
                         default:
                             EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("EqmtName_Sort", System.ComponentModel.ListSortDirection.Ascending));
                             break;
