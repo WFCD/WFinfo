@@ -194,7 +194,7 @@ namespace WFInfo
             Debug.WriteLine(argm);
             Directory.CreateDirectory(appPath);
             using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
-                sw.WriteLineAsync("[" + DateTime.UtcNow + "Still in custom entery point" + "]   " + argm);
+                sw.WriteLineAsync("[" + DateTime.UtcNow + " - Still in custom entrypoint]   " + argm);
         }
 
         public static bool isAVX2Available()
