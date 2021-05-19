@@ -298,29 +298,39 @@ namespace WFInfo
         public void GetSetInfo()
         {
             Grid_Shown = "Visible";
+            Plat_Val = 0;
+            Owned_Capped_Val = 0;
+            Owned_Plat_Val = 0;
+            Owned_Ducat_Val = 0;
+            Owned_Val = 0;
+            Count_Val = 0;
             foreach (TreeNode kid in Children)
             {
                 Plat_Val += kid.Plat_Val * kid.Count_Val;
+                Owned_Capped_Val += kid.Owned_Capped_Val;
+                Owned_Plat_Val += kid.Owned_Plat_Val;
+                Owned_Ducat_Val += kid.Owned_Ducat_Val;
                 Owned_Val += kid.Owned_Val;
                 Count_Val += kid.Count_Val;
             }
-            Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
 
-            Col1_Text1 = _owned + "/" + _count;
+            PrimeUpdateDiff(true);
             Col1_Text2 = _plat.ToString("F1");
 
             Col1_Img1 = PLAT_SRC;
             Col1_Img1_Shown = "Visible";
         }
 
-        internal void SetPrimeEqmt(double plat, int owned, int count)
+        internal void SetPrimeEqmt(double plat, double ducat, int owned, int count)
         {
             Plat_Val = plat;
+            Owned_Capped_Val = Math.Min(owned, count);
+            Owned_Plat_Val = owned * plat;
+            Owned_Ducat_Val = owned * ducat;
             Owned_Val = owned;
             Count_Val = count;
-            Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
 
-            Col1_Text1 = owned + "/" + count;
+            PrimeUpdateDiff(false);
             Col1_Text2 = _plat.ToString("F1");
 
             Col1_Img1 = PLAT_SRC;
@@ -342,7 +352,7 @@ namespace WFInfo
 
         public void SetPrimePart(double plat, int ducat, int owned, int count)
         {
-            SetPrimeEqmt(plat, owned, count);
+            SetPrimeEqmt(plat, ducat, owned, count);
             Col2_Text3 = ducat.ToString();
             Col2_Img1 = DUCAT_SRC;
             Col2_Img1_Shown = "Visible";
@@ -542,21 +552,30 @@ namespace WFInfo
                     {
                         // 0 - Name
                         // 1 - Plat
-                        // 2 - Unowned
-                        // 3 - N/A
+                        // 2 - Unowned (Capped)
+                        // 3 - Owned (Uncapped)
+                        // 4 - Owned Plat Value
 
                         case 1:
                             Children = Children.AsParallel().OrderByDescending(p => p.Plat_Val).ToList();
                             ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Plat_Val).ToList();
                             break;
                         case 2:
-                            Children = Children.AsParallel().OrderBy(p => p.Owned_Val).OrderBy(p => p.Diff_Val).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Owned_Val).OrderBy(p => p.Diff_Val).ToList();
+                            Children = Children.AsParallel().OrderBy(p => p.Owned_Capped_Val).OrderBy(p => p.Diff_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Owned_Capped_Val).OrderBy(p => p.Diff_Val).ToList();
                             break;
-                        //case 3:
-                        //    Children = Children.AsParallel().OrderByDescending(p => p._bonus).ToList();
-                        //    ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._bonus).ToList();
-                        //    break;
+                        case 3:
+                            Children = Children.AsParallel().OrderByDescending(p => p.Owned_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Owned_Val).ToList();
+                            break;
+                        case 4:
+                            Children = Children.AsParallel().OrderByDescending(p => p.Owned_Plat_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Owned_Plat_Val).ToList();
+                            break;
+                        case 5:
+                            Children = Children.AsParallel().OrderByDescending(p => p.Owned_Ducat_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Owned_Ducat_Val).ToList();
+                            break;
                         default:
                             Children = Children.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
                             ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
@@ -642,55 +661,76 @@ namespace WFInfo
             private set { SetField(ref _col2_img1_shown, value); }
         }
 
-        public double _plat = 0;
+        private double _plat = 0;
         public double Plat_Val
         {
             get { return _plat; }
             set { SetField(ref _plat, value); }
         }
 
-        public int _ducat = 0;
+        private int _ducat = 0;
         public int Ducat_Val
         {
             get { return _ducat; }
             set { SetField(ref _ducat, value); }
         }
 
-        public int _owned = 0;
+        private int _owned = 0;
         public int Owned_Val
         {
             get { return _owned; }
             set { SetField(ref _owned, value); }
         }
 
-        public double _count = 0;
-        public double Count_Val
+        private int _owned_capped = 0;
+        public int Owned_Capped_Val
+        {
+            get { return _owned_capped; }
+            set { SetField(ref _owned_capped, value); }
+        }
+
+        private double _owned_plat = 0;
+        public double Owned_Plat_Val
+        {
+            get { return _owned_plat; }
+            set { SetField(ref _owned_plat, value); }
+        }
+
+        private double _owned_ducat = 0;
+        public double Owned_Ducat_Val
+        {
+            get { return _owned_ducat; }
+            set { SetField(ref _owned_ducat, value); }
+        }
+
+        private int _count = 0;
+        public int Count_Val
         {
             get { return _count; }
             set { SetField(ref _count, value); }
         }
-        public double _diff = 0;
+        private double _diff = 0;
         public double Diff_Val
         {
             get { return _diff; }
             set { SetField(ref _diff, value); }
         }
 
-        public double _intact = 0;
+        private double _intact = 0;
         public double Intact_Val
         {
             get { return _intact; }
             set { SetField(ref _intact, value); }
         }
 
-        public double _radiant = 0;
+        private double _radiant = 0;
         public double Radiant_Val
         {
             get { return _radiant; }
             set { SetField(ref _radiant, value); }
         }
 
-        public double _bonus = 0;
+        private double _bonus = 0;
         public double Bonus_Val
         {
             get { return _bonus; }
@@ -781,7 +821,7 @@ namespace WFInfo
             IncrementPart = new SimpleCommand(IncrementPartFunc);
             MarkComplete = new SimpleCommand(MarkCompleteFunc);
         }
-        
+
         public async void DecrementPartFunc()
         {
             if (current.dataRef != null)
@@ -800,7 +840,7 @@ namespace WFInfo
         
         public async void MarkCompleteFunc()
         {
-            await System.Threading.Tasks.Task.Run(() => MarkSetAsComplete(this));
+            await System.Threading.Tasks.Task.Run(() => MarkSetAsComplete());
 
             /*Main.AddLog("test");
             Main.AddLog(current.dataRef);
@@ -810,52 +850,75 @@ namespace WFInfo
             }*/
         }
 
+        public void ReloadPartOwned(TreeNode Parent)
+        {
+            //DOES NOT UPDATE PARENT
+            JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
+            Owned_Val = job["owned"].ToObject<int>();
+            Owned_Capped_Val = Math.Min(Owned_Val, Count_Val);
+            Owned_Plat_Val = Owned_Val * Plat_Val;
+            Owned_Ducat_Val = Owned_Val * Ducat_Val;
+            PrimeUpdateDiff(false);
+        }
+
         private void DecrementPartThreaded(TreeNode Parent)
         {
             JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
-            int owned = job["owned"].ToObject<int>();
+            int owned = Owned_Val;
             if (owned > 0)
             {
                 job["owned"] = owned - 1;
+                Main.dataBase.SaveAllJSONs();
                 Owned_Val--;
+                Owned_Capped_Val = Math.Min(Owned_Val, Count_Val);
+                Owned_Plat_Val = Owned_Val * Plat_Val;
+                Owned_Ducat_Val = Owned_Val * Ducat_Val;
+                PrimeUpdateDiff(false);
+                int count = Count_Val;
                 Parent.Owned_Val--;
-                Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
-                Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
-                Col1_Text1 = Owned_Val + "/" + Count_Val;
-                Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
+                Parent.Owned_Plat_Val -= Plat_Val;
+                Parent.Owned_Ducat_Val -= Ducat_Val;
+                if (owned <= count)
+                {
+                    Parent.Owned_Capped_Val--;
+                    Parent.PrimeUpdateDiff(true);
+                }
                 Main.RunOnUIThread(() =>
                 {
                     EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
                 });
-                Main.dataBase.SaveAllJSONs();
             }
         }
 
         private void IncrementPartThreaded(TreeNode Parent)
         {
             JObject job = Main.dataBase.equipmentData[Parent.dataRef]["parts"][dataRef] as JObject;
-            int count = job["count"].ToObject<int>();
-            int owned = job["owned"].ToObject<int>();
+            int count = Count_Val;
+            int owned = Owned_Val;
+            job["owned"] = owned + 1;
+            Main.dataBase.SaveAllJSONs();
+            Owned_Val++;
+            Owned_Capped_Val = Math.Min(Owned_Val, Count_Val);
+            Owned_Plat_Val = Owned_Val * Plat_Val;
+            Owned_Ducat_Val = Owned_Val * Ducat_Val;
+            PrimeUpdateDiff(false);
+            Parent.Owned_Val++;
+            Parent.Owned_Plat_Val += Plat_Val;
+            Parent.Owned_Ducat_Val += Ducat_Val;
             if (owned < count)
             {
-                job["owned"] = owned + 1;
-                Main.dataBase.SaveAllJSONs();
-                Owned_Val++;
-                Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
-                Col1_Text1 = Owned_Val + "/" + Count_Val;
-                Parent.Owned_Val++;
-                Parent.Diff_Val = Parent.Owned_Val / Parent.Count_Val - 0.01 * Parent.Count_Val;
-                Parent.Col1_Text1 = Parent.Owned_Val + "/" + Parent.Count_Val;
-                Main.RunOnUIThread(() =>
-                {
-                    EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
-                });
+                Parent.Owned_Capped_Val++;
+                Parent.PrimeUpdateDiff(true);
             }
+            Main.RunOnUIThread(() =>
+            {
+                EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
+            });
         }
 
-        private void MarkSetAsComplete(TreeNode Parent)
+        private void MarkSetAsComplete()
         {
-            JObject primeParent = Main.dataBase.equipmentData[Parent.dataRef]["parts"] as JObject;
+            JObject primeParent = Main.dataBase.equipmentData[this.dataRef]["parts"] as JObject;
 
             foreach (var part in primeParent)
             {
@@ -864,26 +927,41 @@ namespace WFInfo
                 if (owned < count)
                 {
                     part.Value["owned"] = count;
-                    Owned_Val = (int)Count_Val;
+                    Owned_Val += count - owned;
                     Debug.WriteLine(part.Key);
                     primeParent[part.Key]["owned"] = count;
-                    Diff_Val = Owned_Val / Count_Val - 0.01 * Count_Val;
-                    Col1_Text1 = Owned_Val + "/" + Count_Val;
-                    foreach (var currentChild in Parent.Children)
+                    foreach (var currentChild in this.Children)
                     {
                         if (!part.Key.Contains(currentChild.Name)) continue;
                         currentChild.Owned_Val = count;
-                        currentChild.Diff_Val = currentChild.Owned_Val / currentChild.Count_Val - 0.01 * currentChild.Count_Val;
-                        currentChild.Col1_Text1 = currentChild.Owned_Val + "/" + currentChild.Count_Val;
+                        currentChild.Owned_Capped_Val = count;
+                        currentChild.Owned_Plat_Val = currentChild.Owned_Val * currentChild.Plat_Val;
+                        Owned_Plat_Val += (count - owned) * currentChild.Plat_Val;
+                        currentChild.Owned_Ducat_Val = currentChild.Owned_Val * currentChild.Ducat_Val;
+                        Owned_Ducat_Val += (count - owned) * currentChild.Ducat_Val;
+                        currentChild.PrimeUpdateDiff(false);
                         break;
                     }
                 }
             }
+            Owned_Capped_Val = Count_Val;
+            PrimeUpdateDiff(true);
             Main.dataBase.SaveAllJSONs();
             Main.RunOnUIThread(() =>
             {
                 EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
             });
+        }
+
+        private void PrimeUpdateDiff(bool UseCappedOwned)
+        {
+            int owned = Owned_Val;
+            if (UseCappedOwned)
+            {
+                owned = Owned_Capped_Val;
+            }
+            Diff_Val = owned / (double)(Count_Val) - 0.01 * Count_Val;
+            Col1_Text1 = owned + "/" + Count_Val;
         }
     }
 }

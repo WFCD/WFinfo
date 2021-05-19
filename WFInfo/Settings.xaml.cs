@@ -52,7 +52,7 @@ namespace WFInfo
         public static KeyConverter converter = new KeyConverter();
         public static Point mainWindowLocation;
         public static bool isOverlaySelected;
-        public static bool isLightSlected;
+        public static bool isLightSelected;
         public static bool debug;
         public static long autoDelay;
         public static int imageRetentionTime;
@@ -66,11 +66,16 @@ namespace WFInfo
         public static double minimumEfficiencyValue;
         public static bool automaticListing;
         public static bool doDoubleCheck;
+        public static bool doSnapItCount;
+        public static int snapItCountThreshold;
+        public static int snapItEdgeWidth;
+        public static int snapItEdgeRadius;
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
         public static bool SnapitExport { get; internal set; }
         public static bool ClipboardVaulted { get; internal set; }
+        public static bool SnapItCount { get; internal set; }
 
         public Settings()
         {
@@ -87,17 +92,17 @@ namespace WFInfo
             {
                 OverlayRadio.IsChecked = true;
                 Overlay_sliders.Visibility = Visibility.Visible;
-                Height = 490;
+                Height = 554;
             }
             else if (settingsObj.GetValue("Display").ToString() == "Light")
             {
                 LightRadio.IsChecked = true;
-                Height = 356;
+                Height = 484;
             }
             else
             {
                 WindowRadio.IsChecked = true;
-                Height = 356;
+                Height = 484;
             }
 
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
@@ -137,6 +142,12 @@ namespace WFInfo
             EfficencyMax_number_box_Copy.Text = maximumEfficiencyValue.ToString(Main.culture);
             EfficencyMin_number_box_Copy.Text = minimumEfficiencyValue.ToString(Main.culture);
             Displaytime_number_box.Text = delay.ToString(Main.culture);
+
+            if (Convert.ToBoolean(settingsObj.GetValue("DoSnapItCount")))
+                SnapItemCountCheckbox.IsChecked = true;
+
+            SnapItCountThreshold_number_box.Text = snapItCountThreshold.ToString(Main.culture);
+
             ResetActivationKeyText();
             Focus();
         }
@@ -164,11 +175,11 @@ namespace WFInfo
         {
             settingsObj["Display"] = "Window";
             isOverlaySelected = false;
-            isLightSlected = false;
+            isLightSelected = false;
             Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 356;
+            Height = 484;
             Save();
         }
 
@@ -176,11 +187,11 @@ namespace WFInfo
         {
             settingsObj["Display"] = "Overlay";
             isOverlaySelected = true;
-            isLightSlected = false;
+            isLightSelected = false;
             Overlay_sliders.Visibility = Visibility.Visible;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 490;
+            Height = 554;
             Save();
         }
 
@@ -429,12 +440,12 @@ namespace WFInfo
         {
             settingsObj["Display"] = "Light";
             isOverlaySelected = false;
-            isLightSlected = true;
+            isLightSelected = true;
             Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboard = true;
             clipboardCheckbox.IsChecked = true;
             clipboardCheckbox.IsEnabled = false;
-            Height = 356;
+            Height = 484;
             Save();
         }
 
@@ -731,6 +742,44 @@ namespace WFInfo
                 EfficencyMax_number_box_Copy.Text = settingsObj["MaximumEfficiencyValue"].ToString();
             }
             
+        }
+
+        private void SnapItCountThreshold_number_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                hidden.Focus();
+            }
+            var num = Regex.Replace(SnapItCountThreshold_number_box.Text, "[^0-9.]", "");
+            SnapItCountThreshold_number_box.Text = num;
+        }
+
+        private void SnapItCountThreshold_number_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            SnapItCountThreshold_number_box.Text = "";
+        }
+
+        private void SnapItCountThreshold_number_box_KeyUp(object sender, KeyEventArgs e)
+        {
+            try
+            {
+                var num = Regex.Replace(SnapItCountThreshold_number_box.Text, "[^0-9.]", "");
+                snapItCountThreshold = int.Parse(num);
+                settingsObj["SnapItCountThreshold"] = snapItCountThreshold;
+                Save();
+            }
+            catch (Exception exception)
+            {
+                Main.AddLog($"Unable to parse display time change, new val would have been: {SnapItCountThreshold_number_box.Text} Exception: {exception}");
+                SnapItCountThreshold_number_box.Text = settingsObj["SnapItCountThreshold"].ToString();
+            }
+        }
+
+        private void SnapItemCountCheckbox_Click(object sender, RoutedEventArgs e)
+        {
+            settingsObj["DoSnapItCount"] = SnapItemCountCheckbox.IsChecked.Value;
+            doSnapItCount = SnapItemCountCheckbox.IsChecked.Value;
+            Save();
         }
     }
 }

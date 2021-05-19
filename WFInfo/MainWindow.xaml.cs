@@ -94,7 +94,7 @@ namespace WFInfo
             if (!Settings.settingsObj.TryGetValue("Display", out _))
                 Settings.settingsObj["Display"] = "Overlay";
             Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
-            Settings.isLightSlected = Settings.settingsObj.GetValue("Display").ToString() == "Light";
+            Settings.isLightSelected = Settings.settingsObj.GetValue("Display").ToString() == "Light";
 
             if (!Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
                 Settings.settingsObj["MainWindowLocation_X"] = 300;
@@ -214,6 +214,22 @@ namespace WFInfo
             if (!Settings.settingsObj.TryGetValue("MinimumEfficiencyValue", out _))
                 Settings.settingsObj["MinimumEfficiencyValue"] = 4.5;
             Settings.minimumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MinimumEfficiencyValue"), Main.culture);
+
+            if (!Settings.settingsObj.TryGetValue("DoSnapItCount", out _))
+                Settings.settingsObj["DoSnapItCount"] = true;
+            Settings.doSnapItCount = (bool)Settings.settingsObj.GetValue("DoSnapItCount");
+
+            if (!Settings.settingsObj.TryGetValue("SnapItCountThreshold", out _))
+                Settings.settingsObj["SnapItCountThreshold"] = 0;
+            Settings.snapItCountThreshold = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItCountThreshold"), Main.culture);
+
+            if (!Settings.settingsObj.TryGetValue("SnapItEdgeWidth", out _))
+                Settings.settingsObj["SnapItEdgeWidth"] = 1;
+            Settings.snapItEdgeWidth = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItEdgeWidth"), Main.culture);
+
+            if (!Settings.settingsObj.TryGetValue("SnapItEdgeRadius", out _))
+                Settings.settingsObj["SnapItEdgeRadius"] = 1;
+            Settings.snapItEdgeRadius = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItEdgeRadius"), Main.culture);
 
             Settings.Save();
 

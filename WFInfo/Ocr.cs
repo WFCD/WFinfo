@@ -182,13 +182,13 @@ namespace WFInfo
             {
                 DefaultPageSegMode = PageSegMode.SingleBlock
             };
-            
+
             secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
             {
                 DefaultPageSegMode = PageSegMode.SingleBlock
             };
 
-            
+
         }
 
         public static void Init()
@@ -234,7 +234,7 @@ namespace WFInfo
             bigScreenshot = file ?? CaptureScreenshot();
             try
             {
-				parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
+				    parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
             }
             catch (Exception e)
             {
@@ -363,11 +363,11 @@ namespace WFInfo
 
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                                 Main.overlays[partNumber].Resize(overWid);
                                 Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + Settings.overlayXOffsetValue) / dpiScaling), startY + (int)(Settings.overlayYOffsetValue / dpiScaling), Settings.delay);
                             }
-                            else if (!Settings.isLightSlected)
+                            else if (!Settings.isLightSelected)
                             {
                                 Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
@@ -415,7 +415,7 @@ namespace WFInfo
             }
             #endregion 
 
-            if (Settings.isLightSlected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
+            if (Settings.isLightSelected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
             {
                 player.Play();
             }
@@ -673,11 +673,11 @@ namespace WFInfo
                         {
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
-                            else if (!Settings.isLightSlected)
+                            else if (!Settings.isLightSelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else
                                 Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
@@ -763,7 +763,7 @@ namespace WFInfo
 
 
 
-			double[] weights = new double[15] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+                    double[] weights = new double[15] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
             int minWidth = mostWidth / 4;
 
             if (image == null || image.Height == 0)
@@ -778,7 +778,7 @@ namespace WFInfo
                 for (int x = 0; x < totWidth; x++)
                 {
                     int match = (int)GetClosestTheme(image.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
-                    
+                
                     weights[match] += 1 / Math.Pow(thresh + 1, 4);
                 }
             }
@@ -832,6 +832,19 @@ namespace WFInfo
         }
 
         /// <summary>
+        /// Checks if partName is close enough to valid to actually process
+        /// </summary>
+        /// <param name="partName">Scanned part name</param>
+        /// <returns>If part name is close enough to valid to actually process</returns>
+        internal static bool PartNameValid (string partName)
+        {
+            if ((partName.Length < 13 && Settings.locale == "en") || (partName.Replace(" ", "").Length < 6 && Settings.locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
+                //TODO: Add a min character for other locale here.
+                return false;
+            return true;
+        }
+
+        /// <summary>
         /// Processes the image the user cropped in the selection
         /// </summary>
         /// <param name="snapItImage"></param>
@@ -852,25 +865,28 @@ namespace WFInfo
             string csv = string.Empty;
             snapItImageFiltered.Dispose();
             if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
-                csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned," + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
-            foreach (var part in foundParts)
+                csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned,partsDetected" + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
+            for (int i = 0; i < foundParts.Count; i++)
             {
-                if ((part.Name.Length < 13 && Settings.locale == "en") || (part.Name.Replace(" ", "").Length < 6 && Settings.locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
-                    //TODO: Add a min character for other locale here.
+                var part = foundParts[i];
+                if (!PartNameValid(part.Name))
                     continue;
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0]);
+                part.Name = name;
+                foundParts[i] = part;
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
                 string plat = job["plat"].ToObject<string>();
                 string ducats = job["ducats"].ToObject<string>();
                 string volume = job["volume"].ToObject<string>();
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
+                string partsDetected = ""+part.Count;
 
                 if (Settings.SnapitExport)
                 {
                     var owned = string.IsNullOrEmpty(partsOwned) ? "0" : partsOwned;
-                    csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + ", \"\"" + Environment.NewLine;
+                    csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + "," + partsDetected + ", \"\"" + Environment.NewLine;
                 }
 
                 int width = (int)(part.Bounding.Width * screenScaling);
@@ -889,12 +905,19 @@ namespace WFInfo
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, false);
+                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, partsDetected, false);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
                 });
             }
+
+            if (Settings.doSnapItCount)
+                Main.RunOnUIThread(() =>
+                {
+                    VerifyCount.ShowVerifyCount(foundParts);
+                 });
+
             if (Main.snapItOverlayWindow.tempImage != null)
                 Main.snapItOverlayWindow.tempImage.Dispose();
             end = watch.ElapsedMilliseconds;
@@ -913,6 +936,7 @@ namespace WFInfo
         /// <returns>List of found items</returns>
         private static List<InventoryItem> FindAllParts(Bitmap filteredImage)
         {
+            Bitmap filteredImageClean = new Bitmap(filteredImage);
             DateTime time = DateTime.UtcNow;
             string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
             List<InventoryItem> foundItems = new List<InventoryItem>();
@@ -925,7 +949,7 @@ namespace WFInfo
             var greenp = new Pen(green);
             var pinkP = new Pen(Brushes.Pink);
             var font = new Font("Arial", 16);
-            using (var page = firstEngine.Process(filteredImage, PageSegMode.SparseText))
+            using (var page = firstEngine.Process(filteredImageClean, PageSegMode.SparseText))
             {
                 using (var iterator = page.GetIterator())
                 {
@@ -933,15 +957,18 @@ namespace WFInfo
                     iterator.Begin();
                     do
                     {
-                        string currentWord = iterator.GetText(PageIteratorLevel.Word);
-                        iterator.TryGetBoundingBox(PageIteratorLevel.Word, out Rect tempbounds);
+                        string currentWord = iterator.GetText(PageIteratorLevel.TextLine);
+                        iterator.TryGetBoundingBox(PageIteratorLevel.TextLine, out Rect tempbounds);
                         Rectangle bounds = new Rectangle(tempbounds.X1, tempbounds.Y1, tempbounds.Width, tempbounds.Height);
                         if (currentWord != null)
                         {
                             currentWord = RE.Replace(currentWord, "").Trim();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
-                                var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
+                                int VerticalPad = bounds.Height/2;
+                                int HorizontalPad = bounds.Height;
+                                var paddedBounds = new Rectangle(bounds.X - HorizontalPad, bounds.Y - VerticalPad, bounds.Width + HorizontalPad * 2, bounds.Height + VerticalPad * 2);
+                                //var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
 
                                 using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
@@ -1000,9 +1027,16 @@ namespace WFInfo
                             }
                         }
                     }
-                    while (iterator.Next(PageIteratorLevel.Word));
+                    while (iterator.Next(PageIteratorLevel.TextLine));
                 }
             }
+
+            if ( Settings.doSnapItCount)
+            {
+                GetItemCounts(filteredImage, filteredImageClean, foundItems, font, Settings.snapItCountThreshold);
+            }
+
+            filteredImageClean.Dispose();
             red.Dispose();
             green.Dispose();
             orange.Dispose();
@@ -1021,6 +1055,224 @@ namespace WFInfo
 
             filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
             return foundItems;
+        }
+
+        /// <summary>
+        /// Gets the item count of an item by estimating what regions should contain item counts. Filters out noise in the image, aggressiveness based on <c>threshold</c>
+        /// </summary>
+        /// <param name="filteredImage">Image to draw debug markings on</param>
+        /// <param name="filteredImageClean">Image to use for scan</param>
+        /// <param name="foundItems">Item list, used to deduce grid system. Modified to add Count for items</param>
+        /// <param name="threshold">If the amount of adjacent black pixels (including itself) is below this number, it will be converted to white before the number scanning</param>
+        /// <param name="font">Font used for debug marking</param>
+        /// <returns>Nothing, but if successful <c>foundItems</c> will be modified</returns>
+        private static void GetItemCounts(Bitmap filteredImage, Bitmap filteredImageClean, List<InventoryItem> foundItems, Font font, int threshold)
+        {
+            Pen darkCyan = new Pen(Brushes.DarkCyan);
+            Pen red = new Pen(Brushes.Red);
+            Pen cyan = new Pen(Brushes.Cyan);
+            using (Graphics g = Graphics.FromImage(filteredImage))
+            {
+
+                //features of grid system
+                List<Rectangle> Columns = new List<Rectangle>();
+                List<Rectangle> Rows = new List<Rectangle>();
+
+                //sort for easier processing in loop below
+                List<InventoryItem> foundItemsBottom = foundItems.OrderBy(o => o.Bounding.Bottom).ToList();
+                //filter out bad parts for more accurate grid
+                bool itemRemoved = false;
+                for (int i = 0; i < foundItemsBottom.Count; i+=(itemRemoved ? 0 : 1))
+                {
+                    itemRemoved = false;
+                    if (!PartNameValid(foundItemsBottom[i].Name))
+                    {
+                        foundItemsBottom.RemoveAt(i);
+                        itemRemoved = true;
+                    }
+                }
+                List<InventoryItem> foundItemsLeft = foundItemsBottom.OrderBy(o => o.Bounding.Left).ToList();
+
+
+                for (int i = 0; i < foundItemsBottom.Count; i++)
+                {
+                    Rectangle currRow = new Rectangle(0, foundItemsBottom[i].Bounding.Y, 10000, foundItemsBottom[i].Bounding.Height);
+                    Rectangle currColumn = new Rectangle(foundItemsLeft[i].Bounding.X, 0, foundItemsLeft[i].Bounding.Width, 10000);
+
+                    //find or improve latest ColumnsRight
+                    if (Rows.Count == 0 || !currRow.IntersectsWith(Rows.Last()))
+                    {
+                        Rows.Add(currRow);
+                    }
+                    else
+                    {
+                        if (currRow.Bottom < Rows.Last().Bottom)
+                        {
+                            Rows[Rows.Count - 1] = new Rectangle(0, Rows.Last().Y, 10000, currRow.Bottom - Rows.Last().Top);
+                        }
+                        if (Rows.Count != 1 && currColumn.Top > Columns.Last().Top)
+                        {
+                            Rows[Rows.Count - 1] = new Rectangle(0, currRow.Y, 10000, Rows.Last().Bottom - currRow.Top);
+                        }
+                    }
+
+                    //find or improve latest ColumnsRight
+                    if (Columns.Count == 0 || !currColumn.IntersectsWith(Columns.Last()))
+                    {
+                        Columns.Add(currColumn);
+                    }
+                    else
+                    {
+                        if (currColumn.Right < Columns.Last().Right)
+                        {
+                            Columns[Columns.Count - 1] = new Rectangle(Columns.Last().X, 0, currColumn.Right - Columns.Last().X, 10000);
+                        }
+                        if (Columns.Count != 1 && currColumn.Left > Columns.Last().Left)
+                        {
+                            Columns[Columns.Count - 1] = new Rectangle(currColumn.X, 0, Columns.Last().Right - currColumn.X, 10000);
+                        }
+                    }
+
+                }
+
+                //draw debug markings for grid system
+                for (int i = 0; i < Columns.Count; i++)
+                {
+                    g.DrawLine(darkCyan, Columns[i].Right, 0, Columns[i].Right, 10000);
+                    g.DrawLine(darkCyan, Columns[i].X, 0, Columns[i].X, 10000);
+                }
+                for (int i = 0; i < Rows.Count; i++)
+                {
+                    g.DrawLine(darkCyan, 0, Rows[i].Bottom, 10000, Rows[i].Bottom);
+                }
+
+
+
+                //set OCR to numbers only
+                firstEngine.SetVariable("tessedit_char_whitelist", "0123456789");
+
+                
+                //Process grid system
+                for (int i = 0; i < Rows.Count; i++)
+                {
+                    for (int j = 0; j < Columns.Count; j++)
+                    {
+                        //edges of current area to scan
+                        int Left = (j == 0 ? 0 : (Columns[j - 1].Right + Columns[j].X) / 2);
+                        int Top = (i == 0 ? 0 : Rows[i - 1].Bottom);
+                        int Width = Math.Min((Columns[j].Right - Left) / 3, filteredImage.Size.Width - Left);
+                        int Height = Math.Min((Rows[i].Bottom - Top) / 3, filteredImage.Size.Height - Top);
+
+                        Rectangle cloneRect = new Rectangle(Left, Top, Width, Height);
+                        Bitmap cloneBitmap = filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat);
+
+                        //filter out parts of item icon
+                        Stack<Point> toFilter = new Stack<Point>();
+                        //mark edges for checking
+                        for (int k = cloneRect.X; k < cloneRect.Right; k++)
+                        {
+                            for (int l = 0; l <= Settings.snapItEdgeWidth; l++)
+                            {
+                                toFilter.Push(new Point(k, cloneRect.Bottom - l));
+                            }
+                        }
+                        for (int k = cloneRect.Y; k < cloneRect.Bottom; k++)
+                        {
+                            for (int l = 0; l <= Settings.snapItEdgeWidth; l++)
+                            {
+                                toFilter.Push(new Point(cloneRect.Right-l, k));
+                            }
+                        }
+                        int checkRadius = Settings.snapItEdgeRadius;
+                        while (toFilter.Count > 0)
+                        {
+                            Point curr = toFilter.Pop();
+                            if (filteredImageClean.GetPixel(curr.X, curr.Y).R < 200)
+                            {
+                                g.DrawRectangle(red, curr.X, curr.Y, 1, 1);
+                                filteredImageClean.SetPixel(curr.X, curr.Y, Color.White);
+                                //check neighbours
+                                for (int k = Math.Max(curr.X - checkRadius, cloneRect.X); k < Math.Min(curr.X + checkRadius, cloneRect.Right); k++)
+                                {
+                                    for (int l = Math.Max(curr.Y - checkRadius, cloneRect.Y); l < Math.Min(curr.Y + checkRadius, cloneRect.Bottom); l++)
+                                    {
+                                        toFilter.Push(new Point(k, l));
+                                    }
+                                }
+                            }
+                        }
+
+                        //filter out noise
+                        for (int k = 1; k < cloneRect.Width - 1; k++)
+                        {
+                            for (int l = 1; l < cloneRect.Height - 1; l++)
+                            {
+                                if (cloneBitmap.GetPixel(k, l).R < 200)
+                                {
+                                    int BlackCount = 0;
+                                    for (int m = -1; m <= 1; m++)
+                                    {
+                                        for (int n = -1; n <= 1; n++)
+                                        {
+                                            if (cloneBitmap.GetPixel(k + m, l + n).R < 200)
+                                            {
+                                                BlackCount++;
+                                            }
+                                        }
+                                    }
+                                    if (BlackCount < threshold)
+                                    {
+                                        g.DrawRectangle(red, k + cloneRect.X, l + cloneRect.Y, 1, 1);
+                                        filteredImageClean.SetPixel(k + cloneRect.X, l + cloneRect.Y, Color.White);
+                                    }
+                                }
+                            }
+                        }
+
+                        cloneBitmap = filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat);
+                        g.DrawRectangle(cyan, cloneRect);
+
+                        //do OCR
+                        using (var page = firstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
+                        {
+                            using (var iterator = page.GetIterator())
+                            {
+                                iterator.Begin();
+                                string rawText = iterator.GetText(PageIteratorLevel.TextLine);
+                                if (rawText != null) 
+                                    rawText = rawText.Replace(" ", "");
+                                //if no number found, 1 of item
+                                if (!Int32.TryParse(rawText, out int itemCount))
+                                {
+                                    itemCount = 1;
+                                }
+                                g.DrawString(rawText, font, Brushes.Cyan, new Point(cloneRect.X, cloneRect.Y));
+
+                                //find what item the item belongs to
+                                Rectangle itemLabel = new Rectangle( Columns[j].X, Rows[i].Top, Columns[j].Width , Rows[i].Height);
+                                g.DrawRectangle(cyan, itemLabel);
+                                for (int k = 0; k < foundItems.Count; k++)
+                                {
+                                    var item = foundItems[k];
+                                    if (item.Bounding.IntersectsWith(itemLabel))
+                                    {
+                                        item.Count = itemCount;
+                                        foundItems[k] = item;
+                                    }
+                                }
+                            }
+
+                        }
+                        cloneBitmap.Dispose();
+                    }
+                }
+                
+                //return OCR to any symbols
+                firstEngine.SetVariable("tessedit_char_whitelist", "");
+            }
+            darkCyan.Dispose();
+            red.Dispose();
+            cyan.Dispose();
         }
 
 
@@ -1774,6 +2026,7 @@ namespace WFInfo
         {
             Name = itemName;
             Bounding = boundingbox;
+            Count = 0;
         }
 
         static public T DeepCopy<T>(T obje)
@@ -1791,5 +2044,6 @@ namespace WFInfo
 
         public string Name { get; set; }
         public Rectangle Bounding { get; set; }
+        public int Count { get; set; }
     }
 }

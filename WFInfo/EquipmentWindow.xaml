@@ -58,7 +58,9 @@
                         <ComboBoxItem IsSelected="True" Content="Name"/>
                         <ComboBoxItem Content="Cost"/>
                         <ComboBoxItem Content="Unowned"/>
-                        <ComboBoxItem Content="Set cost"/>
+                        <ComboBoxItem Content="Owned"/>
+                        <ComboBoxItem Content="Owned Value (Plat)"/>
+                        <ComboBoxItem Content="Owned Value (Ducats)"/>
                     </ComboBox>
                 </Border>
             </Border>
