@@ -966,7 +966,7 @@ namespace WFInfo
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
                                 int VerticalPad = bounds.Height/2;
-                                int HorizontalPad = bounds.Height;
+                                int HorizontalPad = (int)(bounds.Height * Settings.snapItHorizontalNameMargin);
                                 var paddedBounds = new Rectangle(bounds.X - HorizontalPad, bounds.Y - VerticalPad, bounds.Width + HorizontalPad * 2, bounds.Height + VerticalPad * 2);
                                 //var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
 
@@ -1151,7 +1151,8 @@ namespace WFInfo
                 //set OCR to numbers only
                 firstEngine.SetVariable("tessedit_char_whitelist", "0123456789");
 
-                
+
+                double widthMultiplier = (Settings.doCustomNumberBoxWidth ? Settings.snapItNumberBoxWidth : 0.4);
                 //Process grid system
                 for (int i = 0; i < Rows.Count; i++)
                 {
@@ -1160,7 +1161,7 @@ namespace WFInfo
                         //edges of current area to scan
                         int Left = (j == 0 ? 0 : (Columns[j - 1].Right + Columns[j].X) / 2);
                         int Top = (i == 0 ? 0 : Rows[i - 1].Bottom);
-                        int Width = Math.Min((Columns[j].Right - Left) / 3, filteredImage.Size.Width - Left);
+                        int Width = Math.Min((int)((Columns[j].Right - Left) * widthMultiplier), filteredImage.Size.Width - Left);
                         int Height = Math.Min((Rows[i].Bottom - Top) / 3, filteredImage.Size.Height - Top);
 
                         Rectangle cloneRect = new Rectangle(Left, Top, Width, Height);

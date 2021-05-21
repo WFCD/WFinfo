@@ -231,6 +231,18 @@ namespace WFInfo
                 Settings.settingsObj["SnapItEdgeRadius"] = 1;
             Settings.snapItEdgeRadius = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItEdgeRadius"), Main.culture);
 
+            if (!Settings.settingsObj.TryGetValue("SnapItHorizontalNameMargin", out _))
+                Settings.settingsObj["SnapItHorizontalNameMargin"] = 0;
+            Settings.snapItHorizontalNameMargin = Convert.ToDouble(Settings.settingsObj.GetValue("SnapItHorizontalNameMargin"), Main.culture);
+
+            if (!Settings.settingsObj.TryGetValue("DoCustomNumberBoxWidth", out _))
+                Settings.settingsObj["DoCustomNumberBoxWidth"] = false;
+            Settings.doCustomNumberBoxWidth = (bool)Settings.settingsObj.GetValue("DoCustomNumberBoxWidth");
+
+            if (!Settings.settingsObj.TryGetValue("SnapItNumberBoxWidth", out _))
+                Settings.settingsObj["SnapItNumberBoxWidth"] = 0.4;
+            Settings.snapItNumberBoxWidth = Convert.ToDouble(Settings.settingsObj.GetValue("SnapItNumberBoxWidth"), Main.culture);
+
             Settings.Save();
 
             RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");

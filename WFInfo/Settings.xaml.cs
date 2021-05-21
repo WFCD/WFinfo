@@ -70,6 +70,9 @@ namespace WFInfo
         public static int snapItCountThreshold;
         public static int snapItEdgeWidth;
         public static int snapItEdgeRadius;
+        public static double snapItHorizontalNameMargin;
+        public static bool doCustomNumberBoxWidth;
+        public static double snapItNumberBoxWidth;
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
