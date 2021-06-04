@@ -49,7 +49,7 @@ namespace WFInfo
                 {
                     string[] nameParts = item.Name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
                     string primeName = nameParts[0] + "Prime";
-                    string partName = primeName + ( ( nameParts[1].Length > 10 && !nameParts[1].Contains("aKubrow") ) ? nameParts[1].Replace(" Blueprint", "") : nameParts[1]);
+                    string partName = primeName + ( ( nameParts[1].Length > 10 && !nameParts[1].Contains("Kubrow") ) ? nameParts[1].Replace(" Blueprint", "") : nameParts[1]);
 
                     Main.AddLog("Saving count \"" + item.Count + "\" for part \"" + partName + "\"");
                     try
