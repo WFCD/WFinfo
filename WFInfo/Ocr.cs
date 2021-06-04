@@ -1068,6 +1068,7 @@ namespace WFInfo
         /// <returns>Nothing, but if successful <c>foundItems</c> will be modified</returns>
         private static void GetItemCounts(Bitmap filteredImage, Bitmap filteredImageClean, List<InventoryItem> foundItems, Font font, int threshold)
         {
+            Main.AddLog("Starting Item Counting. Noise Threshold: " + Settings.snapItCountThreshold + ", Edge Width: " + Settings.snapItEdgeWidth + ", Edge Radius: " + Settings.snapItEdgeRadius);
             Pen darkCyan = new Pen(Brushes.DarkCyan);
             Pen red = new Pen(Brushes.Red);
             Pen cyan = new Pen(Brushes.Cyan);

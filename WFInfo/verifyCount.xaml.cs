@@ -42,22 +42,34 @@ namespace WFInfo
 
         private void SaveClick(object sender, RoutedEventArgs e)
         {
+            bool saveFailed = false;
             foreach (InventoryItem item in latestSnap)
             {
                 if (item.Name.Contains("Prime"))
                 {
                     string[] nameParts = item.Name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
                     string primeName = nameParts[0] + "Prime";
-                    string partName = primeName + ( ( nameParts[1].Length > 10 && !nameParts[1].Contains("Kubrow") ) ? nameParts[1].Replace(" Blueprint", "") : nameParts[1]);
+                    string partName = primeName + ( ( nameParts[1].Length > 10 && !nameParts[1].Contains("aKubrow") ) ? nameParts[1].Replace(" Blueprint", "") : nameParts[1]);
 
-                    Console.WriteLine(item.Name);
-                    Console.WriteLine(primeName);
-                    Console.WriteLine(partName);
-                    Main.dataBase.equipmentData[primeName]["parts"][partName]["owned"] = item.Count;
+                    Main.AddLog("Saving count \"" + item.Count + "\" for part \"" + partName + "\"");
+                    try
+                    {
+                        Main.dataBase.equipmentData[primeName]["parts"][partName]["owned"] = item.Count;
+                    }
+                    catch (Exception ex)
+                    {
+                        Main.AddLog("FAILED to save count. Count: " + item.Count + ", Name: " + item.Name + ", primeName: " + primeName + ", partName: " + partName);
+                        saveFailed = true;
+                    }
                 }
             }
             Main.dataBase.SaveAllJSONs();
             EquipmentWindow.INSTANCE.reloadItems();
+            if (saveFailed)
+            {
+                _ = new ErrorDialogue(DateTime.Now, 0); //shouldn't need Main.RunOnUIThread since this is already on the UI Thread
+                Main.StatusUpdate("Failed to save one or more item, report to dev", 2);
+            }
             Hide();
         }
 
