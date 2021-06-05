@@ -1339,6 +1339,7 @@ namespace WFInfo
             Pen red = new Pen(Brushes.Red);
             Pen cyan = new Pen(Brushes.Cyan);
             Pen pink = new Pen(Brushes.Pink);
+            Pen darkCyan = new Pen(Brushes.DarkCyan);
             var font = new Font("Arial", 16);
             List<InventoryItem> foundItems = new List<InventoryItem>();
             Bitmap ProfileImageClean = new Bitmap(ProfileImage);
@@ -1346,7 +1347,8 @@ namespace WFInfo
             using (Graphics g = Graphics.FromImage(ProfileImage))
             {
                 int nextY = 0;
-                for (int y = 0; y < ProfileImageClean.Height; y = Math.Max(y+1, nextY))
+                int nextYCounter = -1;
+                for (int y = 0; y < ProfileImageClean.Height; y = (nextYCounter-- == 0 ? nextY : y+1 ))
                 {
                     for (int x = 0; x < ProfileImageClean.Width; x+= probe_interval) //probe every few pixels for performance
                     {
@@ -1376,11 +1378,12 @@ namespace WFInfo
 
                             //find where the line ends
                             int rightEdge = leftEdge;
-                            while (rightEdge+1 < ProfileImageClean.Width && probeProfilePixel(ProfileImageClean.GetPixel(rightEdge+1, y)))
+                            while (rightEdge+2 < ProfileImageClean.Width && ( probeProfilePixel(ProfileImageClean.GetPixel(rightEdge+1, y)) || probeProfilePixel(ProfileImageClean.GetPixel(rightEdge + 2, y))))
                             {
                                 rightEdge++;
                             }
 
+                            
                             //check hit ratio for line above and skip if too high
                             hits = 0;
                             for (int i = leftEdge; i <= rightEdge; i++)
@@ -1391,11 +1394,13 @@ namespace WFInfo
                                 }
                             }
                             hitRatio = hits / (double)(rightEdge - leftEdge);
-                            if ( (rightEdge - leftEdge) < 100 || hitRatio > 0.5)
+                            if ( (rightEdge - leftEdge) < 100 || hitRatio > 0.9)
                             {
-                                g.DrawLine(orange, x - probe_interval, y, x + probe_interval, y);
+                                g.DrawLine(darkCyan, x - probe_interval, y, x + probe_interval, y);
+                                g.DrawLine(darkCyan, leftEdge, y, rightEdge, y);
                                 continue;
                             }
+                            
 
                             //find bottom edge and hit ratio of all rows
                             int topEdge = y;
@@ -1415,7 +1420,7 @@ namespace WFInfo
                                 }
                                 hitRatio = hits / (double)(rightEdge - leftEdge );
                                 hitRatios.Add(hitRatio);
-                            } while (bottomEdge+1 < ProfileImageClean.Height && hitRatios.Last() > 0.5);
+                            } while (bottomEdge+2 < ProfileImageClean.Height && hitRatios.Last() > 0.5);
                             hitRatios.RemoveAt(hitRatios.Count - 1);
                             //find if/where it transitions from text (some misses) to no text (basically no misses) then back to text (some misses). This is proof it's an owned item and marks the bottom edge of the text
                             int ratioChanges = 0;
@@ -1447,6 +1452,7 @@ namespace WFInfo
                             g.DrawRectangle(red, leftEdge, topEdge, width, height);
                             x = rightEdge;
                             nextY = bottomEdge + 1;
+                            nextYCounter = 3;
 
                             height = lineBreak;
 
@@ -1490,6 +1496,7 @@ namespace WFInfo
 
             ProfileImageClean.Dispose();
             ProfileImage.Save(Main.AppPath + @"\Debug\ProfileImageBounds " + timestamp + ".png");
+            darkCyan.Dispose();
             pink.Dispose();
             cyan.Dispose();
             red.Dispose();
