@@ -316,6 +316,8 @@ namespace WFInfo
                         equipmentData[primeName] = new JObject();
                     equipmentData[primeName]["vaulted"] = prime.Value["vaulted"];
                     equipmentData[primeName]["type"] = prime.Value["type"];
+                    if (!equipmentData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
+                        equipmentData[primeName]["mastered"] = false;
 
                     if (!equipmentData[primeName].ToObject<JObject>().TryGetValue("parts", out _))
                         equipmentData[primeName]["parts"] = new JObject();

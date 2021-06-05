@@ -1298,9 +1298,26 @@ namespace WFInfo
                 string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity);
                 part.Name = name;
                 foundParts[i] = part;
-                //Decide if item is an actual prime, if so mark as mastered
 
+                //Decide if item is an actual prime, if so mark as mastered
+                if (proximity < 3 && name.Contains("Prime"))
+                {
+                    //mark as mastered
+                    string[] nameParts = part.Name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
+                    string primeName = nameParts[0] + "Prime";
+
+                    if (Main.dataBase.equipmentData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
+                    {
+                        Main.dataBase.equipmentData[primeName]["mastered"] = true;
+
+                        Main.AddLog("Marked \"" + primeName + "\" as mastered");
+                    } else
+                    {
+                        Main.AddLog("Failed to mark \"" + primeName + "\" as mastered");
+                    }
+                }
             }
+            Main.dataBase.SaveAllJSONs();
 
             long end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed Profile Scanning(" + (end - start) + "ms)", 0);
@@ -1321,6 +1338,7 @@ namespace WFInfo
             Pen orange = new Pen(Brushes.Orange);
             Pen red = new Pen(Brushes.Red);
             Pen cyan = new Pen(Brushes.Cyan);
+            Pen pink = new Pen(Brushes.Pink);
             var font = new Font("Arial", 16);
             List<InventoryItem> foundItems = new List<InventoryItem>();
             Bitmap ProfileImageClean = new Bitmap(ProfileImage);
@@ -1397,7 +1415,7 @@ namespace WFInfo
                                 }
                                 hitRatio = hits / (double)(rightEdge - leftEdge );
                                 hitRatios.Add(hitRatio);
-                            } while (bottomEdge < ProfileImageClean.Height && hitRatios.Last() > 0.5);
+                            } while (bottomEdge+1 < ProfileImageClean.Height && hitRatios.Last() > 0.5);
                             hitRatios.RemoveAt(hitRatios.Count - 1);
                             //find if/where it transitions from text (some misses) to no text (basically no misses) then back to text (some misses). This is proof it's an owned item and marks the bottom edge of the text
                             int ratioChanges = 0;
@@ -1422,7 +1440,7 @@ namespace WFInfo
 
                             if (ratioChanges != 4 || width < 4 * height || width > 6 * height)
                             {
-                                g.DrawRectangle(orange, leftEdge, topEdge, width, height);
+                                g.DrawRectangle(pink, leftEdge, topEdge, width, height);
                                 continue;
                             }
 
@@ -1472,6 +1490,7 @@ namespace WFInfo
 
             ProfileImageClean.Dispose();
             ProfileImage.Save(Main.AppPath + @"\Debug\ProfileImageBounds " + timestamp + ".png");
+            pink.Dispose();
             cyan.Dispose();
             red.Dispose();
             orange.Dispose();
