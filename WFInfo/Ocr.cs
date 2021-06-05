@@ -850,6 +850,8 @@ namespace WFInfo
         /// <param name="snapItImage"></param>
         internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot, Point snapItOrigin)
         {
+            ProcessProfileScreen(snapItImage, fullShot, snapItOrigin);
+            return;
             var watch = new Stopwatch();
             watch.Start();
             long start = watch.ElapsedMilliseconds;
@@ -1275,8 +1277,168 @@ namespace WFInfo
             cyan.Dispose();
         }
 
+        /// <summary>
+        /// Processes the image the user cropped in the selection
+        /// </summary>
+        /// <param name="snapItImage"></param>
+        internal static void ProcessProfileScreen(Bitmap snapItImage, Bitmap fullShot, Point snapItOrigin)
+        {
+            var watch = new Stopwatch();
+            watch.Start();
+            long start = watch.ElapsedMilliseconds;
 
-        private static int ColorDifference(Color test, Color thresh)
+            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
+            snapItImage.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
+            List<InventoryItem> foundParts = FindOwnedItems(snapItImage, timestamp);
+            for (int i = 0; i < foundParts.Count; i++)
+            {
+                var part = foundParts[i];
+                if (!PartNameValid(part.Name))
+                    continue;
+                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out firstProximity[0]);
+                part.Name = name;
+                foundParts[i] = part;
+                //Decide if item is an actual prime, if so mark as mastered
+                
+
+            }
+
+            long end = watch.ElapsedMilliseconds;
+            Main.StatusUpdate("Completed Profile Scanning(" + (end - start) + "ms)", 0);
+            watch.Stop();
+
+        }
+
+        private static bool probeProfilePixel(Color pixel)
+        {
+            return pixel.A > 240 && pixel.R > 200 && pixel.G > 200 && pixel.B > 200;
+        }
+
+        private static List<InventoryItem> FindOwnedItems(Bitmap ProfileImage, string timestamp)
+        {
+            //find edges of owned item label Colour: A > 250, R > 230, G > 230, B > 230
+            //check that there are 2 rows of text
+            //OCR the first row
+            Pen orange = new Pen(Brushes.Orange);
+            Pen red = new Pen(Brushes.Red);
+            Pen cyan = new Pen(Brushes.Cyan);
+            Bitmap ProfileImageClean = new Bitmap(ProfileImage);
+            int probe_interval = 10;
+            using (Graphics g = Graphics.FromImage(ProfileImage))
+            {
+                int nextY = 0;
+                for (int y = 0; y < ProfileImageClean.Height; y = Math.Max(y+1, nextY))
+                {
+                    for (int x = 0; x < ProfileImageClean.Width; x+= probe_interval) //probe every few pixels for performance
+                    {
+                        Color pixel = ProfileImageClean.GetPixel(x, y);
+                        if (probeProfilePixel(pixel) )
+                        {
+                            //find left edge and check that the coloured area is at least as big as probe_interval
+                            int leftEdge = -1;
+                            int hits = 0;
+                            int areaWidth = 0;
+                            double hitRatio = 0;
+                            for (int tempX = Math.Max(x - probe_interval, 0); tempX < Math.Min(x + probe_interval, ProfileImageClean.Width ) ; tempX++)
+                            {
+                                areaWidth++;
+                                if ( probeProfilePixel( ProfileImageClean.GetPixel(tempX, y)))
+                                {
+                                    hits++;
+                                    leftEdge = (leftEdge == -1 ? tempX : leftEdge);
+                                }
+                            }
+                            hitRatio = (double)(hits) / areaWidth;
+                            if ( hitRatio < 0.5) //skip if too low hit ratio
+                            {
+                                g.DrawLine(orange, x - probe_interval, y, x + probe_interval, y);
+                                continue;
+                            }
+
+                            //find where the line ends
+                            int rightEdge = leftEdge;
+                            while (rightEdge+1 < ProfileImageClean.Width && probeProfilePixel(ProfileImageClean.GetPixel(rightEdge+1, y)))
+                            {
+                                rightEdge++;
+                            }
+
+                            //check hit ratio for line above and skip if too high
+                            hits = 0;
+                            for (int i = leftEdge; i <= rightEdge; i++)
+                            {
+                                if ( probeProfilePixel(ProfileImageClean.GetPixel(i, Math.Max(y - 1, 0))))
+                                {
+                                    hits++;
+                                }
+                            }
+                            hitRatio = hits / (double)(rightEdge - leftEdge);
+                            if ( (rightEdge - leftEdge) < 100 || hitRatio > 0.5)
+                            {
+                                g.DrawLine(orange, x - probe_interval, y, x + probe_interval, y);
+                                continue;
+                            }
+
+                            //find bottom edge and hit ratio of all rows
+                            int topEdge = y;
+                            int bottomEdge = y;
+                            List<double> hitRatios = new List<double>();
+                            hitRatios.Add(1);
+                            do
+                            {
+                                hits = 0;
+                                bottomEdge++;
+                                for (int i = leftEdge; i < rightEdge; i++)
+                                {
+                                    if (probeProfilePixel(ProfileImageClean.GetPixel(i, bottomEdge)))
+                                    {
+                                        hits++;
+                                    }
+                                }
+                                hitRatio = hits / (double)(rightEdge - leftEdge );
+                                hitRatios.Add(hitRatio);
+                            } while (bottomEdge < ProfileImageClean.Height && hitRatios.Last() > 0.5);
+                            hitRatios.RemoveAt(hitRatios.Count - 1);
+                            //find if/where it transitions from text (some misses) to no text (basically no misses) then back to text (some misses). This is proof it's an owned item and marks the bottom edge of the text
+                            int ratioChanges = 0;
+                            bool prevMostlyHits = true;
+                            int lineBreak = -1;
+                            for (int i = 0; i < hitRatios.Count; i++)
+                            {
+                                if ( (hitRatios[i] > 0.99) != prevMostlyHits)
+                                {
+                                    if (ratioChanges == 1)
+                                    {
+                                        lineBreak = i+1;
+                                        g.DrawLine(cyan, rightEdge, topEdge+lineBreak, leftEdge, topEdge + lineBreak);
+                                    }
+                                    prevMostlyHits = !prevMostlyHits;
+                                    ratioChanges++;
+                                }
+                            }
+                            
+                            if ( ratioChanges != 4 || (rightEdge - leftEdge) < 4* (bottomEdge - topEdge) || (rightEdge - leftEdge) > 6 * (bottomEdge - topEdge))
+                            {
+                                g.DrawRectangle(orange, leftEdge, topEdge, rightEdge - leftEdge, bottomEdge - topEdge);
+                                continue;
+                            }
+
+                            g.DrawRectangle(red, leftEdge, topEdge, rightEdge - leftEdge, bottomEdge - topEdge);
+                            x = rightEdge;
+                            nextY = bottomEdge+1;
+                        }
+                    }
+                }
+            }
+
+            ProfileImageClean.Dispose();
+            ProfileImage.Save(Main.AppPath + @"\Debug\ProfileImageBounds " + timestamp + ".png");
+            cyan.Dispose();
+            red.Dispose();
+            orange.Dispose();
+            return new List<InventoryItem>(); //TODO
+        }
+
+            private static int ColorDifference(Color test, Color thresh)
         {
             return Math.Abs(test.R - thresh.R) + Math.Abs(test.G - thresh.G) + Math.Abs(test.B - thresh.B);
         }
