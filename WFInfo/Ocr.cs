@@ -1348,7 +1348,7 @@ namespace WFInfo
             {
                 int nextY = 0;
                 int nextYCounter = -1;
-                for (int y = 0; y < ProfileImageClean.Height; y = (nextYCounter-- == 0 ? nextY : y+1 ))
+                for (int y = 0; y < ProfileImageClean.Height; y = (nextYCounter == 0 ? nextY : y+1 ))
                 {
                     for (int x = 0; x < ProfileImageClean.Width; x+= probe_interval) //probe every few pixels for performance
                     {
@@ -1409,6 +1409,8 @@ namespace WFInfo
                             hitRatios.Add(1);
                             do
                             {
+                                int rightMostHit = 0;
+                                int leftMostHit = -1;
                                 hits = 0;
                                 bottomEdge++;
                                 for (int i = leftEdge; i < rightEdge; i++)
@@ -1416,10 +1418,32 @@ namespace WFInfo
                                     if (probeProfilePixel(ProfileImageClean.GetPixel(i, bottomEdge)))
                                     {
                                         hits++;
+                                        rightMostHit = i;
+                                        if (leftMostHit == -1)
+                                        {
+                                            leftMostHit = i;
+                                        }
                                     }
                                 }
                                 hitRatio = hits / (double)(rightEdge - leftEdge );
                                 hitRatios.Add(hitRatio);
+
+                                if (hitRatio > 0.5 && rightMostHit+1 < rightEdge && rightEdge - leftEdge > 100) //make sure the innermost right edge is used (avoid bright part of frame overlapping with edge)
+                                {
+                                    g.DrawLine(red, rightEdge, bottomEdge, rightMostHit, bottomEdge);
+                                    rightEdge = rightMostHit;
+                                    bottomEdge = y;
+                                    hitRatios.Clear();
+                                    hitRatios.Add(1);
+                                }
+                                if (hitRatio > 0.5 && leftMostHit > leftEdge && rightEdge - leftEdge > 100) //make sure the innermost left edge is used (avoid bright part of frame overlapping with edge)
+                                {
+                                    g.DrawLine(red, leftEdge, bottomEdge, leftMostHit, bottomEdge);
+                                    leftEdge = leftMostHit;
+                                    bottomEdge = y;
+                                    hitRatios.Clear();
+                                    hitRatios.Add(1);
+                                }
                             } while (bottomEdge+2 < ProfileImageClean.Height && hitRatios.Last() > 0.5);
                             hitRatios.RemoveAt(hitRatios.Count - 1);
                             //find if/where it transitions from text (some misses) to no text (basically no misses) then back to text (some misses). This is proof it's an owned item and marks the bottom edge of the text
@@ -1490,6 +1514,10 @@ namespace WFInfo
                             }
                             firstEngine.SetVariable("tessedit_char_whitelist", "");
                         }
+                    }
+                    if (nextYCounter >= 0)
+                    {
+                        nextYCounter--;
                     }
                 }
             }
