@@ -1293,13 +1293,12 @@ namespace WFInfo
             for (int i = 0; i < foundParts.Count; i++)
             {
                 var part = foundParts[i];
-                if (!PartNameValid(part.Name))
+                if (!PartNameValid(part.Name + " Blueprint"))
                     continue;
-                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out firstProximity[0]);
+                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity);
                 part.Name = name;
                 foundParts[i] = part;
                 //Decide if item is an actual prime, if so mark as mastered
-                
 
             }
 
@@ -1322,6 +1321,8 @@ namespace WFInfo
             Pen orange = new Pen(Brushes.Orange);
             Pen red = new Pen(Brushes.Red);
             Pen cyan = new Pen(Brushes.Cyan);
+            var font = new Font("Arial", 16);
+            List<InventoryItem> foundItems = new List<InventoryItem>();
             Bitmap ProfileImageClean = new Bitmap(ProfileImage);
             int probe_interval = 10;
             using (Graphics g = Graphics.FromImage(ProfileImage))
@@ -1415,16 +1416,55 @@ namespace WFInfo
                                     ratioChanges++;
                                 }
                             }
-                            
-                            if ( ratioChanges != 4 || (rightEdge - leftEdge) < 4* (bottomEdge - topEdge) || (rightEdge - leftEdge) > 6 * (bottomEdge - topEdge))
+
+                            int width = rightEdge - leftEdge;
+                            int height = bottomEdge - topEdge;
+
+                            if (ratioChanges != 4 || width < 4 * height || width > 6 * height)
                             {
-                                g.DrawRectangle(orange, leftEdge, topEdge, rightEdge - leftEdge, bottomEdge - topEdge);
+                                g.DrawRectangle(orange, leftEdge, topEdge, width, height);
                                 continue;
                             }
 
-                            g.DrawRectangle(red, leftEdge, topEdge, rightEdge - leftEdge, bottomEdge - topEdge);
+                            g.DrawRectangle(red, leftEdge, topEdge, width, height);
                             x = rightEdge;
-                            nextY = bottomEdge+1;
+                            nextY = bottomEdge + 1;
+
+                            height = lineBreak;
+
+                            Rectangle cloneRect = new Rectangle(leftEdge, topEdge, width, height);
+                            Bitmap cloneBitmap = ProfileImageClean.Clone(cloneRect, ProfileImageClean.PixelFormat);
+                            for (int i = 0; i < cloneBitmap.Width; i++)
+                            {
+                                for (int j = 0; j < cloneBitmap.Height; j++)
+                                {
+                                    if (probeProfilePixel(cloneBitmap.GetPixel(i, j)))
+                                    {
+                                        cloneBitmap.SetPixel(i, j, Color.White);
+                                    } else
+                                    {
+                                        cloneBitmap.SetPixel(i, j, Color.Black);
+                                        ProfileImage.SetPixel(cloneRect.X + i , cloneRect.Y + j , Color.Red);
+                                    }
+                                }
+                            }
+                            //do OCR
+                            firstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                            using (var page = firstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
+                            {
+                                using (var iterator = page.GetIterator())
+                                {
+                                    iterator.Begin();
+                                    string rawText = iterator.GetText(PageIteratorLevel.TextLine);
+
+                                    foundItems.Add(new InventoryItem(rawText, cloneRect));
+
+                                    g.DrawString(rawText, font, Brushes.DarkBlue, new Point(cloneRect.X, cloneRect.Y));
+
+
+                                }
+                            }
+                            firstEngine.SetVariable("tessedit_char_whitelist", "");
                         }
                     }
                 }
@@ -1435,7 +1475,7 @@ namespace WFInfo
             cyan.Dispose();
             red.Dispose();
             orange.Dispose();
-            return new List<InventoryItem>(); //TODO
+            return foundItems;
         }
 
             private static int ColorDifference(Color test, Color thresh)
