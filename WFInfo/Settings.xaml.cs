@@ -49,6 +49,7 @@ namespace WFInfo
         public static Key DebugModifierKey;
         public static Key SnapitModifierKey;
         public static Key SearchItModifierKey;
+        public static Key MasterItModifierKey;
         public static KeyConverter converter = new KeyConverter();
         public static Point mainWindowLocation;
         public static bool isOverlaySelected;

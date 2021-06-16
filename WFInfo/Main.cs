@@ -188,6 +188,7 @@ namespace WFInfo
                 $"Delete:{Keyboard.IsKeyDown(Key.Delete)}\n" +
                 $"Snapit, {Settings.SnapitModifierKey}:{Keyboard.IsKeyDown(Settings.SnapitModifierKey)}\n" +
                 $"Searchit, {Settings.SearchItModifierKey}:{Keyboard.IsKeyDown(Settings.SearchItModifierKey)}\n" +
+                $"Masterit, {Settings.MasterItModifierKey}:{Keyboard.IsKeyDown(Settings.MasterItModifierKey)}\n" +
                 $"debug, {Settings.DebugModifierKey}:{Keyboard.IsKeyDown(Settings.DebugModifierKey)}");
 
             if (Keyboard.IsKeyDown(Key.Delete))
@@ -227,6 +228,14 @@ namespace WFInfo
                 AddLog("Starting search it");
                 StatusUpdate("Starting search it", 0);
                 searchBox.Start();
+            }
+            else if (Keyboard.IsKeyDown(Settings.MasterItModifierKey))
+            {//masterit
+                AddLog("Starting master it");
+                StatusUpdate("Starting master it", 0); //this doesn't seem to display
+                Bitmap bigScreenshot = OCR.CaptureScreenshot();
+                OCR.ProcessProfileScreen(bigScreenshot, bigScreenshot);
+                bigScreenshot.Dispose();
             }
             else if (Settings.debug || OCR.VerifyWarframe())
             {

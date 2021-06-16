@@ -850,8 +850,6 @@ namespace WFInfo
         /// <param name="snapItImage"></param>
         internal static void ProcessSnapIt(Bitmap snapItImage, Bitmap fullShot, Point snapItOrigin)
         {
-            ProcessProfileScreen(snapItImage, fullShot, snapItOrigin);
-            return;
             var watch = new Stopwatch();
             watch.Start();
             long start = watch.ElapsedMilliseconds;
@@ -1281,7 +1279,7 @@ namespace WFInfo
         /// Processes the image the user cropped in the selection
         /// </summary>
         /// <param name="snapItImage"></param>
-        internal static void ProcessProfileScreen(Bitmap snapItImage, Bitmap fullShot, Point snapItOrigin)
+        internal static void ProcessProfileScreen(Bitmap snapItImage, Bitmap fullShot)
         {
             var watch = new Stopwatch();
             watch.Start();
@@ -1398,6 +1396,7 @@ namespace WFInfo
                             {
                                 g.DrawLine(darkCyan, x - probe_interval, y, x + probe_interval, y);
                                 g.DrawLine(darkCyan, leftEdge, y, rightEdge, y);
+                                x = Math.Max(rightEdge, x) + probe_interval;
                                 continue;
                             }
                             
