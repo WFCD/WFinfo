@@ -181,23 +181,66 @@ namespace WFInfo
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
         }
 
+        public void ActivationKeyPressed(Object key)
+        {
+            //Log activation. Can't set activation key to left or right mouse button via UI so not differentiating between MouseButton and Key should be fine
+            Main.AddLog($"User is activating with pressing key: {key} and is holding down:\n" +
+                $"Delete:{Keyboard.IsKeyDown(Key.Delete)}\n" +
+                $"Snapit, {Settings.SnapitModifierKey}:{Keyboard.IsKeyDown(Settings.SnapitModifierKey)}\n" +
+                $"Searchit, {Settings.SearchItModifierKey}:{Keyboard.IsKeyDown(Settings.SearchItModifierKey)}\n" +
+                $"debug, {Settings.DebugModifierKey}:{Keyboard.IsKeyDown(Settings.DebugModifierKey)}");
+
+            if (Keyboard.IsKeyDown(Key.Delete))
+            { 
+                //Close all overlays if hotkey + delete is held down
+                foreach (Window overlay in App.Current.Windows)
+                {
+                    if (overlay.GetType().ToString() == "WFInfo.Overlay")
+                    {
+                        overlay.Hide();
+                    }
+                }
+                StatusUpdate("Overlays dismissed", 1);
+                return;
+            }
+
+            if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+            { //snapit debug
+                AddLog("Loading screenshot from file for snapit");
+                StatusUpdate("Offline testing with screenshot for snapit", 0);
+                LoadScreenshotSnap();
+            }
+            else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
+            {//normal debug
+                AddLog("Loading screenshot from file");
+                StatusUpdate("Offline testing with screenshot", 0);
+                LoadScreenshot();
+            }
+            else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+            {//snapit
+                AddLog("Starting snap it");
+                StatusUpdate("Starting snap it", 0);
+                OCR.SnapScreenshot();
+            }
+            else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
+            { //Searchit  
+                AddLog("Starting search it");
+                StatusUpdate("Starting search it", 0);
+                searchBox.Start();
+            }
+            else if (Settings.debug || OCR.VerifyWarframe())
+            {
+                Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
+            }
+        }
+
         public void OnMouseAction(MouseButton key)
         {
             latestActive = DateTime.UtcNow.AddMinutes(minutesTillAfk);
 
             if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
             { //check if user pressed activation key
-                if (Keyboard.IsKeyDown(Key.Delete))
-                { //Close all overlays if hotkey + delete is held down
-                    foreach (Window overlay in App.Current.Windows)
-                    {
-                        if (overlay.GetType().ToString() == "WFInfo.Overlay")
-                        {
-                            overlay.Hide();
-                        }
-                    }
-                    return;
-                }
+
 
                 if (searchBox.IsInUse)
                 { //if key is pressed and searchbox is active then rederect keystokes to it.
@@ -210,34 +253,9 @@ namespace WFInfo
                     return;
                 }
 
-                if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
-                { //snapit debug
-                    AddLog("Loading screenshot from file for snapit");
-                    StatusUpdate("Offline testing with screenshot for snapit", 0);
-                    LoadScreenshotSnap();
-                }
-                else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
-                {//normal debug
-                    AddLog("Loading screenshot from file");
-                    StatusUpdate("Offline testing with screenshot", 0);
-                    LoadScreenshot();
-                }
-                else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
-                {//snapit
-                    AddLog("Starting snap it");
-                    StatusUpdate("Starting snap it", 0);
-                    OCR.SnapScreenshot();
-                }
-                else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
-                { //Searchit  
-                    AddLog("Starting search it");
-                    StatusUpdate("Starting search it", 0);
-                    searchBox.Start();
-                }
-                else if (Settings.debug || OCR.VerifyWarframe())
-                {
-                    Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
-                }
+                ActivationKeyPressed(key);
+
+
             }
             else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying)
             {
@@ -263,6 +281,7 @@ namespace WFInfo
                 StatusUpdate("Closed snapit", 0);
                 return;
             }
+
             if (searchBox.IsInUse)
             { //if key is pressed and searchbox is active then rederect keystokes to it.
                 if (key == Key.Escape)
@@ -277,51 +296,9 @@ namespace WFInfo
             
             if (key == Settings.ActivationKey)
             { //check if user pressed activation key
-                Main.AddLog($"User is activating with pressing key: {key} and is holding down:\n" +
-                                $"Delete:{Keyboard.IsKeyDown(Key.Delete)}\n" +
-                                $"Snapit, {Settings.SnapitModifierKey}:{Keyboard.IsKeyDown(Settings.SnapitModifierKey)}\n" +
-                                $"Searchit, {Settings.SearchItModifierKey}:{Keyboard.IsKeyDown(Settings.SearchItModifierKey)}\n" +
-                                $"debug, {Settings.DebugModifierKey}:{Keyboard.IsKeyDown(Settings.DebugModifierKey)}");
-                if (Keyboard.IsKeyDown(Key.Delete))
-                { //Close all overlays if hotkey + delete is held down
-                    foreach (Window overlay in App.Current.Windows)
-                    {
-                        if (overlay.GetType().ToString() == "WFInfo.Overlay")
-                        {
-                            overlay.Hide();
-                        }
-                    }
-                    StatusUpdate("Overlays dismissed", 1);
-                    return;
-                }
-                if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
-                { //snapit debug
-                    AddLog("Loading screenshot from file for snapit");
-                    StatusUpdate("Offline testing with screenshot for snapit", 0);
-                    LoadScreenshotSnap();
-                }
-                else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
-                {//normal debug
-                    AddLog("Loading screenshot from file");
-                    StatusUpdate("Offline testing with screenshot", 0);
-                    LoadScreenshot();
-                }
-                else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
-                {//snapit
-                    AddLog("Starting snap it");
-                    StatusUpdate("Starting snap it", 0);
-                    OCR.SnapScreenshot();
-                }
-                else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
-                { //Searchit  
-                    AddLog("Starting search it");
-                    StatusUpdate("Starting search it", 0);
-                    searchBox.Start();
-                }
-                else if (Settings.debug || OCR.VerifyWarframe())
-                {
-                    Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
-                }
+
+                ActivationKeyPressed(key);
+
             }
         }
 
