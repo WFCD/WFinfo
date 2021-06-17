@@ -209,13 +209,19 @@ namespace WFInfo
             { //snapit debug
                 AddLog("Loading screenshot from file for snapit");
                 StatusUpdate("Offline testing with screenshot for snapit", 0);
-                LoadScreenshotSnap();
+                LoadScreenshot(ScreenshotType.SNAPIT);
+            } 
+            else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.MasterItModifierKey))
+            { //master debug
+                AddLog("Loading screenshot from file for masterit");
+                StatusUpdate("Offline testing with screenshot for masterit", 0);
+                LoadScreenshot(ScreenshotType.MASTERIT);
             }
             else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
             {//normal debug
                 AddLog("Loading screenshot from file");
                 StatusUpdate("Offline testing with screenshot", 0);
-                LoadScreenshot();
+                LoadScreenshot(ScreenshotType.NORMAL);
             }
             else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
             {//snapit
@@ -322,7 +328,14 @@ namespace WFInfo
             fullscreenpopup = new FullscreenReminder();
         }
 
-        private void LoadScreenshot()
+
+        public enum ScreenshotType 
+        {
+            NORMAL,
+            SNAPIT,
+            MASTERIT
+        }
+        private void LoadScreenshot(ScreenshotType type)
         {
             // Using WinForms for the openFileDialog because it's simpler and much easier
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -335,20 +348,37 @@ namespace WFInfo
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    Task.Factory.StartNew(() =>
+                    Task.Factory.StartNew(
+                        () =>
                     {
                         try
                         {
                             foreach (string file in openFileDialog.FileNames)
                             {
-                                AddLog("Testing file: " + file);
+                                if (type == ScreenshotType.NORMAL)
+                                {
+                                    AddLog("Testing file: " + file);
 
-                                //Get the path of specified file
-                                Bitmap image = new Bitmap(file);
-                                OCR.UpdateWindow(image);
-                                OCR.ProcessRewardScreen(image);
+                                    //Get the path of specified file
+                                    Bitmap image = new Bitmap(file);
+                                    OCR.UpdateWindow(image);
+                                    OCR.ProcessRewardScreen(image);
+                                } else if (type == ScreenshotType.SNAPIT)
+                                {
+                                    AddLog("Testing snapit on file: " + file);
+
+                                    Bitmap image = new Bitmap(file);
+                                    OCR.UpdateWindow(image);
+                                    OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
+                                } else if (type == ScreenshotType.MASTERIT)
+                                {
+                                    AddLog("Testing masterit on file: " + file);
+
+                                    Bitmap image = new Bitmap(file);
+                                    OCR.UpdateWindow(image);
+                                    OCR.ProcessProfileScreen(image, image);
+                                }
                             }
-
                         }
                         catch (Exception e)
                         {
@@ -360,47 +390,10 @@ namespace WFInfo
                 else
                 {
                     StatusUpdate("Failed to load image", 1);
-                    OCR.processingActive = false;
-                }
-            }
-        }
-
-        private void LoadScreenshotSnap()
-        {
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
-                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-                openFileDialog.Filter = "image files (*.png)|*.png|All files (*.*)|*.*";
-                openFileDialog.FilterIndex = 2;
-                openFileDialog.RestoreDirectory = true;
-                openFileDialog.Multiselect = true;
-
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    Task.Factory.StartNew(() =>
+                    if (type == ScreenshotType.NORMAL)
                     {
-                        try
-                        {
-                            foreach (string file in openFileDialog.FileNames)
-                            {
-                                AddLog("Testing snapit on file: " + file);
-
-                                Bitmap image = new Bitmap(file);
-                                OCR.UpdateWindow(image);
-                                OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
-                            }
-
-                        }
-                        catch (Exception e)
-                        {
-                            AddLog(e.Message);
-                            StatusUpdate("Failed to load image", 1);
-                        }
-                    });
-                }
-                else
-                {
-                    StatusUpdate("Failed to load image", 1);
+                        OCR.processingActive = false;
+                    }
                 }
             }
         }

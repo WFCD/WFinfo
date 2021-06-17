@@ -1341,12 +1341,14 @@ namespace WFInfo
             var font = new Font("Arial", 16);
             List<InventoryItem> foundItems = new List<InventoryItem>();
             Bitmap ProfileImageClean = new Bitmap(ProfileImage);
-            int probe_interval = 10;
+            int probe_interval = ProfileImage.Width / 120;
+            Main.AddLog("Using probe interval: " + probe_interval);
             using (Graphics g = Graphics.FromImage(ProfileImage))
             {
                 int nextY = 0;
                 int nextYCounter = -1;
-                for (int y = 0; y < ProfileImageClean.Height; y = (nextYCounter == 0 ? nextY : y+1 ))
+                List<Tuple<int, int, int>> skipZones = new List<Tuple<int, int, int>>(); //left edge, right edge, bottom edge
+                for (int y = 0; y < ProfileImageClean.Height-1; y = (nextYCounter == 0 ? nextY : y+1 ))
                 {
                     for (int x = 0; x < ProfileImageClean.Width; x+= probe_interval) //probe every few pixels for performance
                     {
@@ -1381,22 +1383,20 @@ namespace WFInfo
                                 rightEdge++;
                             }
 
-                            
-                            //check hit ratio for line above and skip if too high
-                            hits = 0;
-                            for (int i = leftEdge; i <= rightEdge; i++)
+                            //check that it isn't in an area already thoroughly searched
+                            bool failed = false;
+                            foreach (Tuple<int,int,int> skipZone in skipZones)
                             {
-                                if ( probeProfilePixel(ProfileImageClean.GetPixel(i, Math.Max(y - 1, 0))))
+                                if ( y < skipZone.Item3 && ( (leftEdge <= skipZone.Item1 && rightEdge >= skipZone.Item1) || (leftEdge >= skipZone.Item1 && leftEdge <= skipZone.Item2) || (rightEdge >= skipZone.Item1 && rightEdge <= skipZone.Item2)))
                                 {
-                                    hits++;
+                                    g.DrawLine(darkCyan, leftEdge, y, rightEdge, y);
+                                    x = Math.Max(x, skipZone.Item2);
+                                    failed = true;
+                                    break;
                                 }
                             }
-                            hitRatio = hits / (double)(rightEdge - leftEdge);
-                            if ( (rightEdge - leftEdge) < 100 || hitRatio > 0.9)
+                             if (failed)
                             {
-                                g.DrawLine(darkCyan, x - probe_interval, y, x + probe_interval, y);
-                                g.DrawLine(darkCyan, leftEdge, y, rightEdge, y);
-                                x = Math.Max(rightEdge, x) + probe_interval;
                                 continue;
                             }
                             
@@ -1469,10 +1469,12 @@ namespace WFInfo
                             if (ratioChanges != 4 || width < 4 * height || width > 6 * height)
                             {
                                 g.DrawRectangle(pink, leftEdge, topEdge, width, height);
+                                x = Math.Max(rightEdge, x);
                                 continue;
                             }
 
                             g.DrawRectangle(red, leftEdge, topEdge, width, height);
+                            skipZones.Add(new Tuple<int, int, int>(leftEdge, rightEdge, bottomEdge));
                             x = rightEdge;
                             nextY = bottomEdge + 1;
                             nextYCounter = 3;
