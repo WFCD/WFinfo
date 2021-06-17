@@ -507,6 +507,14 @@ namespace WFInfo
             return equipmentData[eqmt]["parts"][name]["vaulted"].ToObject<bool>();
         }
 
+        public bool IsPartMastered(string name)
+        {
+            if (name.IndexOf("Prime") < 0)
+                return false;
+            string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
+            return equipmentData[eqmt]["mastered"].ToObject<bool>();
+        }
+
         public string PartsOwned(string name)
         {
             if (name.IndexOf("Prime") < 0)

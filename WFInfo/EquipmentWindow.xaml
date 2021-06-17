@@ -149,6 +149,12 @@
                                                     </MultiDataTrigger.Conditions>
                                                     <Setter Property="TextBlock.Visibility" Value="Visible" />
                                                 </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Mastered}" Value="True" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Label.Style>

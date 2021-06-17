@@ -307,6 +307,7 @@ namespace WFInfo
                         double platinum = double.Parse(plat, styles, provider);
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(correctName);
+                        bool mastered = Main.dataBase.IsPartMastered(correctName);
                         string partsOwned = Main.dataBase.PartsOwned(correctName);
                         string partsCount = Main.dataBase.PartsCount(correctName);
                         int duc = int.Parse(ducats, Main.culture);
@@ -363,13 +364,13 @@ namespace WFInfo
 
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                                 Main.overlays[partNumber].Resize(overWid);
                                 Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + Settings.overlayXOffsetValue) / dpiScaling), startY + (int)(Settings.overlayYOffsetValue / dpiScaling), Settings.delay);
                             }
                             else if (!Settings.isLightSelected)
                             {
-                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
+                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
                             //else
                                 //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
@@ -609,6 +610,7 @@ namespace WFInfo
                         string plat = job["plat"].ToObject<string>();
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(secondName);
+                        bool mastered = Main.dataBase.IsPartMastered(secondName);
                         string partsOwned = Main.dataBase.PartsOwned(secondName);
                         string partsCount = Main.dataBase.PartsCount(secondName);
                         double platinum = double.Parse(plat, styles, provider);
@@ -673,14 +675,14 @@ namespace WFInfo
                         {
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else if (!Settings.isLightSelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else
-                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
+                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
 
                             if (Settings.clipboard && !string.IsNullOrEmpty(tempclipboard))
                                 Clipboard.SetText(tempclipboard);
@@ -880,6 +882,7 @@ namespace WFInfo
                 string ducats = job["ducats"].ToObject<string>();
                 string volume = job["volume"].ToObject<string>();
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
+                bool mastered = Main.dataBase.IsPartMastered(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
                 string partsDetected = ""+part.Count;
 
@@ -905,7 +908,7 @@ namespace WFInfo
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, partsDetected, false);
+                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
@@ -1281,13 +1284,13 @@ namespace WFInfo
         /// <param name="fullShot">Image to scan</param>
         internal static void ProcessProfileScreen(Bitmap fullShot)
         {
-            var watch = new Stopwatch();
+            System.Diagnostics.Stopwatch watch = new Stopwatch();
             watch.Start();
             long start = watch.ElapsedMilliseconds;
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
             fullShot.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
-            List<InventoryItem> foundParts = FindOwnedItems(fullShot, timestamp);
+            List<InventoryItem> foundParts = FindOwnedItems(fullShot, timestamp, start, watch);
             for (int i = 0; i < foundParts.Count; i++)
             {
                 var part = foundParts[i];
@@ -1316,14 +1319,18 @@ namespace WFInfo
                 }
             }
             Main.dataBase.SaveAllJSONs();
+            Main.RunOnUIThread(() =>
+            {
+                EquipmentWindow.INSTANCE.reloadItems();
+            });
 
             long end = watch.ElapsedMilliseconds;
-            if (end - start < 8000)
+            if (end - start < 10000)
             {
                 Main.StatusUpdate("Completed Profile Scanning(" + (end - start) + "ms)", 0);
             } else
             {
-                Main.StatusUpdate("Reduce brightness or use less white(" + (end - start) + "ms)", 1);
+                Main.StatusUpdate("Lower brightness may increase speed(" + (end - start) + "ms)", 1);
             }
             watch.Stop();
 
@@ -1350,7 +1357,7 @@ namespace WFInfo
         /// <param name="ProfileImage">Image of profile screen to scan, debug markings will be drawn on this</param>
         /// <param name="timestamp">Time started at, used for file name</param>
         /// <returns>List of found items</returns>
-        private static List<InventoryItem> FindOwnedItems(Bitmap ProfileImage, string timestamp)
+        private static List<InventoryItem> FindOwnedItems(Bitmap ProfileImage, string timestamp, long start, System.Diagnostics.Stopwatch watch)
         {
             Pen orange = new Pen(Brushes.Orange);
             Pen red = new Pen(Brushes.Red);
@@ -1489,6 +1496,10 @@ namespace WFInfo
                             {
                                 g.DrawRectangle(pink, leftEdge, topEdge, width, height);
                                 x = Math.Max(rightEdge, x);
+                                if (watch.ElapsedMilliseconds - start > 10000)
+                                {
+                                    Main.StatusUpdate("High noise, this might be slow", 3);
+                                }
                                 continue;
                             }
 

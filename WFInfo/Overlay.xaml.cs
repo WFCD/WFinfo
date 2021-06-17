@@ -104,7 +104,7 @@ namespace WFInfo
             partText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 215));
         }
 
-        public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, string detected, bool hideRewardInfo)
+        public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, bool mastered, string owned, string detected, bool hideRewardInfo)
         {
             ducatText.Foreground = bluBrush;
             ducatText.FontWeight = FontWeights.Normal;
@@ -156,7 +156,7 @@ namespace WFInfo
                     throw new ArgumentNullException(nameof(owned));
                 }
                 if (owned.Length > 0)
-                    ownedText.Text = owned + " OWNED";
+                    ownedText.Text = (mastered ? "✓ " : "") + owned + " OWNED";
                 else
                     ownedText.Text = "";
                 if (detected.Length > 0)
