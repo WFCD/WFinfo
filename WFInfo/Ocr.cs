@@ -1276,18 +1276,18 @@ namespace WFInfo
         }
 
         /// <summary>
-        /// Processes the image the user cropped in the selection
+        /// Process the profile screen to find owned items
         /// </summary>
-        /// <param name="snapItImage"></param>
-        internal static void ProcessProfileScreen(Bitmap snapItImage, Bitmap fullShot)
+        /// <param name="fullShot">Image to scan</param>
+        internal static void ProcessProfileScreen(Bitmap fullShot)
         {
             var watch = new Stopwatch();
             watch.Start();
             long start = watch.ElapsedMilliseconds;
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-            snapItImage.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
-            List<InventoryItem> foundParts = FindOwnedItems(snapItImage, timestamp);
+            fullShot.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
+            List<InventoryItem> foundParts = FindOwnedItems(fullShot, timestamp);
             for (int i = 0; i < foundParts.Count; i++)
             {
                 var part = foundParts[i];
@@ -1318,21 +1318,40 @@ namespace WFInfo
             Main.dataBase.SaveAllJSONs();
 
             long end = watch.ElapsedMilliseconds;
-            Main.StatusUpdate("Completed Profile Scanning(" + (end - start) + "ms)", 0);
+            if (end - start < 8000)
+            {
+                Main.StatusUpdate("Completed Profile Scanning(" + (end - start) + "ms)", 0);
+            } else
+            {
+                Main.StatusUpdate("Reduce brightness or use less white(" + (end - start) + "ms)", 1);
+            }
             watch.Stop();
 
         }
 
-        private static bool probeProfilePixel(Color pixel)
+        /// <summary>
+        /// Probe pixel color to see if it's white enough for FindOwnedItems
+        /// </summary>
+        /// <param name="pixel">Pixel to test</param>
+        /// <param name="lowSensitivity">Use lower threshold, mainly for finding black pixels instead</param>
+        /// <returns>if pixel is above threshold for "white"</returns>
+        private static bool probeProfilePixel(Color pixel, bool lowSensitivity)
         {
+            if ( lowSensitivity)
+            {
+                return pixel.A > 80 && pixel.R > 80 && pixel.G > 80 && pixel.B > 80;
+            }
             return pixel.A > 240 && pixel.R > 200 && pixel.G > 200 && pixel.B > 200;
         }
 
+        /// <summary>
+        /// Get owned items from profile screen
+        /// </summary>
+        /// <param name="ProfileImage">Image of profile screen to scan, debug markings will be drawn on this</param>
+        /// <param name="timestamp">Time started at, used for file name</param>
+        /// <returns>List of found items</returns>
         private static List<InventoryItem> FindOwnedItems(Bitmap ProfileImage, string timestamp)
         {
-            //find edges of owned item label Colour: A > 250, R > 230, G > 230, B > 230
-            //check that there are 2 rows of text
-            //OCR the first row
             Pen orange = new Pen(Brushes.Orange);
             Pen red = new Pen(Brushes.Red);
             Pen cyan = new Pen(Brushes.Cyan);
@@ -1353,7 +1372,7 @@ namespace WFInfo
                     for (int x = 0; x < ProfileImageClean.Width; x+= probe_interval) //probe every few pixels for performance
                     {
                         Color pixel = ProfileImageClean.GetPixel(x, y);
-                        if (probeProfilePixel(pixel) )
+                        if (probeProfilePixel(pixel, false) )
                         {
                             //find left edge and check that the coloured area is at least as big as probe_interval
                             int leftEdge = -1;
@@ -1363,7 +1382,7 @@ namespace WFInfo
                             for (int tempX = Math.Max(x - probe_interval, 0); tempX < Math.Min(x + probe_interval, ProfileImageClean.Width ) ; tempX++)
                             {
                                 areaWidth++;
-                                if ( probeProfilePixel( ProfileImageClean.GetPixel(tempX, y)))
+                                if ( probeProfilePixel( ProfileImageClean.GetPixel(tempX, y), false))
                                 {
                                     hits++;
                                     leftEdge = (leftEdge == -1 ? tempX : leftEdge);
@@ -1378,7 +1397,7 @@ namespace WFInfo
 
                             //find where the line ends
                             int rightEdge = leftEdge;
-                            while (rightEdge+2 < ProfileImageClean.Width && ( probeProfilePixel(ProfileImageClean.GetPixel(rightEdge+1, y)) || probeProfilePixel(ProfileImageClean.GetPixel(rightEdge + 2, y))))
+                            while (rightEdge+2 < ProfileImageClean.Width && ( probeProfilePixel(ProfileImageClean.GetPixel(rightEdge+1, y), false) || probeProfilePixel(ProfileImageClean.GetPixel(rightEdge + 2, y), false)))
                             {
                                 rightEdge++;
                             }
@@ -1414,7 +1433,7 @@ namespace WFInfo
                                 bottomEdge++;
                                 for (int i = leftEdge; i < rightEdge; i++)
                                 {
-                                    if (probeProfilePixel(ProfileImageClean.GetPixel(i, bottomEdge)))
+                                    if (probeProfilePixel(ProfileImageClean.GetPixel(i, bottomEdge), false))
                                     {
                                         hits++;
                                         rightMostHit = i;
@@ -1487,7 +1506,7 @@ namespace WFInfo
                             {
                                 for (int j = 0; j < cloneBitmap.Height; j++)
                                 {
-                                    if (probeProfilePixel(cloneBitmap.GetPixel(i, j)))
+                                    if (probeProfilePixel(cloneBitmap.GetPixel(i, j), true))
                                     {
                                         cloneBitmap.SetPixel(i, j, Color.White);
                                     } else

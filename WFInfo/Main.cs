@@ -238,10 +238,12 @@ namespace WFInfo
             else if (Keyboard.IsKeyDown(Settings.MasterItModifierKey))
             {//masterit
                 AddLog("Starting master it");
-                StatusUpdate("Starting master it", 0); //this doesn't seem to display
-                Bitmap bigScreenshot = OCR.CaptureScreenshot();
-                OCR.ProcessProfileScreen(bigScreenshot, bigScreenshot);
-                bigScreenshot.Dispose();
+                StatusUpdate("Starting master it", 0);
+                Task.Factory.StartNew(() => {
+                    Bitmap bigScreenshot = OCR.CaptureScreenshot();
+                    OCR.ProcessProfileScreen(bigScreenshot);
+                    bigScreenshot.Dispose();
+                });
             }
             else if (Settings.debug || OCR.VerifyWarframe())
             {
@@ -376,7 +378,7 @@ namespace WFInfo
 
                                     Bitmap image = new Bitmap(file);
                                     OCR.UpdateWindow(image);
-                                    OCR.ProcessProfileScreen(image, image);
+                                    OCR.ProcessProfileScreen(image);
                                 }
                             }
                         }
