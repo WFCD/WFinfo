@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:WFInfo"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d" 
-        Title="Settings" Height="554" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
+        Title="Settings" Height="594" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
     </Window.Resources>
@@ -49,7 +49,7 @@
             <Label Content="Y" Margin="183,30,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="32" Padding="5,5,5,0" Height="35" VerticalAlignment="Top" RenderTransformOrigin="5.729,-0.505" ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top."/>
             <TextBox x:Name="OverlayYOffset_number_box" ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top." Margin="0,30,30,0" TextWrapping="Wrap" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" Width="90" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="OverlayYOffset_number_box_KeyDown" Cursor="Arrow" GotFocus="OverlayYOffset_number_box_GotFocus" KeyUp="OverlayYOffset_number_box_KeyUp" VerticalAlignment="Top" HorizontalAlignment="Right" Text="0"/>
         </Grid>
-        <Grid x:Name="Activation_key" Margin="0,0,0,154" Height="117" VerticalAlignment="Bottom">
+        <Grid x:Name="Activation_key" Margin="0,0,0,154" Height="157" VerticalAlignment="Bottom">
             <Rectangle x:Name="First_window2" Stroke="#FF646464" Margin="0,-1,0,0" Fill="#FF1B1B1B"/>
             <Label Content="Activation key" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="126" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
             <TextBox x:Name="Activation_key_box" ToolTip="Key to activate the processing. Use modifiers below to achieve other actions" Margin="190,5,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="ActivationDown" Cursor="Arrow" GotFocus="ActivationFocus" KeyUp="ActivationUp" LostFocus="ActivationLost" VerticalAlignment="Top"/>
@@ -58,6 +58,8 @@
             <TextBox x:Name="Searchit_key_box" ToolTip="Modifier to hold down to start search it" Margin="190,43,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="Searchit_key_box_KeyDown" Cursor="Arrow" GotFocus="Searchit_key_box_GotFocus" KeyUp="Searchit_key_box_KeyUp" LostFocus="Searchit_key_box_LostFocus" VerticalAlignment="Top"/>
             <Label Content="Snap it modifier" Margin="24,81,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="138" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
             <TextBox x:Name="Snapit_key_box" ToolTip="Modifier to hold down to start Snap it" Margin="190,83,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="Snapit_key_box_KeyDown" Cursor="Arrow" GotFocus="Snapit_key_box_GotFocus" KeyUp="Snapit_key_box_KeyUp" LostFocus="Snapit_key_box_LostFocus" Height="28" VerticalAlignment="Top"/>
+            <Label Content="Master it modifier" Margin="24,121,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="138" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
+            <TextBox x:Name="Masterit_key_box" ToolTip="Modifier to hold down to start Snap it" Margin="190,123,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="Masterit_key_box_KeyDown" Cursor="Arrow" GotFocus="Masterit_key_box_GotFocus" KeyUp="Masterit_key_box_KeyUp" LostFocus="Masterit_key_box_LostFocus" Height="28" VerticalAlignment="Top"/>
         </Grid>
         <Grid HorizontalAlignment="Left" Height="70" Margin="0,0,0,84" VerticalAlignment="Bottom" Width="334">
             <Rectangle Stroke="#FF646464" Margin="0,-1,0,0"/>
@@ -66,7 +68,7 @@
             <Label Content="Efficiency min" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="120" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
             <Label Content="Efficiency max" Margin="187,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="128" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
         </Grid>
-        <Grid HorizontalAlignment="Left" Margin="0,0,0,271" Width="334" Height="64" VerticalAlignment="Bottom">
+        <Grid HorizontalAlignment="Left" Margin="0,0,0,311" Width="334" Height="64" VerticalAlignment="Bottom">
             <Rectangle Stroke="#FF646464" Margin="0,-1,0,0"/>
             <Label Content="Snap Noise" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="108" Padding="5,5,5,0" Height="35" VerticalAlignment="Top" ToolTip="Snap-It item count noise filtering threshhold"/>
             <TextBox x:Name="SnapItCountThreshold_number_box" ToolTip="Threshold for number detection noise filtering. Higher = More aggressive, 3 or 4 usually works best" Margin="190,5,24,0" TextWrapping="Wrap" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" Width="90" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="SnapItCountThreshold_number_box_KeyDown" Cursor="Arrow" GotFocus="SnapItCountThreshold_number_box_GotFocus" KeyUp="SnapItCountThreshold_number_box_KeyUp" VerticalAlignment="Top" HorizontalAlignment="Right" Text="4"/>

@@ -93,17 +93,17 @@ namespace WFInfo
             {
                 OverlayRadio.IsChecked = true;
                 Overlay_sliders.Visibility = Visibility.Visible;
-                Height = 554;
+                Height = 594;
             }
             else if (settingsObj.GetValue("Display").ToString() == "Light")
             {
                 LightRadio.IsChecked = true;
-                Height = 484;
+                Height = 524;
             }
             else
             {
                 WindowRadio.IsChecked = true;
-                Height = 484;
+                Height = 524;
             }
 
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
@@ -180,7 +180,7 @@ namespace WFInfo
             Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 484;
+            Height = 524;
             Save();
         }
 
@@ -192,7 +192,7 @@ namespace WFInfo
             Overlay_sliders.Visibility = Visibility.Visible;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 554;
+            Height = 594;
             Save();
         }
 
@@ -281,7 +281,7 @@ namespace WFInfo
             //Set mouse button to disabled (never gonna use left as a trigger)
             ActivationMouseButton = MouseButton.Left;
 
-            if (e.Key == SearchItModifierKey || e.Key == SnapitModifierKey)
+            if (e.Key == SearchItModifierKey || e.Key == SnapitModifierKey || e.Key == MasterItModifierKey)
             {
                 Activation_key_box.Text = GetKeyName(ActivationKey);
                 hidden.Focus();
@@ -311,6 +311,7 @@ namespace WFInfo
 
             Searchit_key_box.Text = GetKeyName(SearchItModifierKey);
             Snapit_key_box.Text = GetKeyName(SnapitModifierKey);
+            Masterit_key_box.Text = GetKeyName(MasterItModifierKey);
         }
 
         private void ActivationLost(object sender, RoutedEventArgs e)
@@ -446,7 +447,7 @@ namespace WFInfo
             clipboard = true;
             clipboardCheckbox.IsChecked = true;
             clipboardCheckbox.IsEnabled = false;
-            Height = 484;
+            Height = 524;
             Save();
         }
 
@@ -469,7 +470,7 @@ namespace WFInfo
         {
             e.Handled = true;
 
-            if (e.Key == backupKeyVal || e.Key == SnapitModifierKey)
+            if (e.Key == backupKeyVal || e.Key == SnapitModifierKey || e.Key == MasterItModifierKey)
             {
                 Searchit_key_box.Text = GetKeyName(SearchItModifierKey);
                 hidden.Focus();
@@ -489,6 +490,11 @@ namespace WFInfo
             ResetActivationKeyText();
         }
 
+        private void Masterit_key_box_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ResetActivationKeyText();
+        }
+
         private void Searchit_key_box_LostFocus(object sender, RoutedEventArgs e)
         {
             ResetActivationKeyText();
@@ -498,7 +504,7 @@ namespace WFInfo
         {
             e.Handled = true;
 
-            if (e.Key == backupKeyVal || e.Key == SearchItModifierKey)
+            if (e.Key == backupKeyVal || e.Key == SearchItModifierKey || e.Key == MasterItModifierKey)
             {
                 Snapit_key_box.Text = GetKeyName(SnapitModifierKey);
                 hidden.Focus();
@@ -522,6 +528,38 @@ namespace WFInfo
         }
 
         private void Snapit_key_box_KeyDown(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void Masterit_key_box_KeyUp(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+
+            if (e.Key == backupKeyVal || e.Key == SearchItModifierKey || e.Key == SnapitModifierKey)
+            {
+                Masterit_key_box.Text = GetKeyName(MasterItModifierKey);
+                hidden.Focus();
+                return;
+            }
+
+            Key key = e.Key != Key.System ? e.Key : e.SystemKey;
+            MasterItModifierKey = key;
+            Masterit_key_box.Text = GetKeyName(key);
+            settingsObj["MasterItModifierKey"] = key.ToString();
+            hidden.Focus();
+            Save();
+        }
+
+        private void Masterit_key_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            MasterItModifierKey = Key.None;
+            Masterit_key_box.Text = "";
+            backupKeyVal = activeKeyVal;
+            activeKeyVal = Key.NoName;
+        }
+
+        private void Masterit_key_box_KeyDown(object sender, KeyEventArgs e)
         {
             e.Handled = true;
         }
