@@ -107,7 +107,6 @@ namespace WFInfo
         public static Rectangle window;
 
         private const NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
-        private static readonly IFormatProvider provider = CultureInfo.CreateSpecificCulture("en-GB");
 
         //public static float dpi;
         //private static double ScreenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
@@ -304,7 +303,7 @@ namespace WFInfo
                         //else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
                         primeRewards.Add(correctName);
                         string plat = job["plat"].ToObject<string>();
-                        double platinum = double.Parse(plat, styles, provider);
+                        double platinum = double.Parse(plat, styles, Main.culture);
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                         bool mastered = Main.dataBase.IsPartMastered(correctName);
@@ -613,7 +612,7 @@ namespace WFInfo
                         bool mastered = Main.dataBase.IsPartMastered(secondName);
                         string partsOwned = Main.dataBase.PartsOwned(secondName);
                         string partsCount = Main.dataBase.PartsCount(secondName);
-                        double platinum = double.Parse(plat, styles, provider);
+                        double platinum = double.Parse(plat, styles, Main.culture);
                         int duc = int.Parse(ducats, Main.culture);
                         tempAmountOfRewardsDisplayed++;
 

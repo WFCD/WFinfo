@@ -385,6 +385,7 @@ namespace WFInfo
                         catch (Exception e)
                         {
                             AddLog(e.Message);
+                            AddLog(e.StackTrace);
                             StatusUpdate("Failed to load image", 1);
                         }
                     });
@@ -433,7 +434,7 @@ namespace WFInfo
         }
 
         // Glob
-        public static System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("en");
+        public static System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("en", false);
 
         public static void SignOut()
         {

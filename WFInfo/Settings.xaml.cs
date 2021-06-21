@@ -140,8 +140,8 @@ namespace WFInfo
             OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
             OverlayYOffset_number_box.Text = (-1 * overlayYOffsetValue).ToString(Main.culture);
 
-            EfficencyMax_number_box_Copy.Text = maximumEfficiencyValue.ToString(Main.culture);
-            EfficencyMin_number_box_Copy.Text = minimumEfficiencyValue.ToString(Main.culture);
+            EfficiencyMax_number_box_Copy.Text = maximumEfficiencyValue.ToString(Main.culture);
+            EfficiencyMin_number_box_Copy.Text = minimumEfficiencyValue.ToString(Main.culture);
             Displaytime_number_box.Text = delay.ToString(Main.culture);
 
             if (Convert.ToBoolean(settingsObj.GetValue("DoSnapItCount")))
@@ -714,71 +714,71 @@ namespace WFInfo
             }
         }
 
-        private void EfficencyMin_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
+        private void EfficiencyMin_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 hidden.Focus();
             }
-            var num = Regex.Replace(EfficencyMin_number_box_Copy.Text, "[^0-9.]", "");
-            EfficencyMin_number_box_Copy.Text = num;
+            var num = Regex.Replace(EfficiencyMin_number_box_Copy.Text, "[^0-9.]", "");
+            EfficiencyMin_number_box_Copy.Text = num;
         }
 
-        private void EfficencyMax_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
+        private void EfficiencyMax_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 hidden.Focus();
             }
-            var num = Regex.Replace(EfficencyMax_number_box_Copy.Text, "[^0-9.]", "");
-            EfficencyMax_number_box_Copy.Text = num;
+            var num = Regex.Replace(EfficiencyMax_number_box_Copy.Text, "[^0-9.]", "");
+            EfficiencyMax_number_box_Copy.Text = num;
         }
 
-        private void EfficencyMin_number_box_Copy_GotFocus(object sender, RoutedEventArgs e)
+        private void EfficiencyMin_number_box_Copy_GotFocus(object sender, RoutedEventArgs e)
         {
-            EfficencyMin_number_box_Copy.Text = "";
+            EfficiencyMin_number_box_Copy.Text = "";
         }
 
-        private void EfficencyMax_number_box_Copy_GotFocus(object sender, RoutedEventArgs e)
+        private void EfficiencyMax_number_box_Copy_GotFocus(object sender, RoutedEventArgs e)
         {
-            EfficencyMax_number_box_Copy.Text = "";
+            EfficiencyMax_number_box_Copy.Text = "";
         }
 
-        private void EfficencyMin_number_box_Copy_KeyUp(object sender, KeyEventArgs e)
+        private void EfficiencyMin_number_box_Copy_KeyUp(object sender, KeyEventArgs e)
         {
             try
             {
-                var num = Regex.Replace(EfficencyMin_number_box_Copy.Text, "[^0-9.]", "");
-                minimumEfficiencyValue = double.Parse(EfficencyMin_number_box_Copy.Text);
+                var num = Regex.Replace(EfficiencyMin_number_box_Copy.Text, "[^0-9.]", "");
+                minimumEfficiencyValue = double.Parse(EfficiencyMin_number_box_Copy.Text, Main.culture);
                 if (minimumEfficiencyValue > maximumEfficiencyValue)
                     throw new Exception("Minimum efficiency can not be more than maximum.");
-                EfficencyMin_number_box_Copy.Text = num;
+                EfficiencyMin_number_box_Copy.Text = num;
                 settingsObj["MinimumEfficiencyValue"] = minimumEfficiencyValue;
                 Save();
             }
             catch (Exception exception)
             {
-                Main.AddLog($"Unable to parse display time change, new val would have been: {EfficencyMin_number_box_Copy.Text} Exception: {exception}");
-                EfficencyMin_number_box_Copy.Text = settingsObj["MinimumEfficiencyValue"].ToString();
+                Main.AddLog($"Unable to parse display time change, new val would have been: {EfficiencyMin_number_box_Copy.Text} Exception: {exception}");
+                EfficiencyMin_number_box_Copy.Text = settingsObj["MinimumEfficiencyValue"].ToString();
             }
         }
 
-        private void EfficencyMax_number_box_Copy_KeyUp(object sender, KeyEventArgs e)
+        private void EfficiencyMax_number_box_Copy_KeyUp(object sender, KeyEventArgs e)
         {
             try
             {
-                var num = Regex.Replace(EfficencyMax_number_box_Copy.Text, "[^0-9.]", "");
-                maximumEfficiencyValue = double.Parse(EfficencyMax_number_box_Copy.Text);
+                var num = Regex.Replace(EfficiencyMax_number_box_Copy.Text, "[^0-9.]", "");
+                maximumEfficiencyValue = double.Parse(EfficiencyMax_number_box_Copy.Text, Main.culture);
                 if (maximumEfficiencyValue < minimumEfficiencyValue)
                     throw new Exception("Maximum efficiency can not be less than minimum.");
-                EfficencyMax_number_box_Copy.Text = num;
+                EfficiencyMax_number_box_Copy.Text = num;
                 settingsObj["MaximumEfficiencyValue"] = maximumEfficiencyValue;
                 Save();
             }
             catch (Exception exception)
             {
                 Main.AddLog($"Unable to parse display time change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
-                EfficencyMax_number_box_Copy.Text = settingsObj["MaximumEfficiencyValue"].ToString();
+                EfficiencyMax_number_box_Copy.Text = settingsObj["MaximumEfficiencyValue"].ToString();
             }
             
         }

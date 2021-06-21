@@ -43,16 +43,16 @@ namespace WFInfo
         private static double ducatMargineRightSanpit = 119.0;
         private static double ducatMargineLeftSanpit = 98.0;
 
-        private static double EfficencyMarginRight = 51.0;
+        private static double EfficiencyMarginRight = 51.0;
 
         private static double platImageMarginLeftSanpit = 61.0;
         private static double ducatImageMarginLeftSanpit = 130.0;
-        private static double EfficencyplatImageMarginLeft = 206.0;
-        private static double EfficencyplatImageMarginBottom = 44.0;
-        private static double EfficencyplatImageHeightWidth = 12.0;
-        private static double EfficencyducatImageMarginLeft = 197.0;
-        private static double EfficencyducatImageMarginBottom = 52.0;
-        private static double EfficencyducatImageHeightWidth = 12.0;
+        private static double EfficiencyplatImageMarginLeft = 206.0;
+        private static double EfficiencyplatImageMarginBottom = 44.0;
+        private static double EfficiencyplatImageHeightWidth = 12.0;
+        private static double EfficiencyducatImageMarginLeft = 197.0;
+        private static double EfficiencyducatImageMarginBottom = 52.0;
+        private static double EfficiencyducatImageHeightWidth = 12.0;
 
         private static double largefont = 18.0;
         private static double mediumFont = 17.0;
@@ -178,8 +178,8 @@ namespace WFInfo
             }
             var brush = new SolidColorBrush(color);
 
-            EfficencyText.Text = efficiency;
-            EfficencyText.Foreground = brush;
+            EfficiencyText.Text = efficiency;
+            EfficiencyText.Foreground = brush;
         }
 
         public void Clear()
@@ -280,13 +280,13 @@ namespace WFInfo
             DucatMargineSnap.Margin = margin;
             DucatTextSnap.FontSize = mediumFont * scale;
 
-            //snapit efficency text
-            margin = EfficencyMargin.Margin;
+            //snapit efficiency text
+            margin = EfficiencyMargin.Margin;
             margin.Top = platMarginTop * scale;
             margin.Bottom = platMarginBottom * scale;
-            margin.Right = EfficencyMarginRight * scale;
-            EfficencyMargin.Margin = margin;
-            EfficencyText.FontSize = mediumFont * scale;
+            margin.Right = EfficiencyMarginRight * scale;
+            EfficiencyMargin.Margin = margin;
+            EfficiencyText.FontSize = mediumFont * scale;
 
             //snapit ducat image
             margin = DucatImageSnap.Margin;
@@ -305,21 +305,21 @@ namespace WFInfo
             PlatImageSnap.Height = platImageHeightWidth * scale;
             PlatImageSnap.Width = platImage.Height;
 
-            //snapit plat efficency image
-            margin = EfficencyPlatinumImage.Margin;
-            margin.Bottom = EfficencyplatImageMarginBottom * scale;
-            margin.Left = EfficencyplatImageMarginLeft * scale;
-            EfficencyPlatinumImage.Margin = margin;
-            EfficencyPlatinumImage.Height = EfficencyplatImageHeightWidth * scale;
-            EfficencyPlatinumImage.Width = ducatImage.Height;
+            //snapit plat efficiency image
+            margin = EfficiencyPlatinumImage.Margin;
+            margin.Bottom = EfficiencyplatImageMarginBottom * scale;
+            margin.Left = EfficiencyplatImageMarginLeft * scale;
+            EfficiencyPlatinumImage.Margin = margin;
+            EfficiencyPlatinumImage.Height = EfficiencyplatImageHeightWidth * scale;
+            EfficiencyPlatinumImage.Width = ducatImage.Height;
 
-            //snapit ducat efficency image
-            margin = EfficencyDucatImage.Margin;
-            margin.Bottom = EfficencyducatImageMarginBottom * scale;
-            margin.Left = EfficencyducatImageMarginLeft * scale;
-            EfficencyDucatImage.Margin = margin;
-            EfficencyDucatImage.Height = EfficencyducatImageHeightWidth * scale;
-            EfficencyDucatImage.Width = ducatImage.Height;
+            //snapit ducat efficiency image
+            margin = EfficiencyDucatImage.Margin;
+            margin.Bottom = EfficiencyducatImageMarginBottom * scale;
+            margin.Left = EfficiencyducatImageMarginLeft * scale;
+            EfficiencyDucatImage.Margin = margin;
+            EfficiencyDucatImage.Height = EfficiencyducatImageHeightWidth * scale;
+            EfficiencyDucatImage.Width = ducatImage.Height;
         }
 
         public void Display(int x, int y, int wait = 10000)
@@ -354,9 +354,9 @@ namespace WFInfo
             PlatMargineSnap.Visibility = Visibility.Visible;
             PlatImageSnap.Visibility = Visibility.Visible;
 
-            EfficencyMargin.Visibility = Visibility.Visible;
-            EfficencyDucatImage.Visibility = Visibility.Visible;
-            EfficencyPlatinumImage.Visibility = Visibility.Visible;
+            EfficiencyMargin.Visibility = Visibility.Visible;
+            EfficiencyDucatImage.Visibility = Visibility.Visible;
+            EfficiencyPlatinumImage.Visibility = Visibility.Visible;
 
             PlatTextSnap.Text = platText.Text;
             DucatTextSnap.Text = ducatText.Text;
