@@ -140,8 +140,8 @@ namespace WFInfo
             OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
             OverlayYOffset_number_box.Text = (-1 * overlayYOffsetValue).ToString(Main.culture);
 
-            EfficiencyMax_number_box_Copy.Text = maximumEfficiencyValue.ToString(Main.culture);
-            EfficiencyMin_number_box_Copy.Text = minimumEfficiencyValue.ToString(Main.culture);
+            EfficiencyMax_number_box.Text = maximumEfficiencyValue.ToString(Main.culture);
+            EfficiencyMin_number_box.Text = minimumEfficiencyValue.ToString(Main.culture);
             Displaytime_number_box.Text = delay.ToString(Main.culture);
 
             if (Convert.ToBoolean(settingsObj.GetValue("DoSnapItCount")))
@@ -714,71 +714,73 @@ namespace WFInfo
             }
         }
 
-        private void EfficiencyMin_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
+        private void EfficiencyMin_number_box_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 hidden.Focus();
             }
-            var num = Regex.Replace(EfficiencyMin_number_box_Copy.Text, "[^0-9.]", "");
-            EfficiencyMin_number_box_Copy.Text = num;
+            var num = Regex.Replace(EfficiencyMin_number_box.Text, "[^0-9.,]", "");
+            EfficiencyMin_number_box.Text = num;
         }
 
-        private void EfficiencyMax_number_box_Copy_KeyDown(object sender, KeyEventArgs e)
+        private void EfficiencyMax_number_box_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 hidden.Focus();
             }
-            var num = Regex.Replace(EfficiencyMax_number_box_Copy.Text, "[^0-9.]", "");
-            EfficiencyMax_number_box_Copy.Text = num;
+            var num = Regex.Replace(EfficiencyMax_number_box.Text, "[^0-9.,]", "");
+            EfficiencyMax_number_box.Text = num;
         }
 
-        private void EfficiencyMin_number_box_Copy_GotFocus(object sender, RoutedEventArgs e)
+        private void EfficiencyMin_number_box_GotFocus(object sender, RoutedEventArgs e)
         {
-            EfficiencyMin_number_box_Copy.Text = "";
+            EfficiencyMin_number_box.Text = "";
         }
 
-        private void EfficiencyMax_number_box_Copy_GotFocus(object sender, RoutedEventArgs e)
+        private void EfficiencyMax_number_box_GotFocus(object sender, RoutedEventArgs e)
         {
-            EfficiencyMax_number_box_Copy.Text = "";
+            EfficiencyMax_number_box.Text = "";
         }
 
-        private void EfficiencyMin_number_box_Copy_KeyUp(object sender, KeyEventArgs e)
+        private void EfficiencyMin_number_box_LostFocus(object sender, RoutedEventArgs e)
         {
             try
             {
-                var num = Regex.Replace(EfficiencyMin_number_box_Copy.Text, "[^0-9.]", "");
-                minimumEfficiencyValue = double.Parse(EfficiencyMin_number_box_Copy.Text, Main.culture);
+                var num = Regex.Replace(EfficiencyMin_number_box.Text, "[^0-9.,]", "");
+                num = num.Replace(',', '.');
+                minimumEfficiencyValue = double.Parse(num, Main.culture);
                 if (minimumEfficiencyValue > maximumEfficiencyValue)
                     throw new Exception("Minimum efficiency can not be more than maximum.");
-                EfficiencyMin_number_box_Copy.Text = num;
+                EfficiencyMin_number_box.Text = num;
                 settingsObj["MinimumEfficiencyValue"] = minimumEfficiencyValue;
                 Save();
             }
             catch (Exception exception)
             {
-                Main.AddLog($"Unable to parse display time change, new val would have been: {EfficiencyMin_number_box_Copy.Text} Exception: {exception}");
-                EfficiencyMin_number_box_Copy.Text = settingsObj["MinimumEfficiencyValue"].ToString();
+                Main.AddLog($"Unable to parse efficinecy min change, new val would have been: {EfficiencyMin_number_box.Text} Exception: {exception}");
+                EfficiencyMin_number_box.Text = settingsObj["MinimumEfficiencyValue"].ToString();
             }
         }
 
-        private void EfficiencyMax_number_box_Copy_KeyUp(object sender, KeyEventArgs e)
+        private void EfficiencyMax_number_box_LostFocus(object sender, RoutedEventArgs e)
         {
             try
             {
-                var num = Regex.Replace(EfficiencyMax_number_box_Copy.Text, "[^0-9.]", "");
-                maximumEfficiencyValue = double.Parse(EfficiencyMax_number_box_Copy.Text, Main.culture);
+                var num = Regex.Replace(EfficiencyMax_number_box.Text, "[^0-9.,]", "");
+                num = num.Replace(',', '.');
+                maximumEfficiencyValue = double.Parse(num, Main.culture);
                 if (maximumEfficiencyValue < minimumEfficiencyValue)
                     throw new Exception("Maximum efficiency can not be less than minimum.");
-                EfficiencyMax_number_box_Copy.Text = num;
+                EfficiencyMax_number_box.Text = num;
                 settingsObj["MaximumEfficiencyValue"] = maximumEfficiencyValue;
                 Save();
             }
             catch (Exception exception)
             {
-                Main.AddLog($"Unable to parse display time change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
-                EfficiencyMax_number_box_Copy.Text = settingsObj["MaximumEfficiencyValue"].ToString();
+                Main.AddLog($"Unable to parse efficinecy max change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
+                EfficiencyMax_number_box.Text = settingsObj["MaximumEfficiencyValue"].ToString();
             }
             
         }
@@ -809,7 +811,7 @@ namespace WFInfo
             }
             catch (Exception exception)
             {
-                Main.AddLog($"Unable to parse display time change, new val would have been: {SnapItCountThreshold_number_box.Text} Exception: {exception}");
+                Main.AddLog($"Unable to parse snapit threshold change, new val would have been: {SnapItCountThreshold_number_box.Text} Exception: {exception}");
                 SnapItCountThreshold_number_box.Text = settingsObj["SnapItCountThreshold"].ToString();
             }
         }
