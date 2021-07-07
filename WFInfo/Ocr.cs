@@ -157,6 +157,7 @@ namespace WFInfo
             JObject traineddata_checksums = new JObject
             {
                 {"en", "7af2ad02d11702c7092a5f8dd044d52f"},
+                {"fr", "ac0a3da6bf50ed0dab61b46415e82c17"},
                 {"ko", "c776744205668b7e76b190cc648765da"}
             };
 
@@ -986,7 +987,7 @@ namespace WFInfo
                                             continue;
                                         }
                                     }
-                                    else if (currentWord.Length < 2 && Settings.locale == "en")
+                                    else if (currentWord.Length < 2 && Settings.locale != "ko")
                                     {
                                         g.FillRectangle(green, paddedBounds);
                                         numberTooFewCharacters++;
