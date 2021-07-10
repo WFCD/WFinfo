@@ -15,7 +15,7 @@ namespace WFInfo
         {
             InitializeComponent();
         }
-        public void loadTextData(string name, string plat, string ducats, string volume, bool vaulted, string owned, int partNumber, bool resize = true, bool hideReward = false)
+        public void loadTextData(string name, string plat, string ducats, string volume, bool vaulted, bool mastered, string owned, int partNumber, bool resize = true, bool hideReward = false)
         {
             Show();
             Topmost = true;
@@ -42,7 +42,7 @@ namespace WFInfo
                     firstDucatText.Text = ducats;
                     firstVolumeText.Text = volume + " sold last 48hrs";
                     firstVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
-                    firstOwnedText.Text = owned.Length > 0 ? owned + " OWNED" : "";
+                    firstOwnedText.Text = owned.Length > 0 ? (mastered ? "✓ " : "") + owned + " OWNED" : "";
                     if (resize)
                         Width = 251;
                     break;

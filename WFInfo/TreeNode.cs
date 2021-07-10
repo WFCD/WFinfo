@@ -92,10 +92,11 @@ namespace WFInfo
         public static Brush BACK_BRUSH = new SolidColorBrush(BACK_COLOR);
         public static Brush BACK_U_BRUSH = new SolidColorBrush(BACK_U_COLOR);
 
-        public TreeNode(string name, string vaulted, byte showAll)
+        public TreeNode(string name, string vaulted, bool mastered, byte showAll)
         {
             Name = name;
             Vaulted = vaulted;
+            Mastered = mastered;
             ShowAll = showAll;
             ChildrenFiltered = new List<TreeNode>();
             Children = new List<TreeNode>();
@@ -304,6 +305,7 @@ namespace WFInfo
             Owned_Ducat_Val = 0;
             Owned_Val = 0;
             Count_Val = 0;
+            Mastered = Main.dataBase.equipmentData[this.dataRef]["mastered"].ToObject<bool>();
             foreach (TreeNode kid in Children)
             {
                 Plat_Val += kid.Plat_Val * kid.Count_Val;
@@ -779,6 +781,13 @@ namespace WFInfo
             private set { SetField(ref _children, value); }
         }
 
+        private bool _mastered = false;
+        public bool Mastered
+        {
+            get { return _mastered; }
+            set { SetField(ref _mastered, value); }
+        }
+
         public TreeNode current;
         public void AddChild(TreeNode kid)
         {
@@ -918,34 +927,8 @@ namespace WFInfo
 
         private void MarkSetAsComplete()
         {
-            JObject primeParent = Main.dataBase.equipmentData[this.dataRef]["parts"] as JObject;
-
-            foreach (var part in primeParent)
-            {
-                int count = part.Value["count"].ToObject<int>();
-                int owned = part.Value["owned"].ToObject<int>();
-                if (owned < count)
-                {
-                    part.Value["owned"] = count;
-                    Owned_Val += count - owned;
-                    Debug.WriteLine(part.Key);
-                    primeParent[part.Key]["owned"] = count;
-                    foreach (var currentChild in this.Children)
-                    {
-                        if (!part.Key.Contains(currentChild.Name)) continue;
-                        currentChild.Owned_Val = count;
-                        currentChild.Owned_Capped_Val = count;
-                        currentChild.Owned_Plat_Val = currentChild.Owned_Val * currentChild.Plat_Val;
-                        Owned_Plat_Val += (count - owned) * currentChild.Plat_Val;
-                        currentChild.Owned_Ducat_Val = currentChild.Owned_Val * currentChild.Ducat_Val;
-                        Owned_Ducat_Val += (count - owned) * currentChild.Ducat_Val;
-                        currentChild.PrimeUpdateDiff(false);
-                        break;
-                    }
-                }
-            }
-            Owned_Capped_Val = Count_Val;
-            PrimeUpdateDiff(true);
+            Main.dataBase.equipmentData[this.dataRef]["mastered"] = !Mastered;
+            Mastered = !Mastered;
             Main.dataBase.SaveAllJSONs();
             Main.RunOnUIThread(() =>
             {

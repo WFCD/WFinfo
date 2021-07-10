@@ -139,6 +139,10 @@ namespace WFInfo
                 Settings.settingsObj["SnapitModifierKey"] = Key.LeftCtrl.ToString();
             Settings.SnapitModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SnapitModifierKey").ToString());
 
+            if (!Settings.settingsObj.TryGetValue("MasterItModifierKey", out _))
+                Settings.settingsObj["MasterItModifierKey"] = Key.RightCtrl.ToString();
+            Settings.MasterItModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("MasterItModifierKey").ToString());
+
             if (!Settings.settingsObj.TryGetValue("Debug", out _))
                 Settings.settingsObj["Debug"] = false;
             Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");

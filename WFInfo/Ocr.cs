@@ -107,7 +107,6 @@ namespace WFInfo
         public static Rectangle window;
 
         private const NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
-        private static readonly IFormatProvider provider = CultureInfo.CreateSpecificCulture("en-GB");
 
         //public static float dpi;
         //private static double ScreenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
@@ -304,9 +303,10 @@ namespace WFInfo
                         //else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
                         primeRewards.Add(correctName);
                         string plat = job["plat"].ToObject<string>();
-                        double platinum = double.Parse(plat, styles, provider);
+                        double platinum = double.Parse(plat, styles, Main.culture);
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(correctName);
+                        bool mastered = Main.dataBase.IsPartMastered(correctName);
                         string partsOwned = Main.dataBase.PartsOwned(correctName);
                         string partsCount = Main.dataBase.PartsCount(correctName);
                         int duc = int.Parse(ducats, Main.culture);
@@ -363,13 +363,13 @@ namespace WFInfo
 
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                                 Main.overlays[partNumber].Resize(overWid);
                                 Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + Settings.overlayXOffsetValue) / dpiScaling), startY + (int)(Settings.overlayYOffsetValue / dpiScaling), Settings.delay);
                             }
                             else if (!Settings.isLightSelected)
                             {
-                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
+                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
                             //else
                                 //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
@@ -609,9 +609,10 @@ namespace WFInfo
                         string plat = job["plat"].ToObject<string>();
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(secondName);
+                        bool mastered = Main.dataBase.IsPartMastered(secondName);
                         string partsOwned = Main.dataBase.PartsOwned(secondName);
                         string partsCount = Main.dataBase.PartsCount(secondName);
-                        double platinum = double.Parse(plat, styles, provider);
+                        double platinum = double.Parse(plat, styles, Main.culture);
                         int duc = int.Parse(ducats, Main.culture);
                         tempAmountOfRewardsDisplayed++;
 
@@ -673,14 +674,14 @@ namespace WFInfo
                         {
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else if (!Settings.isLightSelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else
-                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
+                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
 
                             if (Settings.clipboard && !string.IsNullOrEmpty(tempclipboard))
                                 Clipboard.SetText(tempclipboard);
@@ -880,6 +881,7 @@ namespace WFInfo
                 string ducats = job["ducats"].ToObject<string>();
                 string volume = job["volume"].ToObject<string>();
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
+                bool mastered = Main.dataBase.IsPartMastered(name);
                 string partsOwned = Main.dataBase.PartsOwned(name);
                 string partsDetected = ""+part.Count;
 
@@ -905,7 +907,7 @@ namespace WFInfo
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, partsOwned, partsDetected, false);
+                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
@@ -1276,8 +1278,292 @@ namespace WFInfo
             cyan.Dispose();
         }
 
+        /// <summary>
+        /// Process the profile screen to find owned items
+        /// </summary>
+        /// <param name="fullShot">Image to scan</param>
+        internal static void ProcessProfileScreen(Bitmap fullShot)
+        {
+            System.Diagnostics.Stopwatch watch = new Stopwatch();
+            watch.Start();
+            long start = watch.ElapsedMilliseconds;
 
-        private static int ColorDifference(Color test, Color thresh)
+            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
+            fullShot.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
+            List<InventoryItem> foundParts = FindOwnedItems(fullShot, timestamp, start, watch);
+            for (int i = 0; i < foundParts.Count; i++)
+            {
+                var part = foundParts[i];
+                if (!PartNameValid(part.Name + " Blueprint"))
+                    continue;
+                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity);
+                part.Name = name;
+                foundParts[i] = part;
+
+                //Decide if item is an actual prime, if so mark as mastered
+                if (proximity < 3 && name.Contains("Prime"))
+                {
+                    //mark as mastered
+                    string[] nameParts = part.Name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
+                    string primeName = nameParts[0] + "Prime";
+
+                    if (Main.dataBase.equipmentData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
+                    {
+                        Main.dataBase.equipmentData[primeName]["mastered"] = true;
+
+                        Main.AddLog("Marked \"" + primeName + "\" as mastered");
+                    } else
+                    {
+                        Main.AddLog("Failed to mark \"" + primeName + "\" as mastered");
+                    }
+                }
+            }
+            Main.dataBase.SaveAllJSONs();
+            Main.RunOnUIThread(() =>
+            {
+                EquipmentWindow.INSTANCE.reloadItems();
+            });
+
+            long end = watch.ElapsedMilliseconds;
+            if (end - start < 10000)
+            {
+                Main.StatusUpdate("Completed Profile Scanning(" + (end - start) + "ms)", 0);
+            } else
+            {
+                Main.StatusUpdate("Lower brightness may increase speed(" + (end - start) + "ms)", 1);
+            }
+            watch.Stop();
+
+        }
+
+        /// <summary>
+        /// Probe pixel color to see if it's white enough for FindOwnedItems
+        /// </summary>
+        /// <param name="pixel">Pixel to test</param>
+        /// <param name="lowSensitivity">Use lower threshold, mainly for finding black pixels instead</param>
+        /// <returns>if pixel is above threshold for "white"</returns>
+        private static bool probeProfilePixel(Color pixel, bool lowSensitivity)
+        {
+            if ( lowSensitivity)
+            {
+                return pixel.A > 80 && pixel.R > 80 && pixel.G > 80 && pixel.B > 80;
+            }
+            return pixel.A > 240 && pixel.R > 200 && pixel.G > 200 && pixel.B > 200;
+        }
+
+        /// <summary>
+        /// Get owned items from profile screen
+        /// </summary>
+        /// <param name="ProfileImage">Image of profile screen to scan, debug markings will be drawn on this</param>
+        /// <param name="timestamp">Time started at, used for file name</param>
+        /// <returns>List of found items</returns>
+        private static List<InventoryItem> FindOwnedItems(Bitmap ProfileImage, string timestamp, long start, System.Diagnostics.Stopwatch watch)
+        {
+            Pen orange = new Pen(Brushes.Orange);
+            Pen red = new Pen(Brushes.Red);
+            Pen cyan = new Pen(Brushes.Cyan);
+            Pen pink = new Pen(Brushes.Pink);
+            Pen darkCyan = new Pen(Brushes.DarkCyan);
+            var font = new Font("Arial", 16);
+            List<InventoryItem> foundItems = new List<InventoryItem>();
+            Bitmap ProfileImageClean = new Bitmap(ProfileImage);
+            int probe_interval = ProfileImage.Width / 120;
+            Main.AddLog("Using probe interval: " + probe_interval);
+            using (Graphics g = Graphics.FromImage(ProfileImage))
+            {
+                int nextY = 0;
+                int nextYCounter = -1;
+                List<Tuple<int, int, int>> skipZones = new List<Tuple<int, int, int>>(); //left edge, right edge, bottom edge
+                for (int y = 0; y < ProfileImageClean.Height-1; y = (nextYCounter == 0 ? nextY : y+1 ))
+                {
+                    for (int x = 0; x < ProfileImageClean.Width; x+= probe_interval) //probe every few pixels for performance
+                    {
+                        Color pixel = ProfileImageClean.GetPixel(x, y);
+                        if (probeProfilePixel(pixel, false) )
+                        {
+                            //find left edge and check that the coloured area is at least as big as probe_interval
+                            int leftEdge = -1;
+                            int hits = 0;
+                            int areaWidth = 0;
+                            double hitRatio = 0;
+                            for (int tempX = Math.Max(x - probe_interval, 0); tempX < Math.Min(x + probe_interval, ProfileImageClean.Width ) ; tempX++)
+                            {
+                                areaWidth++;
+                                if ( probeProfilePixel( ProfileImageClean.GetPixel(tempX, y), false))
+                                {
+                                    hits++;
+                                    leftEdge = (leftEdge == -1 ? tempX : leftEdge);
+                                }
+                            }
+                            hitRatio = (double)(hits) / areaWidth;
+                            if ( hitRatio < 0.5) //skip if too low hit ratio
+                            {
+                                g.DrawLine(orange, x - probe_interval, y, x + probe_interval, y);
+                                continue;
+                            }
+
+                            //find where the line ends
+                            int rightEdge = leftEdge;
+                            while (rightEdge+2 < ProfileImageClean.Width && ( probeProfilePixel(ProfileImageClean.GetPixel(rightEdge+1, y), false) || probeProfilePixel(ProfileImageClean.GetPixel(rightEdge + 2, y), false)))
+                            {
+                                rightEdge++;
+                            }
+
+                            //check that it isn't in an area already thoroughly searched
+                            bool failed = false;
+                            foreach (Tuple<int,int,int> skipZone in skipZones)
+                            {
+                                if ( y < skipZone.Item3 && ( (leftEdge <= skipZone.Item1 && rightEdge >= skipZone.Item1) || (leftEdge >= skipZone.Item1 && leftEdge <= skipZone.Item2) || (rightEdge >= skipZone.Item1 && rightEdge <= skipZone.Item2)))
+                                {
+                                    g.DrawLine(darkCyan, leftEdge, y, rightEdge, y);
+                                    x = Math.Max(x, skipZone.Item2);
+                                    failed = true;
+                                    break;
+                                }
+                            }
+                             if (failed)
+                            {
+                                continue;
+                            }
+                            
+
+                            //find bottom edge and hit ratio of all rows
+                            int topEdge = y;
+                            int bottomEdge = y;
+                            List<double> hitRatios = new List<double>();
+                            hitRatios.Add(1);
+                            do
+                            {
+                                int rightMostHit = 0;
+                                int leftMostHit = -1;
+                                hits = 0;
+                                bottomEdge++;
+                                for (int i = leftEdge; i < rightEdge; i++)
+                                {
+                                    if (probeProfilePixel(ProfileImageClean.GetPixel(i, bottomEdge), false))
+                                    {
+                                        hits++;
+                                        rightMostHit = i;
+                                        if (leftMostHit == -1)
+                                        {
+                                            leftMostHit = i;
+                                        }
+                                    }
+                                }
+                                hitRatio = hits / (double)(rightEdge - leftEdge );
+                                hitRatios.Add(hitRatio);
+
+                                if (hitRatio > 0.5 && rightMostHit+1 < rightEdge && rightEdge - leftEdge > 100) //make sure the innermost right edge is used (avoid bright part of frame overlapping with edge)
+                                {
+                                    g.DrawLine(red, rightEdge, bottomEdge, rightMostHit, bottomEdge);
+                                    rightEdge = rightMostHit;
+                                    bottomEdge = y;
+                                    hitRatios.Clear();
+                                    hitRatios.Add(1);
+                                }
+                                if (hitRatio > 0.5 && leftMostHit > leftEdge && rightEdge - leftEdge > 100) //make sure the innermost left edge is used (avoid bright part of frame overlapping with edge)
+                                {
+                                    g.DrawLine(red, leftEdge, bottomEdge, leftMostHit, bottomEdge);
+                                    leftEdge = leftMostHit;
+                                    bottomEdge = y;
+                                    hitRatios.Clear();
+                                    hitRatios.Add(1);
+                                }
+                            } while (bottomEdge+2 < ProfileImageClean.Height && hitRatios.Last() > 0.5);
+                            hitRatios.RemoveAt(hitRatios.Count - 1);
+                            //find if/where it transitions from text (some misses) to no text (basically no misses) then back to text (some misses). This is proof it's an owned item and marks the bottom edge of the text
+                            int ratioChanges = 0;
+                            bool prevMostlyHits = true;
+                            int lineBreak = -1;
+                            for (int i = 0; i < hitRatios.Count; i++)
+                            {
+                                if ( (hitRatios[i] > 0.99) != prevMostlyHits)
+                                {
+                                    if (ratioChanges == 1)
+                                    {
+                                        lineBreak = i+1;
+                                        g.DrawLine(cyan, rightEdge, topEdge+lineBreak, leftEdge, topEdge + lineBreak);
+                                    }
+                                    prevMostlyHits = !prevMostlyHits;
+                                    ratioChanges++;
+                                }
+                            }
+
+                            int width = rightEdge - leftEdge;
+                            int height = bottomEdge - topEdge;
+
+                            if (ratioChanges != 4 || width < 4 * height || width > 6 * height)
+                            {
+                                g.DrawRectangle(pink, leftEdge, topEdge, width, height);
+                                x = Math.Max(rightEdge, x);
+                                if (watch.ElapsedMilliseconds - start > 10000)
+                                {
+                                    Main.StatusUpdate("High noise, this might be slow", 3);
+                                }
+                                continue;
+                            }
+
+                            g.DrawRectangle(red, leftEdge, topEdge, width, height);
+                            skipZones.Add(new Tuple<int, int, int>(leftEdge, rightEdge, bottomEdge));
+                            x = rightEdge;
+                            nextY = bottomEdge + 1;
+                            nextYCounter = 3;
+
+                            height = lineBreak;
+
+                            Rectangle cloneRect = new Rectangle(leftEdge, topEdge, width, height);
+                            Bitmap cloneBitmap = ProfileImageClean.Clone(cloneRect, ProfileImageClean.PixelFormat);
+                            for (int i = 0; i < cloneBitmap.Width; i++)
+                            {
+                                for (int j = 0; j < cloneBitmap.Height; j++)
+                                {
+                                    if (probeProfilePixel(cloneBitmap.GetPixel(i, j), true))
+                                    {
+                                        cloneBitmap.SetPixel(i, j, Color.White);
+                                    } else
+                                    {
+                                        cloneBitmap.SetPixel(i, j, Color.Black);
+                                        ProfileImage.SetPixel(cloneRect.X + i , cloneRect.Y + j , Color.Red);
+                                    }
+                                }
+                            }
+                            //do OCR
+                            firstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                            using (var page = firstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
+                            {
+                                using (var iterator = page.GetIterator())
+                                {
+                                    iterator.Begin();
+                                    string rawText = iterator.GetText(PageIteratorLevel.TextLine);
+
+                                    foundItems.Add(new InventoryItem(rawText, cloneRect));
+
+                                    g.DrawString(rawText, font, Brushes.DarkBlue, new Point(cloneRect.X, cloneRect.Y));
+
+
+                                }
+                            }
+                            firstEngine.SetVariable("tessedit_char_whitelist", "");
+                        }
+                    }
+                    if (nextYCounter >= 0)
+                    {
+                        nextYCounter--;
+                    }
+                }
+            }
+
+            ProfileImageClean.Dispose();
+            ProfileImage.Save(Main.AppPath + @"\Debug\ProfileImageBounds " + timestamp + ".png");
+            darkCyan.Dispose();
+            pink.Dispose();
+            cyan.Dispose();
+            red.Dispose();
+            orange.Dispose();
+            return foundItems;
+        }
+
+            private static int ColorDifference(Color test, Color thresh)
         {
             return Math.Abs(test.R - thresh.R) + Math.Abs(test.G - thresh.G) + Math.Abs(test.B - thresh.B);
         }

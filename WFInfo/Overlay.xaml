@@ -45,10 +45,10 @@
 
 
         <Image x:Name="DucatImageSnap" Visibility="Collapsed" Source="Resources/ducat_w.gif" Margin="130,0,0,44" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="20"/>
-        <Viewbox x:Name="EfficencyMargin" Visibility="Collapsed" Margin="0,77,51,43" HorizontalAlignment="Right" Width="28">
-            <TextBlock x:Name="EfficencyText" Text="009" Foreground="#FFB1D0D2"/>
+        <Viewbox x:Name="EfficiencyMargin" Visibility="Collapsed" Margin="0,77,51,43" HorizontalAlignment="Right" Width="28">
+            <TextBlock x:Name="EfficiencyText" Text="009" Foreground="#FFB1D0D2"/>
         </Viewbox>
-        <Image x:Name="EfficencyDucatImage" Visibility="Collapsed" Source="Resources/ducat_w.gif" Margin="198,0,0,52" Height="12" Width="12" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
-        <Image x:Name="EfficencyPlatinumImage" Visibility="Collapsed"  Source="Resources/plat.gif"     Margin="206,0,0,44" Height="12" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="12"/>
+        <Image x:Name="EfficiencyDucatImage" Visibility="Collapsed" Source="Resources/ducat_w.gif" Margin="198,0,0,52" Height="12" Width="12" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+        <Image x:Name="EfficiencyPlatinumImage" Visibility="Collapsed"  Source="Resources/plat.gif"     Margin="206,0,0,44" Height="12" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="12"/>
     </Grid>
 </Window>

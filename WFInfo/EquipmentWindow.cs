@@ -58,6 +58,7 @@ namespace WFInfo
                 {
                     string primeName = prime.Key.Substring(0, prime.Key.IndexOf("Prime") + 5);
                     string primeType = prime.Value["type"].ToObject<string>();
+                    bool mastered = prime.Value["mastered"].ToObject<bool>();
                     if (primeType.Contains("Sentinel") || primeType.Contains("Skin"))
                         primeType = "Companion";
                     else if (primeType.Contains("Arch")) //Future proofing for Arch-Guns and Arch-Melee
@@ -65,14 +66,14 @@ namespace WFInfo
 
                     if (!primeTypes.ContainsKey(primeType))
                     {
-                        TreeNode newType = new TreeNode(primeType, "", 0);
+                        TreeNode newType = new TreeNode(primeType, "", false, 0);
                         if (!types.Contains(primeType))
                             types.Add(primeType);
                         newType.SortNum = types.IndexOf(primeType);
                         primeTypes[primeType] = newType;
                     }
                     TreeNode type = primeTypes[primeType];
-                    TreeNode primeNode = new TreeNode(primeName, prime.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "", 1);
+                    TreeNode primeNode = new TreeNode(primeName, prime.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "", mastered, 1);
                     primeNode.MakeClickable(prime.Key);
                     foreach (KeyValuePair<string, JToken> primePart in prime.Value["parts"].ToObject<JObject>())
                     {
@@ -82,7 +83,7 @@ namespace WFInfo
 
                         if (partName.Contains("Kubrow"))
                             partName = partName.Substring(partName.IndexOf(" Blueprint") + 1);
-                        TreeNode partNode = new TreeNode(partName, primePart.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "", 0);
+                        TreeNode partNode = new TreeNode(partName, primePart.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "", false, 0);
                         partNode.MakeClickable(primePart.Key);
                         if (Main.dataBase.marketData.TryGetValue(primePart.Key.ToString(), out JToken marketValues))
                             partNode.SetPrimePart(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), primePart.Value["owned"].ToObject<int>(), primePart.Value["count"].ToObject<int>());
