@@ -97,7 +97,7 @@ The scanned items list can even be exported to a CSV file, allowing you to see t
   
 ### Warframe.Market connectivity
 
-Manange your Warframe.Market online status automatically by detecting if your game is running or by detecting your AFK status.
+Manage your Warframe.Market online status automatically by detecting if your game is running or by detecting your AFK status.
 Search for specific items on the go with the press of 2 keys, you even can add them to your listings without quitting your game.
 List your choosen prime rewards at the end of your mission by clicking the "Confirm Listing" buttons, even for multiple items.
 If you really like this software, you even can post a review on the devs profile by the press of one button !
