@@ -328,7 +328,7 @@ namespace WFInfo
                         }
                         if (duc > 0)
                         {
-                            if (int.Parse(partsOwned, Main.culture) < int.Parse(partsCount, Main.culture))
+                            if (!mastered && int.Parse(partsOwned, Main.culture) < int.Parse(partsCount, Main.culture))
                             {
                                 unownedItems.Add(i);
                             }
