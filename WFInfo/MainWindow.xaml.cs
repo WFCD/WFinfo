@@ -160,7 +160,7 @@ namespace WFInfo
             Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");
 
             if (!Settings.settingsObj.TryGetValue("Auto", out _))
-                Settings.settingsObj["Auto"] = 250L;
+                Settings.settingsObj["Auto"] = true;
             Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
 
             if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
