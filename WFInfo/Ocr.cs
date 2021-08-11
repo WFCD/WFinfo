@@ -6,22 +6,17 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Management.Instrumentation;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
-using System.Windows.Media;
 using Tesseract;
 using Brushes = System.Drawing.Brushes;
 using Clipboard = System.Windows.Forms.Clipboard;
 using Color = System.Drawing.Color;
-using FontFamily = System.Drawing.FontFamily;
 using Pen = System.Drawing.Pen;
 using Point = System.Drawing.Point;
 using Rect = Tesseract.Rect;
@@ -2153,34 +2148,38 @@ namespace WFInfo
             };
         }
 
-        public static bool VerifyWarframe()
-        {
-    
-            if (Warframe != null && !Warframe.HasExited)
-            { // don't update status
+        public static bool VerifyWarframe() {
+            if (Warframe != null && !Warframe.HasExited) { // don't update status
                 return true;
             }
-            Task.Run(() =>
-            {
-            foreach (Process process in Process.GetProcesses())
-                if (process.ProcessName == "Warframe.x64")
-                {
-                    if (process.MainWindowTitle == "Warframe")
-                    {
-                        HandleRef = new HandleRef(process, process.MainWindowHandle);
-                        Warframe = process;
-                        if (Main.dataBase.GetSocketAliveStatus())
-                            Debug.WriteLine("Socket was open in verify warframe");
-                        Task.Run(async () =>
-                        {
-                            await Main.dataBase.SetWebsocketStatus("in game");
-                        });
-                        Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
-                        return true;
+            Task.Run(() => {
+                foreach (Process process in Process.GetProcesses())
+                    if (process.ProcessName == "Warframe.x64") {
+                        if (process.MainWindowTitle == "Warframe") {
+                            HandleRef = new HandleRef(process, process.MainWindowHandle);
+
+                            Warframe = process;
+                            if (Main.dataBase.GetSocketAliveStatus())
+                                Debug.WriteLine("Socket was open in verify warframe");
+                            Task.Run(async () =>
+                            {
+                                await Main.dataBase.SetWebsocketStatus("in game");
+                            });
+                            Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
+
+                            //try and catch any UAC related issues
+                            try {
+                                bool _ = Warframe.HasExited;
+                                return true;
+                            }
+                            catch (Exception e) {
+                                Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
+                                Main.StatusUpdate("Restart Warframe without admin mode", 1);
+                                return Settings.debug ? true : false;
+                            }
+                        }
                     }
-                }
-                if (!Settings.debug)
-                {
+                if (!Settings.debug) {
                     Main.AddLog("Did Not Detect Warframe Process");
                     Main.StatusUpdate("Unable to Detect Warframe Process", 1);
                 }
