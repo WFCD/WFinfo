@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Management;
+using Microsoft.Win32;
 
 namespace WFInfo
 {
@@ -181,8 +182,8 @@ namespace WFInfo
         static void MyHandler(object sender, UnhandledExceptionEventArgs args)
         {
             Exception e = (Exception)args.ExceptionObject;
-            AddLog("MyHandler caught : " + e.Message);
-            AddLog("Runtime terminating: ," + args.IsTerminating);
+            AddLog("MyHandler caught: " + e.Message);
+            AddLog("Runtime terminating: " + args.IsTerminating);
             AddLog(e.StackTrace);
             AddLog(e.InnerException.Message);
             AddLog(e.InnerException.StackTrace);
@@ -235,6 +236,34 @@ namespace WFInfo
                     return false;
                     // throw new Exception("DLL function pointer in CustomCPUID.dll is not identified");
                 }
+
+                //Log OS version
+                sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Detected Windows version: {Environment.OSVersion}");
+
+                //Log .net Version
+                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\")) {
+                    int releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
+                    if (true) {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Detected .net version: {CheckFor45DotVersion(releaseKey)}");
+                    }
+                }
+
+                //Log C++ x64 runtimes 14.29
+                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies\\VC,redist.x86,x86,14.29,bundle")) {
+                    string displayName = ndpKey.GetValue("DisplayName").ToString();
+                    if (ndpKey.ToString() != null) {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] {displayName}");
+                    }
+                }
+
+                //Log C++ x86 runtimes 14.29
+                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies\\VC,redist.x64,amd64,14.29,bundle")) {
+                    string displayName = ndpKey.GetValue("DisplayName").ToString();
+                    if (ndpKey.ToString() != null) {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] {displayName}");
+                    }
+                }
+
                 isAVX2supported isAvx2Supported = (isAVX2supported)Marshal.GetDelegateForFunctionPointer(
                     pAddressOfFunctionToCall,
                     typeof(isAVX2supported));
@@ -364,6 +393,50 @@ namespace WFInfo
             return null;
         }
 
+        // From: https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
+
+        // Checking the version using >= will enable forward compatibility,  
+        // however you should always compile your code on newer versions of 
+        // the framework to ensure your app works the same. 
+        private static string CheckFor45DotVersion(int releaseKey) {
+            if (releaseKey >= 528040) {
+                return "4.8 or later";
+            }
+            if (releaseKey >= 461808) {
+                return "4.7.2 or later";
+            }
+            if (releaseKey >= 461308) {
+                return "4.7.1 or later";
+            }
+            if (releaseKey >= 460798) {
+                return "4.7 or later";
+            }
+            if (releaseKey >= 394802) {
+                return "4.6.2 or later";
+            }
+            if (releaseKey >= 394254) {
+                return "4.6.1 or later";
+            }
+            if (releaseKey >= 393295) {
+                return "4.6 or later";
+            }
+            if (releaseKey >= 393273) {
+                return "4.6 RC or later";
+            }
+            if ((releaseKey >= 379893)) {
+                return "4.5.2 or later";
+            }
+            if ((releaseKey >= 378675)) {
+                return "4.5.1 or later";
+            }
+            if ((releaseKey >= 378389)) {
+                return "4.5 or later";
+            }
+            // This line should never execute. A non-null release key should mean 
+            // that 4.5 or later is installed. 
+            return "No 4.5 or later version detected";
+        }
+
         private static Assembly OnResolveAssembly(object sender, ResolveEventArgs args)
         {
             Assembly executingAssembly = Assembly.GetExecutingAssembly();
@@ -384,4 +457,6 @@ namespace WFInfo
             }
         }
     }
+
+
 }
