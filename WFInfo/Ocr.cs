@@ -2172,7 +2172,7 @@ namespace WFInfo
                                 bool _ = Warframe.HasExited;
                                 return true;
                             }
-                            catch (Exception e) {
+                            catch (System.ComponentModel.Win32Exception e) {
                                 Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
                                 Main.StatusUpdate("Restart Warframe without admin mode", 1);
                                 return Settings.debug ? true : false;

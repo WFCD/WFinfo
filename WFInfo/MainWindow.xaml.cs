@@ -187,8 +187,11 @@ namespace WFInfo
                 Settings.settingsObj["ClipboardVaulted"] = false;
             Settings.ClipboardVaulted = (bool)Settings.settingsObj.GetValue("ClipboardVaulted");
 
-            if (!Settings.settingsObj.TryGetValue("Auto", out _))
+            if (!Settings.settingsObj.TryGetValue("Auto", out _)) { //Fixes issue with older versions using an int for auto rather than boolean.
                 Settings.settingsObj["Auto"] = false;
+            } else if (Settings.settingsObj.GetValue("Auto").Type != JTokenType.Boolean) {
+                Settings.settingsObj["Auto"] = true;
+            }
             Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
 
             if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
