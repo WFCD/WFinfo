@@ -1349,6 +1349,28 @@ namespace WFInfo
         }
 
         /// <summary>
+        /// Probe pixel color to see if it's white enough for FindOwnedItems
+        /// </summary>
+        /// <param name="byteArr">Byte Array of image (ARGB)</param>
+        /// <param name="width">Width of image</param>
+        /// <param name="x">Pixel X coordiante</param>
+        /// <param name="y">Pixel Y coordinate</param>
+        /// <param name="lowSensitivity">Use lower threshold, mainly for finding black pixels instead</param>
+        /// <returns>if pixel is above threshold for "white"</returns>
+        private static bool probeProfilePixel(byte[] byteArr, int width, int x, int y, bool lowSensitivity)
+        {
+            int A = byteArr[(x + y * width) * 4 + 3]; //4 bytes for ARGB, in order BGRA in the array
+            int R = byteArr[(x + y * width) * 4 + 2];
+            int G = byteArr[(x + y * width) * 4 + 1];
+            int B = byteArr[(x + y * width) * 4];
+            if (lowSensitivity)
+            {
+                return A > 80 && R > 80 && G > 80 && B > 80;
+            }
+            return A > 240 && R > 200 && G > 200 && B > 200;
+        }
+
+        /// <summary>
         /// Get owned items from profile screen
         /// </summary>
         /// <param name="ProfileImage">Image of profile screen to scan, debug markings will be drawn on this</param>
@@ -1366,6 +1388,13 @@ namespace WFInfo
             Bitmap ProfileImageClean = new Bitmap(ProfileImage);
             int probe_interval = ProfileImage.Width / 120;
             Main.AddLog("Using probe interval: " + probe_interval);
+
+            int imgWidth = ProfileImageClean.Width;
+            BitmapData lockedBitmapData = ProfileImageClean.LockBits(new Rectangle(0, 0, imgWidth, ProfileImageClean.Height), ImageLockMode.WriteOnly, ProfileImageClean.PixelFormat);
+            int numbytes = Math.Abs(lockedBitmapData.Stride) * lockedBitmapData.Height;
+            byte[] LockedBitmapBytes = new byte[numbytes]; //Format is ARGB, in order BGRA
+            Marshal.Copy(lockedBitmapData.Scan0, LockedBitmapBytes, 0, numbytes);
+
             using (Graphics g = Graphics.FromImage(ProfileImage))
             {
                 int nextY = 0;
@@ -1373,20 +1402,19 @@ namespace WFInfo
                 List<Tuple<int, int, int>> skipZones = new List<Tuple<int, int, int>>(); //left edge, right edge, bottom edge
                 for (int y = 0; y < ProfileImageClean.Height-1; y = (nextYCounter == 0 ? nextY : y+1 ))
                 {
-                    for (int x = 0; x < ProfileImageClean.Width; x+= probe_interval) //probe every few pixels for performance
+                    for (int x = 0; x < imgWidth; x+= probe_interval) //probe every few pixels for performance
                     {
-                        Color pixel = ProfileImageClean.GetPixel(x, y);
-                        if (probeProfilePixel(pixel, false) )
+                        if (probeProfilePixel(LockedBitmapBytes, imgWidth, x, y, false) )
                         {
                             //find left edge and check that the coloured area is at least as big as probe_interval
                             int leftEdge = -1;
                             int hits = 0;
                             int areaWidth = 0;
                             double hitRatio = 0;
-                            for (int tempX = Math.Max(x - probe_interval, 0); tempX < Math.Min(x + probe_interval, ProfileImageClean.Width ) ; tempX++)
+                            for (int tempX = Math.Max(x - probe_interval, 0); tempX < Math.Min(x + probe_interval, imgWidth) ; tempX++)
                             {
                                 areaWidth++;
-                                if ( probeProfilePixel( ProfileImageClean.GetPixel(tempX, y), false))
+                                if ( probeProfilePixel(LockedBitmapBytes, imgWidth, tempX, y, false))
                                 {
                                     hits++;
                                     leftEdge = (leftEdge == -1 ? tempX : leftEdge);
@@ -1401,7 +1429,9 @@ namespace WFInfo
 
                             //find where the line ends
                             int rightEdge = leftEdge;
-                            while (rightEdge+2 < ProfileImageClean.Width && ( probeProfilePixel(ProfileImageClean.GetPixel(rightEdge+1, y), false) || probeProfilePixel(ProfileImageClean.GetPixel(rightEdge + 2, y), false)))
+                            while (rightEdge+2 < imgWidth && 
+                                ( probeProfilePixel(LockedBitmapBytes, imgWidth, rightEdge+1, y, false) 
+                                || probeProfilePixel(LockedBitmapBytes, imgWidth, rightEdge + 2, y, false)))
                             {
                                 rightEdge++;
                             }
@@ -1437,7 +1467,7 @@ namespace WFInfo
                                 bottomEdge++;
                                 for (int i = leftEdge; i < rightEdge; i++)
                                 {
-                                    if (probeProfilePixel(ProfileImageClean.GetPixel(i, bottomEdge), false))
+                                    if (probeProfilePixel(LockedBitmapBytes, imgWidth, i, bottomEdge, false))
                                     {
                                         hits++;
                                         rightMostHit = i;
