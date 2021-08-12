@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -1641,17 +1642,32 @@ namespace WFInfo
                 filtered = image;
             }
             Color clr;
+            BitmapData lockedBitmapData = filtered.LockBits(new Rectangle(0, 0, filtered.Width, filtered.Height), ImageLockMode.ReadWrite, filtered.PixelFormat);
+            int numbytes = Math.Abs(lockedBitmapData.Stride) * lockedBitmapData.Height;
+            byte[] LockedBitmapBytes = new byte[numbytes];
+            Marshal.Copy(lockedBitmapData.Scan0, LockedBitmapBytes, 0, numbytes);
+            int PixelSize = 3; //24 bits/8 = 3 bytes
             for (int x = 0; x < filtered.Width; x++)
             {
                 for (int y = 0; y < filtered.Height; y++)
-                {
-                    clr = partialScreenshotExpanded.GetPixel(x, y);
-                    if (ThemeThresholdFilter(clr, active))
-                        filtered.SetPixel(x, y, Color.Black);
-                    else
-                        filtered.SetPixel(x, y, Color.White);
+                    {
+                        clr = partialScreenshotExpanded.GetPixel(x, y);
+                    if (ThemeThresholdFilter(clr, active)) 
+                    {
+                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize] = 0;
+                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize + 1] = 0;
+                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize + 2] = 0;
+                        //filtered.SetPixel(x, y, Color.Black);
+                    } else
+                    {
+                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize] = 255;
+                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize + 1] = 255;
+                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize + 2] = 255;
+                        //filtered.SetPixel(x, y, Color.White);
+                    }
                 }
             }
+            Marshal.Copy(LockedBitmapBytes, 0, lockedBitmapData.Scan0, numbytes);
             return filtered;
         }
 
