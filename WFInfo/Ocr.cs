@@ -1638,7 +1638,6 @@ namespace WFInfo
             }
             else
             {
-                partialScreenshotExpanded = (Bitmap)image.Clone();
                 filtered = image;
             }
             Color clr;
@@ -1646,27 +1645,24 @@ namespace WFInfo
             int numbytes = Math.Abs(lockedBitmapData.Stride) * lockedBitmapData.Height;
             byte[] LockedBitmapBytes = new byte[numbytes];
             Marshal.Copy(lockedBitmapData.Scan0, LockedBitmapBytes, 0, numbytes);
-            int PixelSize = 4; //24 bits/8 = 3 bytes
-            for (int x = 0; x < filtered.Width; x++)
+            int PixelSize = 4; //ARGB, order in array is BGRA
+            for (int i = 0; i < numbytes; i+=PixelSize)
             {
-                for (int y = 0; y < filtered.Height; y++)
-                    {
-                        clr = partialScreenshotExpanded.GetPixel(x, y);
-                    if (ThemeThresholdFilter(clr, active)) 
-                    {
-                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize] = 0;
-                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize + 1] = 0;
-                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize + 2] = 0;
-                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize + 3] = 0;
-                        //filtered.SetPixel(x, y, Color.Black);
-                    } else
-                    {
-                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize] = 255;
-                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize + 1] = 255;
-                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize + 2] = 255;
-                        LockedBitmapBytes[(y * filtered.Width + x) * PixelSize + 3] = 255;
-                        //filtered.SetPixel(x, y, Color.White);
-                    }
+                clr = Color.FromArgb(LockedBitmapBytes[i + 3], LockedBitmapBytes[i + 2], LockedBitmapBytes[i + 1], LockedBitmapBytes[i]);
+                if (ThemeThresholdFilter(clr, active)) 
+                {
+                    LockedBitmapBytes[i] = 0;
+                    LockedBitmapBytes[i + 1] = 0;
+                    LockedBitmapBytes[i + 2] = 0;
+                    LockedBitmapBytes[i + 3] = 0;
+                    //Black
+                } else
+                {
+                    LockedBitmapBytes[i] = 255;
+                    LockedBitmapBytes[i + 1] = 255;
+                    LockedBitmapBytes[i + 2] = 255;
+                    LockedBitmapBytes[i + 3] = 255;
+                    //White
                 }
             }
             Marshal.Copy(LockedBitmapBytes, 0, lockedBitmapData.Scan0, numbytes);
