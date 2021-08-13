@@ -855,8 +855,8 @@ namespace WFInfo
             snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme);
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
-            long end = watch.ElapsedMilliseconds;
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
+            long end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
             string csv = string.Empty;
             snapItImageFiltered.Dispose();
