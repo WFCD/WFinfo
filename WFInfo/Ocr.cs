@@ -1534,7 +1534,7 @@ namespace WFInfo
                             skipZones.Add(new Tuple<int, int, int>(leftEdge, rightEdge, bottomEdge));
                             x = rightEdge;
                             nextY = bottomEdge + 1;
-                            nextYCounter = 3;
+                            nextYCounter = Math.Max(height/8, 3);
 
                             height = lineBreak;
 
@@ -1565,7 +1565,7 @@ namespace WFInfo
 
                                     foundItems.Add(new InventoryItem(rawText, cloneRect));
 
-                                    g.DrawString(rawText, font, Brushes.DarkBlue, new Point(cloneRect.X, cloneRect.Y));
+                                    g.DrawString(rawText, font, Brushes.DarkBlue, new Point(cloneRect.X, cloneRect.Y + nextYCounter));
 
 
                                 }
