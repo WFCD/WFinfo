@@ -289,7 +289,7 @@ namespace WFInfo
                     if (part.Replace(" ", "").Length > 6)
                     {
                         #region found a part
-                        string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
+                        string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false);
                         JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
                         string ducats = job["ducats"].ToObject<string>();
                         if (int.Parse(ducats, Main.culture) == 0)
@@ -597,7 +597,7 @@ namespace WFInfo
                     {
                         Debug.WriteLine(secondChecks[i]);
                         string second = secondChecks[i];
-                        string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
+                        string secondName = Main.dataBase.GetPartName(second, out secondProximity[i], false);
                         //if (secondProximity[i] < firstProximity[i])
                         //{
                         JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
@@ -869,7 +869,7 @@ namespace WFInfo
                 if (!PartNameValid(part.Name))
                     continue;
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
-                string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0]);
+                string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0], false);
                 part.Name = name;
                 foundParts[i] = part;
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
@@ -1293,12 +1293,14 @@ namespace WFInfo
                 var part = foundParts[i];
                 if (!PartNameValid(part.Name + " Blueprint"))
                     continue;
-                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity);
+                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity, true); //add blueprint to name to check against prime drop table
+                string checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out int primeProximity, true); //also add prime to check if that gives better match. If so, this is a non-prime
+                Main.AddLog("Checking \"" + part.Name.Trim() +"\", (" + proximity +")\"" + name + "\", +prime (" + primeProximity + ")\"" + checkName + "\"");
                 part.Name = name;
                 foundParts[i] = part;
 
                 //Decide if item is an actual prime, if so mark as mastered
-                if (proximity < 3 && name.Contains("Prime"))
+                if (proximity < 5 && proximity < primeProximity && name.Contains("Prime"))
                 {
                     //mark as mastered
                     string[] nameParts = part.Name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);

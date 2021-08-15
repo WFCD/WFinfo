@@ -837,7 +837,7 @@ namespace WFInfo
         //	return GetPartNameHuman(searchQuery, out _);
         //}
 
-        public string GetPartName(string name, out int low)
+        public string GetPartName(string name, out int low, bool suppressLogging)
         { // Checks the Levenshtein Distance of a string and returns the index in Names() of the closest part
             string lowest = null;
             string lowest_unfiltered = null;
@@ -853,8 +853,8 @@ namespace WFInfo
                 }
             }
 
-
-            Main.AddLog("Found part(" + low + "): \"" + lowest_unfiltered + "\" from \"" + name + "\"");
+            if (!suppressLogging)
+                Main.AddLog("Found part(" + low + "): \"" + lowest_unfiltered + "\" from \"" + name + "\"");
             return lowest;
         }
 
