@@ -927,12 +927,15 @@ namespace WFInfo
             }
         }
 
-        private static List<Tuple<Bitmap, Rectangle>> DivideSnapZones (Bitmap filteredImage, int[] rowHits, int[] colHits) 
+        private static List<Tuple<Bitmap, Rectangle>> DivideSnapZones (Bitmap filteredImage, Bitmap filteredImageClean, int[] rowHits, int[] colHits) 
         {
             //TODO add some margin to box sizes, cut out the actual images
             const double textDensity = 0.05;
-            const double emptyDensity = 0.005;
+            const double emptyRowDensity = 0.01;
+            const double emptyColDensity = 0.005;
             List<Tuple<Bitmap, Rectangle>> zones = new List<Tuple<Bitmap, Rectangle>>();
+            Pen brown = new Pen(Brushes.Brown);
+            Pen white = new Pen(Brushes.White);
 
             //find rows
             List<Tuple<int, int>> rows = new List<Tuple<int, int>>(); //item1 = row top, item2 = row height
@@ -942,7 +945,7 @@ namespace WFInfo
             {
                 if ( (double)(rowHits[i]) / filteredImage.Width > textDensity) {
                     int j = 0;
-                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > emptyDensity)
+                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > emptyRowDensity)
                     {
                         j++;
                     }
@@ -958,15 +961,26 @@ namespace WFInfo
 
             //combine adjacent rows into one block of text
             i = 0;
-            while (i+1 < rows.Count)
+
+            using (Graphics g = Graphics.FromImage(filteredImage))
             {
-                if (rows[i].Item1 + rows[i].Item2 + rowHeight > rows[i+1].Item1)
+                using (Graphics gClean = Graphics.FromImage(filteredImageClean))
                 {
-                    rows[i + 1] = Tuple.Create(rows[i].Item1, rows[i + 1].Item1 - rows[i].Item1 + rows[i + 1].Item2);
-                    rows.RemoveAt(i);
-                } else
-                {
-                    i++;
+                    while (i + 1 < rows.Count)
+                    {
+
+                        g.DrawLine(brown, 0, rows[i].Item1 + rows[i].Item2, 10000, rows[i].Item1 + rows[i].Item2);
+                        gClean.DrawLine(white, 0, rows[i].Item1 + rows[i].Item2, 10000, rows[i].Item1 + rows[i].Item2);
+                        if (rows[i].Item1 + rows[i].Item2 + rowHeight > rows[i + 1].Item1)
+                        {
+                            rows[i + 1] = Tuple.Create(rows[i].Item1, rows[i + 1].Item1 - rows[i].Item1 + rows[i + 1].Item2);
+                            rows.RemoveAt(i);
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
                 }
             }
 
@@ -977,10 +991,10 @@ namespace WFInfo
             i = 0;
             while (i < filteredImage.Width)
             {
-                if ((double)(colHits[i]) / filteredImage.Height < emptyDensity)
+                if ((double)(colHits[i]) / filteredImage.Height < emptyColDensity)
                 {
                     int j = 0;
-                    while (i + j < filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < emptyDensity)
+                    while (i + j < filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < emptyColDensity)
                     {
                         j++;
                     }
@@ -1007,18 +1021,16 @@ namespace WFInfo
             //divide image into text blocks
             for (i = 0; i < rows.Count; i++)
             {
-                for( int j = 0; j < cols.Count; j++)
+                for ( int j = 0; j < cols.Count; j++)
                 {
                     Rectangle cloneRect = new Rectangle(cols[j].Item1, rows[i].Item1, cols[j].Item2, rows[i].Item2);
-                    Rectangle empty = new Rectangle(1, 1, 1, 1);
-                    Tuple<Bitmap, Rectangle> temp = Tuple.Create(filteredImage.Clone(empty, filteredImage.PixelFormat), cloneRect);
+                    Tuple<Bitmap, Rectangle> temp = Tuple.Create(filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat), cloneRect);
                     zones.Add(temp);
                 }
             }
 
             using (Graphics g = Graphics.FromImage(filteredImage))
             {
-                Pen brown = new Pen(Brushes.Brown);
                 foreach (Tuple<Bitmap, Rectangle> tup in zones)
                 {
                     g.DrawRectangle(brown, tup.Item2);
@@ -1026,6 +1038,8 @@ namespace WFInfo
                 g.DrawRectangle(brown, 0, 0, rowHeight / 2, rowHeight);
             }
 
+            brown.Dispose();
+            white.Dispose();
             return zones;
         }
 
@@ -1049,7 +1063,7 @@ namespace WFInfo
             var greenp = new Pen(green);
             var pinkP = new Pen(Brushes.Pink);
             var font = new Font("Arial", 16);
-            DivideSnapZones(filteredImage, rowHits, colHits);
+            DivideSnapZones(filteredImage, filteredImageClean, rowHits, colHits);
             using (var page = firstEngine.Process(filteredImageClean, PageSegMode.SparseText))
             {
                 using (var iterator = page.GetIterator())
