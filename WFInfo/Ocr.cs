@@ -1023,7 +1023,7 @@ namespace WFInfo
             {
                 for ( int j = 0; j < cols.Count; j++)
                 {
-                    Rectangle cloneRect = new Rectangle(cols[j].Item1, rows[i].Item1, cols[j].Item2, rows[i].Item2);
+                    Rectangle cloneRect = new Rectangle(cols[j].Item1 - rowHeight/4, rows[i].Item1 - rowHeight / 4, cols[j].Item2 + rowHeight / 2, rows[i].Item2 + rowHeight / 2);
                     Tuple<Bitmap, Rectangle> temp = Tuple.Create(filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat), cloneRect);
                     zones.Add(temp);
                 }
