@@ -565,7 +565,7 @@ namespace WFInfo
         {
             #region initilizers
             var tempclipboard = "";
-            Bitmap newFilter = ScaleUpAndFilter(partialScreenshot, activeTheme);
+            Bitmap newFilter = ScaleUpAndFilter(partialScreenshot, activeTheme, out _, out _ );
             partialScreenshotExpanded.Save(Main.AppPath + @"\Debug\PartShotUpscaled " + timestamp + ".png");
             newFilter.Save(Main.AppPath + @"\Debug\PartShotUpscaledFiltered " + timestamp + ".png");
             Main.AddLog(("----  SECOND OCR CHECK  ------------------------------------------------------------------------------------------").Substring(0, 108));
@@ -854,11 +854,11 @@ namespace WFInfo
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
             WFtheme theme = GetThemeWeighted(out _, fullShot);
             snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
-            Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme);
+            Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
             long end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
-            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
+            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, rowHits, colHits);
             string csv = string.Empty;
             snapItImageFiltered.Dispose();
             if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
@@ -927,12 +927,114 @@ namespace WFInfo
             }
         }
 
+        private static List<Tuple<Bitmap, Rectangle>> DivideSnapZones (Bitmap filteredImage, int[] rowHits, int[] colHits) 
+        {
+            //TODO add some margin to box sizes, cut out the actual images
+            const double textDensity = 0.05;
+            const double emptyDensity = 0.005;
+            List<Tuple<Bitmap, Rectangle>> zones = new List<Tuple<Bitmap, Rectangle>>();
+
+            //find rows
+            List<Tuple<int, int>> rows = new List<Tuple<int, int>>(); //item1 = row top, item2 = row height
+            int i = 0;
+            int rowHeight = 0;
+            while (i < filteredImage.Height)
+            {
+                if ( (double)(rowHits[i]) / filteredImage.Width > textDensity) {
+                    int j = 0;
+                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > emptyDensity)
+                    {
+                        j++;
+                    }
+                    rows.Add(Tuple.Create(i, j));
+                    i += j;
+                    rowHeight += j;
+                } else
+                {
+                    i++;
+                }
+            }
+            rowHeight = rowHeight / (rows.Count + 1);
+
+            //combine adjacent rows into one block of text
+            i = 0;
+            while (i+1 < rows.Count)
+            {
+                if (rows[i].Item1 + rows[i].Item2 + rowHeight > rows[i+1].Item1)
+                {
+                    rows[i + 1] = Tuple.Create(rows[i].Item1, rows[i + 1].Item1 - rows[i].Item1 + rows[i + 1].Item2);
+                    rows.RemoveAt(i);
+                } else
+                {
+                    i++;
+                }
+            }
+
+            //find columns
+            List<Tuple<int, int>> cols = new List<Tuple<int, int>>(); //item1 = col start, item2 = col width
+
+            int colStart = 0;
+            i = 0;
+            while (i < filteredImage.Width)
+            {
+                if ((double)(colHits[i]) / filteredImage.Height < emptyDensity)
+                {
+                    int j = 0;
+                    while (i + j < filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < emptyDensity)
+                    {
+                        j++;
+                    }
+                    if (j > rowHeight / 2)
+                    {
+                        if (i != 0)
+                        {
+                            cols.Add(Tuple.Create(colStart, i-colStart));
+                        }
+                        colStart = i + j;
+                    }
+                    i += j;
+                }
+                else
+                {
+                    i += 1;
+                }
+            }
+            if (i != colStart)
+            {
+                cols.Add(Tuple.Create(colStart, i));
+            }
+
+            //divide image into text blocks
+            for (i = 0; i < rows.Count; i++)
+            {
+                for( int j = 0; j < cols.Count; j++)
+                {
+                    Rectangle cloneRect = new Rectangle(cols[j].Item1, rows[i].Item1, cols[j].Item2, rows[i].Item2);
+                    Rectangle empty = new Rectangle(1, 1, 1, 1);
+                    Tuple<Bitmap, Rectangle> temp = Tuple.Create(filteredImage.Clone(empty, filteredImage.PixelFormat), cloneRect);
+                    zones.Add(temp);
+                }
+            }
+
+            using (Graphics g = Graphics.FromImage(filteredImage))
+            {
+                Pen brown = new Pen(Brushes.Brown);
+                foreach (Tuple<Bitmap, Rectangle> tup in zones)
+                {
+                    g.DrawRectangle(brown, tup.Item2);
+                }
+                g.DrawRectangle(brown, 0, 0, rowHeight / 2, rowHeight);
+            }
+
+            return zones;
+        }
+
         /// <summary>
         /// Filters out any group of words and addes them all into a single InventoryItem, containing the found words as well as the bounds within they reside.
         /// </summary>
         /// <param name="filteredImage"></param>
         /// <returns>List of found items</returns>
-        private static List<InventoryItem> FindAllParts(Bitmap filteredImage)
+        private static List<InventoryItem> FindAllParts(Bitmap filteredImage, int[] rowHits, int[] colHits)
         {
             Bitmap filteredImageClean = new Bitmap(filteredImage);
             DateTime time = DateTime.UtcNow;
@@ -947,6 +1049,7 @@ namespace WFInfo
             var greenp = new Pen(green);
             var pinkP = new Pen(Brushes.Pink);
             var font = new Font("Arial", 16);
+            DivideSnapZones(filteredImage, rowHits, colHits);
             using (var page = firstEngine.Process(filteredImageClean, PageSegMode.SparseText))
             {
                 using (var iterator = page.GetIterator())
@@ -1647,7 +1750,7 @@ namespace WFInfo
             }
         }
 
-        private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active)
+        private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active, out int[] rowHits, out int[] colHits)
         {
             Bitmap filtered;
             if (image.Height <= SCALING_LIMIT)
@@ -1670,6 +1773,8 @@ namespace WFInfo
             {
                 filtered = image;
             }
+            rowHits = new int[filtered.Height];
+            colHits = new int[filtered.Width];
             Color clr;
             BitmapData lockedBitmapData = filtered.LockBits(new Rectangle(0, 0, filtered.Width, filtered.Height), ImageLockMode.ReadWrite, filtered.PixelFormat);
             int numbytes = Math.Abs(lockedBitmapData.Stride) * lockedBitmapData.Height;
@@ -1686,6 +1791,10 @@ namespace WFInfo
                     LockedBitmapBytes[i + 2] = 0;
                     LockedBitmapBytes[i + 3] = 0;
                     //Black
+                    int x = (i / PixelSize) % filtered.Width;
+                    int y = (i / PixelSize - x) / filtered.Width;
+                    rowHits[y]++;
+                    colHits[x]++;
                 } else
                 {
                     LockedBitmapBytes[i] = 255;
