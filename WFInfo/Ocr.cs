@@ -856,9 +856,9 @@ namespace WFInfo
             snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, rowHits, colHits); 
             long end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
-            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, rowHits, colHits);
             string csv = string.Empty;
             snapItImageFiltered.Dispose();
             if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
@@ -1053,7 +1053,7 @@ namespace WFInfo
             Bitmap filteredImageClean = new Bitmap(filteredImage);
             DateTime time = DateTime.UtcNow;
             string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-            List<InventoryItem> foundItems = new List<InventoryItem>();
+            List<Tuple<List<InventoryItem>, Rectangle>> foundItems = new List<Tuple<List<InventoryItem>, Rectangle>>(); //List containing Tuples of overlapping InventoryItems and their combined bounds
             int numberTooLarge = 0;
             int numberTooFewCharacters = 0;
             int numberTooLargeButEnoughCharacters = 0;
@@ -1088,7 +1088,7 @@ namespace WFInfo
                                 using (Graphics g = Graphics.FromImage(filteredImage))
                                 {
                                     if (paddedBounds.Height > 50 * screenScaling || paddedBounds.Width > 84 * screenScaling)
-                                    { //Determen weither or not the box is too large, false positives in OCR can scan items (such as neuroptics, chassis or systems) as a character(s).
+                                    { //Determine whether or not the box is too large, false positives in OCR can scan items (such as neuroptics, chassis or systems) as a character(s).
                                         if (currentWord.Length > 3)
                                         { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
                                             g.DrawRectangle(orange, paddedBounds);
@@ -1118,25 +1118,27 @@ namespace WFInfo
                                 int i = foundItems.Count - 1;
 
                                 for (; i >= 0; i--)
-                                    if (foundItems[i].Bounding.IntersectsWith(paddedBounds))
+                                    if (foundItems[i].Item2.IntersectsWith(paddedBounds))
                                         break;
 
                                 if (i == -1)
                                 {
-                                    foundItems.Add(new InventoryItem(currentWord, paddedBounds));
+                                    //New entry added by creating a tuple. Item1 in tuple is list with just the newly found item, Item2 is its bounds
+                                    foundItems.Add(Tuple.Create(new List<InventoryItem> { new InventoryItem(currentWord, paddedBounds) }, paddedBounds )); 
                                 }
                                 else
                                 {
-                                    int left = Math.Min(foundItems[i].Bounding.Left, paddedBounds.Left);
-                                    int top = Math.Min(foundItems[i].Bounding.Top, paddedBounds.Top);
-                                    int right = Math.Max(foundItems[i].Bounding.Right, paddedBounds.Right);
-                                    int bot = Math.Max(foundItems[i].Bounding.Bottom, paddedBounds.Bottom);
+                                    int left = Math.Min(foundItems[i].Item2.Left, paddedBounds.Left);
+                                    int top = Math.Min(foundItems[i].Item2.Top, paddedBounds.Top);
+                                    int right = Math.Max(foundItems[i].Item2.Right, paddedBounds.Right);
+                                    int bot = Math.Max(foundItems[i].Item2.Bottom, paddedBounds.Bottom);
 
-                                    Rectangle intersectingBounds = new Rectangle(left, top, right - left, bot - top);
-
-                                    InventoryItem newItem = new InventoryItem(foundItems[i].Name + " " + currentWord, intersectingBounds);
+                                    Rectangle combinedBounds = new Rectangle(left, top, right - left, bot - top);
+                                    
+                                    List<InventoryItem> tempList = new List<InventoryItem>(foundItems[i].Item1);
+                                    tempList.Add(new InventoryItem(currentWord, paddedBounds));
                                     foundItems.RemoveAt(i);
-                                    foundItems.Add(newItem);
+                                    foundItems.Add(Tuple.Create(tempList, combinedBounds));
                                 }
 
                             }
@@ -1146,9 +1148,31 @@ namespace WFInfo
                 }
             }
 
+            List<InventoryItem> results = new List<InventoryItem>();
+
+            foreach( Tuple<List<InventoryItem>, Rectangle> itemGroup in foundItems)
+            {
+                //Sort order for component words to appear in. If large height difference, sort vertically. If small height difference, sort horizontally
+                itemGroup.Item1.Sort( (InventoryItem i1, InventoryItem i2) => 
+                {
+                    return Math.Abs(i1.Bounding.Top - i2.Bounding.Top) > i1.Bounding.Height/8
+                        ? i1.Bounding.Top - i2.Bounding.Top
+                        : i1.Bounding.Left - i2.Bounding.Left;
+                });
+
+                //Combine into item name
+                String name = "";
+                foreach(InventoryItem i1 in itemGroup.Item1)
+                {
+                    name += (i1.Name + " ");
+                }
+                name = name.Trim();
+                results.Add(new InventoryItem(name, itemGroup.Item2));
+            }
+
             if ( Settings.doSnapItCount)
             {
-                GetItemCounts(filteredImage, filteredImageClean, foundItems, font, Settings.snapItCountThreshold);
+                GetItemCounts(filteredImage, filteredImageClean, results, font, Settings.snapItCountThreshold);
             }
 
             filteredImageClean.Dispose();
@@ -1169,7 +1193,7 @@ namespace WFInfo
             }
 
             filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
-            return foundItems;
+            return results;
         }
 
         /// <summary>
