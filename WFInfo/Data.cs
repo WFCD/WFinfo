@@ -851,6 +851,11 @@ namespace WFInfo
                     lowest = prop.Value.ToObject<string>();
                     lowest_unfiltered = prop.Key;
                 }
+                if (val == low && lowest.StartsWith("Gara") && prop.Key.StartsWith("Ivara")) //If both
+                {
+                    lowest = prop.Value.ToObject<string>();
+                    lowest_unfiltered = prop.Key;
+                }
             }
 
             if (!suppressLogging)
