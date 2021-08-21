@@ -250,6 +250,10 @@ namespace WFInfo
                 Settings.settingsObj["SnapItNumberBoxWidth"] = 0.4;
             Settings.snapItNumberBoxWidth = Convert.ToDouble(Settings.settingsObj.GetValue("SnapItNumberBoxWidth"), Main.culture);
 
+            if (!Settings.settingsObj.TryGetValue("SnapMultiThreaded", out _))
+                Settings.settingsObj["SnapMultiThreaded"] = false;
+            Settings.snapMultiThreaded = (bool)Settings.settingsObj.GetValue("SnapMultiThreaded");
+
             Settings.Save();
 
             RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");

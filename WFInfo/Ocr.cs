@@ -956,7 +956,7 @@ namespace WFInfo
                     i++;
                 }
             }
-            rowHeight = rowHeight / (rows.Count + 1);
+            rowHeight = rowHeight / Math.Max(rows.Count, 1);
 
             //combine adjacent rows into one block of text
             i = 0;
@@ -988,12 +988,12 @@ namespace WFInfo
 
             int colStart = 0;
             i = 0;
-            while (i < filteredImage.Width)
+            while (i + 1< filteredImage.Width)
             {
                 if ((double)(colHits[i]) / filteredImage.Height < emptyColDensity)
                 {
                     int j = 0;
-                    while (i + j < filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < emptyColDensity)
+                    while (i + j + 1< filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < emptyColDensity)
                     {
                         j++;
                     }
@@ -1001,20 +1001,17 @@ namespace WFInfo
                     {
                         if (i != 0)
                         {
-                            cols.Add(Tuple.Create(colStart, i-colStart));
+                            cols.Add(Tuple.Create(colStart, i - colStart));
                         }
-                        colStart = i + j;
+                        colStart = i + j + 1;
                     }
                     i += j;
                 }
-                else
-                {
-                    i += 1;
-                }
+                i += 1;
             }
             if (i != colStart)
             {
-                cols.Add(Tuple.Create(colStart, i));
+                cols.Add(Tuple.Create(colStart, i - colStart));
             }
 
             //divide image into text blocks
@@ -1099,8 +1096,18 @@ namespace WFInfo
             var greenp = new Pen(green);
             var pinkP = new Pen(Brushes.Pink);
             var font = new Font("Arial", 16);
-            List<Tuple<Bitmap, Rectangle>> zones = DivideSnapZones(filteredImage, filteredImageClean, rowHits, colHits);
-            const int snapThreads = 4;
+            List<Tuple<Bitmap, Rectangle>> zones;
+            int snapThreads;
+            if ( Settings.snapMultiThreaded)
+            {
+                zones = DivideSnapZones(filteredImage, filteredImageClean, rowHits, colHits);
+                snapThreads = 4;
+            } else
+            {
+                zones = new List<Tuple<Bitmap, Rectangle>>();
+                zones.Add( Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height) ) );
+                snapThreads = 1;
+            }
             Task < List<Tuple<String, Rectangle>>>[] snapTasks = new Task<List<Tuple<String, Rectangle>>>[snapThreads];
             for (int i = 0; i < snapThreads; i++)
             {
