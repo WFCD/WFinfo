@@ -254,6 +254,18 @@ namespace WFInfo
                 Settings.settingsObj["SnapMultiThreaded"] = false;
             Settings.snapMultiThreaded = (bool)Settings.settingsObj.GetValue("SnapMultiThreaded");
 
+            if (!Settings.settingsObj.TryGetValue("SnapRowTextDensity", out _))
+                Settings.settingsObj["SnapRowTextDensity"] = 0.015;
+            Settings.snapRowTextDensity = Convert.ToDouble(Settings.settingsObj.GetValue("SnapRowTextDensity"), Main.culture);
+
+            if (!Settings.settingsObj.TryGetValue("SnapRowEmptyDensity", out _))
+                Settings.settingsObj["SnapRowEmptyDensity"] = 0.01;
+            Settings.snapRowEmptyDensity = Convert.ToDouble(Settings.settingsObj.GetValue("SnapRowEmptyDensity"), Main.culture);
+
+            if (!Settings.settingsObj.TryGetValue("SnapColEmptyDensity", out _))
+                Settings.settingsObj["SnapColEmptyDensity"] = 0.005;
+            Settings.snapColEmptyDensity = Convert.ToDouble(Settings.settingsObj.GetValue("SnapColEmptyDensity"), Main.culture);
+
             Settings.Save();
 
             RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");

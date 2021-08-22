@@ -75,6 +75,9 @@ namespace WFInfo
         public static bool doCustomNumberBoxWidth;
         public static double snapItNumberBoxWidth;
         public static bool snapMultiThreaded;
+        public static double snapRowTextDensity;
+        public static double snapRowEmptyDensity;
+        public static double snapColEmptyDensity;
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }

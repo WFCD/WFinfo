@@ -929,9 +929,6 @@ namespace WFInfo
 
         private static List<Tuple<Bitmap, Rectangle>> DivideSnapZones (Bitmap filteredImage, Bitmap filteredImageClean, int[] rowHits, int[] colHits) 
         {
-            const double textDensity = 0.05;
-            const double emptyRowDensity = 0.01;
-            const double emptyColDensity = 0.005;
             List<Tuple<Bitmap, Rectangle>> zones = new List<Tuple<Bitmap, Rectangle>>();
             Pen brown = new Pen(Brushes.Brown);
             Pen white = new Pen(Brushes.White);
@@ -942,15 +939,19 @@ namespace WFInfo
             int rowHeight = 0;
             while (i < filteredImage.Height)
             {
-                if ( (double)(rowHits[i]) / filteredImage.Width > textDensity) {
+                if ( (double)(rowHits[i]) / filteredImage.Width > Settings.snapRowTextDensity) {
                     int j = 0;
-                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > emptyRowDensity)
+                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > Settings.snapRowEmptyDensity)
                     {
                         j++;
                     }
-                    rows.Add(Tuple.Create(i, j));
+                    if (j > 3) //only add "rows" of reasonable height
+                    {
+                        rows.Add(Tuple.Create(i, j));
+                        rowHeight += j;
+                    }
+
                     i += j;
-                    rowHeight += j;
                 } else
                 {
                     i++;
@@ -990,10 +991,10 @@ namespace WFInfo
             i = 0;
             while (i + 1< filteredImage.Width)
             {
-                if ((double)(colHits[i]) / filteredImage.Height < emptyColDensity)
+                if ((double)(colHits[i]) / filteredImage.Height < Settings.snapColEmptyDensity)
                 {
                     int j = 0;
-                    while (i + j + 1< filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < emptyColDensity)
+                    while (i + j + 1< filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < Settings.snapColEmptyDensity)
                     {
                         j++;
                     }
@@ -1019,12 +1020,10 @@ namespace WFInfo
             {
                 for ( int j = 0; j < cols.Count; j++)
                 {
-                    int top = Math.Max(rows[i].Item1 - rowHeight / 4, 0);
-                    int height = rows[i].Item2 + rowHeight / 2;
-                    height = top + height >= filteredImage.Height ? filteredImage.Height - 1 : height;
-                    int left = Math.Max(cols[j].Item1 - rowHeight / 4, 0);
-                    int width = cols[j].Item2 + rowHeight / 2;
-                    width = left + width >= filteredImage.Width ? filteredImage.Width - 1 : width;
+                    int top = Math.Max(rows[i].Item1 - (rowHeight / 2), 0);
+                    int height = Math.Min(rows[i].Item2 + rowHeight, filteredImageClean.Height - top - 1);
+                    int left = Math.Max(cols[j].Item1 - (rowHeight / 4), 0);
+                    int width = Math.Min(cols[j].Item2 + (rowHeight / 2), filteredImageClean.Width - left - 1);
                     Rectangle cloneRect = new Rectangle(left, top, width, height);
                     Tuple<Bitmap, Rectangle> temp = Tuple.Create(filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat), cloneRect);
                     zones.Add(temp);
