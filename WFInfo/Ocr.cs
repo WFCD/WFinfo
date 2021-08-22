@@ -1300,7 +1300,7 @@ namespace WFInfo
                 foundParts[i] = part;
 
                 //Decide if item is an actual prime, if so mark as mastered
-                if (proximity < 5 && proximity < primeProximity && name.Contains("Prime"))
+                if (proximity < 4 && proximity < primeProximity && name.Contains("Prime"))
                 {
                     //mark as mastered
                     string[] nameParts = part.Name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
