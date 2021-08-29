@@ -2354,7 +2354,7 @@ namespace WFInfo
             Size FullscreenSize = new Size(image.Width, image.Height);
             using (Graphics graphics = Graphics.FromImage(image))
                 graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
-            image.Save(Main.AppPath + @"\Debug\FullScreenShot " + timestamp + ".png");
+            image.Save(Main.AppPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + ".png");
             return image;
         }
 
