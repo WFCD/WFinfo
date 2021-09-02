@@ -565,7 +565,7 @@ namespace WFInfo
         {
             #region initilizers
             var tempclipboard = "";
-            Bitmap newFilter = ScaleUpAndFilter(partialScreenshot, activeTheme);
+            Bitmap newFilter = ScaleUpAndFilter(partialScreenshot, activeTheme, out _, out _ );
             partialScreenshotExpanded.Save(Main.AppPath + @"\Debug\PartShotUpscaled " + timestamp + ".png");
             newFilter.Save(Main.AppPath + @"\Debug\PartShotUpscaledFiltered " + timestamp + ".png");
             Main.AddLog(("----  SECOND OCR CHECK  ------------------------------------------------------------------------------------------").Substring(0, 108));
@@ -854,11 +854,11 @@ namespace WFInfo
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
             WFtheme theme = GetThemeWeighted(out _, fullShot);
             snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
-            Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme);
+            Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, rowHits, colHits); 
             long end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
-            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered);
             string csv = string.Empty;
             snapItImageFiltered.Dispose();
             if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
@@ -927,27 +927,129 @@ namespace WFInfo
             }
         }
 
-        /// <summary>
-        /// Filters out any group of words and addes them all into a single InventoryItem, containing the found words as well as the bounds within they reside.
-        /// </summary>
-        /// <param name="filteredImage"></param>
-        /// <returns>List of found items</returns>
-        private static List<InventoryItem> FindAllParts(Bitmap filteredImage)
+        private static List<Tuple<Bitmap, Rectangle>> DivideSnapZones (Bitmap filteredImage, Bitmap filteredImageClean, int[] rowHits, int[] colHits) 
         {
-            Bitmap filteredImageClean = new Bitmap(filteredImage);
-            DateTime time = DateTime.UtcNow;
-            string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-            List<InventoryItem> foundItems = new List<InventoryItem>();
-            int numberTooLarge = 0;
-            int numberTooFewCharacters = 0;
-            int numberTooLargeButEnoughCharacters = 0;
-            var orange = new Pen(Brushes.Orange);
-            var red = new SolidBrush(Color.FromArgb(100, 139, 0, 0));
-            var green = new SolidBrush(Color.FromArgb(100, 255, 165, 0));
-            var greenp = new Pen(green);
-            var pinkP = new Pen(Brushes.Pink);
-            var font = new Font("Arial", 16);
-            using (var page = firstEngine.Process(filteredImageClean, PageSegMode.SparseText))
+            List<Tuple<Bitmap, Rectangle>> zones = new List<Tuple<Bitmap, Rectangle>>();
+            Pen brown = new Pen(Brushes.Brown);
+            Pen white = new Pen(Brushes.White);
+
+            //find rows
+            List<Tuple<int, int>> rows = new List<Tuple<int, int>>(); //item1 = row top, item2 = row height
+            int i = 0;
+            int rowHeight = 0;
+            while (i < filteredImage.Height)
+            {
+                if ( (double)(rowHits[i]) / filteredImage.Width > Settings.snapRowTextDensity) {
+                    int j = 0;
+                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > Settings.snapRowEmptyDensity)
+                    {
+                        j++;
+                    }
+                    if (j > 3) //only add "rows" of reasonable height
+                    {
+                        rows.Add(Tuple.Create(i, j));
+                        rowHeight += j;
+                    }
+
+                    i += j;
+                } else
+                {
+                    i++;
+                }
+            }
+            rowHeight = rowHeight / Math.Max(rows.Count, 1);
+
+            //combine adjacent rows into one block of text
+            i = 0;
+
+            using (Graphics g = Graphics.FromImage(filteredImage))
+            {
+                using (Graphics gClean = Graphics.FromImage(filteredImageClean))
+                {
+                    while (i + 1 < rows.Count)
+                    {
+
+                        g.DrawLine(brown, 0, rows[i].Item1 + rows[i].Item2, 10000, rows[i].Item1 + rows[i].Item2);
+                        gClean.DrawLine(white, 0, rows[i].Item1 + rows[i].Item2, 10000, rows[i].Item1 + rows[i].Item2);
+                        if (rows[i].Item1 + rows[i].Item2 + rowHeight > rows[i + 1].Item1)
+                        {
+                            rows[i + 1] = Tuple.Create(rows[i].Item1, rows[i + 1].Item1 - rows[i].Item1 + rows[i + 1].Item2);
+                            rows.RemoveAt(i);
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                }
+            }
+
+            //find columns
+            List<Tuple<int, int>> cols = new List<Tuple<int, int>>(); //item1 = col start, item2 = col width
+
+            int colStart = 0;
+            i = 0;
+            while (i + 1< filteredImage.Width)
+            {
+                if ((double)(colHits[i]) / filteredImage.Height < Settings.snapColEmptyDensity)
+                {
+                    int j = 0;
+                    while (i + j + 1< filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < Settings.snapColEmptyDensity)
+                    {
+                        j++;
+                    }
+                    if (j > rowHeight / 2)
+                    {
+                        if (i != 0)
+                        {
+                            cols.Add(Tuple.Create(colStart, i - colStart));
+                        }
+                        colStart = i + j + 1;
+                    }
+                    i += j;
+                }
+                i += 1;
+            }
+            if (i != colStart)
+            {
+                cols.Add(Tuple.Create(colStart, i - colStart));
+            }
+
+            //divide image into text blocks
+            for (i = 0; i < rows.Count; i++)
+            {
+                for ( int j = 0; j < cols.Count; j++)
+                {
+                    int top = Math.Max(rows[i].Item1 - (rowHeight / 2), 0);
+                    int height = Math.Min(rows[i].Item2 + rowHeight, filteredImageClean.Height - top - 1);
+                    int left = Math.Max(cols[j].Item1 - (rowHeight / 4), 0);
+                    int width = Math.Min(cols[j].Item2 + (rowHeight / 2), filteredImageClean.Width - left - 1);
+                    Rectangle cloneRect = new Rectangle(left, top, width, height);
+                    Tuple<Bitmap, Rectangle> temp = Tuple.Create(filteredImageClean.Clone(cloneRect, filteredImageClean.PixelFormat), cloneRect);
+                    zones.Add(temp);
+                }
+            }
+
+            using (Graphics g = Graphics.FromImage(filteredImage))
+            {
+                foreach (Tuple<Bitmap, Rectangle> tup in zones)
+                {
+                    g.DrawRectangle(brown, tup.Item2);
+                }
+                g.DrawRectangle(brown, 0, 0, rowHeight / 2, rowHeight);
+            }
+
+            brown.Dispose();
+            white.Dispose();
+            return zones;
+        }
+
+        private static List<Tuple<String, Rectangle>> GetTextWithBoundsFromImage(TesseractEngine engine, Bitmap image, int rectXOffset, int rectYOffset)
+        {
+            List<Tuple<String, Rectangle>> data = new List<Tuple<String, Rectangle>>();
+
+
+            using (var page = engine.Process(image, PageSegMode.SparseText))
             {
                 using (var iterator = page.GetIterator())
                 {
@@ -957,81 +1059,167 @@ namespace WFInfo
                     {
                         string currentWord = iterator.GetText(PageIteratorLevel.TextLine);
                         iterator.TryGetBoundingBox(PageIteratorLevel.TextLine, out Rect tempbounds);
-                        Rectangle bounds = new Rectangle(tempbounds.X1, tempbounds.Y1, tempbounds.Width, tempbounds.Height);
+                        Rectangle bounds = new Rectangle(tempbounds.X1 + rectXOffset, tempbounds.Y1 + rectYOffset, tempbounds.Width, tempbounds.Height);
                         if (currentWord != null)
                         {
                             currentWord = RE.Replace(currentWord, "").Trim();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
-                                int VerticalPad = bounds.Height/2;
-                                int HorizontalPad = (int)(bounds.Height * Settings.snapItHorizontalNameMargin);
-                                var paddedBounds = new Rectangle(bounds.X - HorizontalPad, bounds.Y - VerticalPad, bounds.Width + HorizontalPad * 2, bounds.Height + VerticalPad * 2);
-                                //var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
-
-                                using (Graphics g = Graphics.FromImage(filteredImage))
-                                {
-                                    if (paddedBounds.Height > 50 * screenScaling || paddedBounds.Width > 84 * screenScaling)
-                                    { //Determen weither or not the box is too large, false positives in OCR can scan items (such as neuroptics, chassis or systems) as a character(s).
-                                        if (currentWord.Length > 3)
-                                        { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
-                                            g.DrawRectangle(orange, paddedBounds);
-                                            numberTooLargeButEnoughCharacters++;
-                                        }
-                                        else
-                                        {
-                                            g.FillRectangle(red, paddedBounds);
-                                            numberTooLarge++;
-                                            continue;
-                                        }
-                                    }
-                                    else if (currentWord.Length < 2 && Settings.locale == "en")
-                                    {
-                                        g.FillRectangle(green, paddedBounds);
-                                        numberTooFewCharacters++;
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        g.DrawRectangle(pinkP, paddedBounds);
-                                    }
-                                    g.DrawRectangle(greenp, bounds);
-                                    g.DrawString(currentWord, font, Brushes.Pink, new Point(paddedBounds.X, paddedBounds.Y));
-
-                                }
-                                int i = foundItems.Count - 1;
-
-                                for (; i >= 0; i--)
-                                    if (foundItems[i].Bounding.IntersectsWith(paddedBounds))
-                                        break;
-
-                                if (i == -1)
-                                {
-                                    foundItems.Add(new InventoryItem(currentWord, paddedBounds));
-                                }
-                                else
-                                {
-                                    int left = Math.Min(foundItems[i].Bounding.Left, paddedBounds.Left);
-                                    int top = Math.Min(foundItems[i].Bounding.Top, paddedBounds.Top);
-                                    int right = Math.Max(foundItems[i].Bounding.Right, paddedBounds.Right);
-                                    int bot = Math.Max(foundItems[i].Bounding.Bottom, paddedBounds.Bottom);
-
-                                    Rectangle intersectingBounds = new Rectangle(left, top, right - left, bot - top);
-
-                                    InventoryItem newItem = new InventoryItem(foundItems[i].Name + " " + currentWord, intersectingBounds);
-                                    foundItems.RemoveAt(i);
-                                    foundItems.Add(newItem);
-                                }
-
+                                data.Add(Tuple.Create(currentWord, bounds));
                             }
                         }
                     }
                     while (iterator.Next(PageIteratorLevel.TextLine));
                 }
             }
+            return data;
+        }
+
+        /// <summary>
+        /// Filters out any group of words and addes them all into a single InventoryItem, containing the found words as well as the bounds within they reside.
+        /// </summary>
+        /// <param name="filteredImage"></param>
+        /// <returns>List of found items</returns>
+        private static List<InventoryItem> FindAllParts(Bitmap filteredImage, int[] rowHits, int[] colHits)
+        {
+            Bitmap filteredImageClean = new Bitmap(filteredImage);
+            DateTime time = DateTime.UtcNow;
+            string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
+            List<Tuple<List<InventoryItem>, Rectangle>> foundItems = new List<Tuple<List<InventoryItem>, Rectangle>>(); //List containing Tuples of overlapping InventoryItems and their combined bounds
+            int numberTooLarge = 0;
+            int numberTooFewCharacters = 0;
+            int numberTooLargeButEnoughCharacters = 0;
+            var orange = new Pen(Brushes.Orange);
+            var red = new SolidBrush(Color.FromArgb(100, 139, 0, 0));
+            var green = new SolidBrush(Color.FromArgb(100, 255, 165, 0));
+            var greenp = new Pen(green);
+            var pinkP = new Pen(Brushes.Pink);
+            var font = new Font("Arial", 16);
+            List<Tuple<Bitmap, Rectangle>> zones;
+            int snapThreads;
+            if ( Settings.snapMultiThreaded)
+            {
+                zones = DivideSnapZones(filteredImage, filteredImageClean, rowHits, colHits);
+                snapThreads = 4;
+            } else
+            {
+                zones = new List<Tuple<Bitmap, Rectangle>>();
+                zones.Add( Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height) ) );
+                snapThreads = 1;
+            }
+            Task < List<Tuple<String, Rectangle>>>[] snapTasks = new Task<List<Tuple<String, Rectangle>>>[snapThreads];
+            for (int i = 0; i < snapThreads; i++)
+            {
+                int tempI = i;
+                snapTasks[i] = Task.Factory.StartNew(() =>
+                {
+                    List<Tuple<String, Rectangle>> taskResults = new List<Tuple<String, Rectangle>>();
+                    for (int j = tempI; j < zones.Count; j += snapThreads)
+                    {
+                        //process images
+                        List<Tuple<String, Rectangle>> currentResult = GetTextWithBoundsFromImage(engines[tempI], zones[j].Item1, zones[j].Item2.X, zones[j].Item2.Y);
+                        taskResults.AddRange(currentResult);
+                    }
+                    return taskResults;
+                });
+            }
+            Task.WaitAll(snapTasks);
+
+            for (int threadNum = 0; threadNum < snapThreads; threadNum++)
+            {
+                foreach (Tuple<String,Rectangle> wordResult in snapTasks[threadNum].Result)
+                {
+                    string currentWord = wordResult.Item1;
+                    Rectangle bounds = wordResult.Item2;
+                    //word is valid start comparing to others
+                    int VerticalPad = bounds.Height/2;
+                    int HorizontalPad = (int)(bounds.Height * Settings.snapItHorizontalNameMargin);
+                    var paddedBounds = new Rectangle(bounds.X - HorizontalPad, bounds.Y - VerticalPad, bounds.Width + HorizontalPad * 2, bounds.Height + VerticalPad * 2);
+                    //var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
+
+                    using (Graphics g = Graphics.FromImage(filteredImage))
+                    {
+                        if (paddedBounds.Height > 50 * screenScaling || paddedBounds.Width > 84 * screenScaling)
+                        { //Determine whether or not the box is too large, false positives in OCR can scan items (such as neuroptics, chassis or systems) as a character(s).
+                            if (currentWord.Length > 3)
+                            { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
+                                g.DrawRectangle(orange, paddedBounds);
+                                numberTooLargeButEnoughCharacters++;
+                            }
+                            else
+                            {
+                                g.FillRectangle(red, paddedBounds);
+                                numberTooLarge++;
+                                continue;
+                            }
+                        }
+                        else if (currentWord.Length < 2 && Settings.locale == "en")
+                        {
+                            g.FillRectangle(green, paddedBounds);
+                            numberTooFewCharacters++;
+                            continue;
+                        }
+                        else
+                        {
+                            g.DrawRectangle(pinkP, paddedBounds);
+                        }
+                        g.DrawRectangle(greenp, bounds);
+                        g.DrawString(currentWord, font, Brushes.Pink, new Point(paddedBounds.X, paddedBounds.Y));
+
+                    }
+                    int i = foundItems.Count - 1;
+
+                    for (; i >= 0; i--)
+                        if (foundItems[i].Item2.IntersectsWith(paddedBounds))
+                            break;
+
+                    if (i == -1)
+                    {
+                        //New entry added by creating a tuple. Item1 in tuple is list with just the newly found item, Item2 is its bounds
+                        foundItems.Add(Tuple.Create(new List<InventoryItem> { new InventoryItem(currentWord, paddedBounds) }, paddedBounds )); 
+                    }
+                    else
+                    {
+                        int left = Math.Min(foundItems[i].Item2.Left, paddedBounds.Left);
+                        int top = Math.Min(foundItems[i].Item2.Top, paddedBounds.Top);
+                        int right = Math.Max(foundItems[i].Item2.Right, paddedBounds.Right);
+                        int bot = Math.Max(foundItems[i].Item2.Bottom, paddedBounds.Bottom);
+
+                        Rectangle combinedBounds = new Rectangle(left, top, right - left, bot - top);
+                                    
+                        List<InventoryItem> tempList = new List<InventoryItem>(foundItems[i].Item1);
+                        tempList.Add(new InventoryItem(currentWord, paddedBounds));
+                        foundItems.RemoveAt(i);
+                        foundItems.Add(Tuple.Create(tempList, combinedBounds));
+                    }
+                }
+            }
+
+            List<InventoryItem> results = new List<InventoryItem>();
+
+            foreach( Tuple<List<InventoryItem>, Rectangle> itemGroup in foundItems)
+            {
+                //Sort order for component words to appear in. If large height difference, sort vertically. If small height difference, sort horizontally
+                itemGroup.Item1.Sort( (InventoryItem i1, InventoryItem i2) => 
+                {
+                    return Math.Abs(i1.Bounding.Top - i2.Bounding.Top) > i1.Bounding.Height/8
+                        ? i1.Bounding.Top - i2.Bounding.Top
+                        : i1.Bounding.Left - i2.Bounding.Left;
+                });
+
+                //Combine into item name
+                String name = "";
+                foreach(InventoryItem i1 in itemGroup.Item1)
+                {
+                    name += (i1.Name + " ");
+                }
+                name = name.Trim();
+                results.Add(new InventoryItem(name, itemGroup.Item2));
+            }
 
             if ( Settings.doSnapItCount)
             {
-                GetItemCounts(filteredImage, filteredImageClean, foundItems, font, Settings.snapItCountThreshold);
+                GetItemCounts(filteredImage, filteredImageClean, results, font, Settings.snapItCountThreshold);
             }
 
             filteredImageClean.Dispose();
@@ -1052,7 +1240,7 @@ namespace WFInfo
             }
 
             filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
-            return foundItems;
+            return results;
         }
 
         /// <summary>
@@ -1649,7 +1837,7 @@ namespace WFInfo
             }
         }
 
-        private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active)
+        private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active, out int[] rowHits, out int[] colHits)
         {
             Bitmap filtered;
             if (image.Height <= SCALING_LIMIT)
@@ -1672,6 +1860,8 @@ namespace WFInfo
             {
                 filtered = image;
             }
+            rowHits = new int[filtered.Height];
+            colHits = new int[filtered.Width];
             Color clr;
             BitmapData lockedBitmapData = filtered.LockBits(new Rectangle(0, 0, filtered.Width, filtered.Height), ImageLockMode.ReadWrite, filtered.PixelFormat);
             int numbytes = Math.Abs(lockedBitmapData.Stride) * lockedBitmapData.Height;
@@ -1688,6 +1878,10 @@ namespace WFInfo
                     LockedBitmapBytes[i + 2] = 0;
                     LockedBitmapBytes[i + 3] = 0;
                     //Black
+                    int x = (i / PixelSize) % filtered.Width;
+                    int y = (i / PixelSize - x) / filtered.Width;
+                    rowHits[y]++;
+                    colHits[x]++;
                 } else
                 {
                     LockedBitmapBytes[i] = 255;
@@ -2162,7 +2356,7 @@ namespace WFInfo
             Size FullscreenSize = new Size(image.Width, image.Height);
             using (Graphics graphics = Graphics.FromImage(image))
                 graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
-            image.Save(Main.AppPath + @"\Debug\FullScreenShot " + timestamp + ".png");
+            image.Save(Main.AppPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + ".png");
             return image;
         }
 

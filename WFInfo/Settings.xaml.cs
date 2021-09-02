@@ -74,6 +74,10 @@ namespace WFInfo
         public static double snapItHorizontalNameMargin;
         public static bool doCustomNumberBoxWidth;
         public static double snapItNumberBoxWidth;
+        public static bool snapMultiThreaded;
+        public static double snapRowTextDensity;
+        public static double snapRowEmptyDensity;
+        public static double snapColEmptyDensity;
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
@@ -149,6 +153,9 @@ namespace WFInfo
 
             if (Convert.ToBoolean(settingsObj.GetValue("DoSnapItCount")))
                 SnapItemCountCheckbox.IsChecked = true;
+
+            if (Convert.ToBoolean(settingsObj.GetValue("SnapMultiThreaded")))
+                SnapItThreadCheckbox.IsChecked = true;
 
             SnapItCountThreshold_number_box.Text = snapItCountThreshold.ToString(Main.culture);
 
@@ -823,6 +830,13 @@ namespace WFInfo
         {
             settingsObj["DoSnapItCount"] = SnapItemCountCheckbox.IsChecked.Value;
             doSnapItCount = SnapItemCountCheckbox.IsChecked.Value;
+            Save();
+        }
+
+        private void SnapItThreadCheckbox_Click(object sender, RoutedEventArgs e)
+        {
+            settingsObj["SnapMultiThreaded"] = SnapItThreadCheckbox.IsChecked.Value;
+            snapMultiThreaded = SnapItThreadCheckbox.IsChecked.Value;
             Save();
         }
     }
