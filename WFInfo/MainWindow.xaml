@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:WFInfo"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         x:Class="WFInfo.MainWindow"
-        Title="WFInfo" Height="103.25" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
+        Title="WFInfo" Height="110" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
     <Window.Resources>
     </Window.Resources>
 
@@ -16,7 +16,7 @@
 
         <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Height="22" VerticalAlignment="Top"/>
         <Rectangle Stroke="#FF646464"/>
-        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="0,0,42,0" Height="21" VerticalAlignment="Bottom"/>
+        <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="0,0,42,0" Height="35" VerticalAlignment="Bottom"/>
         <Rectangle Stroke="#FF646464" Margin="0,21,0,0" HorizontalAlignment="Right" Width="43"/>
         <Rectangle Stroke="#FF414141" Margin="313,22,21,1"/>
 
@@ -170,8 +170,8 @@
             </Label.Style>
         </Label>
         <TextBlock                 Text="Status:"    FontSize="13" Margin="3,0,0,1"
-                                   Grid.Column="0" FontFamily="{StaticResource Roboto_Condensed_Bold}" Height="18" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="41"/>
-        <TextBlock x:Name="Status" Text="Loading..." FontSize="13" Margin="44,0,43,1"     FontFamily="{StaticResource Roboto_Condensed}" Height="18" VerticalAlignment="Bottom"/>
+                                   Grid.Column="0" FontFamily="{StaticResource Roboto_Condensed_Bold}" Height="33" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="41" ToolTip="The latest status update provided from the program"/>
+        <TextBlock x:Name="Status" Text="Loading..." FontSize="13" Margin="44,0,43,1"     FontFamily="{StaticResource Roboto_Condensed}" Height="33" VerticalAlignment="Bottom"/>
         <Label Content="Market Data:" Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="26,27,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="24" Width="101"/>
         <Label x:Name="MarketData"       Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="132,27,0,0" VerticalAlignment="Top" Height="26" HorizontalAlignment="Left" Width="156"/>
         <Label Content="Prime Data:"  Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="26,53,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="23" Width="101"/>
