@@ -1331,7 +1331,7 @@ namespace WFInfo
         /// </summary>
         public void Disconnect()
         {
-            if (marketSocket.ReadyState != WebSocketState.Closed || marketSocket.ReadyState == WebSocketState.Open) {
+            if (marketSocket.ReadyState == WebSocketState.Open) { //only send disconnect message if the socket is connected
                 SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
                 JWT = null;
                 rememberMe = false;
