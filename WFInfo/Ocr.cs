@@ -289,7 +289,7 @@ namespace WFInfo
                     if (part.Replace(" ", "").Length > 6)
                     {
                         #region found a part
-                        string correctName = Main.dataBase.GetPartName(part, out firstProximity[i]);
+                        string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false);
                         JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
                         string ducats = job["ducats"].ToObject<string>();
                         if (int.Parse(ducats, Main.culture) == 0)
@@ -597,7 +597,7 @@ namespace WFInfo
                     {
                         Debug.WriteLine(secondChecks[i]);
                         string second = secondChecks[i];
-                        string secondName = Main.dataBase.GetPartName(second, out secondProximity[i]);
+                        string secondName = Main.dataBase.GetPartName(second, out secondProximity[i], false);
                         //if (secondProximity[i] < firstProximity[i])
                         //{
                         JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
@@ -869,7 +869,7 @@ namespace WFInfo
                 if (!PartNameValid(part.Name))
                     continue;
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
-                string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0]);
+                string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0], false);
                 part.Name = name;
                 foundParts[i] = part;
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
@@ -1290,18 +1290,18 @@ namespace WFInfo
             List<InventoryItem> foundParts = FindOwnedItems(fullShot, timestamp, start, watch);
             for (int i = 0; i < foundParts.Count; i++)
             {
-                var part = foundParts[i];
+                InventoryItem part = foundParts[i];
                 if (!PartNameValid(part.Name + " Blueprint"))
                     continue;
-                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity);
-                part.Name = name;
-                foundParts[i] = part;
+                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity, true); //add blueprint to name to check against prime drop table
+                string checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out int primeProximity, true); //also add prime to check if that gives better match. If so, this is a non-prime
+                Main.AddLog("Checking \"" + part.Name.Trim() +"\", (" + proximity +")\"" + name + "\", +prime (" + primeProximity + ")\"" + checkName + "\"");
 
                 //Decide if item is an actual prime, if so mark as mastered
-                if (proximity < 3 && name.Contains("Prime"))
+                if (proximity < 3 && proximity < primeProximity && part.Name.Length > 6 && name.Contains("Prime"))
                 {
                     //mark as mastered
-                    string[] nameParts = part.Name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
+                    string[] nameParts = name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
                     string primeName = nameParts[0] + "Prime";
 
                     if (Main.dataBase.equipmentData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
@@ -1331,21 +1331,6 @@ namespace WFInfo
             }
             watch.Stop();
 
-        }
-
-        /// <summary>
-        /// Probe pixel color to see if it's white enough for FindOwnedItems
-        /// </summary>
-        /// <param name="pixel">Pixel to test</param>
-        /// <param name="lowSensitivity">Use lower threshold, mainly for finding black pixels instead</param>
-        /// <returns>if pixel is above threshold for "white"</returns>
-        private static bool probeProfilePixel(Color pixel, bool lowSensitivity)
-        {
-            if ( lowSensitivity)
-            {
-                return pixel.A > 80 && pixel.R > 80 && pixel.G > 80 && pixel.B > 80;
-            }
-            return pixel.A > 240 && pixel.R > 200 && pixel.G > 200 && pixel.B > 200;
         }
 
         /// <summary>
@@ -1534,38 +1519,55 @@ namespace WFInfo
                             skipZones.Add(new Tuple<int, int, int>(leftEdge, rightEdge, bottomEdge));
                             x = rightEdge;
                             nextY = bottomEdge + 1;
-                            nextYCounter = 3;
+                            nextYCounter = Math.Max(height/8, 3);
 
                             height = lineBreak;
 
                             Rectangle cloneRect = new Rectangle(leftEdge, topEdge, width, height);
-                            Bitmap cloneBitmap = ProfileImageClean.Clone(cloneRect, ProfileImageClean.PixelFormat);
-                            for (int i = 0; i < cloneBitmap.Width; i++)
+                            Bitmap cloneBitmap = new Bitmap(cloneRect.Width * 3, cloneRect.Height);
+                            using (Graphics g2 = Graphics.FromImage(cloneBitmap))
                             {
-                                for (int j = 0; j < cloneBitmap.Height; j++)
+                                g2.FillRectangle(Brushes.White, 0, 0, cloneBitmap.Width, cloneBitmap.Height);
+                            }
+                            int offset = 0;
+                            bool prevHit = false;
+                            for (int i = 0; i < cloneRect.Width; i++)
+                            {
+                                bool hitSomething = false;
+                                for (int j = 0; j < cloneRect.Height; j++)
                                 {
-                                    if (probeProfilePixel(cloneBitmap.GetPixel(i, j), true))
+                                    if (!probeProfilePixel(LockedBitmapBytes, imgWidth, cloneRect.X + i, cloneRect.Y + j, true))
                                     {
-                                        cloneBitmap.SetPixel(i, j, Color.White);
-                                    } else
-                                    {
-                                        cloneBitmap.SetPixel(i, j, Color.Black);
-                                        ProfileImage.SetPixel(cloneRect.X + i , cloneRect.Y + j , Color.Red);
+                                        cloneBitmap.SetPixel(i + offset, j, Color.Black);
+                                        ProfileImage.SetPixel(cloneRect.X + i, cloneRect.Y + j , Color.Red);
+                                        hitSomething = true;
                                     }
                                 }
+                                if (!hitSomething && prevHit)
+                                {
+                                    //add empty columns between letters for better OCR accuracy
+                                    offset+= 2;
+                                    g.FillRectangle(Brushes.Gray, cloneRect.X + i, cloneRect.Y, 1, cloneRect.Height);
+                                }
+                                prevHit = hitSomething;
                             }
+
+                            //cloneBitmap.Save(Main.AppPath + @"\Debug\ProfileImageClone " + foundItems.Count + " " + timestamp + ".png");
+
+
                             //do OCR
-                            firstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                            firstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&");
                             using (var page = firstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                             {
                                 using (var iterator = page.GetIterator())
                                 {
                                     iterator.Begin();
                                     string rawText = iterator.GetText(PageIteratorLevel.TextLine);
-
+                                    rawText = Regex.Replace(rawText, @"\s", "");
                                     foundItems.Add(new InventoryItem(rawText, cloneRect));
 
-                                    g.DrawString(rawText, font, Brushes.DarkBlue, new Point(cloneRect.X, cloneRect.Y));
+                                    g.FillRectangle(Brushes.LightGray, cloneRect.X, cloneRect.Y + cloneRect.Height, cloneRect.Width, cloneRect.Height);
+                                    g.DrawString(rawText, font, Brushes.DarkBlue, new Point(cloneRect.X, cloneRect.Y + cloneRect.Height));
 
 
                                 }
