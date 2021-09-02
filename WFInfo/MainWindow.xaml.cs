@@ -251,7 +251,7 @@ namespace WFInfo
             Settings.snapItNumberBoxWidth = Convert.ToDouble(Settings.settingsObj.GetValue("SnapItNumberBoxWidth"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("SnapMultiThreaded", out _))
-                Settings.settingsObj["SnapMultiThreaded"] = false;
+                Settings.settingsObj["SnapMultiThreaded"] = true;
             Settings.snapMultiThreaded = (bool)Settings.settingsObj.GetValue("SnapMultiThreaded");
 
             if (!Settings.settingsObj.TryGetValue("SnapRowTextDensity", out _))
