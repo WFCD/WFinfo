@@ -1331,11 +1331,13 @@ namespace WFInfo
         /// </summary>
         public void Disconnect()
         {
-            SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
-            JWT = null;
-            rememberMe = false;
-            inGameName = string.Empty;
-            marketSocket.Close(1006);
+            if (marketSocket.ReadyState != WebSocketState.Closed || marketSocket.ReadyState == WebSocketState.Open) {
+                SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
+                JWT = null;
+                rememberMe = false;
+                inGameName = string.Empty;
+                marketSocket.Close(1006);
+            }
         }
 
         public string GetUrlName(string primeName)
@@ -1403,7 +1405,7 @@ namespace WFInfo
                     var response = await client.SendAsync(request);
                     SetJWT(response.Headers);
                     var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-
+                    Main.AddLog($"JWT check response: {profile.ToString()}");
                     return (string)profile.GetValue("role") != "anonymous";
                 }
             }
