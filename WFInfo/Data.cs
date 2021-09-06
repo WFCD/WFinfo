@@ -119,7 +119,7 @@ namespace WFInfo
 
         public bool IsJwtAvailable()
         {
-            return JWT != null;
+            return JWT.Length > 500; //check if the token is of the right length
         }
 
         public int GetGithubVersion()
@@ -981,7 +981,7 @@ namespace WFInfo
                 Overlay.rewardsDisplaying = true;
             }
 
-            if (!line.Contains("MatchingService::EndSession") || !IsJwtAvailable() || !Settings.automaticListing) return;
+            if (!line.Contains("MatchingService::EndSession") || !Settings.automaticListing) return;
 
             if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
@@ -1405,8 +1405,8 @@ namespace WFInfo
                     var response = await client.SendAsync(request);
                     SetJWT(response.Headers);
                     var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-                    Main.AddLog($"JWT check response: {profile.ToString()}");
-                    return (string)profile.GetValue("role") != "anonymous";
+                    Main.AddLog($"JWT check response: {profile}");
+                    return !(bool)profile["profile"]["anonymous"];
                 }
             }
             catch (Exception e)

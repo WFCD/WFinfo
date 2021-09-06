@@ -253,11 +253,11 @@ namespace WFInfo
 
 			Settings.Save();
 
-			RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
-			if (key.GetValue("JWT") != null) // if the key exists then update it, else ignore it.
-			{
-				Main.dataBase.JWT = (string)key.GetValue("JWT");
-				key.Close();
+			try {
+				Main.dataBase.JWT = File.ReadAllText(Main.AppPath + @"\jwt");
+			}
+			catch (FileNotFoundException e) {
+				Main.AddLog($"{e.Message}, JWT not set");
 			}
 
 		}
@@ -296,12 +296,8 @@ namespace WFInfo
 
 		public void Exit(object sender, RoutedEventArgs e) {
 			NotifyIcon.Dispose();
-			RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
 			if (Main.dataBase.rememberMe) // if rememberme was checked then save it
-			{
-				key.SetValue("JWT", Main.dataBase.JWT);
-				key.Close();
-			}
+				File.WriteAllText(Main.AppPath + @"\jwt", Main.dataBase.JWT);
 			Application.Current.Shutdown();
 		}
 
