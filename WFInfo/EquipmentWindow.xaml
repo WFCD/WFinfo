@@ -90,6 +90,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="30" />
                                 <ColumnDefinition Width="70" />
                             </Grid.ColumnDefinitions>
 
@@ -97,14 +98,14 @@
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Foreground="{Binding NameBrush}"/>
                                 <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Foreground="#506464" Padding="5,2,0,0" FontWeight="Normal" />
                             </StackPanel>
-                            
+
                             <Grid Grid.Column="1" Margin="5,0,5,0" Background="Transparent">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                
+
                                 <Label Content="✓" Foreground="#506464" FontSize="13" Padding="0,-13,0,0">
                                     <Label.InputBindings>
                                         <MouseBinding MouseAction="LeftClick" Command="{Binding MarkComplete}" />
@@ -158,8 +159,8 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Label.Style>
-                                    </Label>
-                                
+                                </Label>
+
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0" Margin="0,0,0,0">
                                     <StackPanel.Style>
                                         <Style>
@@ -170,8 +171,8 @@
                                             </Style.Triggers>
                                         </Style>
                                     </StackPanel.Style>
-                                    
-                                    
+
+
                                     <Label Content="＋" Foreground="#506464" FontSize="13" Padding="0,-13,0,0">
                                         <Label.InputBindings>
                                             <MouseBinding MouseAction="LeftClick" Command="{Binding IncrementPart}" />
@@ -191,7 +192,7 @@
                                             </Style>
                                         </Label.Style>
                                     </Label>
-                                    
+
 
                                     <TextBlock x:Name="OwnedTextBlock" Text="{Binding Col1_Text1}" Foreground="{Binding NameBrush}" />
                                     <Label Content="－" Foreground="#506464" FontSize="13" Padding="0,2,0,0">
@@ -218,7 +219,13 @@
                                 <Image HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin2}" Width="14" Source="{Binding Col1_Img1}" Visibility="{Binding Col1_Img1_Shown}"/>
                             </Grid>
 
-                            <Grid Grid.Column="2" Margin="5,0,5,0" Background="Transparent">
+                            <Label Grid.Column="2" Content="{Binding List_Button_Text}" HorizontalAlignment="Center" Foreground="{Binding NameBrush}">
+                                <Label.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding CreateListing}" />
+                                </Label.InputBindings>
+                            </Label>
+
+                            <Grid Grid.Column="3" Margin="5,0,5,0" Background="Transparent">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />

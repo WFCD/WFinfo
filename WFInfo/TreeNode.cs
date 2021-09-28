@@ -670,6 +670,8 @@ namespace WFInfo
             set { SetField(ref _plat, value); }
         }
 
+        public string List_Button_Text => Plat_Val > 0 ? "M" : "";
+
         private int _ducat = 0;
         public int Ducat_Val
         {
@@ -821,6 +823,14 @@ namespace WFInfo
             private set { SetField(ref _markcomplete, value); }
         }
 
+        private ICommand _createListing;
+
+        public ICommand CreateListing
+        {
+            get { return _createListing; }
+            private set { SetField(ref _createListing, value); }
+        }
+
         private string dataRef;
 
         public void MakeClickable(string eqmtRef)
@@ -829,6 +839,7 @@ namespace WFInfo
             DecrementPart = new SimpleCommand(DecrementPartFunc);
             IncrementPart = new SimpleCommand(IncrementPartFunc);
             MarkComplete = new SimpleCommand(MarkCompleteFunc);
+            CreateListing = new SimpleCommand(CreateListingFunc);
         }
 
         public async void DecrementPartFunc()
@@ -857,6 +868,11 @@ namespace WFInfo
             {
                 Main.AddLog("test");
             }*/
+        }
+
+        public async void CreateListingFunc()
+        {
+            await System.Threading.Tasks.Task.Run(() => CreateListingThreaded());
         }
 
         public void ReloadPartOwned(TreeNode Parent)
@@ -933,6 +949,29 @@ namespace WFInfo
             Main.RunOnUIThread(() =>
             {
                 EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
+            });
+        }
+
+        private void CreateListingThreaded()
+        {
+            bool isInSet = Main.dataBase.equipmentData[dataRef] == null;
+            string name = isInSet ? dataRef : dataRef + " Set";
+            var rewardCollection = System.Threading.Tasks.Task.Run(() => 
+                    Main.listingHelper.GetRewardCollection(new List<string> {name})
+                ).Result;
+
+            Main.RunOnUIThread(() =>
+            {
+
+                Main.listingHelper.ScreensList.Add(
+                    new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                if (!Main.listingHelper.IsVisible)
+                {
+                    Main.listingHelper.SetScreen(Main.listingHelper.ScreensList.Count - 1);
+                }
+
+                Main.listingHelper.Show();
+                Main.listingHelper.BringIntoView();
             });
         }
 
