@@ -377,16 +377,33 @@ namespace WFInfo
             Debug.WriteLine($"Getting listing for {primeName}");
             var results = Task.Run(async () => await Main.dataBase.GetTopListings(primeName)).Result;
             var listings = new List<MarketListing>();
-            var sellOrders = new JArray(results["payload"]["sell_orders"].Children());
-            foreach (var item in sellOrders)
+            try
             {
-                var platinum = item.Value<short>("platinum");
-                var amount = item.Value<short>("quantity");
-                var reputation = item["user"].Value<short>("reputation");
-                var listing = new MarketListing(platinum, amount, reputation);
-                Debug.WriteLine($"Getting listing for {listing.ToHumanString()}");
-                listings.Add(listing);
+
+                var sellOrders = new JArray(results["payload"]["sell_orders"].Children());
+                foreach (var item in sellOrders)
+                {
+                    var platinum = item.Value<short>("platinum");
+                    var amount = item.Value<short>("quantity");
+                    var reputation = item["user"].Value<short>("reputation");
+                    var listing = new MarketListing(platinum, amount, reputation);
+                    Debug.WriteLine($"Getting listing for {listing.ToHumanString()}");
+                    listings.Add(listing);
+                }
             }
+            catch (Exception exception)
+            {
+                Main.AddLog(exception.ToString());
+                listings = new List<MarketListing>()
+                {
+                    new MarketListing(0, 0, 0),
+                    new MarketListing(0, 0, 0),
+                    new MarketListing(0, 0, 0),
+                    new MarketListing(0, 0, 0),
+                    new MarketListing(0, 0, 0)
+                };
+            }
+
             return listings;
         }
 
