@@ -77,7 +77,7 @@
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
             <TreeView x:Name="EqmtTree" Background="{x:Null}" BorderBrush="{x:Null}" TreeViewItem.Selected="SingleClickExpand" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}" >
+                    <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}" DataType="{x:Type local:TreeNode}" >
                         <HierarchicalDataTemplate.Resources>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="FontSize" Value="13" />
@@ -86,7 +86,7 @@
                                 <Setter Property="Padding" Value="0,2,0,0" />
                             </Style>
                         </HierarchicalDataTemplate.Resources>
-                        <Grid Visibility="{Binding Grid_Shown}" Background="{Binding Background_Color}">
+                        <Grid Visibility="{Binding Grid_Shown}" Background="{Binding Background_Color, FallbackValue=#161616}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="100" />
@@ -95,8 +95,8 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Background="Transparent">
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Foreground="{Binding NameBrush}"/>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Foreground="#506464" Padding="5,2,0,0" FontWeight="Normal" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Name, FallbackValue=Item Name}" Foreground="{Binding NameBrush, FallbackValue=Gold}"/>
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted, FallbackValue=Vaulted}" Foreground="#506464" Padding="5,2,0,0" FontWeight="Normal" />
                             </StackPanel>
 
                             <Grid Grid.Column="1" Margin="5,0,5,0" Background="Transparent">
@@ -112,49 +112,49 @@
                                     </Label.InputBindings>
                                     <Label.Style>
                                         <Style>
-                                            <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                            <Setter Property="UIElement.Visibility" Value="Hidden" />
                                             <Style.Triggers>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type Border}}}" Value="True" />
                                                         <Condition Binding="{Binding Children.Count}" Value="2" />
                                                     </MultiDataTrigger.Conditions>
-                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                    <Setter Property="UIElement.Visibility" Value="Visible" />
                                                 </MultiDataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type Border}}}" Value="True" />
                                                         <Condition Binding="{Binding Children.Count}" Value="3" />
                                                     </MultiDataTrigger.Conditions>
-                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                    <Setter Property="UIElement.Visibility" Value="Visible" />
                                                 </MultiDataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type Border}}}" Value="True" />
                                                         <Condition Binding="{Binding Children.Count}" Value="4" />
                                                     </MultiDataTrigger.Conditions>
-                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                    <Setter Property="UIElement.Visibility" Value="Visible" />
                                                 </MultiDataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type Border}}}" Value="True" />
                                                         <Condition Binding="{Binding Children.Count}" Value="5" />
                                                         <Condition Binding="{Binding ShowAll}" Value="1"/>
                                                     </MultiDataTrigger.Conditions>
-                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                    <Setter Property="UIElement.Visibility" Value="Visible" />
                                                 </MultiDataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
+                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type Border}}}" Value="True" />
                                                         <Condition Binding="{Binding Children.Count}" Value="6" />
                                                     </MultiDataTrigger.Conditions>
-                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                    <Setter Property="UIElement.Visibility" Value="Visible" />
                                                 </MultiDataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding Mastered}" Value="True" />
+                                                        <Condition Binding="{Binding Mastered, FallbackValue=True}" Value="True" />
                                                     </MultiDataTrigger.Conditions>
-                                                    <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                    <Setter Property="UIElement.Visibility" Value="Visible" />
                                                 </MultiDataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -165,8 +165,8 @@
                                     <StackPanel.Style>
                                         <Style>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Col1_Text1.Length}" Value="0">
-                                                    <Setter Property="StackPanel.IsEnabled" Value="False"/>
+                                                <DataTrigger Binding="{Binding Col1_Text1.Length, FallbackValue=25}" Value="0">
+                                                    <Setter Property="UIElement.IsEnabled" Value="False"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -179,14 +179,14 @@
                                         </Label.InputBindings>
                                         <Label.Style>
                                             <Style>
-                                                <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                                <Setter Property="UIElement.Visibility" Value="Hidden" />
                                                 <Style.Triggers>
                                                     <MultiDataTrigger>
                                                         <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
-                                                            <Condition Binding="{Binding Children.Count}" Value="0" />
+                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver, FallbackValue=True}" Value="True" />
+                                                            <Condition Binding="{Binding Children.Count, FallbackValue=0}" Value="0" />
                                                         </MultiDataTrigger.Conditions>
-                                                        <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                        <Setter Property="UIElement.Visibility" Value="Visible" />
                                                     </MultiDataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -194,32 +194,32 @@
                                     </Label>
 
 
-                                    <TextBlock x:Name="OwnedTextBlock" Text="{Binding Col1_Text1}" Foreground="{Binding NameBrush}" />
+                                    <TextBlock x:Name="OwnedTextBlock" Text="{Binding Col1_Text1, FallbackValue=2/3}" Foreground="{Binding NameBrush, FallbackValue=#C0C0C0}" />
                                     <Label Content="－" Foreground="#506464" FontSize="13" Padding="0,2,0,0">
                                         <Label.InputBindings>
                                             <MouseBinding MouseAction="LeftClick" Command="{Binding DecrementPart}" />
                                         </Label.InputBindings>
                                         <Label.Style>
                                             <Style>
-                                                <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                                <Setter Property="UIElement.Visibility" Value="Hidden" />
                                                 <Style.Triggers>
                                                     <MultiDataTrigger>
                                                         <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver}" Value="True" />
-                                                            <Condition  Binding="{Binding Children.Count}" Value="0" />
+                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=IsMouseOver, FallbackValue=True}" Value="True" />
+                                                            <Condition  Binding="{Binding Children.Count, FallbackValue=0}" Value="0" />
                                                         </MultiDataTrigger.Conditions>
-                                                        <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                                        <Setter Property="UIElement.Visibility" Value="Visible" />
                                                     </MultiDataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Label.Style>
                                     </Label>
                                 </StackPanel>
-                                <TextBlock HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin1}" Text="{Binding Col1_Text2}" Foreground="{Binding NameBrush}" />
-                                <Image HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin2}" Width="14" Source="{Binding Col1_Img1}" Visibility="{Binding Col1_Img1_Shown}"/>
+                                <TextBlock HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin1, FallbackValue=0\,0\,38\,0}" Text="{Binding Col1_Text2, FallbackValue=25}" Foreground="{Binding NameBrush, FallbackValue=#C0C0C0}" />
+                                <Image HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin2, FallbackValue=0\,0\,20\,0}" Width="14" Source="{Binding Col1_Img1}" Visibility="{Binding Col1_Img1_Shown}" />
                             </Grid>
 
-                            <Label Grid.Column="2" Content="{Binding List_Button_Text}" HorizontalAlignment="Center" Foreground="{Binding NameBrush}">
+                            <Label Grid.Column="2" Content="{Binding List_Button_Text, FallbackValue=M}" HorizontalAlignment="Center" Foreground="{Binding NameBrush, FallbackValue=#C0C0C0}">
                                 <Label.InputBindings>
                                     <MouseBinding MouseAction="LeftClick" Command="{Binding CreateListing}" />
                                 </Label.InputBindings>
@@ -235,8 +235,8 @@
 
                                 <TextBlock HorizontalAlignment="Left"  Grid.Column="0" Text="{Binding Col2_Text1}" Foreground="{Binding NameBrush}" />
                                 <TextBlock HorizontalAlignment="Right" Grid.Column="2" Text="{Binding Col2_Text2}" Foreground="{Binding NameBrush}" Margin="0,0,5,0"/>
-                                <TextBlock HorizontalAlignment="Right" Grid.Column="3" Margin="{Binding Col2_Margin1}" Text="{Binding Col2_Text3}" Foreground="{Binding NameBrush}" />
-                                <Image HorizontalAlignment="Right" Grid.Column="3" Margin="{Binding Col2_Margin2}" Width="14" Source="{Binding Col2_Img1}" Visibility="{Binding Col2_Img1_Shown}"/>
+                                <TextBlock HorizontalAlignment="Right" Grid.Column="3" Margin="{Binding Col2_Margin1, FallbackValue=0\,0\,18\,0}" Text="{Binding Col2_Text3, FallbackValue=100}" Foreground="{Binding NameBrush, FallbackValue=#C0C0C0}" />
+                                <Image HorizontalAlignment="Right" Grid.Column="3" Margin="{Binding Col2_Margin2, FallbackValue=0\,0\,0\,0}" Width="14" Source="{Binding Col2_Img1}" Visibility="{Binding Col2_Img1_Shown}"/>
                             </Grid>
                         </Grid>
                     </HierarchicalDataTemplate>
