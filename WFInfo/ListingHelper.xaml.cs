@@ -316,12 +316,16 @@ namespace WFInfo
         /// </summary>
         /// <param name="primeNames">The human friendly name to search listings for</param>
         /// <returns>the data for an entire "Create listing" screen</returns>
-        public RewardCollection GetRewardCollection(List<string> primeNames)
+        public RewardCollection GetRewardCollection(List<string> primeNames, bool useRewardIndex = true)
         {
             var platinumValues = new List<short>(4);
             var marketListings = new List<List<MarketListing>>(5);
-            var index = SelectedRewardIndex;
-            SelectedRewardIndex = 0;
+            var index = (short)0;
+            if (useRewardIndex) {
+                index = SelectedRewardIndex;
+                SelectedRewardIndex = 0;
+            }
+
             if (primeNames == null)
             {
                 throw new ArgumentNullException(nameof(primeNames));
@@ -345,6 +349,14 @@ namespace WFInfo
                 }
 
             }
+
+            //should not happen, but could cause crashes
+            if (index >= primeNames.Count)
+            {
+                Main.AddLog($"RewardIndex was set to invalid Value: {index}, but there are only {primeNames.Count} items in the Listing");
+                index = (short) (primeNames.Count - 1);
+            }
+
             return new RewardCollection(primeNames, platinumValues, marketListings, index);
         }
 

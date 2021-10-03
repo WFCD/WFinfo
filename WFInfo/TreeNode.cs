@@ -957,21 +957,28 @@ namespace WFInfo
             bool isInSet = Main.dataBase.equipmentData[dataRef] == null;
             string name = isInSet ? dataRef : dataRef + " Set";
             var rewardCollection = System.Threading.Tasks.Task.Run(() => 
-                    Main.listingHelper.GetRewardCollection(new List<string> {name})
+                    Main.listingHelper.GetRewardCollection(new List<string> {name}, false)
                 ).Result;
-
+            
             Main.RunOnUIThread(() =>
             {
-
-                Main.listingHelper.ScreensList.Add(
-                    new KeyValuePair<string, RewardCollection>("", rewardCollection));
-                if (!Main.listingHelper.IsVisible)
+                try
                 {
-                    Main.listingHelper.SetScreen(Main.listingHelper.ScreensList.Count - 1);
-                }
 
-                Main.listingHelper.Show();
-                Main.listingHelper.BringIntoView();
+                    Main.listingHelper.ScreensList.Add(
+                        new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                    if (!Main.listingHelper.IsVisible)
+                    {
+                        Main.listingHelper.SetScreen(Main.listingHelper.ScreensList.Count - 1);
+                    }
+
+                    Main.listingHelper.Show();
+                    Main.listingHelper.BringIntoView();
+                }
+                catch (Exception ex)
+                {
+                    Main.AddLog(ex.ToString());
+                }
             });
         }
 
