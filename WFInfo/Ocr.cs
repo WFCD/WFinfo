@@ -28,6 +28,9 @@ namespace WFInfo
     class OCR
     {
         private static readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
+
+        private static Screen wfScreen = Screen.PrimaryScreen;
+
         #region variabels and sizzle
         public enum WFtheme : int
         {
@@ -131,7 +134,6 @@ namespace WFInfo
 
         private static Bitmap bigScreenshot;
         private static Bitmap partialScreenshot;
-        public static Bitmap RewarIndexScreenshot;
         private static Bitmap partialScreenshotExpanded;
 
         private static WFtheme activeTheme;
@@ -2344,13 +2346,12 @@ namespace WFInfo
 
             if (window == null || window.Width == 0 || window.Height == 0)
             {
-                window = Screen.PrimaryScreen.Bounds;
+                window = wfScreen.Bounds;
                 center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
 
                 width *= (int)dpiScaling;
                 height *= (int)dpiScaling;
             }
-
 
             Bitmap image = new Bitmap(width, height);
             Size FullscreenSize = new Size(image.Width, image.Height);
@@ -2363,13 +2364,13 @@ namespace WFInfo
         internal static void SnapScreenshot()
         {
             Main.snapItOverlayWindow.Populate(CaptureScreenshot());
-            Main.snapItOverlayWindow.Show();
-            Main.snapItOverlayWindow.Left = window.Left;
-            Main.snapItOverlayWindow.Top = window.Top;
-            Main.snapItOverlayWindow.Width = window.Width;
-            Main.snapItOverlayWindow.Height = window.Height;
+            Main.snapItOverlayWindow.Left = window.Left / dpiScaling;
+            Main.snapItOverlayWindow.Top = window.Top / dpiScaling;
+            Main.snapItOverlayWindow.Width = window.Width / dpiScaling;
+            Main.snapItOverlayWindow.Height = window.Height / dpiScaling;
             Main.snapItOverlayWindow.Topmost = true;
             Main.snapItOverlayWindow.Focusable = true;
+            Main.snapItOverlayWindow.Show();
             Main.snapItOverlayWindow.Focus();
         }
 
@@ -2408,6 +2409,10 @@ namespace WFInfo
                             });
                             Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
 
+                            wfScreen = Screen.FromHandle(HandleRef.Handle);
+                            string screenType = (wfScreen == Screen.PrimaryScreen ? "primary" : "secondary");
+                            Main.AddLog("Warframe display: " + wfScreen.DeviceName + ", " + screenType);
+
                             //try and catch any UAC related issues
                             try {
                                 bool _ = Warframe.HasExited;
@@ -2433,7 +2438,7 @@ namespace WFInfo
         {
             try
             {
-                var mon = Win32.MonitorFromPoint(new Point(Screen.PrimaryScreen.Bounds.Left+1, Screen.PrimaryScreen.Bounds.Top+1), 2);
+                var mon = Win32.MonitorFromPoint(new Point(wfScreen.Bounds.Left+1, wfScreen.Bounds.Top+1), 2);
                 Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
                 //Win32.GetDpiForMonitor(mon, Win32.DpiType.Angular, out var dpiXAngular, out _);
                 //Win32.GetDpiForMonitor(mon, Win32.DpiType.Raw, out var dpiXRaw, out _);
@@ -2462,17 +2467,18 @@ namespace WFInfo
 
         public static void UpdateWindow(Bitmap image = null)
         {
+            bool warframeOk = VerifyWarframe();
             RefreshDPIScaling();
-            if (image != null || !VerifyWarframe())
+            if (image != null || !warframeOk)
             {
-                int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width;
-                int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height;
+                int width = image?.Width ?? wfScreen.Bounds.Width;
+                int height = image?.Height ?? wfScreen.Bounds.Height;
                 window = new Rectangle(0, 0, width, height);
                 center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
                 if (image != null)
                     Main.AddLog("DETECTED LOADED IMAGE BOUNDS: " + window.ToString());
                 else
-                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + Screen.PrimaryScreen.DeviceName);
+                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + wfScreen.DeviceName);
 
                 RefreshScaling();
                 return;
@@ -2482,11 +2488,11 @@ namespace WFInfo
             { // get window size of warframe
                 if (Settings.debug)
                 { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
-                    int width = Screen.PrimaryScreen.Bounds.Width * (int)dpiScaling;
-                    int height = Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
+                    int width = wfScreen.Bounds.Width * (int)dpiScaling;
+                    int height = wfScreen.Bounds.Height * (int)dpiScaling;
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
-                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + Screen.PrimaryScreen.DeviceName);
+                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + wfScreen.DeviceName);
                     RefreshScaling();
                     return;
                 }
@@ -2541,7 +2547,7 @@ namespace WFInfo
                         });
                     }
                 }
-                    
+
                 center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
                 RefreshScaling();
             }
