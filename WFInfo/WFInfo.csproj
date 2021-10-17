@@ -46,113 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Roboto\Roboto-Black.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-BlackItalic.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-Bold.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-BoldItalic.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-Italic.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-Light.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-LightItalic.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-Medium.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-MediumItalic.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-Regular.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-Thin.ttf" />
-    <Resource Include="Resources\Roboto\Roboto-ThinItalic.ttf" />
-    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-Bold.ttf" />
-    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-BoldItalic.ttf" />
-    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-Italic.ttf" />
-    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-Light.ttf" />
-    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-LightItalic.ttf" />
-    <Resource Include="Resources\RobotoCondensed\RobotoCondensed-Regular.ttf" />
-    <Resource Include="Resources\RobotoMono\RobotoMono-Bold.ttf" />
-    <Resource Include="Resources\RobotoMono\RobotoMono-BoldItalic.ttf" />
-    <Resource Include="Resources\RobotoMono\RobotoMono-Italic.ttf" />
-    <Resource Include="Resources\RobotoMono\RobotoMono-Light.ttf" />
-    <Resource Include="Resources\RobotoMono\RobotoMono-LightItalic.ttf" />
-    <Resource Include="Resources\RobotoMono\RobotoMono-Medium.ttf" />
-    <Resource Include="Resources\RobotoMono\RobotoMono-MediumItalic.ttf" />
-    <Resource Include="Resources\RobotoMono\RobotoMono-Regular.ttf" />
-    <Resource Include="Resources\RobotoMono\RobotoMono-Thin.ttf" />
-    <Resource Include="Resources\RobotoMono\RobotoMono-ThinItalic.ttf" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\background_dark.jpg" />
-    <Resource Include="Resources\discord_h.png" />
-    <Resource Include="Resources\discord.png" />
-    <Resource Include="Resources\Axi.png" />
-    <Resource Include="Resources\Lith.png" />
-    <Resource Include="Resources\Meso.png" />
-    <Resource Include="Resources\Neo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\ducat_w.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\foundry.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\foundry_h.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\gear.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\gear_h.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\home.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\home_h.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\NameTray.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Panel_UV.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Panel_V.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\panelBG.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\plat.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Relic.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Relic_h.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Settings.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Settings_h.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Target.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Target.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Target1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\TargetBox.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\warning-sign.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\WFLogo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Reload.png" />
-    <Resource Include="Resources\Reload_h.png" />
+    <Resource Include="Resources\*"/>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="WFLogo.ico" />
@@ -170,27 +64,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\background.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\WFLogo.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\achievment_03.wav" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\tressure.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\tressure_h.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\plusone.png" />
-    <Resource Include="Resources\plusone_h.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\SearchIcon.png" />
-    <Resource Include="Resources\SearchIcon_h.png" />
+    <EmbeddedResource Update="Resources\achievment_03.wav" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="FodyWeavers.xml" />
@@ -270,8 +144,5 @@
     <PackageReference Include="System.Xml.ReaderWriter" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
     <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="SnapItOverlay.cs" />
   </ItemGroup>
 </Project>
