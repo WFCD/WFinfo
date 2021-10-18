@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,6 +12,7 @@ namespace WFInfo
     public class RelicsViewModel : ObservableObject
     {
         private string _textBoxText = "";
+        private bool _showAllRelics;
 
         public string TextBoxText
         {
@@ -23,6 +25,26 @@ namespace WFInfo
         }
 
         public bool IsTextboxEmpty => TextBoxText.IsNullOrEmpty();
+        public List<TreeNode> RelicNodes { get; } = new List<TreeNode>();
+
+        public bool ShowAllRelics
+        {
+            get
+            {
+                
+                return _showAllRelics;
+            }
+            set
+            {
+                foreach (TreeNode era in RelicNodes)
+                    foreach (TreeNode relic in era.Children)
+                        relic.topLevel = value;
+                SetProperty(ref _showAllRelics, value);
+                OnPropertyChanged(nameof(ShowAllRelicsText));
+            }
+        }
+
+        public string ShowAllRelicsText => ShowAllRelics ? "All Relics" : "Relic Eras";
     }
     /// <summary>
     /// Interaction logic for RelicsWindow.xaml
@@ -30,13 +52,11 @@ namespace WFInfo
     public partial class RelicsWindow : Window
     {
         private bool showAllRelics = false;
-        public static List<TreeNode> RelicNodes { get; set; }
 
         private string[] SearchText => SearchActive ? _relicsViewModel.TextBoxText.Split(' ') : null;
 
         private bool SearchActive => !_relicsViewModel.TextBoxText.IsNullOrEmpty();
 
-        // set => 
         private RelicsViewModel _relicsViewModel = new RelicsViewModel();
 
         public RelicsWindow()
@@ -49,6 +69,12 @@ namespace WFInfo
                 {
                     ReapplyFilters();
                 }
+                else if (args.PropertyName == nameof(RelicsViewModel.ShowAllRelics))
+                {
+                    RelicTree.Items.Clear();
+                    RefreshVisibleRelics();
+                }
+                
             };
         }
 
@@ -70,9 +96,9 @@ namespace WFInfo
             if (showAllRelics)
             {
                 List<TreeNode> activeNodes = new List<TreeNode>();
-                foreach (TreeNode era in RelicNodes)
-                    foreach (TreeNode relic in era.ChildrenFiltered)
-                        activeNodes.Add(relic);
+                foreach (TreeNode era in _relicsViewModel.RelicNodes)
+                foreach (TreeNode relic in era.ChildrenFiltered)
+                    activeNodes.Add(relic);
 
 
                 for (index = 0; index < RelicTree.Items.Count;)
@@ -94,7 +120,7 @@ namespace WFInfo
             }
             else
             {
-                foreach (TreeNode era in RelicNodes)
+                foreach (TreeNode era in _relicsViewModel.RelicNodes)
                 {
                     int curr = RelicTree.Items.IndexOf(era);
                     if (era.ChildrenFiltered.Count == 0)
@@ -118,15 +144,15 @@ namespace WFInfo
         private void ReapplyFilters()
         {
 
-            foreach (TreeNode era in RelicNodes)
+            foreach (TreeNode era in _relicsViewModel.RelicNodes)
                 era.ResetFilter();
 
             if ((bool)vaulted.IsChecked)
-                foreach (TreeNode era in RelicNodes)
+                foreach (TreeNode era in _relicsViewModel.RelicNodes)
                     era.FilterOutVaulted(true);
 
             if (SearchActive)
-                foreach (TreeNode era in RelicNodes)
+                foreach (TreeNode era in _relicsViewModel.RelicNodes)
                     era.FilterSearchText(SearchText, false, true);
 
             RefreshVisibleRelics();
@@ -136,7 +162,7 @@ namespace WFInfo
         {
             if ((bool)vaulted.IsChecked)
             {
-                foreach (TreeNode era in RelicNodes)
+                foreach (TreeNode era in _relicsViewModel.RelicNodes)
                     era.FilterOutVaulted(true);
 
                 RefreshVisibleRelics();
@@ -155,7 +181,7 @@ namespace WFInfo
 
             if (IsLoaded)
             {
-                foreach (TreeNode era in RelicNodes)
+                foreach (TreeNode era in _relicsViewModel.RelicNodes)
                 {
                     era.Sort(SortBox.SelectedIndex);
                     era.RecolorChildren();
@@ -192,32 +218,15 @@ namespace WFInfo
             }
         }
 
-        private void ToggleShowAllRelics(object sender, RoutedEventArgs e)
-        {
-            showAllRelics = !showAllRelics;
-            foreach (TreeNode era in RelicNodes)
-                foreach (TreeNode relic in era.Children)
-                    relic.topLevel = showAllRelics;
-
-            if (showAllRelics)
-                relicComboButton.Content = "All Relics";
-            else
-                relicComboButton.Content = "Relic Eras";
-
-
-            RelicTree.Items.Clear();
-            RefreshVisibleRelics();
-        }
-
         private void ExpandAll(object sender, RoutedEventArgs e)
         {
-            foreach (TreeNode era in RelicNodes)
+            foreach (TreeNode era in _relicsViewModel.RelicNodes)
                 era.ChangeExpandedTo(true);
         }
 
         private void CollapseAll(object sender, RoutedEventArgs e)
         {
-            foreach (TreeNode era in RelicNodes)
+            foreach (TreeNode era in _relicsViewModel.RelicNodes)
                 era.ChangeExpandedTo(false);
         }
 
@@ -236,15 +245,14 @@ namespace WFInfo
         { // triggers when the window is first loaded, populates all the listviews once.
 
             #region Populate grouped collection
-            RelicNodes = new List<TreeNode>();
 
             TreeNode lith = new TreeNode("Lith", "", false, 0);
             TreeNode meso = new TreeNode("Meso", "", false, 0);
             TreeNode neo = new TreeNode("Neo", "", false, 0);
             TreeNode axi = new TreeNode("Axi", "", false, 0);
-            RelicNodes.AddRange(new[] { lith, meso, neo, axi });
+            _relicsViewModel.RelicNodes.AddRange(new[] { lith, meso, neo, axi });
             int eraNum = 0;
-            foreach (TreeNode head in RelicNodes)
+            foreach (TreeNode head in _relicsViewModel.RelicNodes)
             {
                 double sumIntact = 0;
                 double sumRad = 0;
