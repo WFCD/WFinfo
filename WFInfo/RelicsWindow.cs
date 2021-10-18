@@ -3,22 +3,53 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
+using WebSocketSharp;
 
 namespace WFInfo
 {
+    public class RelicsViewModel : ObservableObject
+    {
+        private string _textBoxText = "";
+
+        public string TextBoxText
+        {
+            get => _textBoxText;
+            set
+            {
+                SetProperty(ref _textBoxText, value); 
+                OnPropertyChanged(nameof(IsTextboxEmpty));
+            }
+        }
+
+        public bool IsTextboxEmpty => TextBoxText.IsNullOrEmpty();
+    }
     /// <summary>
     /// Interaction logic for RelicsWindow.xaml
     /// </summary>
     public partial class RelicsWindow : Window
     {
-        private bool searchActive = false;
         private bool showAllRelics = false;
         public static List<TreeNode> RelicNodes { get; set; }
-        public static string[] searchText;
+
+        private string[] SearchText => SearchActive ? _relicsViewModel.TextBoxText.Split(' ') : null;
+
+        private bool SearchActive => !_relicsViewModel.TextBoxText.IsNullOrEmpty();
+
+        // set => 
+        private RelicsViewModel _relicsViewModel = new RelicsViewModel();
 
         public RelicsWindow()
         {
             InitializeComponent();
+            DataContext = this._relicsViewModel;
+            this._relicsViewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(RelicsViewModel.TextBoxText))
+                {
+                    ReapplyFilters();
+                }
+            };
         }
 
         private void Hide(object sender, RoutedEventArgs e)
@@ -94,9 +125,9 @@ namespace WFInfo
                 foreach (TreeNode era in RelicNodes)
                     era.FilterOutVaulted(true);
 
-            if (searchText != null && searchText.Length != 0)
+            if (SearchActive)
                 foreach (TreeNode era in RelicNodes)
-                    era.FilterSearchText(searchText, false, true);
+                    era.FilterSearchText(SearchText, false, true);
 
             RefreshVisibleRelics();
         }
@@ -113,22 +144,6 @@ namespace WFInfo
             else
                 ReapplyFilters();
             
-        }
-
-        private void TextboxTextChanged(object sender, TextChangedEventArgs e)
-        {
-            searchActive = textBox.Text.Length > 0 && textBox.Text != "Filter Terms";
-            if (textBox.IsLoaded)
-            {
-                if (searchActive || (searchText != null && searchText.Length > 0))
-                {
-                    if (searchActive)
-                        searchText = textBox.Text.Split(' ');
-                    else
-                        searchText = null;
-                    ReapplyFilters();
-                }
-            }
         }
 
         private void SortBoxChanged(object sender, SelectionChangedEventArgs e)
@@ -175,18 +190,6 @@ namespace WFInfo
                     }
                 }
             }
-        }
-
-        private void TextBoxFocus(object sender, RoutedEventArgs e)
-        {
-            if (!searchActive)
-                textBox.Clear();
-        }
-
-        private void TextBoxLostFocus(object sender, RoutedEventArgs e)
-        {
-            if (!searchActive)
-                textBox.Text = "Filter Terms";
         }
 
         private void ToggleShowAllRelics(object sender, RoutedEventArgs e)
