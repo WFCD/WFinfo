@@ -1,8 +1,12 @@
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using WebSocketSharp;
@@ -11,8 +15,18 @@ namespace WFInfo
 {
     public class RelicsViewModel : ObservableObject
     {
+        private RelicsViewModel()
+        {
+            _relicTreeItems = new ObservableCollection<TreeNode>();
+            ItemsView = new ListCollectionView(_relicTreeItems);
+        }
+
+        public static RelicsViewModel Instance { get; } = new RelicsViewModel();
         private string _textBoxText = "";
         private bool _showAllRelics;
+        private ObservableCollection<TreeNode> _relicTreeItems;
+        private int _selectedIndex;
+        private bool _hideVaulted = true;
 
         public string TextBoxText
         {
@@ -37,14 +51,166 @@ namespace WFInfo
             set
             {
                 foreach (TreeNode era in RelicNodes)
-                    foreach (TreeNode relic in era.Children)
-                        relic.topLevel = value;
+                foreach (TreeNode relic in era.Children)
+                    relic.topLevel = value;
                 SetProperty(ref _showAllRelics, value);
                 OnPropertyChanged(nameof(ShowAllRelicsText));
             }
         }
 
+        public bool HideVaulted
+        {
+            get => _hideVaulted;
+            set
+            { 
+                SetProperty(ref _hideVaulted, value);
+                if (value)
+                {
+                    foreach (TreeNode era in RelicNodes)
+                        era.FilterOutVaulted(true);
+     
+                    RefreshVisibleRelics();
+                }
+                else
+                    ReapplyFilters();
+            }
+        }
+
         public string ShowAllRelicsText => ShowAllRelics ? "All Relics" : "Relic Eras";
+
+        public ObservableCollection<TreeNode> RelicTreeItems
+        {
+            get => _relicTreeItems;
+            set => SetProperty(ref _relicTreeItems, value);
+        }
+
+        public ICollectionView ItemsView { get; }
+
+        public int SelectedIndex
+        {
+            get => _selectedIndex;
+            set
+            {
+                SetProperty(ref _selectedIndex, value);
+                SortBoxChanged();
+            }
+        }
+        private string[] SearchText => SearchActive ? TextBoxText.Split(' ') : null;
+
+        private bool SearchActive => !TextBoxText.IsNullOrEmpty();
+        // public ObservableCollection<SortDescription> SortDescriptions { get; } = new ObservableCollection<SortDescription>();
+        public void SortBoxChanged()
+        {
+            // 0 - Name
+            // 1 - Average intact plat
+            // 2 - Average radiant plat
+            // 3 - Difference (radiant-intact)
+        
+            foreach (TreeNode era in RelicNodes)
+            {
+                era.Sort(SelectedIndex);
+                era.RecolorChildren();
+            }
+            if (ShowAllRelics)
+            {
+                ItemsView.SortDescriptions.Clear();
+                //TODO:
+                //_relicTreeItems.IsLiveSorting = true;
+                switch (SelectedIndex)
+                {
+                    case 1:
+                        ItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Intact_Val", System.ComponentModel.ListSortDirection.Descending));
+                        break;
+                    case 2:
+                        ItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Radiant_Val", System.ComponentModel.ListSortDirection.Descending));
+                        break;
+                    case 3:
+                        ItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
+                        break;
+                    default:
+                        ItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Name_Sort", System.ComponentModel.ListSortDirection.Ascending));
+                        break;
+                }
+
+                bool i = false;
+                foreach (TreeNode relic in _relicTreeItems)
+                {
+                    i = !i;
+                    if (i)
+                        relic.Background_Color = TreeNode.BACK_D_BRUSH;
+                    else
+                        relic.Background_Color = TreeNode.BACK_U_BRUSH;
+                }
+            }
+        }
+
+        public void RefreshVisibleRelics()
+        {
+            int index = 0;
+            if (ShowAllRelics)
+            {
+                List<TreeNode> activeNodes = new List<TreeNode>();
+                foreach (TreeNode era in RelicNodes)
+                foreach (TreeNode relic in era.ChildrenFiltered)
+                    activeNodes.Add(relic);
+
+
+                for (index = 0; index < _relicTreeItems.Count;)
+                {
+                    TreeNode relic = (TreeNode)_relicTreeItems.ElementAt(index);
+                    if (!activeNodes.Contains(relic))
+                        _relicTreeItems.RemoveAt(index);
+                    else
+                    {
+                        activeNodes.Remove(relic);
+                        index++;
+                    }
+                }
+
+                foreach (TreeNode relic in activeNodes)
+                    _relicTreeItems.Add(relic);
+
+                SortBoxChanged();
+            }
+            else
+            {
+                foreach (TreeNode era in RelicNodes)
+                {
+                    int curr = _relicTreeItems.IndexOf(era);
+                    if (era.ChildrenFiltered.Count == 0)
+                    {
+                        if (curr != -1)
+                            _relicTreeItems.RemoveAt(curr);
+                    }
+                    else
+                    {
+                        if (curr == -1)
+                            _relicTreeItems.Insert(index, era);
+
+                        index++;
+                    }
+                    era.RecolorChildren();
+                }
+            }
+            // _relicTreeItems.Refresh();
+        }
+
+        public void ReapplyFilters()
+        {
+        
+            foreach (TreeNode era in RelicNodes)
+                era.ResetFilter();
+        
+            if (HideVaulted)
+                foreach (TreeNode era in RelicNodes)
+                    era.FilterOutVaulted(true);
+        
+            if (SearchActive)
+                foreach (TreeNode era in RelicNodes)
+                    era.FilterSearchText(SearchText, false, true);
+        
+            RefreshVisibleRelics();
+        }
     }
     /// <summary>
     /// Interaction logic for RelicsWindow.xaml
@@ -53,11 +219,10 @@ namespace WFInfo
     {
         private bool showAllRelics = false;
 
-        private string[] SearchText => SearchActive ? _relicsViewModel.TextBoxText.Split(' ') : null;
+      
 
-        private bool SearchActive => !_relicsViewModel.TextBoxText.IsNullOrEmpty();
-
-        private RelicsViewModel _relicsViewModel = new RelicsViewModel();
+        private RelicsViewModel _relicsViewModel = RelicsViewModel.Instance;
+        private ObservableCollection<TreeNode> _relicTreeItems => _relicsViewModel.RelicTreeItems;
 
         public RelicsWindow()
         {
@@ -67,12 +232,13 @@ namespace WFInfo
             {
                 if (args.PropertyName == nameof(RelicsViewModel.TextBoxText))
                 {
-                    ReapplyFilters();
+                    _relicsViewModel.ReapplyFilters();
                 }
                 else if (args.PropertyName == nameof(RelicsViewModel.ShowAllRelics))
                 {
-                    RelicTree.Items.Clear();
-                    RefreshVisibleRelics();
+                    // _relicTreeItems = RelicTree.Items;
+                    _relicTreeItems.Clear();
+                    _relicsViewModel.RefreshVisibleRelics();
                 }
                 
             };
@@ -90,133 +256,6 @@ namespace WFInfo
                 DragMove();
         }
 
-        private void RefreshVisibleRelics()
-        {
-            int index = 0;
-            if (showAllRelics)
-            {
-                List<TreeNode> activeNodes = new List<TreeNode>();
-                foreach (TreeNode era in _relicsViewModel.RelicNodes)
-                foreach (TreeNode relic in era.ChildrenFiltered)
-                    activeNodes.Add(relic);
-
-
-                for (index = 0; index < RelicTree.Items.Count;)
-                {
-                    TreeNode relic = (TreeNode)RelicTree.Items.GetItemAt(index);
-                    if (!activeNodes.Contains(relic))
-                        RelicTree.Items.RemoveAt(index);
-                    else
-                    {
-                        activeNodes.Remove(relic);
-                        index++;
-                    }
-                }
-
-                foreach (TreeNode relic in activeNodes)
-                    RelicTree.Items.Add(relic);
-
-                SortBoxChanged(null, null);
-            }
-            else
-            {
-                foreach (TreeNode era in _relicsViewModel.RelicNodes)
-                {
-                    int curr = RelicTree.Items.IndexOf(era);
-                    if (era.ChildrenFiltered.Count == 0)
-                    {
-                        if (curr != -1)
-                            RelicTree.Items.RemoveAt(curr);
-                    }
-                    else
-                    {
-                        if (curr == -1)
-                            RelicTree.Items.Insert(index, era);
-
-                        index++;
-                    }
-                    era.RecolorChildren();
-                }
-            }
-            RelicTree.Items.Refresh();
-        }
-
-        private void ReapplyFilters()
-        {
-
-            foreach (TreeNode era in _relicsViewModel.RelicNodes)
-                era.ResetFilter();
-
-            if ((bool)vaulted.IsChecked)
-                foreach (TreeNode era in _relicsViewModel.RelicNodes)
-                    era.FilterOutVaulted(true);
-
-            if (SearchActive)
-                foreach (TreeNode era in _relicsViewModel.RelicNodes)
-                    era.FilterSearchText(SearchText, false, true);
-
-            RefreshVisibleRelics();
-        }
-
-        private void VaultedClick(object sender, RoutedEventArgs e)
-        {
-            if ((bool)vaulted.IsChecked)
-            {
-                foreach (TreeNode era in _relicsViewModel.RelicNodes)
-                    era.FilterOutVaulted(true);
-
-                RefreshVisibleRelics();
-            }
-            else
-                ReapplyFilters();
-            
-        }
-
-        private void SortBoxChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // 0 - Name
-            // 1 - Average intact plat
-            // 2 - Average radiant plat
-            // 3 - Difference (radiant-intact)
-
-            if (IsLoaded)
-            {
-                foreach (TreeNode era in _relicsViewModel.RelicNodes)
-                {
-                    era.Sort(SortBox.SelectedIndex);
-                    era.RecolorChildren();
-                }
-                if (showAllRelics)
-                {
-                    RelicTree.Items.SortDescriptions.Clear();
-                    RelicTree.Items.IsLiveSorting = true;
-                    switch (SortBox.SelectedIndex)
-                    {
-                        case 1:
-                            RelicTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Intact_Val", System.ComponentModel.ListSortDirection.Descending));
-                            break;
-                        case 2:
-                            RelicTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Radiant_Val", System.ComponentModel.ListSortDirection.Descending));
-                            break;
-                        case 3:
-                            RelicTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
-                            break;
-                        default:
-                            RelicTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Name_Sort", System.ComponentModel.ListSortDirection.Ascending));
-                            break;
-                    }
-                    bool i = false;
-                    foreach (TreeNode relic in RelicTree.Items)
-                    {
-                        i = !i;
-                        if (i)
-                            relic.Background_Color = TreeNode.BACK_D_BRUSH;
-                        else
-                            relic.Background_Color = TreeNode.BACK_U_BRUSH;
-                    }
-                }
-            }
-        }
 
         private void ExpandAll(object sender, RoutedEventArgs e)
         {
@@ -285,9 +324,9 @@ namespace WFInfo
                 head.ResetFilter();
                 head.FilterOutVaulted();
                 head.RecolorChildren();
-                RelicTree.Items.Add(head);
+                _relicTreeItems.Add(head);
             }
-            SortBoxChanged(null, null);
+            _relicsViewModel.SortBoxChanged();
             #endregion
         }
     }

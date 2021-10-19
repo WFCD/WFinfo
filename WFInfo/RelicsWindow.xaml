@@ -23,8 +23,8 @@
 
         <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." Click="VaultedClick"
-                      IsChecked="True" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" />
+            <CheckBox  Content="Hide Vaulted" ToolTip="Show vaulted items." 
+                      IsChecked="{Binding HideVaulted}" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" />
  
             <TextBox
                 Margin="191,0,0,0" VerticalContentAlignment="Center" Padding="0"
@@ -81,8 +81,10 @@
                         </Style>
                     </Border.Style>
                     <ComboBox x:Name="SortBox" Background="#FF0F0F0F" Foreground="#FFAFD0D9"
-                              SelectionChanged="SortBoxChanged" BorderThickness="0"
+                               BorderThickness="0"
+                               
                               Style="{DynamicResource ComboBoxStyle1}"
+                              SelectedIndex="{Binding SelectedIndex}"
                               ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}">
                         <ComboBoxItem IsSelected="True" Content="Name" />
                         <ComboBoxItem Content="Average intact plat" />
@@ -109,6 +111,8 @@
                HorizontalAlignment="Right" Height="27" VerticalAlignment="Top" />
         <Grid x:Name="ListGrid" Margin="1,65,1,1">
             <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}"
+                      ItemsSource="{Binding RelicTreeItems}"
+                      
                       TreeViewItem.Selected="SingleClickExpand" VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
