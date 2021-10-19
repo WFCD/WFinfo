@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.Input;
 using WebSocketSharp;
 
 namespace WFInfo
@@ -19,6 +20,14 @@ namespace WFInfo
         {
             _relicTreeItems = new ObservableCollection<TreeNode>();
             ItemsView = new ListCollectionView(_relicTreeItems);
+            ExpandAllCommand = new RelayCommand(() => ExpandOrCollapseAll(true));
+            CollapseAllCommand = new RelayCommand(() => ExpandOrCollapseAll(false));
+        }
+
+        private void ExpandOrCollapseAll(bool expand)
+        {
+            foreach (TreeNode era in RelicNodes)
+                era.ChangeExpandedTo(expand);
         }
 
         public static RelicsViewModel Instance { get; } = new RelicsViewModel();
@@ -34,10 +43,13 @@ namespace WFInfo
             set
             {
                 SetProperty(ref _textBoxText, value); 
+                ReapplyFilters();
                 OnPropertyChanged(nameof(IsTextboxEmpty));
             }
         }
 
+        public RelayCommand ExpandAllCommand { get; }
+        public RelayCommand CollapseAllCommand { get; }
         public bool IsTextboxEmpty => TextBoxText.IsNullOrEmpty();
         public List<TreeNode> RelicNodes { get; } = new List<TreeNode>();
 
@@ -54,6 +66,9 @@ namespace WFInfo
                 foreach (TreeNode relic in era.Children)
                     relic.topLevel = value;
                 SetProperty(ref _showAllRelics, value);
+                
+                _relicTreeItems.Clear();
+                RefreshVisibleRelics();
                 OnPropertyChanged(nameof(ShowAllRelicsText));
             }
         }
@@ -199,103 +214,29 @@ namespace WFInfo
         {
         
             foreach (TreeNode era in RelicNodes)
+            {
                 era.ResetFilter();
-        
-            if (HideVaulted)
-                foreach (TreeNode era in RelicNodes)
+                if(HideVaulted)
                     era.FilterOutVaulted(true);
-        
-            if (SearchActive)
-                foreach (TreeNode era in RelicNodes)
+                if(SearchActive)
                     era.FilterSearchText(SearchText, false, true);
-        
+            }
             RefreshVisibleRelics();
         }
-    }
-    /// <summary>
-    /// Interaction logic for RelicsWindow.xaml
-    /// </summary>
-    public partial class RelicsWindow : Window
-    {
-        private bool showAllRelics = false;
 
-      
-
-        private RelicsViewModel _relicsViewModel = RelicsViewModel.Instance;
-        private ObservableCollection<TreeNode> _relicTreeItems => _relicsViewModel.RelicTreeItems;
-
-        public RelicsWindow()
+        public void InitializeTree()
         {
-            InitializeComponent();
-            DataContext = this._relicsViewModel;
-            this._relicsViewModel.PropertyChanged += (sender, args) =>
-            {
-                if (args.PropertyName == nameof(RelicsViewModel.TextBoxText))
-                {
-                    _relicsViewModel.ReapplyFilters();
-                }
-                else if (args.PropertyName == nameof(RelicsViewModel.ShowAllRelics))
-                {
-                    // _relicTreeItems = RelicTree.Items;
-                    _relicTreeItems.Clear();
-                    _relicsViewModel.RefreshVisibleRelics();
-                }
-                
-            };
-        }
-
-        private void Hide(object sender, RoutedEventArgs e)
-        {
-            Hide();
-        }
-
-        // Allows the draging of the window
-        private new void MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
-                DragMove();
-        }
-
-
-        private void ExpandAll(object sender, RoutedEventArgs e)
-        {
-            foreach (TreeNode era in _relicsViewModel.RelicNodes)
-                era.ChangeExpandedTo(true);
-        }
-
-        private void CollapseAll(object sender, RoutedEventArgs e)
-        {
-            foreach (TreeNode era in _relicsViewModel.RelicNodes)
-                era.ChangeExpandedTo(false);
-        }
-
-        private void SingleClickExpand(object sender, RoutedEventArgs e)
-        {
-            TreeViewItem tvi = e.OriginalSource as TreeViewItem;
-
-            if (tvi == null || e.Handled) return;
-
-            tvi.IsExpanded = !tvi.IsExpanded;
-            tvi.IsSelected = false;
-            e.Handled = true;
-        }
-
-        private void WindowLoaded(object sender, RoutedEventArgs e)
-        { // triggers when the window is first loaded, populates all the listviews once.
-
-            #region Populate grouped collection
-
             TreeNode lith = new TreeNode("Lith", "", false, 0);
             TreeNode meso = new TreeNode("Meso", "", false, 0);
             TreeNode neo = new TreeNode("Neo", "", false, 0);
             TreeNode axi = new TreeNode("Axi", "", false, 0);
-            _relicsViewModel.RelicNodes.AddRange(new[] { lith, meso, neo, axi });
+            RelicNodes.AddRange(new[] { lith, meso, neo, axi });
             int eraNum = 0;
-            foreach (TreeNode head in _relicsViewModel.RelicNodes)
+            foreach (TreeNode head in RelicNodes)
             {
                 double sumIntact = 0;
                 double sumRad = 0;
-
+            
                 head.SortNum = eraNum++;
                 foreach (JProperty prop in Main.dataBase.relicData[head.Name])
                 {
@@ -312,22 +253,64 @@ namespace WFInfo
                             relic.AddChild(part);
                         }
                     }
-                    
+                                
                     relic.SetRelicText();
                     head.AddChild(relic);
-
+            
                     //groupedByAll.Items.Add(relic);
                     //Search.Items.Add(relic);
                 }
-
+            
                 head.SetEraText();   
                 head.ResetFilter();
                 head.FilterOutVaulted();
                 head.RecolorChildren();
                 _relicTreeItems.Add(head);
             }
-            _relicsViewModel.SortBoxChanged();
-            #endregion
+            SortBoxChanged();
+        }
+    }
+    /// <summary>
+    /// Interaction logic for RelicsWindow.xaml
+    /// </summary>
+    public partial class RelicsWindow : Window
+    {
+        private RelicsViewModel _relicsViewModel = RelicsViewModel.Instance;
+
+        public RelicsWindow()
+        {
+            InitializeComponent();
+            DataContext = this._relicsViewModel;
+        }
+
+        private void Hide(object sender, RoutedEventArgs e)
+        {
+            Hide();
+        }
+
+        // Allows the draging of the window
+        private new void MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                DragMove();
+        }
+
+
+       
+        private void SingleClickExpand(object sender, RoutedEventArgs e)
+        {
+            TreeViewItem tvi = e.OriginalSource as TreeViewItem;
+
+            if (tvi == null || e.Handled) return;
+
+            tvi.IsExpanded = !tvi.IsExpanded;
+            tvi.IsSelected = false;
+            e.Handled = true;
+        }
+
+        private void WindowLoaded(object sender, RoutedEventArgs e)
+        { // triggers when the window is first loaded, populates all the listviews once.
+            _relicsViewModel.InitializeTree();
         }
     }
 }
