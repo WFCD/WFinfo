@@ -15,41 +15,78 @@
     </Window.Resources>
 
     <Grid MouseDown="MouseDown">
-        <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
-        <Button Command="{Binding ExpandAllCommand}" Content="＋" FontSize="15" ToolTip="Expand All Levels" Padding="0"
-               Margin="0,26,529,0" Style="{StaticResource Button_Button}" Height="20" VerticalAlignment="Top" />
-        <Button Command="{Binding CollapseAllCommand}" Content="－" FontSize="15" ToolTip="Collapse All Levels" Padding="0"
-               Margin="20,26,509,0" Style="{StaticResource Button_Button}" Height="20" VerticalAlignment="Top" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="27" />
+            <RowDefinition Height="26" />
+            <RowDefinition Height="26" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
+        <Grid >
+            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" />
+            <DockPanel>
+                <Image HorizontalAlignment="Left" 
+                       VerticalAlignment="Center"
+                       Width="26"
+                       DockPanel.Dock="Left"
+                       Margin="2,0,5,1" 
+                       Source="Resources/WFLogo.png" />
+                <Label MouseLeftButtonDown="Hide" 
+                       Content="x"
+                       Width="30"
+                       Style="{StaticResource Label_Button}"
+                       VerticalContentAlignment="Stretch"
+                       DockPanel.Dock="Right" />
+                <TextBlock Text="Relics" 
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           FontFamily="{StaticResource Roboto_Black}"
+                           FontWeight="Bold" />
+            </DockPanel>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
+            <Button Command="{Binding ExpandAllCommand}" Content="＋" FontSize="15" ToolTip="Expand All Levels"
+                    Padding="0"
+                    Margin="0,0,529,0" Style="{StaticResource Button_Button}" Height="20" VerticalAlignment="Top" />
+            <Button Command="{Binding CollapseAllCommand}" Content="－" FontSize="15" ToolTip="Collapse All Levels"
+                    Padding="0"
+                    Margin="20,0,509,0" Style="{StaticResource Button_Button}" Height="20" VerticalAlignment="Top" />
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox  Content="Hide Vaulted" ToolTip="Show vaulted items." 
-                      IsChecked="{Binding HideVaulted}" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" />
- 
+            <CheckBox Content="Hide Vaulted" ToolTip="Show vaulted items."
+                      IsChecked="{Binding HideVaulted}" Margin="52,0,0,0" VerticalAlignment="Center"
+                      HorizontalAlignment="Left" />
+
             <TextBox
                 Margin="191,0,0,0" VerticalContentAlignment="Center" Padding="0"
-                     Text="{Binding TextBoxText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="#FF646464"
-                     SelectionBrush="#FF7EB4EA" 
-                
-                     BorderBrush="#FF303030" BorderThickness="1,0,0,0" />
-            <TextBlock Margin="194,1,0,0" MinWidth="50" Text="Filter text" 
-                       Foreground="#FF646464" Visibility="{Binding Path=IsTextboxEmpty, Converter={StaticResource BoolToVisibilityConverter}}" IsHitTestVisible="False"/>
+                Text="{Binding TextBoxText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="#FF646464"
+                SelectionBrush="#FF7EB4EA"
+
+                BorderBrush="#FF303030" BorderThickness="1,0,0,0" />
+            <TextBlock Margin="194,1,0,0" MinWidth="50" Text="Filter text"
+                       Foreground="#FF646464"
+                       Visibility="{Binding Path=IsTextboxEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
+                       IsHitTestVisible="False" />
             <Rectangle Stroke="#FF646464" Margin="149,-1,-1,-1" />
             <Label Content="Filter:" HorizontalAlignment="Left" Margin="155,0,0,0" Padding="0"
                    VerticalContentAlignment="Center" />
-
         </Grid>
-        <ToggleButton
-                IsChecked="{Binding ShowAllRelics}"
-               FontWeight="Normal" Margin="0,45,479,0"
-               Panel.ZIndex="500"
-               VerticalAlignment="Top" Background="Transparent" BorderBrush="Transparent"
-               BorderThickness="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-            <Label Content="{Binding ShowAllRelicsText}" Style="{StaticResource Label_Button}" VerticalAlignment="Top"
-                   Opacity="1" Height="20" FontSize="12" FontWeight="Normal"/>
-        </ToggleButton>
-        <Grid Margin="1,46,1,0" Height="18" VerticalAlignment="Top">
+      
 
+        <Grid
+            Grid.Row="2"
+            Margin="1,0,1,0"  VerticalAlignment="Top">
+            <ToggleButton
+                IsChecked="{Binding ShowAllRelics}"
+                FontWeight="Normal" Margin="0,0,479,0"
+                Panel.ZIndex="500"
+                VerticalAlignment="Top" Background="Transparent" BorderBrush="Transparent"
+                BorderThickness="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <Label Content="{Binding ShowAllRelicsText}" Style="{StaticResource Label_Button}"
+                       VerticalAlignment="Top"
+                       
+                       Opacity="1" Height="20" FontSize="12" FontWeight="Normal" />
+            </ToggleButton>
 
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="3" />
             <Rectangle Stroke="#FF646464" Margin="69,-1,-1,-1" Grid.RowSpan="3" />
@@ -81,8 +118,8 @@
                         </Style>
                     </Border.Style>
                     <ComboBox x:Name="SortBox" Background="#FF0F0F0F" Foreground="#FFAFD0D9"
-                               BorderThickness="0"
-                               
+                              BorderThickness="0"
+
                               Style="{DynamicResource ComboBoxStyle1}"
                               SelectedIndex="{Binding SelectedIndex}"
                               ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}">
@@ -98,21 +135,13 @@
                    Background="{x:Null}" HorizontalAlignment="Left" />
 
         </Grid>
-        <Grid Height="27" VerticalAlignment="Top">
-            <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top" />
 
-            <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26"
-                   RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
-            <TextBlock Text="Relics" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left"
-                       VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}"
-                       FontWeight="Bold" Grid.Column="1" />
-        </Grid>
-        <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}"
-               HorizontalAlignment="Right" Height="27" VerticalAlignment="Top" />
-        <Grid x:Name="ListGrid" Margin="1,65,1,1">
+        <Grid
+            Grid.Row="3"
+            x:Name="ListGrid" Margin="1,0,1,1">
             <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}"
                       ItemsSource="{Binding RelicTreeItems}"
-                      
+
                       TreeViewItem.Selected="SingleClickExpand" VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
