@@ -17,27 +17,27 @@
     <Grid MouseDown="MouseDown">
         <Grid.RowDefinitions>
             <RowDefinition Height="27" />
-            <RowDefinition Height="26" />
-            <RowDefinition Height="26" />
+            <RowDefinition Height="21" />
+            <RowDefinition Height="21" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid >
+        <Grid>
             <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" />
             <DockPanel>
-                <Image HorizontalAlignment="Left" 
+                <Image HorizontalAlignment="Left"
                        VerticalAlignment="Center"
                        Width="26"
                        DockPanel.Dock="Left"
-                       Margin="2,0,5,1" 
+                       Margin="2,0,5,1"
                        Source="Resources/WFLogo.png" />
-                <Label MouseLeftButtonDown="Hide" 
+                <Label MouseLeftButtonDown="Hide"
                        Content="x"
                        Width="30"
                        Style="{StaticResource Label_Button}"
                        VerticalContentAlignment="Stretch"
                        DockPanel.Dock="Right" />
-                <TextBlock Text="Relics" 
+                <TextBlock Text="Relics"
                            VerticalAlignment="Center"
                            FontSize="16"
                            FontFamily="{StaticResource Roboto_Black}"
@@ -46,52 +46,79 @@
         </Grid>
         <Grid Grid.Row="1">
             <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
-            <Button Command="{Binding ExpandAllCommand}" Content="＋" FontSize="15" ToolTip="Expand All Levels"
-                    Padding="0"
-                    Margin="0,0,529,0" Style="{StaticResource Button_Button}" Height="20" VerticalAlignment="Top" />
-            <Button Command="{Binding CollapseAllCommand}" Content="－" FontSize="15" ToolTip="Collapse All Levels"
-                    Padding="0"
-                    Margin="20,0,509,0" Style="{StaticResource Button_Button}" Height="20" VerticalAlignment="Top" />
-            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox Content="Hide Vaulted" ToolTip="Show vaulted items."
-                      IsChecked="{Binding HideVaulted}" Margin="52,0,0,0" VerticalAlignment="Center"
-                      HorizontalAlignment="Left" />
+            <DockPanel>
 
-            <TextBox
-                Margin="191,0,0,0" VerticalContentAlignment="Center" Padding="0"
-                Text="{Binding TextBoxText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Foreground="#FF646464"
-                SelectionBrush="#FF7EB4EA"
+                <Button Command="{Binding ExpandAllCommand}"
+                        Content="＋"
+                        FontSize="15"
+                        ToolTip="Expand All Levels"
+                        Style="{StaticResource Button_Button}"
+                        Height="21"
+                        VerticalAlignment="Top"
+                        DockPanel.Dock="Left" />
+                <Button Command="{Binding CollapseAllCommand}" Content="－" FontSize="15" ToolTip="Collapse All Levels"
+                        Style="{StaticResource Button_Button}" Height="21" VerticalAlignment="Top"
+                        DockPanel.Dock="Left" />
+                <CheckBox Content="Hide Vaulted" ToolTip="Show vaulted items."
+                          Margin="10 0"
+                          IsChecked="{Binding HideVaulted}" VerticalAlignment="Center"
 
-                BorderBrush="#FF303030" BorderThickness="1,0,0,0" />
-            <TextBlock Margin="194,1,0,0" MinWidth="50" Text="Filter text"
-                       Foreground="#FF646464"
-                       Visibility="{Binding Path=IsTextboxEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
-                       IsHitTestVisible="False" />
-            <Rectangle Stroke="#FF646464" Margin="149,-1,-1,-1" />
-            <Label Content="Filter:" HorizontalAlignment="Left" Margin="155,0,0,0" Padding="0"
-                   VerticalContentAlignment="Center" />
+                       BorderThickness="1"
+                        BorderBrush="#FF646464" 
+                          DockPanel.Dock="Left" />
+                <Label Content="Filter:" Padding="5 0"
+                       VerticalContentAlignment="Center"
+
+                       BorderThickness="1 0 0 0"
+                        BorderBrush="#FF646464" 
+                       DockPanel.Dock="Left" />
+                <Grid>
+
+                    <TextBox
+                        VerticalContentAlignment="Center" Padding="0"
+                        Text="{Binding TextBoxText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Foreground="#FF646464"
+                        SelectionBrush="#FF7EB4EA"
+
+                        BorderBrush="#FF646464" BorderThickness="1" />
+                    <TextBlock MinWidth="50" Text="Filter terms"
+                               Foreground="#FF646464"
+                               Visibility="{Binding Path=IsTextboxEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
+                               IsHitTestVisible="False"
+                               Margin="5 0 0 0 "
+                               VerticalAlignment="Center" />
+                </Grid>
+
+
+            </DockPanel>
         </Grid>
-      
 
-        <Grid
+
+        <DockPanel
             Grid.Row="2"
-            Margin="1,0,1,0"  VerticalAlignment="Top">
+             VerticalAlignment="Top">
             <ToggleButton
                 IsChecked="{Binding ShowAllRelics}"
-                FontWeight="Normal" Margin="0,0,479,0"
+                FontWeight="Normal"
                 Panel.ZIndex="500"
-                VerticalAlignment="Top" Background="Transparent" BorderBrush="Transparent"
-                BorderThickness="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                VerticalAlignment="Center" Background="Transparent"
+                DockPanel.Dock="Left"
+                 BorderBrush="#FF646464"
+                BorderThickness="1" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center">
                 <Label Content="{Binding ShowAllRelicsText}" Style="{StaticResource Label_Button}"
-                       VerticalAlignment="Top"
-                       
+                       VerticalAlignment="Center"
+
+                       Margin="1"
+                       BorderThickness="0"
                        Opacity="1" Height="20" FontSize="12" FontWeight="Normal" />
             </ToggleButton>
 
-            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="3" />
-            <Rectangle Stroke="#FF646464" Margin="69,-1,-1,-1" Grid.RowSpan="3" />
-            <!-- <Button x:Name="relicComboButton" Content="Relic Eras" HorizontalAlignment="Left" VerticalAlignment="Top" Width="71" Height="20" Margin="-1,-1,0,-1" Background="#FF0F0F0F" FontSize="14" Click="ToggleShowAllRelics"/> -->
-            <Border x:Name="ComboBorder" Margin="121,-1,-1,-1" Grid.RowSpan="3">
+            <Label Content="Sort by:"  Padding="5 0" VerticalContentAlignment="Center" FontSize="12"
+                   Background="{x:Null}" HorizontalAlignment="Left" 
+                   BorderBrush="#FF646464" BorderThickness="1"
+                   DockPanel.Dock="Left"/>
+            <Border x:Name="ComboBorder" Grid.RowSpan="3"
+                    >
                 <Border.Style>
                     <Style>
                         <Style.Triggers>
@@ -131,10 +158,8 @@
                     </ComboBox>
                 </Border>
             </Border>
-            <Label Content="Sort by:" Margin="75,0,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="12"
-                   Background="{x:Null}" HorizontalAlignment="Left" />
 
-        </Grid>
+        </DockPanel>
 
         <Grid
             Grid.Row="3"
