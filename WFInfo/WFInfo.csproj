@@ -199,6 +199,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="WFInfoUtil\StringUtil.cs" />
     <Compile Include="WFInfoUtil\Util.cs" />
     <Compile Include="WFInfoUtil\WordMatch.cs" />
     <Compile Include="WFInfoUtil\GraphicFns.cs" />

@@ -157,9 +157,8 @@ namespace WFInfo
                 }
                 if (owned.Length > 0)
                 {
-                    string prefix = (mastered || eqmtOwned ? $"✓ LVL.{(mastered ? 30 : eqmtLevel)} " : "UNOWNED ");
-                    string ownedMain = $"{owned} OWNED";
-                    ownedText.Text = prefix + ownedMain;
+                    string ownedEqmtPrefix = (mastered || eqmtOwned ? $"✓ Lvl.{(mastered ? 30 : eqmtLevel)}" : "");
+                    ownedText.Text = string.IsNullOrEmpty(ownedEqmtPrefix) ? $"{owned} owned" : $"{ownedEqmtPrefix} [{owned}]";
                 }
                 else
                     ownedText.Text = "";

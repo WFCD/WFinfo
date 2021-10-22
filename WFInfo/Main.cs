@@ -228,6 +228,11 @@ namespace WFInfo
                 AddLog("Starting snap it");
                 StatusUpdate("Starting snap it", 0);
                 OCR.SnapScreenshot();
+                /*
+                AddLog("Loading screenshot from file");
+                StatusUpdate("Offline testing with screenshot", 0);
+                LoadScreenshot(ScreenshotType.NORMAL);
+                */
             }
             else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
             { //Searchit  

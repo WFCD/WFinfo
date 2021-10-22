@@ -869,7 +869,7 @@ namespace WFInfo
             }
 
             if (!suppressLogging)
-                Main.AddLog("Found Equipment(" + low + "): \"" + lowest_key + "\" from \"" + name + "\"");
+                Main.AddLog("Found equipment(" + low + "): \"" + lowest_key + "\" from \"" + name + "\"");
             return lowest_key;
         }
 

@@ -847,7 +847,6 @@ namespace WFInfo
             return true;
         }
 
-
         /// <summary>
         /// Processes the image the user cropped in the selection
         /// </summary>
@@ -856,63 +855,122 @@ namespace WFInfo
         {
             var watch = new Stopwatch();
             watch.Start();
+
             List<InventoryItem> foundParts = FindPartsInSnap(snapItImage, fullShot, snapItOrigin);
-            foundParts = foundParts.Where((part) => { return part.Name.Contains("Prime"); }).ToList();
             Main.StatusUpdate($"Completed snapit Processing({watch.ElapsedMilliseconds}ms)", 0);
 
-            string csv = string.Empty;
-            Regex MatchIllegalPartChars = new Regex("[^a-z가-힣\\ ]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-            if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
-                csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned,partsDetected" + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
-            for (int i = 0; i < foundParts.Count; i++)
-            {
-                var part = foundParts[i];
-                Console.WriteLine($"Found item {part.Name}, count: {part.Count}");
+            List<InventoryItem> matchedItems = MatchItemsToDatabaseEntries(foundParts);
 
-                string correctedName = MatchIllegalPartChars.Replace(part.Name, "").TrimEnd();
+            ExecuteSnapitExport(matchedItems);
+            DisplayItemsOverlay(matchedItems, snapItOrigin);
 
-                int equipmentLevel = GetPartEqmtLevel(part.Name);
-                if (equipmentLevel >= 0) //has a level => is equipment
+            if (Settings.doSnapItCount)
+                Main.RunOnUIThread(() =>
                 {
-                    string equipmentName = Main.dataBase.GetEquipmentName(correctedName, out firstProximity[0], false);
-                    Console.WriteLine($"Found Equipment {equipmentName} with level {equipmentLevel}");
+                    VerifyCount.ShowVerifyCount(matchedItems); //Displays prompt if user wants to save the detected item data
+                });
+
+            Main.StatusUpdate($"Completed snapit Displaying({watch.ElapsedMilliseconds}ms)", 0);
+            watch.Stop();
+        }
+
+        // filters only valid parts/equipment, adds info on type, level and replaces name with matched name
+        private static List<InventoryItem> MatchItemsToDatabaseEntries(List<InventoryItem> items)
+        {
+            List<InventoryItem> output = new List<InventoryItem>();
+            for (int i = 0; i < items.Count; i++)
+            {
+                var part = items[i];
+                string correctedName = StringUtil.CorrectPartName(part.Name);
+
+                Debug.WriteLine($"{items.IndexOf(part) + 1} of {items.Count}: \"{correctedName}\" ({part.Name})");
+
+                string equipmentName = Main.dataBase.GetEquipmentName(correctedName, out int equipmentProximity, false);
+                string partName = Main.dataBase.GetPartName(correctedName, out int partProximity, false);
+
+                if (Math.Min(equipmentProximity, partProximity) > 3) // ignore all that only have matches with less proximity than 3
+                {
+                    Debug.WriteLine($"No good match found for item \"{correctedName}\"");
+                    continue;
+                }
+
+                if (equipmentProximity < partProximity) // better match for equipment name
+                {
+                    int equipmentLevel = StringUtil.GetPartEqmtLevel(part.Name, Main.culture);
+                    if (equipmentLevel < 0) // has no level => is not a valid equipment
+                        continue;
+
+                    Debug.WriteLine($"Found Equipment {equipmentName} with level {equipmentLevel}");
                     part.Name = equipmentName;
                     part.type = ItemType.Equipment;
                     part.level = equipmentLevel;
-                    foundParts[i] = part;
+                    output.Add(part);
                 }
-                else
+                else // better match for part name
                 {
-                    //item is part
                     if (!PartNameValid(part.Name))
-                    {
+                        continue; // skip if part has no valid name
 
-                    }
-                        continue;
-
-                    Debug.WriteLine($"Part {foundParts.IndexOf(part)} out of {foundParts.Count}");
-                    string partName = Main.dataBase.GetPartName(correctedName, out firstProximity[0], false);
+                    Debug.WriteLine($"Found Part {partName} with count {part.Count}");
                     part.Name = partName;
-                    foundParts[i] = part;
-                    JObject jObj = Main.dataBase.marketData.GetValue(partName).ToObject<JObject>();
+                    output.Add(part);
+                }
+            }
+
+            return output;
+        }
+
+        // exports items data to csv
+        private static void ExecuteSnapitExport(List<InventoryItem> items)
+        {
+            if (Settings.SnapitExport)
+            {
+                string csvFilePath = applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv";
+                string csv = string.Empty;
+                if (!File.Exists(csvFilePath))
+                    csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned,partsDetected" + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
+
+                foreach (InventoryItem item in items)
+                {
+                    if (item.type == ItemType.Item)
+                    {
+                        JObject jObj = Main.dataBase.marketData.GetValue(item.Name).ToObject<JObject>();
+                        string plat = jObj["plat"].ToObject<string>();
+                        string ducats = jObj["ducats"].ToObject<string>();
+                        string volume = jObj["volume"].ToObject<string>();
+                        bool vaulted = Main.dataBase.IsPartVaulted(item.Name);
+                        bool mastered = Main.dataBase.IsPartEqmtMastered(item.Name);
+                        string partsOwned = Main.dataBase.PartsOwned(item.Name);
+                        string partsDetected = "" + item.Count;
+
+                        var owned = string.IsNullOrEmpty(partsOwned) ? "0" : partsOwned;
+                        csv += item.Name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + "," + partsDetected + ", \"\"" + Environment.NewLine;
+                    }
+                }
+
+                File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv", csv);
+            }
+        }
+
+        private static void DisplayItemsOverlay(List<InventoryItem> items, Point snapItOrigin)
+        {
+            foreach (InventoryItem item in items)
+            {
+                if (item.type == ItemType.Item)
+                {
+                    JObject jObj = Main.dataBase.marketData.GetValue(item.Name).ToObject<JObject>();
                     string plat = jObj["plat"].ToObject<string>();
                     string ducats = jObj["ducats"].ToObject<string>();
                     string volume = jObj["volume"].ToObject<string>();
-                    bool vaulted = Main.dataBase.IsPartVaulted(partName);
-                    bool mastered = Main.dataBase.IsPartEqmtMastered(partName);
-                    string partsOwned = Main.dataBase.PartsOwned(partName);
-                    string partsDetected = "" + part.Count;
+                    bool vaulted = Main.dataBase.IsPartVaulted(item.Name);
+                    bool mastered = Main.dataBase.IsPartEqmtMastered(item.Name);
+                    string partsOwned = Main.dataBase.PartsOwned(item.Name);
+                    string partsDetected = "" + item.Count;
 
-                    if (Settings.SnapitExport)
-                    {
-                        var owned = string.IsNullOrEmpty(partsOwned) ? "0" : partsOwned;
-                        csv += partName + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + "," + partsDetected + ", \"\"" + Environment.NewLine;
-                    }
-
-                    int width = (int)(part.Bounding.Width * screenScaling);
+                    int width = (int)(item.Bounding.Width * screenScaling);
                     if (width < 120)
                     {
-                        if (width < 50)
+                        if (width < 50) //dont display if width is too small
                             continue;
                         width = 120;
                     }
@@ -921,59 +979,19 @@ namespace WFInfo
                         width = 160;
                     }
 
-
                     Main.RunOnUIThread(() =>
                     {
                         Overlay itemOverlay = new Overlay();
-                        itemOverlay.LoadTextData(partName, plat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
+                        itemOverlay.LoadTextData(item.Name, plat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
                         itemOverlay.toSnapit();
                         itemOverlay.Resize(width);
-                        itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
+                        itemOverlay.Display((int)(window.X + snapItOrigin.X + (item.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + item.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
                     });
                 }
             }
 
-            if (Settings.doSnapItCount)
-                Main.RunOnUIThread(() =>
-                {
-                    VerifyCount.ShowVerifyCount(foundParts);
-                });
-
             if (Main.snapItOverlayWindow.tempImage != null)
                 Main.snapItOverlayWindow.tempImage.Dispose();
-            Main.StatusUpdate($"Completed snapit Displaying({watch.ElapsedMilliseconds}ms)", 0);
-            watch.Stop();
-            if (Settings.SnapitExport)
-            {
-                File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv", csv);
-            }
-        }
-
-        private static Regex MatchAllButNumbers = new Regex("[^0-9]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static int GetPartEqmtLevel(string name)
-        {
-            //TODO take regex instad and isolate numbers
-            if (name != null && name.Length > 2)
-            {
-                string substring = name.Substring(name.Length - 2);
-                substring = MatchAllButNumbers.Replace(substring, string.Empty);
-
-                if (string.IsNullOrEmpty(substring))
-                    return -1;
-
-                try
-                {
-                    int result = int.Parse(substring);
-                    return WFInfoUtil.Util.Clamp(result, 0, 30);
-                }
-                catch (FormatException ex)
-                {
-                    return -1;
-                }
-            }
-
-            return -1;
-
         }
 
         private static List<InventoryItem> FindPartsInSnap(Bitmap snapItImage, Bitmap fullShot, Point snapItOrigin)
@@ -1009,9 +1027,7 @@ namespace WFInfo
             List<InventoryItem> results = WordMatch.ToInventoryItems(matches);
             if (Settings.doSnapItCount)
             {
-                Console.WriteLine($"counting parts");
                 GetItemCounts(filteredImage, filteredImageClean, results, graphicFns.font, Settings.snapItCountThreshold);
-                Console.WriteLine($"finished counting parts");
             }
 
             filteredImageClean.Dispose();
@@ -1273,11 +1289,10 @@ namespace WFInfo
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
             fullShot.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
             List<InventoryItem> foundParts = FindOwnedItems(fullShot, timestamp, start, watch);
-            Console.WriteLine($"-----------------------");
             for (int i = 0; i < foundParts.Count; i++)
             {
                 InventoryItem part = foundParts[i];
-                Console.WriteLine($"Found {part.Name}, {part.Count}, {part.Bounding}");
+                Debug.WriteLine($"Found {part.Name}, {part.Count}, {part.Bounding}");
                 if (!PartNameValid(part.Name + " Blueprint"))
                     continue;
                 string name = Main.dataBase.GetPartName(part.Name + " Blueprint", out int proximity, true); //add blueprint to name to check against prime drop table

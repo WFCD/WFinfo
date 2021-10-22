@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace WFInfo.WFInfoUtil
@@ -40,7 +38,7 @@ namespace WFInfo.WFInfoUtil
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Something went wrong while getting prop {key}");
+                        Debug.WriteLine($"Something went wrong while getting prop {key}");
                         return ifNil;
                     }
                 }

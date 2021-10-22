@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Drawing;
 using Tesseract;
@@ -15,7 +16,7 @@ namespace WFInfo.WFInfoUtil
         {
             List<Tuple<String, Rectangle>> data = new List<Tuple<String, Rectangle>>();
 
-            Console.WriteLine($"Getting text from image");
+            Debug.WriteLine($"Getting text from image");
             using (var page = engine.Process(image, PageSegMode.SparseText))
             {
                 using (var iterator = page.GetIterator())
@@ -33,7 +34,7 @@ namespace WFInfo.WFInfoUtil
                             currentWord = currentWord.TrimEnd();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
-                                Console.WriteLine($"Found valid word {currentWord}");
+                                Debug.WriteLine($"Found valid word {currentWord}");
                                 data.Add(Tuple.Create(currentWord, bounds));
                             }
                         }
