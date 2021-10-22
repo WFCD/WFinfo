@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace WFInfo.Util
+namespace WFInfo.WFInfoUtil
 {
     public class GraphicFns
     {

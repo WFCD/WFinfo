@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace WFInfo.Util
+namespace WFInfo.WFInfoUtil
 {
     public static class TaskUtil
     {

@@ -5,12 +5,11 @@ using Tesseract;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace WFInfo.Util
+namespace WFInfo.WFInfoUtil
 {
     public static class ImageProcessingUtil
     {
-        static Regex MatchIllegalPartChars = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        static Regex MatchIllegalInventoryChars = new Regex("[^a-z가-힣\\[\\]0-9]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        static Regex MatchIllegalInventoryChars = new Regex("[^a-z가-힣0-9\\ ]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static List<Tuple<String, Rectangle>> GetTextWithBoundsFromImage(TesseractEngine engine, Bitmap image, int rectXOffset, int rectYOffset)
         {
@@ -30,8 +29,8 @@ namespace WFInfo.Util
                         Rectangle bounds = new Rectangle(tempbounds.X1 + rectXOffset, tempbounds.Y1 + rectYOffset, tempbounds.Width, tempbounds.Height);
                         if (currentWord != null)
                         {
-                            currentWord = currentWord.TrimEnd();
                             currentWord = MatchIllegalInventoryChars.Replace(currentWord, string.Empty);
+                            currentWord = currentWord.TrimEnd();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
                                 Console.WriteLine($"Found valid word {currentWord}");

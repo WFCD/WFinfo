@@ -22,7 +22,7 @@ using Pen = System.Drawing.Pen;
 using Point = System.Drawing.Point;
 using Rect = Tesseract.Rect;
 using Size = System.Drawing.Size;
-using WFInfo.Util;
+using WFInfo.WFInfoUtil;
 
 namespace WFInfo
 {
@@ -303,7 +303,9 @@ namespace WFInfo
                         double platinum = double.Parse(plat, styles, Main.culture);
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(correctName);
-                        bool mastered = Main.dataBase.IsPartMastered(correctName);
+                        bool eqmtMastered = Main.dataBase.IsPartEqmtMastered(correctName);
+                        bool eqmtOwned = Main.dataBase.IsPartEqmtOwned(correctName);
+                        int eqmtLevel = Main.dataBase.PartEquipmentLevel(correctName);
                         string partsOwned = Main.dataBase.PartsOwned(correctName);
                         string partsCount = Main.dataBase.PartsCount(correctName);
                         int duc = int.Parse(ducats, Main.culture);
@@ -325,7 +327,7 @@ namespace WFInfo
                         }
                         if (duc > 0)
                         {
-                            if (!mastered && int.Parse(partsOwned, Main.culture) < int.Parse(partsCount, Main.culture))
+                            if (!eqmtOwned && !eqmtMastered && int.Parse(partsOwned, Main.culture) < int.Parse(partsCount, Main.culture))
                             {
                                 unownedItems.Add(i);
                             }
@@ -360,13 +362,13 @@ namespace WFInfo
 
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, eqmtMastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo, eqmtOwned, eqmtLevel);
                                 Main.overlays[partNumber].Resize(overWid);
                                 Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + Settings.overlayXOffsetValue) / dpiScaling), startY + (int)(Settings.overlayYOffsetValue / dpiScaling), Settings.delay);
                             }
                             else if (!Settings.isLightSelected)
                             {
-                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
+                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, eqmtMastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
                             //else
                             //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
@@ -609,7 +611,7 @@ namespace WFInfo
                         string plat = job["plat"].ToObject<string>();
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(secondName);
-                        bool mastered = Main.dataBase.IsPartMastered(secondName);
+                        bool mastered = Main.dataBase.IsPartEqmtMastered(secondName);
                         string partsOwned = Main.dataBase.PartsOwned(secondName);
                         string partsCount = Main.dataBase.PartsCount(secondName);
                         double platinum = double.Parse(plat, styles, Main.culture);
@@ -845,6 +847,7 @@ namespace WFInfo
             return true;
         }
 
+
         /// <summary>
         /// Processes the image the user cropped in the selection
         /// </summary>
@@ -853,66 +856,81 @@ namespace WFInfo
         {
             var watch = new Stopwatch();
             watch.Start();
-            long start = watch.ElapsedMilliseconds;
+            List<InventoryItem> foundParts = FindPartsInSnap(snapItImage, fullShot, snapItOrigin);
+            foundParts = foundParts.Where((part) => { return part.Name.Contains("Prime"); }).ToList();
+            Main.StatusUpdate($"Completed snapit Processing({watch.ElapsedMilliseconds}ms)", 0);
 
-            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-            WFtheme theme = GetThemeWeighted(out _, fullShot);
-            snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
-            Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
-            snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
-            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, rowHits, colHits);
-            long end = watch.ElapsedMilliseconds;
-            Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
             string csv = string.Empty;
-            snapItImageFiltered.Dispose();
+            Regex MatchIllegalPartChars = new Regex("[^a-z가-힣\\ ]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
             if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
                 csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned,partsDetected" + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
             for (int i = 0; i < foundParts.Count; i++)
             {
                 var part = foundParts[i];
-                Console.WriteLine($"Found part {part.Name}, {part.Count}");
-                if (!PartNameValid(part.Name))
-                    continue;
-                Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
-                string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0], false);
-                part.Name = name;
-                foundParts[i] = part;
-                JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
-                string plat = job["plat"].ToObject<string>();
-                string ducats = job["ducats"].ToObject<string>();
-                string volume = job["volume"].ToObject<string>();
-                bool vaulted = Main.dataBase.IsPartVaulted(name);
-                bool mastered = Main.dataBase.IsPartMastered(name);
-                string partsOwned = Main.dataBase.PartsOwned(name);
-                string partsDetected = "" + part.Count;
+                Console.WriteLine($"Found item {part.Name}, count: {part.Count}");
 
-                if (Settings.SnapitExport)
+                string correctedName = MatchIllegalPartChars.Replace(part.Name, "").TrimEnd();
+
+                int equipmentLevel = GetPartEqmtLevel(part.Name);
+                if (equipmentLevel >= 0) //has a level => is equipment
                 {
-                    var owned = string.IsNullOrEmpty(partsOwned) ? "0" : partsOwned;
-                    csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + "," + partsDetected + ", \"\"" + Environment.NewLine;
+                    string equipmentName = Main.dataBase.GetEquipmentName(correctedName, out firstProximity[0], false);
+                    Console.WriteLine($"Found Equipment {equipmentName} with level {equipmentLevel}");
+                    part.Name = equipmentName;
+                    part.type = ItemType.Equipment;
+                    part.level = equipmentLevel;
+                    foundParts[i] = part;
                 }
-
-                int width = (int)(part.Bounding.Width * screenScaling);
-                if (width < 120)
+                else
                 {
-                    if (width < 50)
+                    //item is part
+                    if (!PartNameValid(part.Name))
+                    {
+
+                    }
                         continue;
-                    width = 120;
-                }
-                else if (width > 160)
-                {
-                    width = 160;
-                }
+
+                    Debug.WriteLine($"Part {foundParts.IndexOf(part)} out of {foundParts.Count}");
+                    string partName = Main.dataBase.GetPartName(correctedName, out firstProximity[0], false);
+                    part.Name = partName;
+                    foundParts[i] = part;
+                    JObject jObj = Main.dataBase.marketData.GetValue(partName).ToObject<JObject>();
+                    string plat = jObj["plat"].ToObject<string>();
+                    string ducats = jObj["ducats"].ToObject<string>();
+                    string volume = jObj["volume"].ToObject<string>();
+                    bool vaulted = Main.dataBase.IsPartVaulted(partName);
+                    bool mastered = Main.dataBase.IsPartEqmtMastered(partName);
+                    string partsOwned = Main.dataBase.PartsOwned(partName);
+                    string partsDetected = "" + part.Count;
+
+                    if (Settings.SnapitExport)
+                    {
+                        var owned = string.IsNullOrEmpty(partsOwned) ? "0" : partsOwned;
+                        csv += partName + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + "," + partsDetected + ", \"\"" + Environment.NewLine;
+                    }
+
+                    int width = (int)(part.Bounding.Width * screenScaling);
+                    if (width < 120)
+                    {
+                        if (width < 50)
+                            continue;
+                        width = 120;
+                    }
+                    else if (width > 160)
+                    {
+                        width = 160;
+                    }
 
 
-                Main.RunOnUIThread(() =>
-                {
-                    Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
-                    itemOverlay.toSnapit();
-                    itemOverlay.Resize(width);
-                    itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
-                });
+                    Main.RunOnUIThread(() =>
+                    {
+                        Overlay itemOverlay = new Overlay();
+                        itemOverlay.LoadTextData(partName, plat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
+                        itemOverlay.toSnapit();
+                        itemOverlay.Resize(width);
+                        itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
+                    });
+                }
             }
 
             if (Settings.doSnapItCount)
@@ -923,13 +941,53 @@ namespace WFInfo
 
             if (Main.snapItOverlayWindow.tempImage != null)
                 Main.snapItOverlayWindow.tempImage.Dispose();
-            end = watch.ElapsedMilliseconds;
-            Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
+            Main.StatusUpdate($"Completed snapit Displaying({watch.ElapsedMilliseconds}ms)", 0);
             watch.Stop();
             if (Settings.SnapitExport)
             {
                 File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv", csv);
             }
+        }
+
+        private static Regex MatchAllButNumbers = new Regex("[^0-9]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static int GetPartEqmtLevel(string name)
+        {
+            //TODO take regex instad and isolate numbers
+            if (name != null && name.Length > 2)
+            {
+                string substring = name.Substring(name.Length - 2);
+                substring = MatchAllButNumbers.Replace(substring, string.Empty);
+
+                if (string.IsNullOrEmpty(substring))
+                    return -1;
+
+                try
+                {
+                    int result = int.Parse(substring);
+                    return WFInfoUtil.Util.Clamp(result, 0, 30);
+                }
+                catch (FormatException ex)
+                {
+                    return -1;
+                }
+            }
+
+            return -1;
+
+        }
+
+        private static List<InventoryItem> FindPartsInSnap(Bitmap snapItImage, Bitmap fullShot, Point snapItOrigin)
+        {
+            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
+            WFtheme theme = GetThemeWeighted(out _, fullShot);
+            snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
+            Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
+            snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+
+            List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, rowHits, colHits);
+            snapItImageFiltered.Dispose();
+
+            return foundParts;
         }
 
         /// <summary>
@@ -958,7 +1016,7 @@ namespace WFInfo
 
             filteredImageClean.Dispose();
             graphicFns.Dispose();
-            filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds Berndy " + timestamp + ".png");
+            filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
 
             TryShowFindAllPartsError(matches, time);
 
@@ -974,7 +1032,7 @@ namespace WFInfo
             //If there's a too large % of any error make a pop-up. These precentages are arbritary at the moment, a rough index.
             if (numberTooLarge > .3 * matches.Count || numberTooFewCharacters > .4 * matches.Count)
             {
-                Main.AddLog($"numberTooLarge: {numberTooLarge}, numberTooFewCharacters: {numberTooFewCharacters}, numberTooLargeButEnoughCharacters: {numberTooLargeButEnoughCharacters}, foundItems.Count: {matches.Count}");             
+                Main.AddLog($"numberTooLarge: {numberTooLarge}, numberTooFewCharacters: {numberTooFewCharacters}, numberTooLargeButEnoughCharacters: {numberTooLargeButEnoughCharacters}, foundItems.Count: {matches.Count}");
                 Main.RunOnUIThread(() =>
                 {
                     Main.SpawnErrorPopup(time);
@@ -2304,13 +2362,21 @@ namespace WFInfo
         }
     }
 
+    public enum ItemType
+    {
+        Item,
+        Equipment,
+    }
+
     public struct InventoryItem
     {
-        public InventoryItem(string itemName, Rectangle boundingbox)
+        public InventoryItem(string itemName, Rectangle boundingbox, ItemType _type = ItemType.Item, int _level = -1)
         {
             Name = itemName;
             Bounding = boundingbox;
             Count = 0;
+            type = _type;
+            level = _level;
         }
 
         static public T DeepCopy<T>(T obje)
@@ -2329,5 +2395,8 @@ namespace WFInfo
         public string Name { get; set; }
         public Rectangle Bounding { get; set; }
         public int Count { get; set; }
+
+        public ItemType type { get; set; }
+        public int level { get; set; }
     }
 }

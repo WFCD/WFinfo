@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WFInfo.Util
+namespace WFInfo.WFInfoUtil
 {
     //good states are below 100
     public enum WordMatchValidity

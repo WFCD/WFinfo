@@ -104,7 +104,7 @@ namespace WFInfo
             partText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 215));
         }
 
-        public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, bool mastered, string owned, string detected, bool hideRewardInfo)
+        public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, bool mastered, string owned, string detected, bool hideRewardInfo, bool eqmtOwned = false, int eqmtLevel = 30)
         {
             ducatText.Foreground = bluBrush;
             ducatText.FontWeight = FontWeights.Normal;
@@ -156,15 +156,19 @@ namespace WFInfo
                     throw new ArgumentNullException(nameof(owned));
                 }
                 if (owned.Length > 0)
-                    ownedText.Text = (mastered ? "✓ " : "") + owned + " OWNED";
+                {
+                    string prefix = (mastered || eqmtOwned ? $"✓ LVL.{(mastered ? 30 : eqmtLevel)} " : "UNOWNED ");
+                    string ownedMain = $"{owned} OWNED";
+                    ownedText.Text = prefix + ownedMain;
+                }
                 else
                     ownedText.Text = "";
                 if (detected.Length > 0)
                     ownedText.Text += " (" + detected + " FOUND)";
             }
 
-            double.TryParse(plat, NumberStyles.Any , Main.culture, out var platinum );
-            int.TryParse(ducats, NumberStyles.Any , Main.culture, out var duc);
+            double.TryParse(plat, NumberStyles.Any, Main.culture, out var platinum);
+            int.TryParse(ducats, NumberStyles.Any, Main.culture, out var duc);
             var efficiency = $"{Math.Round(duc / platinum, 1)}";
             var color = Color.FromArgb(100, 174, 199, 206);
 

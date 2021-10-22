@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
+using WFInfo.WFInfoUtil;
 
 namespace WFInfo
 {
@@ -507,12 +508,28 @@ namespace WFInfo
             return equipmentData[eqmt]["parts"][name]["vaulted"].ToObject<bool>();
         }
 
-        public bool IsPartMastered(string name)
+        public bool IsPartEqmtMastered(string name)
         {
             if (name.IndexOf("Prime") < 0)
                 return false;
             string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
             return equipmentData[eqmt]["mastered"].ToObject<bool>();
+        }
+
+        public bool IsPartEqmtOwned(string name)
+        {
+            if (name.IndexOf("Prime") < 0)
+                return false;
+            string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
+            return equipmentData.PathOr<bool>(false, new string[] { eqmt, "owned" });
+        }
+
+        public int PartEquipmentLevel(string name)
+        {
+            if (name.IndexOf("Prime") < 0)
+                return 0;
+            string eqmt = name.Substring(0, name.IndexOf("Prime") + 5);
+            return equipmentData.PathOr<int>(0, new string[] { eqmt, "level" });
         }
 
         public string PartsOwned(string name)
@@ -580,7 +597,7 @@ namespace WFInfo
 
         public int LevenshteinDistance(string s, string t)
         {
-            switch(Settings.locale)
+            switch (Settings.locale)
             {
                 case "ko":
                     // for korean
@@ -833,6 +850,29 @@ namespace WFInfo
             return num;
         }
 
+        public string GetEquipmentName(string name, out int low, bool suppressLogging)
+        {
+            string lowest_key = null;
+            low = 9999;
+            foreach (KeyValuePair<string, JToken> prop in equipmentData)
+            {
+                int val = LevenshteinDistance(prop.Key, name);
+                if (val < low)
+                {
+                    low = val;
+                    lowest_key = prop.Key;
+                }
+                if (val == low && lowest_key.StartsWith("Gara") && prop.Key.StartsWith("Ivara")) //If both
+                {
+                    lowest_key = prop.Key;
+                }
+            }
+
+            if (!suppressLogging)
+                Main.AddLog("Found Equipment(" + low + "): \"" + lowest_key + "\" from \"" + name + "\"");
+            return lowest_key;
+        }
+
         //public string ClosestAutoComplete(string searchQuery) {
         //	return GetPartNameHuman(searchQuery, out _);
         //}
@@ -965,7 +1005,7 @@ namespace WFInfo
 
             return lowest;
         }
-        
+
         private void LogChanged(object sender, string line)
         {
             if (autoThread != null && !autoThread.IsCompleted) return;
@@ -1093,10 +1133,10 @@ namespace WFInfo
         /// Attempts to connect the user's account to the websocket
         /// </summary>
         /// <returns>A task to be awaited</returns>
-        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> OpenWebSocket()
         {
-        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             Main.AddLog("Connecting to websocket");
             marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 
@@ -1271,10 +1311,10 @@ namespace WFInfo
         /// </summary>
         /// <param name="status">
         /// </param>
-        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> SetWebsocketStatus(string status)
         {
-        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             if (!IsJwtAvailable())
                 return false;
 
