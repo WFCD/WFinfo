@@ -8,20 +8,18 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.Input;
 using WebSocketSharp;
 
 namespace WFInfo
 {
-    public class RelicsViewModel : ObservableObject
+    public class RelicsViewModel : INPC
     {
         public RelicsViewModel()
         {
             _relicTreeItems = new List<TreeNode>();
             RelicsItemsView = new ListCollectionView(_relicTreeItems);
-            ExpandAllCommand = new RelayCommand(() => ExpandOrCollapseAll(true));
-            CollapseAllCommand = new RelayCommand(() => ExpandOrCollapseAll(false));
+            ExpandAllCommand = new SimpleCommand(() => ExpandOrCollapseAll(true));
+            CollapseAllCommand = new SimpleCommand(() => ExpandOrCollapseAll(false));
         }
 
 
@@ -37,15 +35,15 @@ namespace WFInfo
             get => _filterText;
             set
             {
-                SetProperty(ref _filterText, value); 
+                this.SetField(ref _filterText, value);
                 ReapplyFilters();
-                OnPropertyChanged(nameof(IsFilterEmpty));
+                RaisePropertyChanged(nameof(IsFilterEmpty));
             }
         }
         public bool IsFilterEmpty => FilterText.IsNullOrEmpty();
 
-        public RelayCommand ExpandAllCommand { get; }
-        public RelayCommand CollapseAllCommand { get; }
+        public SimpleCommand ExpandAllCommand { get; }
+        public SimpleCommand CollapseAllCommand { get; }
 
         private void ExpandOrCollapseAll(bool expand)
         {
@@ -61,10 +59,10 @@ namespace WFInfo
                 foreach (TreeNode era in _rawRelicNodes)
                 foreach (TreeNode relic in era.Children)
                     relic.topLevel = value;
-                SetProperty(ref _showAllRelics, value);
+                SetField(ref _showAllRelics, value);
                 
                 RefreshVisibleRelics();
-                OnPropertyChanged(nameof(ShowAllRelicsText));
+                RaisePropertyChanged(nameof(ShowAllRelicsText));
             }
         }
         public string ShowAllRelicsText => ShowAllRelics ? "All Relics" : "Relic Eras";
@@ -74,7 +72,7 @@ namespace WFInfo
             get => _hideVaulted;
             set
             { 
-                SetProperty(ref _hideVaulted, value);
+                SetField(ref _hideVaulted, value);
                 ReapplyFilters();
             }
         }
@@ -86,7 +84,7 @@ namespace WFInfo
             get => _sortBoxSelectedIndex;
             set
             {
-                SetProperty(ref _sortBoxSelectedIndex, value);
+                SetField(ref _sortBoxSelectedIndex, value);
                 SortBoxChanged();
             }
         }
