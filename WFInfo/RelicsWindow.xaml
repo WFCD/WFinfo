@@ -76,14 +76,14 @@
 
                     <TextBox
                         VerticalContentAlignment="Center" Padding="0"
-                        Text="{Binding TextBoxText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Text="{Binding FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Foreground="#FF646464"
                         SelectionBrush="#FF7EB4EA"
 
                         BorderBrush="#FF646464" BorderThickness="1" />
                     <TextBlock MinWidth="50" Text="Filter terms"
                                Foreground="#FF646464"
-                               Visibility="{Binding Path=IsTextboxEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
+                               Visibility="{Binding Path=IsFilterEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
                                IsHitTestVisible="False"
                                Margin="5 0 0 0 "
                                VerticalAlignment="Center" />
@@ -165,10 +165,11 @@
             Grid.Row="3"
             x:Name="ListGrid" Margin="1,0,1,1">
             <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}"
-                      ItemsSource="{Binding RelicTreeItems}"
+                      ItemsSource="{Binding RelicsItemsView}"
+                      
 
                       TreeViewItem.Selected="SingleClickExpand" VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling">
+                      VirtualizingStackPanel.VirtualizationMode="Standard">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}">
                         <HierarchicalDataTemplate.Resources>

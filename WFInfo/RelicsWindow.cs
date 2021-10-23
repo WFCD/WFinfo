@@ -16,53 +16,49 @@ namespace WFInfo
 {
     public class RelicsViewModel : ObservableObject
     {
-        private RelicsViewModel()
+        public RelicsViewModel()
         {
-            _relicTreeItems = new ObservableCollection<TreeNode>();
-            ItemsView = new ListCollectionView(_relicTreeItems);
+            _relicTreeItems = new List<TreeNode>();
+            RelicsItemsView = new ListCollectionView(_relicTreeItems);
             ExpandAllCommand = new RelayCommand(() => ExpandOrCollapseAll(true));
             CollapseAllCommand = new RelayCommand(() => ExpandOrCollapseAll(false));
         }
 
-        private void ExpandOrCollapseAll(bool expand)
-        {
-            foreach (TreeNode era in RelicNodes)
-                era.ChangeExpandedTo(expand);
-        }
 
-        public static RelicsViewModel Instance { get; } = new RelicsViewModel();
-        private string _textBoxText = "";
+        private string _filterText = "";
         private bool _showAllRelics;
-        private ObservableCollection<TreeNode> _relicTreeItems;
+        private readonly List<TreeNode> _relicTreeItems;
         private int _selectedIndex;
         private bool _hideVaulted = true;
+        private readonly List<TreeNode> _rawRelicNodes = new List<TreeNode>();
 
-        public string TextBoxText
+        public string FilterText
         {
-            get => _textBoxText;
+            get => _filterText;
             set
             {
-                SetProperty(ref _textBoxText, value); 
+                SetProperty(ref _filterText, value); 
                 ReapplyFilters();
-                OnPropertyChanged(nameof(IsTextboxEmpty));
+                OnPropertyChanged(nameof(IsFilterEmpty));
             }
         }
+        public bool IsFilterEmpty => FilterText.IsNullOrEmpty();
 
         public RelayCommand ExpandAllCommand { get; }
         public RelayCommand CollapseAllCommand { get; }
-        public bool IsTextboxEmpty => TextBoxText.IsNullOrEmpty();
-        public List<TreeNode> RelicNodes { get; } = new List<TreeNode>();
 
+        private void ExpandOrCollapseAll(bool expand)
+        {
+            foreach (TreeNode era in _rawRelicNodes)
+                era.ChangeExpandedTo(expand);
+        }
+        
         public bool ShowAllRelics
         {
-            get
-            {
-                
-                return _showAllRelics;
-            }
+            get => _showAllRelics;
             set
             {
-                foreach (TreeNode era in RelicNodes)
+                foreach (TreeNode era in _rawRelicNodes)
                 foreach (TreeNode relic in era.Children)
                     relic.topLevel = value;
                 SetProperty(ref _showAllRelics, value);
@@ -72,6 +68,7 @@ namespace WFInfo
                 OnPropertyChanged(nameof(ShowAllRelicsText));
             }
         }
+        public string ShowAllRelicsText => ShowAllRelics ? "All Relics" : "Relic Eras";
 
         public bool HideVaulted
         {
@@ -79,27 +76,20 @@ namespace WFInfo
             set
             { 
                 SetProperty(ref _hideVaulted, value);
-                if (value)
-                {
-                    foreach (TreeNode era in RelicNodes)
-                        era.FilterOutVaulted(true);
-     
-                    RefreshVisibleRelics();
-                }
-                else
-                    ReapplyFilters();
+                ReapplyFilters();
+                // if (value)
+                // {
+                //     foreach (TreeNode era in _rawRelicNodes)
+                //         era.FilterOutVaulted(true);
+                //
+                //     RefreshVisibleRelics();
+                // }
+                // else
+                //     ReapplyFilters();
             }
         }
 
-        public string ShowAllRelicsText => ShowAllRelics ? "All Relics" : "Relic Eras";
-
-        public ObservableCollection<TreeNode> RelicTreeItems
-        {
-            get => _relicTreeItems;
-            set => SetProperty(ref _relicTreeItems, value);
-        }
-
-        public ICollectionView ItemsView { get; }
+        public ICollectionView RelicsItemsView { get; }
 
         public int SelectedIndex
         {
@@ -110,9 +100,6 @@ namespace WFInfo
                 SortBoxChanged();
             }
         }
-        private string[] SearchText => SearchActive ? TextBoxText.Split(' ') : null;
-
-        private bool SearchActive => !TextBoxText.IsNullOrEmpty();
         // public ObservableCollection<SortDescription> SortDescriptions { get; } = new ObservableCollection<SortDescription>();
         public void SortBoxChanged()
         {
@@ -121,29 +108,29 @@ namespace WFInfo
             // 2 - Average radiant plat
             // 3 - Difference (radiant-intact)
         
-            foreach (TreeNode era in RelicNodes)
+            foreach (TreeNode era in _rawRelicNodes)
             {
                 era.Sort(SelectedIndex);
                 era.RecolorChildren();
             }
             if (ShowAllRelics)
             {
-                ItemsView.SortDescriptions.Clear();
+                RelicsItemsView.SortDescriptions.Clear();
                 //TODO:
                 //_relicTreeItems.IsLiveSorting = true;
                 switch (SelectedIndex)
                 {
                     case 1:
-                        ItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Intact_Val", System.ComponentModel.ListSortDirection.Descending));
+                        RelicsItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Intact_Val", System.ComponentModel.ListSortDirection.Descending));
                         break;
                     case 2:
-                        ItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Radiant_Val", System.ComponentModel.ListSortDirection.Descending));
+                        RelicsItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Radiant_Val", System.ComponentModel.ListSortDirection.Descending));
                         break;
                     case 3:
-                        ItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
+                        RelicsItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
                         break;
                     default:
-                        ItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Name_Sort", System.ComponentModel.ListSortDirection.Ascending));
+                        RelicsItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Name_Sort", System.ComponentModel.ListSortDirection.Ascending));
                         break;
                 }
 
@@ -165,7 +152,7 @@ namespace WFInfo
             if (ShowAllRelics)
             {
                 List<TreeNode> activeNodes = new List<TreeNode>();
-                foreach (TreeNode era in RelicNodes)
+                foreach (TreeNode era in _rawRelicNodes)
                 foreach (TreeNode relic in era.ChildrenFiltered)
                     activeNodes.Add(relic);
 
@@ -189,7 +176,7 @@ namespace WFInfo
             }
             else
             {
-                foreach (TreeNode era in RelicNodes)
+                foreach (TreeNode era in _rawRelicNodes)
                 {
                     int curr = _relicTreeItems.IndexOf(era);
                     if (era.ChildrenFiltered.Count == 0)
@@ -208,18 +195,22 @@ namespace WFInfo
                 }
             }
             // _relicTreeItems.Refresh();
+            RelicsItemsView.Refresh();
         }
 
         public void ReapplyFilters()
         {
         
-            foreach (TreeNode era in RelicNodes)
+            foreach (TreeNode era in _rawRelicNodes)
             {
                 era.ResetFilter();
                 if(HideVaulted)
                     era.FilterOutVaulted(true);
-                if(SearchActive)
-                    era.FilterSearchText(SearchText, false, true);
+                if(!FilterText.IsNullOrEmpty())
+                {
+                    var searchText = FilterText.Split(' ');
+                    era.FilterSearchText(searchText, false, true);
+                }
             }
             RefreshVisibleRelics();
         }
@@ -230,9 +221,9 @@ namespace WFInfo
             TreeNode meso = new TreeNode("Meso", "", false, 0);
             TreeNode neo = new TreeNode("Neo", "", false, 0);
             TreeNode axi = new TreeNode("Axi", "", false, 0);
-            RelicNodes.AddRange(new[] { lith, meso, neo, axi });
+            _rawRelicNodes.AddRange(new[] { lith, meso, neo, axi });
             int eraNum = 0;
-            foreach (TreeNode head in RelicNodes)
+            foreach (TreeNode head in _rawRelicNodes)
             {
                 double sumIntact = 0;
                 double sumRad = 0;
@@ -265,8 +256,8 @@ namespace WFInfo
                 head.ResetFilter();
                 head.FilterOutVaulted();
                 head.RecolorChildren();
-                _relicTreeItems.Add(head);
             }
+            RefreshVisibleRelics();
             SortBoxChanged();
         }
     }
@@ -275,7 +266,7 @@ namespace WFInfo
     /// </summary>
     public partial class RelicsWindow : Window
     {
-        private RelicsViewModel _relicsViewModel = RelicsViewModel.Instance;
+        private readonly RelicsViewModel _relicsViewModel = new RelicsViewModel();
 
         public RelicsWindow()
         {
