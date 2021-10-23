@@ -7,7 +7,8 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         x:Class="WFInfo.MainWindow"
         Title="WFInfo"
-        Height="103.25"
+        Height="Auto"
+        SizeToContent="Height"
         Width="334"
         ResizeMode="NoResize"
         Icon="Resources/WFLogo.png"
@@ -26,7 +27,7 @@
             <RowDefinition Height="22" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="21" />
+            <RowDefinition MinHeight="21" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -153,7 +154,9 @@
                        MouseLeftButtonDown="WebsiteClick"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"
-                       Padding="3">
+                       Width="20"
+                       Height="20"
+                       Padding="2">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
@@ -186,9 +189,11 @@
                        Grid.Row="0"
                        ToolTip="Relics, search for what relic you need to use"
                        MouseLeftButtonDown="RelicsClick"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Center"
-                       Padding="3">
+                       VerticalContentAlignment="Center"
+                       HorizontalContentAlignment="Center"
+                       Width="20"
+                       Height="20"
+                       Padding="1">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
@@ -223,7 +228,9 @@
                        MouseLeftButtonDown="EquipmentClick"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"
-                       Padding="3">
+                       Width="20"
+                       Height="20"
+                       Padding="2">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
@@ -258,7 +265,9 @@
                        MouseLeftButtonDown="Settings_click"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"
-                       Padding="3">
+                       Width="20"
+                       Height="20"
+                       Padding="2">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
@@ -294,7 +303,9 @@
                        MouseLeftButtonDown="CreateListing_MouseLeftButtonDown"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"
-                       Padding="3">
+                       Width="20"
+                       Height="20"
+                       Padding="2">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
@@ -330,7 +341,9 @@
                        MouseLeftButtonDown="PlusOne"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"
-                       Padding="3">
+                       Width="20"
+                       Height="20"
+                       Padding="2">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
@@ -363,9 +376,11 @@
                        x:Name="SearchItButton"
                        ToolTip="Launch search it"
                        MouseLeftButtonDown="SearchItButton_MouseLeftButtonDown"
-                       Padding="3"
+                       Padding="2"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"
+                       Width="20"
+                       Height="20"
                        Visibility="Collapsed">
                     <Label.Style>
                         <Style>
@@ -516,7 +531,7 @@
                            Text="{Binding ViewModel.StatusMessage}"
                            Foreground="{Binding ViewModel.StatusBrush}"
                            FontFamily="{StaticResource Roboto_Condensed}"
-                           Height="18" />
+                           TextWrapping="Wrap"/>
             </DockPanel>
         </Border>
 
