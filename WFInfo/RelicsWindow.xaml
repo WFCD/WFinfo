@@ -148,7 +148,7 @@
                               BorderThickness="0"
 
                               Style="{DynamicResource ComboBoxStyle1}"
-                              SelectedIndex="{Binding SelectedIndex}"
+                              SelectedIndex="{Binding SortBoxSelectedIndex}"
                               ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}">
                         <ComboBoxItem IsSelected="True" Content="Name" />
                         <ComboBoxItem Content="Average intact plat" />

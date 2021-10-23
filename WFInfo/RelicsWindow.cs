@@ -28,7 +28,7 @@ namespace WFInfo
         private string _filterText = "";
         private bool _showAllRelics;
         private readonly List<TreeNode> _relicTreeItems;
-        private int _selectedIndex;
+        private int _sortBoxSelectedIndex;
         private bool _hideVaulted = true;
         private readonly List<TreeNode> _rawRelicNodes = new List<TreeNode>();
 
@@ -63,7 +63,6 @@ namespace WFInfo
                     relic.topLevel = value;
                 SetProperty(ref _showAllRelics, value);
                 
-                _relicTreeItems.Clear();
                 RefreshVisibleRelics();
                 OnPropertyChanged(nameof(ShowAllRelicsText));
             }
@@ -77,30 +76,20 @@ namespace WFInfo
             { 
                 SetProperty(ref _hideVaulted, value);
                 ReapplyFilters();
-                // if (value)
-                // {
-                //     foreach (TreeNode era in _rawRelicNodes)
-                //         era.FilterOutVaulted(true);
-                //
-                //     RefreshVisibleRelics();
-                // }
-                // else
-                //     ReapplyFilters();
             }
         }
 
         public ICollectionView RelicsItemsView { get; }
 
-        public int SelectedIndex
+        public int SortBoxSelectedIndex
         {
-            get => _selectedIndex;
+            get => _sortBoxSelectedIndex;
             set
             {
-                SetProperty(ref _selectedIndex, value);
+                SetProperty(ref _sortBoxSelectedIndex, value);
                 SortBoxChanged();
             }
         }
-        // public ObservableCollection<SortDescription> SortDescriptions { get; } = new ObservableCollection<SortDescription>();
         public void SortBoxChanged()
         {
             // 0 - Name
@@ -110,7 +99,7 @@ namespace WFInfo
         
             foreach (TreeNode era in _rawRelicNodes)
             {
-                era.Sort(SelectedIndex);
+                era.Sort(SortBoxSelectedIndex);
                 era.RecolorChildren();
             }
             if (ShowAllRelics)
@@ -118,7 +107,7 @@ namespace WFInfo
                 RelicsItemsView.SortDescriptions.Clear();
                 //TODO:
                 //_relicTreeItems.IsLiveSorting = true;
-                switch (SelectedIndex)
+                switch (SortBoxSelectedIndex)
                 {
                     case 1:
                         RelicsItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Intact_Val", System.ComponentModel.ListSortDirection.Descending));
@@ -194,7 +183,6 @@ namespace WFInfo
                     era.RecolorChildren();
                 }
             }
-            // _relicTreeItems.Refresh();
             RelicsItemsView.Refresh();
         }
 
