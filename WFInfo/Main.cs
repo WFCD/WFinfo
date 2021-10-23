@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using AutoUpdaterDotNET;
 using System.Windows;
 using System.Windows.Forms;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using WebSocketSharp;
 using WFInfo.Resources;
 
@@ -16,7 +17,6 @@ namespace WFInfo
 {
     class Main
     {
-        public static Main INSTANCE;
         public static string AppPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static Data dataBase = new Data();
@@ -43,7 +43,6 @@ namespace WFInfo
 
         public Main()
         {
-            INSTANCE = this;
             StartMessage();
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
 
@@ -178,7 +177,7 @@ namespace WFInfo
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
         public static void StatusUpdate(string message, int severity)
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
+            WeakReferenceMessenger.Default.Send(new ChangeStatusMessage(message, severity));
         }
 
         public void ActivationKeyPressed(Object key)

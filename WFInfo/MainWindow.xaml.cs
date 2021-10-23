@@ -11,24 +11,71 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.Messaging;
 
 namespace WFInfo
 {
-    public class MainWindowViewModel : INPC
+    public class ChangeStatusMessage
+    {
+        public string Message { get; }
+        public int Severity { get; }
+        public ChangeStatusMessage(string message, int severity)
+        {
+            Message = message;
+            Severity = severity;
+        }
+    }
+    public class MainWindowViewModel : ObservableRecipient, IRecipient<ChangeStatusMessage>
     {
         private string _statusMessage;
         private Brush _statusBrush;
 
+        public MainWindowViewModel()
+        {
+            IsActive = true;
+        }
+
         public string StatusMessage
         {
             get => _statusMessage;
-            set => SetField(ref _statusMessage, value);
+            set => SetProperty(ref _statusMessage, value);
         }
 
         public Brush StatusBrush
         {
             get => _statusBrush;
-            set => SetField(ref _statusBrush, value);
+            set => SetProperty(ref _statusBrush, value);
+        }
+
+        public void Receive(ChangeStatusMessage message)
+        {
+            ChangeStatus(message.Message, message.Severity);
+        }
+
+        private readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(177, 208, 217));
+        private readonly SolidColorBrush RedBrush = Brushes.Red;
+        private readonly SolidColorBrush OrangeBrush = Brushes.Orange;
+        private readonly SolidColorBrush YellowBrush = Brushes.Yellow;
+        public void ChangeStatus(string status, int severity)
+        {
+            Debug.WriteLine("Status message: " + status);
+            StatusMessage = status;
+            switch (severity)
+            {
+                case 0: //default, no problem
+                    StatusBrush = DefaultBrush;
+                    break;
+                case 1: //severe, red text
+                    StatusBrush = RedBrush;
+                    break;
+                case 2: //warning, orange text
+                    StatusBrush = OrangeBrush;
+                    break;
+                default: //Uncaught, big problem
+                    StatusBrush = YellowBrush;
+                    break;
+            }
         }
     }
     /// <summary>
@@ -37,7 +84,7 @@ namespace WFInfo
     public partial class MainWindow : Window
     {
         readonly Main main; //subscriber
-        private readonly MainWindowViewModel _viewModel = new MainWindowViewModel();
+        private static MainWindowViewModel _viewModel;
         public static MainWindow INSTANCE;
         public static WelcomeDialogue welcomeDialogue;
         public static LowLevelListener listener;
@@ -46,6 +93,8 @@ namespace WFInfo
         public MainWindowViewModel ViewModel => _viewModel;
         public MainWindow()
         {
+            MainWindow._viewModel = new MainWindowViewModel();
+            InitializeComponent();
             this.DataContext = this;
             string thisprocessname = Process.GetCurrentProcess().ProcessName;
             if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
@@ -311,26 +360,7 @@ namespace WFInfo
         /// </summary>
         /// <param name="status">The string to be displayed</param>
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
-        public void ChangeStatus(string status, int severity)
-        {
-            Debug.WriteLine("Status message: " + status);
-            _viewModel.StatusMessage = status;
-            switch (severity)
-            {
-                case 0: //default, no problem
-                    _viewModel.StatusBrush = new SolidColorBrush(Color.FromRgb(177, 208, 217));
-                    break;
-                case 1: //severe, red text
-                    _viewModel.StatusBrush = Brushes.Red;
-                    break;
-                case 2: //warning, orange text
-                    _viewModel.StatusBrush = Brushes.Orange;
-                    break;
-                default: //Uncaught, big problem
-                    _viewModel.StatusBrush = Brushes.Yellow;
-                    break;
-            }
-        }
+      
 
         public void Exit(object sender, RoutedEventArgs e)
         {
@@ -356,20 +386,20 @@ namespace WFInfo
 
         private void RelicsClick(object sender, RoutedEventArgs e)
         {
-            if (Main.dataBase.relicData == null) { ChangeStatus("Relic data not yet loaded in", 2); return; }
+            if (Main.dataBase.relicData == null) { _viewModel.ChangeStatus("Relic data not yet loaded in", 2); return; }
             Main.relicWindow.Show();
             Main.relicWindow.Focus();
         }
 
         private void EquipmentClick(object sender, RoutedEventArgs e)
         {
-            if (Main.dataBase.equipmentData == null) { ChangeStatus("Equipment data not yet loaded in", 2); return; }
+            if (Main.dataBase.equipmentData == null) { _viewModel.ChangeStatus("Equipment data not yet loaded in", 2); return; }
             Main.equipmentWindow.Show();
         }
 
         private void Settings_click(object sender, RoutedEventArgs e)
         {
-            if (Main.settingsWindow == null) { ChangeStatus("Settings window not yet loaded in", 2); return; }
+            if (Main.settingsWindow == null) { _viewModel.ChangeStatus("Settings window not yet loaded in", 2); return; }
             Main.settingsWindow.populate();
             Main.settingsWindow.Left = Left;
             Main.settingsWindow.Top = Top + Height;
@@ -446,7 +476,7 @@ namespace WFInfo
             PlusOneButton.Visibility = Visibility.Visible;
             CreateListing.Visibility = Visibility.Visible;
             SearchItButton.Visibility = Visibility.Visible;
-            ChangeStatus("Logged in", 0);
+            _viewModel.ChangeStatus("Logged in", 0);
         }
 
         /// <summary>
@@ -553,7 +583,7 @@ namespace WFInfo
 
             if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
-                ChangeStatus("No recorded rewards found", 2);
+                _viewModel.ChangeStatus("No recorded rewards found", 2);
                 return;
             }
 
@@ -570,7 +600,7 @@ namespace WFInfo
             t.Wait();
             if (Main.listingHelper.ScreensList.Count == 0)
             {
-                ChangeStatus("No recorded rewards found", 2);
+                _viewModel.ChangeStatus("No recorded rewards found", 2);
                 return;
 
             }
