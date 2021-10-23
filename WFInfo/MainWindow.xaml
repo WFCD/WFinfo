@@ -33,17 +33,11 @@
             <ColumnDefinition Width="43" />
         </Grid.ColumnDefinitions>
 
-        <!-- <Rectangle Stroke="#FF646464" /> -->
-        <!-- <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="0,0,42,0" Height="21" VerticalAlignment="Bottom" /> -->
-        <!-- <Rectangle Stroke="#FF646464" Margin="0,21,0,0" HorizontalAlignment="Right" Width="43" /> -->
-        <!-- <Rectangle Stroke="#FF414141" Margin="313,22,21,1" /> -->
-
         <Border Grid.Row="0"
                 Grid.Column="0"
                 BorderThickness="1 1 0 1"
                 BorderBrush="#FF646464">
             <DockPanel LastChildFill="False">
-                <!-- <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Height="22" VerticalAlignment="Top" /> -->
                 <Image Margin="1,0,0,0"
                        Source="Resources/WFLogo.png"
                        DockPanel.Dock="Left"
@@ -61,44 +55,65 @@
                        FontSize="11"
                        FontWeight="Bold" />
 
-                <Button x:Name="Login"
-                        DockPanel.Dock="Right"
-                        IsEnabled="False"
-                        Content="Login to WFM"
-                        Width="80"
-                        Background="{x:Null}"
-                        Foreground="#FFB1D0D9"
+                <Border DockPanel.Dock="Right"
                         BorderThickness="1 0 0 0 "
-                        BorderBrush="#FF646464"
-                        Click="SpawnLogin">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border x:Name="Border"
-                                                Background="{TemplateBinding Background}">
-                                            <ContentPresenter HorizontalAlignment="Center"
-                                                              VerticalAlignment="Center" />
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver"
-                                                     Value="True">
-                                                <Setter Property="Background"
-                                                        Value="#1b1b1b"
-                                                        TargetName="Border" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </Button.Style>
-                </Button>
+                        BorderBrush="#FF646464">
+
+                    <Grid Width="80">
+                        <Button x:Name="Login"
+                                IsEnabled="False"
+                                Content="Login to WFM"
+                                Width="80"
+                                Background="{x:Null}"
+                                Foreground="#FFB1D0D9"
+                                Click="SpawnLogin">
+                            <Button.Style>
+                                <Style TargetType="{x:Type Button}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type Button}">
+                                                <Border x:Name="Border"
+                                                        Background="{TemplateBinding Background}">
+                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver"
+                                                             Value="True">
+                                                        <Setter Property="Background"
+                                                                Value="#1b1b1b"
+                                                                TargetName="Border" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <ComboBox x:Name="ComboBox"
+                                  SelectionChanged="ComboBoxOnSelectionChanged"
+                                  Visibility="Collapsed"
+                                  Background="#FF0F0F0F"
+                                  Foreground="#FFAFD0D9"
+                                  BorderThickness="0"
+                                  BorderBrush="{x:Null}"
+                                  Style="{DynamicResource ComboBoxStyle1}"
+                                  ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}">
+                            <ComboBoxItem Content="In game" />
+                            <ComboBoxItem IsSelected="True"
+                                          Content="Online" />
+                            <ComboBoxItem Content="Offline" />
+                            <ComboBoxItem Content="Log out" />
+                        </ComboBox>
+                    </Grid>
+
+                </Border>
             </DockPanel>
         </Border>
 
-        <DockPanel Grid.Column="1">
+        <DockPanel Grid.Row="0"
+                   Grid.Column="1">
             <Label x:Name="exit"
                    DockPanel.Dock="Right"
                    MouseLeftButtonDown="Exit"
@@ -124,7 +139,8 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="3*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -135,14 +151,9 @@
                        Grid.Row="0"
                        ToolTip="Opens WFinfo discord"
                        MouseLeftButtonDown="WebsiteClick"
-                       Padding="1"
-                       HorizontalContentAlignment="Center"
-                       VerticalContentAlignment="Center"
-                       BorderThickness="0,1,0,0"
-                       Height="20"
-                       VerticalAlignment="Top"
-                       HorizontalAlignment="Right"
-                       Width="20">
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Padding="3">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
@@ -175,13 +186,9 @@
                        Grid.Row="0"
                        ToolTip="Relics, search for what relic you need to use"
                        MouseLeftButtonDown="RelicsClick"
-                       Padding="3"
-                       HorizontalContentAlignment="Center"
-                       VerticalContentAlignment="Center"
-                       Height="20"
-                       VerticalAlignment="Top"
-                       HorizontalAlignment="Right"
-                       Width="20">
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Padding="3">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
@@ -214,13 +221,9 @@
                        Grid.Row="1"
                        ToolTip="Equipment, see which items you own"
                        MouseLeftButtonDown="EquipmentClick"
-                       Padding="3"
-                       HorizontalContentAlignment="Center"
-                       VerticalContentAlignment="Center"
-                       Height="20"
-                       VerticalAlignment="Top"
-                       HorizontalAlignment="Right"
-                       Width="20">
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Padding="3">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
@@ -253,13 +256,9 @@
                        Grid.Row="1"
                        ToolTip="Settings"
                        MouseLeftButtonDown="Settings_click"
-                       Padding="3"
-                       HorizontalContentAlignment="Center"
-                       VerticalContentAlignment="Center"
-                       Height="20"
-                       VerticalAlignment="Top"
-                       HorizontalAlignment="Right"
-                       Width="20">
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Padding="3">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
@@ -287,14 +286,121 @@
                         </Style>
                     </Label.Style>
                 </Label>
+                <Label Grid.Row="2"
+                       Grid.Column="0"
+                       Visibility="Collapsed"
+                       x:Name="CreateListing"
+                       ToolTip="Create listings from previous rewards"
+                       MouseLeftButtonDown="CreateListing_MouseLeftButtonDown"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Padding="3">
+                    <Label.Style>
+                        <Style>
+                            <Setter Property="ContentControl.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/tressure.png"
+                                           Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="UIElement.IsMouseOver"
+                                                   Value="True" />
+                                        <Condition Property="UIElement.IsEnabled"
+                                                   Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="ContentControl.Content">
+                                        <Setter.Value>
+                                            <Image Source="Resources/tressure_h.png"
+                                                   Stretch="Uniform" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </MultiTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
+                <Label Grid.Row="2"
+                       Grid.Column="1"
+                       x:Name="PlusOneButton"
+                       Visibility="Collapsed"
+                       ToolTip="Post a review for the developers"
+                       MouseLeftButtonDown="PlusOne"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Padding="3">
+                    <Label.Style>
+                        <Style>
+                            <Setter Property="ContentControl.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/plusone.png"
+                                           Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="UIElement.IsMouseOver"
+                                                   Value="True" />
+                                        <Condition Property="UIElement.IsEnabled"
+                                                   Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="ContentControl.Content">
+                                        <Setter.Value>
+                                            <Image Source="Resources/plusone_h.png"
+                                                   Stretch="Uniform" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </MultiTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
+                <Label Grid.Row="3"
+                       Grid.Column="0"
+                       x:Name="SearchItButton"
+                       ToolTip="Launch search it"
+                       MouseLeftButtonDown="SearchItButton_MouseLeftButtonDown"
+                       Padding="3"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Visibility="Collapsed">
+                    <Label.Style>
+                        <Style>
+                            <Setter Property="ContentControl.Content">
+                                <Setter.Value>
+                                    <Image Source="Resources/SearchIcon.png"
+                                           Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="UIElement.IsMouseOver"
+                                                   Value="True" />
+                                        <Condition Property="UIElement.IsEnabled"
+                                                   Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="ContentControl.Content">
+                                        <Setter.Value>
+                                            <Image Source="Resources/SearchIcon_h.png"
+                                                   Stretch="Uniform" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </MultiTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
             </Grid>
         </Border>
         <Border Grid.Row="1"
                 Grid.Column="0"
                 BorderThickness="1 0 0 0"
                 BorderBrush="#FF646464">
-            <DockPanel
-                VerticalAlignment="Center">
+            <DockPanel VerticalAlignment="Center">
                 <Label x:Name="ReloadMarket"
                        VerticalAlignment="Center"
                        ToolTip="Reloads market data"
@@ -338,8 +444,7 @@
                 <Label x:Name="MarketData"
                        Content="Loading..."
                        Background="{x:Null}"
-                       FontSize="16"
-                        />
+                       FontSize="16" />
             </DockPanel>
         </Border>
         <Border Grid.Row="2"
@@ -386,7 +491,7 @@
                        DockPanel.Dock="Left"
                        Background="{x:Null}"
                        FontSize="16"
-                       Width="101"/>
+                       Width="101" />
                 <Label x:Name="DropData"
                        Content="Loading..."
                        Background="{x:Null}"
@@ -446,147 +551,5 @@
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
-
-        <Label Visibility="Collapsed"
-               x:Name="CreateListing"
-               ToolTip="Create listings from previous rewards"
-               MouseLeftButtonDown="CreateListing_MouseLeftButtonDown"
-               Margin="0,62,22,0"
-               Padding="3"
-               HorizontalContentAlignment="Center"
-               VerticalContentAlignment="Center"
-               Height="20"
-               VerticalAlignment="Top"
-               HorizontalAlignment="Right"
-               Width="20">
-            <Label.Style>
-                <Style>
-                    <Setter Property="ContentControl.Content">
-                        <Setter.Value>
-                            <Image Source="Resources/tressure.png"
-                                   Stretch="Uniform" />
-                        </Setter.Value>
-                    </Setter>
-                    <Style.Triggers>
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="UIElement.IsMouseOver"
-                                           Value="True" />
-                                <Condition Property="UIElement.IsEnabled"
-                                           Value="True" />
-                            </MultiTrigger.Conditions>
-                            <Setter Property="ContentControl.Content">
-                                <Setter.Value>
-                                    <Image Source="Resources/tressure_h.png"
-                                           Stretch="Uniform" />
-                                </Setter.Value>
-                            </Setter>
-                        </MultiTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Label.Style>
-        </Label>
-        <!-- <Rectangle Stroke="#FF646464" -->
-        <!--            Margin="210,0,42,0" -->
-        <!--            Height="22" -->
-        <!--            VerticalAlignment="Top" /> -->
-
-        <Label x:Name="PlusOneButton"
-               Visibility="Collapsed"
-               ToolTip="Post a review for the developers"
-               MouseLeftButtonDown="PlusOne"
-               Margin="0,82,22,0"
-               Padding="3"
-               HorizontalContentAlignment="Center"
-               VerticalContentAlignment="Center"
-               Height="20"
-               VerticalAlignment="Top"
-               HorizontalAlignment="Right"
-               Width="20">
-            <Label.Style>
-                <Style>
-                    <Setter Property="ContentControl.Content">
-                        <Setter.Value>
-                            <Image Source="Resources/plusone.png"
-                                   Stretch="Uniform" />
-                        </Setter.Value>
-                    </Setter>
-                    <Style.Triggers>
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="UIElement.IsMouseOver"
-                                           Value="True" />
-                                <Condition Property="UIElement.IsEnabled"
-                                           Value="True" />
-                            </MultiTrigger.Conditions>
-                            <Setter Property="ContentControl.Content">
-                                <Setter.Value>
-                                    <Image Source="Resources/plusone_h.png"
-                                           Stretch="Uniform" />
-                                </Setter.Value>
-                            </Setter>
-                        </MultiTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Label.Style>
-        </Label>
-        <ComboBox x:Name="ComboBox"
-                  SelectionChanged="ComboBoxOnSelectionChanged"
-                  Visibility="Collapsed"
-                  HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Width="82"
-                  Height="22"
-                  Background="#FF0F0F0F"
-                  Foreground="#FFAFD0D9"
-                  BorderBrush="{x:Null}"
-                  Style="{DynamicResource ComboBoxStyle1}"
-                  ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}"
-                  Margin="210,0,0,0">
-            <ComboBoxItem Content="In game" />
-            <ComboBoxItem IsSelected="True"
-                          Content="Online" />
-            <ComboBoxItem Content="Offline" />
-            <ComboBoxItem Content="Log out" />
-        </ComboBox>
-        <Label x:Name="SearchItButton"
-               ToolTip="Launch search it"
-               MouseLeftButtonDown="SearchItButton_MouseLeftButtonDown"
-               Margin="0,62,1,0"
-               Padding="3"
-               HorizontalContentAlignment="Center"
-               VerticalContentAlignment="Center"
-               Height="20"
-               VerticalAlignment="Top"
-               Visibility="Collapsed"
-               HorizontalAlignment="Right"
-               Width="20">
-            <Label.Style>
-                <Style>
-                    <Setter Property="ContentControl.Content">
-                        <Setter.Value>
-                            <Image Source="Resources/SearchIcon.png"
-                                   Stretch="Uniform" />
-                        </Setter.Value>
-                    </Setter>
-                    <Style.Triggers>
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="UIElement.IsMouseOver"
-                                           Value="True" />
-                                <Condition Property="UIElement.IsEnabled"
-                                           Value="True" />
-                            </MultiTrigger.Conditions>
-                            <Setter Property="ContentControl.Content">
-                                <Setter.Value>
-                                    <Image Source="Resources/SearchIcon_h.png"
-                                           Stretch="Uniform" />
-                                </Setter.Value>
-                            </Setter>
-                        </MultiTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Label.Style>
-        </Label>
     </Grid>
 </Window>
