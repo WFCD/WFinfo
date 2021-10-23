@@ -63,14 +63,14 @@
                           Margin="10 0"
                           IsChecked="{Binding HideVaulted}" VerticalAlignment="Center"
 
-                       BorderThickness="1"
-                        BorderBrush="#FF646464" 
+                          BorderThickness="1"
+                          BorderBrush="#FF646464"
                           DockPanel.Dock="Left" />
                 <Label Content="Filter:" Padding="5 0"
                        VerticalContentAlignment="Center"
 
                        BorderThickness="1 0 0 0"
-                        BorderBrush="#FF646464" 
+                       BorderBrush="#FF646464"
                        DockPanel.Dock="Left" />
                 <Grid>
 
@@ -96,14 +96,13 @@
 
         <DockPanel
             Grid.Row="2"
-             VerticalAlignment="Top">
+            VerticalAlignment="Top">
             <ToggleButton
                 IsChecked="{Binding ShowAllRelics}"
                 FontWeight="Normal"
                 Panel.ZIndex="500"
                 VerticalAlignment="Center" Background="Transparent"
                 DockPanel.Dock="Left"
-                 BorderBrush="#FF646464"
                 BorderThickness="1" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center">
                 <Label Content="{Binding ShowAllRelicsText}" Style="{StaticResource Label_Button}"
                        VerticalAlignment="Center"
@@ -111,14 +110,31 @@
                        Margin="1"
                        BorderThickness="0"
                        Opacity="1" Height="20" FontSize="12" FontWeight="Normal" />
+                <ToggleButton.Style>
+                    <Style TargetType="{x:Type ToggleButton}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
             </ToggleButton>
 
-            <Label Content="Sort by:"  Padding="5 0" VerticalContentAlignment="Center" FontSize="12"
-                   Background="{x:Null}" HorizontalAlignment="Left" 
+            <Label Content="Sort by:" Padding="5 0" VerticalContentAlignment="Center" FontSize="12"
+                   Background="{x:Null}" HorizontalAlignment="Left"
                    BorderBrush="#FF646464" BorderThickness="1"
-                   DockPanel.Dock="Left"/>
-            <Border x:Name="ComboBorder" Grid.RowSpan="3"
-                    >
+                   DockPanel.Dock="Left" />
+            <Border x:Name="ComboBorder">
                 <Border.Style>
                     <Style>
                         <Style.Triggers>
@@ -163,15 +179,18 @@
 
         <Grid
             Grid.Row="3"
-            x:Name="ListGrid" Margin="1,0,1,1">
-            <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}"
+            Margin="1,0,1,1">
+            <TreeView Background="{x:Null}" BorderBrush="{x:Null}"
                       ItemsSource="{Binding RelicsItemsView}"
+                      TreeViewItem.Selected="SingleClickExpand" 
                       
-
-                      TreeViewItem.Selected="SingleClickExpand" VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.VirtualizationMode="Standard">
+                      VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}">
+                    <HierarchicalDataTemplate
+
+                        DataType="local:TreeNode"
+                        ItemsSource="{Binding ChildrenFiltered}">
                         <HierarchicalDataTemplate.Resources>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="FontSize" Value="13" />
