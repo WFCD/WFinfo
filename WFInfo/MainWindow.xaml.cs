@@ -14,20 +14,39 @@ using System.Windows.Media;
 
 namespace WFInfo
 {
+    public class MainWindowViewModel : INPC
+    {
+        private string _statusMessage;
+        private Brush _statusBrush;
+
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set => SetField(ref _statusMessage, value);
+        }
+
+        public Brush StatusBrush
+        {
+            get => _statusBrush;
+            set => SetField(ref _statusBrush, value);
+        }
+    }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
         readonly Main main; //subscriber
+        private readonly MainWindowViewModel _viewModel = new MainWindowViewModel();
         public static MainWindow INSTANCE;
         public static WelcomeDialogue welcomeDialogue;
         public static LowLevelListener listener;
         private static bool updatesupression;
 
+        public MainWindowViewModel ViewModel => _viewModel;
         public MainWindow()
         {
-
+            this.DataContext = this;
             string thisprocessname = Process.GetCurrentProcess().ProcessName;
             if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
             {
@@ -295,20 +314,20 @@ namespace WFInfo
         public void ChangeStatus(string status, int severity)
         {
             Debug.WriteLine("Status message: " + status);
-            Status.Text = status;
+            _viewModel.StatusMessage = status;
             switch (severity)
             {
                 case 0: //default, no problem
-                    Status.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
+                    _viewModel.StatusBrush = new SolidColorBrush(Color.FromRgb(177, 208, 217));
                     break;
                 case 1: //severe, red text
-                    Status.Foreground = Brushes.Red;
+                    _viewModel.StatusBrush = Brushes.Red;
                     break;
                 case 2: //warning, orange text
-                    Status.Foreground = Brushes.Orange;
+                    _viewModel.StatusBrush = Brushes.Orange;
                     break;
                 default: //Uncaught, big problem
-                    Status.Foreground = Brushes.Yellow;
+                    _viewModel.StatusBrush = Brushes.Yellow;
                     break;
             }
         }
