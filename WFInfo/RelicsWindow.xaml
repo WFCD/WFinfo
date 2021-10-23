@@ -7,8 +7,7 @@
     xmlns:local="clr-namespace:WFInfo"
     x:Class="WFInfo.RelicsWindow"
     d:DataContext="{d:DesignInstance Type=local:RelicsViewModel}"
-    Title="Relics" Height="400" Width="550" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip"
-    MaxWidth="550" MinWidth="550" MinHeight="200" Loaded="WindowLoaded">
+    Title="Relics" Height="400" Width="550" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MinHeight="200" Loaded="WindowLoaded">
     <Window.Resources>
 
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />

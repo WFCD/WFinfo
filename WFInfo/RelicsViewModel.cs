@@ -9,6 +9,7 @@ namespace WFInfo
 {
     public class RelicsViewModel : INPC
     {
+        public static RelicsViewModel Instance { get; }= new RelicsViewModel();
         public RelicsViewModel()
         {
             _relicTreeItems = new List<TreeNode>();
@@ -17,6 +18,7 @@ namespace WFInfo
             CollapseAllCommand = new SimpleCommand(() => ExpandOrCollapseAll(false));
         }
 
+        private bool _initialized = false;
         private string _filterText = "";
         private bool _showAllRelics;
         private readonly List<TreeNode> _relicTreeItems;
@@ -198,6 +200,10 @@ namespace WFInfo
 
         public void InitializeTree()
         {
+            if (_initialized)
+            {
+                return;
+            }
             TreeNode lith = new TreeNode("Lith", "", false, 0);
             TreeNode meso = new TreeNode("Meso", "", false, 0);
             TreeNode neo = new TreeNode("Neo", "", false, 0);
@@ -240,6 +246,7 @@ namespace WFInfo
             }
             RefreshVisibleRelics();
             SortBoxChanged();
+            _initialized = true;
         }
     }
 }

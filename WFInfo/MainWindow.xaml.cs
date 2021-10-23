@@ -338,8 +338,10 @@ namespace WFInfo
         private void RelicsClick(object sender, RoutedEventArgs e)
         {
             if (Main.dataBase.relicData == null) { ChangeStatus("Relic data not yet loaded in", 2); return; }
-            Main.relicWindow.Show();
-            Main.relicWindow.Focus();
+
+            var relicWindow = new RelicsWindow();
+            relicWindow.Show();
+            relicWindow.Focus();
         }
 
         private void EquipmentClick(object sender, RoutedEventArgs e)

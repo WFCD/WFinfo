@@ -11,12 +11,10 @@ namespace WFInfo
     /// </summary>
     public partial class RelicsWindow : Window
     {
-        private readonly RelicsViewModel _relicsViewModel = new RelicsViewModel();
-
         public RelicsWindow()
         {
             InitializeComponent();
-            DataContext = this._relicsViewModel;
+            DataContext = RelicsViewModel.Instance;
         }
 
         private void Hide(object sender, RoutedEventArgs e)
@@ -46,7 +44,7 @@ namespace WFInfo
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         { // triggers when the window is first loaded, populates all the listviews once.
-            _relicsViewModel.InitializeTree();
+            RelicsViewModel.Instance.InitializeTree();
         }
     }
 }
