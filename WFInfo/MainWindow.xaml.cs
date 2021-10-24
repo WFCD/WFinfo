@@ -30,6 +30,7 @@ namespace WFInfo
     {
         private string _statusMessage;
         private Brush _statusBrush;
+        private bool _isLoggedIn;
 
         public MainWindowViewModel()
         {
@@ -46,6 +47,12 @@ namespace WFInfo
         {
             get => _statusBrush;
             set => SetProperty(ref _statusBrush, value);
+        }
+
+        public bool IsLoggedIn
+        {
+            get => _isLoggedIn;
+            set => SetProperty(ref _isLoggedIn, value);
         }
 
         public void Receive(ChangeStatusMessage message)
@@ -470,12 +477,8 @@ namespace WFInfo
 
         public void LoggedIn()
         {
-            Login.Visibility = Visibility.Collapsed;
+            _viewModel.IsLoggedIn = true;
             ComboBox.SelectedIndex = 1;
-            ComboBox.Visibility = Visibility.Visible;
-            PlusOneButton.Visibility = Visibility.Visible;
-            CreateListing.Visibility = Visibility.Visible;
-            SearchItButton.Visibility = Visibility.Visible;
             _viewModel.ChangeStatus("Logged in", 0);
         }
 
@@ -492,11 +495,7 @@ namespace WFInfo
 
         public void SignOut()
         {
-            Login.Visibility = Visibility.Visible;
-            ComboBox.Visibility = Visibility.Collapsed;
-            PlusOneButton.Visibility = Visibility.Collapsed;
-            CreateListing.Visibility = Visibility.Collapsed;
-            SearchItButton.Visibility = Visibility.Collapsed;
+            _viewModel.IsLoggedIn = false;
         }
 
         /// <summary>
@@ -561,10 +560,7 @@ namespace WFInfo
 
         internal void LoggOut(object sender, CancelEventArgs e)
         {
-            Login.Visibility = Visibility.Visible;
-            ComboBox.Visibility = Visibility.Hidden;
-            PlusOneButton.Visibility = Visibility.Hidden;
-            CreateListing.Visibility = Visibility.Hidden;
+            _viewModel.IsLoggedIn = false;
             Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
         }
 

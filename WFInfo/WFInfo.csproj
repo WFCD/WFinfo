@@ -234,6 +234,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\BooleanConverter.cs" />
     <Compile Include="verifyCount.xaml.cs">
       <DependentUpon>verifyCount.xaml</DependentUpon>
     </Compile>

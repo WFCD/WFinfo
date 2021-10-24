@@ -5,6 +5,7 @@
         mc:Ignorable="d"
         xmlns:local="clr-namespace:WFInfo"
         xmlns:tb="http://www.hardcodet.net/taskbar"
+        xmlns:converters="clr-namespace:WFInfo.Converters"
         x:Class="WFInfo.MainWindow"
         Title="WFInfo"
         Height="Auto"
@@ -18,6 +19,8 @@
         ContentRendered="OnContentRendered"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}">
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
     </Window.Resources>
 
     <Grid Background="#FF1B1B1B"
@@ -62,6 +65,7 @@
 
                     <Grid Width="80">
                         <Button x:Name="Login"
+                                Visibility="{Binding ViewModel.IsLoggedIn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                 IsEnabled="False"
                                 Content="Login to WFM"
                                 Width="80"
@@ -94,7 +98,7 @@
                         </Button>
                         <ComboBox x:Name="ComboBox"
                                   SelectionChanged="ComboBoxOnSelectionChanged"
-                                  Visibility="Collapsed"
+                                  Visibility="{Binding ViewModel.IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}"
                                   Background="#FF0F0F0F"
                                   Foreground="#FFAFD0D9"
                                   BorderThickness="0"
@@ -297,7 +301,7 @@
                 </Label>
                 <Label Grid.Row="2"
                        Grid.Column="0"
-                       Visibility="Collapsed"
+                       Visibility="{Binding ViewModel.IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}"
                        x:Name="CreateListing"
                        ToolTip="Create listings from previous rewards"
                        MouseLeftButtonDown="CreateListing_MouseLeftButtonDown"
@@ -336,7 +340,7 @@
                 <Label Grid.Row="2"
                        Grid.Column="1"
                        x:Name="PlusOneButton"
-                       Visibility="Collapsed"
+                       Visibility="{Binding ViewModel.IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}"
                        ToolTip="Post a review for the developers"
                        MouseLeftButtonDown="PlusOne"
                        VerticalAlignment="Center"
@@ -381,7 +385,7 @@
                        HorizontalAlignment="Center"
                        Width="20"
                        Height="20"
-                       Visibility="Collapsed">
+                       Visibility="{Binding ViewModel.IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Label.Style>
                         <Style>
                             <Setter Property="ContentControl.Content">
