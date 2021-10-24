@@ -103,6 +103,7 @@
                                   Foreground="#FFAFD0D9"
                                   BorderThickness="0"
                                   BorderBrush="{x:Null}"
+                                  SelectedIndex="{Binding ViewModel.LoginStatus}"
                                   Style="{DynamicResource ComboBoxStyle1}"
                                   ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}">
                             <ComboBoxItem Content="In game" />

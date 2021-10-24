@@ -31,6 +31,8 @@ namespace WFInfo
         private string _statusMessage;
         private Brush _statusBrush;
         private bool _isLoggedIn;
+        private int _loginStatus;
+
 
         public MainWindowViewModel()
         {
@@ -55,6 +57,12 @@ namespace WFInfo
             set => SetProperty(ref _isLoggedIn, value);
         }
 
+        public int LoginStatus
+        {
+            get => _loginStatus;
+            set => SetProperty(ref _loginStatus, value);
+        }
+        
         public void Receive(ChangeStatusMessage message)
         {
             ChangeStatus(message.Message, message.Severity);
@@ -478,7 +486,7 @@ namespace WFInfo
         public void LoggedIn()
         {
             _viewModel.IsLoggedIn = true;
-            ComboBox.SelectedIndex = 1;
+            _viewModel.LoginStatus = 1;
             _viewModel.ChangeStatus("Logged in", 0);
         }
 
@@ -508,16 +516,13 @@ namespace WFInfo
             switch (status)
             {
                 case "online":
-                    if (ComboBox.SelectedIndex == 1) break;
-                    ComboBox.SelectedIndex = 1;
+                    _viewModel.LoginStatus = 1;
                     break;
                 case "invisible":
-                    if (ComboBox.SelectedIndex == 2) break;
-                    ComboBox.SelectedIndex = 2;
+                    _viewModel.LoginStatus = 2;
                     break;
                 case "ingame":
-                    if (ComboBox.SelectedIndex == 0) break;
-                    ComboBox.SelectedIndex = 0;
+                    _viewModel.LoginStatus = 0;
                     break;
             }
             updatesupression = false;
@@ -530,9 +535,9 @@ namespace WFInfo
         /// <param name="e"></param>
         private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!ComboBox.IsLoaded || updatesupression) //Prevent firing off to early
+            if (!IsLoaded || updatesupression) //Prevent firing off to early
                 return;
-            switch (ComboBox.SelectedIndex)
+            switch (_viewModel.LoginStatus)
             {
                 case 0: //Online in game
                     Task.Run(async () =>
