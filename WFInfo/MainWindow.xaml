@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:WFInfo"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:converters="clr-namespace:WFInfo.Converters"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         x:Class="WFInfo.MainWindow"
         Title="WFInfo"
         Height="Auto"
@@ -66,7 +67,7 @@
                     <Grid Width="80">
                         <Button x:Name="Login"
                                 Visibility="{Binding ViewModel.IsLoggedIn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                IsEnabled="False"
+                                IsEnabled="{Binding ViewModel.LoginEnabled}"
                                 Content="Login to WFM"
                                 Width="80"
                                 Background="{x:Null}"
@@ -97,7 +98,6 @@
                             </Button.Style>
                         </Button>
                         <ComboBox x:Name="ComboBox"
-                                  SelectionChanged="ComboBoxOnSelectionChanged"
                                   Visibility="{Binding ViewModel.IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}"
                                   Background="#FF0F0F0F"
                                   Foreground="#FFAFD0D9"
@@ -111,6 +111,11 @@
                                           Content="Online" />
                             <ComboBoxItem Content="Offline" />
                             <ComboBoxItem Content="Log out" />
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="SelectionChanged">
+                                    <b:InvokeCommandAction Command="{Binding ViewModel.LoginSelectionChangedCommand}" />
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
                         </ComboBox>
                     </Grid>
 

@@ -12,6 +12,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using WebSocketSharp;
 
 namespace WFInfo
@@ -1111,7 +1112,7 @@ namespace WFInfo
                 {
                     Main.AddLog(e.Data);
                     Disconnect();
-                    Main.SignOut();
+                    WeakReferenceMessenger.Default.Send<SignOutMessage>();
                 }
             };
 
@@ -1122,7 +1123,7 @@ namespace WFInfo
                 var message = JsonConvert.DeserializeObject<JObject>(e.Data);
                 Main.RunOnUIThread(() =>
                 {
-                    Main.UpdateMarketStatus(message.GetValue("payload").ToString());
+                    WeakReferenceMessenger.Default.Send(new UpdateMarketStatusMessage(message.GetValue("payload").ToString()));
                 });
 
             };

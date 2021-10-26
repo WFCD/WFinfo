@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.Toolkit.Mvvm.Messaging;
 
 namespace WFInfo
@@ -26,17 +27,40 @@ namespace WFInfo
             Severity = severity;
         }
     }
-    public class MainWindowViewModel : ObservableRecipient, IRecipient<ChangeStatusMessage>
+    public class LoginMessage {}
+    public class SignOutMessage {}
+    public class FinishedLoadingMessage{}
+  /// <summary>
+        /// Changes the online selector. Used for websocket lisening to see if the status changed externally (i.e from the site)
+        /// </summary>
+        /// <param name="status">The status to change to</param>
+    public class UpdateMarketStatusMessage
+    {
+        public string Status { get; }
+
+        public UpdateMarketStatusMessage(string status)
+        {
+            Status = status;
+        }
+    }
+    public class MainWindowViewModel : ObservableRecipient, IRecipient<ChangeStatusMessage>, IRecipient<LoginMessage>,
+        IRecipient<SignOutMessage>, IRecipient<FinishedLoadingMessage>, IRecipient<UpdateMarketStatusMessage>
     {
         private string _statusMessage;
         private Brush _statusBrush;
         private bool _isLoggedIn;
         private int _loginStatus;
+        private bool _finishedLoading;
+        private bool _loginEnabled;
+
+        private bool _supressChanges;
+    
 
 
         public MainWindowViewModel()
         {
             IsActive = true;
+            LoginSelectionChangedCommand = new RelayCommand(ComboBoxOnSelectionChanged);
         }
 
         public string StatusMessage
@@ -63,6 +87,13 @@ namespace WFInfo
             set => SetProperty(ref _loginStatus, value);
         }
         
+        public bool LoginEnabled
+        {
+            get => _loginEnabled;
+            set => SetProperty(ref _loginEnabled, value);
+        }
+        
+        public RelayCommand LoginSelectionChangedCommand { get; }
         public void Receive(ChangeStatusMessage message)
         {
             ChangeStatus(message.Message, message.Severity);
@@ -92,6 +123,80 @@ namespace WFInfo
                     break;
             }
         }
+        
+        /// <summary>
+        /// Allows the user to overwrite the current websocket status
+        /// </summary>
+        private void ComboBoxOnSelectionChanged()
+        {
+            if (!_finishedLoading || _supressChanges) //Prevent firing off to early
+                return;
+            switch (LoginStatus)
+            {
+                case 0: //Online in game
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("in game");
+                    });
+                    break;
+                case 1: //Online
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("online");
+                    });
+                    break;
+                case 2: //Invisible
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("offline");
+                    });
+                    break;
+                case 3: //Sign out
+                    break;
+            }
+        }
+
+        public void LogOut()
+        {
+            IsLoggedIn = false;
+            Task.Run(() => { Main.dataBase.Disconnect(); });
+        }
+
+        public void Receive(LoginMessage message)
+        {
+            IsLoggedIn = true;
+            LoginStatus = 1;
+            ChangeStatus("Logged in", 0);
+        }
+
+        public void Receive(SignOutMessage message)
+        {
+            IsLoggedIn = false;
+        }
+
+        public void Receive(FinishedLoadingMessage message)
+        {
+            LoginEnabled = true;
+            _finishedLoading = true;
+        }
+
+        public void Receive(UpdateMarketStatusMessage message)
+        {
+            _supressChanges = true;
+            switch (message.Status)
+            {
+                case "online":
+                    LoginStatus = 1;
+                    break;
+                case "invisible":
+                    LoginStatus = 2;
+                    break;
+                case "ingame":
+                    LoginStatus = 0;
+                    break;
+            }
+            _supressChanges = false;
+        }
     }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -103,7 +208,6 @@ namespace WFInfo
         public static MainWindow INSTANCE;
         public static WelcomeDialogue welcomeDialogue;
         public static LowLevelListener listener;
-        private static bool updatesupression;
 
         public MainWindowViewModel ViewModel => _viewModel;
         public MainWindow()
@@ -150,7 +254,7 @@ namespace WFInfo
 
                 Settings.Save();
 
-                Closing += new CancelEventHandler(LoggOut);
+                Closing += new CancelEventHandler((_, __) => _viewModel.LogOut());
             }
             catch (Exception e)
             {
@@ -483,13 +587,6 @@ namespace WFInfo
             INSTANCE.Focus();         // important
         }
 
-        public void LoggedIn()
-        {
-            _viewModel.IsLoggedIn = true;
-            _viewModel.LoginStatus = 1;
-            _viewModel.ChangeStatus("Logged in", 0);
-        }
-
         /// <summary>
         /// Prompts user to log in
         /// </summary>
@@ -501,78 +598,9 @@ namespace WFInfo
 
         }
 
-        public void SignOut()
-        {
-            _viewModel.IsLoggedIn = false;
-        }
+    
+   
 
-        /// <summary>
-        /// Changes the online selector. Used for websocket lisening to see if the status changed externally (i.e from the site)
-        /// </summary>
-        /// <param name="status">The status to change to</param>
-        public void UpdateMarketStatus(string status)
-        {
-            updatesupression = true;
-            switch (status)
-            {
-                case "online":
-                    _viewModel.LoginStatus = 1;
-                    break;
-                case "invisible":
-                    _viewModel.LoginStatus = 2;
-                    break;
-                case "ingame":
-                    _viewModel.LoginStatus = 0;
-                    break;
-            }
-            updatesupression = false;
-        }
-
-        /// <summary>
-        /// Allows the user to overwrite the current websocket status
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!IsLoaded || updatesupression) //Prevent firing off to early
-                return;
-            switch (_viewModel.LoginStatus)
-            {
-                case 0: //Online in game
-                    Task.Run(async () =>
-                    {
-                        await Main.dataBase.SetWebsocketStatus("in game");
-                    });
-                    break;
-                case 1: //Online
-                    Task.Run(async () =>
-                    {
-                        await Main.dataBase.SetWebsocketStatus("online");
-                    });
-                    break;
-                case 2: //Invisible
-                    Task.Run(async () =>
-                    {
-                        await Main.dataBase.SetWebsocketStatus("offline");
-                    });
-                    break;
-                case 3: //Sign out
-                    LoggOut(null, null);
-                    break;
-            }
-        }
-
-        internal void LoggOut(object sender, CancelEventArgs e)
-        {
-            _viewModel.IsLoggedIn = false;
-            Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
-        }
-
-        internal void FinishedLoading()
-        {
-            Login.IsEnabled = true;
-        }
 
         private void CreateListing_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
