@@ -30,6 +30,19 @@ namespace WFInfo
     public class LoginMessage {}
     public class SignOutMessage {}
     public class FinishedLoadingMessage{}
+
+    public class UpdateDataTimestamp
+    {
+        public UpdateDataTimestamp(string status, bool isDropData)
+        {
+            Status = status;
+            IsDropData = isDropData;
+        }
+
+        public string Status { get; }
+        public bool IsDropData { get; }
+        
+    }
   /// <summary>
         /// Changes the online selector. Used for websocket lisening to see if the status changed externally (i.e from the site)
         /// </summary>
@@ -44,7 +57,8 @@ namespace WFInfo
         }
     }
     public class MainWindowViewModel : ObservableRecipient, IRecipient<ChangeStatusMessage>, IRecipient<LoginMessage>,
-        IRecipient<SignOutMessage>, IRecipient<FinishedLoadingMessage>, IRecipient<UpdateMarketStatusMessage>
+        IRecipient<SignOutMessage>, IRecipient<FinishedLoadingMessage>, IRecipient<UpdateMarketStatusMessage>,
+        IRecipient<UpdateDataTimestamp>
     {
         private string _statusMessage;
         private Brush _statusBrush;
@@ -52,6 +66,8 @@ namespace WFInfo
         private int _loginStatus;
         private bool _finishedLoading;
         private bool _loginEnabled;
+        private string _marketDataStatus = "Loading...";
+        private string _dropDataStatus = "Loading...";
 
         private bool _supressChanges;
     
@@ -91,6 +107,18 @@ namespace WFInfo
         {
             get => _loginEnabled;
             set => SetProperty(ref _loginEnabled, value);
+        }
+
+        public string MarketDataStatus
+        {
+            get => _marketDataStatus;
+            set => SetProperty(ref _marketDataStatus, value);
+        }
+
+        public string DropDataStatus
+        {
+            get => _dropDataStatus;
+            set => SetProperty(ref _dropDataStatus, value);
         }
         
         public RelayCommand LoginSelectionChangedCommand { get; }
@@ -196,6 +224,18 @@ namespace WFInfo
                     break;
             }
             _supressChanges = false;
+        }
+
+        public void Receive(UpdateDataTimestamp message)
+        {
+            if (message.IsDropData)
+            {
+                DropDataStatus = message.Status;
+            }
+            else
+            {
+                MarketDataStatus = message.Status;
+            }
         }
     }
     /// <summary>
@@ -529,7 +569,7 @@ namespace WFInfo
         {
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
-            MarketData.Content = "Loading...";
+            ViewModel.MarketDataStatus = "Loading...";
             Main.StatusUpdate("Forcing Market Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
         }
@@ -538,7 +578,7 @@ namespace WFInfo
         {
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
-            DropData.Content = "Loading...";
+            ViewModel.DropDataStatus = "Loading...";
             Main.StatusUpdate("Forcing Prime Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
         }

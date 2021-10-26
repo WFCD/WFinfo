@@ -466,8 +466,7 @@
                        Background="{x:Null}"
                        FontSize="16"
                        Width="101" />
-                <Label x:Name="MarketData"
-                       Content="Loading..."
+                <Label Content="{Binding Path=ViewModel.MarketDataStatus}"
                        Background="{x:Null}"
                        FontSize="16" />
             </DockPanel>
@@ -517,8 +516,7 @@
                        Background="{x:Null}"
                        FontSize="16"
                        Width="101" />
-                <Label x:Name="DropData"
-                       Content="Loading..."
+                <Label Content="{Binding Path=ViewModel.DropDataStatus}"
                        Background="{x:Null}"
                        FontSize="16" />
 

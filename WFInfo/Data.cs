@@ -399,16 +399,19 @@ namespace WFInfo
 
             if (marketData["timestamp"] == null)
             {
-                Main.RunOnUIThread(() => { MainWindow.INSTANCE.MarketData.Content = "VERIFY"; });
-                Main.RunOnUIThread(() => { MainWindow.INSTANCE.DropData.Content = "TIME"; });
+                WeakReferenceMessenger.Default.Send(new UpdateDataTimestamp("VERIFY", false));
+                WeakReferenceMessenger.Default.Send(new UpdateDataTimestamp("TIME", true));
 
                 return false;
             }
 
-            Main.RunOnUIThread(() => { MainWindow.INSTANCE.MarketData.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
+            var marketStatus = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+            WeakReferenceMessenger.Default.Send(new UpdateDataTimestamp(marketStatus, false));
 
             saveDatabases = LoadEqmtData(allFiltered, saveDatabases);
-            Main.RunOnUIThread(() => { MainWindow.INSTANCE.DropData.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
+            
+            var dropStatus = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+            WeakReferenceMessenger.Default.Send(new UpdateDataTimestamp(dropStatus, true));
 
             if (saveDatabases)
                 SaveAllJSONs();
@@ -442,9 +445,12 @@ namespace WFInfo
 
                 SaveDatabase(marketItemsPath, marketItems);
                 SaveDatabase(marketDataPath, marketData);
+                
+                var marketStatus = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+                WeakReferenceMessenger.Default.Send(new UpdateDataTimestamp(marketStatus, false));
+                
                 Main.RunOnUIThread(() =>
                 {
-                    MainWindow.INSTANCE.MarketData.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
                     Main.StatusUpdate("Market Update Complete", 0);
                     MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
                     MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
@@ -479,9 +485,10 @@ namespace WFInfo
                 JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
                 LoadEqmtData(allFiltered, true);
                 SaveAllJSONs();
+                var dropStatus = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+                WeakReferenceMessenger.Default.Send(new UpdateDataTimestamp(dropStatus, true));
                 Main.RunOnUIThread(() =>
                 {
-                    MainWindow.INSTANCE.DropData.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
                     Main.StatusUpdate("Prime Update Complete", 0);
 
                     MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
