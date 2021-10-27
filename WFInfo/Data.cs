@@ -65,6 +65,7 @@ namespace WFInfo
         private LogCapture EElogWatcher;
         private Task autoThread;
 
+        private protected static string encryptionKey = "REDACTED"; //Replace this key with the one found above, this is redacted from the official git page as it'd defeat the purpose of encrpytion if we just give the key away.
 
         public Data()
         {
@@ -1019,38 +1020,93 @@ namespace WFInfo
             });
         }
 
-        public static void AutoTriggered()
-        {
-            try
-            {
-                var watch = Stopwatch.StartNew();
-                long stop = watch.ElapsedMilliseconds + 5000;
-                long wait = watch.ElapsedMilliseconds;
+		public static void AutoTriggered() {
+			try {
+				var watch = Stopwatch.StartNew();
+				long stop = watch.ElapsedMilliseconds + 5000;
+				long wait = watch.ElapsedMilliseconds;
 
-                OCR.UpdateWindow();
+				OCR.UpdateWindow();
 
-                while (watch.ElapsedMilliseconds < stop)
-                {
-                    if (watch.ElapsedMilliseconds <= wait) continue;
-                    wait += Settings.autoDelay;
-                    OCR.GetThemeWeighted(out double diff);
-                    if (!(diff > 40)) continue;
-                    while (watch.ElapsedMilliseconds < wait) ;
-                    Main.AddLog("started auto processing");
-                    OCR.ProcessRewardScreen();
-                    break;
+				while (watch.ElapsedMilliseconds < stop) {
+					if (watch.ElapsedMilliseconds <= wait) continue;
+					wait += Settings.autoDelay;
+					OCR.GetThemeWeighted(out double diff);
+					if (!(diff > 40)) continue;
+					while (watch.ElapsedMilliseconds < wait) ;
+					Main.AddLog("started auto processing");
+					OCR.ProcessRewardScreen();
+					break;
+				}
+				watch.Stop();
+			}
+			catch (Exception ex) {
+				Main.AddLog("AUTO FAILED");
+				Main.AddLog(ex.ToString());
+				Main.StatusUpdate("Auto Detection Failed", 0);
+				Main.RunOnUIThread(() => {
+					_ = new ErrorDialogue(DateTime.Now, 0);
+				});
+			}
+		}
+
+		public static void EncryptFile(string inputFile, string outputFile) {
+			try {
+				using (RijndaelManaged aes = new RijndaelManaged()) {
+					byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(encryptionKey);
+
+					/* This is for demostrating purposes only. 
+                     * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
+
+                    //Dapal: I would like to implement this secururety feature but at the moment don't have enough time to look into it more.
+					byte[] IV = System.Text.ASCIIEncoding.UTF8.GetBytes(encryptionKey);
+
+					using (FileStream fsCrypt = new FileStream(outputFile, FileMode.Create)) {
+						using (ICryptoTransform encryptor = aes.CreateEncryptor(key, IV)) {
+							using (CryptoStream cs = new CryptoStream(fsCrypt, encryptor, CryptoStreamMode.Write)) {
+								using (FileStream fsIn = new FileStream(inputFile, FileMode.Open)) {
+									int data;
+									while ((data = fsIn.ReadByte()) != -1) {
+										cs.WriteByte((byte)data);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex) {
+				// failed to encrypt file
+			}
+		}
+
+        public static void DecryptFile(string inputFile, string outputFile) {
+            try {
+                using (RijndaelManaged aes = new RijndaelManaged()) {
+                    byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(encryptionKey);
+
+                    /* This is for demostrating purposes only. 
+                     * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
+
+                    //Dapal: I would like to implement this secururety feature but at the moment don't have enough time to look into it more.
+                    byte[] IV = System.Text.ASCIIEncoding.UTF8.GetBytes(encryptionKey);
+
+                    using (FileStream fsCrypt = new FileStream(inputFile, FileMode.Open)) {
+                        using (FileStream fsOut = new FileStream(outputFile, FileMode.Create)) {
+                            using (ICryptoTransform decryptor = aes.CreateDecryptor(key, IV)) {
+                                using (CryptoStream cs = new CryptoStream(fsCrypt, decryptor, CryptoStreamMode.Read)) {
+                                    int data;
+                                    while ((data = cs.ReadByte()) != -1) {
+                                        fsOut.WriteByte((byte)data);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                watch.Stop();
             }
-            catch (Exception ex)
-            {
-                Main.AddLog("AUTO FAILED");
-                Main.AddLog(ex.ToString());
-                Main.StatusUpdate("Auto Detection Failed", 0);
-                Main.RunOnUIThread(() =>
-                {
-                    _ = new ErrorDialogue(DateTime.Now, 0);
-                });
+            catch (Exception ex) {
+                // failed to decrypt file
             }
         }
 
