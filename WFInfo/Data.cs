@@ -1076,7 +1076,7 @@ namespace WFInfo
 				}
 			}
 			catch (Exception ex) {
-				// failed to encrypt file
+                Main.AddLog($"Unabble to encpryt file {ex}");
 			}
 		}
 
@@ -1106,7 +1106,7 @@ namespace WFInfo
                 }
             }
             catch (Exception ex) {
-                // failed to decrypt file
+                Main.AddLog($"Unable to decrpyt file: {ex}");
             }
         }
 
