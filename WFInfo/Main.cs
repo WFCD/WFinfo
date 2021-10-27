@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using AutoUpdaterDotNET;
 using System.Windows;
 using System.Windows.Forms;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using WebSocketSharp;
 using WFInfo.Resources;
 
@@ -16,7 +17,6 @@ namespace WFInfo
 {
     class Main
     {
-        public static Main INSTANCE;
         public static string AppPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static Data dataBase = new Data();
@@ -43,7 +43,6 @@ namespace WFInfo
 
         public Main()
         {
-            INSTANCE = this;
             StartMessage();
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
 
@@ -75,7 +74,7 @@ namespace WFInfo
                 {
                     OCR.VerifyWarframe();
                     latestActive = DateTime.UtcNow.AddMinutes(1);
-                    LoggedIn();
+                    WeakReferenceMessenger.Default.Send<LoginMessage>();
 
                     var startTimeSpan = TimeSpan.Zero;
                     var periodTimeSpan = TimeSpan.FromMinutes(1);
@@ -87,7 +86,7 @@ namespace WFInfo
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
-                FinishedLoading();
+                WeakReferenceMessenger.Default.Send<FinishedLoadingMessage>();
             }
             catch (Exception ex)
             {
@@ -178,7 +177,7 @@ namespace WFInfo
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
         public static void StatusUpdate(string message, int severity)
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
+            WeakReferenceMessenger.Default.Send(new ChangeStatusMessage(message, severity));
         }
 
         public void ActivationKeyPressed(Object key)
@@ -401,21 +400,6 @@ namespace WFInfo
             }
         }
 
-        public static void LoggedIn()
-        { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
-        }
-
-
-        public static void FinishedLoading()
-        {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.FinishedLoading(); });
-        }
-        public static void UpdateMarketStatus(string msg)
-        {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.UpdateMarketStatus(msg); });
-        }
-
         public static string BuildVersion { get => buildVersion; }
 
         public static int VersionToInteger(string vers)
@@ -435,11 +419,6 @@ namespace WFInfo
 
         // Glob
         public static System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("en", false);
-
-        public static void SignOut()
-        {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
-        }
     }
 
     public class Status

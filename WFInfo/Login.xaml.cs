@@ -5,6 +5,7 @@ using System.Windows.Input;
 using Google.Apis.Auth;
 using Microsoft.Win32;
 using System.Windows.Media;
+using Microsoft.Toolkit.Mvvm.Messaging;
 
 namespace WFInfo
 {
@@ -93,7 +94,7 @@ namespace WFInfo
                         StatusMessage = "Too many requests";
                         StatusSeverity = 1; //default to too many requests
                     }
-                    Main.SignOut();
+                    WeakReferenceMessenger.Default.Send<SignOutMessage>();
                     Main.StatusUpdate(StatusMessage, StatusSeverity); //Changing WFinfo status
 
                     switch (StatusSeverity)
@@ -116,7 +117,7 @@ namespace WFInfo
                     Error.Visibility = Visibility.Visible;
                     return;
                 }
-                Main.LoggedIn();
+                WeakReferenceMessenger.Default.Send<LoginMessage>();
                 Email.Text = "Email";
                 Password.Password = "";
                 Main.dataBase.rememberMe = RememberMe.IsChecked.Value;

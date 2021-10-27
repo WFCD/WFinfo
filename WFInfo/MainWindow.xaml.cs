@@ -11,23 +11,250 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.Input;
+using Microsoft.Toolkit.Mvvm.Messaging;
 
 namespace WFInfo
 {
+    public class ChangeStatusMessage
+    {
+        public string Message { get; }
+        public int Severity { get; }
+        public ChangeStatusMessage(string message, int severity)
+        {
+            Message = message;
+            Severity = severity;
+        }
+    }
+    public class LoginMessage {}
+    public class SignOutMessage {}
+    public class FinishedLoadingMessage{}
+
+    public class UpdateDataTimestamp
+    {
+        public UpdateDataTimestamp(string status, bool isDropData)
+        {
+            Status = status;
+            IsDropData = isDropData;
+        }
+
+        public string Status { get; }
+        public bool IsDropData { get; }
+        
+    }
+  /// <summary>
+        /// Changes the online selector. Used for websocket lisening to see if the status changed externally (i.e from the site)
+        /// </summary>
+        /// <param name="status">The status to change to</param>
+    public class UpdateMarketStatusMessage
+    {
+        public string Status { get; }
+
+        public UpdateMarketStatusMessage(string status)
+        {
+            Status = status;
+        }
+    }
+    public class MainWindowViewModel : ObservableRecipient, IRecipient<ChangeStatusMessage>, IRecipient<LoginMessage>,
+        IRecipient<SignOutMessage>, IRecipient<FinishedLoadingMessage>, IRecipient<UpdateMarketStatusMessage>,
+        IRecipient<UpdateDataTimestamp>
+    {
+        private string _statusMessage;
+        private Brush _statusBrush;
+        private bool _isLoggedIn;
+        private int _loginStatus;
+        private bool _finishedLoading;
+        private bool _loginEnabled;
+        private string _marketDataStatus = "Loading...";
+        private string _dropDataStatus = "Loading...";
+
+        private bool _supressChanges;
+    
+
+
+        public MainWindowViewModel()
+        {
+            IsActive = true;
+            LoginSelectionChangedCommand = new RelayCommand(ComboBoxOnSelectionChanged);
+        }
+
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set => SetProperty(ref _statusMessage, value);
+        }
+
+        public Brush StatusBrush
+        {
+            get => _statusBrush;
+            set => SetProperty(ref _statusBrush, value);
+        }
+
+        public bool IsLoggedIn
+        {
+            get => _isLoggedIn;
+            set => SetProperty(ref _isLoggedIn, value);
+        }
+
+        public int LoginStatus
+        {
+            get => _loginStatus;
+            set => SetProperty(ref _loginStatus, value);
+        }
+        
+        public bool LoginEnabled
+        {
+            get => _loginEnabled;
+            set => SetProperty(ref _loginEnabled, value);
+        }
+
+        public string MarketDataStatus
+        {
+            get => _marketDataStatus;
+            set => SetProperty(ref _marketDataStatus, value);
+        }
+
+        public string DropDataStatus
+        {
+            get => _dropDataStatus;
+            set => SetProperty(ref _dropDataStatus, value);
+        }
+        
+        public RelayCommand LoginSelectionChangedCommand { get; }
+        public void Receive(ChangeStatusMessage message)
+        {
+            ChangeStatus(message.Message, message.Severity);
+        }
+
+        private readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(177, 208, 217));
+        private readonly SolidColorBrush RedBrush = Brushes.Red;
+        private readonly SolidColorBrush OrangeBrush = Brushes.Orange;
+        private readonly SolidColorBrush YellowBrush = Brushes.Yellow;
+        public void ChangeStatus(string status, int severity)
+        {
+            Debug.WriteLine("Status message: " + status);
+            StatusMessage = status;
+            switch (severity)
+            {
+                case 0: //default, no problem
+                    StatusBrush = DefaultBrush;
+                    break;
+                case 1: //severe, red text
+                    StatusBrush = RedBrush;
+                    break;
+                case 2: //warning, orange text
+                    StatusBrush = OrangeBrush;
+                    break;
+                default: //Uncaught, big problem
+                    StatusBrush = YellowBrush;
+                    break;
+            }
+        }
+        
+        /// <summary>
+        /// Allows the user to overwrite the current websocket status
+        /// </summary>
+        private void ComboBoxOnSelectionChanged()
+        {
+            if (!_finishedLoading || _supressChanges) //Prevent firing off to early
+                return;
+            switch (LoginStatus)
+            {
+                case 0: //Online in game
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("in game");
+                    });
+                    break;
+                case 1: //Online
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("online");
+                    });
+                    break;
+                case 2: //Invisible
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("offline");
+                    });
+                    break;
+                case 3: //Sign out
+                    break;
+            }
+        }
+
+        public void LogOut()
+        {
+            IsLoggedIn = false;
+            Task.Run(() => { Main.dataBase.Disconnect(); });
+        }
+
+        public void Receive(LoginMessage message)
+        {
+            IsLoggedIn = true;
+            LoginStatus = 1;
+            ChangeStatus("Logged in", 0);
+        }
+
+        public void Receive(SignOutMessage message)
+        {
+            IsLoggedIn = false;
+        }
+
+        public void Receive(FinishedLoadingMessage message)
+        {
+            LoginEnabled = true;
+            _finishedLoading = true;
+        }
+
+        public void Receive(UpdateMarketStatusMessage message)
+        {
+            _supressChanges = true;
+            switch (message.Status)
+            {
+                case "online":
+                    LoginStatus = 1;
+                    break;
+                case "invisible":
+                    LoginStatus = 2;
+                    break;
+                case "ingame":
+                    LoginStatus = 0;
+                    break;
+            }
+            _supressChanges = false;
+        }
+
+        public void Receive(UpdateDataTimestamp message)
+        {
+            if (message.IsDropData)
+            {
+                DropDataStatus = message.Status;
+            }
+            else
+            {
+                MarketDataStatus = message.Status;
+            }
+        }
+    }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
         readonly Main main; //subscriber
+        private static MainWindowViewModel _viewModel;
         public static MainWindow INSTANCE;
         public static WelcomeDialogue welcomeDialogue;
         public static LowLevelListener listener;
-        private static bool updatesupression;
 
+        public MainWindowViewModel ViewModel => _viewModel;
         public MainWindow()
         {
-
+            MainWindow._viewModel = new MainWindowViewModel();
+            InitializeComponent();
+            this.DataContext = this;
             string thisprocessname = Process.GetCurrentProcess().ProcessName;
             if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
             {
@@ -67,7 +294,7 @@ namespace WFInfo
 
                 Settings.Save();
 
-                Closing += new CancelEventHandler(LoggOut);
+                Closing += new CancelEventHandler((_, __) => _viewModel.LogOut());
             }
             catch (Exception e)
             {
@@ -292,26 +519,7 @@ namespace WFInfo
         /// </summary>
         /// <param name="status">The string to be displayed</param>
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
-        public void ChangeStatus(string status, int severity)
-        {
-            Debug.WriteLine("Status message: " + status);
-            Status.Text = status;
-            switch (severity)
-            {
-                case 0: //default, no problem
-                    Status.Foreground = new SolidColorBrush(Color.FromRgb(177, 208, 217));
-                    break;
-                case 1: //severe, red text
-                    Status.Foreground = Brushes.Red;
-                    break;
-                case 2: //warning, orange text
-                    Status.Foreground = Brushes.Orange;
-                    break;
-                default: //Uncaught, big problem
-                    Status.Foreground = Brushes.Yellow;
-                    break;
-            }
-        }
+      
 
         public void Exit(object sender, RoutedEventArgs e)
         {
@@ -337,20 +545,20 @@ namespace WFInfo
 
         private void RelicsClick(object sender, RoutedEventArgs e)
         {
-            if (Main.dataBase.relicData == null) { ChangeStatus("Relic data not yet loaded in", 2); return; }
+            if (Main.dataBase.relicData == null) { _viewModel.ChangeStatus("Relic data not yet loaded in", 2); return; }
             Main.relicWindow.Show();
             Main.relicWindow.Focus();
         }
 
         private void EquipmentClick(object sender, RoutedEventArgs e)
         {
-            if (Main.dataBase.equipmentData == null) { ChangeStatus("Equipment data not yet loaded in", 2); return; }
+            if (Main.dataBase.equipmentData == null) { _viewModel.ChangeStatus("Equipment data not yet loaded in", 2); return; }
             Main.equipmentWindow.Show();
         }
 
         private void Settings_click(object sender, RoutedEventArgs e)
         {
-            if (Main.settingsWindow == null) { ChangeStatus("Settings window not yet loaded in", 2); return; }
+            if (Main.settingsWindow == null) { _viewModel.ChangeStatus("Settings window not yet loaded in", 2); return; }
             Main.settingsWindow.populate();
             Main.settingsWindow.Left = Left;
             Main.settingsWindow.Top = Top + Height;
@@ -361,7 +569,7 @@ namespace WFInfo
         {
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
-            MarketData.Content = "Loading...";
+            ViewModel.MarketDataStatus = "Loading...";
             Main.StatusUpdate("Forcing Market Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
         }
@@ -370,7 +578,7 @@ namespace WFInfo
         {
             ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
-            DropData.Content = "Loading...";
+            ViewModel.DropDataStatus = "Loading...";
             Main.StatusUpdate("Forcing Prime Update", 0);
             Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
         }
@@ -419,17 +627,6 @@ namespace WFInfo
             INSTANCE.Focus();         // important
         }
 
-        public void LoggedIn()
-        {
-            Login.Visibility = Visibility.Collapsed;
-            ComboBox.SelectedIndex = 1;
-            ComboBox.Visibility = Visibility.Visible;
-            PlusOneButton.Visibility = Visibility.Visible;
-            CreateListing.Visibility = Visibility.Visible;
-            SearchItButton.Visibility = Visibility.Visible;
-            ChangeStatus("Logged in", 0);
-        }
-
         /// <summary>
         /// Prompts user to log in
         /// </summary>
@@ -441,88 +638,9 @@ namespace WFInfo
 
         }
 
-        public void SignOut()
-        {
-            Login.Visibility = Visibility.Visible;
-            ComboBox.Visibility = Visibility.Collapsed;
-            PlusOneButton.Visibility = Visibility.Collapsed;
-            CreateListing.Visibility = Visibility.Collapsed;
-            SearchItButton.Visibility = Visibility.Collapsed;
-        }
+    
+   
 
-        /// <summary>
-        /// Changes the online selector. Used for websocket lisening to see if the status changed externally (i.e from the site)
-        /// </summary>
-        /// <param name="status">The status to change to</param>
-        public void UpdateMarketStatus(string status)
-        {
-            updatesupression = true;
-            switch (status)
-            {
-                case "online":
-                    if (ComboBox.SelectedIndex == 1) break;
-                    ComboBox.SelectedIndex = 1;
-                    break;
-                case "invisible":
-                    if (ComboBox.SelectedIndex == 2) break;
-                    ComboBox.SelectedIndex = 2;
-                    break;
-                case "ingame":
-                    if (ComboBox.SelectedIndex == 0) break;
-                    ComboBox.SelectedIndex = 0;
-                    break;
-            }
-            updatesupression = false;
-        }
-
-        /// <summary>
-        /// Allows the user to overwrite the current websocket status
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!ComboBox.IsLoaded || updatesupression) //Prevent firing off to early
-                return;
-            switch (ComboBox.SelectedIndex)
-            {
-                case 0: //Online in game
-                    Task.Run(async () =>
-                    {
-                        await Main.dataBase.SetWebsocketStatus("in game");
-                    });
-                    break;
-                case 1: //Online
-                    Task.Run(async () =>
-                    {
-                        await Main.dataBase.SetWebsocketStatus("online");
-                    });
-                    break;
-                case 2: //Invisible
-                    Task.Run(async () =>
-                    {
-                        await Main.dataBase.SetWebsocketStatus("offline");
-                    });
-                    break;
-                case 3: //Sign out
-                    LoggOut(null, null);
-                    break;
-            }
-        }
-
-        internal void LoggOut(object sender, CancelEventArgs e)
-        {
-            Login.Visibility = Visibility.Visible;
-            ComboBox.Visibility = Visibility.Hidden;
-            PlusOneButton.Visibility = Visibility.Hidden;
-            CreateListing.Visibility = Visibility.Hidden;
-            Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
-        }
-
-        internal void FinishedLoading()
-        {
-            Login.IsEnabled = true;
-        }
 
         private void CreateListing_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -534,7 +652,7 @@ namespace WFInfo
 
             if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
-                ChangeStatus("No recorded rewards found", 2);
+                _viewModel.ChangeStatus("No recorded rewards found", 2);
                 return;
             }
 
@@ -551,7 +669,7 @@ namespace WFInfo
             t.Wait();
             if (Main.listingHelper.ScreensList.Count == 0)
             {
-                ChangeStatus("No recorded rewards found", 2);
+                _viewModel.ChangeStatus("No recorded rewards found", 2);
                 return;
 
             }
