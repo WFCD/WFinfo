@@ -199,6 +199,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="WFInfoUtil\StringUtil.cs" />
+    <Compile Include="WFInfoUtil\Util.cs" />
+    <Compile Include="WFInfoUtil\WordMatch.cs" />
+    <Compile Include="WFInfoUtil\GraphicFns.cs" />
+    <Compile Include="WFInfoUtil\TaskUtil.cs" />
+    <Compile Include="WFInfoUtil\ImageProcessingUtil.cs" />
     <Compile Include="verifyCount.xaml.cs">
       <DependentUpon>verifyCount.xaml</DependentUpon>
     </Compile>

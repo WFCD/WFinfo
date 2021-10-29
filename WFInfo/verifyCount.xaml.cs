@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using WFInfo.WFInfoUtil;
 
 namespace WFInfo
 {
@@ -47,19 +48,40 @@ namespace WFInfo
             {
                 if (item.Name.Contains("Prime"))
                 {
-                    string[] nameParts = item.Name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
-                    string primeName = nameParts[0] + "Prime";
-                    string partName = primeName + ( ( nameParts[1].Length > 10 && !nameParts[1].Contains("Kubrow") ) ? nameParts[1].Replace(" Blueprint", "") : nameParts[1]);
+                    if(item.type == ItemType.Item)
+                    {
+                        string[] nameParts = item.Name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
+                        string primeName = nameParts[0] + "Prime";
+                        string partName = primeName + ((nameParts[1].Length > 10 && !nameParts[1].Contains("Kubrow")) ? nameParts[1].Replace(" Blueprint", "") : nameParts[1]);
 
-                    Main.AddLog("Saving count \"" + item.Count + "\" for part \"" + partName + "\"");
-                    try
-                    {
-                        Main.dataBase.equipmentData[primeName]["parts"][partName]["owned"] = item.Count;
+                        Main.AddLog("Saving count \"" + item.Count + "\" for part \"" + partName + "\"");
+                        try
+                        {
+                            Main.dataBase.equipmentData[primeName]["parts"][partName]["owned"] = item.Count;
+                        }
+                        catch (Exception ex)
+                        {
+                            Main.AddLog("FAILED to save count. Count: " + item.Count + ", Name: " + item.Name + ", primeName: " + primeName + ", partName: " + partName);
+                            saveFailed = true;
+                        }
                     }
-                    catch (Exception ex)
+                    else if(item.type == ItemType.Equipment)
                     {
-                        Main.AddLog("FAILED to save count. Count: " + item.Count + ", Name: " + item.Name + ", primeName: " + primeName + ", partName: " + partName);
-                        saveFailed = true;
+                        if(Main.dataBase.equipmentData.ContainsKey(item.Name))
+                        {
+                            Main.dataBase.equipmentData[item.Name]["owned"] = true;
+                            if(item.level >= 0 && item.level <= 30)
+                            {
+                                int prevLevel = Main.dataBase.PartEquipmentLevel(item.Name);
+                                int maxLevel = Math.Max(item.level, prevLevel);
+                                Main.dataBase.equipmentData[item.Name]["level"] = maxLevel > 30 ? 30 : maxLevel;
+                                if(maxLevel == 30)
+                                {
+                                    Main.dataBase.equipmentData[item.Name]["mastered"] = true;
+                                }
+                                Main.AddLog($"Saving level {maxLevel} for equipment \"{item.Name}\"");
+                            }
+                        }
                     }
                 }
             }
