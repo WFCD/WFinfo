@@ -26,6 +26,7 @@ using WFInfo.WFInfoUtil;
 
 namespace WFInfo
 {
+    //Optical Character Recognition
     class OCR
     {
         private static readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";

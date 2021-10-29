@@ -24,17 +24,26 @@ namespace WFInfo.WFInfoUtil
 
         public static T PathOr<T>(this JObject jObj, T ifNil, string[] path)
         {
-            if (jObj == null ||path == null || path.Length == 0)
+            if (jObj == null || path == null)
                 return ifNil;
 
-            string key = path[0];
-            if (jObj.ContainsKey(key))
+            JObject tempObj = jObj;
+            for (int i = 0; i < path.Length - 1; i++) //iterate over path except for last element
             {
-                if(path.Length == 1)
+                string key = path[i];
+                if (tempObj.ContainsKey(key))
                 {
                     try
                     {
-                        return jObj[key].ToObject<T>();
+                        if (i == path.Length - 1) 
+                        {
+                            //return if key is last key in path
+                            return jObj[key].ToObject<T>();
+                        }
+                        else 
+                        {
+                            tempObj = tempObj[key].ToObject<JObject>();
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -44,35 +53,11 @@ namespace WFInfo.WFInfoUtil
                 }
                 else
                 {
-                    try
-                    {
-                        JObject newJObj = jObj[key].ToObject<JObject>();
-                        return newJObj.PathOr<T>(ifNil, path.DropFirst());
-                    }
-                    catch (Exception ex)
-                    {
-                        return ifNil;
-                    }
+                    return ifNil;
                 }
             }
-            else
-            {
-                return ifNil;
-            }
-        }
 
-        public static T[] DropFirst<T>(this T[] arr)
-        {
-            if (arr == null || arr.Length == 0)
-                return Array.Empty<T>();
-
-            T[] newArr = new T[arr.Length - 1];
-            for(int i = 0; i < newArr.Length; i++)
-            {
-                newArr[i] = arr[i+1];
-            }
-
-            return newArr;
+            return ifNil;
         }
     }
 }

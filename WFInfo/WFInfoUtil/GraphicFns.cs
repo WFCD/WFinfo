@@ -4,12 +4,12 @@ namespace WFInfo.WFInfoUtil
 {
     public class GraphicFns
     {
-        public Pen orange;
-        public SolidBrush red;
-        public SolidBrush green;
-        public Pen greenp;
-        public Pen pinkP;
-        public Font font;
+        public Pen orange { get; private set; }
+        public SolidBrush red { get; private set; }
+        public SolidBrush green { get; private set; }
+        public Pen greenp { get; private set; }
+        public Pen pinkP { get; private set; }
+        public Font font { get; private set; }
 
         public GraphicFns()
         {
