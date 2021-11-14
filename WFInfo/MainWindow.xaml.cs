@@ -24,6 +24,7 @@ namespace WFInfo
         public static WelcomeDialogue welcomeDialogue;
         public static LowLevelListener listener;
         private static bool updatesupression;
+        private RelicsWindow _relicsWindow = new RelicsWindow();
 
         public MainWindow()
         {
@@ -339,9 +340,8 @@ namespace WFInfo
         {
             if (Main.dataBase.relicData == null) { ChangeStatus("Relic data not yet loaded in", 2); return; }
 
-            var relicWindow = new RelicsWindow();
-            relicWindow.Show();
-            relicWindow.Focus();
+            _relicsWindow.Show();
+            _relicsWindow.Focus();
         }
 
         private void EquipmentClick(object sender, RoutedEventArgs e)
