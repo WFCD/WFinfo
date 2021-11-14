@@ -74,6 +74,8 @@ namespace WFInfo
             {
                 Main.AddLog("An error occured while loading the main window: " + e.Message);
             }
+            
+            Application.Current.MainWindow = this;
         }
 
 
@@ -339,7 +341,8 @@ namespace WFInfo
         private void RelicsClick(object sender, RoutedEventArgs e)
         {
             if (Main.dataBase.relicData == null) { ChangeStatus("Relic data not yet loaded in", 2); return; }
-
+            _relicsWindow?.Close();
+            _relicsWindow = new RelicsWindow();
             _relicsWindow.Show();
             _relicsWindow.Focus();
         }
