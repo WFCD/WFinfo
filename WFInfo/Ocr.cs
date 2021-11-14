@@ -118,9 +118,6 @@ namespace WFInfo
         // Screen / Resolution Scaling - Used to adjust pixel values to each person's monitor
         public static double screenScaling;
 
-        public static TesseractEngine firstEngine;
-        public static TesseractEngine secondEngine;
-        public static TesseractEngine[] engines = new TesseractEngine[4];
         public static Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
@@ -148,61 +145,14 @@ namespace WFInfo
         private static string clipboard;
         #endregion
 
-        static void getLocaleTessdata()
-        {
-            string traineddata_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/libs/tessdata/";
-            JObject traineddata_checksums = new JObject
-            {
-                {"en", "7af2ad02d11702c7092a5f8dd044d52f"},
-                {"ko", "c776744205668b7e76b190cc648765da"}
-            };
+       
+        private static ITesseractService _tesseractService;
 
-            // get trainned data
-            string traineddata_hotlink = traineddata_hotlink_prefix + Settings.locale + ".traineddata";
-            string app_data_traineddata_path = CustomEntrypoint.appdata_tessdata_folder + @"\" + Settings.locale + ".traineddata";
-
-            WebClient webClient = new WebClient();
-
-            if (!File.Exists(app_data_traineddata_path) || CustomEntrypoint.GetMD5hash(app_data_traineddata_path) != traineddata_checksums.GetValue(Settings.locale).ToObject<string>())
-            {
-                try
-                {
-                    webClient.DownloadFile(traineddata_hotlink, app_data_traineddata_path);
-                }
-                catch (Exception) { }
-            }
-        }
-        static OCR()
-        {
-            getLocaleTessdata();
-            firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
-            {
-                DefaultPageSegMode = PageSegMode.SingleBlock
-            };
-
-            secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
-            {
-                DefaultPageSegMode = PageSegMode.SingleBlock
-            };
-
-
-        }
-
-        public static void Init()
+        public static void Init(ITesseractService tesseractService)
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
-
-            for (int i = 0; i < 4; i++)
-            {
-                if(engines[i] != null)
-                {
-                    engines[i].Dispose();
-                }
-                engines[i] = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
-                {
-                    DefaultPageSegMode = PageSegMode.SingleBlock
-                };
-            }
+            _tesseractService = tesseractService;
+            _tesseractService.Init();
         }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
@@ -246,7 +196,7 @@ namespace WFInfo
             for (int i = 0; i < parts.Count; i++)
             {
                 int tempI = i;
-                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]);});
+                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]);});
             }
             Task.WaitAll(tasks);
 
@@ -571,7 +521,7 @@ namespace WFInfo
             partialScreenshotExpanded.Save(Main.AppPath + @"\Debug\PartShotUpscaled " + timestamp + ".png");
             newFilter.Save(Main.AppPath + @"\Debug\PartShotUpscaledFiltered " + timestamp + ".png");
             Main.AddLog(("----  SECOND OCR CHECK  ------------------------------------------------------------------------------------------").Substring(0, 108));
-            secondChecks = SeparatePlayers(newFilter, secondEngine);
+            secondChecks = SeparatePlayers(newFilter, _tesseractService.SecondEngine);
             var primeRewards = new List<string>();
 
             var tempAmountOfRewardsDisplayed = 0;
@@ -1119,7 +1069,7 @@ namespace WFInfo
                     for (int j = tempI; j < zones.Count; j += snapThreads)
                     {
                         //process images
-                        List<Tuple<String, Rectangle>> currentResult = GetTextWithBoundsFromImage(engines[tempI], zones[j].Item1, zones[j].Item2.X, zones[j].Item2.Y);
+                        List<Tuple<String, Rectangle>> currentResult = GetTextWithBoundsFromImage(_tesseractService.Engines[tempI], zones[j].Item1, zones[j].Item2.X, zones[j].Item2.Y);
                         taskResults.AddRange(currentResult);
                     }
                     return taskResults;
@@ -1338,7 +1288,7 @@ namespace WFInfo
 
 
                 //set OCR to numbers only
-                firstEngine.SetVariable("tessedit_char_whitelist", "0123456789");
+                _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "0123456789");
 
 
                 double widthMultiplier = (Settings.doCustomNumberBoxWidth ? Settings.snapItNumberBoxWidth : 0.4);
@@ -1423,7 +1373,7 @@ namespace WFInfo
                         g.DrawRectangle(cyan, cloneRect);
 
                         //do OCR
-                        using (var page = firstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
+                        using (var page = _tesseractService.FirstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                         {
                             using (var iterator = page.GetIterator())
                             {
@@ -1458,7 +1408,7 @@ namespace WFInfo
                 }
                 
                 //return OCR to any symbols
-                firstEngine.SetVariable("tessedit_char_whitelist", "");
+                _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "");
             }
             darkCyan.Dispose();
             red.Dispose();
@@ -1746,8 +1696,8 @@ namespace WFInfo
 
 
                             //do OCR
-                            firstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&");
-                            using (var page = firstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
+                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&");
+                            using (var page = _tesseractService.FirstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                             {
                                 using (var iterator = page.GetIterator())
                                 {
@@ -1762,7 +1712,7 @@ namespace WFInfo
 
                                 }
                             }
-                            firstEngine.SetVariable("tessedit_char_whitelist", "");
+                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "");
                         }
                     }
                     if (nextYCounter >= 0)
@@ -2376,18 +2326,7 @@ namespace WFInfo
 
         public static async Task updateEngineAsync()
         {
-            getLocaleTessdata();
-            Init();
-            firstEngine.Dispose();
-            firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
-            {
-                DefaultPageSegMode = PageSegMode.SingleBlock
-            };
-            secondEngine.Dispose();
-            secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
-            {
-                DefaultPageSegMode = PageSegMode.SingleBlock
-            };
+            _tesseractService.ReloadEngines();
         }
 
         public static bool VerifyWarframe() {
