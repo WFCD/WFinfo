@@ -67,7 +67,7 @@ namespace WFInfo
                     secondDucatText.Text = ducats;
                     secondVolumeText.Text = volume + " sold last 48hrs";
                     secondVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
-                    secondOwnedText.Text = owned.Length > 0 ? owned + " OWNED" : "";
+                    secondOwnedText.Text = owned.Length > 0 ? (mastered ? "✓ " : "") + owned + " OWNED" : "";
                     if (resize)
                         Width = 501;
                     break;
@@ -92,7 +92,7 @@ namespace WFInfo
                     thirdDucatText.Text = ducats;
                     thirdVolumeText.Text = volume + " sold last 48hrs";
                     thirdVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
-                    thirdOwnedText.Text = owned.Length > 0 ? owned + " OWNED" : "";
+                    thirdOwnedText.Text = owned.Length > 0 ? (mastered ? "✓ " : "") + owned + " OWNED" : "";
                     if (resize)
                         Width = 751;
                     break;
@@ -117,7 +117,7 @@ namespace WFInfo
                     fourthDucatText.Text = ducats;
                     fourthVolumeText.Text = volume + " sold last 48hrs";
                     fourthVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
-                    fourthOwnedText.Text = owned.Length > 0 ? owned + " OWNED" : "";
+                    fourthOwnedText.Text = owned.Length > 0 ? (mastered ? "✓ " : "") + owned + " OWNED" : "";
                     if (resize)
                         Width = 1000;
                     break;
