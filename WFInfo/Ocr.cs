@@ -87,11 +87,7 @@ namespace WFInfo
                                                             Color.FromArgb(255,  53,   0) };    //ZEPHER	
 
 
-    public static Assembly assembly = Assembly.GetExecutingAssembly();
-        public static Stream audioStream = assembly.GetManifestResourceStream("WFInfo.Resources.achievment_03.wav");
-        public static System.Media.SoundPlayer player = new System.Media.SoundPlayer(audioStream);
-
-        private static int numberOfRewardsDisplayed;
+    private static int numberOfRewardsDisplayed;
 
         public static WindowStyle currentStyle;
         public enum WindowStyle
@@ -147,12 +143,14 @@ namespace WFInfo
 
        
         private static ITesseractService _tesseractService;
+        private static ISoundPlayer _soundPlayer;
 
-        public static void Init(ITesseractService tesseractService)
+        public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer)
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
             _tesseractService = tesseractService;
             _tesseractService.Init();
+            _soundPlayer = soundPlayer; 
         }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
@@ -365,7 +363,7 @@ namespace WFInfo
 
             if (Settings.isLightSelected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
             {
-                player.Play();
+                _soundPlayer.Play();
             }
 
 
@@ -2228,7 +2226,7 @@ namespace WFInfo
                     } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word) || iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine) || iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para) || iter.Next(PageIteratorLevel.Block));
                 }
             }
-            arr2D.Sort(new Arr2D_Compare());
+            arr2D.Sort(new OCR.Arr2D_Compare());
 
             List<string> ret = new List<string>();
 
