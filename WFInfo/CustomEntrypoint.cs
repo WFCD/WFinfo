@@ -169,6 +169,7 @@ namespace WFInfo
             {
                 AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve_Tesseract;
                 AppDomain.CurrentDomain.AssemblyResolve += OnResolveAssembly;
+                InteropDotNet.LibraryLoader.Instance.CustomSearchPath = app_data_tesseract_catalog;
                 App.Main();
             }
 
