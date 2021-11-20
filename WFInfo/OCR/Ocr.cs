@@ -23,85 +23,21 @@ using Point = System.Drawing.Point;
 using Rect = Tesseract.Rect;
 using Size = System.Drawing.Size;
 
-namespace WFInfo
+namespace WFInfo.OCR
 {
     class OCR
     {
-        private static readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
-
         private static Screen wfScreen = Screen.PrimaryScreen;
 
         #region variabels and sizzle
-        public enum WFtheme : int
-        {
-            VITRUVIAN,
-            STALKER,
-            BARUUK,
-            CORPUS,
-            FORTUNA,
-            GRINEER,
-            LOTUS,
-            NIDUS,
-            OROKIN,
-            TENNO,
-            HIGH_CONTRAST,
-            LEGACY,
-            EQUINOX,
-            DARK_LOTUS,
-            ZEPHYR,
-            UNKNOWN = -1
-        }
 
-        // Colors for the top left "profile bar"
-        public static Color[] ThemePrimary = new Color[] {  Color.FromArgb(190, 169, 102),		//VITRUVIAN		
-															Color.FromArgb(153,  31,  35), 	    //STALKER		
-															Color.FromArgb(238, 193, 105),  	//BARUUK		
-															Color.FromArgb( 35, 201, 245),  	//CORPUS		
-															Color.FromArgb( 57, 105, 192),  	//FORTUNA		
-															Color.FromArgb(255, 189, 102),  	//GRINEER		
-															Color.FromArgb( 36, 184, 242),  	//LOTUS			
-															Color.FromArgb(140,  38,  92),  	//NIDUS			
-															Color.FromArgb( 20,  41,  29),  	//OROKIN		
-															Color.FromArgb(  9,  78, 106),  	//TENNO			
-															Color.FromArgb(  2, 127, 217),  	//HIGH_CONTRAST	
-															Color.FromArgb(255, 255, 255),  	//LEGACY		
-															Color.FromArgb(158, 159, 167),  	//EQUINOX		
-															Color.FromArgb(140, 119, 147),      //DARK_LOTUS
-                                                            Color.FromArgb(253, 132,   2), };   //ZEPHER
-
-    //highlight colors from selected items
-    public static Color[] ThemeSecondary = new Color[] {    Color.FromArgb(245, 227, 173),		//VITRUVIAN		
-															Color.FromArgb(255,  61,  51), 	//STALKER		
-															Color.FromArgb(236, 211, 162),  	//BARUUK		
-															Color.FromArgb(111, 229, 253),  	//CORPUS		
-															Color.FromArgb(255, 115, 230),  	//FORTUNA		
-															Color.FromArgb(255, 224, 153),  	//GRINEER		
-															Color.FromArgb(255, 241, 191),  	//LOTUS			
-															Color.FromArgb(245,  73,  93),  	//NIDUS			
-															Color.FromArgb(178, 125,   5),  	//OROKIN		
-															Color.FromArgb(  6, 106,  74),  	//TENNO			
-															Color.FromArgb(255, 255,   0),  	//HIGH_CONTRAST	
-															Color.FromArgb(232, 213,  93),  	//LEGACY		
-															Color.FromArgb(232, 227, 227),  	//EQUINOX		
-															Color.FromArgb(189, 169, 237),      //DARK_LOTUS	
-                                                            Color.FromArgb(255,  53,   0) };    //ZEPHER	
-
-
-    private static int numberOfRewardsDisplayed;
+        private static int numberOfRewardsDisplayed;
 
         public static WindowStyle currentStyle;
-        public enum WindowStyle
-        {
-            FULLSCREEN,
-            BORDERLESS,
-            WINDOWED
-        }
         public static HandleRef HandleRef { get; private set; }
         public static Process Warframe = null;
         public static Point center;
         public static Rectangle window;
-
-        private const NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
 
         //public static float dpi;
         //private static double ScreenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
@@ -114,15 +50,7 @@ namespace WFInfo
         // Screen / Resolution Scaling - Used to adjust pixel values to each person's monitor
         public static double screenScaling;
 
-        public static Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
-        public const int pixleRewardWidth = 968;
-        public const int pixleRewardHeight = 235;
-        public const int pixleRewardYDisplay = 316;
-        public const int pixelRewardLineHeight = 48;
-
-        public const int SCALING_LIMIT = 100;
         public static bool processingActive = false;
 
         private static Bitmap bigScreenshot;
@@ -179,7 +107,7 @@ namespace WFInfo
             bigScreenshot = file ?? CaptureScreenshot();
             try
             {
-				    parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
+                parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
             }
             catch (Exception e)
             {
@@ -225,7 +153,7 @@ namespace WFInfo
             if (firstChecks.Length > 0)
             {
                 clipboard = string.Empty;
-                int width = (int)(pixleRewardWidth * screenScaling * uiScaling) + 10;
+                int width = (int)(OcrConstants.pixleRewardWidth * screenScaling * uiScaling) + 10;
                 int startX = center.X - width / 2 + (int)(width * 0.004);
                 if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
                 if (firstChecks.Length == 4 && firstChecks[0].Replace(" ", "").Length < 6) { startX += 2 * (width / 8); }
@@ -249,7 +177,7 @@ namespace WFInfo
                         //else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
                         primeRewards.Add(correctName);
                         string plat = job["plat"].ToObject<string>();
-                        double platinum = double.Parse(plat, styles, Main.culture);
+                        double platinum = double.Parse(plat, OcrConstants.styles, Main.culture);
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(correctName);
                         bool mastered = Main.dataBase.IsPartMastered(correctName);
@@ -318,7 +246,7 @@ namespace WFInfo
                                 Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
                             //else
-                                //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
+                            //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
 
                             if (Settings.clipboard && !string.IsNullOrEmpty(clipboard))
                                 Clipboard.SetText(clipboard);
@@ -389,10 +317,10 @@ namespace WFInfo
             lastClick.Offset(-window.X, -window.Y);
             var width = window.Width * (int)dpiScaling;
             var height = window.Height * (int)dpiScaling;
-            var mostWidth = (int)(pixleRewardWidth * screenScaling * uiScaling);
+            var mostWidth = (int)(OcrConstants.pixleRewardWidth * screenScaling * uiScaling);
             var mostLeft = (width / 2) - (mostWidth / 2);
-            var bottom = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5 * uiScaling);
-            var top = height / 2 - (int)((pixleRewardYDisplay) * screenScaling * uiScaling);
+            var bottom = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight) * screenScaling * 0.5 * uiScaling);
+            var top = height / 2 - (int)((OcrConstants.pixleRewardYDisplay) * screenScaling * uiScaling);
             var selectionRectangle = new Rectangle(mostLeft, top, mostWidth, bottom / 2);
             if (numberOfRewardsDisplayed == 3)
             {
@@ -407,15 +335,15 @@ namespace WFInfo
 
 
             var RewardPoints4 = new List<Point>() {
-            new Point(mostLeft + length, middelHeight),
-            new Point(mostLeft + 3 * length, middelHeight),
-            new Point(mostLeft + 5 * length, middelHeight),
-            new Point(mostLeft + 7 * length, middelHeight)};
+                new Point(mostLeft + length, middelHeight),
+                new Point(mostLeft + 3 * length, middelHeight),
+                new Point(mostLeft + 5 * length, middelHeight),
+                new Point(mostLeft + 7 * length, middelHeight)};
 
             var RewardPoints3 = new List<Point>() {
-            new Point(mostLeft + 2 * length, middelHeight),
-            new Point(mostLeft + 4 * length, middelHeight),
-            new Point(mostLeft + 6 * length, middelHeight)};
+                new Point(mostLeft + 2 * length, middelHeight),
+                new Point(mostLeft + 4 * length, middelHeight),
+                new Point(mostLeft + 6 * length, middelHeight)};
 
             var lowestDistance = int.MaxValue;
             var lowestDistancePoint = new Point();
@@ -504,7 +432,7 @@ namespace WFInfo
             int max = Math.Min(Math.Min(Math.Min(firstChecks.Length, firstProximity.Length), secondChecks.Count), secondProximity.Length);
             for (int i = 0; i < max; i++)
                 if (firstProximity[i] > ERROR_DETECTION_THRESH * firstChecks[i].Length &&
-                  (secondProximity[i] == -1 || secondProximity[i] > ERROR_DETECTION_THRESH * secondChecks[i].Length))
+                    (secondProximity[i] == -1 || secondProximity[i] > ERROR_DETECTION_THRESH * secondChecks[i].Length))
                     return true;
 
             return false;
@@ -558,7 +486,7 @@ namespace WFInfo
                         bool mastered = Main.dataBase.IsPartMastered(secondName);
                         string partsOwned = Main.dataBase.PartsOwned(secondName);
                         string partsCount = Main.dataBase.PartsCount(secondName);
-                        double platinum = double.Parse(plat, styles, Main.culture);
+                        double platinum = double.Parse(plat, OcrConstants.styles, Main.culture);
                         int duc = int.Parse(ducats, Main.culture);
                         tempAmountOfRewardsDisplayed++;
 
@@ -692,10 +620,10 @@ namespace WFInfo
         /// <returns></returns>
         public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
+            int lineHeight = (int)(OcrConstants.pixelRewardLineHeight / 2 * screenScaling);
             // int width = image == null ? window.Width * (int)dpiScaling : image.Width;
             // int height = image == null ? window.Height * (int)dpiScaling : image.Height;
-            int mostWidth = (int)(pixleRewardWidth * screenScaling);
+            int mostWidth = (int)(OcrConstants.pixleRewardWidth * screenScaling);
             // int mostLeft = (width / 2) - (mostWidth / 2);
             // int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
             // int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
@@ -710,7 +638,7 @@ namespace WFInfo
 
 
 
-                    double[] weights = new double[15] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+            double[] weights = new double[15] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
             int minWidth = mostWidth / 4;
 
             if (image == null || image.Height == 0)
@@ -764,7 +692,7 @@ namespace WFInfo
             {
                 if (theme != WFtheme.UNKNOWN)
                 {
-                    Color themeColor = ThemePrimary[(int)theme];
+                    Color themeColor = OcrConstants.ThemePrimary[(int)theme];
                     int tempThresh = ColorDifference(clr, themeColor);
                     if (tempThresh < threshold)
                     {
@@ -811,7 +739,7 @@ namespace WFInfo
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
             string csv = string.Empty;
             snapItImageFiltered.Dispose();
-            if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
+            if (!File.Exists(OcrConstants.applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
                 csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned,partsDetected" + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
             for (int i = 0; i < foundParts.Count; i++)
             {
@@ -864,7 +792,7 @@ namespace WFInfo
                 Main.RunOnUIThread(() =>
                 {
                     VerifyCount.ShowVerifyCount(foundParts);
-                 });
+                });
 
             if (Main.snapItOverlayWindow.tempImage != null)
                 Main.snapItOverlayWindow.tempImage.Dispose();
@@ -873,7 +801,7 @@ namespace WFInfo
             watch.Stop();
             if (Settings.SnapitExport)
             {
-                File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv", csv);
+                File.AppendAllText(OcrConstants.applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv", csv);
             }
         }
 
@@ -1012,7 +940,7 @@ namespace WFInfo
                         Rectangle bounds = new Rectangle(tempbounds.X1 + rectXOffset, tempbounds.Y1 + rectYOffset, tempbounds.Width, tempbounds.Height);
                         if (currentWord != null)
                         {
-                            currentWord = RE.Replace(currentWord, "").Trim();
+                            currentWord = OcrConstants.RE.Replace(currentWord, "").Trim();
                             if (currentWord.Length > 0)
                             { //word is valid start comparing to others
                                 data.Add(Tuple.Create(currentWord, bounds));
@@ -1553,8 +1481,8 @@ namespace WFInfo
                             //find where the line ends
                             int rightEdge = leftEdge;
                             while (rightEdge+2 < imgWidth && 
-                                ( probeProfilePixel(LockedBitmapBytes, imgWidth, rightEdge+1, y, false) 
-                                || probeProfilePixel(LockedBitmapBytes, imgWidth, rightEdge + 2, y, false)))
+                                   ( probeProfilePixel(LockedBitmapBytes, imgWidth, rightEdge+1, y, false) 
+                                     || probeProfilePixel(LockedBitmapBytes, imgWidth, rightEdge + 2, y, false)))
                             {
                                 rightEdge++;
                             }
@@ -1571,7 +1499,7 @@ namespace WFInfo
                                     break;
                                 }
                             }
-                             if (failed)
+                            if (failed)
                             {
                                 continue;
                             }
@@ -1730,15 +1658,15 @@ namespace WFInfo
             return foundItems;
         }
 
-            private static int ColorDifference(Color test, Color thresh)
+        private static int ColorDifference(Color test, Color thresh)
         {
             return Math.Abs(test.R - thresh.R) + Math.Abs(test.G - thresh.G) + Math.Abs(test.B - thresh.B);
         }
 
         public static bool ThemeThresholdFilter(Color test, WFtheme theme)
         {
-            Color primary = ThemePrimary[(int)theme];
-            Color secondary = ThemeSecondary[(int)theme];
+            Color primary = OcrConstants.ThemePrimary[(int)theme];
+            Color secondary = OcrConstants.ThemeSecondary[(int)theme];
 
             switch (theme)
             {
@@ -1746,40 +1674,40 @@ namespace WFInfo
                     return Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
                 case WFtheme.LOTUS:
                     return Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - primary.GetBrightness()) <= 0.1
-                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetBrightness() >= 0.65);
+                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetBrightness() >= 0.65);
                 case WFtheme.OROKIN:        // TO CHECK
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() <= 0.42 && test.GetSaturation() >= 0.1)
-                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
+                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
                 case WFtheme.STALKER:
                     return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.55)
-                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
+                            || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
                 case WFtheme.CORPUS:
                     return Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.42 && test.GetSaturation() >= 0.35;
                 case WFtheme.EQUINOX:
                     return test.GetSaturation() <= 0.2 && test.GetBrightness() >= 0.55;
                 case WFtheme.DARK_LOTUS:
                     return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.35 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.25 && test.GetSaturation() >= 0.05)
-                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
+                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
                 case WFtheme.FORTUNA:
                     return ((Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.35) || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.15)) && test.GetSaturation() >= 0.20;
                 case WFtheme.HIGH_CONTRAST:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.35; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
                 case WFtheme.LEGACY:    // TO CHECK
                     return (test.GetBrightness() >= 0.65)
-                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
+                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
                 case WFtheme.NIDUS:
                     return (Math.Abs(test.GetHue() - (primary.GetHue() + 6)) < 8 && test.GetSaturation() >= 0.30)
-                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetSaturation() >= 0.55);
+                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetSaturation() >= 0.55);
                 case WFtheme.TENNO:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.38 && test.GetBrightness() <= 0.55;
                 case WFtheme.BARUUK:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 2) && test.GetSaturation() > 0.25 && test.GetBrightness() > 0.5;
                 case WFtheme.GRINEER:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() > 0.5)
-                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() > 0.55);
+                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() > 0.55);
                 case WFtheme.ZEPHYR:
-                return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.55)
-                    || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
+                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.55)
+                            || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
                 default:
                     // This shouldn't be ran
                     //   Only for initial testing
@@ -1790,9 +1718,9 @@ namespace WFInfo
         private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active, out int[] rowHits, out int[] colHits)
         {
             Bitmap filtered;
-            if (image.Height <= SCALING_LIMIT)
+            if (image.Height <= OcrConstants.SCALING_LIMIT)
             {
-                partialScreenshotExpanded = new Bitmap(image.Width * SCALING_LIMIT / image.Height, SCALING_LIMIT);
+                partialScreenshotExpanded = new Bitmap(image.Width * OcrConstants.SCALING_LIMIT / image.Height, OcrConstants.SCALING_LIMIT);
                 partialScreenshotExpanded.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
                 using (Graphics graphics = Graphics.FromImage(partialScreenshotExpanded))
@@ -1857,17 +1785,17 @@ namespace WFInfo
             long start = watch.ElapsedMilliseconds;
             long beginning = start;
 
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
+            int lineHeight = (int)(OcrConstants.pixelRewardLineHeight / 2 * screenScaling);
 
             Color clr;
             int width = window.Width;
             int height = window.Height;
-            int mostWidth = (int)(pixleRewardWidth * screenScaling);
+            int mostWidth = (int)(OcrConstants.pixleRewardWidth * screenScaling);
             int mostLeft = (width / 2) - (mostWidth / 2 );
             // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
             //                   (316          -        235        +       44)    *    1.1    =    137
-            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
-            int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
+            int mostTop = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight + OcrConstants.pixelRewardLineHeight) * screenScaling);
+            int mostBot = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight) * screenScaling * 0.5);
             //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
             var rectangle = new Rectangle((int)(mostLeft), (int)(mostTop), mostWidth, mostBot - mostTop);
             Bitmap preFilter;
@@ -1908,11 +1836,11 @@ namespace WFInfo
                 {
                     clr = preFilter.GetPixel(x, y);
                     if (ThemeThresholdFilter(clr, active))
-                    //{
+                        //{
                         rows[y]++;
-                        //postFilter.SetPixel(x, y, Color.Black);
+                    //postFilter.SetPixel(x, y, Color.Black);
                     //} else
-                        //postFilter.SetPixel(x, y, Color.White);
+                    //postFilter.SetPixel(x, y, Color.White);
                 }
                 //Debug.Write(rows[y] + " ");
             }
@@ -2016,10 +1944,10 @@ namespace WFInfo
             double highScaling = scaling < 1.0 ? scaling + 0.01 : scaling;
             double lowScaling = scaling > 0.5 ? scaling - 0.01 : scaling;
 
-            int cropWidth = (int)(pixleRewardWidth * screenScaling * highScaling);
+            int cropWidth = (int)(OcrConstants.pixleRewardWidth * screenScaling * highScaling);
             int cropLeft = (preFilter.Width / 2) - (cropWidth / 2);
-            int cropTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling * highScaling);
-            int cropBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * lowScaling);
+            int cropTop = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight + OcrConstants.pixelRewardLineHeight) * screenScaling * highScaling);
+            int cropBot = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight) * screenScaling * lowScaling);
             int cropHei = cropBot - cropTop;
             cropTop -= mostTop;
             try
@@ -2144,7 +2072,7 @@ namespace WFInfo
             string ret = "";
             using (Page page = engine.Process(image))
                 ret = page.GetText().Trim();
-            return RE.Replace(ret, "").Trim();
+            return OcrConstants.RE.Replace(ret, "").Trim();
         }
 
         internal static List<string> SeparatePlayers(Bitmap image, TesseractEngine engine)
@@ -2189,7 +2117,7 @@ namespace WFInfo
                         string word = iter.GetText(PageIteratorLevel.Word);
                         if (word != null)
                         {
-                            word = RE.Replace(word, "").Trim();
+                            word = OcrConstants.RE.Replace(word, "").Trim();
                             if (word.Length > 0)
                             {
                                 int topOrBot = outRect.Y1 > (outRect.Height * 3 / 4) ? 0 : 1;
@@ -2449,7 +2377,7 @@ namespace WFInfo
             else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
             { // checks if old window size is the right size if not change it
                 window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
-                                                                                                                         // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
+                // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
                 int GWL_style = -16;
                 uint WS_BORDER = 0x00800000;
                 uint WS_POPUP = 0x80000000;
@@ -2490,7 +2418,10 @@ namespace WFInfo
             }
         }
     }
+}
 
+namespace WFInfo
+{
     public struct InventoryItem
     {
         public InventoryItem(string itemName, Rectangle boundingbox)

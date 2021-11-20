@@ -349,7 +349,7 @@ namespace WFInfo
             locale = selectedLocale;
             Save();
 
-            _ = OCR.updateEngineAsync();
+            _ = OCR.OCR.updateEngineAsync();
 
             _ = Task.Run(async () =>
               {
@@ -649,13 +649,13 @@ namespace WFInfo
                 overlayXOffsetValue = ParseOverlayOffsetStringToInt(OverlayXOffset_number_box.Text);
 
                 int width = 2000; // presume bounding
-                if (OCR.VerifyWarframe())
+                if (OCR.OCR.VerifyWarframe())
                 {
-                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
+                    if (OCR.OCR.window == null || OCR.OCR.window.Width == 0 || OCR.OCR.window.Height == 0)
                     {
-                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
+                        OCR.OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
                     }
-                    width = OCR.window.Width;
+                    width = OCR.OCR.window.Width;
                 }
                 overlayXOffsetValue = (overlayXOffsetValue <= -1 * width / 2) ? (-1 * width / 2) : (overlayXOffsetValue >= width / 2) ? (width / 2) : overlayXOffsetValue; // clamp value to valid bound
 
@@ -688,13 +688,13 @@ namespace WFInfo
                 overlayYOffsetValue = (-1) * ParseOverlayOffsetStringToInt(OverlayYOffset_number_box.Text);
 
                 int height = 2000; // presume bounding
-                if (OCR.VerifyWarframe())
+                if (OCR.OCR.VerifyWarframe())
                 {
-                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
+                    if (OCR.OCR.window == null || OCR.OCR.window.Width == 0 || OCR.OCR.window.Height == 0)
                     {
-                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
+                        OCR.OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
                     }
-                    height = OCR.window.Height;
+                    height = OCR.OCR.window.Height;
                 }
                 overlayYOffsetValue = (overlayYOffsetValue <= -1 * height / 2) ? (-1 * height / 2) : (overlayYOffsetValue >= height / 2) ? (height / 2) : overlayYOffsetValue; // clamp value to valid bound
 

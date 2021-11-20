@@ -526,7 +526,7 @@ namespace WFInfo
 
         private void CreateListing_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (OCR.processingActive)
+            if (OCR.OCR.processingActive)
             {
                 Main.StatusUpdate("Still Processing Reward Screen", 2);
                 return;
@@ -570,7 +570,7 @@ namespace WFInfo
 
         private void SearchItButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (OCR.processingActive)
+            if (OCR.OCR.processingActive)
             {
                 Main.StatusUpdate("Still Processing Reward Screen", 2);
                 return;

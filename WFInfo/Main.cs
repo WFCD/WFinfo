@@ -67,13 +67,13 @@ namespace WFInfo
                 dataBase.Update();
 
                 //RelicsWindow.LoadNodesOnThread();
-                OCR.Init(new TesseractService(), new SoundPlayer());
+                OCR.OCR.Init(new TesseractService(), new SoundPlayer());
 
                 if ((bool)Settings.settingsObj["Auto"])
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
-                    OCR.VerifyWarframe();
+                    OCR.OCR.VerifyWarframe();
                     latestActive = DateTime.UtcNow.AddMinutes(1);
                     LoggedIn();
 
@@ -107,7 +107,7 @@ namespace WFInfo
             var now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
 
-            if (OCR.Warframe != null && OCR.Warframe.HasExited)
+            if (OCR.OCR.Warframe != null && OCR.OCR.Warframe.HasExited)
             {//set user offline if Warframe has closed but no new game was found
                 await Task.Run(async () =>
                 {
@@ -227,7 +227,7 @@ namespace WFInfo
             {//snapit
                 AddLog("Starting snap it");
                 StatusUpdate("Starting snap it", 0);
-                OCR.SnapScreenshot();
+                OCR.OCR.SnapScreenshot();
             }
             else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
             { //Searchit  
@@ -240,14 +240,14 @@ namespace WFInfo
                 AddLog("Starting master it");
                 StatusUpdate("Starting master it", 0);
                 Task.Factory.StartNew(() => {
-                    Bitmap bigScreenshot = OCR.CaptureScreenshot();
-                    OCR.ProcessProfileScreen(bigScreenshot);
+                    Bitmap bigScreenshot = OCR.OCR.CaptureScreenshot();
+                    OCR.OCR.ProcessProfileScreen(bigScreenshot);
                     bigScreenshot.Dispose();
                 });
             }
-            else if (Settings.debug || OCR.VerifyWarframe())
+            else if (Settings.debug || OCR.OCR.VerifyWarframe())
             {
-                Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
+                Task.Factory.StartNew(() => OCR.OCR.ProcessRewardScreen());
             }
         }
 
@@ -274,12 +274,12 @@ namespace WFInfo
 
 
             }
-            else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying)
+            else if (key == MouseButton.Left && OCR.OCR.Warframe != null && !OCR.OCR.Warframe.HasExited && Overlay.rewardsDisplaying)
             {
                 Task.Run((() =>
                 {
                     lastClick = System.Windows.Forms.Cursor.Position;
-                    var index = OCR.GetSelectedReward(lastClick);
+                    var index = OCR.OCR.GetSelectedReward(lastClick);
                     Debug.WriteLine(index);
                     if (index < 0) return;
                     listingHelper.SelectedRewardIndex = (short)index;
@@ -363,22 +363,22 @@ namespace WFInfo
 
                                     //Get the path of specified file
                                     Bitmap image = new Bitmap(file);
-                                    OCR.UpdateWindow(image);
-                                    OCR.ProcessRewardScreen(image);
+                                    OCR.OCR.UpdateWindow(image);
+                                    OCR.OCR.ProcessRewardScreen(image);
                                 } else if (type == ScreenshotType.SNAPIT)
                                 {
                                     AddLog("Testing snapit on file: " + file);
 
                                     Bitmap image = new Bitmap(file);
-                                    OCR.UpdateWindow(image);
-                                    OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
+                                    OCR.OCR.UpdateWindow(image);
+                                    OCR.OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
                                 } else if (type == ScreenshotType.MASTERIT)
                                 {
                                     AddLog("Testing masterit on file: " + file);
 
                                     Bitmap image = new Bitmap(file);
-                                    OCR.UpdateWindow(image);
-                                    OCR.ProcessProfileScreen(image);
+                                    OCR.OCR.UpdateWindow(image);
+                                    OCR.OCR.ProcessProfileScreen(image);
                                 }
                             }
                         }
@@ -395,7 +395,7 @@ namespace WFInfo
                     StatusUpdate("Failed to load image", 1);
                     if (type == ScreenshotType.NORMAL)
                     {
-                        OCR.processingActive = false;
+                        OCR.OCR.processingActive = false;
                     }
                 }
             }

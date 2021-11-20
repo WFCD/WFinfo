@@ -83,8 +83,8 @@ namespace WFInfo
                 Main.StatusUpdate("Please slecet a larger area to scan", 2);
                 return;
             }
-            Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * OCR.dpiScaling), (int)(topLeft.Y * OCR.dpiScaling), (int)(rectangle.Width * OCR.dpiScaling), (int)(rectangle.Height * OCR.dpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
-            Task.Factory.StartNew(() => OCR.ProcessSnapIt(cutout, tempImage, topLeft));
+            Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * OCR.OCR.dpiScaling), (int)(topLeft.Y * OCR.OCR.dpiScaling), (int)(rectangle.Width * OCR.OCR.dpiScaling), (int)(rectangle.Height * OCR.OCR.dpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
+            Task.Factory.StartNew(() => OCR.OCR.ProcessSnapIt(cutout, tempImage, topLeft));
 
             closeOverlay();
         }

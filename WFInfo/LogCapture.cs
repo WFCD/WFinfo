@@ -60,14 +60,14 @@ namespace WFInfo
                         continue;
                     }
 
-                    if (OCR.Warframe != null)
+                    if (OCR.OCR.Warframe != null)
                     {
                         using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
                         {
                             using (BinaryReader reader = new BinaryReader(stream, Encoding.Default))
                             {
                                 uint processId = reader.ReadUInt32();
-                                if (processId == OCR.Warframe.Id)
+                                if (processId == OCR.OCR.Warframe.Id)
                                 {
                                     char[] chars = reader.ReadChars(4092);
                                     int index = Array.IndexOf(chars, '\0');
@@ -103,9 +103,9 @@ namespace WFInfo
 
         private void GetProcess()
         {
-            if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
+            if ((OCR.OCR.Warframe == null) || (OCR.OCR.Warframe.HasExited))
             {
-                if (!OCR.VerifyWarframe())
+                if (!OCR.OCR.VerifyWarframe())
                     return;
             }
             dataReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_DATA_READY", out Boolean createdData);

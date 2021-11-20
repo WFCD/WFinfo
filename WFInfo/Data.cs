@@ -1027,17 +1027,17 @@ namespace WFInfo
                 long stop = watch.ElapsedMilliseconds + 5000;
                 long wait = watch.ElapsedMilliseconds;
 
-                OCR.UpdateWindow();
+                OCR.OCR.UpdateWindow();
 
                 while (watch.ElapsedMilliseconds < stop)
                 {
                     if (watch.ElapsedMilliseconds <= wait) continue;
                     wait += Settings.autoDelay;
-                    OCR.GetThemeWeighted(out double diff);
+                    OCR.OCR.GetThemeWeighted(out double diff);
                     if (!(diff > 40)) continue;
                     while (watch.ElapsedMilliseconds < wait) ;
                     Main.AddLog("started auto processing");
-                    OCR.ProcessRewardScreen();
+                    OCR.OCR.ProcessRewardScreen();
                     break;
                 }
                 watch.Stop();
@@ -1129,7 +1129,7 @@ namespace WFInfo
 
             marketSocket.OnOpen += (sender, e) =>
             {
-                marketSocket.Send(OCR.VerifyWarframe()
+                marketSocket.Send(OCR.OCR.VerifyWarframe()
                     ? "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}"
                     : "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
             };
