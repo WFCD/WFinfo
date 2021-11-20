@@ -29,5 +29,6 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore ./WFInfo.Services.Tests/WFInfo.Services.Tests.csproj
+    - run: ldd /WFInfo.Services.Tests/bin/Debug/net5.0/x64/leptonica-1.80.0.so
     - name: Test
       run: dotnet test --no-build --verbosity normal
