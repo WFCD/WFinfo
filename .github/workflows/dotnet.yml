@@ -19,7 +19,6 @@ jobs:
        wget -O - https://notesalexp.org/debian/alexp_key.asc | sudo apt-key add -
        sudo apt-get update
        sudo apt update && sudo apt install tesseract-ocr=4.1.1+git4259-c1a56cce-1 -y
-       sudo ln -s /usr/lib/x86_64-linux-gnu/liblept.so.5 /home/runner/work/WFinfo/WFinfo/WFInfo.Services.Tests/bin/Debug/net5.0/x64/libleptonica-1.80.0.so
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
@@ -29,6 +28,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore ./WFInfo.Services.Tests/WFInfo.Services.Tests.csproj
+    - run:        sudo ln -s /usr/lib/x86_64-linux-gnu/liblept.so.5 /home/runner/work/WFinfo/WFinfo/WFInfo.Services.Tests/bin/Debug/net5.0/x64/libleptonica-1.80.0.so
     - run: ls  /home/runner/work/WFinfo/WFinfo/WFInfo.Services.Tests/bin/Debug/net5.0/x64
     - run: ldd /home/runner/work/WFinfo/WFinfo/WFInfo.Services.Tests/bin/Debug/net5.0/x64/leptonica-1.80.0.so
     - name: Test
