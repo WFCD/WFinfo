@@ -30,6 +30,6 @@ jobs:
       run: dotnet build --no-restore ./WFInfo.Services.Tests/WFInfo.Services.Tests.csproj
     - run:        sudo ln -s /usr/lib/x86_64-linux-gnu/liblept.so.5 /home/runner/work/WFinfo/WFinfo/WFInfo.Services.Tests/bin/Debug/net5.0/x64/libleptonica-1.80.0.so
     - run: ls  /home/runner/work/WFinfo/WFinfo/WFInfo.Services.Tests/bin/Debug/net5.0/x64
-    - run: ldd /home/runner/work/WFinfo/WFinfo/WFInfo.Services.Tests/bin/Debug/net5.0/x64/leptonica-1.80.0.so
+    - run: ldd /home/runner/work/WFinfo/WFinfo/WFInfo.Services.Tests/bin/Debug/net5.0/x64/libleptonica-1.80.0.so
     - name: Test
       run: dotnet test --no-build --verbosity normal
