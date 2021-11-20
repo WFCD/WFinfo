@@ -18,7 +18,7 @@ jobs:
        echo "deb https://notesalexp.org/debian/buster/ buster main" | sudo tee /etc/apt/sources.list > /dev/null
        wget -O - https://notesalexp.org/debian/alexp_key.asc | sudo apt-key add -
        sudo apt-get update
-       apt update && apt install tesseract-ocr=4.1.1+git4247-97079fa3-1 -y
+       sudo apt update && sudo apt install tesseract-ocr=4.1.1+git4247-97079fa3-1 -y
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
