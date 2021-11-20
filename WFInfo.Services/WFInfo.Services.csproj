@@ -3,10 +3,14 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>latest</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+      <PackageReference Include="Tesseract" Version="4.1.1" />
     </ItemGroup>
+
+
 
 </Project>

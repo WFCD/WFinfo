@@ -1,7 +1,9 @@
 using System;
+using Tesseract;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 
 namespace WFInfo.Services.OCR
@@ -257,7 +259,7 @@ namespace WFInfo.Services.OCR
             try
             {
                 Rectangle rect = new Rectangle(cropLeft, cropTop, cropWidth, cropHei);
-                partialScreenshot = preFilter.Clone(rect, System.Drawing.Imaging.PixelFormat.DontCare);
+                partialScreenshot = preFilter.Clone(rect, PixelFormat.DontCare);
                 if (partialScreenshot.Height == 0 || partialScreenshot.Width == 0)
                     throw new ArithmeticException("New image was null");
             }
@@ -277,6 +279,16 @@ namespace WFInfo.Services.OCR
             // Main.StatusUpdate("Filter and separate failed, report to dev", 1);
             // });
             return RewardHelpers.FilterAndSeparatePartsFromPartBox(partialScreenshot, active, addLog, culture, statusUpdate, appPath, timestampParam, updateProcessingActive);
+        }
+
+        public static string GetTextFromImage(Bitmap image, TesseractEngine engine)
+        {
+            string ret = "";
+            var converter = new BitmapToPixConverter();
+            var pix = converter.Convert(image);
+            using (Page page = engine.Process(pix))
+                ret = page.GetText().Trim();
+            return OcrConstants.RE.Replace(ret, "").Trim();
         }
     }
 }

@@ -24,4 +24,9 @@
       <ProjectReference Include="..\WFInfo.Services\WFInfo.Services.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Reference Include="Tesseract">
+            <HintPath>..\WFInfo\lib\Tesseract.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 </Project>

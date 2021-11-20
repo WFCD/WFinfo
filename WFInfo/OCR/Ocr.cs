@@ -131,7 +131,7 @@ namespace WFInfo.OCR
             for (int i = 0; i < parts.Count; i++)
             {
                 int tempI = i;
-                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]);});
+                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = RewardHelpers.GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]);});
             }
             Task.WaitAll(tasks);
 
@@ -1654,14 +1654,6 @@ namespace WFInfo.OCR
         //    }
         //    return FilterAndSeparatePartsFromPartBox(partialScreenshot, active);
         //}
-
-        public static string GetTextFromImage(Bitmap image, TesseractEngine engine)
-        {
-            string ret = "";
-            using (Page page = engine.Process(image))
-                ret = page.GetText().Trim();
-            return OcrConstants.RE.Replace(ret, "").Trim();
-        }
 
         internal static List<string> SeparatePlayers(Bitmap image, TesseractEngine engine)
         {
