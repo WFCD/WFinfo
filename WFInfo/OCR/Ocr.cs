@@ -109,7 +109,7 @@ namespace WFInfo.OCR
             bigScreenshot = file ?? CaptureScreenshot();
             try
             {
-                parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot);
+                parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot, Main.AddLog, Main.culture);
             }
             catch (Exception e)
             {
@@ -1568,58 +1568,6 @@ namespace WFInfo.OCR
             return foundItems;
         }
 
-        public static bool ThemeThresholdFilter(Color test, WFtheme theme)
-        {
-            Color primary = OcrConstants.ThemePrimary[(int)theme];
-            Color secondary = OcrConstants.ThemeSecondary[(int)theme];
-
-            switch (theme)
-            {
-                case WFtheme.VITRUVIAN:     // TO CHECK
-                    return Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.42;
-                case WFtheme.LOTUS:
-                    return Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetSaturation() >= 0.65 && Math.Abs(test.GetBrightness() - primary.GetBrightness()) <= 0.1
-                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetBrightness() >= 0.65);
-                case WFtheme.OROKIN:        // TO CHECK
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() <= 0.42 && test.GetSaturation() >= 0.1)
-                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 5 && test.GetBrightness() <= 0.5 && test.GetBrightness() >= 0.25 && test.GetSaturation() >= 0.25);
-                case WFtheme.STALKER:
-                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.55)
-                            || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
-                case WFtheme.CORPUS:
-                    return Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.42 && test.GetSaturation() >= 0.35;
-                case WFtheme.EQUINOX:
-                    return test.GetSaturation() <= 0.2 && test.GetBrightness() >= 0.55;
-                case WFtheme.DARK_LOTUS:
-                    return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.35 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.25 && test.GetSaturation() >= 0.05)
-                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
-                case WFtheme.FORTUNA:
-                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.35) || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.15)) && test.GetSaturation() >= 0.20;
-                case WFtheme.HIGH_CONTRAST:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.35; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
-                case WFtheme.LEGACY:    // TO CHECK
-                    return (test.GetBrightness() >= 0.65)
-                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
-                case WFtheme.NIDUS:
-                    return (Math.Abs(test.GetHue() - (primary.GetHue() + 6)) < 8 && test.GetSaturation() >= 0.30)
-                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 15 && test.GetSaturation() >= 0.55);
-                case WFtheme.TENNO:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.38 && test.GetBrightness() <= 0.55;
-                case WFtheme.BARUUK:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 2) && test.GetSaturation() > 0.25 && test.GetBrightness() > 0.5;
-                case WFtheme.GRINEER:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 5 && test.GetBrightness() > 0.5)
-                           || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() > 0.55);
-                case WFtheme.ZEPHYR:
-                    return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.55)
-                            || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
-                default:
-                    // This shouldn't be ran
-                    //   Only for initial testing
-                    return Math.Abs(test.GetHue() - primary.GetHue()) < 2 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
-            }
-        }
-
         private static Bitmap ScaleUpAndFilter(Bitmap image, WFtheme active, out int[] rowHits, out int[] colHits)
         {
             Bitmap filtered;
@@ -1654,7 +1602,7 @@ namespace WFInfo.OCR
             for (int i = 0; i < numbytes; i+=PixelSize)
             {
                 clr = Color.FromArgb(LockedBitmapBytes[i + 3], LockedBitmapBytes[i + 2], LockedBitmapBytes[i + 1], LockedBitmapBytes[i]);
-                if (ThemeThresholdFilter(clr, active)) 
+                if (ThemeHelpers.ThemeThresholdFilter(clr, active)) 
                 {
                     LockedBitmapBytes[i] = 0;
                     LockedBitmapBytes[i + 1] = 0;
@@ -1683,7 +1631,7 @@ namespace WFInfo.OCR
         // The top bit (upper case and dots/strings, bdfhijklt) > the juicy bit (lower case, acemnorsuvwxz) > the tails (gjpqy)
         // we ignore the "tippy top" because it has a lot of variance, so we just look at the "bottom half of the top"
         private static readonly int[] TextSegments = new int[] { 2, 4, 16, 21 };
-        private static List<Bitmap> ExtractPartBoxAutomatically(out double scaling, out WFtheme active, Bitmap fullScreen)
+        private static List<Bitmap> ExtractPartBoxAutomatically(out double scaling, out WFtheme active, Bitmap fullScreen, Action<string> addLog, CultureInfo cultureInfo)
         {
             var watch = new Stopwatch();
             watch.Start();
@@ -1707,25 +1655,25 @@ namespace WFInfo.OCR
 
             try
             {
-                Main.AddLog($"Fullscreen is {fullScreen.Size}:, trying to clone: {rectangle.Size} at {rectangle.Location}");
+                addLog($"Fullscreen is {fullScreen.Size}:, trying to clone: {rectangle.Size} at {rectangle.Location}");
                 preFilter = fullScreen.Clone(new Rectangle(mostLeft, mostTop, mostWidth, mostBot - mostTop), fullScreen.PixelFormat);
             }
             catch (Exception ex)
             {
-                Main.AddLog("Something went wrong with getting the starting image: " + ex.ToString());
+                addLog("Something went wrong with getting the starting image: " + ex.ToString());
                 throw;
             }
 
 
             long end = watch.ElapsedMilliseconds;
-            Main.AddLog("Grabbed images " + (end - start) + "ms");
+            addLog("Grabbed images " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
             
-            active = ThemeHelpers.GetThemeWeighted(out var closest, OCR.screenScaling, Main.AddLog, Main.culture, fullScreen ?? OCR.CaptureScreenshot());
-            Main.AddLog("CLOSEST THEME(" + closest.ToString("F2", Main.culture) + "): " + active);
+            active = ThemeHelpers.GetThemeWeighted(out var closest, OCR.screenScaling, addLog, cultureInfo, fullScreen ?? OCR.CaptureScreenshot());
+            addLog("CLOSEST THEME(" + closest.ToString("F2", cultureInfo) + "): " + active);
 
             end = watch.ElapsedMilliseconds;
-            Main.AddLog("Got theme " + (end - start) + "ms");
+            addLog("Got theme " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
 
             int[] rows = new int[preFilter.Height];
@@ -1740,7 +1688,7 @@ namespace WFInfo.OCR
                 for (int x = 0; x < preFilter.Width; x++)
                 {
                     clr = preFilter.GetPixel(x, y);
-                    if (ThemeThresholdFilter(clr, active))
+                    if (ThemeHelpers.ThemeThresholdFilter(clr, active))
                         //{
                         rows[y]++;
                     //postFilter.SetPixel(x, y, Color.Black);
@@ -1753,7 +1701,7 @@ namespace WFInfo.OCR
             //postFilter.Save(Main.AppPath + @"\Debug\PostFilter" + timestamp + ".png");
 
             end = watch.ElapsedMilliseconds;
-            Main.AddLog("Filtered Image " + (end - start) + "ms");
+            addLog("Filtered Image " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
 
             double[] percWeights = new double[51];
@@ -1810,7 +1758,7 @@ namespace WFInfo.OCR
 
             end = watch.ElapsedMilliseconds;
 
-            Main.AddLog("Got scaling " + (end - start) + "ms");
+            addLog("Got scaling " + (end - start) + "ms");
 
             int[] topFive = new int[] { -1, -1, -1, -1, -1 };
 
@@ -1830,7 +1778,7 @@ namespace WFInfo.OCR
 
             for (int i = 0; i < 5; i++)
             {
-                Main.AddLog("RANK " + (5 - i) + " SCALE: " + (topFive[i] + 50) + "%\t\t" + percWeights[topFive[i]].ToString("F2", Main.culture) + " -- " + topWeights[topFive[i]].ToString("F2", Main.culture) + ", " + midWeights[topFive[i]].ToString("F2", Main.culture) + ", " + botWeights[topFive[i]].ToString("F2", Main.culture));
+                addLog("RANK " + (5 - i) + " SCALE: " + (topFive[i] + 50) + "%\t\t" + percWeights[topFive[i]].ToString("F2", cultureInfo) + " -- " + topWeights[topFive[i]].ToString("F2", cultureInfo) + ", " + midWeights[topFive[i]].ToString("F2", cultureInfo) + ", " + botWeights[topFive[i]].ToString("F2", cultureInfo));
             }
 
             using (Graphics g = Graphics.FromImage(fullScreen))
@@ -1864,19 +1812,30 @@ namespace WFInfo.OCR
             }
             catch (Exception ex)
             {
-                Main.AddLog("Something went wrong while trying to copy the right part of the screen into partial screenshot: " + ex.ToString());
+                addLog("Something went wrong while trying to copy the right part of the screen into partial screenshot: " + ex.ToString());
                 throw;
             }
 
             preFilter.Dispose();
 
             end = watch.ElapsedMilliseconds;
-            Main.AddLog("Finished function " + (end - beginning) + "ms");
+            addLog("Finished function " + (end - beginning) + "ms");
             partialScreenshot.Save(Main.AppPath + @"\Debug\PartialScreenshot" + timestamp + ".png");
-            return FilterAndSeparatePartsFromPartBox(partialScreenshot, active);
+            // Main.RunOnUIThread(() =>
+            // {
+            // Main.StatusUpdate("Filter and separate failed, report to dev", 1);
+            // });
+            Action<string, int> statusUpdate = (string s, int i) =>
+            {
+                Main.RunOnUIThread(() =>
+                {
+                    Main.StatusUpdate(s, i);
+                });
+            };
+            return FilterAndSeparatePartsFromPartBox(partialScreenshot, active, Main.AddLog, Main.culture, statusUpdate, Main.AppPath);
         }
 
-        private static List<Bitmap> FilterAndSeparatePartsFromPartBox(Bitmap partBox, WFtheme active)
+        private static List<Bitmap> FilterAndSeparatePartsFromPartBox(Bitmap partBox, WFtheme active, Action<string> addLog, CultureInfo cultureInfo, Action<string, int> updateStatus, string appPath)
         {
             Color clr;
             double weight = 0;
@@ -1890,7 +1849,7 @@ namespace WFInfo.OCR
                 for (int y = 0; y < filtered.Height; y++)
                 {
                     clr = partBox.GetPixel(x, y);
-                    if (ThemeThresholdFilter(clr, active))
+                    if (ThemeHelpers.ThemeThresholdFilter(clr, active))
                     {
                         filtered.SetPixel(x, y, Color.Black);
                         count++;
@@ -1912,17 +1871,14 @@ namespace WFInfo.OCR
 
             if (totalEven == 0 || totalOdd == 0)
             {
-                Main.RunOnUIThread(() =>
-                {
-                    Main.StatusUpdate("Filter and separate failed, report to dev", 1);
-                });
+                updateStatus("Filter and separate failed, report to dev", 1);
                 processingActive = false;
                 throw new Exception("Unable to find any parts");
             }
 
             double total = totalEven + totalOdd;
-            Main.AddLog("EVEN DISTRIBUTION: " + (totalEven / total * 100).ToString("F2", Main.culture) + "%");
-            Main.AddLog("ODD DISTRIBUTION: " + (totalOdd / total * 100).ToString("F2", Main.culture) + "%");
+            addLog("EVEN DISTRIBUTION: " + (totalEven / total * 100).ToString("F2", cultureInfo) + "%");
+            addLog("ODD DISTRIBUTION: " + (totalOdd / total * 100).ToString("F2", cultureInfo) + "%");
 
             int boxWidth = partBox.Width / 4;
             int boxHeight = filtered.Height;
@@ -1945,7 +1901,7 @@ namespace WFInfo.OCR
                 using (Graphics grD = Graphics.FromImage(newBox))
                     grD.DrawImage(filtered, destRegion, srcRegion, GraphicsUnit.Pixel);
                 ret.Add(newBox);
-                newBox.Save(Main.AppPath + @"\Debug\PartBox(" + i + ") " + timestamp + ".png");
+                newBox.Save(appPath + @"\Debug\PartBox(" + i + ") " + timestamp + ".png");
             }
             filtered.Dispose();
             return ret;
