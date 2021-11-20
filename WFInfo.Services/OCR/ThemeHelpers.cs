@@ -1,12 +1,11 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
-using WFInfo.Services;
-using WFInfo.Services.OCR;
+using System.Globalization;
 
-namespace WFInfo.OCR
+namespace WFInfo.Services.OCR
 {
-    class ThemeHelpers
+    public class ThemeHelpers
     {
         private static short[,,] GetThemeCache = new short[256, 256, 256];
         private static short[,,] GetThresholdCache = new short[256, 256, 256];
@@ -18,9 +17,11 @@ namespace WFInfo.OCR
         /// <param name="closestThresh"></param>
         /// <param name="screenScaling"></param>
         /// <param name="addLog"></param>
+        /// <param name="cultureInfo"></param>
+        /// <param name="captureScreenshot"></param>
         /// <param name="image"></param>
         /// <returns></returns>
-        public static WFtheme GetThemeWeighted(out double closestThresh, double screenScaling, Action<string> addLog, Bitmap image = null)
+        public static WFtheme GetThemeWeighted(out double closestThresh, double screenScaling, Action<string> addLog, CultureInfo cultureInfo, Bitmap image = null)
         {
             int lineHeight = (int)(OcrConstants.pixelRewardLineHeight / 2 * screenScaling);
             // int width = image == null ? window.Width * (int)dpiScaling : image.Width;
@@ -29,16 +30,6 @@ namespace WFInfo.OCR
             // int mostLeft = (width / 2) - (mostWidth / 2);
             // int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
             // int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
-
-            if (image == null)
-            {
-                // using (image = new Bitmap(mostWidth, mostBot - mostTop))
-                //     using (Graphics graphics = Graphics.FromImage(image))
-                //         graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(image.Width, image.Height));
-                image = OCR.CaptureScreenshot();
-            }
-
-
 
             double[] weights = new double[15] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
             int minWidth = mostWidth / 4;
@@ -64,14 +55,14 @@ namespace WFInfo.OCR
             WFtheme active = WFtheme.UNKNOWN;
             for (int i = 0; i < weights.Length; i++)
             {
-                Debug.Write(weights[i].ToString("F2", Main.culture) + " ");
+                Debug.Write(weights[i].ToString("F2", cultureInfo) + " ");
                 if (weights[i] > max)
                 {
                     max = weights[i];
                     active = (WFtheme)i;
                 }
             }
-            addLog("CLOSEST THEME(" + max.ToString("F2", Main.culture) + "): " + active.ToString());
+            addLog("CLOSEST THEME(" + max.ToString("F2", cultureInfo) + "): " + active.ToString());
             closestThresh = max;
             return active;
         }

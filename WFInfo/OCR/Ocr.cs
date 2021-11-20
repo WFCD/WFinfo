@@ -640,7 +640,7 @@ namespace WFInfo.OCR
             long start = watch.ElapsedMilliseconds;
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-            WFtheme theme = ThemeHelpers.GetThemeWeighted(out _, OCR.screenScaling, Main.AddLog, fullShot);
+            WFtheme theme = ThemeHelpers.GetThemeWeighted(out _, OCR.screenScaling, Main.AddLog, Main.culture, fullShot ?? OCR.CaptureScreenshot());
             snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
@@ -1721,7 +1721,7 @@ namespace WFInfo.OCR
             Main.AddLog("Grabbed images " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
             
-            active = ThemeHelpers.GetThemeWeighted(out var closest, OCR.screenScaling, Main.AddLog, fullScreen);
+            active = ThemeHelpers.GetThemeWeighted(out var closest, OCR.screenScaling, Main.AddLog, Main.culture, fullScreen ?? OCR.CaptureScreenshot());
             Main.AddLog("CLOSEST THEME(" + closest.ToString("F2", Main.culture) + "): " + active);
 
             end = watch.ElapsedMilliseconds;

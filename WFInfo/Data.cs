@@ -1035,7 +1035,7 @@ namespace WFInfo
                 {
                     if (watch.ElapsedMilliseconds <= wait) continue;
                     wait += Settings.autoDelay;
-                    ThemeHelpers.GetThemeWeighted(out double diff, OCR.OCR.screenScaling, Main.AddLog);
+                    ThemeHelpers.GetThemeWeighted(out double diff, OCR.OCR.screenScaling, Main.AddLog, Main.culture, OCR.OCR.CaptureScreenshot());
                     if (!(diff > 40)) continue;
                     while (watch.ElapsedMilliseconds < wait) ;
                     Main.AddLog("started auto processing");
