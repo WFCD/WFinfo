@@ -52,5 +52,11 @@ namespace WFInfo.Services.OCR
         public const NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
         public static readonly Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         public static readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
+        
+
+        /// The parts of text
+        /// The top bit (upper case and dots/strings, bdfhijklt) > the juicy bit (lower case, acemnorsuvwxz) > the tails (gjpqy)
+        /// we ignore the "tippy top" because it has a lot of variance, so we just look at the "bottom half of the top"
+        public static readonly int[] TextSegments = new int[] { 2, 4, 16, 21 };
     }
 }
