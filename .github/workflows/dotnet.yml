@@ -18,7 +18,7 @@ jobs:
        echo "deb https://notesalexp.org/debian/focal/ focal main" | sudo tee /etc/apt/sources.list.d/test.list
        wget -O - https://notesalexp.org/debian/alexp_key.asc | sudo apt-key add -
        sudo apt-get update
-       sudo apt update && sudo apt install tesseract-ocr=4.1.1+git4247-97079fa3-1 -y
+       sudo apt update && sudo apt install tesseract-ocr=4.1.1+git4259-c1a56cce-1 -y
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
