@@ -15,7 +15,7 @@ jobs:
     - run: |
        sudo apt update && sudo apt install gnupg2 libc6-dev -y
        sudo apt-get install apt-transport-https
-       echo "deb https://notesalexp.org/debian/buster/ buster main" | sudo tee /etc/apt/sources.list.d/test.list
+       echo "deb https://notesalexp.org/debian/focal/ focal main" | sudo tee /etc/apt/sources.list.d/test.list
        wget -O - https://notesalexp.org/debian/alexp_key.asc | sudo apt-key add -
        sudo apt-get update
        sudo apt update && sudo apt install tesseract-ocr=4.1.1+git4247-97079fa3-1 -y
