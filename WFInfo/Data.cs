@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
+using WFInfo.OCR;
 
 namespace WFInfo
 {
@@ -1033,7 +1034,7 @@ namespace WFInfo
                 {
                     if (watch.ElapsedMilliseconds <= wait) continue;
                     wait += Settings.autoDelay;
-                    OCR.OCR.GetThemeWeighted(out double diff);
+                    ThemeHelpers.GetThemeWeighted(out double diff, OCR.OCR.screenScaling, Main.AddLog);
                     if (!(diff > 40)) continue;
                     while (watch.ElapsedMilliseconds < wait) ;
                     Main.AddLog("started auto processing");

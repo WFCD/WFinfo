@@ -611,100 +611,8 @@ namespace WFInfo.OCR
             }
         }
 
-        /// <summary>
-        /// Processes the theme, parse image to detect the theme in the image. Parse null to detect the theme from the screen.
-        /// closeestThresh is used for getting the most "Accuracte" result, anything over 100 is sure to be correct.
-        /// </summary>
-        /// <param name="closestThresh"></param>
-        /// <param name="image"></param>
-        /// <returns></returns>
-        public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
-        {
-            int lineHeight = (int)(OcrConstants.pixelRewardLineHeight / 2 * screenScaling);
-            // int width = image == null ? window.Width * (int)dpiScaling : image.Width;
-            // int height = image == null ? window.Height * (int)dpiScaling : image.Height;
-            int mostWidth = (int)(OcrConstants.pixleRewardWidth * screenScaling);
-            // int mostLeft = (width / 2) - (mostWidth / 2);
-            // int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
-            // int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
-
-            if (image == null)
-            {
-                // using (image = new Bitmap(mostWidth, mostBot - mostTop))
-                //     using (Graphics graphics = Graphics.FromImage(image))
-                //         graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(image.Width, image.Height));
-                image = CaptureScreenshot();
-            }
-
-
-
-            double[] weights = new double[15] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
-            int minWidth = mostWidth / 4;
-
-            if (image == null || image.Height == 0)
-            {
-                throw new Exception("Image height was 0");
-            }
-
-            for (int y = lineHeight; y < image.Height; y++)
-            {
-                double perc = (y - lineHeight) / (image.Height - lineHeight);
-                int totWidth = (int)(minWidth * perc + minWidth);
-                for (int x = 0; x < totWidth; x++)
-                {
-                    int match = (int)GetClosestTheme(image.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
-                
-                    weights[match] += 1 / Math.Pow(thresh + 1, 4);
-                }
-            }
-
-            double max = 0;
-            WFtheme active = WFtheme.UNKNOWN;
-            for (int i = 0; i < weights.Length; i++)
-            {
-                Debug.Write(weights[i].ToString("F2", Main.culture) + " ");
-                if (weights[i] > max)
-                {
-                    max = weights[i];
-                    active = (WFtheme)i;
-                }
-            }
-            Main.AddLog("CLOSEST THEME(" + max.ToString("F2", Main.culture) + "): " + active.ToString());
-            closestThresh = max;
-            return active;
-        }
 #pragma warning disable IDE0044 // Add readonly modifier
-        private static short[,,] GetThemeCache = new short[256, 256, 256];
-        private static short[,,] GetThresholdCache = new short[256, 256, 256];
 #pragma warning disable IDE0044 // Add readonly modifier
-
-        private static WFtheme GetClosestTheme(Color clr, out int threshold)
-        {
-            threshold = 999;
-            WFtheme minTheme = WFtheme.CORPUS;
-            if (GetThemeCache[clr.R, clr.G, clr.B] > 0)
-            {
-                threshold = GetThresholdCache[clr.R, clr.G, clr.B];
-                return (WFtheme)(GetThemeCache[clr.R, clr.G, clr.B] - 1);
-            }
-
-            foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
-            {
-                if (theme != WFtheme.UNKNOWN)
-                {
-                    Color themeColor = OcrConstants.ThemePrimary[(int)theme];
-                    int tempThresh = ColorDifference(clr, themeColor);
-                    if (tempThresh < threshold)
-                    {
-                        threshold = tempThresh;
-                        minTheme = theme;
-                    }
-                }
-            }
-            GetThemeCache[clr.R, clr.G, clr.B] = (byte)(minTheme + 1);
-            GetThresholdCache[clr.R, clr.G, clr.B] = (byte)threshold;
-            return minTheme;
-        }
 
         /// <summary>
         /// Checks if partName is close enough to valid to actually process
@@ -730,7 +638,7 @@ namespace WFInfo.OCR
             long start = watch.ElapsedMilliseconds;
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-            WFtheme theme = GetThemeWeighted(out _, fullShot);
+            WFtheme theme = ThemeHelpers.GetThemeWeighted(out _, OCR.screenScaling, Main.AddLog, fullShot);
             snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
@@ -1658,11 +1566,6 @@ namespace WFInfo.OCR
             return foundItems;
         }
 
-        private static int ColorDifference(Color test, Color thresh)
-        {
-            return Math.Abs(test.R - thresh.R) + Math.Abs(test.G - thresh.G) + Math.Abs(test.B - thresh.B);
-        }
-
         public static bool ThemeThresholdFilter(Color test, WFtheme theme)
         {
             Color primary = OcrConstants.ThemePrimary[(int)theme];
@@ -1816,7 +1719,7 @@ namespace WFInfo.OCR
             Main.AddLog("Grabbed images " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
             
-            active = GetThemeWeighted(out var closest, fullScreen);
+            active = ThemeHelpers.GetThemeWeighted(out var closest, OCR.screenScaling, Main.AddLog, fullScreen);
             Main.AddLog("CLOSEST THEME(" + closest.ToString("F2", Main.culture) + "): " + active);
 
             end = watch.ElapsedMilliseconds;
