@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using WFInfo.Services;
+using WFInfo.Services.OCR;
 
 namespace WFInfo.OCR
 {

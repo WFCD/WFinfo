@@ -94,4 +94,7 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WFInfo.Services\WFInfo.Services.csproj" />
+  </ItemGroup>
 </Project>

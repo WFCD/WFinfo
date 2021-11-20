@@ -1,6 +1,6 @@
-namespace WFInfo.OCR
+namespace WFInfo.Services
 {
-    internal enum WindowStyle
+    public enum WindowStyle
     {
         FULLSCREEN,
         BORDERLESS,

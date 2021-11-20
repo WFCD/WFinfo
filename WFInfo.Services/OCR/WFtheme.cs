@@ -1,6 +1,6 @@
-namespace WFInfo.OCR
+namespace WFInfo.Services
 {
-    internal enum WFtheme : int
+    public enum WFtheme : int
     {
         VITRUVIAN,
         STALKER,

@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
 using WFInfo.OCR;
+using WFInfo.Services.OCR;
 
 namespace WFInfo
 {

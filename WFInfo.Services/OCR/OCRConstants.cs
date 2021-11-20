@@ -3,9 +3,9 @@ using System.Drawing;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace WFInfo.OCR
+namespace WFInfo.Services.OCR
 {
-    static class OcrConstants
+    public static class OcrConstants
     {
         
         /// Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
