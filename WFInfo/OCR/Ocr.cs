@@ -109,7 +109,13 @@ namespace WFInfo.OCR
             bigScreenshot = file ?? CaptureScreenshot();
             try
             {
-                parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot, Main.AddLog, Main.culture);
+                parts = ExtractPartBoxAutomatically(out uiScaling, out activeTheme, bigScreenshot, Main.AddLog, Main.culture, Main.AppPath, Main.culture, timestamp, (bool b) => processingActive = b, (string s, int i) =>
+                {
+                    Main.RunOnUIThread(() =>
+                    {
+                        Main.StatusUpdate(s, i);
+                    });
+                }, Main.AddLog, screenScaling);
             }
             catch (Exception e)
             {
@@ -280,12 +286,12 @@ namespace WFInfo.OCR
                     });
                 }
 
-                if (partialScreenshot.Height < 70 && Settings.doDoubleCheck)
-                {
+                // if (partialScreenshot.Height < 70 && Settings.doDoubleCheck)
+                // {
                     // SlowSecondProcess(); secondProximity is never being written to, thus this will always result in that there is no change in the first scan. I've commented this out to increase preformance. @Dapal
-                    end = watch.ElapsedMilliseconds;
-                    Main.StatusUpdate("Completed second pass(" + (end - start) + "ms)", 0);
-                }
+                    // end = watch.ElapsedMilliseconds;
+                    // Main.StatusUpdate("Completed second pass(" + (end - start) + "ms)", 0);
+                // }
                 Main.AddLog(("----  Total Processing Time " + (end - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
                 watch.Stop();
             }
@@ -301,12 +307,12 @@ namespace WFInfo.OCR
                 .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
                 .ToList().ForEach(f => f.Delete());
 
-            if (partialScreenshot != null)
-            {
-                partialScreenshot.Save(Main.AppPath + @"\Debug\PartBox " + timestamp + ".png");
-                partialScreenshot.Dispose();
-                partialScreenshot = null;
-            }
+            // if (partialScreenshot != null)
+            // {
+                // partialScreenshot.Save(Main.AppPath + @"\Debug\PartBox " + timestamp + ".png");
+                // partialScreenshot.Dispose();
+                // partialScreenshot = null;
+            // }
 
             processingActive = false;
 
@@ -1631,24 +1637,24 @@ namespace WFInfo.OCR
         // The top bit (upper case and dots/strings, bdfhijklt) > the juicy bit (lower case, acemnorsuvwxz) > the tails (gjpqy)
         // we ignore the "tippy top" because it has a lot of variance, so we just look at the "bottom half of the top"
         private static readonly int[] TextSegments = new int[] { 2, 4, 16, 21 };
-        private static List<Bitmap> ExtractPartBoxAutomatically(out double scaling, out WFtheme active, Bitmap fullScreen, Action<string> addLog, CultureInfo cultureInfo)
+        private static List<Bitmap> ExtractPartBoxAutomatically(out double scaling, out WFtheme active, Bitmap fullScreen, Action<string> addLog, CultureInfo cultureInfo, string appPath, CultureInfo culture, string timestampParam, Action<bool> updateProcessingActive, Action<string, int> statusUpdate, Action<string> addLog, double screenScalingParam)
         {
             var watch = new Stopwatch();
             watch.Start();
             long start = watch.ElapsedMilliseconds;
             long beginning = start;
 
-            int lineHeight = (int)(OcrConstants.pixelRewardLineHeight / 2 * screenScaling);
+            int lineHeight = (int)(OcrConstants.pixelRewardLineHeight / 2 * screenScalingParam);
 
             Color clr;
             int width = window.Width;
             int height = window.Height;
-            int mostWidth = (int)(OcrConstants.pixleRewardWidth * screenScaling);
+            int mostWidth = (int)(OcrConstants.pixleRewardWidth * screenScalingParam);
             int mostLeft = (width / 2) - (mostWidth / 2 );
             // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
             //                   (316          -        235        +       44)    *    1.1    =    137
-            int mostTop = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight + OcrConstants.pixelRewardLineHeight) * screenScaling);
-            int mostBot = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight) * screenScaling * 0.5);
+            int mostTop = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight + OcrConstants.pixelRewardLineHeight) * screenScalingParam);
+            int mostBot = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight) * screenScalingParam * 0.5);
             //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
             var rectangle = new Rectangle((int)(mostLeft), (int)(mostTop), mostWidth, mostBot - mostTop);
             Bitmap preFilter;
@@ -1669,7 +1675,7 @@ namespace WFInfo.OCR
             addLog("Grabbed images " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
             
-            active = ThemeHelpers.GetThemeWeighted(out var closest, OCR.screenScaling, addLog, cultureInfo, fullScreen ?? OCR.CaptureScreenshot());
+            active = ThemeHelpers.GetThemeWeighted(out var closest, screenScalingParam, addLog, cultureInfo, fullScreen ?? OCR.CaptureScreenshot());
             addLog("CLOSEST THEME(" + closest.ToString("F2", cultureInfo) + "): " + active);
 
             end = watch.ElapsedMilliseconds;
@@ -1714,7 +1720,7 @@ namespace WFInfo.OCR
 
             scaling = -1;
             double lowestWeight = 0;
-            Rectangle uidebug = new Rectangle((topLine_100 - topLine_50) / 50 + topLine_50, (int)(preFilter.Height/screenScaling), preFilter.Width, 50);
+            Rectangle uidebug = new Rectangle((topLine_100 - topLine_50) / 50 + topLine_50, (int)(preFilter.Height/screenScalingParam), preFilter.Width, 50);
             for (int i = 0; i <= 50; i++)
             {
                 int yFromTop = preFilter.Height - (i * (topLine_100 - topLine_50) / 50 + topLine_50);
@@ -1722,10 +1728,10 @@ namespace WFInfo.OCR
                 int scale = (50 + i);
                 int scaleWidth = preFilter.Width * scale / 100;
 
-                int textTop = (int)(screenScaling * TextSegments[0] * scale / 100);
-                int textTopBot = (int)(screenScaling * TextSegments[1] * scale / 100);
-                int textBothBot = (int)(screenScaling * TextSegments[2] * scale / 100);
-                int textTailBot = (int)(screenScaling * TextSegments[3] * scale / 100);
+                int textTop = (int)(screenScalingParam * TextSegments[0] * scale / 100);
+                int textTopBot = (int)(screenScalingParam * TextSegments[1] * scale / 100);
+                int textBothBot = (int)(screenScalingParam * TextSegments[2] * scale / 100);
+                int textTailBot = (int)(screenScalingParam * TextSegments[3] * scale / 100);
 
                 int loc = textTop;
                 for (; loc <= textTopBot; loc++)
@@ -1786,23 +1792,24 @@ namespace WFInfo.OCR
                 g.DrawRectangle(Pens.Red, rectangle);
                 g.DrawRectangle(Pens.Chartreuse, uidebug);
             }
-            fullScreen.Save(Main.AppPath + @"\Debug\BorderScreenshot " + timestamp + ".png");
+            fullScreen.Save(appPath + @"\Debug\BorderScreenshot " + timestampParam + ".png");
 
 
             //postFilter.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
-            preFilter.Save(Main.AppPath + @"\Debug\FullPartArea " + timestamp + ".png");
+            preFilter.Save(appPath + @"\Debug\FullPartArea " + timestampParam + ".png");
             scaling = topFive[4] + 50; //scaling was sometimes going to 50 despite being set to 100, so taking the value from above that seems to be accurate.
 
             scaling /= 100;
             double highScaling = scaling < 1.0 ? scaling + 0.01 : scaling;
             double lowScaling = scaling > 0.5 ? scaling - 0.01 : scaling;
 
-            int cropWidth = (int)(OcrConstants.pixleRewardWidth * screenScaling * highScaling);
+            int cropWidth = (int)(OcrConstants.pixleRewardWidth * screenScalingParam * highScaling);
             int cropLeft = (preFilter.Width / 2) - (cropWidth / 2);
-            int cropTop = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight + OcrConstants.pixelRewardLineHeight) * screenScaling * highScaling);
-            int cropBot = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight) * screenScaling * lowScaling);
+            int cropTop = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight + OcrConstants.pixelRewardLineHeight) * screenScalingParam * highScaling);
+            int cropBot = height / 2 - (int)((OcrConstants.pixleRewardYDisplay - OcrConstants.pixleRewardHeight) * screenScalingParam * lowScaling);
             int cropHei = cropBot - cropTop;
             cropTop -= mostTop;
+            Bitmap partialScreenshot;
             try
             {
                 Rectangle rect = new Rectangle(cropLeft, cropTop, cropWidth, cropHei);
@@ -1820,20 +1827,12 @@ namespace WFInfo.OCR
 
             end = watch.ElapsedMilliseconds;
             addLog("Finished function " + (end - beginning) + "ms");
-            partialScreenshot.Save(Main.AppPath + @"\Debug\PartialScreenshot" + timestamp + ".png");
+            partialScreenshot.Save(appPath + @"\Debug\PartialScreenshot" + timestampParam + ".png");
             // Main.RunOnUIThread(() =>
             // {
             // Main.StatusUpdate("Filter and separate failed, report to dev", 1);
             // });
-            Action<string, int> statusUpdate = (string s, int i) =>
-            {
-                Main.RunOnUIThread(() =>
-                {
-                    Main.StatusUpdate(s, i);
-                });
-            };
-            Action<bool> updateProcessingActive = (bool b) => processingActive = b;
-            return RewardHelpers.FilterAndSeparatePartsFromPartBox(partialScreenshot, active, Main.AddLog, Main.culture, statusUpdate, Main.AppPath, timestamp, updateProcessingActive);
+            return RewardHelpers.FilterAndSeparatePartsFromPartBox(partialScreenshot, active, addLog, culture, statusUpdate, appPath, timestampParam, updateProcessingActive);
         }
 
         //private static List<Bitmap> FilterAndSeparateParts(Bitmap image, WFtheme active)
