@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Launcher", "Launcher\Launch
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFInfo.Services", "WFInfo.Services\WFInfo.Services.csproj", "{C3E4B0EE-A0D9-4859-A6A4-FAF9CB434FFC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFInfo.Services.Tests", "WFInfo.Services.Tests\WFInfo.Services.Tests.csproj", "{9396D674-9C46-4F66-9884-C679614DA22B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{C3E4B0EE-A0D9-4859-A6A4-FAF9CB434FFC}.Release|x64.Build.0 = Release|Any CPU
 		{C3E4B0EE-A0D9-4859-A6A4-FAF9CB434FFC}.Release|x86.ActiveCfg = Release|Any CPU
 		{C3E4B0EE-A0D9-4859-A6A4-FAF9CB434FFC}.Release|x86.Build.0 = Release|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Debug|x64.Build.0 = Debug|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Debug|x86.Build.0 = Debug|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Release|x64.ActiveCfg = Release|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Release|x64.Build.0 = Release|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Release|x86.ActiveCfg = Release|Any CPU
+		{9396D674-9C46-4F66-9884-C679614DA22B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
