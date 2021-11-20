@@ -19,6 +19,7 @@ jobs:
        wget -O - https://notesalexp.org/debian/alexp_key.asc | sudo apt-key add -
        sudo apt-get update
        sudo apt update && sudo apt install tesseract-ocr=4.1.1+git4259-c1a56cce-1 -y
+       ls /usr/lib/x86_64-linux-gnu
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
