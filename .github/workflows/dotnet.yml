@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - run: |
-       apt update && apt install sudo gnupg2 libc6-dev -y
+       sudo apt update && sudo apt install gnupg2 libc6-dev -y
        sudo apt-get install apt-transport-https
        echo "deb https://notesalexp.org/debian/buster/ buster main" >> /etc/apt/sources.list
        wget -O - https://notesalexp.org/debian/alexp_key.asc | sudo apt-key add -
