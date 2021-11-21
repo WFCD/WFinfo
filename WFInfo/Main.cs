@@ -66,7 +66,7 @@ namespace WFInfo
                 dataBase.Update();
 
                 //RelicsWindow.LoadNodesOnThread();
-                OCR.Init();
+                OCR.Init(new TesseractService(), new SoundPlayer());
 
                 if ((bool)Settings.settingsObj["Auto"])
                     dataBase.EnableLogCapture();
