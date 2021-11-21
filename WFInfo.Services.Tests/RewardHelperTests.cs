@@ -98,9 +98,9 @@ namespace WFInfo.Services.Tests
                 bitmap.Height
             );
             var tempfolder = CreateUniqueTempDirectory();
-            Directory.CreateDirectory(Path.Combine(tempfolder, "tessdatas"));
+            Directory.CreateDirectory(Path.Combine(tempfolder, "tessdata"));
             var dataPath = tempfolder + @"\tessdata";
-            // getLocaleTessdata("en", dataPath);
+            getLocaleTessdata("en", dataPath);
             TesseractEngine CreateEngine() => 
                 new TesseractEngine(dataPath, "en")
                 {
