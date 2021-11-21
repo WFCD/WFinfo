@@ -132,7 +132,7 @@ namespace WFInfo.Services.Tests
         
             // get trainned data
             string traineddata_hotlink = traineddata_hotlink_prefix + Locale + ".traineddata";
-            string app_data_traineddata_path = AppdataTessdataFolder + @"\" + Locale + ".traineddata";
+            string app_data_traineddata_path = Path.Combine(AppdataTessdataFolder, Locale + ".traineddata");
         
             WebClient webClient = new WebClient();
         
