@@ -99,7 +99,7 @@ namespace WFInfo.Services.Tests
             );
             var tempfolder = CreateUniqueTempDirectory();
             Directory.CreateDirectory(Path.Combine(tempfolder, "tessdata"));
-            var dataPath = tempfolder + @"\tessdata";
+            var dataPath = Path.Combine(tempfolder, "tessdata");
             getLocaleTessdata("en", dataPath);
             TesseractEngine CreateEngine() => 
                 new TesseractEngine(dataPath, "en")
