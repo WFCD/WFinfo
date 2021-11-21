@@ -2,8 +2,10 @@ using System;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Tesseract;
 using WFInfo.Services.OCR;
 using Xunit;
@@ -79,6 +81,8 @@ namespace WFInfo.Services.Tests
                 }
             }
 
+            Directory.CreateDirectory(
+                Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Debug"));
             var parts = RewardHelpers.ExtractPartBoxAutomatically(out var scaling,
                 out var theme,
                 bitmap,
@@ -93,7 +97,10 @@ namespace WFInfo.Services.Tests
                 bitmap.Width,
                 bitmap.Height
             );
-            var dataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo" + @"\tessdata";
+            var tempfolder = CreateUniqueTempDirectory();
+            Directory.CreateDirectory(Path.Combine(tempfolder, "tessdata"));
+            var dataPath = tempfolder + @"\tessdata";
+            getLocaleTessdata("en", dataPath);
             TesseractEngine CreateEngine() => 
                 new TesseractEngine(dataPath, "en")
                 {
@@ -114,5 +121,36 @@ namespace WFInfo.Services.Tests
             Assert.True(LevenshteinDistanceDefault(firstChecks[2], "IvaraPrimeNeuropticsBlueprint") < 3);
             Assert.True(LevenshteinDistanceDefault(firstChecks[3], "CarrierPrimeCerebrum") < 3);
         }
+        private void getLocaleTessdata(string Locale, string AppdataTessdataFolder)
+        {
+            string traineddata_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/libs/tessdata/";
+            JObject traineddata_checksums = new JObject
+            {
+                {"en", "7af2ad02d11702c7092a5f8dd044d52f"},
+                {"ko", "c776744205668b7e76b190cc648765da"}
+            };
+        
+            // get trainned data
+            string traineddata_hotlink = traineddata_hotlink_prefix + Locale + ".traineddata";
+            string app_data_traineddata_path = AppdataTessdataFolder + @"\" + Locale + ".traineddata";
+        
+            WebClient webClient = new WebClient();
+        
+            if (!File.Exists(app_data_traineddata_path))
+            {
+                try
+                {
+                    webClient.DownloadFile(traineddata_hotlink, app_data_traineddata_path);
+                }
+                catch (Exception) { }
+            }
+        }
+        public string CreateUniqueTempDirectory()
+        {
+            var uniqueTempDir = Path.GetFullPath(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+            Directory.CreateDirectory(uniqueTempDir);
+            return uniqueTempDir;
+        }
+ 
     }
 }
