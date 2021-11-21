@@ -29,6 +29,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore ./WFInfo.Services.Tests/WFInfo.Services.Tests.csproj
+    - run:  dotnet run --project ./ConsoleApp1/ConsoleApp1.csproj 
     - run: sudo ln -s  /usr/lib/x86_64-linux-gnu/libtesseract.so.4.0.1 /home/runner/work/WFinfo/WFinfo/WFInfo.Services.Tests/bin/Debug/net5.0/x64/libtesseract41.so
 
     - run:        sudo ln -s /usr/lib/x86_64-linux-gnu/liblept.so.5 /home/runner/work/WFinfo/WFinfo/WFInfo.Services.Tests/bin/Debug/net5.0/x64/libleptonica-1.80.0.so
