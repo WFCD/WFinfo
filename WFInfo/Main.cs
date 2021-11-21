@@ -22,7 +22,6 @@ namespace WFInfo
         public static Data dataBase = new Data();
         public static RewardWindow window = new RewardWindow();
         public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
-        public static RelicsWindow relicWindow = new RelicsWindow();
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
         public static Settings settingsWindow = new Settings();
         public static VerifyCount verifyCount = new VerifyCount();
