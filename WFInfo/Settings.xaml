@@ -10,10 +10,20 @@
         Width="334"
         BorderBrush="#FF707070"
         WindowStyle="None"
+        SizeToContent="Height"
         ResizeMode="NoResize">
     <Window.Resources>
         <System:Double x:Key="FontSize">18</System:Double>
-        <Style x:Key="NestedBorder" TargetType="Border">
+
+    </Window.Resources>
+    <DockPanel MouseDown="MouseDown"
+               PreviewMouseDown="ActivationMouseDown"
+               Background="#FF1B1B1B"
+               Width="334">
+        <DockPanel.Resources>
+
+        <Style x:Key="NestedBorder"
+               TargetType="Border">
             <Setter Property="BorderBrush"
                     Value="#FF646464" />
             <Setter Property="Padding"
@@ -25,17 +35,10 @@
             <Setter Property="BorderBrush"
                     Value="#FF646464" />
             <Setter Property="Padding"
-                    Value="25, 2" />
+                    Value="25, 5" />
             <Setter Property="BorderThickness"
                     Value="1" />
         </Style>
-    </Window.Resources>
-    <DockPanel MouseDown="MouseDown"
-               PreviewMouseDown="ActivationMouseDown"
-               Background="#FF1B1B1B"
-               Width="334">
-        <DockPanel.Resources>
-
         </DockPanel.Resources>
         <Grid HorizontalAlignment="Left"
               Height="27"
@@ -72,9 +75,7 @@
                    Margin="304,0,0,0"
                    Style="{StaticResource Label_Button}" />
         </Grid>
-        <Border VerticalAlignment="Top"
-                DockPanel.Dock="Top"
-                Style="{StaticResource SettingsBorderStyle}">
+        <Border DockPanel.Dock="Top">
             <DockPanel>
                 <Grid DockPanel.Dock="Bottom"
                       HorizontalAlignment="Stretch">
@@ -120,24 +121,11 @@
                        Margin="0,0,-1,0" />
             </DockPanel>
         </Border>
-        <Border BorderBrush="#FF646464"
-                Padding="25, 0"
-                DockPanel.Dock="Top"
-                BorderThickness="1">
+        <Border DockPanel.Dock="Top">
             <UniformGrid>
-                <!-- <Grid.ColumnDefinitions> -->
-                <!--     <ColumnDefinition Width="*" /> -->
-                <!--     <ColumnDefinition Width="*" /> -->
-                <!-- </Grid.ColumnDefinitions> -->
-                <!-- <Grid.RowDefinitions> -->
-                <!--     <RowDefinition Height="*" /> -->
-                <!--     <RowDefinition Height="*" /> -->
-                <!-- </Grid.RowDefinitions> -->
                 <Label Content="Display time"
                        FontSize="{DynamicResource FontSize}" />
                 <TextBox x:Name="Displaytime_number_box"
-                         Grid.Column="1"
-                         Grid.Row="0"
                          ToolTip="The time in milliseconds the overlays will be displayed on screen"
                          Text="TextBox"
                          FontSize="{DynamicResource FontSize}"
@@ -153,8 +141,6 @@
                          KeyUp="Displaytime_number_box_KeyUp" />
 
                 <CheckBox x:Name="HighlightCheckbox"
-                          Grid.Row="1"
-                          Grid.Column="0"
                           FontSize="{DynamicResource FontSize}"
                           Content="Highlight"
                           ToolTip="Highlight the best rewards on the overlay."
@@ -163,8 +149,6 @@
                           BorderBrush="#FF0F0F0F"
                           Click="HighlightRewardCheckbox_Click" />
                 <CheckBox x:Name="HighContrastCheckbox"
-                          Grid.Row="1"
-                          Grid.Column="1"
                           FontSize="{DynamicResource FontSize}"
                           Content="High contrast"
                           ToolTip="Enable High contrast for the overlay."
@@ -175,13 +159,8 @@
             </UniformGrid>
         </Border>
         <Border x:Name="Overlay_sliders"
-                BorderBrush="#FF646464"
-                BorderThickness="1"
-                Width="334"
-                Padding="25, 5"
                 DockPanel.Dock="Top">
             <DockPanel LastChildFill="False">
-
                 <Label Content="Overlay Offset"
                        DockPanel.Dock="Top"
                        HorizontalAlignment="Center"
@@ -190,7 +169,6 @@
                        Margin="0,0,-1,0" />
                 <DockPanel LastChildFill="False"
                            DockPanel.Dock="Top">
-
                     <Label Content="X"
                            DockPanel.Dock="Left"
                            FontSize="{DynamicResource FontSize}"
@@ -237,12 +215,46 @@
                 </DockPanel>
             </DockPanel>
         </Border>
-        <Border x:Name="Activation_key"
-                BorderBrush="#FF646464"
-                BorderThickness="1"
-                Width="334"
-                Padding="25, 5"
-                DockPanel.Dock="Top">
+        <Border DockPanel.Dock="Top">
+            <UniformGrid>
+                <Label Content="Snap Noise"
+                       FontSize="{DynamicResource FontSize}"
+                       ToolTip="Snap-It item count noise filtering threshhold" />
+                <TextBox x:Name="SnapItCountThreshold_number_box"
+                         ToolTip="Threshold for number detection noise filtering. Higher = More aggressive, 3 or 4 usually works best"
+                         TextWrapping="Wrap"
+                         FontSize="{DynamicResource FontSize}"
+                         Background="#FF0F0F0F"
+                         BorderBrush="#FFB1D0D9"
+                         VerticalContentAlignment="Center"
+                         HorizontalContentAlignment="Center"
+                         Padding="0,0,0,2.5"
+                         KeyDown="SnapItCountThreshold_number_box_KeyDown"
+                         Cursor="Arrow"
+                         GotFocus="SnapItCountThreshold_number_box_GotFocus"
+                         KeyUp="SnapItCountThreshold_number_box_KeyUp"
+                         VerticalAlignment="Top"
+                         Text="4" />
+
+                <CheckBox x:Name="SnapItemCountCheckbox"
+                          Content="Count Item"
+                          ToolTip="Scan for item amount using Snap-It"
+                          VerticalContentAlignment="Center"
+                          Background="#FFB1D0D9"
+                          BorderBrush="#FF0F0F0F"
+                          Click="SnapItemCountCheckbox_Click" />
+
+                <CheckBox x:Name="SnapItThreadCheckbox"
+                          Content="Multithread Snap"
+                          ToolTip="Speed up snap-it using multithreading"
+                          VerticalContentAlignment="Center"
+                          Background="#FFB1D0D9"
+                          BorderBrush="#FF0F0F0F"
+                          Click="SnapItThreadCheckbox_Click" />
+
+            </UniformGrid>
+        </Border>
+        <Border DockPanel.Dock="Top">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
@@ -355,15 +367,10 @@
                          VerticalAlignment="Top" />
             </Grid>
         </Border>
-        <Border BorderBrush="#FF646464"
-                BorderThickness="1"
-                Width="334"
-                Padding="25, 5"
-                DockPanel.Dock="Top">
+        <Border DockPanel.Dock="Top">
             <UniformGrid>
                 <Label Content="Efficiency min"
                        FontSize="{DynamicResource FontSize}" />
-
                 <Label Content="Efficiency max"
                        FontSize="{DynamicResource FontSize}" />
                 <TextBox x:Name="EfficiencyMin_number_box"
@@ -399,56 +406,9 @@
                          VerticalAlignment="Top" />
             </UniformGrid>
         </Border>
-        <Border BorderBrush="#FF646464"
-                BorderThickness="1"
-                Width="334"
-                Padding="25, 5"
+
+        <Border Padding="0"
                 DockPanel.Dock="Top">
-
-            <UniformGrid>
-                <Label Content="Snap Noise"
-                       FontSize="{DynamicResource FontSize}"
-                       ToolTip="Snap-It item count noise filtering threshhold" />
-                <TextBox x:Name="SnapItCountThreshold_number_box"
-                         ToolTip="Threshold for number detection noise filtering. Higher = More aggressive, 3 or 4 usually works best"
-                         TextWrapping="Wrap"
-                         FontSize="{DynamicResource FontSize}"
-                         Background="#FF0F0F0F"
-                         BorderBrush="#FFB1D0D9"
-                         VerticalContentAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Padding="0,0,0,2.5"
-                         KeyDown="SnapItCountThreshold_number_box_KeyDown"
-                         Cursor="Arrow"
-                         GotFocus="SnapItCountThreshold_number_box_GotFocus"
-                         KeyUp="SnapItCountThreshold_number_box_KeyUp"
-                         VerticalAlignment="Top"
-                         Text="4" />
-
-                <CheckBox x:Name="SnapItemCountCheckbox"
-                          Content="Count Item"
-                          ToolTip="Scan for item amount using Snap-It"
-                          VerticalContentAlignment="Center"
-                          Background="#FFB1D0D9"
-                          BorderBrush="#FF0F0F0F"
-                          Click="SnapItemCountCheckbox_Click" />
-
-                <CheckBox x:Name="SnapItThreadCheckbox"
-                          Content="Multithread Snap"
-                          ToolTip="Speed up snap-it using multithreading"
-                          VerticalContentAlignment="Center"
-                          Background="#FFB1D0D9"
-                          BorderBrush="#FF0F0F0F"
-                          Click="SnapItThreadCheckbox_Click" />
-
-            </UniformGrid>
-        </Border>
-        <Border BorderBrush="#FF646464"
-                BorderThickness="0"
-                Width="334"
-                Padding="0"
-                DockPanel.Dock="Top">
-
             <DockPanel>
                 <Label MouseLeftButtonDown="ClickCreateDebug"
                        Padding="5"
@@ -456,9 +416,8 @@
                        Content="Create debug zip"
                        FontWeight="Regular"
                        Style="{StaticResource Label_Button}" />
-                <Border
-                    Style="{StaticResource NestedBorder}"
-                    DockPanel.Dock="Top">
+                <Border Style="{StaticResource NestedBorder}"
+                        DockPanel.Dock="Top">
                     <UniformGrid DockPanel.Dock="Top"
                                  Rows="1">
 
@@ -483,12 +442,13 @@
                                           FontSize="14"
                                           Background="#FF1B1B1B" />
                         </ComboBox>
-                    </UniformGrid></Border>
+                    </UniformGrid>
+                </Border>
                 <Border DockPanel.Dock="Top"
                         Style="{StaticResource NestedBorder}">
                     <CheckBox x:Name="clipboardCheckbox"
                               Content="Clipboard"
-                              Fontsize="{StaticResource FontSize}"
+                              FontSize="{StaticResource FontSize}"
                               ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat"
                               VerticalContentAlignment="Center"
                               Background="#FFB1D0D9"
@@ -502,7 +462,7 @@
                         <CheckBox x:Name="autoCheckbox"
                                   DockPanel.Dock="Right"
                                   Content="Auto"
-                                  Fontsize="{StaticResource FontSize}"
+                                  FontSize="{StaticResource FontSize}"
                                   ToolTip="Automatically detects when the relic screen is visible."
                                   VerticalContentAlignment="Center"
                                   Background="#FFB1D0D9"
@@ -511,7 +471,7 @@
                         <CheckBox x:Name="Autolist"
                                   DockPanel.Dock="Left"
                                   Content="Auto list"
-                                  Fontsize="{StaticResource FontSize}"
+                                  FontSize="{StaticResource FontSize}"
                                   ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto"
                                   VerticalContentAlignment="Center"
                                   Background="#FFB1D0D9"

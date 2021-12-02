@@ -100,17 +100,14 @@ namespace WFInfo
             {
                 OverlayRadio.IsChecked = true;
                 Overlay_sliders.Visibility = Visibility.Visible;
-                Height = 594;
             }
             else if (settingsObj.GetValue("Display").ToString() == "Light")
             {
                 LightRadio.IsChecked = true;
-                Height = 524;
             }
             else
             {
                 WindowRadio.IsChecked = true;
-                Height = 524;
             }
 
             if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
@@ -190,7 +187,6 @@ namespace WFInfo
             Overlay_sliders.Visibility = Visibility.Collapsed;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 524;
             Save();
         }
 
@@ -202,7 +198,6 @@ namespace WFInfo
             Overlay_sliders.Visibility = Visibility.Visible;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
-            Height = 594;
             Save();
         }
 
@@ -457,7 +452,6 @@ namespace WFInfo
             clipboard = true;
             clipboardCheckbox.IsChecked = true;
             clipboardCheckbox.IsEnabled = false;
-            Height = 524;
             Save();
         }
 
