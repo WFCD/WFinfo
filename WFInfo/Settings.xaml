@@ -48,7 +48,7 @@
                 <Setter Property="Margin"
                         Value="0, 5" />
                 <Setter Property="Padding"
-                        Value="0,0,0,2.5" />
+                        Value="0,1,0,2.5" />
                 <Setter Property="Cursor"
                         Value="Arrow" />
                 <Setter Property="TextWrapping"
