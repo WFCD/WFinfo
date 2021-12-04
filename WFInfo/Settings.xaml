@@ -10,10 +10,11 @@
         Width="334"
         BorderBrush="#FF707070"
         WindowStyle="None"
+        FontSize="18"
         SizeToContent="Height"
         ResizeMode="NoResize">
     <Window.Resources>
-        <System:Double x:Key="FontSize">18</System:Double>
+        <!-- <System:Double x:Key="FontSize">18</System:Double> -->
 
     </Window.Resources>
     <DockPanel MouseDown="MouseDown"
@@ -22,23 +23,46 @@
                Width="334">
         <DockPanel.Resources>
 
-        <Style x:Key="NestedBorder"
-               TargetType="Border">
-            <Setter Property="BorderBrush"
-                    Value="#FF646464" />
-            <Setter Property="Padding"
-                    Value="5, 2" />
-            <Setter Property="BorderThickness"
-                    Value="1" />
-        </Style>
-        <Style TargetType="Border">
-            <Setter Property="BorderBrush"
-                    Value="#FF646464" />
-            <Setter Property="Padding"
-                    Value="25, 5" />
-            <Setter Property="BorderThickness"
-                    Value="1" />
-        </Style>
+            <Style x:Key="NestedBorder"
+                   TargetType="Border">
+                <Setter Property="BorderBrush"
+                        Value="#FF646464" />
+                <Setter Property="Padding"
+                        Value="5, 2" />
+                <Setter Property="BorderThickness"
+                        Value="1" />
+            </Style>
+            <Style TargetType="Border">
+                <Setter Property="BorderBrush"
+                        Value="#FF646464" />
+                <Setter Property="Padding"
+                        Value="25, 5" />
+                <Setter Property="BorderThickness"
+                        Value="1" />
+            </Style>
+
+
+            <Style BasedOn="{StaticResource baseStyle}"
+                   TargetType="TextBox">
+                <Setter Property="Background"
+                        Value="#FF0F0F0F" />
+                <Setter Property="BorderBrush"
+                        Value="#FFB1D0D9" />
+                <Setter Property="VerticalContentAlignment"
+                        Value="Center" />
+                <Setter Property="HorizontalContentAlignment"
+                        Value="Center" />
+                <Setter Property="Margin"
+                        Value="0, 5" />
+                <Setter Property="Padding"
+                        Value="0,0,0,2.5" />
+                <Setter Property="Cursor"
+                        Value="Arrow" />
+                        <Setter Property="TextWrapping"
+                                Value="Wrap"/>
+               <!-- <Setter Property="FontSize" -->
+                        <!-- Value="{DynamicResource FontSize}" /> -->
+            </Style>
         </DockPanel.Resources>
         <Grid HorizontalAlignment="Left"
               Height="27"
@@ -92,8 +116,7 @@
                                  Checked="WindowChecked"
                                  Background="#FFB1D0D9"
                                  BorderBrush="#FF0F0F0F"
-                                 HorizontalAlignment="Center"
-                                 FontSize="{DynamicResource FontSize}" />
+                                 HorizontalAlignment="Center" />
                     <RadioButton x:Name="OverlayRadio"
                                  Grid.Column="2"
                                  Content="Overlay"
@@ -101,8 +124,7 @@
                                  VerticalContentAlignment="Center"
                                  Checked="OverlayChecked"
                                  Background="#FFB1D0D9"
-                                 BorderBrush="#FF0F0F0F"
-                                 FontSize="{DynamicResource FontSize}" />
+                                 BorderBrush="#FF0F0F0F" />
                     <RadioButton x:Name="LightRadio"
                                  Grid.Column="0"
                                  Content="Light"
@@ -110,38 +132,26 @@
                                  VerticalContentAlignment="Center"
                                  Checked="LightRadioChecked"
                                  Background="#FFB1D0D9"
-                                 BorderBrush="#FF0F0F0F"
-                                 FontSize="{DynamicResource FontSize}" />
+                                 BorderBrush="#FF0F0F0F" />
                 </Grid>
                 <Label Content="Rewards display"
                        DockPanel.Dock="Top"
                        HorizontalAlignment="Center"
-                       FontSize="{DynamicResource FontSize}"
                        FontFamily="{StaticResource Roboto}"
                        Margin="0,0,-1,0" />
             </DockPanel>
         </Border>
         <Border DockPanel.Dock="Top">
             <UniformGrid>
-                <Label Content="Display time"
-                       FontSize="{DynamicResource FontSize}" />
+                <Label Content="Display time" />
                 <TextBox x:Name="Displaytime_number_box"
                          ToolTip="The time in milliseconds the overlays will be displayed on screen"
                          Text="TextBox"
-                         FontSize="{DynamicResource FontSize}"
-                         Background="#FF0F0F0F"
-                         BorderBrush="#FFB1D0D9"
-                         VerticalContentAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Margin="0, 5"
-                         Padding="0,0,0,2.5"
                          KeyDown="Displaytime_number_box_KeyDown"
-                         Cursor="Arrow"
                          GotFocus="Displaytime_number_box_GotFocus"
                          KeyUp="Displaytime_number_box_KeyUp" />
 
                 <CheckBox x:Name="HighlightCheckbox"
-                          FontSize="{DynamicResource FontSize}"
                           Content="Highlight"
                           ToolTip="Highlight the best rewards on the overlay."
                           VerticalContentAlignment="Center"
@@ -149,7 +159,6 @@
                           BorderBrush="#FF0F0F0F"
                           Click="HighlightRewardCheckbox_Click" />
                 <CheckBox x:Name="HighContrastCheckbox"
-                          FontSize="{DynamicResource FontSize}"
                           Content="High contrast"
                           ToolTip="Enable High contrast for the overlay."
                           VerticalContentAlignment="Center"
@@ -164,14 +173,12 @@
                 <Label Content="Overlay Offset"
                        DockPanel.Dock="Top"
                        HorizontalAlignment="Center"
-                       FontSize="{DynamicResource FontSize}"
                        FontFamily="{StaticResource Roboto}"
                        Margin="0,0,-1,0" />
                 <DockPanel LastChildFill="False"
                            DockPanel.Dock="Top">
                     <Label Content="X"
                            DockPanel.Dock="Left"
-                           FontSize="{DynamicResource FontSize}"
                            HorizontalContentAlignment="Center"
                            Width="32"
                            ToolTip="The X Offset of the overlay. Positive values shift the overlay to the right." />
@@ -179,14 +186,8 @@
                              DockPanel.Dock="Left"
                              ToolTip="The X Offset of the overlay. Positive values shift the overlay to the right."
                              TextWrapping="Wrap"
-                             FontSize="{DynamicResource FontSize}"
-                             Background="#FF0F0F0F"
-                             BorderBrush="#FFB1D0D9"
                              Width="90"
-                             VerticalContentAlignment="Center"
-                             HorizontalContentAlignment="Center"
                              KeyDown="OverlayXOffset_number_box_KeyDown"
-                             Cursor="Arrow"
                              GotFocus="OverlayXOffset_number_box_GotFocus"
                              KeyUp="OverlayXOffset_number_box_KeyUp"
                              Text="0" />
@@ -195,20 +196,13 @@
                              DockPanel.Dock="Right"
                              ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top."
                              TextWrapping="Wrap"
-                             FontSize="{DynamicResource FontSize}"
-                             Background="#FF0F0F0F"
-                             BorderBrush="#FFB1D0D9"
                              Width="90"
-                             VerticalContentAlignment="Center"
-                             HorizontalContentAlignment="Center"
                              KeyDown="OverlayYOffset_number_box_KeyDown"
-                             Cursor="Arrow"
                              GotFocus="OverlayYOffset_number_box_GotFocus"
                              KeyUp="OverlayYOffset_number_box_KeyUp"
                              Text="0" />
                     <Label Content="Y"
                            DockPanel.Dock="Right"
-                           FontSize="{DynamicResource FontSize}"
                            HorizontalContentAlignment="Center"
                            Width="32"
                            ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top." />
@@ -218,19 +212,10 @@
         <Border DockPanel.Dock="Top">
             <UniformGrid>
                 <Label Content="Snap Noise"
-                       FontSize="{DynamicResource FontSize}"
                        ToolTip="Snap-It item count noise filtering threshhold" />
                 <TextBox x:Name="SnapItCountThreshold_number_box"
                          ToolTip="Threshold for number detection noise filtering. Higher = More aggressive, 3 or 4 usually works best"
-                         TextWrapping="Wrap"
-                         FontSize="{DynamicResource FontSize}"
-                         Background="#FF0F0F0F"
-                         BorderBrush="#FFB1D0D9"
-                         VerticalContentAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Padding="0,0,0,2.5"
                          KeyDown="SnapItCountThreshold_number_box_KeyDown"
-                         Cursor="Arrow"
                          GotFocus="SnapItCountThreshold_number_box_GotFocus"
                          KeyUp="SnapItCountThreshold_number_box_KeyUp"
                          VerticalAlignment="Top"
@@ -268,21 +253,13 @@
                 </Grid.RowDefinitions>
                 <Label Content="Activation key"
                        Grid.Row="0"
-                       Grid.Column="0"
-                       FontSize="{DynamicResource FontSize}" />
+                       Grid.Column="0" />
                 <TextBox x:Name="Activation_key_box"
                          Grid.Row="0"
                          Grid.Column="1"
                          ToolTip="Key to activate the processing. Use modifiers below to achieve other actions"
-                         TextWrapping="Wrap"
                          Text="TextBox"
-                         FontSize="{DynamicResource FontSize}"
-                         Background="#FF0F0F0F"
-                         BorderBrush="#FFB1D0D9"
-                         HorizontalContentAlignment="Center"
-                         Padding="0,0,0,2.5"
                          KeyDown="ActivationDown"
-                         Cursor="Arrow"
                          GotFocus="ActivationFocus"
                          KeyUp="ActivationUp"
                          LostFocus="ActivationLost"
@@ -301,66 +278,39 @@
                            d:IsHidden="True" />
                 <Label Content="Search it modifier"
                        Grid.Row="1"
-                       Grid.Column="0"
-                       FontSize="{DynamicResource FontSize}" />
+                       Grid.Column="0" />
                 <TextBox x:Name="Searchit_key_box"
                          Grid.Row="1"
                          Grid.Column="1"
                          ToolTip="Modifier to hold down to start search it"
-                         TextWrapping="Wrap"
                          Text="TextBox"
-                         FontSize="{DynamicResource FontSize}"
-                         Background="#FF0F0F0F"
-                         BorderBrush="#FFB1D0D9"
-                         VerticalContentAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Padding="0,0,0,2.5"
                          KeyDown="Searchit_key_box_KeyDown"
-                         Cursor="Arrow"
                          GotFocus="Searchit_key_box_GotFocus"
                          KeyUp="Searchit_key_box_KeyUp"
                          LostFocus="Searchit_key_box_LostFocus"
                          VerticalAlignment="Top" />
                 <Label Content="Snap it modifier"
                        Grid.Row="2"
-                       Grid.Column="0"
-                       FontSize="{DynamicResource FontSize}" />
+                       Grid.Column="0" />
                 <TextBox x:Name="Snapit_key_box"
                          Grid.Row="2"
                          Grid.Column="1"
                          ToolTip="Modifier to hold down to start Snap it"
-                         TextWrapping="Wrap"
                          Text="TextBox"
-                         FontSize="{DynamicResource FontSize}"
-                         Background="#FF0F0F0F"
-                         BorderBrush="#FFB1D0D9"
-                         VerticalContentAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Padding="0,0,0,2.5"
                          KeyDown="Snapit_key_box_KeyDown"
-                         Cursor="Arrow"
                          GotFocus="Snapit_key_box_GotFocus"
                          KeyUp="Snapit_key_box_KeyUp"
                          LostFocus="Snapit_key_box_LostFocus"
                          VerticalAlignment="Top" />
                 <Label Content="Master it modifier"
                        Grid.Row="3"
-                       Grid.Column="0"
-                       FontSize="{DynamicResource FontSize}" />
+                       Grid.Column="0" />
                 <TextBox x:Name="Masterit_key_box"
                          Grid.Row="3"
                          Grid.Column="1"
                          ToolTip="Modifier to hold down to start Snap it"
-                         TextWrapping="Wrap"
                          Text="TextBox"
-                         FontSize="{DynamicResource FontSize}"
-                         Background="#FF0F0F0F"
-                         BorderBrush="#FFB1D0D9"
-                         VerticalContentAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Padding="0,0,0,2.5"
                          KeyDown="Masterit_key_box_KeyDown"
-                         Cursor="Arrow"
                          GotFocus="Masterit_key_box_GotFocus"
                          KeyUp="Masterit_key_box_KeyUp"
                          LostFocus="Masterit_key_box_LostFocus"
@@ -369,38 +319,21 @@
         </Border>
         <Border DockPanel.Dock="Top">
             <UniformGrid>
-                <Label Content="Efficiency min"
-                       FontSize="{DynamicResource FontSize}" />
-                <Label Content="Efficiency max"
-                       FontSize="{DynamicResource FontSize}" />
+                <Label Content="Efficiency min" />
+                <Label Content="Efficiency max" />
                 <TextBox x:Name="EfficiencyMin_number_box"
                          ToolTip="Anything below this efficiency will be marked as red in snapit"
-                         TextWrapping="Wrap"
                          Text="TextBox"
-                         FontSize="{DynamicResource FontSize}"
-                         Background="#FF0F0F0F"
-                         BorderBrush="#FFB1D0D9"
-                         VerticalContentAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Padding="0,0,0,2.5"
                          Margin="0, 0, 20, 0"
                          KeyDown="EfficiencyMin_number_box_KeyDown"
-                         Cursor="Arrow"
                          GotFocus="EfficiencyMin_number_box_GotFocus"
                          LostFocus="EfficiencyMin_number_box_LostFocus"
                          VerticalAlignment="Top" />
                 <TextBox x:Name="EfficiencyMax_number_box"
                          ToolTip="Anything above this efficiency will be marked as green in snapit"
-                         TextWrapping="Wrap"
                          Text="TextBox"
-                         FontSize="{DynamicResource FontSize}"
-                         Background="#FF0F0F0F"
-                         BorderBrush="#FFB1D0D9"
-                         VerticalContentAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Padding="0,0,0,2.5"
+                         Margin="0, 0, 20, 0"
                          KeyDown="EfficiencyMax_number_box_KeyDown"
-                         Cursor="Arrow"
                          GotFocus="EfficiencyMax_number_box_GotFocus"
                          LostFocus="EfficiencyMax_number_box_LostFocus"
                          VerticalAlignment="Top" />
@@ -448,7 +381,6 @@
                         Style="{StaticResource NestedBorder}">
                     <CheckBox x:Name="clipboardCheckbox"
                               Content="Clipboard"
-                              FontSize="{StaticResource FontSize}"
                               ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat"
                               VerticalContentAlignment="Center"
                               Background="#FFB1D0D9"
@@ -462,7 +394,6 @@
                         <CheckBox x:Name="autoCheckbox"
                                   DockPanel.Dock="Right"
                                   Content="Auto"
-                                  FontSize="{StaticResource FontSize}"
                                   ToolTip="Automatically detects when the relic screen is visible."
                                   VerticalContentAlignment="Center"
                                   Background="#FFB1D0D9"
@@ -471,7 +402,6 @@
                         <CheckBox x:Name="Autolist"
                                   DockPanel.Dock="Left"
                                   Content="Auto list"
-                                  FontSize="{StaticResource FontSize}"
                                   ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto"
                                   VerticalContentAlignment="Center"
                                   Background="#FFB1D0D9"
