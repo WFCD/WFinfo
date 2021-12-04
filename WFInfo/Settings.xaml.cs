@@ -13,12 +13,59 @@ using WebSocketSharp;
 
 namespace WFInfo
 {
+    public class ApplicationSettings
+    {
+        public Key DebugModifierKey { get; set; } = Key.LeftShift;
+        public Key SearchItModifierKey { get; set; } = Key.OemTilde;
+        public Key SnapitModifierKey { get; set; } = Key.LeftCtrl;
+        public Key MasterItModifierKey { get; set; } = Key.RightCtrl;
+        public bool Debug { get; set; } = false;
+        public string Locale { get; set; } = "en";
+        public bool Clipboard { get; set; } = false;
+        public long AutoDelay { get; set; } = 250L;
+        public int ImageRetentionTime { get; set; } = 12;
+        public string ClipboardTemplate { get; set; } = "-- by WFInfo (smart OCR with pricecheck)";
+        public bool SnapitExport { get; set; } = false;
+        public int Delay { get; set; } = 10000;
+        public bool HighlightRewards { get; set; } = true;
+        public bool ClipboardVaulted { get; set; } = false;
+        public bool Auto { get; set; } = false;
+        public bool HighContrast { get; set; } = false;
+        public int OverlayXOffsetValue { get; set; } = 0;
+        public int OverlayYOffsetValue { get; set; } = 0;
+        public bool AutoList { get; set; } = false;
+        public bool DoDoubleCheck { get; set; } = true;
+        public double MaximumEfficiencyValue { get; set; } = 9.5;
+        public double MinimumEfficiencyValue { get; set; } = 4.5;
+        public bool DoSnapItCount { get; set; } = true;
+        public int SnapItCountThreshold { get; set; } = 0;
+        public int SnapItEdgeWidth { get; set; } = 1;
+        public int SnapItEdgeRadius { get; set; } = 1;
+        public double SnapItHorizontalNameMargin { get; set; } = 0;
+        public bool DoCustomNumberBoxWidth { get; set; } = false;
+        public double SnapItNumberBoxWidth { get; set; } = 0.4;
+        public bool SnapMultiThreaded { get; set; } = true;
+        public double SnapRowTextDensity { get; set; } = 0.015;
+        public double SnapRowEmptyDensity { get; set; } = 0.01;
+        public double SnapColEmptyDensity { get; set; } = 0.005;
+    }
+    public class SettingsViewModel
+    {
+        private ApplicationSettings _settings;
+
+        public SettingsViewModel(ApplicationSettings settings)
+        {
+            _settings = settings;
+        }
+
+        public static SettingsViewModel Instance { get; }= new SettingsViewModel(new ApplicationSettings());
+    }
+
     /// <summary>
     /// Interaction logic for Settings.xaml
     /// </summary>
     public partial class Settings : Window
     {
-
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
 
@@ -88,6 +135,7 @@ namespace WFInfo
         public Settings()
         {
             InitializeComponent();
+            DataContext = RelicsViewModel.Instance;
         }
 
         public void populate()
