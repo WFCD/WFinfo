@@ -3,20 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WFInfo"
-        xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Settings"
         Width="334"
         BorderBrush="#FF707070"
         WindowStyle="None"
-        FontSize="18"
+        FontSize="16"
         SizeToContent="Height"
         ResizeMode="NoResize">
-    <Window.Resources>
-        <!-- <System:Double x:Key="FontSize">18</System:Double> -->
-
-    </Window.Resources>
     <DockPanel MouseDown="MouseDown"
                PreviewMouseDown="ActivationMouseDown"
                Background="#FF1B1B1B"
@@ -40,8 +34,7 @@
                 <Setter Property="BorderThickness"
                         Value="1" />
             </Style>
-
-
+            
             <Style BasedOn="{StaticResource baseStyle}"
                    TargetType="TextBox">
                 <Setter Property="Background"
@@ -58,10 +51,20 @@
                         Value="0,0,0,2.5" />
                 <Setter Property="Cursor"
                         Value="Arrow" />
-                        <Setter Property="TextWrapping"
-                                Value="Wrap"/>
-               <!-- <Setter Property="FontSize" -->
-                        <!-- Value="{DynamicResource FontSize}" /> -->
+                <Setter Property="TextWrapping"
+                        Value="Wrap" />
+                <Setter Property="FontFamily"
+                        Value="{StaticResource Roboto}"/>
+            </Style>
+
+            <Style TargetType="CheckBox"
+                   BasedOn="{StaticResource baseStyle}">
+                <Setter Property="Background"
+                        Value="#FFB1D0D9" />
+                <Setter Property="BorderBrush"
+                        Value="#FF0F0F0F" />
+                <Setter Property="VerticalContentAlignment"
+                        Value="Center" />
             </Style>
         </DockPanel.Resources>
         <Grid HorizontalAlignment="Left"
@@ -154,17 +157,11 @@
                 <CheckBox x:Name="HighlightCheckbox"
                           Content="Highlight"
                           ToolTip="Highlight the best rewards on the overlay."
-                          VerticalContentAlignment="Center"
-                          Background="#FFB1D0D9"
-                          BorderBrush="#FF0F0F0F"
                           Click="HighlightRewardCheckbox_Click" />
                 <CheckBox x:Name="HighContrastCheckbox"
                           Content="High contrast"
                           ToolTip="Enable High contrast for the overlay."
-                          VerticalContentAlignment="Center"
-                          Background="#FFB1D0D9"
-                          BorderBrush="#FF0F0F0F"
-                          Click="HighContrastCheckbox_Click" />
+                          Click="HighContrastCheckbox_Click"/>
             </UniformGrid>
         </Border>
         <Border x:Name="Overlay_sliders"
@@ -195,7 +192,6 @@
                     <TextBox x:Name="OverlayYOffset_number_box"
                              DockPanel.Dock="Right"
                              ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top."
-                             TextWrapping="Wrap"
                              Width="90"
                              KeyDown="OverlayYOffset_number_box_KeyDown"
                              GotFocus="OverlayYOffset_number_box_GotFocus"
@@ -224,17 +220,11 @@
                 <CheckBox x:Name="SnapItemCountCheckbox"
                           Content="Count Item"
                           ToolTip="Scan for item amount using Snap-It"
-                          VerticalContentAlignment="Center"
-                          Background="#FFB1D0D9"
-                          BorderBrush="#FF0F0F0F"
                           Click="SnapItemCountCheckbox_Click" />
 
                 <CheckBox x:Name="SnapItThreadCheckbox"
                           Content="Multithread Snap"
                           ToolTip="Speed up snap-it using multithreading"
-                          VerticalContentAlignment="Center"
-                          Background="#FFB1D0D9"
-                          BorderBrush="#FF0F0F0F"
                           Click="SnapItThreadCheckbox_Click" />
 
             </UniformGrid>
@@ -382,9 +372,6 @@
                     <CheckBox x:Name="clipboardCheckbox"
                               Content="Clipboard"
                               ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat"
-                              VerticalContentAlignment="Center"
-                              Background="#FFB1D0D9"
-                              BorderBrush="#FF0F0F0F"
                               Click="clipboardCheckboxClicked" />
                 </Border>
                 <Border DockPanel.Dock="Top"
@@ -395,17 +382,11 @@
                                   DockPanel.Dock="Right"
                                   Content="Auto"
                                   ToolTip="Automatically detects when the relic screen is visible."
-                                  VerticalContentAlignment="Center"
-                                  Background="#FFB1D0D9"
-                                  BorderBrush="#FF0F0F0F"
                                   Click="AutoClicked" />
                         <CheckBox x:Name="Autolist"
                                   DockPanel.Dock="Left"
                                   Content="Auto list"
                                   ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto"
-                                  VerticalContentAlignment="Center"
-                                  Background="#FFB1D0D9"
-                                  BorderBrush="#FF0F0F0F"
                                   Click="Autolist_Click" />
                     </UniformGrid>
                 </Border>
