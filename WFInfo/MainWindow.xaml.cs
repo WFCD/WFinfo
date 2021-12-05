@@ -124,19 +124,6 @@ namespace WFInfo
                 }
             }
 
-
-            //
-            // if (!Settings.settingsObj.TryGetValue("Auto", out _))
-            //     Settings.settingsObj["Auto"] = true;
-            // Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
-            // //
-            // if (!Settings.settingsObj.TryGetValue("Auto", out _)) { //Fixes issue with older versions using an int for auto rather than boolean.
-            //     Settings.settingsObj["Auto"] = false;
-            // } else if (Settings.settingsObj.GetValue("Auto").Type != JTokenType.Boolean) {
-            //     Settings.settingsObj["Auto"] = true;
-            // }
-            // Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
-
             Settings.Save();
 
             RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
