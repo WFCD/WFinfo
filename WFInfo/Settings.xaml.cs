@@ -83,11 +83,6 @@ namespace WFInfo
                 backupKeyVal = value;
             }
         }
-        public static string locale;
-        public static Key DebugModifierKey;
-        public static Key SnapitModifierKey;
-        public static Key SearchItModifierKey;
-        public static Key MasterItModifierKey;
         public static KeyConverter converter = new KeyConverter();
         public static Point mainWindowLocation;
         public static bool isOverlaySelected;
@@ -293,7 +288,7 @@ namespace WFInfo
             //Set mouse button to disabled (never gonna use left as a trigger)
             ActivationMouseButton = MouseButton.Left;
 
-            if (e.Key == SearchItModifierKey || e.Key == SnapitModifierKey || e.Key == MasterItModifierKey)
+            if (e.Key == _viewModel.SearchItModifierKey || e.Key == _viewModel.SnapitModifierKey || e.Key == _viewModel.MasterItModifierKey)
             {
                 Activation_key_box.Text = GetKeyName(ActivationKey);
                 hidden.Focus();
@@ -321,9 +316,9 @@ namespace WFInfo
                 Activation_key_box.Text = ActivationMouseButton.ToString();
             }
 
-            Searchit_key_box.Text = GetKeyName(SearchItModifierKey);
-            Snapit_key_box.Text = GetKeyName(SnapitModifierKey);
-            Masterit_key_box.Text = GetKeyName(MasterItModifierKey);
+            Searchit_key_box.Text = GetKeyName(_viewModel.SearchItModifierKey);
+            Snapit_key_box.Text = GetKeyName(_viewModel.SnapitModifierKey);
+            Masterit_key_box.Text = GetKeyName(_viewModel.MasterItModifierKey);
         }
 
         private void ActivationLost(object sender, RoutedEventArgs e)
@@ -341,8 +336,7 @@ namespace WFInfo
             ComboBoxItem item = (ComboBoxItem) localeCombobox.SelectedItem;
             
             string selectedLocale = item.Tag.ToString();
-            settingsObj["Locale"] = selectedLocale;
-            locale = selectedLocale;
+            _viewModel.Locale = selectedLocale;
             Save();
 
             _ = OCR.updateEngineAsync();
@@ -458,7 +452,7 @@ namespace WFInfo
 
         private void Searchit_key_box_GotFocus(object sender, RoutedEventArgs e)
         {
-            SearchItModifierKey = Key.None;
+            _viewModel.SearchItModifierKey = Key.None;
             Searchit_key_box.Text = "";
             backupKeyVal = activeKeyVal;
             activeKeyVal = Key.NoName;
@@ -468,17 +462,16 @@ namespace WFInfo
         {
             e.Handled = true;
 
-            if (e.Key == backupKeyVal || e.Key == SnapitModifierKey || e.Key == MasterItModifierKey)
+            if (e.Key == backupKeyVal || e.Key == _viewModel.SnapitModifierKey || e.Key == _viewModel.MasterItModifierKey)
             {
-                Searchit_key_box.Text = GetKeyName(SearchItModifierKey);
+                Searchit_key_box.Text = GetKeyName(_viewModel.SearchItModifierKey);
                 hidden.Focus();
                 return;
             }
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
-            SearchItModifierKey = key;
+            _viewModel.SearchItModifierKey = key;
             Searchit_key_box.Text = GetKeyName(key);
-            settingsObj["SearchItModifierKey"] = key.ToString();
             hidden.Focus();
             Save();
         }
@@ -502,24 +495,23 @@ namespace WFInfo
         {
             e.Handled = true;
 
-            if (e.Key == backupKeyVal || e.Key == SearchItModifierKey || e.Key == MasterItModifierKey)
+            if (e.Key == backupKeyVal || e.Key == _viewModel.SearchItModifierKey || e.Key == _viewModel.MasterItModifierKey)
             {
-                Snapit_key_box.Text = GetKeyName(SnapitModifierKey);
+                Snapit_key_box.Text = GetKeyName(_viewModel.SnapitModifierKey);
                 hidden.Focus();
                 return;
             }
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
-            SnapitModifierKey = key;
+            _viewModel.SnapitModifierKey = key;
             Snapit_key_box.Text = GetKeyName(key);
-            settingsObj["SnapitModifierKey"] = key.ToString();
             hidden.Focus();
             Save();
         }
 
         private void Snapit_key_box_GotFocus(object sender, RoutedEventArgs e)
         {
-            SnapitModifierKey = Key.None;
+            _viewModel.SnapitModifierKey = Key.None;
             Snapit_key_box.Text = "";
             backupKeyVal = activeKeyVal;
             activeKeyVal = Key.NoName;
@@ -534,24 +526,23 @@ namespace WFInfo
         {
             e.Handled = true;
 
-            if (e.Key == backupKeyVal || e.Key == SearchItModifierKey || e.Key == SnapitModifierKey)
+            if (e.Key == backupKeyVal || e.Key == _viewModel.SearchItModifierKey || e.Key == _viewModel.SnapitModifierKey)
             {
-                Masterit_key_box.Text = GetKeyName(MasterItModifierKey);
+                Masterit_key_box.Text = GetKeyName(_viewModel.MasterItModifierKey);
                 hidden.Focus();
                 return;
             }
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
-            MasterItModifierKey = key;
+            _viewModel.MasterItModifierKey = key;
             Masterit_key_box.Text = GetKeyName(key);
-            settingsObj["MasterItModifierKey"] = key.ToString();
             hidden.Focus();
             Save();
         }
 
         private void Masterit_key_box_GotFocus(object sender, RoutedEventArgs e)
         {
-            MasterItModifierKey = Key.None;
+            _viewModel.MasterItModifierKey = Key.None;
             Masterit_key_box.Text = "";
             backupKeyVal = activeKeyVal;
             activeKeyVal = Key.NoName;

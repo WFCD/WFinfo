@@ -46,7 +46,7 @@ namespace WFInfo
         /// </summary>
         public TesseractEngine[] Engines { get; } = new TesseractEngine[4];
 
-        private static string Locale => Settings.locale;
+        private static string Locale => ApplicationSettings.GlobalReadonlySettings.Locale;
         private static string AppdataTessdataFolder => CustomEntrypoint.appdata_tessdata_folder;
         private static readonly string ApplicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         private static readonly string DataPath = ApplicationDirectory + @"\tessdata";
