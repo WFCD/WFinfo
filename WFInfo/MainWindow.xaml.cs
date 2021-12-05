@@ -146,37 +146,22 @@ namespace WFInfo
                 Settings.settingsObj["MasterItModifierKey"] = Key.RightCtrl.ToString();
             Settings.MasterItModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("MasterItModifierKey").ToString());
 
-            if (!Settings.settingsObj.TryGetValue("Debug", out _))
-                Settings.settingsObj["Debug"] = false;
-            Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
 
             if (!Settings.settingsObj.TryGetValue("Locale", out _))
                 Settings.settingsObj["Locale"] = "en";
             Settings.locale = Settings.settingsObj.GetValue("Locale").ToString();
 
-            if (!Settings.settingsObj.TryGetValue("Clipboard", out _))
-                Settings.settingsObj["Clipboard"] = false;
-            Settings.clipboard = (bool)Settings.settingsObj.GetValue("Clipboard");
-
-            if (!Settings.settingsObj.TryGetValue("Auto", out _))
-                Settings.settingsObj["Auto"] = true;
-            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
-
-            if (!Settings.settingsObj.TryGetValue("SnapitExport", out _))
-                Settings.settingsObj["SnapitExport"] = false;
-            Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"), Main.culture);
-
-
-            if (!Settings.settingsObj.TryGetValue("ClipboardVaulted", out _))
-                Settings.settingsObj["ClipboardVaulted"] = false;
-            Settings.ClipboardVaulted = (bool)Settings.settingsObj.GetValue("ClipboardVaulted");
-
-            if (!Settings.settingsObj.TryGetValue("Auto", out _)) { //Fixes issue with older versions using an int for auto rather than boolean.
-                Settings.settingsObj["Auto"] = false;
-            } else if (Settings.settingsObj.GetValue("Auto").Type != JTokenType.Boolean) {
-                Settings.settingsObj["Auto"] = true;
-            }
-            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
+            //
+            // if (!Settings.settingsObj.TryGetValue("Auto", out _))
+            //     Settings.settingsObj["Auto"] = true;
+            // Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
+            // //
+            // if (!Settings.settingsObj.TryGetValue("Auto", out _)) { //Fixes issue with older versions using an int for auto rather than boolean.
+            //     Settings.settingsObj["Auto"] = false;
+            // } else if (Settings.settingsObj.GetValue("Auto").Type != JTokenType.Boolean) {
+            //     Settings.settingsObj["Auto"] = true;
+            // }
+            // Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
 
             Settings.Save();
 

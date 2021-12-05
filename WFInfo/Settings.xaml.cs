@@ -92,13 +92,6 @@ namespace WFInfo
         public static Point mainWindowLocation;
         public static bool isOverlaySelected;
         public static bool isLightSelected;
-        public static bool debug;
-        public static bool auto { get; internal set; }
-        public static bool clipboard { get; internal set; }
-        public static bool detectScaling { get; internal set; }
-        public static bool SnapitExport { get; internal set; }
-        public static bool ClipboardVaulted { get; internal set; }
-        public static bool SnapItCount { get; internal set; }
 
         public Settings()
         {
@@ -220,9 +213,8 @@ namespace WFInfo
 
         private void AutoClicked(object sender, RoutedEventArgs e)
         {
-            settingsObj["Auto"] = autoCheckbox.IsChecked.Value;
-            auto = autoCheckbox.IsChecked.Value;
-            if (auto)
+            _viewModel.Auto = autoCheckbox.IsChecked.Value;
+            if (_viewModel.Auto)
             {
                 var message = "Do you want to enable the new auto mode?" + Environment.NewLine +
                 "This connects to the warframe debug logger to detect the reward window." + Environment.NewLine +
@@ -239,8 +231,7 @@ namespace WFInfo
                 }
                 else
                 {
-                    settingsObj["Auto"] = false;
-                    auto = false;
+                    _viewModel.Auto = false;
                     autoCheckbox.IsChecked = false;
                     Main.dataBase.DisableLogCapture();
                     Autolist.IsEnabled = false;
@@ -248,8 +239,7 @@ namespace WFInfo
             }
             else
             {
-                settingsObj["Auto"] = false;
-                auto = false;
+                _viewModel.Auto = false;
                 Main.dataBase.DisableLogCapture();
             }
             Save();
@@ -346,12 +336,6 @@ namespace WFInfo
             Main.SpawnErrorPopup(DateTime.UtcNow, 1800);
         }
 
-        private void clipboardCheckboxClicked(object sender, RoutedEventArgs e)
-        {
-            settingsObj["Clipboard"] = clipboardCheckbox.IsChecked.Value;
-            clipboard = clipboardCheckbox.IsChecked.Value;
-            Save();
-        }
         private void localeComboboxSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             ComboBoxItem item = (ComboBoxItem) localeCombobox.SelectedItem;
@@ -466,7 +450,7 @@ namespace WFInfo
             isOverlaySelected = false;
             isLightSelected = true;
             Overlay_sliders.Visibility = Visibility.Collapsed;
-            clipboard = true;
+            _viewModel.Clipboard = true;
             clipboardCheckbox.IsChecked = true;
             clipboardCheckbox.IsEnabled = false;
             Save();

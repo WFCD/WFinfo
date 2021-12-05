@@ -374,7 +374,7 @@
                     <CheckBox x:Name="clipboardCheckbox"
                               Content="Clipboard"
                               ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat"
-                              Click="clipboardCheckboxClicked" />
+                              IsChecked="{Binding Clipboard, Mode=TwoWay}" />
                 </Border>
                 <Border DockPanel.Dock="Top"
                         Style="{StaticResource NestedBorder}">
