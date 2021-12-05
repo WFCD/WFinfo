@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Input;
 
 namespace WFInfo
@@ -12,6 +13,16 @@ namespace WFInfo
             set
             {
                 _settings.Display = value;
+                RaisePropertyChanged();
+            }
+        }
+        
+        public Point MainWindowLocation
+        {
+            get => _settings.MainWindowLocation;
+            set
+            {
+                _settings.MainWindowLocation = value;
                 RaisePropertyChanged();
             }
         }

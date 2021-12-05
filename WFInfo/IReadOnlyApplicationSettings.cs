@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Input;
 using Google.Apis.Sheets.v4;
 
@@ -12,6 +13,9 @@ namespace WFInfo
     public interface IReadOnlyApplicationSettings
     {
         Display Display { get; }
+        int MainWindowLocation_X { get; }
+        int MainWindowLocation_Y { get; }
+        Point MainWindowLocation { get; }
         bool IsOverlaySelected { get; }
         bool IsLightSelected { get; }
         Key DebugModifierKey { get; }

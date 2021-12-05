@@ -17,6 +17,19 @@ namespace WFInfo
     {
         public static IReadOnlyApplicationSettings GlobalReadonlySettings { get; } = new ApplicationSettings();
         public Display Display { get; set; } = Display.Overlay;
+        public int MainWindowLocation_X { get; private set; } = 300;
+        public int MainWindowLocation_Y { get; private set; } = 300;
+
+        public Point MainWindowLocation
+        {
+            get => new Point(MainWindowLocation_X, MainWindowLocation_Y);
+            set
+            {
+                MainWindowLocation_X = (int)value.X;
+                MainWindowLocation_Y = (int)value.Y;
+            }
+        }
+
         public bool IsOverlaySelected => Display == Display.Overlay;
         public bool IsLightSelected => Display == Display.Light;
         public Key DebugModifierKey { get; set; } = Key.LeftShift;
@@ -87,7 +100,6 @@ namespace WFInfo
             }
         }
         public static KeyConverter converter = new KeyConverter();
-        public static Point mainWindowLocation;
 
         public Settings()
         {

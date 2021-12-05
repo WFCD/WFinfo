@@ -25,6 +25,7 @@ namespace WFInfo
         public static LowLevelListener listener;
         private static bool updatesupression;
         private RelicsWindow _relicsWindow = new RelicsWindow();
+        private SettingsViewModel _settingsViewModel = SettingsViewModel.Instance;
 
         public MainWindow()
         {
@@ -53,18 +54,18 @@ namespace WFInfo
                 Left = 300;
                 Top = 300;
 
-                System.Drawing.Rectangle winBounds = new System.Drawing.Rectangle(Convert.ToInt32(Settings.mainWindowLocation.X), Convert.ToInt32(Settings.mainWindowLocation.Y), Convert.ToInt32(Width), Convert.ToInt32(Height));
+                System.Drawing.Rectangle winBounds = new System.Drawing.Rectangle(Convert.ToInt32(_settingsViewModel.MainWindowLocation.X), Convert.ToInt32(_settingsViewModel.MainWindowLocation.Y), Convert.ToInt32(Width), Convert.ToInt32(Height));
                 foreach (System.Windows.Forms.Screen scr in System.Windows.Forms.Screen.AllScreens)
                 {
                     if (scr.Bounds.Contains(winBounds))
                     {
-                        Left = Settings.mainWindowLocation.X;
-                        Top = Settings.mainWindowLocation.Y;
+                        Left = _settingsViewModel.MainWindowLocation.X;
+                        Top = _settingsViewModel.MainWindowLocation.Y;
                         break;
                     }
                 }
-                Settings.settingsObj["MainWindowLocation_X"] = Left;
-                Settings.settingsObj["MainWindowLocation_Y"] = Top;
+
+                _settingsViewModel.MainWindowLocation = new Point(Left, Top);
 
                 Settings.Save();
 
@@ -94,14 +95,6 @@ namespace WFInfo
                 welcomeDialogue = new WelcomeDialogue();
             }
 
-
-            if (!Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
-                Settings.settingsObj["MainWindowLocation_X"] = 300;
-            if (!Settings.settingsObj.TryGetValue("MainWindowLocation_Y", out _))
-                Settings.settingsObj["MainWindowLocation_Y"] = 300;
-            Settings.mainWindowLocation =
-                new Point(Settings.settingsObj.GetValue("MainWindowLocation_X").ToObject<Int32>(),
-                    Settings.settingsObj.GetValue("MainWindowLocation_Y").ToObject<Int32>());
 
             if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
                 Settings.settingsObj["ActivationKey"] = "Snapshot";
@@ -265,23 +258,8 @@ namespace WFInfo
 
         private void OnLocationChanged(object sender, EventArgs e)
         {
-            if (Settings.settingsObj != null)
-            {
-                if (Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
-                {
-                    Settings.mainWindowLocation = new Point(Left, Top);
-                    Settings.settingsObj["MainWindowLocation_X"] = Left;
-                    Settings.settingsObj["MainWindowLocation_Y"] = Top;
-                    Settings.Save();
-                }
-                else
-                {
-                    Settings.mainWindowLocation = new Point(100, 100);
-                    Settings.settingsObj["MainWindowLocation_X"] = 100;
-                    Settings.settingsObj["MainWindowLocation_Y"] = 100;
-                    Settings.Save();
-                }
-            }
+            _settingsViewModel.MainWindowLocation = new Point(Left, Top);
+            Settings.Save();
         }
 
         public void ToForeground(object sender, RoutedEventArgs e)
