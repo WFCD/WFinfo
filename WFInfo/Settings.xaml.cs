@@ -581,11 +581,6 @@ namespace WFInfo
             Displaytime_number_box.Text = num;
         }
 
-        private void Displaytime_number_box_GotFocus(object sender, RoutedEventArgs e)
-        {
-            Displaytime_number_box.Text = "";
-        }
-
         private void Displaytime_number_box_KeyUp(object sender, KeyEventArgs e)
         {
             try
@@ -609,11 +604,6 @@ namespace WFInfo
             }
             var numStr = Regex.Replace(OverlayXOffset_number_box.Text, @"[^-?\d]+$", "");
             OverlayXOffset_number_box.Text = numStr;
-        }
-
-        private void OverlayXOffset_number_box_GotFocus(object sender, RoutedEventArgs e)
-        {
-            OverlayXOffset_number_box.Text = "";
         }
         
         private void OverlayXOffset_number_box_KeyUp(object sender, KeyEventArgs e)
@@ -646,11 +636,6 @@ namespace WFInfo
             }
             var numStr = Regex.Replace(OverlayYOffset_number_box.Text, @"[^-?\d]+$", "");
             OverlayYOffset_number_box.Text = numStr;
-        }
-
-        private void OverlayYOffset_number_box_GotFocus(object sender, RoutedEventArgs e)
-        {
-            OverlayYOffset_number_box.Text = "";
         }
 
         private void OverlayYOffset_number_box_KeyUp(object sender, KeyEventArgs e)
@@ -716,15 +701,6 @@ namespace WFInfo
             EfficiencyMax_number_box.Text = num;
         }
 
-        private void EfficiencyMin_number_box_GotFocus(object sender, RoutedEventArgs e)
-        {
-            EfficiencyMin_number_box.Text = "";
-        }
-
-        private void EfficiencyMax_number_box_GotFocus(object sender, RoutedEventArgs e)
-        {
-            EfficiencyMax_number_box.Text = "";
-        }
 
         private void EfficiencyMin_number_box_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -773,11 +749,6 @@ namespace WFInfo
             }
             var num = Regex.Replace(SnapItCountThreshold_number_box.Text, "[^0-9.]", "");
             SnapItCountThreshold_number_box.Text = num;
-        }
-
-        private void SnapItCountThreshold_number_box_GotFocus(object sender, RoutedEventArgs e)
-        {
-            SnapItCountThreshold_number_box.Text = "";
         }
 
         private void SnapItCountThreshold_number_box_KeyUp(object sender, KeyEventArgs e)

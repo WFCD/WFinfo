@@ -57,6 +57,8 @@
                         Value="Wrap" />
                 <Setter Property="FontFamily"
                         Value="{StaticResource Roboto}"/>
+                <Setter Property="wfInfo:SelectTextOnFocus.Active"
+                        Value="True"/>
             </Style>
 
             <Style TargetType="CheckBox"
@@ -153,7 +155,6 @@
                          ToolTip="The time in milliseconds the overlays will be displayed on screen"
                          Text="TextBox"
                          KeyDown="Displaytime_number_box_KeyDown"
-                         GotFocus="Displaytime_number_box_GotFocus"
                          KeyUp="Displaytime_number_box_KeyUp" />
 
                 <CheckBox x:Name="HighlightCheckbox"
@@ -187,7 +188,6 @@
                              TextWrapping="Wrap"
                              Width="90"
                              KeyDown="OverlayXOffset_number_box_KeyDown"
-                             GotFocus="OverlayXOffset_number_box_GotFocus"
                              KeyUp="OverlayXOffset_number_box_KeyUp"
                              Text="0" />
 
@@ -196,7 +196,6 @@
                              ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top."
                              Width="90"
                              KeyDown="OverlayYOffset_number_box_KeyDown"
-                             GotFocus="OverlayYOffset_number_box_GotFocus"
                              KeyUp="OverlayYOffset_number_box_KeyUp"
                              Text="0" />
                     <Label Content="Y"
@@ -214,7 +213,6 @@
                 <TextBox x:Name="SnapItCountThreshold_number_box"
                          ToolTip="Threshold for number detection noise filtering. Higher = More aggressive, 3 or 4 usually works best"
                          KeyDown="SnapItCountThreshold_number_box_KeyDown"
-                         GotFocus="SnapItCountThreshold_number_box_GotFocus"
                          KeyUp="SnapItCountThreshold_number_box_KeyUp"
                          VerticalAlignment="Top"
                          Text="4" />
@@ -318,15 +316,14 @@
                          Text="TextBox"
                          Margin="0, 0, 20, 0"
                          KeyDown="EfficiencyMin_number_box_KeyDown"
-                         GotFocus="EfficiencyMin_number_box_GotFocus"
                          LostFocus="EfficiencyMin_number_box_LostFocus"
+                         AutoWordSelection="True"
                          VerticalAlignment="Top" />
                 <TextBox x:Name="EfficiencyMax_number_box"
                          ToolTip="Anything above this efficiency will be marked as green in snapit"
                          Text="TextBox"
                          Margin="0, 0, 20, 0"
                          KeyDown="EfficiencyMax_number_box_KeyDown"
-                         GotFocus="EfficiencyMax_number_box_GotFocus"
                          LostFocus="EfficiencyMax_number_box_LostFocus"
                          VerticalAlignment="Top" />
             </UniformGrid>
