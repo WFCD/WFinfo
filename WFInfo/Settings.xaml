@@ -11,7 +11,7 @@
         WindowStyle="None"
         FontSize="16"
         SizeToContent="Height"
-        d:DataContext="{d:DesignInstance Type=wfInfo:SettingsViewModel}"
+        d:DataContext="{d:DesignInstance Type=wfInfo:Settings}"
         ResizeMode="NoResize">
     <DockPanel MouseDown="MouseDown"
                PreviewMouseDown="ActivationMouseDown"
@@ -159,11 +159,11 @@
                 <CheckBox x:Name="HighlightCheckbox"
                           Content="Highlight"
                           ToolTip="Highlight the best rewards on the overlay."
-                          Checked="{Binding HighlightRewards, Mode=TwoWay}" />
+                          IsChecked="{Binding SettingsViewModel.HighlightRewards, Mode=TwoWay}" />
                 <CheckBox x:Name="HighContrastCheckbox"
                           Content="High contrast"
                           ToolTip="Enable High contrast for the overlay."
-                          Checked="{Binding HighContrast, Mode=TwoWay}" />
+                          IsChecked="{Binding SettingsViewModel.HighContrast, Mode=TwoWay}" />
             </UniformGrid>
         </Border>
         <Border x:Name="Overlay_sliders"
@@ -222,12 +222,12 @@
                 <CheckBox x:Name="SnapItemCountCheckbox"
                           Content="Count Item"
                           ToolTip="Scan for item amount using Snap-It"
-                          IsChecked="{Binding DoSnapItCount}" />
+                          IsChecked="{Binding SettingsViewModel.DoSnapItCount, Mode=TwoWay}" />
 
                 <CheckBox x:Name="SnapItThreadCheckbox"
                           Content="Multithread Snap"
                           ToolTip="Speed up snap-it using multithreading"
-                          IsChecked="{Binding SnapMultiThreaded}" />
+                          IsChecked="{Binding SettingsViewModel.SnapMultiThreaded, Mode=TwoWay}" />
 
             </UniformGrid>
         </Border>
@@ -374,7 +374,7 @@
                     <CheckBox x:Name="clipboardCheckbox"
                               Content="Clipboard"
                               ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat"
-                              IsChecked="{Binding Clipboard, Mode=TwoWay}" />
+                              IsChecked="{Binding SettingsViewModel.Clipboard, Mode=TwoWay}" />
                 </Border>
                 <Border DockPanel.Dock="Top"
                         Style="{StaticResource NestedBorder}">
@@ -389,7 +389,7 @@
                                   DockPanel.Dock="Left"
                                   Content="Auto list"
                                   ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto"
-                                  IsChecked="{Binding AutoList, Mode=TwoWay}" />
+                                  IsChecked="{Binding SettingsViewModel.AutoList, Mode=TwoWay}" />
                     </UniformGrid>
                 </Border>
             </DockPanel>

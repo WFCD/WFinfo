@@ -3,12 +3,15 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using WebSocketSharp;
 
 namespace WFInfo
@@ -20,16 +23,19 @@ namespace WFInfo
         [JsonIgnore]
         public bool Initialized { get; set; } = false;
         public Display Display { get; set; } = Display.Overlay;
-        public int MainWindowLocation_X { get; private set; } = 300;
-        public int MainWindowLocation_Y { get; private set; } = 300;
+        [JsonProperty]
+        public double MainWindowLocation_X { get; private set; } = 300;
+        [JsonProperty]
+        public double MainWindowLocation_Y { get; private set; } = 300;
 
+        [JsonIgnore]
         public Point MainWindowLocation
         {
             get => new Point(MainWindowLocation_X, MainWindowLocation_Y);
             set
             {
-                MainWindowLocation_X = (int)value.X;
-                MainWindowLocation_Y = (int)value.Y;
+                MainWindowLocation_X = value.X;
+                MainWindowLocation_Y = value.Y;
             }
         }
 
@@ -72,6 +78,13 @@ namespace WFInfo
         public double SnapRowEmptyDensity { get; set; } = 0.01;
         public double SnapColEmptyDensity { get; set; } = 0.005;
         public string Ignored { get; set; } = null;
+        [OnError]
+        internal void OnError(StreamingContext context, ErrorContext errorContext)
+        {
+            Main.AddLog("Failed to parse settings file: " + errorContext.Error.Message);
+            errorContext.Handled = true;
+        }
+ 
     }
 
     /// <summary>
@@ -81,6 +94,7 @@ namespace WFInfo
     {
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         private readonly SettingsViewModel _viewModel;
+        public SettingsViewModel SettingsViewModel => _viewModel;
 
         public static MouseButton backupMouseVal = MouseButton.Left;
         private static MouseButton activeMouseVal = MouseButton.Left;
@@ -110,13 +124,13 @@ namespace WFInfo
         public Settings()
         {
             InitializeComponent();
-            DataContext = SettingsViewModel.Instance;
+            // DataContext = SettingsViewModel.Instance;
             _viewModel = SettingsViewModel.Instance;
         }
 
         public void populate()
         {
-            DataContext = this;
+            // DataContext = this;
 
             Overlay_sliders.Visibility = Visibility.Collapsed; // default hidden for the majority of states
 
@@ -167,7 +181,12 @@ namespace WFInfo
 
         public static void Save()
         {
-            File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(ApplicationSettings.GlobalSettings, Formatting.Indented));
+            var jsonSettings = new JsonSerializerSettings()
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
+            jsonSettings.Converters.Add(new StringEnumConverter());
+            File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(ApplicationSettings.GlobalSettings, Formatting.Indented,jsonSettings));
         }
 
         private void Hide(object sender, RoutedEventArgs e)

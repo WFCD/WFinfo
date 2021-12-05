@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace WFInfo
 {
@@ -84,10 +85,15 @@ namespace WFInfo
 
         public void InitializeSettings()
         {
+            var jsonSettings = new JsonSerializerSettings()
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
+            jsonSettings.Converters.Add(new StringEnumConverter());
             if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json") && !ApplicationSettings.GlobalSettings.Initialized)
             {
                 var jsonText = File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json");
-                JsonConvert.PopulateObject(jsonText, ApplicationSettings.GlobalSettings);
+                JsonConvert.PopulateObject(jsonText, ApplicationSettings.GlobalSettings, jsonSettings);
                 ApplicationSettings.GlobalSettings.Initialized = true;
 
             }

@@ -13,8 +13,8 @@ namespace WFInfo
     public interface IReadOnlyApplicationSettings
     {
         Display Display { get; }
-        int MainWindowLocation_X { get; }
-        int MainWindowLocation_Y { get; }
+        double MainWindowLocation_X { get; }
+        double MainWindowLocation_Y { get; }
         Point MainWindowLocation { get; }
         bool IsOverlaySelected { get; }
         bool IsLightSelected { get; }
