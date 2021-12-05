@@ -389,7 +389,7 @@
                                   DockPanel.Dock="Left"
                                   Content="Auto list"
                                   ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto"
-                                  Click="Autolist_Click" />
+                                  IsChecked="{Binding AutoList, Mode=TwoWay}" />
                     </UniformGrid>
                 </Border>
             </DockPanel>

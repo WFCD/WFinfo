@@ -102,15 +102,6 @@ namespace WFInfo
         public static int overlayYOffsetValue;
         public static double maximumEfficiencyValue;
         public static double minimumEfficiencyValue;
-        public static bool automaticListing;
-        public static bool doDoubleCheck;
-        public static bool doSnapItCount;
-        public static int snapItCountThreshold;
-        public static int snapItEdgeWidth;
-        public static int snapItEdgeRadius;
-        public static double snapItHorizontalNameMargin;
-        public static bool doCustomNumberBoxWidth;
-        public static double snapItNumberBoxWidth;
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
@@ -189,7 +180,7 @@ namespace WFInfo
             if (Convert.ToBoolean(settingsObj.GetValue("SnapMultiThreaded")))
                 SnapItThreadCheckbox.IsChecked = true;
 
-            SnapItCountThreshold_number_box.Text = snapItCountThreshold.ToString(Main.culture);
+            SnapItCountThreshold_number_box.Text = _viewModel.SnapItCountThreshold.ToString(Main.culture);
 
             ResetActivationKeyText();
             Focus();
@@ -618,12 +609,6 @@ namespace WFInfo
             Save();
         }
 
-        private void Autolist_Click(object sender, RoutedEventArgs e)
-        {
-            settingsObj["AutoList"] = Autolist.IsChecked.Value;
-            automaticListing = Autolist.IsChecked.Value;
-            Save();
-        }
 
         private void Displaytime_number_box_KeyDown(object sender, KeyEventArgs e)
         {
@@ -844,8 +829,7 @@ namespace WFInfo
             try
             {
                 var num = Regex.Replace(SnapItCountThreshold_number_box.Text, "[^0-9.]", "");
-                snapItCountThreshold = int.Parse(num);
-                settingsObj["SnapItCountThreshold"] = snapItCountThreshold;
+                _viewModel.SnapItCountThreshold = int.Parse(num);
                 Save();
             }
             catch (Exception exception)
