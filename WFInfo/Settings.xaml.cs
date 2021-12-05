@@ -32,6 +32,9 @@ namespace WFInfo
 
         public bool IsOverlaySelected => Display == Display.Overlay;
         public bool IsLightSelected => Display == Display.Light;
+        public string ActivationKey { get; set; } = "Snapshot";
+        // public Key ActivationKeyKey { get; } = Key.None;
+        // public MouseButton ActivationMouseButton { get;} = MouseButton.Left;
         public Key DebugModifierKey { get; set; } = Key.LeftShift;
         public Key SearchItModifierKey { get; set; } = Key.OemTilde;
         public Key SnapitModifierKey { get; set; } = Key.LeftCtrl;
@@ -65,6 +68,7 @@ namespace WFInfo
         public double SnapRowTextDensity { get; set; } = 0.015;
         public double SnapRowEmptyDensity { get; set; } = 0.01;
         public double SnapColEmptyDensity { get; set; } = 0.005;
+        public string Ignored { get; set; } = null;
     }
 
     /// <summary>
@@ -256,7 +260,7 @@ namespace WFInfo
 
                     ActivationMouseButton = key;
                     Activation_key_box.Text = key.ToString();
-                    settingsObj["ActivationKey"] = key.ToString();
+                    _viewModel.ActivationKey = key.ToString();
                     hidden.Focus();
                     Save();
                 }
@@ -287,7 +291,7 @@ namespace WFInfo
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
             ActivationKey = key;
             Activation_key_box.Text = GetKeyName(ActivationKey);
-            settingsObj["ActivationKey"] = key.ToString();
+            _viewModel.ActivationKey = key.ToString();
             hidden.Focus();
             Save();
         }

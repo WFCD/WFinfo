@@ -96,24 +96,22 @@ namespace WFInfo
             }
 
 
-            if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
-                Settings.settingsObj["ActivationKey"] = "Snapshot";
             try
             {
                 Settings.ActivationKey =
-                    (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                    (Key)Enum.Parse(typeof(Key), _settingsViewModel.ActivationKey);
             }
             catch
             {
                 try
                 {
                     Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton),
-                        Settings.settingsObj.GetValue("ActivationKey").ToString());
+                        _settingsViewModel.ActivationKey);
                 }
                 catch
                 {
                     Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
-                    Settings.settingsObj["ActivationKey"] = "Snapshot";
+                    _settingsViewModel.ActivationKey = "Snapshot";
                     Settings.ActivationKey = Key.Snapshot;
                 }
             }

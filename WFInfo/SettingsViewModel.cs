@@ -26,6 +26,15 @@ namespace WFInfo
                 RaisePropertyChanged();
             }
         }
+        public string ActivationKey 
+        {
+            get => _settings.ActivationKey;
+            set
+            {
+                _settings.ActivationKey = value;
+                RaisePropertyChanged();
+            }
+        }
         public Key DebugModifierKey
         {
             get => _settings.DebugModifierKey;
@@ -323,6 +332,13 @@ namespace WFInfo
             }
         }
 
+        public string Ignored{
+            get => _settings.Ignored;
+            set { 
+                _settings.Ignored = value;
+                RaisePropertyChanged(); 
+            }
+        }
         public SettingsViewModel(ApplicationSettings settings)
         {
             _settings = settings;

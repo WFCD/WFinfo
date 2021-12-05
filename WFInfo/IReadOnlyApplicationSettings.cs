@@ -18,6 +18,9 @@ namespace WFInfo
         Point MainWindowLocation { get; }
         bool IsOverlaySelected { get; }
         bool IsLightSelected { get; }
+        string ActivationKey { get; }
+        // Key ActivationKeyKey { get; }
+        // MouseButton ActivationMouseButton { get; }
         Key DebugModifierKey { get; }
         Key SearchItModifierKey { get; }
         Key SnapitModifierKey { get; }
@@ -51,5 +54,6 @@ namespace WFInfo
         double SnapRowTextDensity { get; }
         double SnapRowEmptyDensity { get; }
         double SnapColEmptyDensity { get; }
+        string Ignored { get; }
     }
 }

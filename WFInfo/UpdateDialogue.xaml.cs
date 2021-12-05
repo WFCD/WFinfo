@@ -16,6 +16,7 @@ namespace WFInfo
     {
         UpdateInfoEventArgs updateInfo;
         readonly WebClient WebClient;
+        private readonly SettingsViewModel settings = SettingsViewModel.Instance;
 
         public UpdateDialogue(UpdateInfoEventArgs args)
         {
@@ -23,7 +24,7 @@ namespace WFInfo
             updateInfo = args;
 
             string version = args.CurrentVersion.ToString();
-            if (!args.IsUpdateAvailable || (Settings.settingsObj.TryGetValue("ignored", out JToken val) && val.ToString() == version))
+            if (!args.IsUpdateAvailable || (settings.Ignored == version))
                 return;
             version = version.Substring(0, version.LastIndexOf("."));
 
@@ -75,7 +76,7 @@ namespace WFInfo
 
         private void Skip(object sender, RoutedEventArgs e)
         {
-            Settings.settingsObj["ignored"] = updateInfo.CurrentVersion.ToString();
+            settings.Ignored = updateInfo.CurrentVersion.ToString();
             Settings.Save();
             Close();
         }
