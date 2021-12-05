@@ -309,13 +309,13 @@ namespace WFInfo
                         {
                             Overlay.rewardsDisplaying = true;
 
-                            if (Settings.isOverlaySelected)
+                            if (_settings.IsOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                                 Main.overlays[partNumber].Resize(overWid);
                                 Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / dpiScaling), startY + (int)(_settings.OverlayYOffsetValue / dpiScaling), _settings.Delay);
                             }
-                            else if (!Settings.isLightSelected)
+                            else if (!_settings.IsLightSelected)
                             {
                                 Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
@@ -363,7 +363,7 @@ namespace WFInfo
             }
             #endregion 
 
-            if (Settings.isLightSelected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
+            if (_settings.IsLightSelected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
             {
                 _soundPlayer.Play();
             }
@@ -620,11 +620,11 @@ namespace WFInfo
 
                         Main.RunOnUIThread(() =>
                         {
-                            if (Settings.isOverlaySelected)
+                            if (_settings.IsOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
-                            else if (!Settings.isLightSelected)
+                            else if (!_settings.IsLightSelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
@@ -2477,7 +2477,7 @@ namespace WFInfo
                     Main.AddLog($"Fullscreen detected (0x{styles.ToString("X8", Main.culture)}, {window.ToString()}");
                     currentStyle = WindowStyle.FULLSCREEN;
                     //Show the Fullscreen prompt
-                    if (Settings.isOverlaySelected)
+                    if (_settings.IsOverlaySelected)
                     {
                         Main.AddLog($"Showing the Fullscreen Reminder");
                         Main.RunOnUIThread(() =>

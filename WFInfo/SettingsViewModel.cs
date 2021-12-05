@@ -5,6 +5,16 @@ namespace WFInfo
     public class SettingsViewModel : INPC
     {
         private ApplicationSettings _settings;
+
+        public Display Display
+        {
+            get => _settings.Display;
+            set
+            {
+                _settings.Display = value;
+                RaisePropertyChanged();
+            }
+        }
         public Key DebugModifierKey
         {
             get => _settings.DebugModifierKey;

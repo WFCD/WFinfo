@@ -1,9 +1,19 @@
 using System.Windows.Input;
+using Google.Apis.Sheets.v4;
 
 namespace WFInfo
 {
+    public enum Display
+    {
+        Window,
+        Overlay,
+        Light
+    }
     public interface IReadOnlyApplicationSettings
     {
+        Display Display { get; }
+        bool IsOverlaySelected { get; }
+        bool IsLightSelected { get; }
         Key DebugModifierKey { get; }
         Key SearchItModifierKey { get; }
         Key SnapitModifierKey { get; }

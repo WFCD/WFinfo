@@ -94,10 +94,6 @@ namespace WFInfo
                 welcomeDialogue = new WelcomeDialogue();
             }
 
-            if (!Settings.settingsObj.TryGetValue("Display", out _))
-                Settings.settingsObj["Display"] = "Overlay";
-            Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
-            Settings.isLightSelected = Settings.settingsObj.GetValue("Display").ToString() == "Light";
 
             if (!Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
                 Settings.settingsObj["MainWindowLocation_X"] = 300;

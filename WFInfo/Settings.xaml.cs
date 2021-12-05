@@ -16,6 +16,9 @@ namespace WFInfo
     public class ApplicationSettings : IReadOnlyApplicationSettings
     {
         public static IReadOnlyApplicationSettings GlobalReadonlySettings { get; } = new ApplicationSettings();
+        public Display Display { get; set; } = Display.Overlay;
+        public bool IsOverlaySelected => Display == Display.Overlay;
+        public bool IsLightSelected => Display == Display.Light;
         public Key DebugModifierKey { get; set; } = Key.LeftShift;
         public Key SearchItModifierKey { get; set; } = Key.OemTilde;
         public Key SnapitModifierKey { get; set; } = Key.LeftCtrl;
@@ -85,8 +88,6 @@ namespace WFInfo
         }
         public static KeyConverter converter = new KeyConverter();
         public static Point mainWindowLocation;
-        public static bool isOverlaySelected;
-        public static bool isLightSelected;
 
         public Settings()
         {
@@ -101,12 +102,12 @@ namespace WFInfo
 
             Overlay_sliders.Visibility = Visibility.Collapsed; // default hidden for the majority of states
 
-            if (settingsObj.GetValue("Display").ToString() == "Overlay")
+            if (_viewModel.Display == Display.Overlay)
             {
                 OverlayRadio.IsChecked = true;
                 Overlay_sliders.Visibility = Visibility.Visible;
             }
-            else if (settingsObj.GetValue("Display").ToString() == "Light")
+            else if (_viewModel.Display == Display.Light)
             {
                 LightRadio.IsChecked = true;
             }
@@ -115,7 +116,7 @@ namespace WFInfo
                 WindowRadio.IsChecked = true;
             }
 
-            if (Convert.ToBoolean(settingsObj.GetValue("Auto")))
+            if (_viewModel.Auto)
             {
                 autoCheckbox.IsChecked = true;
                 Autolist.IsEnabled = true;
@@ -125,22 +126,9 @@ namespace WFInfo
                 Autolist.IsEnabled = false;
             }
 
-            if (Convert.ToBoolean(settingsObj.GetValue("Clipboard")))
-                clipboardCheckbox.IsChecked = true;
-
-            if (Convert.ToBoolean(settingsObj.GetValue("HighlightRewards")))
-                HighlightCheckbox.IsChecked = true;
-
-            if (Convert.ToBoolean(settingsObj.GetValue("HighContrast")))
-                HighContrastCheckbox.IsChecked = true;
-
-            if (Convert.ToBoolean(settingsObj.GetValue("AutoList")))
-                Autolist.IsChecked = true;
-
-            string settingLocale = Convert.ToString(settingsObj.GetValue("Locale"));
             foreach (ComboBoxItem localeItem in localeCombobox.Items)
             {
-                if(settingLocale.Equals(localeItem.Tag.ToString()))
+                if(_viewModel.Locale.Equals(localeItem.Tag.ToString()))
                 {
                     localeItem.IsSelected = true;
                 }
@@ -152,12 +140,6 @@ namespace WFInfo
             EfficiencyMax_number_box.Text = _viewModel.MaximumEfficiencyValue.ToString(Main.culture);
             EfficiencyMin_number_box.Text = _viewModel.MinimumEfficiencyValue.ToString(Main.culture);
             Displaytime_number_box.Text = _viewModel.Delay.ToString(Main.culture);
-
-            if (Convert.ToBoolean(settingsObj.GetValue("DoSnapItCount")))
-                SnapItemCountCheckbox.IsChecked = true;
-
-            if (Convert.ToBoolean(settingsObj.GetValue("SnapMultiThreaded")))
-                SnapItThreadCheckbox.IsChecked = true;
 
             SnapItCountThreshold_number_box.Text = _viewModel.SnapItCountThreshold.ToString(Main.culture);
 
@@ -186,20 +168,15 @@ namespace WFInfo
 
         private void WindowChecked(object sender, RoutedEventArgs e)
         {
-            settingsObj["Display"] = "Window";
-            isOverlaySelected = false;
-            isLightSelected = false;
+            _viewModel.Display = Display.Window;
             Overlay_sliders.Visibility = Visibility.Collapsed;
-            clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
             Save();
         }
 
         private void OverlayChecked(object sender, RoutedEventArgs e)
         {
-            settingsObj["Display"] = "Overlay";
-            isOverlaySelected = true;
-            isLightSelected = false;
+            _viewModel.Display = Display.Overlay;
             Overlay_sliders.Visibility = Visibility.Visible;
             clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
@@ -440,9 +417,7 @@ namespace WFInfo
 
         private void LightRadioChecked(object sender, RoutedEventArgs e)
         {
-            settingsObj["Display"] = "Light";
-            isOverlaySelected = false;
-            isLightSelected = true;
+            _viewModel.Display = Display.Light;
             Overlay_sliders.Visibility = Visibility.Collapsed;
             _viewModel.Clipboard = true;
             clipboardCheckbox.IsChecked = true;
