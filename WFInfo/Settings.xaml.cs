@@ -588,7 +588,7 @@ namespace WFInfo
             catch (Exception exception)
             {
                 Main.AddLog($"Unable to parse display time change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
-                Displaytime_number_box.Text = settingsObj["Delay"].ToString();
+                Displaytime_number_box.Text = _viewModel.Delay.ToString();
             }
         }
 
@@ -732,7 +732,7 @@ namespace WFInfo
             catch (Exception exception)
             {
                 Main.AddLog($"Unable to parse efficinecy min change, new val would have been: {EfficiencyMin_number_box.Text} Exception: {exception}");
-                EfficiencyMin_number_box.Text = settingsObj["MinimumEfficiencyValue"].ToString();
+                EfficiencyMin_number_box.Text = _viewModel.MinimumEfficiencyValue.ToString(Main.culture);
             }
         }
 
@@ -751,7 +751,7 @@ namespace WFInfo
             catch (Exception exception)
             {
                 Main.AddLog($"Unable to parse efficinecy max change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
-                EfficiencyMax_number_box.Text = settingsObj["MaximumEfficiencyValue"].ToString();
+                EfficiencyMax_number_box.Text = _viewModel.MaximumEfficiencyValue.ToString(Main.culture);
             }
             
         }
@@ -782,7 +782,7 @@ namespace WFInfo
             catch (Exception exception)
             {
                 Main.AddLog($"Unable to parse snapit threshold change, new val would have been: {SnapItCountThreshold_number_box.Text} Exception: {exception}");
-                SnapItCountThreshold_number_box.Text = settingsObj["SnapItCountThreshold"].ToString();
+                SnapItCountThreshold_number_box.Text = _viewModel.SnapItCountThreshold.ToString();
             }
         }
 
