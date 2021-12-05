@@ -1034,7 +1034,7 @@ namespace WFInfo
                 while (watch.ElapsedMilliseconds < stop)
                 {
                     if (watch.ElapsedMilliseconds <= wait) continue;
-                    wait += Settings.autoDelay;
+                    wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
                     OCR.GetThemeWeighted(out double diff);
                     if (!(diff > 40)) continue;
                     while (watch.ElapsedMilliseconds < wait) ;

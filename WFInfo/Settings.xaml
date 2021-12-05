@@ -159,11 +159,11 @@
                 <CheckBox x:Name="HighlightCheckbox"
                           Content="Highlight"
                           ToolTip="Highlight the best rewards on the overlay."
-                          Click="HighlightRewardCheckbox_Click" />
+                          Checked="{Binding HighlightRewards, Mode=TwoWay}" />
                 <CheckBox x:Name="HighContrastCheckbox"
                           Content="High contrast"
                           ToolTip="Enable High contrast for the overlay."
-                          Click="HighContrastCheckbox_Click"/>
+                          Checked="{Binding HighContrast, Mode=TwoWay}" />
             </UniformGrid>
         </Border>
         <Border x:Name="Overlay_sliders"

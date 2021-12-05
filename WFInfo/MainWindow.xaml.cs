@@ -158,33 +158,14 @@ namespace WFInfo
                 Settings.settingsObj["Clipboard"] = false;
             Settings.clipboard = (bool)Settings.settingsObj.GetValue("Clipboard");
 
-            if (!Settings.settingsObj.TryGetValue("AutoDelay", out _))
-                Settings.settingsObj["AutoDelay"] = 250L;
-            Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");
-
             if (!Settings.settingsObj.TryGetValue("Auto", out _))
                 Settings.settingsObj["Auto"] = true;
             Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
-
-            if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
-                Settings.settingsObj["ImageRetentionTime"] = 12;
-            Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("ClipboardTemplate", out _))
-                Settings.settingsObj["ClipboardTemplate"] = "-- by WFInfo (smart OCR with pricecheck)";
-            Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("SnapitExport", out _))
                 Settings.settingsObj["SnapitExport"] = false;
             Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"), Main.culture);
 
-            if (!Settings.settingsObj.TryGetValue("Delay", out _))
-                Settings.settingsObj["Delay"] = 10000;
-            Settings.delay = Convert.ToInt32(Settings.settingsObj.GetValue("Delay"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("HighlightRewards", out _))
-                Settings.settingsObj["HighlightRewards"] = true;
-            Settings.Highlight = Convert.ToBoolean(Settings.settingsObj.GetValue("HighlightRewards"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("ClipboardVaulted", out _))
                 Settings.settingsObj["ClipboardVaulted"] = false;

@@ -15,6 +15,7 @@ namespace WFInfo
 {
     public class ApplicationSettings : IReadOnlyApplicationSettings
     {
+        public static IReadOnlyApplicationSettings GlobalReadonlySettings { get; } = new ApplicationSettings();
         public Key DebugModifierKey { get; set; } = Key.LeftShift;
         public Key SearchItModifierKey { get; set; } = Key.OemTilde;
         public Key SnapitModifierKey { get; set; } = Key.LeftCtrl;
@@ -92,16 +93,6 @@ namespace WFInfo
         public static bool isOverlaySelected;
         public static bool isLightSelected;
         public static bool debug;
-        public static long autoDelay;
-        public static int imageRetentionTime;
-        public static string ClipboardTemplate;
-        internal static int delay;
-        public static bool Highlight;
-        internal static bool highContrast;
-        public static int overlayXOffsetValue;
-        public static int overlayYOffsetValue;
-        public static double maximumEfficiencyValue;
-        public static double minimumEfficiencyValue;
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
@@ -167,12 +158,12 @@ namespace WFInfo
                 }
             }
 
-            OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
-            OverlayYOffset_number_box.Text = (-1 * overlayYOffsetValue).ToString(Main.culture);
+            OverlayXOffset_number_box.Text = _viewModel.OverlayXOffsetValue.ToString(Main.culture);
+            OverlayYOffset_number_box.Text = (-1 * _viewModel.OverlayYOffsetValue).ToString(Main.culture);
 
-            EfficiencyMax_number_box.Text = maximumEfficiencyValue.ToString(Main.culture);
-            EfficiencyMin_number_box.Text = minimumEfficiencyValue.ToString(Main.culture);
-            Displaytime_number_box.Text = delay.ToString(Main.culture);
+            EfficiencyMax_number_box.Text = _viewModel.MaximumEfficiencyValue.ToString(Main.culture);
+            EfficiencyMin_number_box.Text = _viewModel.MinimumEfficiencyValue.ToString(Main.culture);
+            Displaytime_number_box.Text = _viewModel.Delay.ToString(Main.culture);
 
             if (Convert.ToBoolean(settingsObj.GetValue("DoSnapItCount")))
                 SnapItemCountCheckbox.IsChecked = true;
@@ -481,13 +472,6 @@ namespace WFInfo
             Save();
         }
 
-        private void HighlightRewardCheckbox_Click(object sender, RoutedEventArgs e)
-        {
-            settingsObj["HighlightRewards"] = HighlightCheckbox.IsChecked.Value;
-            Highlight = HighlightCheckbox.IsChecked.Value;
-            Save();
-        }
-
         private void Searchit_key_box_GotFocus(object sender, RoutedEventArgs e)
         {
             SearchItModifierKey = Key.None;
@@ -602,13 +586,6 @@ namespace WFInfo
             hidden.Focus();
         }
 
-        private void HighContrastCheckbox_Click(object sender, RoutedEventArgs e)
-        {
-            settingsObj["HighContrast"] = HighContrastCheckbox.IsChecked.Value;
-            highContrast = HighContrastCheckbox.IsChecked.Value;
-            Save();
-        }
-
 
         private void Displaytime_number_box_KeyDown(object sender, KeyEventArgs e)
         {
@@ -630,8 +607,7 @@ namespace WFInfo
             try
             {
                 var num = Regex.Replace(Displaytime_number_box.Text, "[^0-9.]", "");
-                delay = int.Parse(num);
-                settingsObj["Delay"] = delay;
+                _viewModel.Delay = int.Parse(num);
                 Save();
             }
             catch (Exception exception)
@@ -660,7 +636,7 @@ namespace WFInfo
         {
             if (IsValidOverlayOffset(OverlayXOffset_number_box.Text))
             {
-                overlayXOffsetValue = ParseOverlayOffsetStringToInt(OverlayXOffset_number_box.Text);
+                _viewModel.OverlayXOffsetValue = ParseOverlayOffsetStringToInt(OverlayXOffset_number_box.Text);
 
                 int width = 2000; // presume bounding
                 if (OCR.VerifyWarframe())
@@ -671,10 +647,9 @@ namespace WFInfo
                     }
                     width = OCR.window.Width;
                 }
-                overlayXOffsetValue = (overlayXOffsetValue <= -1 * width / 2) ? (-1 * width / 2) : (overlayXOffsetValue >= width / 2) ? (width / 2) : overlayXOffsetValue; // clamp value to valid bound
+                _viewModel.OverlayXOffsetValue = (_viewModel.OverlayXOffsetValue <= -1 * width / 2) ? (-1 * width / 2) : (_viewModel.OverlayXOffsetValue >= width / 2) ? (width / 2) : _viewModel.OverlayXOffsetValue; // clamp value to valid bound
 
-                settingsObj["OverlayXOffsetValue"] = overlayXOffsetValue;
-                OverlayXOffset_number_box.Text = overlayXOffsetValue.ToString(Main.culture);
+                OverlayXOffset_number_box.Text = _viewModel.OverlayXOffsetValue.ToString(Main.culture);
                 Save();
             }
         }
@@ -699,7 +674,7 @@ namespace WFInfo
             if (IsValidOverlayOffset(OverlayYOffset_number_box.Text))
             {
                 // -1 is for inverting the y-coord so that the user is presented with an increasing value from bottom to top
-                overlayYOffsetValue = (-1) * ParseOverlayOffsetStringToInt(OverlayYOffset_number_box.Text);
+                _viewModel.OverlayYOffsetValue = (-1) * ParseOverlayOffsetStringToInt(OverlayYOffset_number_box.Text);
 
                 int height = 2000; // presume bounding
                 if (OCR.VerifyWarframe())
@@ -710,10 +685,9 @@ namespace WFInfo
                     }
                     height = OCR.window.Height;
                 }
-                overlayYOffsetValue = (overlayYOffsetValue <= -1 * height / 2) ? (-1 * height / 2) : (overlayYOffsetValue >= height / 2) ? (height / 2) : overlayYOffsetValue; // clamp value to valid bound
+                _viewModel.OverlayYOffsetValue = (_viewModel.OverlayYOffsetValue <= -1 * height / 2) ? (-1 * height / 2) : (_viewModel.OverlayYOffsetValue >= height / 2) ? (height / 2) : _viewModel.OverlayYOffsetValue; // clamp value to valid bound
 
-                settingsObj["OverlayYOffsetValue"] = overlayYOffsetValue;
-                OverlayYOffset_number_box.Text = (-1 * overlayYOffsetValue).ToString(Main.culture);
+                OverlayYOffset_number_box.Text = (-1 * _viewModel.OverlayYOffsetValue).ToString(Main.culture);
                 Save();
             }
         }
@@ -774,11 +748,10 @@ namespace WFInfo
             {
                 var num = Regex.Replace(EfficiencyMin_number_box.Text, "[^0-9.,]", "");
                 num = num.Replace(',', '.');
-                minimumEfficiencyValue = double.Parse(num, Main.culture);
-                if (minimumEfficiencyValue > maximumEfficiencyValue)
+                _viewModel.MinimumEfficiencyValue = double.Parse(num, Main.culture);
+                if (_viewModel.MinimumEfficiencyValue > _viewModel.MaximumEfficiencyValue)
                     throw new Exception("Minimum efficiency can not be more than maximum.");
                 EfficiencyMin_number_box.Text = num;
-                settingsObj["MinimumEfficiencyValue"] = minimumEfficiencyValue;
                 Save();
             }
             catch (Exception exception)
@@ -794,11 +767,10 @@ namespace WFInfo
             {
                 var num = Regex.Replace(EfficiencyMax_number_box.Text, "[^0-9.,]", "");
                 num = num.Replace(',', '.');
-                maximumEfficiencyValue = double.Parse(num, Main.culture);
-                if (maximumEfficiencyValue < minimumEfficiencyValue)
+                _viewModel.MaximumEfficiencyValue = double.Parse(num, Main.culture);
+                if (_viewModel.MaximumEfficiencyValue < _viewModel.MinimumEfficiencyValue)
                     throw new Exception("Maximum efficiency can not be less than minimum.");
                 EfficiencyMax_number_box.Text = num;
-                settingsObj["MaximumEfficiencyValue"] = maximumEfficiencyValue;
                 Save();
             }
             catch (Exception exception)
