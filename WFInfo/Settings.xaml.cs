@@ -13,7 +13,7 @@ using WebSocketSharp;
 
 namespace WFInfo
 {
-    public class ApplicationSettings
+    public class ApplicationSettings : IReadOnlyApplicationSettings
     {
         public Key DebugModifierKey { get; set; } = Key.LeftShift;
         public Key SearchItModifierKey { get; set; } = Key.OemTilde;
@@ -122,9 +122,6 @@ namespace WFInfo
         public static bool doCustomNumberBoxWidth;
         public static double snapItNumberBoxWidth;
         public static bool snapMultiThreaded;
-        public static double snapRowTextDensity;
-        public static double snapRowEmptyDensity;
-        public static double snapColEmptyDensity;
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
@@ -135,7 +132,7 @@ namespace WFInfo
         public Settings()
         {
             InitializeComponent();
-            DataContext = RelicsViewModel.Instance;
+            DataContext = SettingsViewModel.Instance;
         }
 
         public void populate()
@@ -879,6 +876,7 @@ namespace WFInfo
         {
             settingsObj["SnapMultiThreaded"] = SnapItThreadCheckbox.IsChecked.Value;
             snapMultiThreaded = SnapItThreadCheckbox.IsChecked.Value;
+            
             Save();
         }
     }

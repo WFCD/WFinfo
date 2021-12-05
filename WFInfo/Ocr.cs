@@ -144,13 +144,15 @@ namespace WFInfo
        
         private static ITesseractService _tesseractService;
         private static ISoundPlayer _soundPlayer;
+        private static IReadOnlyApplicationSettings _settings;
 
-        public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer)
+        public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer, IReadOnlyApplicationSettings settings)
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
             _tesseractService = tesseractService;
             _tesseractService.Init();
-            _soundPlayer = soundPlayer; 
+            _soundPlayer = soundPlayer;
+            _settings = settings;
         }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
@@ -889,9 +891,9 @@ namespace WFInfo
             int rowHeight = 0;
             while (i < filteredImage.Height)
             {
-                if ( (double)(rowHits[i]) / filteredImage.Width > Settings.snapRowTextDensity) {
+                if ( (double)(rowHits[i]) / filteredImage.Width > _settings.SnapRowTextDensity) {
                     int j = 0;
-                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > Settings.snapRowEmptyDensity)
+                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > _settings.SnapRowEmptyDensity)
                     {
                         j++;
                     }
@@ -941,10 +943,10 @@ namespace WFInfo
             i = 0;
             while (i + 1< filteredImage.Width)
             {
-                if ((double)(colHits[i]) / filteredImage.Height < Settings.snapColEmptyDensity)
+                if ((double)(colHits[i]) / filteredImage.Height < _settings.SnapColEmptyDensity)
                 {
                     int j = 0;
-                    while (i + j + 1< filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < Settings.snapColEmptyDensity)
+                    while (i + j + 1< filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < _settings.SnapColEmptyDensity)
                     {
                         j++;
                     }
