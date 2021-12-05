@@ -15,7 +15,10 @@ namespace WFInfo
 {
     public class ApplicationSettings : IReadOnlyApplicationSettings
     {
-        public static IReadOnlyApplicationSettings GlobalReadonlySettings { get; } = new ApplicationSettings();
+        public static IReadOnlyApplicationSettings GlobalReadonlySettings => GlobalSettings;
+        internal static ApplicationSettings GlobalSettings { get; } = new ApplicationSettings();
+        [JsonIgnore]
+        public bool Initialized { get; set; } = false;
         public Display Display { get; set; } = Display.Overlay;
         public int MainWindowLocation_X { get; private set; } = 300;
         public int MainWindowLocation_Y { get; private set; } = 300;
@@ -78,7 +81,6 @@ namespace WFInfo
     {
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         private readonly SettingsViewModel _viewModel;
-        public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
 
         public static MouseButton backupMouseVal = MouseButton.Left;
         private static MouseButton activeMouseVal = MouseButton.Left;
@@ -165,7 +167,7 @@ namespace WFInfo
 
         public static void Save()
         {
-            File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(settingsObj, Formatting.Indented));
+            File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(ApplicationSettings.GlobalSettings, Formatting.Indented));
         }
 
         private void Hide(object sender, RoutedEventArgs e)
@@ -194,7 +196,6 @@ namespace WFInfo
         {
             _viewModel.Display = Display.Overlay;
             Overlay_sliders.Visibility = Visibility.Visible;
-            clipboardCheckbox.IsChecked = (bool)settingsObj["Clipboard"];
             clipboardCheckbox.IsEnabled = true;
             Save();
         }

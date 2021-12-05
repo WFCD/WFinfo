@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Newtonsoft.Json;
 
 namespace WFInfo
 {
@@ -83,15 +84,16 @@ namespace WFInfo
 
         public void InitializeSettings()
         {
-            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json") && Settings.settingsObj == null)
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json") && !ApplicationSettings.GlobalSettings.Initialized)
             {
-                Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
+                var jsonText = File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json");
+                JsonConvert.PopulateObject(jsonText, ApplicationSettings.GlobalSettings);
+                ApplicationSettings.GlobalSettings.Initialized = true;
 
             }
             else
             {
-                if (Settings.settingsObj == null)
-                    Settings.settingsObj = new JObject();
+                ApplicationSettings.GlobalSettings.Initialized = true;
                 welcomeDialogue = new WelcomeDialogue();
             }
 

@@ -344,6 +344,6 @@ namespace WFInfo
             _settings = settings;
         }
 
-        public static SettingsViewModel Instance { get; }= new SettingsViewModel(new ApplicationSettings());
+        public static SettingsViewModel Instance { get; }= new SettingsViewModel(ApplicationSettings.GlobalSettings);
     }
 }
