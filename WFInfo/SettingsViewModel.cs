@@ -1,5 +1,9 @@
+using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace WFInfo
 {
@@ -339,9 +343,22 @@ namespace WFInfo
                 RaisePropertyChanged(); 
             }
         }
+        
+        private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         public SettingsViewModel(ApplicationSettings settings)
         {
             _settings = settings;
+            this.PropertyChanged += (sender, args) => Save();
+        }
+
+        public void Save()
+        {
+            var jsonSettings = new JsonSerializerSettings()
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
+            jsonSettings.Converters.Add(new StringEnumConverter());
+            File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(ApplicationSettings.GlobalSettings, Formatting.Indented,jsonSettings));
         }
 
         public static SettingsViewModel Instance { get; }= new SettingsViewModel(ApplicationSettings.GlobalSettings);

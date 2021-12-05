@@ -39,7 +39,9 @@ namespace WFInfo
             }
         }
 
+        [JsonIgnore]
         public bool IsOverlaySelected => Display == Display.Overlay;
+        [JsonIgnore]
         public bool IsLightSelected => Display == Display.Light;
         public string ActivationKey { get; set; } = "Snapshot";
         // public Key ActivationKeyKey { get; } = Key.None;
@@ -92,7 +94,6 @@ namespace WFInfo
     /// </summary>
     public partial class Settings : Window
     {
-        private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         private readonly SettingsViewModel _viewModel;
         public SettingsViewModel SettingsViewModel => _viewModel;
 
@@ -123,7 +124,9 @@ namespace WFInfo
 
         public Settings()
         {
+            
             InitializeComponent();
+            DataContext = this;
             // DataContext = SettingsViewModel.Instance;
             _viewModel = SettingsViewModel.Instance;
         }
@@ -181,12 +184,7 @@ namespace WFInfo
 
         public static void Save()
         {
-            var jsonSettings = new JsonSerializerSettings()
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            };
-            jsonSettings.Converters.Add(new StringEnumConverter());
-            File.WriteAllText(settingsDirectory, JsonConvert.SerializeObject(ApplicationSettings.GlobalSettings, Formatting.Indented,jsonSettings));
+            WFInfo.SettingsViewModel.Instance.Save();
         }
 
         private void Hide(object sender, RoutedEventArgs e)
