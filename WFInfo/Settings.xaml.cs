@@ -49,17 +49,6 @@ namespace WFInfo
         public double SnapRowEmptyDensity { get; set; } = 0.01;
         public double SnapColEmptyDensity { get; set; } = 0.005;
     }
-    public class SettingsViewModel
-    {
-        private ApplicationSettings _settings;
-
-        public SettingsViewModel(ApplicationSettings settings)
-        {
-            _settings = settings;
-        }
-
-        public static SettingsViewModel Instance { get; }= new SettingsViewModel(new ApplicationSettings());
-    }
 
     /// <summary>
     /// Interaction logic for Settings.xaml
@@ -67,6 +56,7 @@ namespace WFInfo
     public partial class Settings : Window
     {
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
+        private readonly SettingsViewModel _viewModel;
         public static JObject settingsObj; // contains settings {<SettingName>: "<Value>", ...}
 
         public static MouseButton backupMouseVal = MouseButton.Left;
@@ -121,7 +111,6 @@ namespace WFInfo
         public static double snapItHorizontalNameMargin;
         public static bool doCustomNumberBoxWidth;
         public static double snapItNumberBoxWidth;
-        public static bool snapMultiThreaded;
         public static bool auto { get; internal set; }
         public static bool clipboard { get; internal set; }
         public static bool detectScaling { get; internal set; }
@@ -133,6 +122,7 @@ namespace WFInfo
         {
             InitializeComponent();
             DataContext = SettingsViewModel.Instance;
+            _viewModel = SettingsViewModel.Instance;
         }
 
         public void populate()
@@ -865,19 +855,5 @@ namespace WFInfo
             }
         }
 
-        private void SnapItemCountCheckbox_Click(object sender, RoutedEventArgs e)
-        {
-            settingsObj["DoSnapItCount"] = SnapItemCountCheckbox.IsChecked.Value;
-            doSnapItCount = SnapItemCountCheckbox.IsChecked.Value;
-            Save();
-        }
-
-        private void SnapItThreadCheckbox_Click(object sender, RoutedEventArgs e)
-        {
-            settingsObj["SnapMultiThreaded"] = SnapItThreadCheckbox.IsChecked.Value;
-            snapMultiThreaded = SnapItThreadCheckbox.IsChecked.Value;
-            
-            Save();
-        }
     }
 }

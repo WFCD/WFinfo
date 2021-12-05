@@ -197,66 +197,6 @@ namespace WFInfo
             }
             Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
 
-            if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
-                Settings.settingsObj["HighContrast"] = false;
-            Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
-
-            if (!Settings.settingsObj.TryGetValue("OverlayXOffsetValue", out _))
-                Settings.settingsObj["OverlayXOffsetValue"] = 0;
-            Settings.overlayXOffsetValue = Convert.ToInt32(Settings.settingsObj.GetValue("OverlayXOffsetValue"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("OverlayYOffsetValue", out _))
-                Settings.settingsObj["OverlayYOffsetValue"] = 0;
-            Settings.overlayYOffsetValue = Convert.ToInt32(Settings.settingsObj.GetValue("OverlayYOffsetValue"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("AutoList", out _))
-                Settings.settingsObj["AutoList"] = false;
-            Settings.automaticListing = (bool)Settings.settingsObj.GetValue("AutoList");
-
-            if (!Settings.settingsObj.TryGetValue("DoDoubleCheck", out _))
-                Settings.settingsObj["DoDoubleCheck"] = true;
-            Settings.doDoubleCheck = (bool)Settings.settingsObj.GetValue("DoDoubleCheck");
-            
-            if (!Settings.settingsObj.TryGetValue("MaximumEfficiencyValue", out _))
-                Settings.settingsObj["MaximumEfficiencyValue"] = 9.5;
-            Settings.maximumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MaximumEfficiencyValue"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("MinimumEfficiencyValue", out _))
-                Settings.settingsObj["MinimumEfficiencyValue"] = 4.5;
-            Settings.minimumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MinimumEfficiencyValue"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("DoSnapItCount", out _))
-                Settings.settingsObj["DoSnapItCount"] = true;
-            Settings.doSnapItCount = (bool)Settings.settingsObj.GetValue("DoSnapItCount");
-
-            if (!Settings.settingsObj.TryGetValue("SnapItCountThreshold", out _))
-                Settings.settingsObj["SnapItCountThreshold"] = 0;
-            Settings.snapItCountThreshold = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItCountThreshold"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapItEdgeWidth", out _))
-                Settings.settingsObj["SnapItEdgeWidth"] = 1;
-            Settings.snapItEdgeWidth = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItEdgeWidth"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapItEdgeRadius", out _))
-                Settings.settingsObj["SnapItEdgeRadius"] = 1;
-            Settings.snapItEdgeRadius = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItEdgeRadius"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapItHorizontalNameMargin", out _))
-                Settings.settingsObj["SnapItHorizontalNameMargin"] = 0;
-            Settings.snapItHorizontalNameMargin = Convert.ToDouble(Settings.settingsObj.GetValue("SnapItHorizontalNameMargin"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("DoCustomNumberBoxWidth", out _))
-                Settings.settingsObj["DoCustomNumberBoxWidth"] = false;
-            Settings.doCustomNumberBoxWidth = (bool)Settings.settingsObj.GetValue("DoCustomNumberBoxWidth");
-
-            if (!Settings.settingsObj.TryGetValue("SnapItNumberBoxWidth", out _))
-                Settings.settingsObj["SnapItNumberBoxWidth"] = 0.4;
-            Settings.snapItNumberBoxWidth = Convert.ToDouble(Settings.settingsObj.GetValue("SnapItNumberBoxWidth"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapMultiThreaded", out _))
-                Settings.settingsObj["SnapMultiThreaded"] = true;
-            Settings.snapMultiThreaded = (bool)Settings.settingsObj.GetValue("SnapMultiThreaded");
-
             Settings.Save();
 
             RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
