@@ -743,10 +743,10 @@ namespace WFInfo
 
         private void SnapItCountThreshold_number_box_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
-            {
-                hidden.Focus();
-            }
+            // if (e.Key == Key.Enter)
+            // {
+            //     hidden.Focus();
+            // }
             var num = Regex.Replace(SnapItCountThreshold_number_box.Text, "[^0-9.]", "");
             SnapItCountThreshold_number_box.Text = num;
         }

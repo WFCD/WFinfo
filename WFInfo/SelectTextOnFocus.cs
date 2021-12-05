@@ -81,5 +81,4 @@ namespace WFInfo
             @object.SetValue(ActiveProperty, value);
         }
     }
-
 }

@@ -59,6 +59,8 @@
                         Value="{StaticResource Roboto}"/>
                 <Setter Property="wfInfo:SelectTextOnFocus.Active"
                         Value="True"/>
+                <Setter Property="wfInfo:FocusAdvancement.AdvancesByEnterKey"
+                        Value="True"/>
             </Style>
 
             <Style TargetType="CheckBox"
