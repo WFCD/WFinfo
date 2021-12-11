@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
@@ -129,6 +130,15 @@ namespace WFInfo
             DataContext = this;
             // DataContext = SettingsViewModel.Instance;
             _viewModel = SettingsViewModel.Instance;
+            _viewModel.PropertyChanged += ViewModelOnPropertyChanged;
+        }
+
+        private void ViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName == nameof(SettingsViewModel.OverlayYOffsetValue))
+            {
+                
+            }
         }
 
         public void populate()
@@ -570,82 +580,5 @@ namespace WFInfo
             hidden.Focus();
         }
 
-
-        private void OverlayXOffset_number_box_KeyDown(object sender, KeyEventArgs e)
-        {
-            var numStr = Regex.Replace(OverlayXOffset_number_box.Text, @"[^-?\d]+$", "");
-            OverlayXOffset_number_box.Text = numStr;
-        }
-        
-        private void OverlayXOffset_number_box_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (IsValidOverlayOffset(OverlayXOffset_number_box.Text))
-            {
-                _viewModel.OverlayXOffsetValue = ParseOverlayOffsetStringToInt(OverlayXOffset_number_box.Text);
-
-                int width = 2000; // presume bounding
-                if (OCR.VerifyWarframe())
-                {
-                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
-                    {
-                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
-                    }
-                    width = OCR.window.Width;
-                }
-                _viewModel.OverlayXOffsetValue = (_viewModel.OverlayXOffsetValue <= -1 * width / 2) ? (-1 * width / 2) : (_viewModel.OverlayXOffsetValue >= width / 2) ? (width / 2) : _viewModel.OverlayXOffsetValue; // clamp value to valid bound
-
-                OverlayXOffset_number_box.Text = _viewModel.OverlayXOffsetValue.ToString(Main.culture);
-                Save();
-            }
-        }
-
-        private void OverlayYOffset_number_box_KeyDown(object sender, KeyEventArgs e)
-        {
-            var numStr = Regex.Replace(OverlayYOffset_number_box.Text, @"[^-?\d]+$", "");
-            OverlayYOffset_number_box.Text = numStr;
-        }
-
-        private void OverlayYOffset_number_box_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (IsValidOverlayOffset(OverlayYOffset_number_box.Text))
-            {
-                // -1 is for inverting the y-coord so that the user is presented with an increasing value from bottom to top
-                _viewModel.OverlayYOffsetValue = (-1) * ParseOverlayOffsetStringToInt(OverlayYOffset_number_box.Text);
-
-                int height = 2000; // presume bounding
-                if (OCR.VerifyWarframe())
-                {
-                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
-                    {
-                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
-                    }
-                    height = OCR.window.Height;
-                }
-                _viewModel.OverlayYOffsetValue = (_viewModel.OverlayYOffsetValue <= -1 * height / 2) ? (-1 * height / 2) : (_viewModel.OverlayYOffsetValue >= height / 2) ? (height / 2) : _viewModel.OverlayYOffsetValue; // clamp value to valid bound
-
-                OverlayYOffset_number_box.Text = (-1 * _viewModel.OverlayYOffsetValue).ToString(Main.culture);
-                Save();
-            }
-        }
-
-        private bool IsValidOverlayOffset(string offsetValue)
-        {
-            string pattern = @"[^\d]+$";
-            return !Regex.IsMatch(offsetValue, pattern);
-        }
-
-        private int ParseOverlayOffsetStringToInt(string offset)
-        {
-            try
-            {
-                var num = Regex.Replace(offset, @"[^-?\d]+$", "");
-                return int.Parse(num, Main.culture);
-            }
-            catch (Exception exception)
-            {
-                Main.AddLog($"Unable to parse overlay offset value, new val would have been: {offset} Exception: {exception}");
-                return 0;
-            }
-        }
     }
 }

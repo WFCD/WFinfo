@@ -190,7 +190,16 @@ namespace WFInfo
         {
             get => _settings.OverlayXOffsetValue;
             set { 
-                _settings.OverlayXOffsetValue = value;
+                int width = 2000; // presume bounding
+                if (OCR.VerifyWarframe())
+                {
+                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
+                    {
+                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
+                    }
+                    width = OCR.window.Width;
+                }
+                _settings.OverlayXOffsetValue = (value <= -1 * width / 2) ? (-1 * width / 2) : (value >= width / 2) ? (width / 2) : value; // clamp value to valid bound
                 RaisePropertyChanged(); 
             }
         }
@@ -199,7 +208,16 @@ namespace WFInfo
         {
             get => _settings.OverlayYOffsetValue;
             set { 
-                _settings.OverlayYOffsetValue = value;
+                int height = 2000; // presume bounding
+                if (OCR.VerifyWarframe())
+                {
+                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
+                    {
+                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
+                    }
+                    height = OCR.window.Height;
+                }
+                _settings.OverlayYOffsetValue = (value <= -1 * height / 2) ? (-1 * height / 2) : (value >= height / 2) ? (height / 2) : value; // clamp value to valid bound
                 RaisePropertyChanged(); 
             }
         }

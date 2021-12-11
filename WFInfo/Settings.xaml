@@ -178,6 +178,9 @@
                        Margin="0,0,-1,0" />
                 <DockPanel LastChildFill="False"
                            DockPanel.Dock="Top">
+                    <DockPanel.Resources>
+                        <wfInfo:NegateIntConverter x:Key="NegateIntConverter" />
+                    </DockPanel.Resources>
                     <Label Content="X"
                            DockPanel.Dock="Left"
                            HorizontalContentAlignment="Center"
@@ -187,18 +190,18 @@
                              DockPanel.Dock="Left"
                              ToolTip="The X Offset of the overlay. Positive values shift the overlay to the right."
                              TextWrapping="Wrap"
-                             Width="90"
-                             KeyDown="OverlayXOffset_number_box_KeyDown"
-                             KeyUp="OverlayXOffset_number_box_KeyUp"
-                             Text="0" />
+                             Text="{Binding SettingsViewModel.OverlayXOffsetValue, Mode=TwoWay}"
+                             wfInfo:NumericOnlyEntry.RegexFilter="^-?[0-9]*$"
+                             Width="90" />
 
                     <TextBox x:Name="OverlayYOffset_number_box"
                              DockPanel.Dock="Right"
                              ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top."
                              Width="90"
-                             KeyDown="OverlayYOffset_number_box_KeyDown"
-                             KeyUp="OverlayYOffset_number_box_KeyUp"
-                             Text="0" />
+                             Text="{Binding SettingsViewModel.OverlayYOffsetValue, Mode=TwoWay
+                             , Converter={StaticResource NegateIntConverter}}" 
+                             wfInfo:NumericOnlyEntry.RegexFilter="^-?[0-9]*$"
+                              />
                     <Label Content="Y"
                            DockPanel.Dock="Right"
                            HorizontalContentAlignment="Center"
