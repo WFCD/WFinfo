@@ -262,14 +262,13 @@
                        Grid.Row="0"
                        Grid.Column="0" />
                 <TextBox x:Name="Activation_key_box"
+                         Style="{StaticResource KeyBindTextboxStyle}"
                          Grid.Row="0"
                          Grid.Column="1"
                          ToolTip="Key to activate the processing. Use modifiers below to achieve other actions"
-                         Text="TextBox"
+                         Text="{Binding SettingsViewModel.ActivationKeyDisplay, Mode=OneWay}"
                          IsReadOnly="True"
-                         GotFocus="ActivationFocus"
                          KeyUp="ActivationUp"
-                         LostFocus="ActivationLost"
                          VerticalAlignment="Top" />
                 <TextBlock x:Name="hidden"
                            Focusable="True"

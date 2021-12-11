@@ -40,8 +40,15 @@ namespace WFInfo
             {
                 _settings.ActivationKey = value;
                 RaisePropertyChanged();
+                RaisePropertyChanged(nameof(ActivationKeyDisplay));
             }
         }
+
+        public string ActivationKeyDisplay =>
+            _settings.ActivationMouseButton == null
+                ? KeyNameHelpers.GetKeyName(_settings.ActivationKeyKey ?? Key.None)
+                : _settings.ActivationMouseButton.ToString();
+
         public Key DebugModifierKey
         {
             get => _settings.DebugModifierKey;

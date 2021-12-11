@@ -45,8 +45,8 @@ namespace WFInfo
         [JsonIgnore]
         public bool IsLightSelected => Display == Display.Light;
         public string ActivationKey { get; set; } = "Snapshot";
-        // public Key ActivationKeyKey { get; } = Key.None;
-        // public MouseButton ActivationMouseButton { get;} = MouseButton.Left;
+        public Key? ActivationKeyKey => Enum.TryParse<Key>(ActivationKey, out var res) ? res : (Key?)null;
+        public MouseButton? ActivationMouseButton => Enum.TryParse<MouseButton>(ActivationKey, out var res) ? res : (MouseButton?)null;
         public Key DebugModifierKey { get; set; } = Key.LeftShift;
         public Key SearchItModifierKey { get; set; } = Key.OemTilde;
         public Key SnapitModifierKey { get; set; } = Key.LeftCtrl;
@@ -98,29 +98,6 @@ namespace WFInfo
         private readonly SettingsViewModel _viewModel;
         public SettingsViewModel SettingsViewModel => _viewModel;
 
-        public static MouseButton backupMouseVal = MouseButton.Left;
-        private static MouseButton activeMouseVal = MouseButton.Left;
-        public static MouseButton ActivationMouseButton
-        {
-            get { return activeMouseVal; }
-            set
-            {
-                activeMouseVal = value;
-                backupMouseVal = value;
-            }
-        }
-
-        public static Key backupKeyVal = Key.None;
-        private static Key activeKeyVal = Key.None;
-        public static Key ActivationKey
-        {
-            get { return activeKeyVal; }
-            set
-            {
-                activeKeyVal = value;
-                backupKeyVal = value;
-            }
-        }
         public static KeyConverter converter = new KeyConverter();
 
         public Settings()
@@ -130,15 +107,6 @@ namespace WFInfo
             DataContext = this;
             // DataContext = SettingsViewModel.Instance;
             _viewModel = SettingsViewModel.Instance;
-            _viewModel.PropertyChanged += ViewModelOnPropertyChanged;
-        }
-
-        private void ViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if(e.PropertyName == nameof(SettingsViewModel.OverlayYOffsetValue))
-            {
-                
-            }
         }
 
         public void populate()
@@ -188,7 +156,6 @@ namespace WFInfo
 
             SnapItCountThreshold_number_box.Text = _viewModel.SnapItCountThreshold.ToString(Main.culture);
 
-            ResetActivationKeyText();
             Focus();
         }
 
@@ -262,14 +229,11 @@ namespace WFInfo
         }
 
 
-        private void ActivationDown(object sender, KeyEventArgs e)
-        {
-            e.Handled = true;
-        }
+        public bool IsActivationFocused => Activation_key_box.IsFocused;
 
         private void ActivationMouseDown(object sender, MouseEventArgs e)
         {
-            if (activeKeyVal == Key.None && ActivationMouseButton == MouseButton.Left)
+            if (IsActivationFocused)
             {
                 MouseButton key = MouseButton.Left;
 
@@ -283,64 +247,25 @@ namespace WFInfo
                 if (key != MouseButton.Left)
                 {
                     e.Handled = true;
-                    //Set key to disabled 
-                    ActivationKey = Key.None;
-
-                    ActivationMouseButton = key;
-                    Activation_key_box.Text = key.ToString();
                     _viewModel.ActivationKey = key.ToString();
                     hidden.Focus();
-                    Save();
                 }
             }
-        }
-
-        private void ActivationFocus(object sender, RoutedEventArgs e)
-        {
-            activeKeyVal = Key.None;
-            activeMouseVal = MouseButton.Left;
-            Activation_key_box.Text = "";
         }
 
         private void ActivationUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
 
-            //Set mouse button to disabled (never gonna use left as a trigger)
-            ActivationMouseButton = MouseButton.Left;
-
             if (e.Key == _viewModel.SearchItModifierKey || e.Key == _viewModel.SnapitModifierKey || e.Key == _viewModel.MasterItModifierKey)
             {
-                Activation_key_box.Text = KeyNameHelpers.GetKeyName(ActivationKey);
                 hidden.Focus();
                 return;
             }
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
-            ActivationKey = key;
-            Activation_key_box.Text = KeyNameHelpers.GetKeyName(ActivationKey);
             _viewModel.ActivationKey = key.ToString();
             hidden.Focus();
-            Save();
-        }
-
-        private void ResetActivationKeyText()
-        {
-            if (backupKeyVal != Key.None)
-            {
-                activeKeyVal = backupKeyVal;
-                Activation_key_box.Text = KeyNameHelpers.GetKeyName(ActivationKey);
-            }
-            else
-            {
-                activeMouseVal = backupMouseVal;
-                Activation_key_box.Text = ActivationMouseButton.ToString();
-            }
-        }
-
-        private void ActivationLost(object sender, RoutedEventArgs e)
-        {
-            ResetActivationKeyText();
         }
 
         private void ClickCreateDebug(object sender, RoutedEventArgs e)

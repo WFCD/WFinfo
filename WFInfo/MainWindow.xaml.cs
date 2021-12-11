@@ -106,21 +106,18 @@ namespace WFInfo
 
             try
             {
-                Settings.ActivationKey =
-                    (Key)Enum.Parse(typeof(Key), _settingsViewModel.ActivationKey);
+                Enum.Parse(typeof(Key), _settingsViewModel.ActivationKey);
             }
             catch
             {
                 try
                 {
-                    Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton),
-                        _settingsViewModel.ActivationKey);
+                    Enum.Parse(typeof(MouseButton), _settingsViewModel.ActivationKey);
                 }
                 catch
                 {
                     Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
                     _settingsViewModel.ActivationKey = "Snapshot";
-                    Settings.ActivationKey = Key.Snapshot;
                 }
             }
 

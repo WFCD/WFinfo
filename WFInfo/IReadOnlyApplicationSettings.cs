@@ -19,8 +19,8 @@ namespace WFInfo
         bool IsOverlaySelected { get; }
         bool IsLightSelected { get; }
         string ActivationKey { get; }
-        // Key ActivationKeyKey { get; }
-        // MouseButton ActivationMouseButton { get; }
+        Key? ActivationKeyKey { get; }
+        MouseButton? ActivationMouseButton { get; }
         Key DebugModifierKey { get; }
         Key SearchItModifierKey { get; }
         Key SnapitModifierKey { get; }

@@ -255,7 +255,7 @@ namespace WFInfo
         {
             latestActive = DateTime.UtcNow.AddMinutes(minutesTillAfk);
 
-            if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
+            if (_settings.ActivationMouseButton != null && key == _settings.ActivationMouseButton)
             { //check if user pressed activation key
 
 
@@ -311,7 +311,7 @@ namespace WFInfo
             }
 
             
-            if (key == Settings.ActivationKey)
+            if (key == _settings.ActivationKeyKey)
             { //check if user pressed activation key
 
                 ActivationKeyPressed(key);
