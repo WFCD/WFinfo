@@ -720,27 +720,5 @@ namespace WFInfo
             }
             
         }
-
-        private void SnapItCountThreshold_number_box_KeyDown(object sender, KeyEventArgs e)
-        {
-            var num = Regex.Replace(SnapItCountThreshold_number_box.Text, "[^0-9.]", "");
-            SnapItCountThreshold_number_box.Text = num;
-        }
-
-        private void SnapItCountThreshold_number_box_KeyUp(object sender, KeyEventArgs e)
-        {
-            try
-            {
-                var num = Regex.Replace(SnapItCountThreshold_number_box.Text, "[^0-9.]", "");
-                _viewModel.SnapItCountThreshold = int.Parse(num);
-                Save();
-            }
-            catch (Exception exception)
-            {
-                Main.AddLog($"Unable to parse snapit threshold change, new val would have been: {SnapItCountThreshold_number_box.Text} Exception: {exception}");
-                SnapItCountThreshold_number_box.Text = _viewModel.SnapItCountThreshold.ToString();
-            }
-        }
-
     }
 }

@@ -32,12 +32,10 @@ namespace WFInfo
             if (e.NewValue is string)
             {
                 element.PreviewTextInput += PreviewTextInputHandler;
-                element.PreviewKeyDown += PreviewKeyDownHandler;
             }
             else
             {
                 element.PreviewTextInput -= PreviewTextInputHandler;
-                element.PreviewKeyDown -= PreviewKeyDownHandler;
             }
 
         }
@@ -62,42 +60,7 @@ namespace WFInfo
         }
 
         private static string _emptyValue = "";
-        static void PreviewKeyDownHandler(object sender, KeyEventArgs e)
-        {
-            var textBox = sender as TextBox;
-            if (string.IsNullOrEmpty(_emptyValue))
-                return;
 
-            string text = null;
-
-            // Handle the Backspace key
-            if (e.Key == Key.Back)
-            {
-                if (!TreatSelectedText(textBox, out text))
-                {
-                    if (textBox.SelectionStart > 0)
-                        text = textBox.Text.Remove(textBox.SelectionStart - 1, 1);
-                }
-            }
-            // Handle the Delete key
-            else if (e.Key == Key.Delete)
-            {
-                // If text was selected, delete it
-                if (!TreatSelectedText(textBox, out text) && textBox.Text.Length > textBox.SelectionStart)
-                {
-                    // Otherwise delete next symbol
-                    text = textBox.Text.Remove(textBox.SelectionStart, 1);
-                }
-            }
-
-            if (text == string.Empty)
-            {
-                textBox.Text = _emptyValue;
-                if (e.Key == Key.Back)
-                    textBox.SelectionStart++;
-                e.Handled = true;
-            }
-        }
         /// <summary>
         ///     Handle text selection
         /// </summary>
@@ -119,7 +82,6 @@ namespace WFInfo
             return true;
         }
 
-        // private static string _regex = "[0-9.]";
         private static int _maxLength = 10;
         /// <summary>
         ///     Validate certain text by our regular expression and text length conditions

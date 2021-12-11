@@ -156,7 +156,7 @@
                 <TextBox x:Name="Displaytime_number_box"
                          ToolTip="The time in milliseconds the overlays will be displayed on screen"
                          Text="{Binding SettingsViewModel.Delay, Mode=TwoWay}"
-                         wfInfo:NumericOnlyEntry.RegexFilter="[0-9\.,]" />
+                         wfInfo:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$" />
 
                 <CheckBox x:Name="HighlightCheckbox"
                           Content="Highlight"
@@ -213,10 +213,9 @@
                        ToolTip="Snap-It item count noise filtering threshhold" />
                 <TextBox x:Name="SnapItCountThreshold_number_box"
                          ToolTip="Threshold for number detection noise filtering. Higher = More aggressive, 3 or 4 usually works best"
-                         KeyDown="SnapItCountThreshold_number_box_KeyDown"
-                         KeyUp="SnapItCountThreshold_number_box_KeyUp"
-                         VerticalAlignment="Top"
-                         Text="4" />
+                         Text="{Binding SettingsViewModel.SnapItCountThreshold, Mode=TwoWay}"
+                         wfInfo:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
+                         VerticalAlignment="Top" />
 
                 <CheckBox x:Name="SnapItemCountCheckbox"
                           Content="Count Item"
