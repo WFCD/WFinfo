@@ -111,8 +111,6 @@ namespace WFInfo
 
         public void populate()
         {
-            // DataContext = this;
-
             Overlay_sliders.Visibility = Visibility.Collapsed; // default hidden for the majority of states
 
             if (_viewModel.Display == Display.Overlay)
@@ -146,15 +144,6 @@ namespace WFInfo
                     localeItem.IsSelected = true;
                 }
             }
-
-            OverlayXOffset_number_box.Text = _viewModel.OverlayXOffsetValue.ToString(Main.culture);
-            OverlayYOffset_number_box.Text = (-1 * _viewModel.OverlayYOffsetValue).ToString(Main.culture);
-
-            EfficiencyMax_number_box.Text = _viewModel.MaximumEfficiencyValue.ToString(Main.culture);
-            EfficiencyMin_number_box.Text = _viewModel.MinimumEfficiencyValue.ToString(Main.culture);
-            Displaytime_number_box.Text = _viewModel.Delay.ToString(Main.culture);
-
-            SnapItCountThreshold_number_box.Text = _viewModel.SnapItCountThreshold.ToString(Main.culture);
 
             Focus();
         }
