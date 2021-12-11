@@ -233,12 +233,12 @@ namespace WFInfo
             if (_viewModel.Auto)
             {
                 var message = "Do you want to enable the new auto mode?" + Environment.NewLine +
-                "This connects to the warframe debug logger to detect the reward window." + Environment.NewLine +
-                "The logger contains info about your pc specs, your public IP, and your email." + Environment.NewLine +
-                "We will be ignoring all of that and only looking for the Fissure Reward Screen." + Environment.NewLine +
-                "We will begin listening after your approval, and it is completely inactive currently." + Environment.NewLine +
-                "If you opt-in, we will be using a windows method to receive this info quicker, but it is the same info being written to EE.log, which you can check before agreeing." + Environment.NewLine +
-                "If you want more information or have questions, please contact us on Discord.";
+                              "This connects to the warframe debug logger to detect the reward window." + Environment.NewLine +
+                              "The logger contains info about your pc specs, your public IP, and your email." + Environment.NewLine +
+                              "We will be ignoring all of that and only looking for the Fissure Reward Screen." + Environment.NewLine +
+                              "We will begin listening after your approval, and it is completely inactive currently." + Environment.NewLine +
+                              "If you opt-in, we will be using a windows method to receive this info quicker, but it is the same info being written to EE.log, which you can check before agreeing." + Environment.NewLine +
+                              "If you want more information or have questions, please contact us on Discord.";
                 MessageBoxResult messageBoxResult = MessageBox.Show(message, "Automation Mode Opt-In", MessageBoxButton.YesNo);
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
@@ -311,14 +311,14 @@ namespace WFInfo
 
             if (e.Key == _viewModel.SearchItModifierKey || e.Key == _viewModel.SnapitModifierKey || e.Key == _viewModel.MasterItModifierKey)
             {
-                Activation_key_box.Text = GetKeyName(ActivationKey);
+                Activation_key_box.Text = KeyNameHelpers.GetKeyName(ActivationKey);
                 hidden.Focus();
                 return;
             }
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
             ActivationKey = key;
-            Activation_key_box.Text = GetKeyName(ActivationKey);
+            Activation_key_box.Text = KeyNameHelpers.GetKeyName(ActivationKey);
             _viewModel.ActivationKey = key.ToString();
             hidden.Focus();
             Save();
@@ -329,17 +329,13 @@ namespace WFInfo
             if (backupKeyVal != Key.None)
             {
                 activeKeyVal = backupKeyVal;
-                Activation_key_box.Text = GetKeyName(ActivationKey);
+                Activation_key_box.Text = KeyNameHelpers.GetKeyName(ActivationKey);
             }
             else
             {
                 activeMouseVal = backupMouseVal;
                 Activation_key_box.Text = ActivationMouseButton.ToString();
             }
-
-            Searchit_key_box.Text = GetKeyName(_viewModel.SearchItModifierKey);
-            Snapit_key_box.Text = GetKeyName(_viewModel.SnapitModifierKey);
-            Masterit_key_box.Text = GetKeyName(_viewModel.MasterItModifierKey);
         }
 
         private void ActivationLost(object sender, RoutedEventArgs e)
@@ -363,101 +359,11 @@ namespace WFInfo
             _ = OCR.updateEngineAsync();
 
             _ = Task.Run(async () =>
-              {
-                  Main.dataBase.ReloadItems();
-              });
-        }
-
-        public static string GetKeyName(Key key)
-        {
-            char temp = GetCharFromKey(key);
-            switch (key)
             {
-                case Key.OemTilde:
-                    return "Tilde";
-                case Key.Return:
-                    return "Enter";
-                case Key.Next:
-                    return "PageDown";
-                case Key.NumPad0:
-                case Key.NumPad1:
-                case Key.NumPad2:
-                case Key.NumPad3:
-                case Key.NumPad4:
-                case Key.NumPad5:
-                case Key.NumPad6:
-                case Key.NumPad7:
-                case Key.NumPad8:
-                case Key.NumPad9:
-                    return key.ToString();
-                case Key.Decimal:
-                    return "NumpadDot";
-                case Key.Add:
-                case Key.Subtract:
-                case Key.Multiply:
-                case Key.Divide:
-                    return "NumPad" + key.ToString().Substring(0, 3);
-            }
-            if (temp > ' ')
-                return temp.ToString().ToUpper();
-            return key.ToString();
+                Main.dataBase.ReloadItems();
+            });
         }
 
-        // Black magic below - blame: https://stackoverflow.com/a/5826175
-
-        public enum MapType : uint
-        {
-            MAPVK_VK_TO_VSC = 0x0,
-            MAPVK_VSC_TO_VK = 0x1,
-            MAPVK_VK_TO_CHAR = 0x2,
-            MAPVK_VSC_TO_VK_EX = 0x3,
-        }
-
-        [DllImport("user32.dll")]
-        private static extern int ToUnicode(
-            uint wVirtKey,
-            uint wScanCode,
-            byte[] lpKeyState,
-            [Out, MarshalAs(UnmanagedType.LPWStr, SizeParamIndex = 4)]
-            StringBuilder pwszBuff,
-            int cchBuff,
-            uint wFlags);
-
-        //[DllImport("user32.dll")]
-        //public static extern bool GetKeyboardState(byte[] lpKeyState);
-
-        [DllImport("user32.dll")]
-        private static extern uint MapVirtualKey(uint uCode, MapType uMapType);
-
-        public static char GetCharFromKey(Key key)
-        {
-            char ch = ' ';
-
-            int virtualKey = KeyInterop.VirtualKeyFromKey(key);
-            byte[] keyboardState = new byte[256];
-            //  Disabled to avoid Shifted variants   EX: Shift + \ => |
-            //  But we don't care about the character, we just want the key
-            //  So ignore they current keyboard state
-            //GetKeyboardState(keyboardState);
-
-            uint scanCode = MapVirtualKey((uint)virtualKey, MapType.MAPVK_VK_TO_VSC);
-            StringBuilder stringBuilder = new StringBuilder(2);
-
-            int result = ToUnicode((uint)virtualKey, scanCode, keyboardState, stringBuilder, stringBuilder.Capacity, 0);
-            switch (result)
-            {
-                case -1:
-                    break;
-                case 0:
-                    break;
-                default:
-                    {
-                        ch = stringBuilder[0];
-                        break;
-                    }
-            }
-            return ch;
-        }
 
         private void LightRadioChecked(object sender, RoutedEventArgs e)
         {
@@ -469,99 +375,50 @@ namespace WFInfo
             Save();
         }
 
-        private void Searchit_key_box_GotFocus(object sender, RoutedEventArgs e)
-        {
-            _viewModel.SearchItModifierKey = Key.None;
-            Searchit_key_box.Text = "";
-            backupKeyVal = activeKeyVal;
-            activeKeyVal = Key.NoName;
-        }
-
         private void Searchit_key_box_KeyUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
 
-            if (e.Key == backupKeyVal || e.Key == _viewModel.SnapitModifierKey || e.Key == _viewModel.MasterItModifierKey)
+            if  (e.Key == _viewModel.SnapitModifierKey || e.Key == _viewModel.MasterItModifierKey)
             {
-                Searchit_key_box.Text = GetKeyName(_viewModel.SearchItModifierKey);
                 hidden.Focus();
                 return;
             }
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
             _viewModel.SearchItModifierKey = key;
-            Searchit_key_box.Text = GetKeyName(key);
             hidden.Focus();
-            Save();
-        }
-
-        private void Snapit_key_box_LostFocus(object sender, RoutedEventArgs e)
-        {
-            ResetActivationKeyText();
-        }
-
-        private void Masterit_key_box_LostFocus(object sender, RoutedEventArgs e)
-        {
-            ResetActivationKeyText();
-        }
-
-        private void Searchit_key_box_LostFocus(object sender, RoutedEventArgs e)
-        {
-            ResetActivationKeyText();
         }
 
         private void Snapit_key_box_KeyUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
 
-            if (e.Key == backupKeyVal || e.Key == _viewModel.SearchItModifierKey || e.Key == _viewModel.MasterItModifierKey)
+            if (e.Key == _viewModel.SearchItModifierKey || e.Key == _viewModel.MasterItModifierKey)
             {
-                Snapit_key_box.Text = GetKeyName(_viewModel.SnapitModifierKey);
                 hidden.Focus();
                 return;
             }
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
             _viewModel.SnapitModifierKey = key;
-            Snapit_key_box.Text = GetKeyName(key);
             hidden.Focus();
-            Save();
         }
 
-        private void Snapit_key_box_GotFocus(object sender, RoutedEventArgs e)
-        {
-            _viewModel.SnapitModifierKey = Key.None;
-            Snapit_key_box.Text = "";
-            backupKeyVal = activeKeyVal;
-            activeKeyVal = Key.NoName;
-        }
 
         private void Masterit_key_box_KeyUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
 
-            if (e.Key == backupKeyVal || e.Key == _viewModel.SearchItModifierKey || e.Key == _viewModel.SnapitModifierKey)
+            if (e.Key == _viewModel.SearchItModifierKey || e.Key == _viewModel.SnapitModifierKey)
             {
-                Masterit_key_box.Text = GetKeyName(_viewModel.MasterItModifierKey);
                 hidden.Focus();
                 return;
             }
 
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
             _viewModel.MasterItModifierKey = key;
-            Masterit_key_box.Text = GetKeyName(key);
             hidden.Focus();
-            Save();
         }
-
-        private void Masterit_key_box_GotFocus(object sender, RoutedEventArgs e)
-        {
-            _viewModel.MasterItModifierKey = Key.None;
-            Masterit_key_box.Text = "";
-            backupKeyVal = activeKeyVal;
-            activeKeyVal = Key.NoName;
-        }
-
-
     }
 }

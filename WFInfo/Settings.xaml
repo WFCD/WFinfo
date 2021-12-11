@@ -36,8 +36,8 @@
                 <Setter Property="BorderThickness"
                         Value="1" />
             </Style>
-
-            <Style BasedOn="{StaticResource baseStyle}"
+            <Style x:Key="AllTextBoxes"
+                   BasedOn="{StaticResource baseStyle}"
                    TargetType="TextBox">
                 <Setter Property="Background"
                         Value="#FF0F0F0F" />
@@ -72,6 +72,24 @@
                 <Setter Property="VerticalContentAlignment"
                         Value="Center" />
             </Style>
+            <Style BasedOn="{StaticResource AllTextBoxes}"
+                   TargetType="TextBox" />
+            <Style x:Key="KeyBindTextboxStyle"
+                   BasedOn="{StaticResource AllTextBoxes}"
+                   TargetType="TextBox">
+                <Setter Property="wfInfo:SelectTextOnFocus.Active"
+                        Value="False" />
+                <Style.Triggers>
+                    <Trigger Property="IsFocused"
+                             Value="True">
+                        <Setter Property="Foreground"
+                                Value="Transparent">
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <wfInfo:NegateIntConverter x:Key="NegateIntConverter" />
+            <wfInfo:KeyStringConverter x:Key="KeyStringConverter" />
         </DockPanel.Resources>
         <Grid HorizontalAlignment="Left"
               Height="27"
@@ -178,9 +196,6 @@
                        Margin="0,0,-1,0" />
                 <DockPanel LastChildFill="False"
                            DockPanel.Dock="Top">
-                    <DockPanel.Resources>
-                        <wfInfo:NegateIntConverter x:Key="NegateIntConverter" />
-                    </DockPanel.Resources>
                     <Label Content="X"
                            DockPanel.Dock="Left"
                            HorizontalContentAlignment="Center"
@@ -199,9 +214,8 @@
                              ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top."
                              Width="90"
                              Text="{Binding SettingsViewModel.OverlayYOffsetValue, Mode=TwoWay
-                             , Converter={StaticResource NegateIntConverter}}" 
-                             wfInfo:NumericOnlyEntry.RegexFilter="^-?[0-9]*$"
-                              />
+                             , Converter={StaticResource NegateIntConverter}}"
+                             wfInfo:NumericOnlyEntry.RegexFilter="^-?[0-9]*$" />
                     <Label Content="Y"
                            DockPanel.Dock="Right"
                            HorizontalContentAlignment="Center"
@@ -273,40 +287,40 @@
                        Grid.Row="1"
                        Grid.Column="0" />
                 <TextBox x:Name="Searchit_key_box"
+                         Style="{StaticResource KeyBindTextboxStyle}"
                          Grid.Row="1"
                          Grid.Column="1"
                          ToolTip="Modifier to hold down to start search it"
-                         Text="TextBox"
                          IsReadOnly="True"
-                         GotFocus="Searchit_key_box_GotFocus"
                          KeyUp="Searchit_key_box_KeyUp"
-                         LostFocus="Searchit_key_box_LostFocus"
+                         Text="{Binding SettingsViewModel.SearchItModifierKey,
+                                Converter={StaticResource KeyStringConverter}}"
                          VerticalAlignment="Top" />
                 <Label Content="Snap it modifier"
                        Grid.Row="2"
                        Grid.Column="0" />
                 <TextBox x:Name="Snapit_key_box"
+                         Style="{StaticResource KeyBindTextboxStyle}"
                          Grid.Row="2"
                          Grid.Column="1"
                          ToolTip="Modifier to hold down to start Snap it"
-                         Text="TextBox"
-                         IsReadOnly="True"
-                         GotFocus="Snapit_key_box_GotFocus"
+                         Text="{Binding SettingsViewModel.SnapitModifierKey,
+                                Converter={StaticResource KeyStringConverter}}"
                          KeyUp="Snapit_key_box_KeyUp"
-                         LostFocus="Snapit_key_box_LostFocus"
+                         IsReadOnly="True"
                          VerticalAlignment="Top" />
                 <Label Content="Master it modifier"
                        Grid.Row="3"
                        Grid.Column="0" />
                 <TextBox x:Name="Masterit_key_box"
+                         Style="{StaticResource KeyBindTextboxStyle}"
                          Grid.Row="3"
                          Grid.Column="1"
                          ToolTip="Modifier to hold down to start Snap it"
-                         Text="TextBox"
+                         Text="{Binding SettingsViewModel.MasterItModifierKey,
+                                Converter={StaticResource KeyStringConverter}}"
                          IsReadOnly="True"
-                         GotFocus="Masterit_key_box_GotFocus"
                          KeyUp="Masterit_key_box_KeyUp"
-                         LostFocus="Masterit_key_box_LostFocus"
                          VerticalAlignment="Top" />
             </Grid>
         </Border>
