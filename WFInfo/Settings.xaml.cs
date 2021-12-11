@@ -45,7 +45,9 @@ namespace WFInfo
         [JsonIgnore]
         public bool IsLightSelected => Display == Display.Light;
         public string ActivationKey { get; set; } = "Snapshot";
+        [JsonIgnore]
         public Key? ActivationKeyKey => Enum.TryParse<Key>(ActivationKey, out var res) ? res : (Key?)null;
+        [JsonIgnore]
         public MouseButton? ActivationMouseButton => Enum.TryParse<MouseButton>(ActivationKey, out var res) ? res : (MouseButton?)null;
         public Key DebugModifierKey { get; set; } = Key.LeftShift;
         public Key SearchItModifierKey { get; set; } = Key.OemTilde;
