@@ -2,9 +2,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Input;
 
-namespace WFInfo
+namespace WFInfo.Components
 {
-    public class KeyNameHelpers
+    public static class KeyNameHelpers
     {
         // Black magic below - blame: https://stackoverflow.com/a/5826175
 

@@ -6,6 +6,7 @@ using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -77,7 +78,7 @@ namespace WFInfo
         private void Skip(object sender, RoutedEventArgs e)
         {
             settings.Ignored = updateInfo.CurrentVersion.ToString();
-            Settings.Save();
+            SettingsWindow.Save();
             Close();
         }
 

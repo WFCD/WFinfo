@@ -1,8 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
-using Google.Apis.Sheets.v4;
 
-namespace WFInfo
+namespace WFInfo.Settings
 {
     public enum Display
     {
@@ -10,6 +9,9 @@ namespace WFInfo
         Overlay,
         Light
     }
+    /// <summary>
+    /// Readonly copy of the settings for services to use
+    /// </summary>
     public interface IReadOnlyApplicationSettings
     {
         Display Display { get; }

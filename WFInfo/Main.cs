@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Forms;
 using WebSocketSharp;
 using WFInfo.Resources;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -23,7 +24,7 @@ namespace WFInfo
         public static RewardWindow window = new RewardWindow();
         public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
-        public static Settings settingsWindow = new Settings();
+        public static SettingsWindow settingsWindow = new SettingsWindow();
         public static VerifyCount verifyCount = new VerifyCount();
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;

@@ -1,9 +1,11 @@
-﻿<Window x:Class="WFInfo.Settings"
+﻿<Window x:Class="WFInfo.Settings.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:wfInfo="clr-namespace:WFInfo"
+        xmlns:settings="clr-namespace:WFInfo.Settings"
+        xmlns:components="clr-namespace:WFInfo.Components"
         mc:Ignorable="d"
         Title="Settings"
         Width="334"
@@ -11,7 +13,7 @@
         WindowStyle="None"
         FontSize="16"
         SizeToContent="Height"
-        d:DataContext="{d:DesignInstance Type=wfInfo:Settings}"
+        d:DataContext="{d:DesignInstance Type=settings:SettingsWindow}"
         ResizeMode="NoResize">
     <DockPanel MouseDown="MouseDown"
                PreviewMouseDown="ActivationMouseDown"
@@ -57,7 +59,7 @@
                         Value="Wrap" />
                 <Setter Property="FontFamily"
                         Value="{StaticResource Roboto}" />
-                <Setter Property="wfInfo:SelectTextOnFocus.Active"
+                <Setter Property="components:SelectTextOnFocus.Active"
                         Value="True" />
                 <Setter Property="wfInfo:FocusAdvancement.AdvancesByEnterKey"
                         Value="True" />
@@ -77,7 +79,7 @@
             <Style x:Key="KeyBindTextboxStyle"
                    BasedOn="{StaticResource AllTextBoxes}"
                    TargetType="TextBox">
-                <Setter Property="wfInfo:SelectTextOnFocus.Active"
+                <Setter Property="components:SelectTextOnFocus.Active"
                         Value="False" />
                 <Style.Triggers>
                     <Trigger Property="IsFocused"
@@ -88,8 +90,8 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-            <wfInfo:NegateIntConverter x:Key="NegateIntConverter" />
-            <wfInfo:KeyStringConverter x:Key="KeyStringConverter" />
+            <components:NegateIntConverter x:Key="NegateIntConverter" />
+            <components:KeyStringConverter x:Key="KeyStringConverter" />
         </DockPanel.Resources>
         <Grid HorizontalAlignment="Left"
               Height="27"
@@ -174,7 +176,7 @@
                 <TextBox x:Name="Displaytime_number_box"
                          ToolTip="The time in milliseconds the overlays will be displayed on screen"
                          Text="{Binding SettingsViewModel.Delay, Mode=TwoWay}"
-                         wfInfo:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$" />
+                         components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$" />
 
                 <CheckBox x:Name="HighlightCheckbox"
                           Content="Highlight"
@@ -206,7 +208,7 @@
                              ToolTip="The X Offset of the overlay. Positive values shift the overlay to the right."
                              TextWrapping="Wrap"
                              Text="{Binding SettingsViewModel.OverlayXOffsetValue, Mode=TwoWay}"
-                             wfInfo:NumericOnlyEntry.RegexFilter="^-?[0-9]*$"
+                             components:NumericOnlyEntry.RegexFilter="^-?[0-9]*$"
                              Width="90" />
 
                     <TextBox x:Name="OverlayYOffset_number_box"
@@ -215,7 +217,7 @@
                              Width="90"
                              Text="{Binding SettingsViewModel.OverlayYOffsetValue, Mode=TwoWay
                              , Converter={StaticResource NegateIntConverter}}"
-                             wfInfo:NumericOnlyEntry.RegexFilter="^-?[0-9]*$" />
+                             components:NumericOnlyEntry.RegexFilter="^-?[0-9]*$" />
                     <Label Content="Y"
                            DockPanel.Dock="Right"
                            HorizontalContentAlignment="Center"
@@ -231,7 +233,7 @@
                 <TextBox x:Name="SnapItCountThreshold_number_box"
                          ToolTip="Threshold for number detection noise filtering. Higher = More aggressive, 3 or 4 usually works best"
                          Text="{Binding SettingsViewModel.SnapItCountThreshold, Mode=TwoWay}"
-                         wfInfo:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
+                         components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
                          VerticalAlignment="Top" />
 
                 <CheckBox x:Name="SnapItemCountCheckbox"
@@ -331,13 +333,13 @@
                          ToolTip="Anything below this efficiency will be marked as red in snapit"
                          Margin="0, 0, 20, 0"
                          Text="{Binding SettingsViewModel.MinimumEfficiencyValue, Mode=TwoWay}"
-                         wfInfo:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
+                         components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
                          AutoWordSelection="True"
                          VerticalAlignment="Top" />
                 <TextBox x:Name="EfficiencyMax_number_box"
                          ToolTip="Anything above this efficiency will be marked as green in snapit"
                          Text="{Binding SettingsViewModel.MaximumEfficiencyValue, Mode=TwoWay}"
-                         wfInfo:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
+                         components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
                          Margin="0, 0, 20, 0"
                          VerticalAlignment="Top" />
             </UniformGrid>

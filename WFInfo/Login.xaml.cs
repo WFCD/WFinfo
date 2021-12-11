@@ -5,6 +5,7 @@ using System.Windows.Input;
 using Google.Apis.Auth;
 using Microsoft.Win32;
 using System.Windows.Media;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -60,7 +61,7 @@ namespace WFInfo
                 catch (Exception ex)
                 {
                     Main.dataBase.JWT = null;
-                    Settings.Save();
+                    SettingsWindow.Save();
                     Main.AddLog("Couldn't login: " + ex);
                     string StatusMessage; //StatusMessage = text to display on StatusUpdate() AND the error box under login 
                     byte StatusSeverity; //StatusSeverity = Severity for StatusUpdate()

@@ -7,9 +7,13 @@ using System.Windows;
 using System.Windows.Input;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using WFInfo.Components;
 
-namespace WFInfo
+namespace WFInfo.Settings
 {
+    /// <summary>
+    /// Viewmodel wrapping the settings and providing some validation and a save method.
+    /// </summary>
     public class SettingsViewModel : INPC, INotifyDataErrorInfo
     {
         private ApplicationSettings _settings;

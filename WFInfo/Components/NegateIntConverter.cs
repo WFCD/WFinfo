@@ -1,11 +1,13 @@
 using System;
-using System.Data.SqlClient;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace WFInfo
+namespace WFInfo.Components
 {
+    /// <summary>
+    /// Negate an integer value, -1 will be displayed as 1 and vice versa.
+    /// </summary>
     [ValueConversion(typeof(int), typeof(string))]
     public class NegateIntConverter : IValueConverter
     {

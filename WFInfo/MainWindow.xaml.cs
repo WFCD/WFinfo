@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -69,7 +70,7 @@ namespace WFInfo
 
                 _settingsViewModel.MainWindowLocation = new Point(Left, Top);
 
-                Settings.Save();
+                SettingsWindow.Save();
 
                 Closing += new CancelEventHandler(LoggOut);
             }
@@ -121,7 +122,7 @@ namespace WFInfo
                 }
             }
 
-            Settings.Save();
+            SettingsWindow.Save();
 
             RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
             if (key.GetValue("JWT") != null) // if the key exists then update it, else ignore it.
@@ -249,7 +250,7 @@ namespace WFInfo
         private void OnLocationChanged(object sender, EventArgs e)
         {
             _settingsViewModel.MainWindowLocation = new Point(Left, Top);
-            Settings.Save();
+            SettingsWindow.Save();
         }
 
         public void ToForeground(object sender, RoutedEventArgs e)

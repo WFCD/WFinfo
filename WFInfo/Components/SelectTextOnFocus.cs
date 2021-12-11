@@ -2,7 +2,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-namespace WFInfo
+
+namespace WFInfo.Components
 {
 
     // https://stackoverflow.com/a/2674291
@@ -69,7 +70,7 @@ namespace WFInfo
             }
         }
 
-        [AttachedPropertyBrowsableForChildrenAttribute(IncludeDescendants = false)]
+        [AttachedPropertyBrowsableForChildren(IncludeDescendants = false)]
         [AttachedPropertyBrowsableForType(typeof(TextBox))]
         public static bool GetActive(DependencyObject @object)
         {

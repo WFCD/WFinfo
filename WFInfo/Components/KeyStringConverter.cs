@@ -1,11 +1,13 @@
 using System;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
-namespace WFInfo
+namespace WFInfo.Components
 {
+    /// <summary>
+    /// Convert a Key into a human readable string
+    /// </summary>
     [ValueConversion(typeof(Key), typeof(string))]
     public class KeyStringConverter : IValueConverter
     {

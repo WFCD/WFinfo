@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using Tesseract;
+using WFInfo.Settings;
 
 namespace WFInfo
 {

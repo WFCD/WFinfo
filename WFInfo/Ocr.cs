@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tesseract;
+using WFInfo.Settings;
 using Brushes = System.Drawing.Brushes;
 using Clipboard = System.Windows.Forms.Clipboard;
 using Color = System.Drawing.Color;
