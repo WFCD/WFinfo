@@ -155,9 +155,8 @@
                 <Label Content="Display time" />
                 <TextBox x:Name="Displaytime_number_box"
                          ToolTip="The time in milliseconds the overlays will be displayed on screen"
-                         Text="TextBox"
-                         KeyDown="Displaytime_number_box_KeyDown"
-                         KeyUp="Displaytime_number_box_KeyUp" />
+                         Text="{Binding SettingsViewModel.Delay, Mode=TwoWay}"
+                         wfInfo:NumericOnlyEntry.RegexFilter="[0-9\.,]" />
 
                 <CheckBox x:Name="HighlightCheckbox"
                           Content="Highlight"

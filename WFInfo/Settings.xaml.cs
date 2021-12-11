@@ -566,42 +566,34 @@ namespace WFInfo
         {
             e.Handled = true;
             if (e.Key != Key.Enter) return;
-            Displaytime_number_box_KeyUp(sender, e);
+            // Displaytime_number_box_KeyUp(sender, e);
             hidden.Focus();
         }
 
 
-        private void Displaytime_number_box_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                hidden.Focus();
-            }
-            var num = Regex.Replace(Displaytime_number_box.Text, "[^0-9.]", "");
-            Displaytime_number_box.Text = num;
-        }
+        // private void Displaytime_number_box_KeyDown(object sender, KeyEventArgs e)
+        // {
+        //     var num = Regex.Replace(Displaytime_number_box.Text, "[^0-9.]", "");
+        //     Displaytime_number_box.Text = num;
+        // }
 
-        private void Displaytime_number_box_KeyUp(object sender, KeyEventArgs e)
-        {
-            try
-            {
-                var num = Regex.Replace(Displaytime_number_box.Text, "[^0-9.]", "");
-                _viewModel.Delay = int.Parse(num);
-                Save();
-            }
-            catch (Exception exception)
-            {
-                Main.AddLog($"Unable to parse display time change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
-                Displaytime_number_box.Text = _viewModel.Delay.ToString();
-            }
-        }
+        // private void Displaytime_number_box_KeyUp(object sender, KeyEventArgs e)
+        // {
+        //     try
+        //     {
+        //         var num = Regex.Replace(Displaytime_number_box.Text, "[^0-9.]", "");
+        //         _viewModel.Delay = int.Parse(num);
+        //         Save();
+        //     }
+        //     catch (Exception exception)
+        //     {
+        //         Main.AddLog($"Unable to parse display time change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
+        //         Displaytime_number_box.Text = _viewModel.Delay.ToString();
+        //     }
+        // }
 
         private void OverlayXOffset_number_box_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
-            {
-                hidden.Focus();
-            }
             var numStr = Regex.Replace(OverlayXOffset_number_box.Text, @"[^-?\d]+$", "");
             OverlayXOffset_number_box.Text = numStr;
         }
@@ -630,10 +622,6 @@ namespace WFInfo
 
         private void OverlayYOffset_number_box_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
-            {
-                hidden.Focus();
-            }
             var numStr = Regex.Replace(OverlayYOffset_number_box.Text, @"[^-?\d]+$", "");
             OverlayYOffset_number_box.Text = numStr;
         }
@@ -683,20 +671,12 @@ namespace WFInfo
 
         private void EfficiencyMin_number_box_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
-            {
-                hidden.Focus();
-            }
             var num = Regex.Replace(EfficiencyMin_number_box.Text, "[^0-9.,]", "");
             EfficiencyMin_number_box.Text = num;
         }
 
         private void EfficiencyMax_number_box_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
-            {
-                hidden.Focus();
-            }
             var num = Regex.Replace(EfficiencyMax_number_box.Text, "[^0-9.,]", "");
             EfficiencyMax_number_box.Text = num;
         }
@@ -743,10 +723,6 @@ namespace WFInfo
 
         private void SnapItCountThreshold_number_box_KeyDown(object sender, KeyEventArgs e)
         {
-            // if (e.Key == Key.Enter)
-            // {
-            //     hidden.Focus();
-            // }
             var num = Regex.Replace(SnapItCountThreshold_number_box.Text, "[^0-9.]", "");
             SnapItCountThreshold_number_box.Text = num;
         }

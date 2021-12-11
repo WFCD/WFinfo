@@ -1,5 +1,4 @@
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Xaml.Behaviors;
 
@@ -20,6 +19,11 @@ namespace WFInfo
         public static readonly DependencyProperty AdvancesByEnterKeyProperty =
             DependencyProperty.RegisterAttached("AdvancesByEnterKey", typeof(bool), typeof(FocusAdvancement), 
                 new UIPropertyMetadata(OnAdvancesByEnterKeyPropertyChanged));
+        
+        public static readonly DependencyProperty FocusUIElementProperty =
+            DependencyProperty.RegisterAttached("FocusUIElement", typeof(UIElement), typeof(FocusAdvancement), 
+                new UIPropertyMetadata(null));
+  
 
         static void OnAdvancesByEnterKeyPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -35,7 +39,8 @@ namespace WFInfo
             if(!e.Key.Equals(Key.Enter)) return;
 
             var element = sender as UIElement;
-            if(element != null) element.MoveFocus(new TraversalRequest(FocusNavigationDirection.Up));
+            // if(element != null) element.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
+            Keyboard.ClearFocus();
         }
     }
 
