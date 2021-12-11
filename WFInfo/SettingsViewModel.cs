@@ -1,4 +1,7 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -7,7 +10,7 @@ using Newtonsoft.Json.Converters;
 
 namespace WFInfo
 {
-    public class SettingsViewModel : INPC
+    public class SettingsViewModel : INPC, INotifyDataErrorInfo
     {
         private ApplicationSettings _settings;
 
@@ -222,9 +225,18 @@ namespace WFInfo
         public double MaximumEfficiencyValue
         {
             get => _settings.MaximumEfficiencyValue;
-            set { 
-                _settings.MaximumEfficiencyValue = value;
-                RaisePropertyChanged(); 
+            set {
+                if (value < _settings.MinimumEfficiencyValue)
+                {
+                    _validationErrors.Add(nameof(MaximumEfficiencyValue), "Maximum efficiency cannot be less than minimum efficiency");
+                }
+                else
+                {
+                    _settings.MaximumEfficiencyValue = value;
+                    _validationErrors.Remove(nameof(MaximumEfficiencyValue));
+                    RaisePropertyChanged();
+                }
+                ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(nameof(MaximumEfficiencyValue)));
             }
         }
 
@@ -232,8 +244,17 @@ namespace WFInfo
         {
             get => _settings.MinimumEfficiencyValue;
             set { 
-                _settings.MinimumEfficiencyValue = value;
-                RaisePropertyChanged(); 
+                if (value > _settings.MaximumEfficiencyValue)
+                {
+                    _validationErrors[nameof(MinimumEfficiencyValue)] = "Minimum efficiency cannot be greater than maximum efficiency";
+                }
+                else
+                {
+                    _settings.MinimumEfficiencyValue = value;
+                    _validationErrors.Remove(nameof(MinimumEfficiencyValue));
+                    RaisePropertyChanged(); 
+                }
+                ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(nameof(MaximumEfficiencyValue)));
             }
         }
 
@@ -362,5 +383,12 @@ namespace WFInfo
         }
 
         public static SettingsViewModel Instance { get; }= new SettingsViewModel(ApplicationSettings.GlobalSettings);
+        private readonly Dictionary<string, string> _validationErrors = new Dictionary<string, string>();
+ 
+        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
+        public bool HasErrors => _validationErrors.Count > 0;
+        public IEnumerable GetErrors(string propertyName) =>
+            _validationErrors.TryGetValue(propertyName, out string error) ? new string[1] { error } : null;
+
     }
 }

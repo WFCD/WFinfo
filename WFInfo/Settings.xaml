@@ -36,7 +36,7 @@
                 <Setter Property="BorderThickness"
                         Value="1" />
             </Style>
-            
+
             <Style BasedOn="{StaticResource baseStyle}"
                    TargetType="TextBox">
                 <Setter Property="Background"
@@ -56,11 +56,11 @@
                 <Setter Property="TextWrapping"
                         Value="Wrap" />
                 <Setter Property="FontFamily"
-                        Value="{StaticResource Roboto}"/>
+                        Value="{StaticResource Roboto}" />
                 <Setter Property="wfInfo:SelectTextOnFocus.Active"
-                        Value="True"/>
+                        Value="True" />
                 <Setter Property="wfInfo:FocusAdvancement.AdvancesByEnterKey"
-                        Value="True"/>
+                        Value="True" />
             </Style>
 
             <Style TargetType="CheckBox"
@@ -313,18 +313,16 @@
                 <Label Content="Efficiency max" />
                 <TextBox x:Name="EfficiencyMin_number_box"
                          ToolTip="Anything below this efficiency will be marked as red in snapit"
-                         Text="TextBox"
                          Margin="0, 0, 20, 0"
-                         KeyDown="EfficiencyMin_number_box_KeyDown"
-                         LostFocus="EfficiencyMin_number_box_LostFocus"
+                         Text="{Binding SettingsViewModel.MinimumEfficiencyValue, Mode=TwoWay}"
+                         wfInfo:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
                          AutoWordSelection="True"
                          VerticalAlignment="Top" />
                 <TextBox x:Name="EfficiencyMax_number_box"
                          ToolTip="Anything above this efficiency will be marked as green in snapit"
-                         Text="TextBox"
+                         Text="{Binding SettingsViewModel.MaximumEfficiencyValue, Mode=TwoWay}"
+                         wfInfo:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
                          Margin="0, 0, 20, 0"
-                         KeyDown="EfficiencyMax_number_box_KeyDown"
-                         LostFocus="EfficiencyMax_number_box_LostFocus"
                          VerticalAlignment="Top" />
             </UniformGrid>
         </Border>

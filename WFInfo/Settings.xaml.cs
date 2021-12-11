@@ -571,27 +571,6 @@ namespace WFInfo
         }
 
 
-        // private void Displaytime_number_box_KeyDown(object sender, KeyEventArgs e)
-        // {
-        //     var num = Regex.Replace(Displaytime_number_box.Text, "[^0-9.]", "");
-        //     Displaytime_number_box.Text = num;
-        // }
-
-        // private void Displaytime_number_box_KeyUp(object sender, KeyEventArgs e)
-        // {
-        //     try
-        //     {
-        //         var num = Regex.Replace(Displaytime_number_box.Text, "[^0-9.]", "");
-        //         _viewModel.Delay = int.Parse(num);
-        //         Save();
-        //     }
-        //     catch (Exception exception)
-        //     {
-        //         Main.AddLog($"Unable to parse display time change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
-        //         Displaytime_number_box.Text = _viewModel.Delay.ToString();
-        //     }
-        // }
-
         private void OverlayXOffset_number_box_KeyDown(object sender, KeyEventArgs e)
         {
             var numStr = Regex.Replace(OverlayXOffset_number_box.Text, @"[^-?\d]+$", "");
@@ -667,58 +646,6 @@ namespace WFInfo
                 Main.AddLog($"Unable to parse overlay offset value, new val would have been: {offset} Exception: {exception}");
                 return 0;
             }
-        }
-
-        private void EfficiencyMin_number_box_KeyDown(object sender, KeyEventArgs e)
-        {
-            var num = Regex.Replace(EfficiencyMin_number_box.Text, "[^0-9.,]", "");
-            EfficiencyMin_number_box.Text = num;
-        }
-
-        private void EfficiencyMax_number_box_KeyDown(object sender, KeyEventArgs e)
-        {
-            var num = Regex.Replace(EfficiencyMax_number_box.Text, "[^0-9.,]", "");
-            EfficiencyMax_number_box.Text = num;
-        }
-
-
-        private void EfficiencyMin_number_box_LostFocus(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var num = Regex.Replace(EfficiencyMin_number_box.Text, "[^0-9.,]", "");
-                num = num.Replace(',', '.');
-                _viewModel.MinimumEfficiencyValue = double.Parse(num, Main.culture);
-                if (_viewModel.MinimumEfficiencyValue > _viewModel.MaximumEfficiencyValue)
-                    throw new Exception("Minimum efficiency can not be more than maximum.");
-                EfficiencyMin_number_box.Text = num;
-                Save();
-            }
-            catch (Exception exception)
-            {
-                Main.AddLog($"Unable to parse efficinecy min change, new val would have been: {EfficiencyMin_number_box.Text} Exception: {exception}");
-                EfficiencyMin_number_box.Text = _viewModel.MinimumEfficiencyValue.ToString(Main.culture);
-            }
-        }
-
-        private void EfficiencyMax_number_box_LostFocus(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var num = Regex.Replace(EfficiencyMax_number_box.Text, "[^0-9.,]", "");
-                num = num.Replace(',', '.');
-                _viewModel.MaximumEfficiencyValue = double.Parse(num, Main.culture);
-                if (_viewModel.MaximumEfficiencyValue < _viewModel.MinimumEfficiencyValue)
-                    throw new Exception("Maximum efficiency can not be less than minimum.");
-                EfficiencyMax_number_box.Text = num;
-                Save();
-            }
-            catch (Exception exception)
-            {
-                Main.AddLog($"Unable to parse efficinecy max change, new val would have been: {Displaytime_number_box.Text} Exception: {exception}");
-                EfficiencyMax_number_box.Text = _viewModel.MaximumEfficiencyValue.ToString(Main.culture);
-            }
-            
         }
     }
 }
