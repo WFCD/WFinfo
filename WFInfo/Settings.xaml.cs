@@ -536,11 +536,6 @@ namespace WFInfo
             activeKeyVal = Key.NoName;
         }
 
-        private void Snapit_key_box_KeyDown(object sender, KeyEventArgs e)
-        {
-            e.Handled = true;
-        }
-
         private void Masterit_key_box_KeyUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
@@ -567,18 +562,6 @@ namespace WFInfo
             activeKeyVal = Key.NoName;
         }
 
-        private void Masterit_key_box_KeyDown(object sender, KeyEventArgs e)
-        {
-            e.Handled = true;
-        }
-
-        private void Searchit_key_box_KeyDown(object sender, KeyEventArgs e)
-        {
-            e.Handled = true;
-            if (e.Key != Key.Enter) return;
-            // Displaytime_number_box_KeyUp(sender, e);
-            hidden.Focus();
-        }
 
     }
 }
