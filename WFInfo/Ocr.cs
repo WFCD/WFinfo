@@ -240,7 +240,9 @@ namespace WFInfo
                     {
                         #region found a part
                         string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false);
+                        string primeSetName = Main.dataBase.GetSetName(correctName);
                         JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
+                        JObject primeSet = Main.dataBase.marketData.GetValue(primeSetName).ToObject<JObject>();
                         string ducats = job["ducats"].ToObject<string>();
                         if (int.Parse(ducats, Main.culture) == 0)
                         {
@@ -249,6 +251,7 @@ namespace WFInfo
                         //else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
                         primeRewards.Add(correctName);
                         string plat = job["plat"].ToObject<string>();
+                        string primeSetPlat = primeSet["plat"].ToObject<string>();
                         double platinum = double.Parse(plat, styles, Main.culture);
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(correctName);
@@ -287,6 +290,7 @@ namespace WFInfo
                             if (!string.IsNullOrEmpty(clipboard)) { clipboard += "-  "; }
 
                             clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
+                            clipboard += "[" + primeSetName.Replace(" Set", "") + "]: " + primeSetPlat + ":platinum: ";
 
                             if (Settings.ClipboardVaulted)
                             {
@@ -309,13 +313,13 @@ namespace WFInfo
 
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(correctName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                                 Main.overlays[partNumber].Resize(overWid);
                                 Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + Settings.overlayXOffsetValue) / dpiScaling), startY + (int)(Settings.overlayYOffsetValue / dpiScaling), Settings.delay);
                             }
                             else if (!Settings.isLightSelected)
                             {
-                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
+                                Main.window.loadTextData(correctName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
                             //else
                                 //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
@@ -548,11 +552,14 @@ namespace WFInfo
                         Debug.WriteLine(secondChecks[i]);
                         string second = secondChecks[i];
                         string secondName = Main.dataBase.GetPartName(second, out secondProximity[i], false);
+                        string primeSetName = Main.dataBase.GetSetName(secondName);
                         //if (secondProximity[i] < firstProximity[i])
                         //{
                         JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
+                        JObject primeSet = Main.dataBase.marketData.GetValue(primeSetName).ToObject<JObject>();
                         string ducats = job["ducats"].ToObject<string>();
                         string plat = job["plat"].ToObject<string>();
+                        string primeSetPlat = primeSet["plat"].ToObject<string>();
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(secondName);
                         bool mastered = Main.dataBase.IsPartMastered(secondName);
@@ -620,14 +627,14 @@ namespace WFInfo
                         {
                             if (Settings.isOverlaySelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else if (!Settings.isLightSelected)
                             {
-                                Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                                Main.overlays[partNumber].LoadTextData(secondName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else
-                                Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
+                                Main.window.loadTextData(secondName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
 
                             if (Settings.clipboard && !string.IsNullOrEmpty(tempclipboard))
                                 Clipboard.SetText(tempclipboard);
@@ -820,10 +827,13 @@ namespace WFInfo
                     continue;
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0], false);
+                string primeSetName = Main.dataBase.GetSetName(name);
                 part.Name = name;
                 foundParts[i] = part;
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
+                JObject primeSet = Main.dataBase.marketData.GetValue(primeSetName).ToObject<JObject>();
                 string plat = job["plat"].ToObject<string>();
+                string primeSetPlat = primeSet["plat"].ToObject<string>();
                 string ducats = job["ducats"].ToObject<string>();
                 string volume = job["volume"].ToObject<string>();
                 bool vaulted = Main.dataBase.IsPartVaulted(name);
@@ -853,7 +863,7 @@ namespace WFInfo
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
+                    itemOverlay.LoadTextData(name, plat, primeSetPlat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);

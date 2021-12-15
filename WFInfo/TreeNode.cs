@@ -298,8 +298,12 @@ namespace WFInfo
 
         public void GetSetInfo()
         {
+            string primeSetName = Main.dataBase.GetSetName(Name);
+            JObject primeSet = Main.dataBase.marketData.GetValue(primeSetName).ToObject<JObject>();
+            string primeSetPlat = primeSet["plat"].ToObject<string>();
+
             Grid_Shown = "Visible";
-            Plat_Val = 0;
+            Plat_Val = double.Parse(primeSetPlat, Main.culture);
             Owned_Capped_Val = 0;
             Owned_Plat_Val = 0;
             Owned_Ducat_Val = 0;
@@ -308,7 +312,7 @@ namespace WFInfo
             Mastered = Main.dataBase.equipmentData[this.dataRef]["mastered"].ToObject<bool>();
             foreach (TreeNode kid in Children)
             {
-                Plat_Val += kid.Plat_Val * kid.Count_Val;
+                //Plat_Val += kid.Plat_Val * kid.Count_Val;
                 Owned_Capped_Val += kid.Owned_Capped_Val;
                 Owned_Plat_Val += kid.Owned_Plat_Val;
                 Owned_Ducat_Val += kid.Owned_Ducat_Val;

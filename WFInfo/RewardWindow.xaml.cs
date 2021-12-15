@@ -15,7 +15,7 @@ namespace WFInfo
         {
             InitializeComponent();
         }
-        public void loadTextData(string name, string plat, string ducats, string volume, bool vaulted, bool mastered, string owned, int partNumber, bool resize = true, bool hideReward = false)
+        public void loadTextData(string name, string plat, string primeSetPlat, string ducats, string volume, bool vaulted, bool mastered, string owned, int partNumber, bool resize = true, bool hideReward = false)
         {
             Show();
             Topmost = true;
@@ -26,8 +26,10 @@ namespace WFInfo
                     if (hideReward)
                     {
                         platImage.Visibility = Visibility.Hidden;
+                        setPlatImage.Visibility = Visibility.Hidden;
                         firstDucatImage.Visibility = Visibility.Hidden;
                         firstPlatText.Text = string.Empty;
+                        firstSetPlatText.Text = string.Empty;
                         firstDucatText.Text = string.Empty;
                         firstVolumeText.Text = string.Empty;
                         firstVaultedMargin.Visibility = Visibility.Hidden;
@@ -37,8 +39,10 @@ namespace WFInfo
                         break;
                     }
                     platImage.Visibility = Visibility.Visible;
+                    setPlatImage.Visibility = Visibility.Visible;
                     firstDucatImage.Visibility = Visibility.Visible;
                     firstPlatText.Text = plat;
+                    firstSetPlatText.Text = "Full set price: " + primeSetPlat;
                     firstDucatText.Text = ducats;
                     firstVolumeText.Text = volume + " sold last 48hrs";
                     firstVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
@@ -52,8 +56,10 @@ namespace WFInfo
                     if (hideReward)
                     {
                         platImage1.Visibility = Visibility.Hidden;
+                        setPlatImage1.Visibility = Visibility.Hidden;
                         firstDucatImage1.Visibility = Visibility.Hidden;
                         secondPlatText.Text = string.Empty;
+                        secondSetPlatText.Text = string.Empty;
                         secondDucatText.Text = string.Empty;
                         secondVolumeText.Text = string.Empty;
                         secondVaultedMargin.Visibility = Visibility.Hidden;
@@ -62,8 +68,10 @@ namespace WFInfo
                             Width = 501;
                     }
                     platImage1.Visibility = Visibility.Visible;
+                    setPlatImage1.Visibility = Visibility.Visible;
                     firstDucatImage1.Visibility = Visibility.Visible;
                     secondPlatText.Text = plat;
+                    secondSetPlatText.Text = "Full set price: " + primeSetPlat;
                     secondDucatText.Text = ducats;
                     secondVolumeText.Text = volume + " sold last 48hrs";
                     secondVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
@@ -77,8 +85,10 @@ namespace WFInfo
                     if (hideReward)
                     {
                         platImage2.Visibility = Visibility.Hidden;
+                        setPlatImage2.Visibility = Visibility.Hidden;
                         firstDucatImage2.Visibility = Visibility.Hidden;
                         thirdPlatText.Text = string.Empty;
+                        thirdSetPlatText.Text = string.Empty;
                         thirdDucatText.Text = string.Empty;
                         thirdVolumeText.Text = string.Empty;
                         thirdVaultedMargin.Visibility = Visibility.Hidden;
@@ -87,8 +97,10 @@ namespace WFInfo
                             Width = 751;
                     }
                     platImage2.Visibility = Visibility.Visible;
+                    setPlatImage2.Visibility = Visibility.Visible;
                     firstDucatImage2.Visibility = Visibility.Visible;
                     thirdPlatText.Text = plat;
+                    thirdSetPlatText.Text = "Full set price: " + primeSetPlat;
                     thirdDucatText.Text = ducats;
                     thirdVolumeText.Text = volume + " sold last 48hrs";
                     thirdVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
@@ -102,8 +114,10 @@ namespace WFInfo
                     if (hideReward)
                     {
                         platImage3.Visibility = Visibility.Hidden;
+                        setPlatImage3.Visibility = Visibility.Hidden;
                         firstDucatImage3.Visibility = Visibility.Hidden;
                         fourthPlatText.Text = string.Empty;
+                        fourthSetPlatText.Text = string.Empty;
                         fourthDucatText.Text = string.Empty;
                         fourthVolumeText.Text = string.Empty;
                         fourthVaultedMargin.Visibility = Visibility.Hidden;
@@ -112,8 +126,10 @@ namespace WFInfo
                             Width = 1000;
                     }
                     platImage3.Visibility = Visibility.Visible;
+                    setPlatImage3.Visibility = Visibility.Visible;
                     firstDucatImage3.Visibility = Visibility.Visible;
                     fourthPlatText.Text = plat;
+                    fourthSetPlatText.Text = "Full set price: " + primeSetPlat;
                     fourthDucatText.Text = ducats;
                     fourthVolumeText.Text = volume + " sold last 48hrs";
                     fourthVaultedMargin.Visibility = vaulted ? Visibility.Visible : Visibility.Hidden;
