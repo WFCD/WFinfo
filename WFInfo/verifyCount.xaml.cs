@@ -64,10 +64,10 @@ namespace WFInfo
                 }
             }
             Main.dataBase.SaveAllJSONs();
-            EquipmentWindow.INSTANCE.reloadItems();
+            EquipmentWindow.INSTANCE.reloadItems(); 
             if (saveFailed)
             {
-                _ = new ErrorDialogue(DateTime.Now, 0); //shouldn't need Main.RunOnUIThread since this is already on the UI Thread
+                Main.SpawnErrorPopup(DateTime.UtcNow); //shouldn't need Main.RunOnUIThread since this is already on the UI Thread
                 Main.StatusUpdate("Failed to save one or more item, report to dev", 2);
             }
             Hide();
