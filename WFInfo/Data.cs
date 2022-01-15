@@ -1281,6 +1281,7 @@ namespace WFInfo
             var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
             switch (status)
             {
+                case "ingame":
                 case "in game":
                     message += "ingame\"}";
                     break;
@@ -1293,6 +1294,7 @@ namespace WFInfo
             }
             try
             {
+                Main.AddLog("SetWebsocketStatus, Sent a status message of : " + message);
                 SendMessage(message);
             }
             catch (Exception e)
