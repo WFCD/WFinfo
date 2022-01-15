@@ -21,7 +21,6 @@ namespace WFInfo.Settings
             
             InitializeComponent();
             DataContext = this;
-            // DataContext = SettingsViewModel.Instance;
             _viewModel = SettingsViewModel.Instance;
         }
 
