@@ -329,8 +329,24 @@
                                  VerticalAlignment="Top" />
                     </Grid>
                 </Border>
-
-
+                <Border DockPanel.Dock="Top"
+                        Width="334">
+                    <UniformGrid>
+                        <Label Content="Efficiency min" />
+                        <Label Content="Efficiency max" />
+                        <TextBox ToolTip="Anything below this efficiency will be marked as red in snapit"
+                                 Margin="0, 0, 20, 0"
+                                 Text="{Binding SettingsViewModel.MinimumEfficiencyValue, Mode=TwoWay}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
+                                 AutoWordSelection="True"
+                                 VerticalAlignment="Top" />
+                        <TextBox ToolTip="Anything above this efficiency will be marked as green in snapit"
+                                 Text="{Binding SettingsViewModel.MaximumEfficiencyValue, Mode=TwoWay}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
+                                 Margin="0, 0, 20, 0"
+                                 VerticalAlignment="Top" />
+                    </UniformGrid>
+                </Border>
                 <Border Padding="0"
                         DockPanel.Dock="Top">
                     <DockPanel>
@@ -392,24 +408,6 @@
                             </UniformGrid>
                         </Border>
                     </DockPanel>
-                </Border>
-                <Border DockPanel.Dock="Top"
-                        Width="334">
-                    <UniformGrid>
-                        <Label Content="Efficiency min" />
-                        <Label Content="Efficiency max" />
-                        <TextBox ToolTip="Anything below this efficiency will be marked as red in snapit"
-                                 Margin="0, 0, 20, 0"
-                                 Text="{Binding SettingsViewModel.MinimumEfficiencyValue, Mode=TwoWay}"
-                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
-                                 AutoWordSelection="True"
-                                 VerticalAlignment="Top" />
-                        <TextBox ToolTip="Anything above this efficiency will be marked as green in snapit"
-                                 Text="{Binding SettingsViewModel.MaximumEfficiencyValue, Mode=TwoWay}"
-                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
-                                 Margin="0, 0, 20, 0"
-                                 VerticalAlignment="Top" />
-                    </UniformGrid>
                 </Border>
             </StackPanel>
         </ScrollViewer>
