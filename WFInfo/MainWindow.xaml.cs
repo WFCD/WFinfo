@@ -209,6 +209,8 @@ namespace WFInfo
         private void Settings_click(object sender, RoutedEventArgs e)
         {
             if (Main.settingsWindow == null) { ChangeStatus("Settings window not yet loaded in", 2); return; }
+            Main.settingsWindow?.Close();
+            Main.settingsWindow = new SettingsWindow();
             Main.settingsWindow.populate();
             Main.settingsWindow.Left = Left;
             Main.settingsWindow.Top = Top + Height;
