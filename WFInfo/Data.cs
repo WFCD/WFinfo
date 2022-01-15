@@ -1294,7 +1294,6 @@ namespace WFInfo
             }
             try
             {
-                Main.AddLog("SetWebsocketStatus, Sent a status message of : " + message);
                 SendMessage(message);
             }
             catch (Exception e)
