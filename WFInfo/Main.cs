@@ -125,25 +125,35 @@ namespace WFInfo
             {
                 Debug.WriteLine($"User has returned. Last Status was: {LastMarketStatusB4AFK}");
  
-                await Task.Run(async () =>
+                UserAway = false;
+                if (LastMarketStatusB4AFK != "invisible")
                 {
-                    UserAway = false;
-                    await dataBase.SetWebsocketStatus(LastMarketStatusB4AFK).ConfigureAwait(false);
-                    string user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
-                    StatusUpdate($"Welcome back {user}, restored as {LastMarketStatusB4AFK}", 0);
-                }).ConfigureAwait(false);
+                    await Task.Run(async () =>
+                    {
+                        await dataBase.SetWebsocketStatus(LastMarketStatusB4AFK).ConfigureAwait(false);
+                        string user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
+                        StatusUpdate($"Welcome back {user}, restored as {LastMarketStatusB4AFK}", 0);
+                    }).ConfigureAwait(false);
+                }
+                else
+                {
+                    StatusUpdate($"Welcome back user", 0);
+                }
             }
-            else if (!UserAway && latestActive <= now && LastMarketStatus != "invisible")
+            else if (!UserAway && latestActive <= now)
             {//set users offline if afk for longer than set timer
                 LastMarketStatusB4AFK = LastMarketStatus;
                 Debug.WriteLine($"User is now away - Storing last known user status as: {LastMarketStatusB4AFK}");
-
-                await Task.Run(async () =>
+                
+                UserAway = true;
+                if (LastMarketStatus != "invisible")
                 {
-                    UserAway = true;
-                    await dataBase.SetWebsocketStatus("invisible").ConfigureAwait(false);
-                    StatusUpdate($"User has been inactive for {minutesTillAfk} minutes", 0);
-                }).ConfigureAwait(false);
+                    await Task.Run(async () =>
+                    {
+                        await dataBase.SetWebsocketStatus("invisible").ConfigureAwait(false);
+                        StatusUpdate($"User has been inactive for {minutesTillAfk} minutes", 0);
+                    }).ConfigureAwait(false);
+                }
             }
             else
             {
