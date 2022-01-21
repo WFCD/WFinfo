@@ -22,18 +22,21 @@ namespace WFInfo
 
         private List<InventoryItem> latestSnap;
         public static VerifyCount INSTANCE;
+        private DateTime triggerTime;
 
         public VerifyCount()
         {
             InitializeComponent();
             INSTANCE = this;
             latestSnap = new List<InventoryItem>();
+            triggerTime = DateTime.UtcNow;
         }
         public static void ShowVerifyCount( List<InventoryItem> itemList)
         {
             if (INSTANCE != null)
             {
                 INSTANCE.latestSnap = itemList;
+                INSTANCE.triggerTime = DateTime.UtcNow;
                 INSTANCE.BackupButton.Visibility = Visibility.Visible;
                 INSTANCE.Show();
                 INSTANCE.Focus();
@@ -67,7 +70,9 @@ namespace WFInfo
             EquipmentWindow.INSTANCE.reloadItems();
             if (saveFailed)
             {
-                _ = new ErrorDialogue(DateTime.Now, 0); //shouldn't need Main.RunOnUIThread since this is already on the UI Thread
+                //shouldn't need Main.RunOnUIThread since this is already on the UI Thread
+                //adjust for time diff between snap-it finishing and save being pressed, in case of long delay
+                Main.SpawnErrorPopup(DateTime.UtcNow, (int)((DateTime.UtcNow - triggerTime).TotalSeconds) + 30);
                 Main.StatusUpdate("Failed to save one or more item, report to dev", 2);
             }
             Hide();
