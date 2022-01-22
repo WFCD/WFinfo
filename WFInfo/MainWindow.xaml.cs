@@ -226,11 +226,11 @@ namespace WFInfo
             Settings.minimumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MinimumEfficiencyValue"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("DoSnapItCount", out _))
-                Settings.settingsObj["DoSnapItCount"] = true;
+                Settings.settingsObj["DoSnapItCount"] = false;
             Settings.doSnapItCount = (bool)Settings.settingsObj.GetValue("DoSnapItCount");
 
             if (!Settings.settingsObj.TryGetValue("SnapItCountThreshold", out _))
-                Settings.settingsObj["SnapItCountThreshold"] = 0;
+                Settings.settingsObj["SnapItCountThreshold"] = 4;
             Settings.snapItCountThreshold = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItCountThreshold"), Main.culture);
 
             if (!Settings.settingsObj.TryGetValue("SnapItEdgeWidth", out _))
