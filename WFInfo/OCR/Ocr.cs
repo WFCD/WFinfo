@@ -52,6 +52,7 @@ namespace WFInfo.OCR
         // Screen / Resolution Scaling - Used to adjust pixel values to each person's monitor
         public static double screenScaling;
 
+        public static Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static bool processingActive = false;
 
