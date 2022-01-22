@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFInfo.Services", "WFInfo.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFInfo.Services.Tests", "WFInfo.Services.Tests\WFInfo.Services.Tests.csproj", "{9396D674-9C46-4F66-9884-C679614DA22B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{B996F117-3253-4219-9836-58486F2B6467}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,18 +69,6 @@ Global
 		{9396D674-9C46-4F66-9884-C679614DA22B}.Release|x64.Build.0 = Release|Any CPU
 		{9396D674-9C46-4F66-9884-C679614DA22B}.Release|x86.ActiveCfg = Release|Any CPU
 		{9396D674-9C46-4F66-9884-C679614DA22B}.Release|x86.Build.0 = Release|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Debug|x64.Build.0 = Debug|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Debug|x86.Build.0 = Debug|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Release|x64.ActiveCfg = Release|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Release|x64.Build.0 = Release|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Release|x86.ActiveCfg = Release|Any CPU
-		{B996F117-3253-4219-9836-58486F2B6467}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
