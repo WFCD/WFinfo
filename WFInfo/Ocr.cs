@@ -820,7 +820,10 @@ namespace WFInfo
             {
                 var part = foundParts[i];
                 if (!PartNameValid(part.Name))
+                {
+                    foundParts.RemoveAt(i--); //remove invalid part from list to not clog VerifyCount. Decrement to not skip any entries
                     continue;
+                }
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0], false);
                 part.Name = name;
