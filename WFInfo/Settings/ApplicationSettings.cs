@@ -70,8 +70,8 @@ namespace WFInfo.Settings
         public bool DoDoubleCheck { get; set; } = true;
         public double MaximumEfficiencyValue { get; set; } = 9.5;
         public double MinimumEfficiencyValue { get; set; } = 4.5;
-        public bool DoSnapItCount { get; set; } = true;
-        public int SnapItCountThreshold { get; set; } = 0;
+        public bool DoSnapItCount { get; set; } = false;
+        public int SnapItCountThreshold { get; set; } = 4;
         public int SnapItEdgeWidth { get; set; } = 1;
         public int SnapItEdgeRadius { get; set; } = 1;
         public double SnapItHorizontalNameMargin { get; set; } = 0;
