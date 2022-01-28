@@ -1,106 +1,397 @@
-﻿<Window
-        x:Class="WFInfo.Settings"
+﻿<Window x:Class="WFInfo.Settings"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WFInfo"
-        xmlns:System="clr-namespace:System;assembly=mscorlib"
-        mc:Ignorable="d" 
-        Title="Settings" Height="594" Width="334" BorderBrush="#FF707070" WindowStyle="None" ResizeMode="NoResize">
-    <Window.Resources>
-        <System:Double x:Key="FontSize">18</System:Double>
-    </Window.Resources>
-    <Grid MouseDown="MouseDown" PreviewMouseDown="ActivationMouseDown" Background="#FF1B1B1B">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="334"/>
-        </Grid.ColumnDefinitions>
-        <Grid HorizontalAlignment="Left" Height="27" VerticalAlignment="Top" Width="334" Panel.ZIndex="500">
-            <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" HorizontalAlignment="Left" Height="27" Stroke="#FF646464" VerticalAlignment="Top" Width="335"/>
-            <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="27" RenderTransformOrigin="-1.263,-0.625" Source="Resources/WFLogo.png" Margin="1,0,0,0" />
-            <TextBlock Text="Settings" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
-            <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Margin="304,0,0,0" Style="{StaticResource Label_Button}"/>
-        </Grid>
-        <Grid x:Name="Display_setting" HorizontalAlignment="Left" Height="59" VerticalAlignment="Top" Width="334" Margin="0,26,0,0">
-            <Rectangle x:Name="First_window" Stroke="#FF646464"/>
-            <RadioButton x:Name="WindowRadio" Margin="116,33,128,5" Content="Window" ToolTip="Display rewards in a separate window"  VerticalContentAlignment="Center" Checked="WindowChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}"/>
+        mc:Ignorable="d"
+        Title="Settings"
+        Width="334"
+        BorderBrush="#FF707070"
+        WindowStyle="None"
+        FontSize="16"
+        SizeToContent="Height"
+        ResizeMode="NoResize">
+    <DockPanel MouseDown="MouseDown"
+               PreviewMouseDown="ActivationMouseDown"
+               Background="#FF1B1B1B"
+               Width="334">
+        <DockPanel.Resources>
 
-            <RadioButton x:Name="OverlayRadio" Margin="229,32,24,5" Content="Overlay" ToolTip="Display rewards on top of Warframe"  VerticalContentAlignment="Center" Checked="OverlayChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}"/>
+            <Style x:Key="NestedBorder"
+                   TargetType="Border">
+                <Setter Property="BorderBrush"
+                        Value="#FF646464" />
+                <Setter Property="Padding"
+                        Value="5, 2" />
+                <Setter Property="BorderThickness"
+                        Value="1" />
+            </Style>
+            <Style TargetType="Border">
+                <Setter Property="BorderBrush"
+                        Value="#FF646464" />
+                <Setter Property="Padding"
+                        Value="25, 5" />
+                <Setter Property="BorderThickness"
+                        Value="1" />
+            </Style>
+            
+            <Style BasedOn="{StaticResource baseStyle}"
+                   TargetType="TextBox">
+                <Setter Property="Background"
+                        Value="#FF0F0F0F" />
+                <Setter Property="BorderBrush"
+                        Value="#FFB1D0D9" />
+                <Setter Property="VerticalContentAlignment"
+                        Value="Center" />
+                <Setter Property="HorizontalContentAlignment"
+                        Value="Center" />
+                <Setter Property="Margin"
+                        Value="0, 5" />
+                <Setter Property="Padding"
+                        Value="0,1,0,2.5" />
+                <Setter Property="Cursor"
+                        Value="Arrow" />
+                <Setter Property="TextWrapping"
+                        Value="Wrap" />
+                <Setter Property="FontFamily"
+                        Value="{StaticResource Roboto}"/>
+            </Style>
 
-            <Label Content="Rewards display" VerticalAlignment="Top" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="335" Height="31" FontSize="{DynamicResource FontSize}" FontFamily="{StaticResource Roboto}" Margin="0,0,-1,0"/>
-            <RadioButton x:Name="LightRadio" Margin="27,33,218,5" Content="Light" ToolTip="Do not display any window at all"  VerticalContentAlignment="Center" Checked="LightRadioChecked" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" FontSize="{DynamicResource FontSize}"/>
+            <Style TargetType="CheckBox"
+                   BasedOn="{StaticResource baseStyle}">
+                <Setter Property="Background"
+                        Value="#FFB1D0D9" />
+                <Setter Property="BorderBrush"
+                        Value="#FF0F0F0F" />
+                <Setter Property="VerticalContentAlignment"
+                        Value="Center" />
+            </Style>
+        </DockPanel.Resources>
+        <Grid HorizontalAlignment="Left"
+              Height="27"
+              VerticalAlignment="Top"
+              Width="334"
+              DockPanel.Dock="Top"
+              Panel.ZIndex="500">
+            <Rectangle x:Name="Main_bar"
+                       Fill="#FF0F0F0F"
+                       HorizontalAlignment="Left"
+                       Height="27"
+                       Stroke="#FF646464"
+                       VerticalAlignment="Top"
+                       Width="335" />
+            <Image HorizontalAlignment="Left"
+                   Height="26"
+                   VerticalAlignment="Top"
+                   Width="27"
+                   RenderTransformOrigin="-1.263,-0.625"
+                   Source="Resources/WFLogo.png"
+                   Margin="1,0,0,0" />
+            <TextBlock Text="Settings"
+                       Margin="34,4,0,0"
+                       Background="{x:Null}"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       FontSize="16"
+                       FontFamily="{StaticResource Roboto_Black}"
+                       FontWeight="Bold"
+                       Grid.Column="1" />
+            <Label x:Name="exit"
+                   MouseLeftButtonDown="Hide"
+                   Content="x"
+                   Margin="304,0,0,0"
+                   Style="{StaticResource Label_Button}" />
         </Grid>
-        <Grid HorizontalAlignment="Left" Margin="0,85,0,0" Width="334" Height="64" VerticalAlignment="Top">
-            <Rectangle Stroke="#FF646464" Margin="0,-1,0,0"/>
-            <Label Content="Display time" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="108" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
-            <TextBox x:Name="Displaytime_number_box" ToolTip="The time in milliseconds the overlays will be displayed on screen" Margin="190,5,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="Displaytime_number_box_KeyDown" Cursor="Arrow" GotFocus="Displaytime_number_box_GotFocus" KeyUp="Displaytime_number_box_KeyUp" VerticalAlignment="Top"/>
-            <Viewbox Margin="29,39,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="91" >
-                <CheckBox x:Name="HighlightCheckbox" Content="Highlight" ToolTip="Highlight the best rewards on the overlay." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="HighlightRewardCheckbox_Click"/>
-            </Viewbox>
-            <Viewbox Margin="188,39,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="123" >
-                <CheckBox x:Name="HighContrastCheckbox" Content="High contrast" ToolTip="Enable High contrast for the overlay." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="HighContrastCheckbox_Click"/>
-            </Viewbox>
-        </Grid>
-        <Grid x:Name="Overlay_sliders" HorizontalAlignment="Left" Margin="0,149,0,0" Width="334" Height="70" VerticalAlignment="Top">
-            <Rectangle Stroke="#FF646464" Margin="0,-1,0,0"/>
-            <Label Content="Overlay Offset" VerticalAlignment="Top" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="335" Height="31" FontSize="{DynamicResource FontSize}" FontFamily="{StaticResource Roboto}" Margin="0,0,-1,0"/>
-            <Label Content="X" Margin="15,30,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="32" Padding="5,5,5,0" Height="35" VerticalAlignment="Top" ToolTip="The X Offset of the overlay. Positive values shift the overlay to the right."/>
-            <TextBox x:Name="OverlayXOffset_number_box" ToolTip="The X Offset of the overlay. Positive values shift the overlay to the right." Margin="45,30,0,0" TextWrapping="Wrap" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" Width="90" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="OverlayXOffset_number_box_KeyDown" Cursor="Arrow" GotFocus="OverlayXOffset_number_box_GotFocus" KeyUp="OverlayXOffset_number_box_KeyUp" VerticalAlignment="Top" HorizontalAlignment="Left" Text="0"/>
-            <Label Content="Y" Margin="183,30,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="32" Padding="5,5,5,0" Height="35" VerticalAlignment="Top" RenderTransformOrigin="5.729,-0.505" ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top."/>
-            <TextBox x:Name="OverlayYOffset_number_box" ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top." Margin="0,30,30,0" TextWrapping="Wrap" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" Width="90" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="OverlayYOffset_number_box_KeyDown" Cursor="Arrow" GotFocus="OverlayYOffset_number_box_GotFocus" KeyUp="OverlayYOffset_number_box_KeyUp" VerticalAlignment="Top" HorizontalAlignment="Right" Text="0"/>
-        </Grid>
-        <Grid x:Name="Activation_key" Margin="0,0,0,154" Height="157" VerticalAlignment="Bottom">
-            <Rectangle x:Name="First_window2" Stroke="#FF646464" Margin="0,-1,0,0" Fill="#FF1B1B1B"/>
-            <Label Content="Activation key" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="126" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
-            <TextBox x:Name="Activation_key_box" ToolTip="Key to activate the processing. Use modifiers below to achieve other actions" Margin="190,5,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="ActivationDown" Cursor="Arrow" GotFocus="ActivationFocus" KeyUp="ActivationUp" LostFocus="ActivationLost" VerticalAlignment="Top"/>
-            <TextBlock x:Name="hidden" Focusable="True" Visibility="Visible" IsEnabled="True" HorizontalAlignment="Left" Margin="333,101,0,-64" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="1" Width="1" RenderTransformOrigin="0.5,0.5" d:IsHidden="True" />
-            <Label Content="Search it modifier" Margin="24,41,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="152" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
-            <TextBox x:Name="Searchit_key_box" ToolTip="Modifier to hold down to start search it" Margin="190,43,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="Searchit_key_box_KeyDown" Cursor="Arrow" GotFocus="Searchit_key_box_GotFocus" KeyUp="Searchit_key_box_KeyUp" LostFocus="Searchit_key_box_LostFocus" VerticalAlignment="Top"/>
-            <Label Content="Snap it modifier" Margin="24,81,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="138" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
-            <TextBox x:Name="Snapit_key_box" ToolTip="Modifier to hold down to start Snap it" Margin="190,83,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="Snapit_key_box_KeyDown" Cursor="Arrow" GotFocus="Snapit_key_box_GotFocus" KeyUp="Snapit_key_box_KeyUp" LostFocus="Snapit_key_box_LostFocus" Height="28" VerticalAlignment="Top"/>
-            <Label Content="Master it modifier" Margin="24,121,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="138" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
-            <TextBox x:Name="Masterit_key_box" ToolTip="Modifier to hold down to start Snap it" Margin="190,123,24,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="Masterit_key_box_KeyDown" Cursor="Arrow" GotFocus="Masterit_key_box_GotFocus" KeyUp="Masterit_key_box_KeyUp" LostFocus="Masterit_key_box_LostFocus" Height="28" VerticalAlignment="Top"/>
-        </Grid>
-        <Grid HorizontalAlignment="Left" Height="70" Margin="0,0,0,84" VerticalAlignment="Bottom" Width="334">
-            <Rectangle Stroke="#FF646464" Margin="0,-1,0,0"/>
-            <TextBox x:Name="EfficiencyMin_number_box" ToolTip="Anything below this efficiency will be marked as red in snapit" Margin="24,35,190,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="EfficiencyMin_number_box_KeyDown" Cursor="Arrow" GotFocus="EfficiencyMin_number_box_GotFocus" LostFocus="EfficiencyMin_number_box_LostFocus" VerticalAlignment="Top"/>
-            <TextBox x:Name="EfficiencyMax_number_box" ToolTip="Anything above this efficiency will be marked as green in snapit" Margin="191,35,23,0" TextWrapping="Wrap" Text="TextBox" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="EfficiencyMax_number_box_KeyDown" Cursor="Arrow" GotFocus="EfficiencyMax_number_box_GotFocus" LostFocus="EfficiencyMax_number_box_LostFocus" Height="28" VerticalAlignment="Top"/>
-            <Label Content="Efficiency min" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="120" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
-            <Label Content="Efficiency max" Margin="187,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="128" Padding="5,5,5,0" Height="35" VerticalAlignment="Top"/>
-        </Grid>
-        <Grid HorizontalAlignment="Left" Margin="0,0,0,311" Width="334" Height="64" VerticalAlignment="Bottom">
-            <Rectangle Stroke="#FF646464" Margin="0,-1,0,0"/>
-            <Label Content="Snap Noise" Margin="24,3,0,0" FontSize="{DynamicResource FontSize}" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Width="108" Padding="5,5,5,0" Height="35" VerticalAlignment="Top" ToolTip="Snap-It item count noise filtering threshhold"/>
-            <TextBox x:Name="SnapItCountThreshold_number_box" ToolTip="Threshold for number detection noise filtering. Higher = More aggressive, 3 or 4 usually works best" Margin="190,5,24,0" TextWrapping="Wrap" FontSize="{DynamicResource FontSize}" Background="#FF0F0F0F" BorderBrush="#FFB1D0D9" Height="28" Width="90" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.451" HorizontalContentAlignment="Center" Padding="0,0,0,2.5" KeyDown="SnapItCountThreshold_number_box_KeyDown" Cursor="Arrow" GotFocus="SnapItCountThreshold_number_box_GotFocus" KeyUp="SnapItCountThreshold_number_box_KeyUp" VerticalAlignment="Top" HorizontalAlignment="Right" Text="4"/>
-            <Viewbox Margin="29,39,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="91" >
-                <CheckBox x:Name="SnapItemCountCheckbox" Content="Count Item" ToolTip="Scan for item amount using Snap-It" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="SnapItemCountCheckbox_Click"/>
-            </Viewbox>
-            <Viewbox Margin="188,39,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="123" >
-                <CheckBox x:Name="SnapItThreadCheckbox" Content="Multithread Snap" ToolTip="Speed up snap-it using multithreading" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="SnapItThreadCheckbox_Click"/>
-            </Viewbox>
-        </Grid>
-        <Grid x:Name="Extra_settings" HorizontalAlignment="Left" Width="334" Height="86" VerticalAlignment="Bottom">
-            <Rectangle Stroke="#FF646464" Fill="#FF1B1B1B"/>
-            <Rectangle Stroke="#FF646464" Margin="0,28,144,28"/>
-            <Viewbox Margin="90,0,158,5" Height="20" VerticalAlignment="Bottom" >
-                <CheckBox x:Name="Autolist" Content="Auto list" ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="Autolist_Click"/>
-            </Viewbox>
-            <Viewbox Margin="49,3,0,4" HorizontalAlignment="Left" />
-            <Viewbox Margin="0,0,262,5" HorizontalAlignment="Right" Height="20" VerticalAlignment="Bottom" >
-                <CheckBox x:Name="autoCheckbox" Content="Auto" ToolTip="Automatically detects when the relic screen is visible." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="AutoClicked"/>
-            </Viewbox>
-            <Label MouseLeftButtonDown="ClickCreateDebug" Content="Create debug zip" Margin="189,-1,0,0" Width="146" FontWeight="Regular" Style="{StaticResource Label_Button}"/>
-            <Viewbox Margin="12,28,227,32" HorizontalAlignment="Right" >
-                <CheckBox x:Name="clipboardCheckbox" Content="Clipboard" ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat" VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Click="clipboardCheckboxClicked"/>
-            </Viewbox>
-            <Label Content="Locale" Margin="12,0,245,58" FontSize="16" FontWeight="Regular" Height="28" />
-            <Viewbox Margin="0,0,158,58" HorizontalAlignment="Right" Width="164" >
-                <ComboBox SelectionChanged="localeComboboxSelectionChanged" x:Name="localeCombobox" FontSize="14" FontFamily="{DynamicResource Roboto}" Background="#FF1B1B1B" BorderBrush="#FF0F0F0F" Margin="0,4" Width="93">
-                    <ComboBoxItem Tag="en" Content="English" FontSize="14" Background="#FF1B1B1B"/>
-                    <ComboBoxItem Tag="ko" Content="한국어" FontSize="14" Background="#FF1B1B1B"/>
-                </ComboBox>
-            </Viewbox>
-        </Grid>
+        <Border DockPanel.Dock="Top">
+            <DockPanel>
+                <Grid DockPanel.Dock="Bottom"
+                      HorizontalAlignment="Stretch">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <RadioButton x:Name="WindowRadio"
+                                 Grid.Column="1"
+                                 Content="Window"
+                                 ToolTip="Display rewards in a separate window"
+                                 VerticalContentAlignment="Center"
+                                 Checked="WindowChecked"
+                                 Background="#FFB1D0D9"
+                                 BorderBrush="#FF0F0F0F"
+                                 HorizontalAlignment="Center" />
+                    <RadioButton x:Name="OverlayRadio"
+                                 Grid.Column="2"
+                                 Content="Overlay"
+                                 ToolTip="Display rewards on top of Warframe"
+                                 VerticalContentAlignment="Center"
+                                 Checked="OverlayChecked"
+                                 Background="#FFB1D0D9"
+                                 BorderBrush="#FF0F0F0F" />
+                    <RadioButton x:Name="LightRadio"
+                                 Grid.Column="0"
+                                 Content="Light"
+                                 ToolTip="Do not display any window at all"
+                                 VerticalContentAlignment="Center"
+                                 Checked="LightRadioChecked"
+                                 Background="#FFB1D0D9"
+                                 BorderBrush="#FF0F0F0F" />
+                </Grid>
+                <Label Content="Rewards display"
+                       DockPanel.Dock="Top"
+                       HorizontalAlignment="Center"
+                       FontFamily="{StaticResource Roboto}"
+                       Margin="0,0,-1,0" />
+            </DockPanel>
+        </Border>
+        <Border DockPanel.Dock="Top">
+            <UniformGrid>
+                <Label Content="Display time" />
+                <TextBox x:Name="Displaytime_number_box"
+                         ToolTip="The time in milliseconds the overlays will be displayed on screen"
+                         Text="TextBox"
+                         KeyDown="Displaytime_number_box_KeyDown"
+                         GotFocus="Displaytime_number_box_GotFocus"
+                         KeyUp="Displaytime_number_box_KeyUp" />
 
-    </Grid>
+                <CheckBox x:Name="HighlightCheckbox"
+                          Content="Highlight"
+                          ToolTip="Highlight the best rewards on the overlay."
+                          Click="HighlightRewardCheckbox_Click" />
+                <CheckBox x:Name="HighContrastCheckbox"
+                          Content="High contrast"
+                          ToolTip="Enable High contrast for the overlay."
+                          Click="HighContrastCheckbox_Click"/>
+            </UniformGrid>
+        </Border>
+        <Border x:Name="Overlay_sliders"
+                DockPanel.Dock="Top">
+            <DockPanel LastChildFill="False">
+                <Label Content="Overlay Offset"
+                       DockPanel.Dock="Top"
+                       HorizontalAlignment="Center"
+                       FontFamily="{StaticResource Roboto}"
+                       Margin="0,0,-1,0" />
+                <DockPanel LastChildFill="False"
+                           DockPanel.Dock="Top">
+                    <Label Content="X"
+                           DockPanel.Dock="Left"
+                           HorizontalContentAlignment="Center"
+                           Width="32"
+                           ToolTip="The X Offset of the overlay. Positive values shift the overlay to the right." />
+                    <TextBox x:Name="OverlayXOffset_number_box"
+                             DockPanel.Dock="Left"
+                             ToolTip="The X Offset of the overlay. Positive values shift the overlay to the right."
+                             TextWrapping="Wrap"
+                             Width="90"
+                             KeyDown="OverlayXOffset_number_box_KeyDown"
+                             GotFocus="OverlayXOffset_number_box_GotFocus"
+                             KeyUp="OverlayXOffset_number_box_KeyUp"
+                             Text="0" />
+
+                    <TextBox x:Name="OverlayYOffset_number_box"
+                             DockPanel.Dock="Right"
+                             ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top."
+                             Width="90"
+                             KeyDown="OverlayYOffset_number_box_KeyDown"
+                             GotFocus="OverlayYOffset_number_box_GotFocus"
+                             KeyUp="OverlayYOffset_number_box_KeyUp"
+                             Text="0" />
+                    <Label Content="Y"
+                           DockPanel.Dock="Right"
+                           HorizontalContentAlignment="Center"
+                           Width="32"
+                           ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top." />
+                </DockPanel>
+            </DockPanel>
+        </Border>
+        <Border DockPanel.Dock="Top">
+            <UniformGrid>
+                <Label Content="Snap Noise"
+                       ToolTip="Snap-It item count noise filtering threshhold" />
+                <TextBox x:Name="SnapItCountThreshold_number_box"
+                         ToolTip="Threshold for number detection noise filtering. Higher = More aggressive, 3 or 4 usually works best"
+                         KeyDown="SnapItCountThreshold_number_box_KeyDown"
+                         GotFocus="SnapItCountThreshold_number_box_GotFocus"
+                         KeyUp="SnapItCountThreshold_number_box_KeyUp"
+                         VerticalAlignment="Top"
+                         Text="4" />
+
+                <CheckBox x:Name="SnapItemCountCheckbox"
+                          Content="Count Item"
+                          ToolTip="Scan for item amount using Snap-It"
+                          Click="SnapItemCountCheckbox_Click" />
+
+                <CheckBox x:Name="SnapItThreadCheckbox"
+                          Content="Multithread Snap"
+                          ToolTip="Speed up snap-it using multithreading"
+                          Click="SnapItThreadCheckbox_Click" />
+
+            </UniformGrid>
+        </Border>
+        <Border DockPanel.Dock="Top">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Label Content="Activation key"
+                       Grid.Row="0"
+                       Grid.Column="0" />
+                <TextBox x:Name="Activation_key_box"
+                         Grid.Row="0"
+                         Grid.Column="1"
+                         ToolTip="Key to activate the processing. Use modifiers below to achieve other actions"
+                         Text="TextBox"
+                         KeyDown="ActivationDown"
+                         GotFocus="ActivationFocus"
+                         KeyUp="ActivationUp"
+                         LostFocus="ActivationLost"
+                         VerticalAlignment="Top" />
+                <TextBlock x:Name="hidden"
+                           Focusable="True"
+                           Visibility="Visible"
+                           IsEnabled="True"
+                           HorizontalAlignment="Left"
+                           TextWrapping="Wrap"
+                           Text=""
+                           VerticalAlignment="Top"
+                           Height="1"
+                           Width="1"
+                           RenderTransformOrigin="0.5,0.5"
+                           d:IsHidden="True" />
+                <Label Content="Search it modifier"
+                       Grid.Row="1"
+                       Grid.Column="0" />
+                <TextBox x:Name="Searchit_key_box"
+                         Grid.Row="1"
+                         Grid.Column="1"
+                         ToolTip="Modifier to hold down to start search it"
+                         Text="TextBox"
+                         KeyDown="Searchit_key_box_KeyDown"
+                         GotFocus="Searchit_key_box_GotFocus"
+                         KeyUp="Searchit_key_box_KeyUp"
+                         LostFocus="Searchit_key_box_LostFocus"
+                         VerticalAlignment="Top" />
+                <Label Content="Snap it modifier"
+                       Grid.Row="2"
+                       Grid.Column="0" />
+                <TextBox x:Name="Snapit_key_box"
+                         Grid.Row="2"
+                         Grid.Column="1"
+                         ToolTip="Modifier to hold down to start Snap it"
+                         Text="TextBox"
+                         KeyDown="Snapit_key_box_KeyDown"
+                         GotFocus="Snapit_key_box_GotFocus"
+                         KeyUp="Snapit_key_box_KeyUp"
+                         LostFocus="Snapit_key_box_LostFocus"
+                         VerticalAlignment="Top" />
+                <Label Content="Master it modifier"
+                       Grid.Row="3"
+                       Grid.Column="0" />
+                <TextBox x:Name="Masterit_key_box"
+                         Grid.Row="3"
+                         Grid.Column="1"
+                         ToolTip="Modifier to hold down to start Snap it"
+                         Text="TextBox"
+                         KeyDown="Masterit_key_box_KeyDown"
+                         GotFocus="Masterit_key_box_GotFocus"
+                         KeyUp="Masterit_key_box_KeyUp"
+                         LostFocus="Masterit_key_box_LostFocus"
+                         VerticalAlignment="Top" />
+            </Grid>
+        </Border>
+        <Border DockPanel.Dock="Top">
+            <UniformGrid>
+                <Label Content="Efficiency min" />
+                <Label Content="Efficiency max" />
+                <TextBox x:Name="EfficiencyMin_number_box"
+                         ToolTip="Anything below this efficiency will be marked as red in snapit"
+                         Text="TextBox"
+                         Margin="0, 0, 20, 0"
+                         KeyDown="EfficiencyMin_number_box_KeyDown"
+                         GotFocus="EfficiencyMin_number_box_GotFocus"
+                         LostFocus="EfficiencyMin_number_box_LostFocus"
+                         VerticalAlignment="Top" />
+                <TextBox x:Name="EfficiencyMax_number_box"
+                         ToolTip="Anything above this efficiency will be marked as green in snapit"
+                         Text="TextBox"
+                         Margin="0, 0, 20, 0"
+                         KeyDown="EfficiencyMax_number_box_KeyDown"
+                         GotFocus="EfficiencyMax_number_box_GotFocus"
+                         LostFocus="EfficiencyMax_number_box_LostFocus"
+                         VerticalAlignment="Top" />
+            </UniformGrid>
+        </Border>
+
+        <Border Padding="0"
+                DockPanel.Dock="Top">
+            <DockPanel>
+                <Label MouseLeftButtonDown="ClickCreateDebug"
+                       Padding="5"
+                       DockPanel.Dock="Right"
+                       Content="Create debug zip"
+                       FontWeight="Regular"
+                       Style="{StaticResource Label_Button}" />
+                <Border Style="{StaticResource NestedBorder}"
+                        DockPanel.Dock="Top">
+                    <UniformGrid DockPanel.Dock="Top"
+                                 Rows="1">
+
+                        <Label Content="Locale"
+                               DockPanel.Dock="Left"
+                               FontSize="16"
+                               FontWeight="Regular" />
+                        <ComboBox SelectionChanged="localeComboboxSelectionChanged"
+                                  DockPanel.Dock="Right"
+                                  x:Name="localeCombobox"
+                                  FontSize="14"
+                                  FontFamily="{DynamicResource Roboto}"
+                                  Background="#FF1B1B1B"
+                                  BorderBrush="#FF0F0F0F"
+                                  Margin="0,4">
+                            <ComboBoxItem Tag="en"
+                                          Content="English"
+                                          FontSize="14"
+                                          Background="#FF1B1B1B" />
+                            <ComboBoxItem Tag="ko"
+                                          Content="한국어"
+                                          FontSize="14"
+                                          Background="#FF1B1B1B" />
+                        </ComboBox>
+                    </UniformGrid>
+                </Border>
+                <Border DockPanel.Dock="Top"
+                        Style="{StaticResource NestedBorder}">
+                    <CheckBox x:Name="clipboardCheckbox"
+                              Content="Clipboard"
+                              ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat"
+                              Click="clipboardCheckboxClicked" />
+                </Border>
+                <Border DockPanel.Dock="Top"
+                        Style="{StaticResource NestedBorder}">
+                    <UniformGrid Rows="1">
+
+                        <CheckBox x:Name="autoCheckbox"
+                                  DockPanel.Dock="Right"
+                                  Content="Auto"
+                                  ToolTip="Automatically detects when the relic screen is visible."
+                                  Click="AutoClicked" />
+                        <CheckBox x:Name="Autolist"
+                                  DockPanel.Dock="Left"
+                                  Content="Auto list"
+                                  ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto"
+                                  Click="Autolist_Click" />
+                    </UniformGrid>
+                </Border>
+            </DockPanel>
+        </Border>
+
+    </DockPanel>
 </Window>
