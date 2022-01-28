@@ -92,7 +92,7 @@ namespace WFInfo
             {
                 AddLog("LOADING FAILED");
                 AddLog(ex.ToString());
-                StatusUpdate(ex.ToString().Contains("invalid_grant") ? "System clock invalid - Please resync": "Launch Failure - Please Restart", 0);
+                StatusUpdate(ex.ToString().Contains("invalid_grant") ? "System time out of sync with server\nResync system clock in windows settings": "Launch Failure - Please Restart", 0);
                 RunOnUIThread(() =>
                 {
                     _ = new ErrorDialogue(DateTime.Now, 0);

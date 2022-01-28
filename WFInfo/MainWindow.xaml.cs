@@ -190,9 +190,12 @@ namespace WFInfo
                 Settings.settingsObj["ClipboardVaulted"] = false;
             Settings.ClipboardVaulted = (bool)Settings.settingsObj.GetValue("ClipboardVaulted");
 
-            if (!Settings.settingsObj.TryGetValue("Auto", out _)) { //Fixes issue with older versions using an int for auto rather than boolean.
+            if (!Settings.settingsObj.TryGetValue("Auto", out _))
+            { //Fixes issue with older versions using an int for auto rather than boolean.
                 Settings.settingsObj["Auto"] = false;
-            } else if (Settings.settingsObj.GetValue("Auto").Type != JTokenType.Boolean) {
+            }
+            else if (Settings.settingsObj.GetValue("Auto").Type != JTokenType.Boolean)
+            {
                 Settings.settingsObj["Auto"] = true;
             }
             Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
@@ -216,7 +219,7 @@ namespace WFInfo
             if (!Settings.settingsObj.TryGetValue("DoDoubleCheck", out _))
                 Settings.settingsObj["DoDoubleCheck"] = true;
             Settings.doDoubleCheck = (bool)Settings.settingsObj.GetValue("DoDoubleCheck");
-            
+
             if (!Settings.settingsObj.TryGetValue("MaximumEfficiencyValue", out _))
                 Settings.settingsObj["MaximumEfficiencyValue"] = 9.5;
             Settings.maximumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MaximumEfficiencyValue"), Main.culture);
@@ -271,11 +274,17 @@ namespace WFInfo
 
             Settings.Save();
 
-            RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
-            if (key.GetValue("JWT") != null) // if the key exists then update it, else ignore it.
+            try
             {
-                Main.dataBase.JWT = (string)key.GetValue("JWT");
-                key.Close();
+                Data.DecryptFile(Main.AppPath + @"\jwt_encrpyted", Main.AppPath + @"\jwt");
+                Main.dataBase.JWT = File.ReadAllText(Main.AppPath + @"\jwt");
+
+                //Remove the unencrpyed file.
+                File.Delete(Main.AppPath + @"\jwt");
+            }
+            catch (FileNotFoundException e)
+            {
+                Main.AddLog($"{e.Message}, JWT not set");
             }
 
         }
@@ -319,11 +328,14 @@ namespace WFInfo
         public void Exit(object sender, RoutedEventArgs e)
         {
             NotifyIcon.Dispose();
-            RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WFinfo");
-            if (Main.dataBase.rememberMe) // if rememberme was checked then save it
-            {
-                key.SetValue("JWT", Main.dataBase.JWT);
-                key.Close();
+            if (Main.dataBase.rememberMe)
+            { // if rememberme was checked then save it
+
+                File.WriteAllText(Main.AppPath + @"\jwt", Main.dataBase.JWT);
+                Data.EncryptFile(Main.AppPath + @"\jwt", Main.AppPath + @"\jwt_encrpyted");
+
+                //Remove the unencrpyed file.
+                File.Delete(Main.AppPath + @"\jwt");
             }
             Application.Current.Shutdown();
         }
@@ -332,7 +344,7 @@ namespace WFInfo
         {
             Visibility = Visibility.Hidden;
         }
-        
+
         private void WebsiteClick(object sender, RoutedEventArgs e)
         {
             Process.Start("https://discord.gg/N8S5zfw");
@@ -383,7 +395,7 @@ namespace WFInfo
         // Allows the draging of the window
         private new void MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
+            if (e.ChangedButton == MouseButton.Left && e.LeftButton == MouseButtonState.Pressed)
                 try
                 {
                     DragMove();
@@ -583,6 +595,11 @@ namespace WFInfo
             Main.AddLog("Starting search it");
             Main.StatusUpdate("Starting search it", 0);
             Main.searchBox.Start();
+        }
+
+        private void OpenAppDataFolder(object sender, MouseButtonEventArgs e)
+        {
+            Process.Start(Main.AppPath);
         }
     }
 }

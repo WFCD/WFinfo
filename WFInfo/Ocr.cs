@@ -2084,7 +2084,7 @@ namespace WFInfo
             {
                 Main.RunOnUIThread(() =>
                 {
-                    Main.StatusUpdate("Filter and separate failed, report to dev", 1);
+                    Main.StatusUpdate("Unable to detect reward from selection screen\nScanning inventory? Hold down snap-it modifier", 1);
                 });
                 processingActive = false;
                 throw new Exception("Unable to find any parts");
@@ -2360,7 +2360,7 @@ namespace WFInfo
                             }
                             catch (System.ComponentModel.Win32Exception e) {
                                 Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
-                                Main.StatusUpdate("Restart Warframe without admin mode", 1);
+                                Main.StatusUpdate("Restart Warframe without admin privileges", 1);
                                 return Settings.debug ? true : false;
                             }
                         }
