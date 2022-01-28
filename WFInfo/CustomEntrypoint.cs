@@ -242,25 +242,55 @@ namespace WFInfo
 
                 //Log .net Version
                 using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\")) {
-                    int releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
-                    if (true) {
-                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Detected .net version: {CheckFor45DotVersion(releaseKey)}");
+                    try
+                    {
+                        int releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
+                        if (true)
+                        {
+                            sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Detected .net version: {CheckFor45DotVersion(releaseKey)}");
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Unable to fetch .net version due to: {e}");
+                    }
+
                 }
 
                 //Log C++ x64 runtimes 14.29
-                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies\\VC,redist.x86,x86,14.29,bundle")) {
-                    string displayName = ndpKey.GetValue("DisplayName").ToString();
-                    if (ndpKey.ToString() != null) {
-                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] {displayName}");
+                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies")) {
+                    try
+                    {
+                        foreach (var item in ndpKey.GetSubKeyNames()) // VC,redist.x64,amd64,14.30,bundle
+                        {
+                            if (item.Contains("VC,redist.x64,amd64"))
+                            {
+                                sw.WriteLineAsync("[" + DateTime.UtcNow + $"] {ndpKey.OpenSubKey(item).GetValue("DisplayName")}");
+                            }
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Unable to fetch x64 runtime due to: {e}");
+                    }
+
                 }
 
                 //Log C++ x86 runtimes 14.29
-                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies\\VC,redist.x64,amd64,14.29,bundle")) {
-                    string displayName = ndpKey.GetValue("DisplayName").ToString();
-                    if (ndpKey.ToString() != null) {
-                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] {displayName}");
+                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies")) {
+                    try
+                    {
+                        foreach (var item in ndpKey.GetSubKeyNames()) // VC,redist.x86,x86,14.30,bundle
+                        {
+                            if (item.Contains("VC,redist.x86,x86"))
+                            {
+                                sw.WriteLineAsync("[" + DateTime.UtcNow + $"] {ndpKey.OpenSubKey(item).GetValue("DisplayName")}");
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Unable to fetch x86 runtime due to: {e}");
                     }
                 }
 
