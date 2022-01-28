@@ -65,7 +65,6 @@ namespace WFInfo
         private LogCapture EElogWatcher;
         private Task autoThread;
 
-
         public Data()
         {
             Main.AddLog("Initializing Databases");
@@ -119,7 +118,7 @@ namespace WFInfo
 
         public bool IsJwtAvailable()
         {
-            return JWT != null;
+            return JWT.Length > 500; //check if the token is of the right length
         }
 
         public int GetGithubVersion()
@@ -673,6 +672,7 @@ namespace WFInfo
                 SaveAllJSONs();
             return localeName;
         }
+        private protected static string e = "A?s/,;j_<Z3Q4z&)";
 
         public int LevenshteinDistanceKorean(string s, string t)
         {
@@ -981,7 +981,7 @@ namespace WFInfo
                 Overlay.rewardsDisplaying = true;
             }
 
-            if (!line.Contains("MatchingService::EndSession") || !IsJwtAvailable() || !Settings.automaticListing) return;
+            if (!line.Contains("MatchingService::EndSession") || !Settings.automaticListing) return;
 
             if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
@@ -1019,38 +1019,94 @@ namespace WFInfo
             });
         }
 
-        public static void AutoTriggered()
-        {
-            try
-            {
-                var watch = Stopwatch.StartNew();
-                long stop = watch.ElapsedMilliseconds + 5000;
-                long wait = watch.ElapsedMilliseconds;
+		public static void AutoTriggered() {
+			try {
+				var watch = Stopwatch.StartNew();
+				long stop = watch.ElapsedMilliseconds + 5000;
+				long wait = watch.ElapsedMilliseconds;
 
-                OCR.UpdateWindow();
+				OCR.UpdateWindow();
 
-                while (watch.ElapsedMilliseconds < stop)
-                {
-                    if (watch.ElapsedMilliseconds <= wait) continue;
-                    wait += Settings.autoDelay;
-                    OCR.GetThemeWeighted(out double diff);
-                    if (!(diff > 40)) continue;
-                    while (watch.ElapsedMilliseconds < wait) ;
-                    Main.AddLog("started auto processing");
-                    OCR.ProcessRewardScreen();
-                    break;
+				while (watch.ElapsedMilliseconds < stop) {
+					if (watch.ElapsedMilliseconds <= wait) continue;
+					wait += Settings.autoDelay;
+					OCR.GetThemeWeighted(out double diff);
+					if (!(diff > 40)) continue;
+					while (watch.ElapsedMilliseconds < wait) ;
+					Main.AddLog("started auto processing");
+					OCR.ProcessRewardScreen();
+					break;
+				}
+				watch.Stop();
+			}
+			catch (Exception ex) {
+				Main.AddLog("AUTO FAILED");
+				Main.AddLog(ex.ToString());
+				Main.StatusUpdate("Auto Detection Failed", 0);
+				Main.RunOnUIThread(() => {
+					_ = new ErrorDialogue(DateTime.Now, 0);
+				});
+			}
+		}
+
+		public static void EncryptFile(string inputFile, string outputFile) {
+			try {
+				using (RijndaelManaged aes = new RijndaelManaged()) {
+					byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
+                    aes.Padding = PaddingMode.PKCS7;
+					/* This is for demostrating purposes only. 
+                     * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
+
+                    //Dapal: I would like to implement this secururety feature but at the moment don't have enough time to look into it more.
+					byte[] IV = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
+
+					using (FileStream fsCrypt = new FileStream(outputFile, FileMode.Create)) {
+						using (ICryptoTransform encryptor = aes.CreateEncryptor(key, IV)) {
+							using (CryptoStream cs = new CryptoStream(fsCrypt, encryptor, CryptoStreamMode.Write)) {
+								using (FileStream fsIn = new FileStream(inputFile, FileMode.Open)) {
+									int data;
+									while ((data = fsIn.ReadByte()) != -1) {
+										cs.WriteByte((byte)data);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex) {
+                Main.AddLog($"Unabble to encpryt file {ex}");
+			}
+		}
+
+        public static void DecryptFile(string inputFile, string outputFile) {
+            try {
+                using (RijndaelManaged aes = new RijndaelManaged()) {
+                    byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
+                    aes.Padding = PaddingMode.PKCS7;
+
+                    /* This is for demostrating purposes only. 
+                     * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
+
+                    //Dapal: I would like to implement this secururety feature but at the moment don't have enough time to look into it more.
+                    byte[] IV = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
+
+                    using (FileStream fsCrypt = new FileStream(inputFile, FileMode.Open)) {
+                        using (FileStream fsOut = new FileStream(outputFile, FileMode.Create)) {
+                            using (ICryptoTransform decryptor = aes.CreateDecryptor(key, IV)) {
+                                using (CryptoStream cs = new CryptoStream(fsCrypt, decryptor, CryptoStreamMode.Read)) {
+                                    int data;
+                                    while ((data = cs.ReadByte()) != -1) {
+                                        fsOut.WriteByte((byte)data);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                watch.Stop();
             }
-            catch (Exception ex)
-            {
-                Main.AddLog("AUTO FAILED");
-                Main.AddLog(ex.ToString());
-                Main.StatusUpdate("Auto Detection Failed", 0);
-                Main.RunOnUIThread(() =>
-                {
-                    _ = new ErrorDialogue(DateTime.Now, 0);
-                });
+            catch (Exception ex) {
+                Main.AddLog($"Unable to decrpyt file: {ex}");
             }
         }
 
@@ -1331,11 +1387,19 @@ namespace WFInfo
         /// </summary>
         public void Disconnect()
         {
-            SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
-            JWT = null;
-            rememberMe = false;
-            inGameName = string.Empty;
-            marketSocket.Close(1006);
+            if (marketSocket.ReadyState == WebSocketState.Open) { //only send disconnect message if the socket is connected
+                SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
+                JWT = null;
+                rememberMe = false;
+                inGameName = string.Empty;
+                marketSocket.Close(1006);
+
+                //delete the jwt token if user logs out
+                if (File.Exists(Main.AppPath + @"\jwt_encrpyted"))
+                {
+                    File.Delete(Main.AppPath + @"\jwt_encrpyted");
+                }
+            }
         }
 
         public string GetUrlName(string primeName)
@@ -1403,8 +1467,9 @@ namespace WFInfo
                     var response = await client.SendAsync(request);
                     SetJWT(response.Headers);
                     var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-
-                    return (string)profile.GetValue("role") != "anonymous";
+                    profile["profile"]["check_code"] = "REDACTED"; // remnove the code that can compromise an account.
+                    Main.AddLog($"JWT check response: {profile["profile"]}");
+                    return !(bool)profile["profile"]["anonymous"];
                 }
             }
             catch (Exception e)

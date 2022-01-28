@@ -51,77 +51,76 @@ namespace WFInfo
         private async void LoginClick(object sender, MouseButtonEventArgs e)
         {
 
-            if (!Main.dataBase.IsJwtAvailable())
+            try
             {
-                try
-                {
-                    await Main.dataBase.GetUserLogin(Email.Text, Password.Password);
-                }
-                catch (Exception ex)
-                {
-                    Main.dataBase.JWT = null;
-                    Settings.Save();
-                    Main.AddLog("Couldn't login: " + ex);
-                    string StatusMessage; //StatusMessage = text to display on StatusUpdate() AND the error box under login 
-                    byte StatusSeverity; //StatusSeverity = Severity for StatusUpdate()
-                    if (ex.Message.Contains("email"))
-                    {
-                        if (ex.Message.Contains("app.form.invalid"))
-                        {
-                            StatusMessage = "Invalid email form";
-                            StatusSeverity = 2;
-
-                        }
-                        else
-                        {
-                            StatusMessage = "Unknown email";
-                            StatusSeverity = 1;
-                        }
-                    }
-                    else if (ex.Message.Contains("password"))
-                    {
-                        StatusMessage = "Wrong password";
-                        StatusSeverity = 1;
-                    }
-                    else if (ex.Message.Contains("could not understand"))
-                    {
-                        StatusMessage = "Severe issue, server did not understand request";
-                        StatusSeverity = 1;
-                    }
-                    else
-                    {
-                        StatusMessage = "Too many requests";
-                        StatusSeverity = 1; //default to too many requests
-                    }
-                    Main.SignOut();
-                    Main.StatusUpdate(StatusMessage, StatusSeverity); //Changing WFinfo status
-
-                    switch (StatusSeverity)
-                    { // copy/paste from Main.cs (statusChange())
-                        case 1: //severe, red text
-                            Error.Foreground = Brushes.Red;
-                            break;
-                        case 2: //warning, orange text
-                            Error.Foreground = Brushes.Orange;
-                            break;
-                        default: //Uncaught, big problem
-                            Error.Foreground = Brushes.Yellow;
-                            break;
-                    }
-                    Error.Text = StatusMessage; //Displaying the error under the text fields
-                    if(Error.Visibility != Visibility.Visible)
-                    {
-                        Height += 20;
-                    }
-                    Error.Visibility = Visibility.Visible;
-                    return;
-                }
+                await Main.dataBase.GetUserLogin(Email.Text, Password.Password);
                 Main.LoggedIn();
                 Email.Text = "Email";
                 Password.Password = "";
                 Main.dataBase.rememberMe = RememberMe.IsChecked.Value;
+
+                Hide(); //dispose of window once done
             }
-            Hide(); //dispose of window once done
+            catch (Exception ex)
+            {
+                Main.dataBase.JWT = null;
+                Settings.Save();
+                Main.AddLog("Couldn't login: " + ex);
+                string StatusMessage; //StatusMessage = text to display on StatusUpdate() AND the error box under login 
+                byte StatusSeverity; //StatusSeverity = Severity for StatusUpdate()
+                if (ex.Message.Contains("email"))
+                {
+                    if (ex.Message.Contains("app.form.invalid"))
+                    {
+                        StatusMessage = "Invalid email form";
+                        StatusSeverity = 2;
+
+                    }
+                    else
+                    {
+                        StatusMessage = "Unknown email";
+                        StatusSeverity = 1;
+                    }
+                }
+                else if (ex.Message.Contains("password"))
+                {
+                    StatusMessage = "Wrong password";
+                    StatusSeverity = 1;
+                }
+                else if (ex.Message.Contains("could not understand"))
+                {
+                    StatusMessage = "Severe issue, server did not understand request";
+                    StatusSeverity = 1;
+                }
+                else
+                {
+                    StatusMessage = "Too many requests";
+                    StatusSeverity = 1; //default to too many requests
+                }
+                Main.SignOut();
+                Main.StatusUpdate(StatusMessage, StatusSeverity); //Changing WFinfo status
+
+                switch (StatusSeverity)
+                { // copy/paste from Main.cs (statusChange())
+                    case 1: //severe, red text
+                        Error.Foreground = Brushes.Red;
+                        break;
+                    case 2: //warning, orange text
+                        Error.Foreground = Brushes.Orange;
+                        break;
+                    default: //Uncaught, big problem
+                        Error.Foreground = Brushes.Yellow;
+                        break;
+                }
+                Error.Text = StatusMessage; //Displaying the error under the text fields
+                if(Error.Visibility != Visibility.Visible)
+                {
+                    Height += 20;
+                }
+                Error.Visibility = Visibility.Visible;
+                return;
+            }
+
             if (Main.searchBox.IsActive)
             {
                 Main.searchBox.placeholder.Content = "Logged in";
