@@ -301,8 +301,9 @@ namespace WFInfo
 		public void Exit(object sender, RoutedEventArgs e) {
 			NotifyIcon.Dispose();
 			if (Main.dataBase.rememberMe) { // if rememberme was checked then save it
-				Data.EncryptFile(Main.AppPath + @"\jwt", Main.AppPath + @"\jwt_encrpyted");
+				
 				File.WriteAllText(Main.AppPath + @"\jwt", Main.dataBase.JWT);
+				Data.EncryptFile(Main.AppPath + @"\jwt", Main.AppPath + @"\jwt_encrpyted");
 
 				//Remove the unencrpyed file.
 				File.Delete(Main.AppPath + @"\jwt");
