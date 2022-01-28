@@ -34,7 +34,7 @@
                 <Setter Property="BorderThickness"
                         Value="1" />
             </Style>
-            
+
             <Style BasedOn="{StaticResource baseStyle}"
                    TargetType="TextBox">
                 <Setter Property="Background"
