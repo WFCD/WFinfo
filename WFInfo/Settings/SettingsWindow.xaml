@@ -252,7 +252,8 @@
 
                     </UniformGrid>
                 </Border>
-                <Border DockPanel.Dock="Top">
+                <Border DockPanel.Dock="Top"
+                        Padding="15 5 25 5">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
