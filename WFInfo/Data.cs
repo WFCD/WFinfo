@@ -1054,7 +1054,7 @@ namespace WFInfo
 			try {
 				using (RijndaelManaged aes = new RijndaelManaged()) {
 					byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(encryptionKey);
-
+                    aes.Padding = PaddingMode.PKCS7;
 					/* This is for demostrating purposes only. 
                      * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
 
@@ -1084,6 +1084,7 @@ namespace WFInfo
             try {
                 using (RijndaelManaged aes = new RijndaelManaged()) {
                     byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(encryptionKey);
+                    aes.Padding = PaddingMode.PKCS7;
 
                     /* This is for demostrating purposes only. 
                      * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
@@ -1393,6 +1394,12 @@ namespace WFInfo
                 rememberMe = false;
                 inGameName = string.Empty;
                 marketSocket.Close(1006);
+
+                //delete the jwt token if user logs out
+                if (File.Exists(Main.AppPath + @"\jwt_encrpyted"))
+                {
+                    File.Delete(Main.AppPath + @"\jwt_encrpyted");
+                }
             }
         }
 
@@ -1461,7 +1468,8 @@ namespace WFInfo
                     var response = await client.SendAsync(request);
                     SetJWT(response.Headers);
                     var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-                    Main.AddLog($"JWT check response: {profile}");
+                    profile["profile"]["check_code"] = "REDACTED"; // remnove the code that can compromise an account.
+                    Main.AddLog($"JWT check response: {profile["profile"]}");
                     return !(bool)profile["profile"]["anonymous"];
                 }
             }
