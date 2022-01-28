@@ -65,6 +65,8 @@ namespace WFInfo
         private LogCapture EElogWatcher;
         private Task autoThread;
 
+        private protected static string encryptionKey = "REDACTED"; //Replace this key with the one found above, this is redacted from the official git page as it'd defeat the purpose of encrpytion if we just give the key away.
+
         public Data()
         {
             Main.AddLog("Initializing Databases");
@@ -672,7 +674,6 @@ namespace WFInfo
                 SaveAllJSONs();
             return localeName;
         }
-        private protected static string e = "A?s/,;j_<Z3Q4z&)";
 
         public int LevenshteinDistanceKorean(string s, string t)
         {
@@ -1052,13 +1053,13 @@ namespace WFInfo
 		public static void EncryptFile(string inputFile, string outputFile) {
 			try {
 				using (RijndaelManaged aes = new RijndaelManaged()) {
-					byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
-                    aes.Padding = PaddingMode.PKCS7;
+					byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(encryptionKey);
+
 					/* This is for demostrating purposes only. 
                      * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
 
                     //Dapal: I would like to implement this secururety feature but at the moment don't have enough time to look into it more.
-					byte[] IV = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
+					byte[] IV = System.Text.ASCIIEncoding.UTF8.GetBytes(encryptionKey);
 
 					using (FileStream fsCrypt = new FileStream(outputFile, FileMode.Create)) {
 						using (ICryptoTransform encryptor = aes.CreateEncryptor(key, IV)) {
@@ -1082,14 +1083,13 @@ namespace WFInfo
         public static void DecryptFile(string inputFile, string outputFile) {
             try {
                 using (RijndaelManaged aes = new RijndaelManaged()) {
-                    byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
-                    aes.Padding = PaddingMode.PKCS7;
+                    byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(encryptionKey);
 
                     /* This is for demostrating purposes only. 
                      * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
 
                     //Dapal: I would like to implement this secururety feature but at the moment don't have enough time to look into it more.
-                    byte[] IV = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
+                    byte[] IV = System.Text.ASCIIEncoding.UTF8.GetBytes(encryptionKey);
 
                     using (FileStream fsCrypt = new FileStream(inputFile, FileMode.Open)) {
                         using (FileStream fsOut = new FileStream(outputFile, FileMode.Create)) {
@@ -1393,12 +1393,6 @@ namespace WFInfo
                 rememberMe = false;
                 inGameName = string.Empty;
                 marketSocket.Close(1006);
-
-                //delete the jwt token if user logs out
-                if (File.Exists(Main.AppPath + @"\jwt_encrpyted"))
-                {
-                    File.Delete(Main.AppPath + @"\jwt_encrpyted");
-                }
             }
         }
 
@@ -1467,8 +1461,7 @@ namespace WFInfo
                     var response = await client.SendAsync(request);
                     SetJWT(response.Headers);
                     var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-                    profile["profile"]["check_code"] = "REDACTED"; // remnove the code that can compromise an account.
-                    Main.AddLog($"JWT check response: {profile["profile"]}");
+                    Main.AddLog($"JWT check response: {profile}");
                     return !(bool)profile["profile"]["anonymous"];
                 }
             }
