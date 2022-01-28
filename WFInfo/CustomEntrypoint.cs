@@ -207,11 +207,20 @@ namespace WFInfo
             using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
             {
                 sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
-                ManagementObjectSearcher mos = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_Processor");
-                foreach (ManagementObject mo in mos.Get())
+
+                try
                 {
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] CPU model name is " + mo["Name"]);
+                    ManagementObjectSearcher mos = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_Processor");
+                    foreach (ManagementObject mo in mos.Get())
+                    {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + "] CPU model is " + mo["Name"]);
+                    }
                 }
+                catch (Exception e)
+                {
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] Unable to fetch CPU model due to:" + e);
+                }
+
 
                 if (!File.Exists(path) || GetMD5hash(path) != md5)
                 {
