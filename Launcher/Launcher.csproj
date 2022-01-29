@@ -7,6 +7,6 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Autoupdater.NET.Official" Version="1.6.0" />
+    <PackageReference Include="Autoupdater.NET.Official" Version="1.7.0" />
   </ItemGroup>
 </Project>
