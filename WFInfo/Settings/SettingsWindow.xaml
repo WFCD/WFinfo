@@ -10,7 +10,7 @@
         Title="Settings"
         MaxWidth="334"
         MinWidth="334"
-        Height="594"
+        Height="634"
         BorderBrush="#FF707070"
         WindowStyle="None"
         FontSize="16"
