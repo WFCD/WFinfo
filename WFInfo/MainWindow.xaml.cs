@@ -11,6 +11,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -25,6 +28,7 @@ namespace WFInfo
         public static LowLevelListener listener;
         private static bool updatesupression;
         private RelicsWindow _relicsWindow = new RelicsWindow();
+        private SettingsViewModel _settingsViewModel = SettingsViewModel.Instance;
 
         public MainWindow()
         {
@@ -53,20 +57,20 @@ namespace WFInfo
                 Left = 300;
                 Top = 300;
 
-                System.Drawing.Rectangle winBounds = new System.Drawing.Rectangle(Convert.ToInt32(Settings.mainWindowLocation.X), Convert.ToInt32(Settings.mainWindowLocation.Y), Convert.ToInt32(Width), Convert.ToInt32(Height));
+                System.Drawing.Rectangle winBounds = new System.Drawing.Rectangle(Convert.ToInt32(_settingsViewModel.MainWindowLocation.X), Convert.ToInt32(_settingsViewModel.MainWindowLocation.Y), Convert.ToInt32(Width), Convert.ToInt32(Height));
                 foreach (System.Windows.Forms.Screen scr in System.Windows.Forms.Screen.AllScreens)
                 {
                     if (scr.Bounds.Contains(winBounds))
                     {
-                        Left = Settings.mainWindowLocation.X;
-                        Top = Settings.mainWindowLocation.Y;
+                        Left = _settingsViewModel.MainWindowLocation.X;
+                        Top = _settingsViewModel.MainWindowLocation.Y;
                         break;
                     }
                 }
-                Settings.settingsObj["MainWindowLocation_X"] = Left;
-                Settings.settingsObj["MainWindowLocation_Y"] = Top;
 
-                Settings.Save();
+                _settingsViewModel.MainWindowLocation = new Point(Left, Top);
+
+                SettingsWindow.Save();
 
                 Closing += new CancelEventHandler(LoggOut);
             }
@@ -82,197 +86,43 @@ namespace WFInfo
 
         public void InitializeSettings()
         {
-            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json") && Settings.settingsObj == null)
+            var jsonSettings = new JsonSerializerSettings()
             {
-                Settings.settingsObj = JObject.Parse(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json"));
+                NullValueHandling = NullValueHandling.Ignore
+            };
+            jsonSettings.Converters.Add(new StringEnumConverter());
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json") && !ApplicationSettings.GlobalSettings.Initialized)
+            {
+                var jsonText = File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json");
+                JsonConvert.PopulateObject(jsonText, ApplicationSettings.GlobalSettings, jsonSettings);
+                ApplicationSettings.GlobalSettings.Initialized = true;
 
             }
             else
             {
-                if (Settings.settingsObj == null)
-                    Settings.settingsObj = new JObject();
+                ApplicationSettings.GlobalSettings.Initialized = true;
                 welcomeDialogue = new WelcomeDialogue();
             }
 
-            if (!Settings.settingsObj.TryGetValue("Display", out _))
-                Settings.settingsObj["Display"] = "Overlay";
-            Settings.isOverlaySelected = Settings.settingsObj.GetValue("Display").ToString() == "Overlay";
-            Settings.isLightSelected = Settings.settingsObj.GetValue("Display").ToString() == "Light";
 
-            if (!Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
-                Settings.settingsObj["MainWindowLocation_X"] = 300;
-            if (!Settings.settingsObj.TryGetValue("MainWindowLocation_Y", out _))
-                Settings.settingsObj["MainWindowLocation_Y"] = 300;
-            Settings.mainWindowLocation =
-                new Point(Settings.settingsObj.GetValue("MainWindowLocation_X").ToObject<Int32>(),
-                    Settings.settingsObj.GetValue("MainWindowLocation_Y").ToObject<Int32>());
-
-            if (!Settings.settingsObj.TryGetValue("ActivationKey", out _))
-                Settings.settingsObj["ActivationKey"] = "Snapshot";
             try
             {
-                Settings.ActivationKey =
-                    (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("ActivationKey").ToString());
+                Enum.Parse(typeof(Key), _settingsViewModel.ActivationKey);
             }
             catch
             {
                 try
                 {
-                    Settings.ActivationMouseButton = (MouseButton)Enum.Parse(typeof(MouseButton),
-                        Settings.settingsObj.GetValue("ActivationKey").ToString());
+                    Enum.Parse(typeof(MouseButton), _settingsViewModel.ActivationKey);
                 }
                 catch
                 {
                     Main.AddLog("Couldn't Parse Activation Key -- Defaulting to PrintScreen");
-                    Settings.settingsObj["ActivationKey"] = "Snapshot";
-                    Settings.ActivationKey = Key.Snapshot;
+                    _settingsViewModel.ActivationKey = "Snapshot";
                 }
             }
 
-            if (!Settings.settingsObj.TryGetValue("DebugModifierKey", out _))
-                Settings.settingsObj["DebugModifierKey"] = Key.LeftShift.ToString();
-            Settings.DebugModifierKey =
-                (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("DebugModifierKey").ToString());
-
-            if (!Settings.settingsObj.TryGetValue("SearchItModifierKey", out _))
-                Settings.settingsObj["SearchItModifierKey"] = Key.OemTilde.ToString();
-            Settings.SearchItModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SearchItModifierKey").ToString());
-
-            if (!Settings.settingsObj.TryGetValue("SnapitModifierKey", out _))
-                Settings.settingsObj["SnapitModifierKey"] = Key.LeftCtrl.ToString();
-            Settings.SnapitModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("SnapitModifierKey").ToString());
-
-            if (!Settings.settingsObj.TryGetValue("MasterItModifierKey", out _))
-                Settings.settingsObj["MasterItModifierKey"] = Key.RightCtrl.ToString();
-            Settings.MasterItModifierKey = (Key)Enum.Parse(typeof(Key), Settings.settingsObj.GetValue("MasterItModifierKey").ToString());
-
-            if (!Settings.settingsObj.TryGetValue("Debug", out _))
-                Settings.settingsObj["Debug"] = false;
-            Settings.debug = (bool)Settings.settingsObj.GetValue("Debug");
-
-            if (!Settings.settingsObj.TryGetValue("Locale", out _))
-                Settings.settingsObj["Locale"] = "en";
-            Settings.locale = Settings.settingsObj.GetValue("Locale").ToString();
-
-            if (!Settings.settingsObj.TryGetValue("Clipboard", out _))
-                Settings.settingsObj["Clipboard"] = false;
-            Settings.clipboard = (bool)Settings.settingsObj.GetValue("Clipboard");
-
-            if (!Settings.settingsObj.TryGetValue("AutoDelay", out _))
-                Settings.settingsObj["AutoDelay"] = 250L;
-            Settings.autoDelay = (long)Settings.settingsObj.GetValue("AutoDelay");
-
-            if (!Settings.settingsObj.TryGetValue("Auto", out _))
-                Settings.settingsObj["Auto"] = true;
-            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
-
-            if (!Settings.settingsObj.TryGetValue("ImageRetentionTime", out _))
-                Settings.settingsObj["ImageRetentionTime"] = 12;
-            Settings.imageRetentionTime = Convert.ToInt32(Settings.settingsObj.GetValue("ImageRetentionTime"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("ClipboardTemplate", out _))
-                Settings.settingsObj["ClipboardTemplate"] = "-- by WFInfo (smart OCR with pricecheck)";
-            Settings.ClipboardTemplate = Convert.ToString(Settings.settingsObj.GetValue("ClipboardTemplate"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapitExport", out _))
-                Settings.settingsObj["SnapitExport"] = false;
-            Settings.SnapitExport = Convert.ToBoolean(Settings.settingsObj.GetValue("SnapitExport"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("Delay", out _))
-                Settings.settingsObj["Delay"] = 10000;
-            Settings.delay = Convert.ToInt32(Settings.settingsObj.GetValue("Delay"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("HighlightRewards", out _))
-                Settings.settingsObj["HighlightRewards"] = true;
-            Settings.Highlight = Convert.ToBoolean(Settings.settingsObj.GetValue("HighlightRewards"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("ClipboardVaulted", out _))
-                Settings.settingsObj["ClipboardVaulted"] = false;
-            Settings.ClipboardVaulted = (bool)Settings.settingsObj.GetValue("ClipboardVaulted");
-
-            if (!Settings.settingsObj.TryGetValue("Auto", out _))
-            { //Fixes issue with older versions using an int for auto rather than boolean.
-                Settings.settingsObj["Auto"] = false;
-            }
-            else if (Settings.settingsObj.GetValue("Auto").Type != JTokenType.Boolean)
-            {
-                Settings.settingsObj["Auto"] = true;
-            }
-            Settings.auto = (bool)Settings.settingsObj.GetValue("Auto");
-
-            if (!Settings.settingsObj.TryGetValue("HighContrast", out _))
-                Settings.settingsObj["HighContrast"] = false;
-            Settings.highContrast = (bool)Settings.settingsObj.GetValue("HighContrast");
-
-            if (!Settings.settingsObj.TryGetValue("OverlayXOffsetValue", out _))
-                Settings.settingsObj["OverlayXOffsetValue"] = 0;
-            Settings.overlayXOffsetValue = Convert.ToInt32(Settings.settingsObj.GetValue("OverlayXOffsetValue"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("OverlayYOffsetValue", out _))
-                Settings.settingsObj["OverlayYOffsetValue"] = 0;
-            Settings.overlayYOffsetValue = Convert.ToInt32(Settings.settingsObj.GetValue("OverlayYOffsetValue"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("AutoList", out _))
-                Settings.settingsObj["AutoList"] = false;
-            Settings.automaticListing = (bool)Settings.settingsObj.GetValue("AutoList");
-
-            if (!Settings.settingsObj.TryGetValue("DoDoubleCheck", out _))
-                Settings.settingsObj["DoDoubleCheck"] = true;
-            Settings.doDoubleCheck = (bool)Settings.settingsObj.GetValue("DoDoubleCheck");
-
-            if (!Settings.settingsObj.TryGetValue("MaximumEfficiencyValue", out _))
-                Settings.settingsObj["MaximumEfficiencyValue"] = 9.5;
-            Settings.maximumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MaximumEfficiencyValue"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("MinimumEfficiencyValue", out _))
-                Settings.settingsObj["MinimumEfficiencyValue"] = 4.5;
-            Settings.minimumEfficiencyValue = Convert.ToDouble(Settings.settingsObj.GetValue("MinimumEfficiencyValue"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("DoSnapItCount", out _))
-                Settings.settingsObj["DoSnapItCount"] = false;
-            Settings.doSnapItCount = (bool)Settings.settingsObj.GetValue("DoSnapItCount");
-
-            if (!Settings.settingsObj.TryGetValue("SnapItCountThreshold", out _))
-                Settings.settingsObj["SnapItCountThreshold"] = 4;
-            Settings.snapItCountThreshold = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItCountThreshold"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapItEdgeWidth", out _))
-                Settings.settingsObj["SnapItEdgeWidth"] = 1;
-            Settings.snapItEdgeWidth = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItEdgeWidth"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapItEdgeRadius", out _))
-                Settings.settingsObj["SnapItEdgeRadius"] = 1;
-            Settings.snapItEdgeRadius = Convert.ToInt32(Settings.settingsObj.GetValue("SnapItEdgeRadius"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapItHorizontalNameMargin", out _))
-                Settings.settingsObj["SnapItHorizontalNameMargin"] = 0;
-            Settings.snapItHorizontalNameMargin = Convert.ToDouble(Settings.settingsObj.GetValue("SnapItHorizontalNameMargin"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("DoCustomNumberBoxWidth", out _))
-                Settings.settingsObj["DoCustomNumberBoxWidth"] = false;
-            Settings.doCustomNumberBoxWidth = (bool)Settings.settingsObj.GetValue("DoCustomNumberBoxWidth");
-
-            if (!Settings.settingsObj.TryGetValue("SnapItNumberBoxWidth", out _))
-                Settings.settingsObj["SnapItNumberBoxWidth"] = 0.4;
-            Settings.snapItNumberBoxWidth = Convert.ToDouble(Settings.settingsObj.GetValue("SnapItNumberBoxWidth"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapMultiThreaded", out _))
-                Settings.settingsObj["SnapMultiThreaded"] = true;
-            Settings.snapMultiThreaded = (bool)Settings.settingsObj.GetValue("SnapMultiThreaded");
-
-            if (!Settings.settingsObj.TryGetValue("SnapRowTextDensity", out _))
-                Settings.settingsObj["SnapRowTextDensity"] = 0.015;
-            Settings.snapRowTextDensity = Convert.ToDouble(Settings.settingsObj.GetValue("SnapRowTextDensity"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapRowEmptyDensity", out _))
-                Settings.settingsObj["SnapRowEmptyDensity"] = 0.01;
-            Settings.snapRowEmptyDensity = Convert.ToDouble(Settings.settingsObj.GetValue("SnapRowEmptyDensity"), Main.culture);
-
-            if (!Settings.settingsObj.TryGetValue("SnapColEmptyDensity", out _))
-                Settings.settingsObj["SnapColEmptyDensity"] = 0.005;
-            Settings.snapColEmptyDensity = Convert.ToDouble(Settings.settingsObj.GetValue("SnapColEmptyDensity"), Main.culture);
-
-            Settings.Save();
+            SettingsWindow.Save();
 
             try
             {
@@ -368,6 +218,8 @@ namespace WFInfo
         private void Settings_click(object sender, RoutedEventArgs e)
         {
             if (Main.settingsWindow == null) { ChangeStatus("Settings window not yet loaded in", 2); return; }
+            Main.settingsWindow?.Close();
+            Main.settingsWindow = new SettingsWindow();
             Main.settingsWindow.populate();
             Main.settingsWindow.Left = Left;
             Main.settingsWindow.Top = Top + Height;
@@ -408,23 +260,8 @@ namespace WFInfo
 
         private void OnLocationChanged(object sender, EventArgs e)
         {
-            if (Settings.settingsObj != null)
-            {
-                if (Settings.settingsObj.TryGetValue("MainWindowLocation_X", out _))
-                {
-                    Settings.mainWindowLocation = new Point(Left, Top);
-                    Settings.settingsObj["MainWindowLocation_X"] = Left;
-                    Settings.settingsObj["MainWindowLocation_Y"] = Top;
-                    Settings.Save();
-                }
-                else
-                {
-                    Settings.mainWindowLocation = new Point(100, 100);
-                    Settings.settingsObj["MainWindowLocation_X"] = 100;
-                    Settings.settingsObj["MainWindowLocation_Y"] = 100;
-                    Settings.Save();
-                }
-            }
+            _settingsViewModel.MainWindowLocation = new Point(Left, Top);
+            SettingsWindow.Save();
         }
 
         public void ToForeground(object sender, RoutedEventArgs e)

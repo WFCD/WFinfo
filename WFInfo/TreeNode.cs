@@ -32,13 +32,14 @@ namespace WFInfo
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
-        protected void RaisePropertyChanged(string propName)
+        protected void RaisePropertyChanged([CallerMemberName]string propName = null)
         {
             if (!string.IsNullOrWhiteSpace(propName) && (PropertyChanged != null))
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propName));
             }
         }
+ 
     }
 
     public class SimpleCommand : ICommand

@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -64,9 +65,11 @@ namespace WFInfo
         public bool rememberMe;
         private LogCapture EElogWatcher;
         private Task autoThread;
+        private readonly IReadOnlyApplicationSettings _settings;
 
-        public Data()
+        public Data(IReadOnlyApplicationSettings settings)
         {
+            _settings = settings;
             Main.AddLog("Initializing Databases");
             marketItemsPath = applicationDirectory + @"\market_items.json";
             marketDataPath = applicationDirectory + @"\market_data.json";
@@ -160,7 +163,7 @@ namespace WFInfo
                     Method = HttpMethod.Get
                 })
                 {
-                    request.Headers.Add("language", Settings.locale);
+                    request.Headers.Add("language", _settings.Locale);
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
                     var task = Task.Run(() => client.SendAsync(request));
@@ -579,7 +582,7 @@ namespace WFInfo
 
         public int LevenshteinDistance(string s, string t)
         {
-            switch(Settings.locale)
+            switch(_settings.Locale)
             {
                 case "ko":
                     // for korean
@@ -981,7 +984,7 @@ namespace WFInfo
                 Overlay.rewardsDisplaying = true;
             }
 
-            if (!line.Contains("MatchingService::EndSession") || !Settings.automaticListing) return;
+            if (!line.Contains("MatchingService::EndSession") || !_settings.AutoList) return;
 
             if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
@@ -1029,7 +1032,7 @@ namespace WFInfo
 
 				while (watch.ElapsedMilliseconds < stop) {
 					if (watch.ElapsedMilliseconds <= wait) continue;
-					wait += Settings.autoDelay;
+					wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
 					OCR.GetThemeWeighted(out double diff);
 					if (!(diff > 40)) continue;
 					while (watch.ElapsedMilliseconds < wait) ;
