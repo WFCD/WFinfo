@@ -1052,67 +1052,6 @@ namespace WFInfo
 			}
 		}
 
-		public static void EncryptFile(string inputFile, string outputFile) {
-			try {
-				using (RijndaelManaged aes = new RijndaelManaged()) {
-					byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
-                    aes.Padding = PaddingMode.PKCS7;
-					/* This is for demostrating purposes only. 
-                     * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
-
-                    //Dapal: I would like to implement this secururety feature but at the moment don't have enough time to look into it more.
-					byte[] IV = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
-
-					using (FileStream fsCrypt = new FileStream(outputFile, FileMode.Create)) {
-						using (ICryptoTransform encryptor = aes.CreateEncryptor(key, IV)) {
-							using (CryptoStream cs = new CryptoStream(fsCrypt, encryptor, CryptoStreamMode.Write)) {
-								using (FileStream fsIn = new FileStream(inputFile, FileMode.Open)) {
-									int data;
-									while ((data = fsIn.ReadByte()) != -1) {
-										cs.WriteByte((byte)data);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			catch (Exception ex) {
-                Main.AddLog($"Unabble to encpryt file {ex}");
-			}
-		}
-
-        public static void DecryptFile(string inputFile, string outputFile) {
-            try {
-                using (RijndaelManaged aes = new RijndaelManaged()) {
-                    byte[] key = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
-                    aes.Padding = PaddingMode.PKCS7;
-
-                    /* This is for demostrating purposes only. 
-                     * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
-
-                    //Dapal: I would like to implement this secururety feature but at the moment don't have enough time to look into it more.
-                    byte[] IV = System.Text.ASCIIEncoding.UTF8.GetBytes(e);
-
-                    using (FileStream fsCrypt = new FileStream(inputFile, FileMode.Open)) {
-                        using (FileStream fsOut = new FileStream(outputFile, FileMode.Create)) {
-                            using (ICryptoTransform decryptor = aes.CreateDecryptor(key, IV)) {
-                                using (CryptoStream cs = new CryptoStream(fsCrypt, decryptor, CryptoStreamMode.Read)) {
-                                    int data;
-                                    while ((data = cs.ReadByte()) != -1) {
-                                        fsOut.WriteByte((byte)data);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex) {
-                Main.AddLog($"Unable to decrpyt file: {ex}");
-            }
-        }
-
         /// <summary>
         ///	Get's the user's login JWT to authenticate future API calls.
         /// </summary>

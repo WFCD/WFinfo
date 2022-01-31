@@ -124,18 +124,7 @@ namespace WFInfo
 
             SettingsWindow.Save();
 
-            try
-            {
-                Data.DecryptFile(Main.AppPath + @"\jwt_encrpyted", Main.AppPath + @"\jwt");
-                Main.dataBase.JWT = File.ReadAllText(Main.AppPath + @"\jwt");
-
-                //Remove the unencrpyed file.
-                File.Delete(Main.AppPath + @"\jwt");
-            }
-            catch (FileNotFoundException e)
-            {
-                Main.AddLog($"{e.Message}, JWT not set");
-            }
+            Main.dataBase.JWT = EncryptedDataService.LoadStoredJWT();
 
         }
 
@@ -180,12 +169,7 @@ namespace WFInfo
             NotifyIcon.Dispose();
             if (Main.dataBase.rememberMe)
             { // if rememberme was checked then save it
-
-                File.WriteAllText(Main.AppPath + @"\jwt", Main.dataBase.JWT);
-                Data.EncryptFile(Main.AppPath + @"\jwt", Main.AppPath + @"\jwt_encrpyted");
-
-                //Remove the unencrpyed file.
-                File.Delete(Main.AppPath + @"\jwt");
+                EncryptedDataService.PersistJWT(Main.dataBase.JWT);
             }
             Application.Current.Shutdown();
         }
