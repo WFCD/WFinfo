@@ -21,10 +21,18 @@ jobs:
        sudo apt update && sudo apt install tesseract-ocr -y
        ls  /usr/lib/x86_64-linux-gnu/
     - uses: actions/checkout@v2
+      with:
+        path: main
+    - uses: iterative/setup-dvc@v1
+    - uses: actions/checkout@v2
+      with:
+        repository: https://dagshub.com/tboby/wfinfo-images.git
+        path: images
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
+    - run: cd main
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
