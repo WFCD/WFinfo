@@ -10,7 +10,7 @@
         Title="Settings"
         MaxWidth="334"
         MinWidth="334"
-        Height="594"
+        Height="634"
         BorderBrush="#FF707070"
         WindowStyle="None"
         FontSize="16"
@@ -373,7 +373,7 @@
                                           FontFamily="{DynamicResource Roboto}"
                                           Background="#FF1B1B1B"
                                           BorderBrush="#FF0F0F0F"
-                                          Margin="0,4">
+                                          Margin="0,4" Template="{DynamicResource ComboBoxTemplate}" Style="{DynamicResource ComboBoxStyle1}">
                                     <ComboBoxItem Tag="en"
                                                   Content="English"
                                                   FontSize="14"
