@@ -75,16 +75,7 @@ namespace WFInfo
                 if (dataBase.IsJWTvalid().Result)
                 {
                     OCR.VerifyWarframe();
-                    latestActive = DateTime.UtcNow.AddMinutes(1);
                     LoggedIn();
-
-                    TimeSpan startTimeSpan = TimeSpan.Zero;
-                    TimeSpan periodTimeSpan = TimeSpan.FromMinutes(1);
-
-                    timer = new System.Threading.Timer((e) =>
-                    {
-                        TimeoutCheck();
-                    }, null, startTimeSpan, periodTimeSpan);
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
@@ -430,9 +421,20 @@ namespace WFInfo
             }
         }
 
+        // Switch to logged in mode for warfrane.market systems
         public static void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
+
+            // start the AFK timer
+            latestActive = DateTime.UtcNow.AddMinutes(1);
+            TimeSpan startTimeSpan = TimeSpan.Zero;
+            TimeSpan periodTimeSpan = TimeSpan.FromMinutes(1);
+            
+            timer = new System.Threading.Timer((e) =>
+            {
+                TimeoutCheck();
+            }, null, startTimeSpan, periodTimeSpan);
         }
 
 
