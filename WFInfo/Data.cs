@@ -583,13 +583,24 @@ namespace WFInfo
         public int LevenshteinDistance(string s, string t)
         {
             switch(_settings.Locale)
-            {
+            {      
+                case "ru":
+                    //for russian
+                    return LevenshteinDistanceRussian(s, t);
                 case "ko":
                     // for korean
                     return LevenshteinDistanceKorean(s, t);
                 default:
                     return LevenshteinDistanceDefault(s, t);
             }
+        }
+
+        int LevenshteinDistanceRussian(string firstWord, string secondWord)
+        {
+            firstWord = getLocaleNameData(firstWord);
+            firstWord = firstWord.Replace("Чертеж", "").Replace(":","").Trim();
+            secondWord = secondWord.Replace("Чертеж", "").Trim();
+            return LevenshteinDistanceDefault(firstWord, secondWord);    
         }
 
         public int LevenshteinDistanceDefault(string s, string t)
@@ -636,9 +647,14 @@ namespace WFInfo
                     d[i, j] = Math.Min(Math.Min(opt1, opt2), opt3);
                 }
 
-
-
             return d[n, m];
+        }
+        //I don't know why this method exists but korean does so does my
+        public static bool isRussian(String str) 
+        {
+            char c = str[0];
+            if (0x0400 <= c && c <= 0x045F) return true;
+            return false;
         }
 
         public static bool isKorean(String str)
@@ -658,7 +674,8 @@ namespace WFInfo
                 if (marketItem.Key == "version")
                     continue;
                 string[] split = marketItem.Value.ToString().Split('|');
-                if (split[0] == s)
+                //So the first names can end with the Bluperint while second can start with Blueprint (or maybe vice versa, I forgot), I really don't want to fugure out why is that
+                if (split[0].Replace("Blueprint", "").Trim() == s.Replace("Blueprint", "").Trim())
                 {
                     if (split.Length == 3)
                     {
