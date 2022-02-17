@@ -121,6 +121,11 @@ namespace WFInfo
 
         public bool IsJwtAvailable()
         {
+            return JWT.Length > 300; //check if the token is of the right length
+        }
+
+        public bool IsJwtLoggedIn()
+        {
             return JWT.Length > 500; //check if the token is of the right length
         }
 
