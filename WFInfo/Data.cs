@@ -1085,7 +1085,7 @@ namespace WFInfo
             {
                 Regex rgx = new Regex("[a-zA-Z0-9]");
                 string censoredEmail = rgx.Replace(email, "*");
-                throw new Exception("GetUserLogin, " + responseBody + $"Email length: {censoredEmail}, Pw length: {password.Length}");
+                throw new Exception("GetUserLogin, " + responseBody + $"Email: {censoredEmail}, Pw length: {password.Length}");
             }
             request.Dispose();
         }
@@ -1101,7 +1101,7 @@ namespace WFInfo
             Main.AddLog("Connecting to websocket");
             marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 
-            if (marketSocket.IsAlive) //|| marketSocket.ReadyState == WebSocketState.Connecting
+            if (marketSocket.IsAlive)
             {
                 return false;
             }
@@ -1157,7 +1157,7 @@ namespace WFInfo
         {
             foreach (var item in headers)
             {
-                if (!item.Key.Contains("authorization")) continue;
+                if (!item.Key.ToLower(Main.culture).Contains("authorization")) continue;
                 var temp = item.Value.First();
                 JWT = temp.Substring(4);
                 return;
@@ -1314,11 +1314,6 @@ namespace WFInfo
             Debug.WriteLine("Sending: " + data + " to websocket.");
             try
             {
-                if (marketSocket.ReadyState == WebSocketState.Closed || marketSocket.ReadyState != WebSocketState.Open)
-                {
-                    marketSocket.Close();
-                    bool result = OpenWebSocket().Result;
-                }
                 marketSocket.Send(data);
             }
             catch (InvalidOperationException e)
