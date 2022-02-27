@@ -71,7 +71,7 @@ namespace WFInfo
 
                 //RelicsWindow.LoadNodesOnThread();
                 OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings);
-                
+
                 if (ApplicationSettings.GlobalReadonlySettings.Auto)
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
@@ -82,6 +82,12 @@ namespace WFInfo
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
                 FinishedLoading();
+
+                if (dataBase.JWT != null)// if token is loaded in, connect to websocket
+                {
+                    bool result = dataBase.OpenWebSocket().Result;
+                    Debug.WriteLine("Logging into websocket success: " + result);
+                }
             }
             catch (Exception ex)
             {

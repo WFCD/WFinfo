@@ -119,14 +119,9 @@ namespace WFInfo
             File.WriteAllText(path, JsonConvert.SerializeObject(db, Formatting.Indented));
         }
 
-        public bool IsJwtAvailable()
-        {
-            return JWT.Length > 300; //check if the token is of the right length
-        }
-
         public bool IsJwtLoggedIn()
         {
-            return JWT.Length > 500; //check if the token is of the right length
+            return JWT.Length > 300; //check if the token is of the right length
         }
 
         public int GetGithubVersion()
@@ -1103,7 +1098,7 @@ namespace WFInfo
             Main.AddLog("Connecting to websocket");
             marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 
-            if (marketSocket.IsAlive || marketSocket.ReadyState == WebSocketState.Connecting)
+            if (marketSocket.IsAlive) //|| marketSocket.ReadyState == WebSocketState.Connecting
             {
                 return false;
             }
@@ -1278,7 +1273,7 @@ namespace WFInfo
         public async Task<bool> SetWebsocketStatus(string status)
         {
         #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            if (!IsJwtAvailable())
+            if (!IsJwtLoggedIn())
                 return false;
 
             var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
@@ -1319,10 +1314,8 @@ namespace WFInfo
                 if (marketSocket.ReadyState == WebSocketState.Closed || marketSocket.ReadyState != WebSocketState.Open)
                 {
                     marketSocket.Close();
-                    OpenWebSocket();
+                    bool result = OpenWebSocket().Result;
                 }
-                while (marketSocket.ReadyState == WebSocketState.Connecting) //Make sure that the socket is actually connected before sending any data.
-                    Thread.Sleep(1);
                 marketSocket.Send(data);
             }
             catch (InvalidOperationException e)
