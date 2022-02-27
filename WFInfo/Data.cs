@@ -1159,7 +1159,7 @@ namespace WFInfo
         {
             foreach (var item in headers)
             {
-                if (!item.Key.Contains("Authorization")) continue;
+                if (!item.Key.Contains("authorization")) continue;
                 var temp = item.Value.First();
                 JWT = temp.Substring(4);
                 return;
