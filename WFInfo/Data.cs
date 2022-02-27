@@ -1336,9 +1336,9 @@ namespace WFInfo
                 marketSocket.Close(1006);
 
                 //delete the jwt token if user logs out
-                if (File.Exists(Main.AppPath + @"\jwt_encrpyted"))
+                if (File.Exists(Main.AppPath + @"\jwt_encrypted"))
                 {
-                    File.Delete(Main.AppPath + @"\jwt_encrpyted");
+                    File.Delete(Main.AppPath + @"\jwt_encrypted");
                 }
             }
         }
