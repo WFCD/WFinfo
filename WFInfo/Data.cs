@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
@@ -1082,7 +1083,9 @@ namespace WFInfo
             }
             else
             {
-                throw new Exception("GetUserLogin, " + responseBody + $"Email length: {email.Length}, Pw length: {password.Length}");
+                Regex rgx = new Regex("[a-zA-Z0-9]");
+                string censoredEmail = rgx.Replace(email, "*");
+                throw new Exception("GetUserLogin, " + responseBody + $"Email length: {censoredEmail}, Pw length: {password.Length}");
             }
             request.Dispose();
         }
@@ -1334,12 +1337,6 @@ namespace WFInfo
                 rememberMe = false;
                 inGameName = string.Empty;
                 marketSocket.Close(1006);
-
-                //delete the jwt token if user logs out
-                if (File.Exists(Main.AppPath + @"\jwt_encrypted"))
-                {
-                    File.Delete(Main.AppPath + @"\jwt_encrypted");
-                }
             }
         }
 
