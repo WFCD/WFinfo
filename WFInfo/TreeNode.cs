@@ -32,13 +32,14 @@ namespace WFInfo
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
-        protected void RaisePropertyChanged(string propName)
+        protected void RaisePropertyChanged([CallerMemberName]string propName = null)
         {
             if (!string.IsNullOrWhiteSpace(propName) && (PropertyChanged != null))
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propName));
             }
         }
+ 
     }
 
     public class SimpleCommand : ICommand
@@ -892,10 +893,6 @@ namespace WFInfo
                     Parent.Owned_Capped_Val--;
                     Parent.PrimeUpdateDiff(true);
                 }
-                Main.RunOnUIThread(() =>
-                {
-                    EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
-                });
             }
         }
 
@@ -919,10 +916,6 @@ namespace WFInfo
                 Parent.Owned_Capped_Val++;
                 Parent.PrimeUpdateDiff(true);
             }
-            Main.RunOnUIThread(() =>
-            {
-                EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
-            });
         }
 
         private void MarkSetAsComplete()
@@ -930,10 +923,6 @@ namespace WFInfo
             Main.dataBase.equipmentData[this.dataRef]["mastered"] = !Mastered;
             Mastered = !Mastered;
             Main.dataBase.SaveAllJSONs();
-            Main.RunOnUIThread(() =>
-            {
-                EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
-            });
         }
 
         private void PrimeUpdateDiff(bool UseCappedOwned)

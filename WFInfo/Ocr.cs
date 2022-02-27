@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tesseract;
+using WFInfo.Settings;
 using Brushes = System.Drawing.Brushes;
 using Clipboard = System.Windows.Forms.Clipboard;
 using Color = System.Drawing.Color;
@@ -144,13 +145,15 @@ namespace WFInfo
        
         private static ITesseractService _tesseractService;
         private static ISoundPlayer _soundPlayer;
+        private static IReadOnlyApplicationSettings _settings;
 
-        public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer)
+        public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer, IReadOnlyApplicationSettings settings)
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
             _tesseractService = tesseractService;
             _tesseractService.Init();
-            _soundPlayer = soundPlayer; 
+            _soundPlayer = soundPlayer;
+            _settings = settings;
         }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
@@ -288,7 +291,7 @@ namespace WFInfo
 
                             clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
 
-                            if (Settings.ClipboardVaulted)
+                            if (_settings.ClipboardVaulted)
                             {
                                 clipboard += ducats + ":ducats:";
                                 if (vaulted)
@@ -298,7 +301,7 @@ namespace WFInfo
 
                         if ((partNumber == firstChecks.Length - 1) && (!string.IsNullOrEmpty(clipboard)))
                         {
-                            clipboard += Settings.ClipboardTemplate;
+                            clipboard += _settings.ClipboardTemplate;
                         }
                         #endregion
 
@@ -307,20 +310,20 @@ namespace WFInfo
                         {
                             Overlay.rewardsDisplaying = true;
 
-                            if (Settings.isOverlaySelected)
+                            if (_settings.IsOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                                 Main.overlays[partNumber].Resize(overWid);
-                                Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + Settings.overlayXOffsetValue) / dpiScaling), startY + (int)(Settings.overlayYOffsetValue / dpiScaling), Settings.delay);
+                                Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / dpiScaling), startY + (int)(_settings.OverlayYOffsetValue / dpiScaling), _settings.Delay);
                             }
-                            else if (!Settings.isLightSelected)
+                            else if (!_settings.IsLightSelected)
                             {
                                 Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
                             //else
                                 //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
 
-                            if (Settings.clipboard && !string.IsNullOrEmpty(clipboard))
+                            if (_settings.Clipboard && !string.IsNullOrEmpty(clipboard))
                                 Clipboard.SetText(clipboard);
 
                         });
@@ -337,7 +340,7 @@ namespace WFInfo
                     Main.listingHelper.PrimeRewards.Add(primeRewards);
                 }
 
-                if (Settings.Highlight)
+                if (_settings.HighlightRewards)
                 {
                     Main.RunOnUIThread(() =>
                     {
@@ -350,7 +353,7 @@ namespace WFInfo
                     });
                 }
 
-                if (partialScreenshot.Height < 70 && Settings.doDoubleCheck)
+                if (partialScreenshot.Height < 70 && _settings.DoDoubleCheck)
                 {
                     // SlowSecondProcess(); secondProximity is never being written to, thus this will always result in that there is no change in the first scan. I've commented this out to increase preformance. @Dapal
                     end = watch.ElapsedMilliseconds;
@@ -361,14 +364,14 @@ namespace WFInfo
             }
             #endregion 
 
-            if (Settings.isLightSelected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
+            if (_settings.IsLightSelected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
             {
                 _soundPlayer.Play();
             }
 
 
             (new DirectoryInfo(Main.AppPath + @"\Debug\")).GetFiles()
-                .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
+                .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * _settings.ImageRetentionTime))
                 .ToList().ForEach(f => f.Delete());
 
             if (partialScreenshot != null)
@@ -578,7 +581,7 @@ namespace WFInfo
 
                             tempclipboard += "[" + secondName.Replace(" Blueprint", "") + "]: " + platinum + ":platinum: ";
 
-                            if (Settings.ClipboardVaulted)
+                            if (_settings.ClipboardVaulted)
                             {
                                 tempclipboard += ducats + ":ducats:";
                                 if (vaulted)
@@ -587,7 +590,7 @@ namespace WFInfo
                         }
                         if ((partNumber == firstChecks.Length - 1) && (!string.IsNullOrEmpty(tempclipboard)))
                         {
-                            tempclipboard += Settings.ClipboardTemplate;
+                            tempclipboard += _settings.ClipboardTemplate;
                         }
 
                         #endregion
@@ -618,18 +621,18 @@ namespace WFInfo
 
                         Main.RunOnUIThread(() =>
                         {
-                            if (Settings.isOverlaySelected)
+                            if (_settings.IsOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
-                            else if (!Settings.isLightSelected)
+                            else if (!_settings.IsLightSelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else
                                 Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
 
-                            if (Settings.clipboard && !string.IsNullOrEmpty(tempclipboard))
+                            if (_settings.Clipboard && !string.IsNullOrEmpty(tempclipboard))
                                 Clipboard.SetText(tempclipboard);
                         });
                         #endregion
@@ -648,7 +651,7 @@ namespace WFInfo
                 Main.AddLog($"Replacing the last entry as slow processing found another rewards: {msg} to list");
                 Main.listingHelper.PrimeRewards.Add(primeRewards);
 
-                if (Settings.Highlight)
+                if (_settings.HighlightRewards)
                 {
                     Main.RunOnUIThread(() =>
                     {
@@ -785,7 +788,7 @@ namespace WFInfo
         /// <returns>If part name is close enough to valid to actually process</returns>
         internal static bool PartNameValid (string partName)
         {
-            if ((partName.Length < 13 && Settings.locale == "en") || (partName.Replace(" ", "").Length < 6 && Settings.locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
+            if ((partName.Length < 13 && _settings.Locale == "en") || (partName.Replace(" ", "").Length < 6 && _settings.Locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
                 //TODO: Add a min character for other locale here.
                 return false;
             return true;
@@ -811,13 +814,16 @@ namespace WFInfo
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
             string csv = string.Empty;
             snapItImageFiltered.Dispose();
-            if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
+            if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && _settings.SnapitExport)
                 csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned,partsDetected" + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
             for (int i = 0; i < foundParts.Count; i++)
             {
                 var part = foundParts[i];
                 if (!PartNameValid(part.Name))
+                {
+                    foundParts.RemoveAt(i--); //remove invalid part from list to not clog VerifyCount. Decrement to not skip any entries
                     continue;
+                }
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0], false);
                 part.Name = name;
@@ -831,7 +837,7 @@ namespace WFInfo
                 string partsOwned = Main.dataBase.PartsOwned(name);
                 string partsDetected = ""+part.Count;
 
-                if (Settings.SnapitExport)
+                if (_settings.SnapitExport)
                 {
                     var owned = string.IsNullOrEmpty(partsOwned) ? "0" : partsOwned;
                     csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + "," + partsDetected + ", \"\"" + Environment.NewLine;
@@ -856,11 +862,11 @@ namespace WFInfo
                     itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
-                    itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
+                    itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), _settings.Delay);
                 });
             }
 
-            if (Settings.doSnapItCount)
+            if (_settings.DoSnapItCount)
                 Main.RunOnUIThread(() =>
                 {
                     VerifyCount.ShowVerifyCount(foundParts);
@@ -871,7 +877,7 @@ namespace WFInfo
             end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
             watch.Stop();
-            if (Settings.SnapitExport)
+            if (_settings.SnapitExport)
             {
                 File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv", csv);
             }
@@ -889,9 +895,9 @@ namespace WFInfo
             int rowHeight = 0;
             while (i < filteredImage.Height)
             {
-                if ( (double)(rowHits[i]) / filteredImage.Width > Settings.snapRowTextDensity) {
+                if ( (double)(rowHits[i]) / filteredImage.Width > _settings.SnapRowTextDensity) {
                     int j = 0;
-                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > Settings.snapRowEmptyDensity)
+                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > _settings.SnapRowEmptyDensity)
                     {
                         j++;
                     }
@@ -941,10 +947,10 @@ namespace WFInfo
             i = 0;
             while (i + 1< filteredImage.Width)
             {
-                if ((double)(colHits[i]) / filteredImage.Height < Settings.snapColEmptyDensity)
+                if ((double)(colHits[i]) / filteredImage.Height < _settings.SnapColEmptyDensity)
                 {
                     int j = 0;
-                    while (i + j + 1< filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < Settings.snapColEmptyDensity)
+                    while (i + j + 1< filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < _settings.SnapColEmptyDensity)
                     {
                         j++;
                     }
@@ -1047,7 +1053,7 @@ namespace WFInfo
             var font = new Font("Arial", 16);
             List<Tuple<Bitmap, Rectangle>> zones;
             int snapThreads;
-            if ( Settings.snapMultiThreaded)
+            if ( _settings.SnapMultiThreaded)
             {
                 zones = DivideSnapZones(filteredImage, filteredImageClean, rowHits, colHits);
                 snapThreads = 4;
@@ -1083,7 +1089,7 @@ namespace WFInfo
                     Rectangle bounds = wordResult.Item2;
                     //word is valid start comparing to others
                     int VerticalPad = bounds.Height/2;
-                    int HorizontalPad = (int)(bounds.Height * Settings.snapItHorizontalNameMargin);
+                    int HorizontalPad = (int)(bounds.Height * _settings.SnapItHorizontalNameMargin);
                     var paddedBounds = new Rectangle(bounds.X - HorizontalPad, bounds.Y - VerticalPad, bounds.Width + HorizontalPad * 2, bounds.Height + VerticalPad * 2);
                     //var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
 
@@ -1103,7 +1109,7 @@ namespace WFInfo
                                 continue;
                             }
                         }
-                        else if (currentWord.Length < 2 && Settings.locale == "en")
+                        else if (currentWord.Length < 2 && _settings.Locale == "en")
                         {
                             g.FillRectangle(green, paddedBounds);
                             numberTooFewCharacters++;
@@ -1167,9 +1173,9 @@ namespace WFInfo
                 results.Add(new InventoryItem(name, itemGroup.Item2));
             }
 
-            if ( Settings.doSnapItCount)
+            if ( _settings.DoSnapItCount)
             {
-                GetItemCounts(filteredImage, filteredImageClean, results, font, Settings.snapItCountThreshold);
+                GetItemCounts(filteredImage, filteredImageClean, results, font, _settings.SnapItCountThreshold);
             }
 
             filteredImageClean.Dispose();
@@ -1204,7 +1210,7 @@ namespace WFInfo
         /// <returns>Nothing, but if successful <c>foundItems</c> will be modified</returns>
         private static void GetItemCounts(Bitmap filteredImage, Bitmap filteredImageClean, List<InventoryItem> foundItems, Font font, int threshold)
         {
-            Main.AddLog("Starting Item Counting. Noise Threshold: " + Settings.snapItCountThreshold + ", Edge Width: " + Settings.snapItEdgeWidth + ", Edge Radius: " + Settings.snapItEdgeRadius);
+            Main.AddLog("Starting Item Counting. Noise Threshold: " + _settings.SnapItCountThreshold + ", Edge Width: " + _settings.SnapItEdgeWidth + ", Edge Radius: " + _settings.SnapItEdgeRadius);
             Pen darkCyan = new Pen(Brushes.DarkCyan);
             Pen red = new Pen(Brushes.Red);
             Pen cyan = new Pen(Brushes.Cyan);
@@ -1289,7 +1295,7 @@ namespace WFInfo
                 _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "0123456789");
 
 
-                double widthMultiplier = (Settings.doCustomNumberBoxWidth ? Settings.snapItNumberBoxWidth : 0.4);
+                double widthMultiplier = (_settings.DoCustomNumberBoxWidth ? _settings.SnapItNumberBoxWidth : 0.4);
                 //Process grid system
                 for (int i = 0; i < Rows.Count; i++)
                 {
@@ -1309,19 +1315,19 @@ namespace WFInfo
                         //mark edges for checking
                         for (int k = cloneRect.X; k < cloneRect.Right; k++)
                         {
-                            for (int l = 0; l <= Settings.snapItEdgeWidth; l++)
+                            for (int l = 0; l <= _settings.SnapItEdgeWidth; l++)
                             {
                                 toFilter.Push(new Point(k, cloneRect.Bottom - l));
                             }
                         }
                         for (int k = cloneRect.Y; k < cloneRect.Bottom; k++)
                         {
-                            for (int l = 0; l <= Settings.snapItEdgeWidth; l++)
+                            for (int l = 0; l <= _settings.SnapItEdgeWidth; l++)
                             {
                                 toFilter.Push(new Point(cloneRect.Right-l, k));
                             }
                         }
-                        int checkRadius = Settings.snapItEdgeRadius;
+                        int checkRadius = _settings.SnapItEdgeRadius;
                         while (toFilter.Count > 0)
                         {
                             Point curr = toFilter.Pop();
@@ -2081,7 +2087,7 @@ namespace WFInfo
             {
                 Main.RunOnUIThread(() =>
                 {
-                    Main.StatusUpdate("Filter and separate failed, report to dev", 1);
+                    Main.StatusUpdate("Unable to detect reward from selection screen\nScanning inventory? Hold down snap-it modifier", 1);
                 });
                 processingActive = false;
                 throw new Exception("Unable to find any parts");
@@ -2357,12 +2363,12 @@ namespace WFInfo
                             }
                             catch (System.ComponentModel.Win32Exception e) {
                                 Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
-                                Main.StatusUpdate("Restart Warframe without admin mode", 1);
-                                return Settings.debug ? true : false;
+                                Main.StatusUpdate("Restart Warframe without admin privileges", 1);
+                                return _settings.Debug ? true : false;
                             }
                         }
                     }
-                if (!Settings.debug) {
+                if (!_settings.Debug) {
                     Main.AddLog("Did Not Detect Warframe Process");
                     Main.StatusUpdate("Unable to Detect Warframe Process", 1);
                 }
@@ -2423,7 +2429,7 @@ namespace WFInfo
 
             if (!Win32.GetWindowRect(HandleRef, out Win32.R osRect))
             { // get window size of warframe
-                if (Settings.debug)
+                if (_settings.Debug)
                 { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
                     int width = wfScreen.Bounds.Width * (int)dpiScaling;
                     int height = wfScreen.Bounds.Height * (int)dpiScaling;
@@ -2475,7 +2481,7 @@ namespace WFInfo
                     Main.AddLog($"Fullscreen detected (0x{styles.ToString("X8", Main.culture)}, {window.ToString()}");
                     currentStyle = WindowStyle.FULLSCREEN;
                     //Show the Fullscreen prompt
-                    if (Settings.isOverlaySelected)
+                    if (_settings.IsOverlaySelected)
                     {
                         Main.AddLog($"Showing the Fullscreen Reminder");
                         Main.RunOnUIThread(() =>

@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Forms;
 using WebSocketSharp;
 using WFInfo.Resources;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -19,11 +20,11 @@ namespace WFInfo
         public static Main INSTANCE;
         public static string AppPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static Data dataBase = new Data();
+        public static Data dataBase = new Data(ApplicationSettings.GlobalReadonlySettings);
         public static RewardWindow window = new RewardWindow();
         public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
-        public static Settings settingsWindow = new Settings();
+        public static SettingsWindow settingsWindow = new SettingsWindow();
         public static VerifyCount verifyCount = new VerifyCount();
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;
@@ -41,6 +42,7 @@ namespace WFInfo
         private static bool UserAway { get; set; }
         private static string LastMarketStatus { get; set; } = "invisible";
         private static string LastMarketStatusB4AFK { get; set; } = "invisible";
+        private readonly IReadOnlyApplicationSettings _settings = ApplicationSettings.GlobalReadonlySettings;
 
         public Main()
         {
@@ -68,9 +70,9 @@ namespace WFInfo
                 dataBase.Update();
 
                 //RelicsWindow.LoadNodesOnThread();
-                OCR.Init(new TesseractService(), new SoundPlayer());
-
-                if ((bool)Settings.settingsObj["Auto"])
+                OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings);
+                
+                if (ApplicationSettings.GlobalReadonlySettings.Auto)
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
@@ -85,7 +87,7 @@ namespace WFInfo
             {
                 AddLog("LOADING FAILED");
                 AddLog(ex.ToString());
-                StatusUpdate(ex.ToString().Contains("invalid_grant") ? "System clock invalid - Please resync": "Launch Failure - Please Restart", 0);
+                StatusUpdate(ex.ToString().Contains("invalid_grant") ? "System time out of sync with server\nResync system clock in windows settings": "Launch Failure - Please Restart", 0);
                 RunOnUIThread(() =>
                 {
                     _ = new ErrorDialogue(DateTime.Now, 0);
@@ -206,10 +208,10 @@ namespace WFInfo
             //Log activation. Can't set activation key to left or right mouse button via UI so not differentiating between MouseButton and Key should be fine
             Main.AddLog($"User is activating with pressing key: {key} and is holding down:\n" +
                 $"Delete:{Keyboard.IsKeyDown(Key.Delete)}\n" +
-                $"Snapit, {Settings.SnapitModifierKey}:{Keyboard.IsKeyDown(Settings.SnapitModifierKey)}\n" +
-                $"Searchit, {Settings.SearchItModifierKey}:{Keyboard.IsKeyDown(Settings.SearchItModifierKey)}\n" +
-                $"Masterit, {Settings.MasterItModifierKey}:{Keyboard.IsKeyDown(Settings.MasterItModifierKey)}\n" +
-                $"debug, {Settings.DebugModifierKey}:{Keyboard.IsKeyDown(Settings.DebugModifierKey)}");
+                $"Snapit, {_settings.SnapitModifierKey}:{Keyboard.IsKeyDown(_settings.SnapitModifierKey)}\n" +
+                $"Searchit, {_settings.SearchItModifierKey}:{Keyboard.IsKeyDown(_settings.SearchItModifierKey)}\n" +
+                $"Masterit, {_settings.MasterItModifierKey}:{Keyboard.IsKeyDown(_settings.MasterItModifierKey)}\n" +
+                $"debug, {_settings.DebugModifierKey}:{Keyboard.IsKeyDown(_settings.DebugModifierKey)}");
 
             if (Keyboard.IsKeyDown(Key.Delete))
             { 
@@ -225,37 +227,37 @@ namespace WFInfo
                 return;
             }
 
-            if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+            if (_settings.Debug && Keyboard.IsKeyDown(_settings.DebugModifierKey) && Keyboard.IsKeyDown(_settings.SnapitModifierKey))
             { //snapit debug
                 AddLog("Loading screenshot from file for snapit");
                 StatusUpdate("Offline testing with screenshot for snapit", 0);
                 LoadScreenshot(ScreenshotType.SNAPIT);
             } 
-            else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.MasterItModifierKey))
+            else if (_settings.Debug && Keyboard.IsKeyDown(_settings.DebugModifierKey) && Keyboard.IsKeyDown(_settings.MasterItModifierKey))
             { //master debug
                 AddLog("Loading screenshot from file for masterit");
                 StatusUpdate("Offline testing with screenshot for masterit", 0);
                 LoadScreenshot(ScreenshotType.MASTERIT);
             }
-            else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
+            else if (_settings.Debug && Keyboard.IsKeyDown(_settings.DebugModifierKey))
             {//normal debug
                 AddLog("Loading screenshot from file");
                 StatusUpdate("Offline testing with screenshot", 0);
                 LoadScreenshot(ScreenshotType.NORMAL);
             }
-            else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+            else if (Keyboard.IsKeyDown(_settings.SnapitModifierKey))
             {//snapit
                 AddLog("Starting snap it");
                 StatusUpdate("Starting snap it", 0);
                 OCR.SnapScreenshot();
             }
-            else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
+            else if (Keyboard.IsKeyDown(_settings.SearchItModifierKey))
             { //Searchit  
                 AddLog("Starting search it");
                 StatusUpdate("Starting search it", 0);
                 searchBox.Start();
             }
-            else if (Keyboard.IsKeyDown(Settings.MasterItModifierKey))
+            else if (Keyboard.IsKeyDown(_settings.MasterItModifierKey))
             {//masterit
                 AddLog("Starting master it");
                 StatusUpdate("Starting master it", 0);
@@ -265,7 +267,7 @@ namespace WFInfo
                     bigScreenshot.Dispose();
                 });
             }
-            else if (Settings.debug || OCR.VerifyWarframe())
+            else if (_settings.Debug || OCR.VerifyWarframe())
             {
                 Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
             }
@@ -275,7 +277,7 @@ namespace WFInfo
         {
             latestActive = DateTime.UtcNow.AddMinutes(minutesTillAfk);
 
-            if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
+            if (_settings.ActivationMouseButton != null && key == _settings.ActivationMouseButton)
             { //check if user pressed activation key
 
 
@@ -331,7 +333,7 @@ namespace WFInfo
             }
 
             
-            if (key == Settings.ActivationKey)
+            if (key == _settings.ActivationKeyKey)
             { //check if user pressed activation key
 
                 ActivationKeyPressed(key);
