@@ -32,13 +32,14 @@ namespace WFInfo
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
-        protected void RaisePropertyChanged(string propName)
+        protected void RaisePropertyChanged([CallerMemberName]string propName = null)
         {
             if (!string.IsNullOrWhiteSpace(propName) && (PropertyChanged != null))
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propName));
             }
         }
+ 
     }
 
     public class SimpleCommand : ICommand
@@ -525,27 +526,27 @@ namespace WFInfo
                             // 2 - Average radiant plat
                             // 3 - Difference (radiant-intact)
                             case 1:
-                                Children = Children.AsParallel().OrderByDescending(p => p._intact).ToList();
-                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._intact).ToList();
+                                Children = Children.OrderByDescending(p => p._intact).ToList();
+                                ChildrenFiltered = ChildrenFiltered.OrderByDescending(p => p._intact).ToList();
                                 break;
                             case 2:
-                                Children = Children.AsParallel().OrderByDescending(p => p._radiant).ToList();
-                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._radiant).ToList();
+                                Children = Children.OrderByDescending(p => p._radiant).ToList();
+                                ChildrenFiltered = ChildrenFiltered.OrderByDescending(p => p._radiant).ToList();
                                 break;
                             case 3:
-                                Children = Children.AsParallel().OrderByDescending(p => p._bonus).ToList();
-                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p._bonus).ToList();
+                                Children = Children.OrderByDescending(p => p._bonus).ToList();
+                                ChildrenFiltered = ChildrenFiltered.OrderByDescending(p => p._bonus).ToList();
                                 break;
                             default:
-                                Children = Children.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
-                                ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
+                                Children = Children.OrderBy(p => PadNumbers(p.Name)).ToList();
+                                ChildrenFiltered = ChildrenFiltered.OrderBy(p => PadNumbers(p.Name)).ToList();
                                 break;
                         }
                     }
                     else            // Parts
                     {
-                        Children = Children.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
-                        ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.NameColor.G).ToList();
+                        Children = Children.OrderByDescending(p => p.NameColor.G).ToList();
+                        ChildrenFiltered = ChildrenFiltered.OrderByDescending(p => p.NameColor.G).ToList();
                     }
                 }
                 else
@@ -559,28 +560,28 @@ namespace WFInfo
                         // 4 - Owned Plat Value
 
                         case 1:
-                            Children = Children.AsParallel().OrderByDescending(p => p.Plat_Val).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Plat_Val).ToList();
+                            Children = Children.OrderByDescending(p => p.Plat_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.OrderByDescending(p => p.Plat_Val).ToList();
                             break;
                         case 2:
-                            Children = Children.AsParallel().OrderBy(p => p.Owned_Capped_Val).OrderBy(p => p.Diff_Val).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => p.Owned_Capped_Val).OrderBy(p => p.Diff_Val).ToList();
+                            Children = Children.OrderBy(p => p.Owned_Capped_Val).OrderBy(p => p.Diff_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.OrderBy(p => p.Owned_Capped_Val).OrderBy(p => p.Diff_Val).ToList();
                             break;
                         case 3:
-                            Children = Children.AsParallel().OrderByDescending(p => p.Owned_Val).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Owned_Val).ToList();
+                            Children = Children.OrderByDescending(p => p.Owned_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.OrderByDescending(p => p.Owned_Val).ToList();
                             break;
                         case 4:
-                            Children = Children.AsParallel().OrderByDescending(p => p.Owned_Plat_Val).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Owned_Plat_Val).ToList();
+                            Children = Children.OrderByDescending(p => p.Owned_Plat_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.OrderByDescending(p => p.Owned_Plat_Val).ToList();
                             break;
                         case 5:
-                            Children = Children.AsParallel().OrderByDescending(p => p.Owned_Ducat_Val).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderByDescending(p => p.Owned_Ducat_Val).ToList();
+                            Children = Children.OrderByDescending(p => p.Owned_Ducat_Val).ToList();
+                            ChildrenFiltered = ChildrenFiltered.OrderByDescending(p => p.Owned_Ducat_Val).ToList();
                             break;
                         default:
-                            Children = Children.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
-                            ChildrenFiltered = ChildrenFiltered.AsParallel().OrderBy(p => PadNumbers(p.Name)).ToList();
+                            Children = Children.OrderBy(p => PadNumbers(p.Name)).ToList();
+                            ChildrenFiltered = ChildrenFiltered.OrderBy(p => PadNumbers(p.Name)).ToList();
                             break;
                     }
                 }
@@ -892,10 +893,6 @@ namespace WFInfo
                     Parent.Owned_Capped_Val--;
                     Parent.PrimeUpdateDiff(true);
                 }
-                Main.RunOnUIThread(() =>
-                {
-                    EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
-                });
             }
         }
 
@@ -919,10 +916,6 @@ namespace WFInfo
                 Parent.Owned_Capped_Val++;
                 Parent.PrimeUpdateDiff(true);
             }
-            Main.RunOnUIThread(() =>
-            {
-                EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
-            });
         }
 
         private void MarkSetAsComplete()
@@ -930,10 +923,6 @@ namespace WFInfo
             Main.dataBase.equipmentData[this.dataRef]["mastered"] = !Mastered;
             Mastered = !Mastered;
             Main.dataBase.SaveAllJSONs();
-            Main.RunOnUIThread(() =>
-            {
-                EquipmentWindow.INSTANCE.EqmtTree.Items.Refresh();
-            });
         }
 
         private void PrimeUpdateDiff(bool UseCappedOwned)

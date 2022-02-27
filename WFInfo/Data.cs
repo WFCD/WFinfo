@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -64,10 +65,11 @@ namespace WFInfo
         public bool rememberMe;
         private LogCapture EElogWatcher;
         private Task autoThread;
+        private readonly IReadOnlyApplicationSettings _settings;
 
-
-        public Data()
+        public Data(IReadOnlyApplicationSettings settings)
         {
+            _settings = settings;
             Main.AddLog("Initializing Databases");
             marketItemsPath = applicationDirectory + @"\market_items.json";
             marketDataPath = applicationDirectory + @"\market_data.json";
@@ -119,7 +121,12 @@ namespace WFInfo
 
         public bool IsJwtAvailable()
         {
-            return JWT != null;
+            return JWT.Length > 300; //check if the token is of the right length
+        }
+
+        public bool IsJwtLoggedIn()
+        {
+            return JWT.Length > 500; //check if the token is of the right length
         }
 
         public int GetGithubVersion()
@@ -161,7 +168,7 @@ namespace WFInfo
                     Method = HttpMethod.Get
                 })
                 {
-                    request.Headers.Add("language", Settings.locale);
+                    request.Headers.Add("language", _settings.Locale);
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
                     var task = Task.Run(() => client.SendAsync(request));
@@ -580,7 +587,7 @@ namespace WFInfo
 
         public int LevenshteinDistance(string s, string t)
         {
-            switch(Settings.locale)
+            switch(_settings.Locale)
             {
                 case "ko":
                     // for korean
@@ -673,6 +680,7 @@ namespace WFInfo
                 SaveAllJSONs();
             return localeName;
         }
+        private protected static string e = "A?s/,;j_<Z3Q4z&)";
 
         public int LevenshteinDistanceKorean(string s, string t)
         {
@@ -981,7 +989,7 @@ namespace WFInfo
                 Overlay.rewardsDisplaying = true;
             }
 
-            if (!line.Contains("MatchingService::EndSession") || !IsJwtAvailable() || !Settings.automaticListing) return;
+            if (!line.Contains("MatchingService::EndSession") || !_settings.AutoList) return;
 
             if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
@@ -1019,40 +1027,35 @@ namespace WFInfo
             });
         }
 
-        public static void AutoTriggered()
-        {
-            try
-            {
-                var watch = Stopwatch.StartNew();
-                long stop = watch.ElapsedMilliseconds + 5000;
-                long wait = watch.ElapsedMilliseconds;
+		public static void AutoTriggered() {
+			try {
+				var watch = Stopwatch.StartNew();
+				long stop = watch.ElapsedMilliseconds + 5000;
+				long wait = watch.ElapsedMilliseconds;
 
-                OCR.UpdateWindow();
+				OCR.UpdateWindow();
 
-                while (watch.ElapsedMilliseconds < stop)
-                {
-                    if (watch.ElapsedMilliseconds <= wait) continue;
-                    wait += Settings.autoDelay;
-                    OCR.GetThemeWeighted(out double diff);
-                    if (!(diff > 40)) continue;
-                    while (watch.ElapsedMilliseconds < wait) ;
-                    Main.AddLog("started auto processing");
-                    OCR.ProcessRewardScreen();
-                    break;
-                }
-                watch.Stop();
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog("AUTO FAILED");
-                Main.AddLog(ex.ToString());
-                Main.StatusUpdate("Auto Detection Failed", 0);
-                Main.RunOnUIThread(() =>
-                {
-                    _ = new ErrorDialogue(DateTime.Now, 0);
-                });
-            }
-        }
+				while (watch.ElapsedMilliseconds < stop) {
+					if (watch.ElapsedMilliseconds <= wait) continue;
+					wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
+					OCR.GetThemeWeighted(out double diff);
+					if (!(diff > 40)) continue;
+					while (watch.ElapsedMilliseconds < wait) ;
+					Main.AddLog("started auto processing");
+					OCR.ProcessRewardScreen();
+					break;
+				}
+				watch.Stop();
+			}
+			catch (Exception ex) {
+				Main.AddLog("AUTO FAILED");
+				Main.AddLog(ex.ToString());
+				Main.StatusUpdate("Auto Detection Failed", 0);
+				Main.RunOnUIThread(() => {
+					_ = new ErrorDialogue(DateTime.Now, 0);
+				});
+			}
+		}
 
         /// <summary>
         ///	Get's the user's login JWT to authenticate future API calls.
@@ -1281,6 +1284,7 @@ namespace WFInfo
             var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
             switch (status)
             {
+                case "ingame":
                 case "in game":
                     message += "ingame\"}";
                     break;
@@ -1331,11 +1335,19 @@ namespace WFInfo
         /// </summary>
         public void Disconnect()
         {
-            SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
-            JWT = null;
-            rememberMe = false;
-            inGameName = string.Empty;
-            marketSocket.Close(1006);
+            if (marketSocket.ReadyState == WebSocketState.Open) { //only send disconnect message if the socket is connected
+                SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
+                JWT = null;
+                rememberMe = false;
+                inGameName = string.Empty;
+                marketSocket.Close(1006);
+
+                //delete the jwt token if user logs out
+                if (File.Exists(Main.AppPath + @"\jwt_encrpyted"))
+                {
+                    File.Delete(Main.AppPath + @"\jwt_encrpyted");
+                }
+            }
         }
 
         public string GetUrlName(string primeName)
@@ -1403,8 +1415,9 @@ namespace WFInfo
                     var response = await client.SendAsync(request);
                     SetJWT(response.Headers);
                     var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-
-                    return (string)profile.GetValue("role") != "anonymous";
+                    profile["profile"]["check_code"] = "REDACTED"; // remnove the code that can compromise an account.
+                    Main.AddLog($"JWT check response: {profile["profile"]}");
+                    return !(bool)profile["profile"]["anonymous"];
                 }
             }
             catch (Exception e)

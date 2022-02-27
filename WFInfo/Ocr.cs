@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tesseract;
+using WFInfo.Settings;
 using Brushes = System.Drawing.Brushes;
 using Clipboard = System.Windows.Forms.Clipboard;
 using Color = System.Drawing.Color;
@@ -28,6 +29,9 @@ namespace WFInfo
     class OCR
     {
         private static readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
+
+        private static Screen wfScreen = Screen.PrimaryScreen;
+
         #region variabels and sizzle
         public enum WFtheme : int
         {
@@ -84,11 +88,7 @@ namespace WFInfo
                                                             Color.FromArgb(255,  53,   0) };    //ZEPHER	
 
 
-    public static Assembly assembly = Assembly.GetExecutingAssembly();
-        public static Stream audioStream = assembly.GetManifestResourceStream("WFInfo.Resources.achievment_03.wav");
-        public static System.Media.SoundPlayer player = new System.Media.SoundPlayer(audioStream);
-
-        private static int numberOfRewardsDisplayed;
+    private static int numberOfRewardsDisplayed;
 
         public static WindowStyle currentStyle;
         public enum WindowStyle
@@ -115,9 +115,6 @@ namespace WFInfo
         // Screen / Resolution Scaling - Used to adjust pixel values to each person's monitor
         public static double screenScaling;
 
-        public static TesseractEngine firstEngine;
-        public static TesseractEngine secondEngine;
-        public static TesseractEngine[] engines = new TesseractEngine[4];
         public static Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
@@ -131,7 +128,6 @@ namespace WFInfo
 
         private static Bitmap bigScreenshot;
         private static Bitmap partialScreenshot;
-        public static Bitmap RewarIndexScreenshot;
         private static Bitmap partialScreenshotExpanded;
 
         private static WFtheme activeTheme;
@@ -146,61 +142,18 @@ namespace WFInfo
         private static string clipboard;
         #endregion
 
-        static void getLocaleTessdata()
-        {
-            string traineddata_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/libs/tessdata/";
-            JObject traineddata_checksums = new JObject
-            {
-                {"en", "7af2ad02d11702c7092a5f8dd044d52f"},
-                {"ko", "c776744205668b7e76b190cc648765da"}
-            };
+       
+        private static ITesseractService _tesseractService;
+        private static ISoundPlayer _soundPlayer;
+        private static IReadOnlyApplicationSettings _settings;
 
-            // get trainned data
-            string traineddata_hotlink = traineddata_hotlink_prefix + Settings.locale + ".traineddata";
-            string app_data_traineddata_path = CustomEntrypoint.appdata_tessdata_folder + @"\" + Settings.locale + ".traineddata";
-
-            WebClient webClient = new WebClient();
-
-            if (!File.Exists(app_data_traineddata_path) || CustomEntrypoint.GetMD5hash(app_data_traineddata_path) != traineddata_checksums.GetValue(Settings.locale).ToObject<string>())
-            {
-                try
-                {
-                    webClient.DownloadFile(traineddata_hotlink, app_data_traineddata_path);
-                }
-                catch (Exception) { }
-            }
-        }
-        static OCR()
-        {
-            getLocaleTessdata();
-            firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
-            {
-                DefaultPageSegMode = PageSegMode.SingleBlock
-            };
-
-            secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
-            {
-                DefaultPageSegMode = PageSegMode.SingleBlock
-            };
-
-
-        }
-
-        public static void Init()
+        public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer, IReadOnlyApplicationSettings settings)
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
-
-            for (int i = 0; i < 4; i++)
-            {
-                if(engines[i] != null)
-                {
-                    engines[i].Dispose();
-                }
-                engines[i] = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
-                {
-                    DefaultPageSegMode = PageSegMode.SingleBlock
-                };
-            }
+            _tesseractService = tesseractService;
+            _tesseractService.Init();
+            _soundPlayer = soundPlayer;
+            _settings = settings;
         }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
@@ -244,7 +197,7 @@ namespace WFInfo
             for (int i = 0; i < parts.Count; i++)
             {
                 int tempI = i;
-                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], engines[tempI]);});
+                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]);});
             }
             Task.WaitAll(tasks);
 
@@ -338,7 +291,7 @@ namespace WFInfo
 
                             clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
 
-                            if (Settings.ClipboardVaulted)
+                            if (_settings.ClipboardVaulted)
                             {
                                 clipboard += ducats + ":ducats:";
                                 if (vaulted)
@@ -348,7 +301,7 @@ namespace WFInfo
 
                         if ((partNumber == firstChecks.Length - 1) && (!string.IsNullOrEmpty(clipboard)))
                         {
-                            clipboard += Settings.ClipboardTemplate;
+                            clipboard += _settings.ClipboardTemplate;
                         }
                         #endregion
 
@@ -357,20 +310,20 @@ namespace WFInfo
                         {
                             Overlay.rewardsDisplaying = true;
 
-                            if (Settings.isOverlaySelected)
+                            if (_settings.IsOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                                 Main.overlays[partNumber].Resize(overWid);
-                                Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + Settings.overlayXOffsetValue) / dpiScaling), startY + (int)(Settings.overlayYOffsetValue / dpiScaling), Settings.delay);
+                                Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / dpiScaling), startY + (int)(_settings.OverlayYOffsetValue / dpiScaling), _settings.Delay);
                             }
-                            else if (!Settings.isLightSelected)
+                            else if (!_settings.IsLightSelected)
                             {
                                 Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
                             }
                             //else
                                 //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
 
-                            if (Settings.clipboard && !string.IsNullOrEmpty(clipboard))
+                            if (_settings.Clipboard && !string.IsNullOrEmpty(clipboard))
                                 Clipboard.SetText(clipboard);
 
                         });
@@ -387,7 +340,7 @@ namespace WFInfo
                     Main.listingHelper.PrimeRewards.Add(primeRewards);
                 }
 
-                if (Settings.Highlight)
+                if (_settings.HighlightRewards)
                 {
                     Main.RunOnUIThread(() =>
                     {
@@ -400,7 +353,7 @@ namespace WFInfo
                     });
                 }
 
-                if (partialScreenshot.Height < 70 && Settings.doDoubleCheck)
+                if (partialScreenshot.Height < 70 && _settings.DoDoubleCheck)
                 {
                     // SlowSecondProcess(); secondProximity is never being written to, thus this will always result in that there is no change in the first scan. I've commented this out to increase preformance. @Dapal
                     end = watch.ElapsedMilliseconds;
@@ -411,14 +364,14 @@ namespace WFInfo
             }
             #endregion 
 
-            if (Settings.isLightSelected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
+            if (_settings.IsLightSelected && clipboard.Length > 3) //light mode doesn't have any visual confirmation that the ocr has finished, thus we use a sound to indicate this.
             {
-                player.Play();
+                _soundPlayer.Play();
             }
 
 
             (new DirectoryInfo(Main.AppPath + @"\Debug\")).GetFiles()
-                .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * Settings.imageRetentionTime))
+                .Where(f => f.CreationTime < DateTime.Now.AddHours(-1 * _settings.ImageRetentionTime))
                 .ToList().ForEach(f => f.Delete());
 
             if (partialScreenshot != null)
@@ -569,7 +522,7 @@ namespace WFInfo
             partialScreenshotExpanded.Save(Main.AppPath + @"\Debug\PartShotUpscaled " + timestamp + ".png");
             newFilter.Save(Main.AppPath + @"\Debug\PartShotUpscaledFiltered " + timestamp + ".png");
             Main.AddLog(("----  SECOND OCR CHECK  ------------------------------------------------------------------------------------------").Substring(0, 108));
-            secondChecks = SeparatePlayers(newFilter, secondEngine);
+            secondChecks = SeparatePlayers(newFilter, _tesseractService.SecondEngine);
             var primeRewards = new List<string>();
 
             var tempAmountOfRewardsDisplayed = 0;
@@ -628,7 +581,7 @@ namespace WFInfo
 
                             tempclipboard += "[" + secondName.Replace(" Blueprint", "") + "]: " + platinum + ":platinum: ";
 
-                            if (Settings.ClipboardVaulted)
+                            if (_settings.ClipboardVaulted)
                             {
                                 tempclipboard += ducats + ":ducats:";
                                 if (vaulted)
@@ -637,7 +590,7 @@ namespace WFInfo
                         }
                         if ((partNumber == firstChecks.Length - 1) && (!string.IsNullOrEmpty(tempclipboard)))
                         {
-                            tempclipboard += Settings.ClipboardTemplate;
+                            tempclipboard += _settings.ClipboardTemplate;
                         }
 
                         #endregion
@@ -668,18 +621,18 @@ namespace WFInfo
 
                         Main.RunOnUIThread(() =>
                         {
-                            if (Settings.isOverlaySelected)
+                            if (_settings.IsOverlaySelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
-                            else if (!Settings.isLightSelected)
+                            else if (!_settings.IsLightSelected)
                             {
                                 Main.overlays[partNumber].LoadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
                             }
                             else
                                 Main.window.loadTextData(secondName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
 
-                            if (Settings.clipboard && !string.IsNullOrEmpty(tempclipboard))
+                            if (_settings.Clipboard && !string.IsNullOrEmpty(tempclipboard))
                                 Clipboard.SetText(tempclipboard);
                         });
                         #endregion
@@ -698,7 +651,7 @@ namespace WFInfo
                 Main.AddLog($"Replacing the last entry as slow processing found another rewards: {msg} to list");
                 Main.listingHelper.PrimeRewards.Add(primeRewards);
 
-                if (Settings.Highlight)
+                if (_settings.HighlightRewards)
                 {
                     Main.RunOnUIThread(() =>
                     {
@@ -835,7 +788,7 @@ namespace WFInfo
         /// <returns>If part name is close enough to valid to actually process</returns>
         internal static bool PartNameValid (string partName)
         {
-            if ((partName.Length < 13 && Settings.locale == "en") || (partName.Replace(" ", "").Length < 6 && Settings.locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
+            if ((partName.Length < 13 && _settings.Locale == "en") || (partName.Replace(" ", "").Length < 6 && _settings.Locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
                 //TODO: Add a min character for other locale here.
                 return false;
             return true;
@@ -861,13 +814,16 @@ namespace WFInfo
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
             string csv = string.Empty;
             snapItImageFiltered.Dispose();
-            if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && Settings.SnapitExport)
+            if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && _settings.SnapitExport)
                 csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned,partsDetected" + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
             for (int i = 0; i < foundParts.Count; i++)
             {
                 var part = foundParts[i];
                 if (!PartNameValid(part.Name))
+                {
+                    foundParts.RemoveAt(i--); //remove invalid part from list to not clog VerifyCount. Decrement to not skip any entries
                     continue;
+                }
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0], false);
                 part.Name = name;
@@ -881,7 +837,7 @@ namespace WFInfo
                 string partsOwned = Main.dataBase.PartsOwned(name);
                 string partsDetected = ""+part.Count;
 
-                if (Settings.SnapitExport)
+                if (_settings.SnapitExport)
                 {
                     var owned = string.IsNullOrEmpty(partsOwned) ? "0" : partsOwned;
                     csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + "," + partsDetected + ", \"\"" + Environment.NewLine;
@@ -906,11 +862,11 @@ namespace WFInfo
                     itemOverlay.LoadTextData(name, plat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
-                    itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), Settings.delay);
+                    itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), _settings.Delay);
                 });
             }
 
-            if (Settings.doSnapItCount)
+            if (_settings.DoSnapItCount)
                 Main.RunOnUIThread(() =>
                 {
                     VerifyCount.ShowVerifyCount(foundParts);
@@ -921,7 +877,7 @@ namespace WFInfo
             end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
             watch.Stop();
-            if (Settings.SnapitExport)
+            if (_settings.SnapitExport)
             {
                 File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv", csv);
             }
@@ -939,9 +895,9 @@ namespace WFInfo
             int rowHeight = 0;
             while (i < filteredImage.Height)
             {
-                if ( (double)(rowHits[i]) / filteredImage.Width > Settings.snapRowTextDensity) {
+                if ( (double)(rowHits[i]) / filteredImage.Width > _settings.SnapRowTextDensity) {
                     int j = 0;
-                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > Settings.snapRowEmptyDensity)
+                    while ( i+j < filteredImage.Height && (double)(rowHits[i+j]) / filteredImage.Width > _settings.SnapRowEmptyDensity)
                     {
                         j++;
                     }
@@ -991,10 +947,10 @@ namespace WFInfo
             i = 0;
             while (i + 1< filteredImage.Width)
             {
-                if ((double)(colHits[i]) / filteredImage.Height < Settings.snapColEmptyDensity)
+                if ((double)(colHits[i]) / filteredImage.Height < _settings.SnapColEmptyDensity)
                 {
                     int j = 0;
-                    while (i + j + 1< filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < Settings.snapColEmptyDensity)
+                    while (i + j + 1< filteredImage.Width && (double)(colHits[i + j]) / filteredImage.Width < _settings.SnapColEmptyDensity)
                     {
                         j++;
                     }
@@ -1097,7 +1053,7 @@ namespace WFInfo
             var font = new Font("Arial", 16);
             List<Tuple<Bitmap, Rectangle>> zones;
             int snapThreads;
-            if ( Settings.snapMultiThreaded)
+            if ( _settings.SnapMultiThreaded)
             {
                 zones = DivideSnapZones(filteredImage, filteredImageClean, rowHits, colHits);
                 snapThreads = 4;
@@ -1117,7 +1073,7 @@ namespace WFInfo
                     for (int j = tempI; j < zones.Count; j += snapThreads)
                     {
                         //process images
-                        List<Tuple<String, Rectangle>> currentResult = GetTextWithBoundsFromImage(engines[tempI], zones[j].Item1, zones[j].Item2.X, zones[j].Item2.Y);
+                        List<Tuple<String, Rectangle>> currentResult = GetTextWithBoundsFromImage(_tesseractService.Engines[tempI], zones[j].Item1, zones[j].Item2.X, zones[j].Item2.Y);
                         taskResults.AddRange(currentResult);
                     }
                     return taskResults;
@@ -1133,7 +1089,7 @@ namespace WFInfo
                     Rectangle bounds = wordResult.Item2;
                     //word is valid start comparing to others
                     int VerticalPad = bounds.Height/2;
-                    int HorizontalPad = (int)(bounds.Height * Settings.snapItHorizontalNameMargin);
+                    int HorizontalPad = (int)(bounds.Height * _settings.SnapItHorizontalNameMargin);
                     var paddedBounds = new Rectangle(bounds.X - HorizontalPad, bounds.Y - VerticalPad, bounds.Width + HorizontalPad * 2, bounds.Height + VerticalPad * 2);
                     //var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
 
@@ -1153,7 +1109,7 @@ namespace WFInfo
                                 continue;
                             }
                         }
-                        else if (currentWord.Length < 2 && Settings.locale == "en")
+                        else if (currentWord.Length < 2 && _settings.Locale == "en")
                         {
                             g.FillRectangle(green, paddedBounds);
                             numberTooFewCharacters++;
@@ -1217,9 +1173,9 @@ namespace WFInfo
                 results.Add(new InventoryItem(name, itemGroup.Item2));
             }
 
-            if ( Settings.doSnapItCount)
+            if ( _settings.DoSnapItCount)
             {
-                GetItemCounts(filteredImage, filteredImageClean, results, font, Settings.snapItCountThreshold);
+                GetItemCounts(filteredImage, filteredImageClean, results, font, _settings.SnapItCountThreshold);
             }
 
             filteredImageClean.Dispose();
@@ -1254,7 +1210,7 @@ namespace WFInfo
         /// <returns>Nothing, but if successful <c>foundItems</c> will be modified</returns>
         private static void GetItemCounts(Bitmap filteredImage, Bitmap filteredImageClean, List<InventoryItem> foundItems, Font font, int threshold)
         {
-            Main.AddLog("Starting Item Counting. Noise Threshold: " + Settings.snapItCountThreshold + ", Edge Width: " + Settings.snapItEdgeWidth + ", Edge Radius: " + Settings.snapItEdgeRadius);
+            Main.AddLog("Starting Item Counting. Noise Threshold: " + _settings.SnapItCountThreshold + ", Edge Width: " + _settings.SnapItEdgeWidth + ", Edge Radius: " + _settings.SnapItEdgeRadius);
             Pen darkCyan = new Pen(Brushes.DarkCyan);
             Pen red = new Pen(Brushes.Red);
             Pen cyan = new Pen(Brushes.Cyan);
@@ -1336,10 +1292,10 @@ namespace WFInfo
 
 
                 //set OCR to numbers only
-                firstEngine.SetVariable("tessedit_char_whitelist", "0123456789");
+                _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "0123456789");
 
 
-                double widthMultiplier = (Settings.doCustomNumberBoxWidth ? Settings.snapItNumberBoxWidth : 0.4);
+                double widthMultiplier = (_settings.DoCustomNumberBoxWidth ? _settings.SnapItNumberBoxWidth : 0.4);
                 //Process grid system
                 for (int i = 0; i < Rows.Count; i++)
                 {
@@ -1359,19 +1315,19 @@ namespace WFInfo
                         //mark edges for checking
                         for (int k = cloneRect.X; k < cloneRect.Right; k++)
                         {
-                            for (int l = 0; l <= Settings.snapItEdgeWidth; l++)
+                            for (int l = 0; l <= _settings.SnapItEdgeWidth; l++)
                             {
                                 toFilter.Push(new Point(k, cloneRect.Bottom - l));
                             }
                         }
                         for (int k = cloneRect.Y; k < cloneRect.Bottom; k++)
                         {
-                            for (int l = 0; l <= Settings.snapItEdgeWidth; l++)
+                            for (int l = 0; l <= _settings.SnapItEdgeWidth; l++)
                             {
                                 toFilter.Push(new Point(cloneRect.Right-l, k));
                             }
                         }
-                        int checkRadius = Settings.snapItEdgeRadius;
+                        int checkRadius = _settings.SnapItEdgeRadius;
                         while (toFilter.Count > 0)
                         {
                             Point curr = toFilter.Pop();
@@ -1421,7 +1377,7 @@ namespace WFInfo
                         g.DrawRectangle(cyan, cloneRect);
 
                         //do OCR
-                        using (var page = firstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
+                        using (var page = _tesseractService.FirstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                         {
                             using (var iterator = page.GetIterator())
                             {
@@ -1456,7 +1412,7 @@ namespace WFInfo
                 }
                 
                 //return OCR to any symbols
-                firstEngine.SetVariable("tessedit_char_whitelist", "");
+                _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "");
             }
             darkCyan.Dispose();
             red.Dispose();
@@ -1744,8 +1700,8 @@ namespace WFInfo
 
 
                             //do OCR
-                            firstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&");
-                            using (var page = firstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
+                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&");
+                            using (var page = _tesseractService.FirstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                             {
                                 using (var iterator = page.GetIterator())
                                 {
@@ -1760,7 +1716,7 @@ namespace WFInfo
 
                                 }
                             }
-                            firstEngine.SetVariable("tessedit_char_whitelist", "");
+                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "");
                         }
                     }
                     if (nextYCounter >= 0)
@@ -2131,7 +2087,7 @@ namespace WFInfo
             {
                 Main.RunOnUIThread(() =>
                 {
-                    Main.StatusUpdate("Filter and separate failed, report to dev", 1);
+                    Main.StatusUpdate("Unable to detect reward from selection screen\nScanning inventory? Hold down snap-it modifier", 1);
                 });
                 processingActive = false;
                 throw new Exception("Unable to find any parts");
@@ -2276,7 +2232,7 @@ namespace WFInfo
                     } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word) || iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine) || iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para) || iter.Next(PageIteratorLevel.Block));
                 }
             }
-            arr2D.Sort(new Arr2D_Compare());
+            arr2D.Sort(new OCR.Arr2D_Compare());
 
             List<string> ret = new List<string>();
 
@@ -2344,13 +2300,12 @@ namespace WFInfo
 
             if (window == null || window.Width == 0 || window.Height == 0)
             {
-                window = Screen.PrimaryScreen.Bounds;
+                window = wfScreen.Bounds;
                 center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
 
                 width *= (int)dpiScaling;
                 height *= (int)dpiScaling;
             }
-
 
             Bitmap image = new Bitmap(width, height);
             Size FullscreenSize = new Size(image.Width, image.Height);
@@ -2363,30 +2318,19 @@ namespace WFInfo
         internal static void SnapScreenshot()
         {
             Main.snapItOverlayWindow.Populate(CaptureScreenshot());
-            Main.snapItOverlayWindow.Show();
-            Main.snapItOverlayWindow.Left = window.Left;
-            Main.snapItOverlayWindow.Top = window.Top;
-            Main.snapItOverlayWindow.Width = window.Width;
-            Main.snapItOverlayWindow.Height = window.Height;
+            Main.snapItOverlayWindow.Left = window.Left / dpiScaling;
+            Main.snapItOverlayWindow.Top = window.Top / dpiScaling;
+            Main.snapItOverlayWindow.Width = window.Width / dpiScaling;
+            Main.snapItOverlayWindow.Height = window.Height / dpiScaling;
             Main.snapItOverlayWindow.Topmost = true;
             Main.snapItOverlayWindow.Focusable = true;
+            Main.snapItOverlayWindow.Show();
             Main.snapItOverlayWindow.Focus();
         }
 
         public static async Task updateEngineAsync()
         {
-            getLocaleTessdata();
-            Init();
-            firstEngine.Dispose();
-            firstEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
-            {
-                DefaultPageSegMode = PageSegMode.SingleBlock
-            };
-            secondEngine.Dispose();
-            secondEngine = new TesseractEngine(applicationDirectory + @"\tessdata", Settings.locale)
-            {
-                DefaultPageSegMode = PageSegMode.SingleBlock
-            };
+            _tesseractService.ReloadEngines();
         }
 
         public static bool VerifyWarframe() {
@@ -2408,6 +2352,10 @@ namespace WFInfo
                             });
                             Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
 
+                            wfScreen = Screen.FromHandle(HandleRef.Handle);
+                            string screenType = (wfScreen == Screen.PrimaryScreen ? "primary" : "secondary");
+                            Main.AddLog("Warframe display: " + wfScreen.DeviceName + ", " + screenType);
+
                             //try and catch any UAC related issues
                             try {
                                 bool _ = Warframe.HasExited;
@@ -2415,12 +2363,12 @@ namespace WFInfo
                             }
                             catch (System.ComponentModel.Win32Exception e) {
                                 Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
-                                Main.StatusUpdate("Restart Warframe without admin mode", 1);
-                                return Settings.debug ? true : false;
+                                Main.StatusUpdate("Restart Warframe without admin privileges", 1);
+                                return _settings.Debug ? true : false;
                             }
                         }
                     }
-                if (!Settings.debug) {
+                if (!_settings.Debug) {
                     Main.AddLog("Did Not Detect Warframe Process");
                     Main.StatusUpdate("Unable to Detect Warframe Process", 1);
                 }
@@ -2433,7 +2381,7 @@ namespace WFInfo
         {
             try
             {
-                var mon = Win32.MonitorFromPoint(new Point(Screen.PrimaryScreen.Bounds.Left+1, Screen.PrimaryScreen.Bounds.Top+1), 2);
+                var mon = Win32.MonitorFromPoint(new Point(wfScreen.Bounds.Left+1, wfScreen.Bounds.Top+1), 2);
                 Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
                 //Win32.GetDpiForMonitor(mon, Win32.DpiType.Angular, out var dpiXAngular, out _);
                 //Win32.GetDpiForMonitor(mon, Win32.DpiType.Raw, out var dpiXRaw, out _);
@@ -2462,17 +2410,18 @@ namespace WFInfo
 
         public static void UpdateWindow(Bitmap image = null)
         {
+            bool warframeOk = VerifyWarframe();
             RefreshDPIScaling();
-            if (image != null || !VerifyWarframe())
+            if (image != null || !warframeOk)
             {
-                int width = image?.Width ?? Screen.PrimaryScreen.Bounds.Width;
-                int height = image?.Height ?? Screen.PrimaryScreen.Bounds.Height;
+                int width = image?.Width ?? wfScreen.Bounds.Width;
+                int height = image?.Height ?? wfScreen.Bounds.Height;
                 window = new Rectangle(0, 0, width, height);
                 center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
                 if (image != null)
                     Main.AddLog("DETECTED LOADED IMAGE BOUNDS: " + window.ToString());
                 else
-                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + Screen.PrimaryScreen.DeviceName);
+                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + wfScreen.DeviceName);
 
                 RefreshScaling();
                 return;
@@ -2480,13 +2429,13 @@ namespace WFInfo
 
             if (!Win32.GetWindowRect(HandleRef, out Win32.R osRect))
             { // get window size of warframe
-                if (Settings.debug)
+                if (_settings.Debug)
                 { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
-                    int width = Screen.PrimaryScreen.Bounds.Width * (int)dpiScaling;
-                    int height = Screen.PrimaryScreen.Bounds.Height * (int)dpiScaling;
+                    int width = wfScreen.Bounds.Width * (int)dpiScaling;
+                    int height = wfScreen.Bounds.Height * (int)dpiScaling;
                     window = new Rectangle(0, 0, width, height);
                     center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
-                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + Screen.PrimaryScreen.DeviceName);
+                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + wfScreen.DeviceName);
                     RefreshScaling();
                     return;
                 }
@@ -2532,7 +2481,7 @@ namespace WFInfo
                     Main.AddLog($"Fullscreen detected (0x{styles.ToString("X8", Main.culture)}, {window.ToString()}");
                     currentStyle = WindowStyle.FULLSCREEN;
                     //Show the Fullscreen prompt
-                    if (Settings.isOverlaySelected)
+                    if (_settings.IsOverlaySelected)
                     {
                         Main.AddLog($"Showing the Fullscreen Reminder");
                         Main.RunOnUIThread(() =>
@@ -2541,7 +2490,7 @@ namespace WFInfo
                         });
                     }
                 }
-                    
+
                 center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
                 RefreshScaling();
             }

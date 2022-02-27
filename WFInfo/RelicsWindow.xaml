@@ -1,48 +1,150 @@
 ﻿<Window
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        xmlns:local="clr-namespace:WFInfo"
-        x:Class="WFInfo.RelicsWindow"
-        Title="Relics" Height="400" Width="550" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MaxWidth="550" MinWidth="550" MinHeight="200" Loaded="WindowLoaded">
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:local="clr-namespace:WFInfo"
+    x:Class="WFInfo.RelicsWindow"
+    d:DataContext="{d:DesignInstance Type=local:RelicsViewModel}"
+    Title="Relics" Height="400" Width="550" WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResizeWithGrip" MinHeight="200" Loaded="WindowLoaded">
     <Window.Resources>
 
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </Window.Resources>
 
     <Grid MouseDown="MouseDown">
-        <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
-        <Label MouseLeftButtonDown="ExpandAll" Content="＋" FontSize="15" ToolTip="Expand All Levels" Padding="0" Margin="0,26,529,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
-        <Label MouseLeftButtonDown="CollapseAll" Content="－" FontSize="15" ToolTip="Collapse All Levels" Padding="0" Margin="20,26,509,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="27" />
+            <RowDefinition Height="21" />
+            <RowDefinition Height="21" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <Grid Height="18" VerticalAlignment="Top" Margin="1,27,1,0">
-            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1"/>
-            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." Click="VaultedClick" IsChecked="True" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-            <TextBox x:Name="textBox" Margin="191,0,0,0" VerticalContentAlignment="Center" Padding="0" Text="Filter Terms" Foreground="#FF646464" TextChanged="TextboxTextChanged" SelectionBrush="#FF7EB4EA" GotFocus="TextBoxFocus" LostFocus="TextBoxLostFocus" BorderBrush="#FF303030" BorderThickness="1,0,0,0"/>
-            <Rectangle Stroke="#FF646464" Margin="149,-1,-1,-1"/>
-            <Label Content="Filter:" HorizontalAlignment="Left" Margin="155,0,0,0" Padding="0" VerticalContentAlignment="Center" />
-
+        <Grid>
+            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" />
+            <DockPanel>
+                <Image HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Width="26"
+                       DockPanel.Dock="Left"
+                       Margin="2,0,5,1"
+                       Source="Resources/WFLogo.png" />
+                <Label MouseLeftButtonDown="Hide"
+                       Content="x"
+                       Width="30"
+                       Style="{StaticResource Label_Button}"
+                       VerticalContentAlignment="Stretch"
+                       DockPanel.Dock="Right" />
+                <TextBlock Text="Relics"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           FontFamily="{StaticResource Roboto_Black}"
+                           FontWeight="Bold" />
+            </DockPanel>
         </Grid>
-        <Label x:Name="relicComboButton" MouseLeftButtonDown="ToggleShowAllRelics" Content="Relic Eras" FontSize="12" FontWeight="Normal" Margin="0,45,479,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
-        <Grid Margin="1,46,1,0" Height="18" VerticalAlignment="Top">
+        <Grid Grid.Row="1">
+            <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
+            <DockPanel>
+
+                <Button Command="{Binding ExpandAllCommand}"
+                        Content="＋"
+                        FontSize="15"
+                        ToolTip="Expand All Levels"
+                        Style="{StaticResource Button_Button}"
+                        Height="21"
+                        VerticalAlignment="Top"
+                        DockPanel.Dock="Left" />
+                <Button Command="{Binding CollapseAllCommand}" Content="－" FontSize="15" ToolTip="Collapse All Levels"
+                        Style="{StaticResource Button_Button}" Height="21" VerticalAlignment="Top"
+                        DockPanel.Dock="Left" />
+                <CheckBox Content="Hide Vaulted" ToolTip="Show vaulted items."
+                          Margin="10 0"
+                          IsChecked="{Binding HideVaulted}" VerticalAlignment="Center"
+
+                          BorderThickness="1"
+                          BorderBrush="#FF646464"
+                          DockPanel.Dock="Left" />
+                <Label Content="Filter:" Padding="5 0"
+                       VerticalContentAlignment="Center"
+
+                       BorderThickness="1 0 0 0"
+                       BorderBrush="#FF646464"
+                       DockPanel.Dock="Left" />
+                <Grid>
+
+                    <TextBox
+                        VerticalContentAlignment="Center" Padding="0"
+                        Text="{Binding FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Foreground="#FF646464"
+                        SelectionBrush="#FF7EB4EA"
+
+                        BorderBrush="#FF646464" BorderThickness="1" />
+                    <TextBlock MinWidth="50" Text="Filter terms"
+                               Foreground="#FF646464"
+                               Visibility="{Binding Path=IsFilterEmpty, Converter={StaticResource BoolToVisibilityConverter}}"
+                               IsHitTestVisible="False"
+                               Margin="5 0 0 0 "
+                               VerticalAlignment="Center" />
+                </Grid>
 
 
-            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" Grid.RowSpan="3" />
-            <Rectangle Stroke="#FF646464" Margin="69,-1,-1,-1" Grid.RowSpan="3"/>
-            <!-- <Button x:Name="relicComboButton" Content="Relic Eras" HorizontalAlignment="Left" VerticalAlignment="Top" Width="71" Height="20" Margin="-1,-1,0,-1" Background="#FF0F0F0F" FontSize="14" Click="ToggleShowAllRelics"/> -->
-            <Border x:Name="ComboBorder" Margin="121,-1,-1,-1" Grid.RowSpan="3">
+            </DockPanel>
+        </Grid>
+
+
+        <DockPanel
+            Grid.Row="2"
+            VerticalAlignment="Top">
+            <ToggleButton
+                IsChecked="{Binding ShowAllRelics}"
+                FontWeight="Normal"
+                Panel.ZIndex="500"
+                VerticalAlignment="Center" Background="Transparent"
+                DockPanel.Dock="Left"
+                BorderThickness="1" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center">
+                <Label Content="{Binding ShowAllRelicsText}" Style="{StaticResource Label_Button}"
+                       VerticalAlignment="Center"
+
+                       Margin="1"
+                       BorderThickness="0"
+                       Opacity="1" Height="20" FontSize="12" FontWeight="Normal" />
+                <ToggleButton.Style>
+                    <Style TargetType="{x:Type ToggleButton}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+
+            <Label Content="Sort by:" Padding="5 0" VerticalContentAlignment="Center" FontSize="12"
+                   Background="{x:Null}" HorizontalAlignment="Left"
+                   BorderBrush="#FF646464" BorderThickness="1"
+                   DockPanel.Dock="Left" />
+            <Border x:Name="ComboBorder">
                 <Border.Style>
                     <Style>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ElementName=ComboBorder, Path=IsMouseOver}" Value="true">
-                                <Setter Property="Border.BorderThickness" Value="1"/>
-                                <Setter Property="Border.BorderBrush" Value="#FF7EB4EA"/>
-                                <Setter Property="Panel.ZIndex" Value="1000"/>
+                                <Setter Property="Border.BorderThickness" Value="1" />
+                                <Setter Property="Border.BorderBrush" Value="#FF7EB4EA" />
+                                <Setter Property="Panel.ZIndex" Value="1000" />
                             </DataTrigger>
                         </Style.Triggers>
-                        <Setter Property="Border.BorderBrush" Value="#FF646464"/>
-                        <Setter Property="Border.BorderThickness" Value="0,1,1,1"/>
+                        <Setter Property="Border.BorderBrush" Value="#FF646464" />
+                        <Setter Property="Border.BorderThickness" Value="0,1,1,1" />
                     </Style>
                 </Border.Style>
                 <Border>
@@ -50,36 +152,44 @@
                         <Style>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ElementName=ComboBorder, Path=IsMouseOver}" Value="true">
-                                    <Setter Property="Border.BorderThickness" Value="0"/>
+                                    <Setter Property="Border.BorderThickness" Value="0" />
                                 </DataTrigger>
                             </Style.Triggers>
-                            <Setter Property="Border.BorderBrush" Value="#FF303030"/>
-                            <Setter Property="Border.BorderThickness" Value="1,0,0,0"/>
+                            <Setter Property="Border.BorderBrush" Value="#FF303030" />
+                            <Setter Property="Border.BorderThickness" Value="1,0,0,0" />
                         </Style>
                     </Border.Style>
-                    <ComboBox x:Name="SortBox" Background="#FF0F0F0F" Foreground="#FFAFD0D9" SelectionChanged="SortBoxChanged" BorderThickness="0" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}">
-                        <ComboBoxItem IsSelected="True" Content="Name"/>
-                        <ComboBoxItem Content="Average intact plat"/>
-                        <ComboBoxItem Content="Average radiant plat"/>
-                        <ComboBoxItem Content="Difference (radiant-intact)"/>
+                    <ComboBox x:Name="SortBox" Background="#FF0F0F0F" Foreground="#FFAFD0D9"
+                              BorderThickness="0"
+
+                              Style="{DynamicResource ComboBoxStyle1}"
+                              SelectedIndex="{Binding SortBoxSelectedIndex}"
+                              ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}">
+                        <ComboBoxItem IsSelected="True" Content="Name" />
+                        <ComboBoxItem Content="Average intact plat" />
+                        <ComboBoxItem Content="Average radiant plat" />
+                        <ComboBoxItem Content="Difference (radiant-intact)" />
 
                     </ComboBox>
                 </Border>
             </Border>
-            <Label Content="Sort by:" Margin="75,0,0,0" Padding="0" VerticalContentAlignment="Center" FontSize="12" Background="{x:Null}" HorizontalAlignment="Left"/>
 
-        </Grid>
-        <Grid Height="27" VerticalAlignment="Top">
-            <Rectangle x:Name="Main_bar" Fill="#FF0F0F0F" Height="27" Stroke="#FF646464" VerticalAlignment="Top"/>
+        </DockPanel>
 
-            <Image HorizontalAlignment="Left" Height="26" VerticalAlignment="Center" Width="26" RenderTransformOrigin="-1.263,-0.625" Margin="2,0,0,1" Source="Resources/WFLogo.png" />
-            <TextBlock Text="Relics" Margin="34,4,0,0" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="{StaticResource Roboto_Black}" FontWeight="Bold" Grid.Column="1" />
-        </Grid>
-        <Label x:Name="exit" MouseLeftButtonDown="Hide" Content="x" Width="30" Style="{StaticResource Label_Button}" HorizontalAlignment="Right" Height="27" VerticalAlignment="Top"/>
-        <Grid x:Name="ListGrid" Margin="1,65,1,1">
-            <TreeView x:Name="RelicTree" Background="{x:Null}" BorderBrush="{x:Null}" TreeViewItem.Selected="SingleClickExpand" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
+        <Grid
+            Grid.Row="3"
+            Margin="1,0,1,1">
+            <TreeView Background="{x:Null}" BorderBrush="{x:Null}"
+                      ItemsSource="{Binding RelicsItemsView}"
+                      TreeViewItem.Selected="SingleClickExpand" 
+                      
+                      VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding ChildrenFiltered}" >
+                    <HierarchicalDataTemplate
+
+                        DataType="local:TreeNode"
+                        ItemsSource="{Binding ChildrenFiltered}">
                         <HierarchicalDataTemplate.Resources>
                             <Style TargetType="{x:Type TextBlock}">
                                 <Setter Property="FontSize" Value="13" />
@@ -96,8 +206,10 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" Foreground="{Binding NameBrush}"/>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Foreground="#506464" Padding="5,2,0,0" FontWeight="Normal" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}"
+                                           Foreground="{Binding NameBrush}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Vaulted}" Foreground="#506464"
+                                           Padding="5,2,0,0" FontWeight="Normal" />
                             </StackPanel>
 
                             <Grid Grid.Column="1" Margin="5,0,5,0">
@@ -107,9 +219,12 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock HorizontalAlignment="Left"  Grid.Column="0" Text="{Binding Col1_Text1}" Foreground="{Binding NameBrush}" />
-                                <TextBlock HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin1}" Text="{Binding Col1_Text2}" Foreground="{Binding NameBrush}" />
-                                <Image HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin2}" Width="14" Source="{Binding Col1_Img1}" Visibility="{Binding Col1_Img1_Shown}"/>
+                                <TextBlock HorizontalAlignment="Left" Grid.Column="0" Text="{Binding Col1_Text1}"
+                                           Foreground="{Binding NameBrush}" />
+                                <TextBlock HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin1}"
+                                           Text="{Binding Col1_Text2}" Foreground="{Binding NameBrush}" />
+                                <Image HorizontalAlignment="Right" Grid.Column="2" Margin="{Binding Col1_Margin2}"
+                                       Width="14" Source="{Binding Col1_Img1}" Visibility="{Binding Col1_Img1_Shown}" />
                             </Grid>
 
                             <Grid Grid.Column="2" Margin="5,0,5,0">
@@ -120,16 +235,20 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock HorizontalAlignment="Left"  Grid.Column="0" Text="{Binding Col2_Text1}" Foreground="{Binding NameBrush}" />
-                                <TextBlock HorizontalAlignment="Right" Grid.Column="2" Text="{Binding Col2_Text2}" Foreground="{Binding NameBrush}" Margin="0,0,5,0"/>
-                                <TextBlock HorizontalAlignment="Right" Grid.Column="3" Margin="{Binding Col2_Margin1}" Text="{Binding Col2_Text3}" Foreground="{Binding NameBrush}" />
-                                <Image HorizontalAlignment="Right" Grid.Column="3" Margin="{Binding Col2_Margin2}" Width="14" Source="{Binding Col2_Img1}" Visibility="{Binding Col2_Img1_Shown}"/>
+                                <TextBlock HorizontalAlignment="Left" Grid.Column="0" Text="{Binding Col2_Text1}"
+                                           Foreground="{Binding NameBrush}" />
+                                <TextBlock HorizontalAlignment="Right" Grid.Column="2" Text="{Binding Col2_Text2}"
+                                           Foreground="{Binding NameBrush}" Margin="0,0,5,0" />
+                                <TextBlock HorizontalAlignment="Right" Grid.Column="3" Margin="{Binding Col2_Margin1}"
+                                           Text="{Binding Col2_Text3}" Foreground="{Binding NameBrush}" />
+                                <Image HorizontalAlignment="Right" Grid.Column="3" Margin="{Binding Col2_Margin2}"
+                                       Width="14" Source="{Binding Col2_Img1}" Visibility="{Binding Col2_Img1_Shown}" />
                             </Grid>
                         </Grid>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
                 <TreeView.Resources>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent" />
                     <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource WFInfo_TreeViewItem}">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                         <Setter Property="Visibility" Value="{Binding IsVisible}" />

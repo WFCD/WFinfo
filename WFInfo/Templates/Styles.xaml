@@ -37,6 +37,31 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
+    <Style x:Key="Button_Button" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Foreground" Value="#FFB1D0D9"/>
+        <Setter Property="FontFamily" Value="{StaticResource Roboto}"/>
+        <Setter Property="BorderBrush" Value="#FF646464"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Control.FontWeight" Value="Bold"/>
+        <Setter Property="Control.Padding" Value="0"/>
+        <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Control.VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Panel.ZIndex" Value="500"/>
+
+        <Style.Triggers>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="Button.IsMouseOver" Value="True"/>
+                    <Condition Property="Button.IsEnabled" Value="True"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Button.BorderBrush" Value="#FF7EB4EA"/>
+                <Setter Property="Panel.ZIndex" Value="1000"/>
+            </MultiTrigger>
+        </Style.Triggers>
+    </Style>
     <Style x:Key="Label_Button" TargetType="Label">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="FontSize" Value="16"/>
@@ -65,7 +90,7 @@
     <SolidColorBrush x:Key="ComboBox.Static.Background" Color="#FF0F0F0F"/>
     <SolidColorBrush x:Key="ComboBox.Static.Border" Color="#646464"/>
     <SolidColorBrush x:Key="ComboBox.Static." Color="#FF0F0F0F"/>
-    <SolidColorBrush x:Key="ComboBox.Static.Editable.Background" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="ComboBox.Static.Editable.Background" Color="#FF141414"/>
     <SolidColorBrush x:Key="ComboBox.Static.Editable.Border" Color="#FFABADB3"/>
     <SolidColorBrush x:Key="ComboBox.Static.Editable.Button.Background" Color="Transparent"/>
     <SolidColorBrush x:Key="ComboBox.Static.Editable.Button.Border" Color="Transparent"/>
@@ -75,7 +100,7 @@
         <GradientStop Color="#FF0F0F0F" Offset="1.0"/>
     </LinearGradientBrush>
     <SolidColorBrush x:Key="ComboBox.MouseOver.Border" Color="#FF7EB4EA"/>
-    <SolidColorBrush x:Key="ComboBox.MouseOver.Editable.Background" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="ComboBox.MouseOver.Editable.Background" Color="#FF141414"/>
     <SolidColorBrush x:Key="ComboBox.MouseOver.Editable.Border" Color="#FF7EB4EA"/>
     <LinearGradientBrush x:Key="ComboBox.MouseOver.Editable.Button.Background" EndPoint="0,1" StartPoint="0,0">
         <GradientStop Color="#FFEBF4FC" Offset="0.0"/>
@@ -88,7 +113,7 @@
         <GradientStop Color="#FFC4E0FC" Offset="1.0"/>
     </LinearGradientBrush>
     <SolidColorBrush x:Key="ComboBox.Pressed.Border" Color="#FF569DE5"/>
-    <SolidColorBrush x:Key="ComboBox.Pressed.Editable.Background" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="ComboBox.Pressed.Editable.Background" Color="#FF141414"/>
     <SolidColorBrush x:Key="ComboBox.Pressed.Editable.Border" Color="#FF569DE5"/>
     <LinearGradientBrush x:Key="ComboBox.Pressed.Editable.Button.Background" EndPoint="0,1" StartPoint="0,0">
         <GradientStop Color="#FFDAEBFC" Offset="0.0"/>
@@ -96,9 +121,9 @@
     </LinearGradientBrush>
     <SolidColorBrush x:Key="ComboBox.Pressed.Editable.Button.Border" Color="#FF569DE5"/>
     <SolidColorBrush x:Key="ComboBox.Disabled.Glyph" Color="#FFBFBFBF"/>
-    <SolidColorBrush x:Key="ComboBox.Disabled.Background" Color="#FFF0F0F0"/>
+    <SolidColorBrush x:Key="ComboBox.Disabled.Background" Color="#FF141414"/>
     <SolidColorBrush x:Key="ComboBox.Disabled.Border" Color="#FFD9D9D9"/>
-    <SolidColorBrush x:Key="ComboBox.Disabled.Editable.Background" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="ComboBox.Disabled.Editable.Background" Color="#FF141414"/>
     <SolidColorBrush x:Key="ComboBox.Disabled.Editable.Border" Color="#FFBFBFBF"/>
     <SolidColorBrush x:Key="ComboBox.Disabled.Editable.Button.Background" Color="Transparent"/>
     <SolidColorBrush x:Key="ComboBox.Disabled.Editable.Button.Border" Color="Transparent"/>
@@ -425,8 +450,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Thumb}">
-                    <Border Margin="-12,0,-2,0" Width="10" Background="Transparent">
-                        <Border CornerRadius="2" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0"  Width="4" Margin="4,0,0,0"/>
+                    <Border Margin="-16,0,-2,0" Width="14" Background="Transparent">
+                        <Border CornerRadius="2" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0"  Width="8" Margin="4,0,0,0"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -511,7 +536,8 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <ScrollContentPresenter Grid.Column="1"/>
-                        <ScrollBar Name="PART_VerticalScrollBar" Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                        <ScrollBar Name="PART_VerticalScrollBar" Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                  />
                         <ScrollBar Name="PART_HorizontalScrollBar" Orientation="Horizontal" Grid.Row="1" Grid.Column="1" Value="{TemplateBinding HorizontalOffset}" Maximum="{TemplateBinding ScrollableWidth}" ViewportSize="{TemplateBinding ViewportWidth}" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
                     </Grid>
                 </ControlTemplate>
