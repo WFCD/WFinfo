@@ -122,7 +122,7 @@ namespace WFInfo
 
         public bool IsJwtLoggedIn()
         {
-            return JWT.Length > 300; //check if the token is of the right length
+            return JWT != null && JWT.Length> 300; //check if the token is of the right length
         }
 
         public int GetGithubVersion()
