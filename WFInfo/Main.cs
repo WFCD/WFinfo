@@ -37,9 +37,11 @@ namespace WFInfo
         public static PlusOne plusOne = new PlusOne();
         public static System.Threading.Timer timer;
         public static System.Drawing.Point lastClick;
-        private static int minutesTillAfk = 7;
+        private const int minutesTillAfk = 7;
 
         private static bool UserAway { get; set; }
+        private static string LastMarketStatus { get; set; } = "invisible";
+        private static string LastMarketStatusB4AFK { get; set; } = "invisible";
         private readonly IReadOnlyApplicationSettings _settings = ApplicationSettings.GlobalReadonlySettings;
 
         public Main()
@@ -75,16 +77,7 @@ namespace WFInfo
                 if (dataBase.IsJWTvalid().Result)
                 {
                     OCR.VerifyWarframe();
-                    latestActive = DateTime.UtcNow.AddMinutes(1);
                     LoggedIn();
-
-                    var startTimeSpan = TimeSpan.Zero;
-                    var periodTimeSpan = TimeSpan.FromMinutes(1);
-
-                    timer = new System.Threading.Timer((e) =>
-                    {
-                        TimeoutCheck();
-                    }, null, startTimeSpan, periodTimeSpan);
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
@@ -103,40 +96,68 @@ namespace WFInfo
         }
         private static async void TimeoutCheck()
         {
-            if (!await dataBase.IsJWTvalid())
+            if (!await dataBase.IsJWTvalid().ConfigureAwait(true))
                 return;
-            var now = DateTime.UtcNow;
+            DateTime now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
 
-            if (OCR.Warframe != null && OCR.Warframe.HasExited)
+            if (OCR.Warframe != null && OCR.Warframe.HasExited && LastMarketStatus != "invisible")
             {//set user offline if Warframe has closed but no new game was found
+                Debug.WriteLine($"Warframe was detected as closed");
+
                 await Task.Run(async () =>
                 {
-                    if (!await dataBase.IsJWTvalid())
+                    if (!await dataBase.IsJWTvalid().ConfigureAwait(true))
                         return;
-                    await dataBase.SetWebsocketStatus("invisible");
+                    //IDE0058 - computed value is never used.  Ever. Consider changing the return signature of SetWebsocketStatus to void instead
+                    await dataBase.SetWebsocketStatus("invisible").ConfigureAwait(false);
                     StatusUpdate("WFM status set offline, Warframe was closed", 0);
-                });
+                }).ConfigureAwait(false);
             }
-            
-            if (latestActive <= now)
-            {//set users offline if afk for longer than set timer
-                await Task.Run(async () =>
-                {
-                UserAway = true;
-                await dataBase.SetWebsocketStatus("invisible");
-                StatusUpdate($"User has been inactive for {minutesTillAfk} minutes", 0);
-                });
-            }
-            if (UserAway)
+            else if (UserAway && latestActive > now)
             {
-                await Task.Run(async () =>
+                Debug.WriteLine($"User has returned. Last Status was: {LastMarketStatusB4AFK}");
+ 
+                UserAway = false;
+                if (LastMarketStatusB4AFK != "invisible")
                 {
-                    UserAway = false;
-                    await dataBase.SetWebsocketStatus("online");
-                    var user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
-                StatusUpdate($"Welcome back {user}, we've put you online", 0);
-                });
+                    await Task.Run(async () =>
+                    {
+                        await dataBase.SetWebsocketStatus(LastMarketStatusB4AFK).ConfigureAwait(false);
+                        string user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
+                        StatusUpdate($"Welcome back {user}, restored as {LastMarketStatusB4AFK}", 0);
+                    }).ConfigureAwait(false);
+                }
+                else
+                {
+                    StatusUpdate($"Welcome back user", 0);
+                }
+            }
+            else if (!UserAway && latestActive <= now)
+            {//set users offline if afk for longer than set timer
+                LastMarketStatusB4AFK = LastMarketStatus;
+                Debug.WriteLine($"User is now away - Storing last known user status as: {LastMarketStatusB4AFK}");
+                
+                UserAway = true;
+                if (LastMarketStatus != "invisible")
+                {
+                    await Task.Run(async () =>
+                    {
+                        await dataBase.SetWebsocketStatus("invisible").ConfigureAwait(false);
+                        StatusUpdate($"User has been inactive for {minutesTillAfk} minutes", 0);
+                    }).ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                if (UserAway)
+                {
+                    Debug.WriteLine($"User is away - no status change needed.  Last known status was: {LastMarketStatusB4AFK}");
+                }
+                else
+                {
+                    Debug.WriteLine($"User is active - no status change needed");
+                }
             }
         }
 
@@ -280,7 +301,7 @@ namespace WFInfo
                 Task.Run((() =>
                 {
                     lastClick = System.Windows.Forms.Cursor.Position;
-                    var index = OCR.GetSelectedReward(lastClick);
+                    int index = OCR.GetSelectedReward(lastClick);
                     Debug.WriteLine(index);
                     if (index < 0) return;
                     listingHelper.SelectedRewardIndex = (short)index;
@@ -402,9 +423,20 @@ namespace WFInfo
             }
         }
 
+        // Switch to logged in mode for warfrane.market systems
         public static void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
+
+            // start the AFK timer
+            latestActive = DateTime.UtcNow.AddMinutes(1);
+            TimeSpan startTimeSpan = TimeSpan.Zero;
+            TimeSpan periodTimeSpan = TimeSpan.FromMinutes(1);
+            
+            timer = new System.Threading.Timer((e) =>
+            {
+                TimeoutCheck();
+            }, null, startTimeSpan, periodTimeSpan);
         }
 
 
@@ -414,6 +446,13 @@ namespace WFInfo
         }
         public static void UpdateMarketStatus(string msg)
         {
+            Debug.WriteLine($"New market status received: {msg}");
+            if (!UserAway)
+            {
+                // AFK system only cares about a status that the user set
+                LastMarketStatus = msg;
+                Debug.WriteLine($"User is not away. last known market status will be: {LastMarketStatus}");
+            }
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.UpdateMarketStatus(msg); });
         }
 

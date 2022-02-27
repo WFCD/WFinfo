@@ -1284,6 +1284,7 @@ namespace WFInfo
             var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
             switch (status)
             {
+                case "ingame":
                 case "in game":
                     message += "ingame\"}";
                     break;
