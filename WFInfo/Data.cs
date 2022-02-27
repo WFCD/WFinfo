@@ -1082,7 +1082,7 @@ namespace WFInfo
             }
             else
             {
-                throw new Exception("GetUserLogin, " + responseBody + $"Email: {email}, Pw length: {password.Length}");
+                throw new Exception("GetUserLogin, " + responseBody + $"Email length: {email.Length}, Pw length: {password.Length}");
             }
             request.Dispose();
         }
