@@ -344,6 +344,11 @@ namespace WFInfo
                     break;
                 case 3: //Sign out
                     LoggOut(null, null);
+                    //delete the jwt token if user logs out
+                    if (File.Exists(Main.AppPath + @"\jwt_encrypted"))
+                    {
+                        File.Delete(Main.AppPath + @"\jwt_encrypted");
+                    }
                     break;
             }
         }

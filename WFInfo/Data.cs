@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
@@ -119,14 +120,9 @@ namespace WFInfo
             File.WriteAllText(path, JsonConvert.SerializeObject(db, Formatting.Indented));
         }
 
-        public bool IsJwtAvailable()
-        {
-            return JWT.Length > 300; //check if the token is of the right length
-        }
-
         public bool IsJwtLoggedIn()
         {
-            return JWT.Length > 500; //check if the token is of the right length
+            return JWT != null && JWT.Length> 300; //check if the token is of the right length
         }
 
         public int GetGithubVersion()
@@ -1087,7 +1083,9 @@ namespace WFInfo
             }
             else
             {
-                throw new Exception("GetUserLogin, " + responseBody + $"Email: {email}, Pw length: {password.Length}");
+                Regex rgx = new Regex("[a-zA-Z0-9]");
+                string censoredEmail = rgx.Replace(email, "*");
+                throw new Exception("GetUserLogin, " + responseBody + $"Email: {censoredEmail}, Pw length: {password.Length}");
             }
             request.Dispose();
         }
@@ -1103,7 +1101,7 @@ namespace WFInfo
             Main.AddLog("Connecting to websocket");
             marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 
-            if (marketSocket.IsAlive || marketSocket.ReadyState == WebSocketState.Connecting)
+            if (marketSocket.IsAlive)
             {
                 return false;
             }
@@ -1159,7 +1157,7 @@ namespace WFInfo
         {
             foreach (var item in headers)
             {
-                if (!item.Key.Contains("Authorization")) continue;
+                if (!item.Key.ToLower(Main.culture).Contains("authorization")) continue;
                 var temp = item.Value.First();
                 JWT = temp.Substring(4);
                 return;
@@ -1278,7 +1276,7 @@ namespace WFInfo
         public async Task<bool> SetWebsocketStatus(string status)
         {
         #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            if (!IsJwtAvailable())
+            if (!IsJwtLoggedIn())
                 return false;
 
             var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
@@ -1316,13 +1314,6 @@ namespace WFInfo
             Debug.WriteLine("Sending: " + data + " to websocket.");
             try
             {
-                if (marketSocket.ReadyState == WebSocketState.Closed || marketSocket.ReadyState != WebSocketState.Open)
-                {
-                    marketSocket.Close();
-                    OpenWebSocket();
-                }
-                while (marketSocket.ReadyState == WebSocketState.Connecting) //Make sure that the socket is actually connected before sending any data.
-                    Thread.Sleep(1);
                 marketSocket.Send(data);
             }
             catch (InvalidOperationException e)
@@ -1341,12 +1332,6 @@ namespace WFInfo
                 rememberMe = false;
                 inGameName = string.Empty;
                 marketSocket.Close(1006);
-
-                //delete the jwt token if user logs out
-                if (File.Exists(Main.AppPath + @"\jwt_encrpyted"))
-                {
-                    File.Delete(Main.AppPath + @"\jwt_encrpyted");
-                }
             }
         }
 
