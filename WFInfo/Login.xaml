@@ -26,7 +26,7 @@
         <TextBlock HorizontalAlignment="Left" Margin="20,39,0,0" TextWrapping="Wrap" Text="Email:" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="20,67,0,0" TextWrapping="Wrap" Text="Password:" VerticalAlignment="Top"/>
         <PasswordBox x:Name="Password" Margin="93,65,20,0" VerticalAlignment="Top" Foreground="#FFB1D0D9" BorderBrush="#FF646464"/>
-        <RadioButton x:Name="RememberMe" Content="Remember me" VerticalContentAlignment="Center" Margin="0,0,20,13" VerticalAlignment="Bottom" FontSize="16" HorizontalAlignment="Right" Width="123"/>
+        <CheckBox x:Name="RememberMe" Content="Remember me" VerticalContentAlignment="Center" Margin="0,0,20,13" VerticalAlignment="Bottom" FontSize="16" HorizontalAlignment="Right" Width="123"/>
         <TextBlock x:Name="Error" Text="" FontSize="13" Margin="20,0,20,45"     FontFamily="{StaticResource Roboto_Condensed}" Height="18" VerticalAlignment="Bottom" TextAlignment="Center" Width="260" Visibility="Collapsed"/>
     </Grid>
 </Window>
