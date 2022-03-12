@@ -201,9 +201,20 @@ namespace WFInfo
 
         public static bool isAVX2Available()
         {
-            string dll = "CustomCPUID.dll";
-            string path = app_data_tesseract_catalog + @"\" + dll;
-            string md5 = "745d1bdb33e1d2c8df1a90ce1a6cebcd";
+            string dll;
+            string path;
+            string md5;
+            if (Environment.Is64BitOperatingSystem)
+            {
+                dll = "CustomCPUID_x64.dll";
+                md5 = "c4dffc5941729493b0ae1513855bb9a2";
+            } else
+            {
+                dll = "CustomCPUID_x86.dll";
+                md5 = "745d1bdb33e1d2c8df1a90ce1a6cebcd";    
+            }
+            path = app_data_tesseract_catalog + @"\" + dll;
+
             // Redownload if DLL is not present or got corrupted
             using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
             {
@@ -234,6 +245,7 @@ namespace WFInfo
                 IntPtr pDll = NativeMethods.LoadLibrary(path);
                 if (pDll == IntPtr.Zero)
                 {
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] Marshal Error Code - " + Marshal.GetLastWin32Error().ToString());
                     sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL Pointer is pointing to null, fallback to SSE");
                     return false;
                     // throw new Exception("DLL pointer to CustomCPUID.dll is not identified");
@@ -313,7 +325,7 @@ namespace WFInfo
         }
         static class NativeMethods
         {
-            [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
+            [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
             public static extern IntPtr LoadLibrary(string dllToLoad);
 
             [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
