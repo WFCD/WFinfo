@@ -204,7 +204,7 @@ namespace WFInfo
             string dll;
             string path;
             string md5;
-            if (Environment.Is64BitOperatingSystem)
+            if (Environment.Is64BitProcess)
             {
                 dll = "CustomCPUID_x64.dll";
                 md5 = "c4dffc5941729493b0ae1513855bb9a2";
