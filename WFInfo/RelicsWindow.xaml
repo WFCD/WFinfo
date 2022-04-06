@@ -183,7 +183,7 @@
                       ItemsSource="{Binding RelicsItemsView}"
                       TreeViewItem.Selected="SingleClickExpand" 
                       
-                      VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingStackPanel.IsVirtualizing="False"
                       VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate
