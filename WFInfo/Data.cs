@@ -59,7 +59,12 @@ namespace WFInfo
         private readonly WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
         private readonly string filterAllJSON = "https://docs.google.com/uc?id=1w_cSmhsULIoSt4tyNgnh7xY2N98Mfpbf&export=download";
         public string inGameName = string.Empty;
-        static readonly HttpClient client = new HttpClient();
+        private static readonly WebProxy proxy = new WebProxy(new Uri("socks5://127.0.0.1:7890"));
+        static readonly HttpClientHandler handler = new HttpClientHandler
+        {
+            Proxy = proxy
+        };
+        static readonly HttpClient client = new HttpClient(handler);
         readonly WebClient WebClient;
         private readonly Sheets sheetsApi;
         private string githubVersion;
@@ -122,7 +127,7 @@ namespace WFInfo
 
         public bool IsJwtLoggedIn()
         {
-            return JWT != null && JWT.Length> 300; //check if the token is of the right length
+            return JWT != null && JWT.Length > 300; //check if the token is of the right length
         }
 
         public int GetGithubVersion()
@@ -583,7 +588,7 @@ namespace WFInfo
 
         public int LevenshteinDistance(string s, string t)
         {
-            switch(_settings.Locale)
+            switch (_settings.Locale)
             {
                 case "ko":
                     // for korean
@@ -969,7 +974,7 @@ namespace WFInfo
 
             return lowest;
         }
-        
+
         private void LogChanged(object sender, string line)
         {
             if (autoThread != null && !autoThread.IsCompleted) return;
@@ -1023,35 +1028,40 @@ namespace WFInfo
             });
         }
 
-		public static void AutoTriggered() {
-			try {
-				var watch = Stopwatch.StartNew();
-				long stop = watch.ElapsedMilliseconds + 5000;
-				long wait = watch.ElapsedMilliseconds;
+        public static void AutoTriggered()
+        {
+            try
+            {
+                var watch = Stopwatch.StartNew();
+                long stop = watch.ElapsedMilliseconds + 5000;
+                long wait = watch.ElapsedMilliseconds;
 
-				OCR.UpdateWindow();
+                OCR.UpdateWindow();
 
-				while (watch.ElapsedMilliseconds < stop) {
-					if (watch.ElapsedMilliseconds <= wait) continue;
-					wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
-					OCR.GetThemeWeighted(out double diff);
-					if (!(diff > 40)) continue;
-					while (watch.ElapsedMilliseconds < wait) ;
-					Main.AddLog("started auto processing");
-					OCR.ProcessRewardScreen();
-					break;
-				}
-				watch.Stop();
-			}
-			catch (Exception ex) {
-				Main.AddLog("AUTO FAILED");
-				Main.AddLog(ex.ToString());
-				Main.StatusUpdate("Auto Detection Failed", 0);
-				Main.RunOnUIThread(() => {
-					_ = new ErrorDialogue(DateTime.Now, 0);
-				});
-			}
-		}
+                while (watch.ElapsedMilliseconds < stop)
+                {
+                    if (watch.ElapsedMilliseconds <= wait) continue;
+                    wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
+                    OCR.GetThemeWeighted(out double diff);
+                    if (!(diff > 40)) continue;
+                    while (watch.ElapsedMilliseconds < wait) ;
+                    Main.AddLog("started auto processing");
+                    OCR.ProcessRewardScreen();
+                    break;
+                }
+                watch.Stop();
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog("AUTO FAILED");
+                Main.AddLog(ex.ToString());
+                Main.StatusUpdate("Auto Detection Failed", 0);
+                Main.RunOnUIThread(() =>
+                {
+                    _ = new ErrorDialogue(DateTime.Now, 0);
+                });
+            }
+        }
 
         /// <summary>
         ///	Get's the user's login JWT to authenticate future API calls.
@@ -1094,10 +1104,10 @@ namespace WFInfo
         /// Attempts to connect the user's account to the websocket
         /// </summary>
         /// <returns>A task to be awaited</returns>
-        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> OpenWebSocket()
         {
-        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             Main.AddLog("Connecting to websocket");
             marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 
@@ -1272,10 +1282,10 @@ namespace WFInfo
         /// </summary>
         /// <param name="status">
         /// </param>
-        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> SetWebsocketStatus(string status)
         {
-        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             if (!IsJwtLoggedIn())
                 return false;
 
@@ -1326,7 +1336,8 @@ namespace WFInfo
         /// </summary>
         public void Disconnect()
         {
-            if (marketSocket.ReadyState == WebSocketState.Open) { //only send disconnect message if the socket is connected
+            if (marketSocket.ReadyState == WebSocketState.Open)
+            { //only send disconnect message if the socket is connected
                 SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
                 JWT = null;
                 rememberMe = false;
