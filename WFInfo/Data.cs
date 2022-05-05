@@ -58,11 +58,10 @@ namespace WFInfo
         public string JWT; // JWT is the security key, store this as email+pw combo
         private readonly WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
         private readonly string filterAllJSON = "https://docs.google.com/uc?id=1w_cSmhsULIoSt4tyNgnh7xY2N98Mfpbf&export=download";
-	private readonly string sheetJsonUrl = "https://PLACEHOLDER_URL_HERE_FOR_CDN";
+        private readonly string sheetJsonUrl = "https://PLACEHOLDER_URL_HERE_FOR_CDN";
         public string inGameName = string.Empty;
         static readonly HttpClient client = new HttpClient();
         readonly WebClient WebClient;
-        private readonly Sheets sheetsApi;
         private string githubVersion;
         public bool rememberMe;
         private LogCapture EElogWatcher;
@@ -86,7 +85,6 @@ namespace WFInfo
             WebClient.Headers.Add("language", "en");
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-            sheetsApi = new Sheets();
         }
 
         public void EnableLogCapture()
