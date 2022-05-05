@@ -58,6 +58,7 @@ namespace WFInfo
         public string JWT; // JWT is the security key, store this as email+pw combo
         private readonly WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
         private readonly string filterAllJSON = "https://docs.google.com/uc?id=1w_cSmhsULIoSt4tyNgnh7xY2N98Mfpbf&export=download";
+	private readonly string sheetJsonUrl = "https://PLACEHOLDER_URL_HERE_FOR_CDN";
         public string inGameName = string.Empty;
         static readonly HttpClient client = new HttpClient();
         readonly WebClient WebClient;
@@ -221,19 +222,19 @@ namespace WFInfo
             marketData = new JObject();
             IList<IList<object>> sheet;
 
-            sheet = sheetsApi.GetSheet("prices!A:I");
+            sheet = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(sheetJsonUrl));
+            rows = JArray.FromObject(sheet);
 
-
-            foreach (IList<object> row in sheet)
+            foreach (var row in rows)
             {
-                string name = row[0].ToString();
+                string name = row["name"].ToString();
                 if (name.Contains("Prime "))
                 {
                     marketData[name] = new JObject
                     {
-                        {"plat", double.Parse(row[8].ToString(), Main.culture)},
+                        {"plat", double.Parse(row["custom_avg"].ToString(), Main.culture)},
                         {"ducats", 0},
-                        {"volume", int.Parse(row[4].ToString(), Main.culture) + int.Parse(row[6].ToString(), Main.culture)}
+                        {"volume", int.Parse(row["yesterday_vol"].ToString(), Main.culture) + int.Parse(row["today_vol"].ToString(), Main.culture)}
                     };
                 }
             }
