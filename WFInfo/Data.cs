@@ -218,7 +218,7 @@ namespace WFInfo
             }
             ReloadItems();
             marketData = new JObject();
-            IList<IList<object>> sheet;
+            JObject sheet;
 
             sheet = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(sheetJsonUrl));
             rows = JArray.FromObject(sheet);
