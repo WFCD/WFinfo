@@ -199,6 +199,17 @@ namespace WFInfo
                 sw.WriteLineAsync("[" + DateTime.UtcNow + " - Still in custom entrypoint]   " + argm);
         }
 
+        public static WebClient createNewWebClient()
+        {
+            WebProxy proxy = null;
+            String proxy_string = Environment.GetEnvironmentVariable("http_proxy");
+            if (proxy_string != null)
+            {
+                proxy = new WebProxy(new Uri(proxy_string));
+            }
+            return new WebClient() { Proxy = proxy };
+        }
+
         public static bool isAVX2Available()
         {
             string dll;
@@ -237,7 +248,7 @@ namespace WFInfo
                 if (!File.Exists(path) || GetMD5hash(path) != md5)
                 {
                     sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL is missing or corrupted, downloading");
-                    WebClient webClient = new WebClient();
+                    WebClient webClient = createNewWebClient();
                     webClient.DownloadFile(libs_hotlink_prefix + "/" + dll, path);
                 }
 
@@ -349,7 +360,7 @@ namespace WFInfo
         public static string GetMD5hashByURL(string url)
         {
             Debug.WriteLine(url);
-            WebClient webClient = new WebClient();
+            WebClient webClient = createNewWebClient();
             using (var md5 = MD5.Create())
             {
                 byte[] stream = webClient.DownloadData(url);
@@ -366,7 +377,7 @@ namespace WFInfo
 
         private static async void RefreshTesseractDlls(CancellationToken token, bool AvxSupport)
         {
-            WebClient webClient = new WebClient();
+            WebClient webClient = createNewWebClient();
             webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgressCallback);
             token.Register(webClient.CancelAsync);
 

@@ -32,7 +32,7 @@ namespace WFInfo
             NewVersionText.Text = "WFInfo version " + version + " has been released!";
             OldVersionText.Text = "You have version " + Main.BuildVersion + " installed.";
 
-            WebClient = new WebClient();
+            WebClient = CustomEntrypoint.createNewWebClient();
             WebClient.Headers.Add("platform", "pc");
             WebClient.Headers.Add("language", "en");
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
