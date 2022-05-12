@@ -100,7 +100,7 @@ namespace WFInfo
             string traineddata_hotlink = traineddata_hotlink_prefix + Locale + ".traineddata";
             string app_data_traineddata_path = AppdataTessdataFolder + @"\" + Locale + ".traineddata";
 
-            WebClient webClient = new WebClient();
+            WebClient webClient = CustomEntrypoint.createNewWebClient();
 
             if (!File.Exists(app_data_traineddata_path) || CustomEntrypoint.GetMD5hash(app_data_traineddata_path) != traineddata_checksums.GetValue(Locale).ToObject<string>())
             {
