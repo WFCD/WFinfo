@@ -57,11 +57,11 @@ namespace WFInfo
         private readonly string nameDataPath;
         public string JWT; // JWT is the security key, store this as email+pw combo
         private readonly WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
-        private readonly string filterAllJSON = "https://docs.google.com/uc?id=1w_cSmhsULIoSt4tyNgnh7xY2N98Mfpbf&export=download";
+        private readonly string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
+        private readonly string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
         public string inGameName = string.Empty;
         static readonly HttpClient client = new HttpClient();
         readonly WebClient WebClient;
-        private readonly Sheets sheetsApi;
         private string githubVersion;
         public bool rememberMe;
         private LogCapture EElogWatcher;
@@ -85,7 +85,6 @@ namespace WFInfo
             WebClient.Headers.Add("language", "en");
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-            sheetsApi = new Sheets();
         }
 
         public void EnableLogCapture()
@@ -219,21 +218,18 @@ namespace WFInfo
             }
             ReloadItems();
             marketData = new JObject();
-            IList<IList<object>> sheet;
+            JArray rows = JsonConvert.DeserializeObject<JArray>(WebClient.DownloadString(sheetJsonUrl));
 
-            sheet = sheetsApi.GetSheet("prices!A:I");
-
-
-            foreach (IList<object> row in sheet)
+            foreach (var row in rows)
             {
-                string name = row[0].ToString();
+                string name = row["name"].ToString();
                 if (name.Contains("Prime "))
                 {
                     marketData[name] = new JObject
                     {
-                        {"plat", double.Parse(row[8].ToString(), Main.culture)},
+                        {"plat", double.Parse(row["custom_avg"].ToString(), Main.culture)},
                         {"ducats", 0},
-                        {"volume", int.Parse(row[4].ToString(), Main.culture) + int.Parse(row[6].ToString(), Main.culture)}
+                        {"volume", int.Parse(row["yesterday_vol"].ToString(), Main.culture) + int.Parse(row["today_vol"].ToString(), Main.culture)}
                     };
                 }
             }
