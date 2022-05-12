@@ -218,10 +218,7 @@ namespace WFInfo
             }
             ReloadItems();
             marketData = new JObject();
-            JObject sheet;
-
-            sheet = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(sheetJsonUrl));
-            rows = JArray.FromObject(sheet);
+            JArray rows = JsonConvert.DeserializeObject<JArray>(WebClient.DownloadString(sheetJsonUrl));
 
             foreach (var row in rows)
             {
