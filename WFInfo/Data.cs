@@ -83,7 +83,6 @@ namespace WFInfo
             webClient = CustomEntrypoint.createNewWebClient();
             webClient.Headers.Add("platform", "pc");
             webClient.Headers.Add("language", "en");
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             // Create websocket for WFM
             WebProxy proxy = null;
@@ -1115,7 +1114,6 @@ namespace WFInfo
         {
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             Main.AddLog("Connecting to websocket");
-            marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 
             if (marketSocket.IsAlive)
             {
