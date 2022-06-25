@@ -26,6 +26,7 @@ namespace WFInfo
         public JObject relicData; // Contains relicData from Warframe PC Drops        {<Era>: {"A1":{"vaulted": true,<rare1/uncommon[12]/common[123]>: <part>}, ...}, "Meso": ..., "Neo": ..., "Axi": ...}
         public JObject equipmentData; // Contains equipmentData from Warframe PC Drops          {<EQMT>: {"vaulted": true, "PARTS": {<NAME>:{"relic_name":<name>|"","count":<num>}, ...}},  ...}
         public JObject nameData; // Contains relic to market name translation          {<relic_name>: <market_name>}
+
         
         private static List<Dictionary<int, List<int>>> korean = new List<Dictionary<int, List<int>>>() {
             new Dictionary<int, List<int>>() {
@@ -85,6 +86,7 @@ namespace WFInfo
             equipmentDataPath = applicationDirectory + @"\eqmt_data.json";
             relicDataPath = applicationDirectory + @"\relic_data.json";
             nameDataPath = applicationDirectory + @"\name_data.json";
+            translationDataPath = applicationDirectory + @"\translation_data.json";
 
             Directory.CreateDirectory(applicationDirectory);
 
@@ -398,6 +400,7 @@ namespace WFInfo
                 foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
                 {
                     nameData[ignored.Key] = ignored.Key;
+                    translationData[ignored.Key] = ignored.Key;
                 }
                 Main.AddLog("Prime Database has been downloaded");
                 return true;
@@ -510,6 +513,7 @@ namespace WFInfo
             SaveDatabase(nameDataPath, nameData);
             SaveDatabase(marketItemsPath, marketItems);
             SaveDatabase(marketDataPath, marketData);
+            SaveDatabase(translationDataPath, translationData);
         }
 
         public void ForceEquipmentUpdate()
@@ -898,7 +902,18 @@ namespace WFInfo
             string lowest = null;
             string lowest_unfiltered = null;
             low = 9999;
-            foreach (KeyValuePair<string, JToken> prop in nameData)
+            JObject namesData;
+            switch (_settings.Locale)
+            {
+                case "fr":
+                    namesData = translationData;
+                    break;
+                default:
+                    namesData = nameData;
+                    break;  
+            }
+
+            foreach (KeyValuePair<string, JToken> prop in namesData)
             {
                 int val = LevenshteinDistance(prop.Key, name);
                 if (val < low)
