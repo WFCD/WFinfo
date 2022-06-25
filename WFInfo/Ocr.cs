@@ -115,7 +115,7 @@ namespace WFInfo
         // Screen / Resolution Scaling - Used to adjust pixel values to each person's monitor
         public static double screenScaling;
 
-        public static Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static Regex RE = new Regex("[^a-z가-힣éèêëîïàäâÉÈç]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
         public const int pixleRewardWidth = 968;
@@ -825,7 +825,7 @@ namespace WFInfo
                     continue;
                 }
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
-                string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0], false);
+                string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0], false);//Gives the part name in the locale language, translation is done in GetPartName
                 part.Name = name;
                 foundParts[i] = part;
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
