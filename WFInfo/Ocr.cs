@@ -788,7 +788,9 @@ namespace WFInfo
         /// <returns>If part name is close enough to valid to actually process</returns>
         internal static bool PartNameValid (string partName)
         {
-            if ((partName.Length < 13 && _settings.Locale == "en") || (partName.Replace(" ", "").Length < 6 && _settings.Locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
+            if ((partName.Length < 13 && _settings.Locale == "en") 
+                || (partName.Replace(" ", "").Length < 6 && _settings.Locale == "ko")
+                || partName.Length < 13 && _settings.Locale == "fr") // if part name is smaller than "Bo prime handle" skip current part 
                 //TODO: Add a min character for other locale here.
                 return false;
             return true;

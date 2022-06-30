@@ -26,7 +26,6 @@ namespace WFInfo
         public JObject relicData; // Contains relicData from Warframe PC Drops        {<Era>: {"A1":{"vaulted": true,<rare1/uncommon[12]/common[123]>: <part>}, ...}, "Meso": ..., "Neo": ..., "Axi": ...}
         public JObject equipmentData; // Contains equipmentData from Warframe PC Drops          {<EQMT>: {"vaulted": true, "PARTS": {<NAME>:{"relic_name":<name>|"","count":<num>}, ...}},  ...}
         public JObject nameData; // Contains relic to market name translation          {<relic_name>: <market_name>}
-        public JObject translationData; // Contains names of parts in locale language and in english  {<locale_relic_name> : <english_part_name>}
         
         private static List<Dictionary<int, List<int>>> korean = new List<Dictionary<int, List<int>>>() {
             new Dictionary<int, List<int>>() {
@@ -56,7 +55,6 @@ namespace WFInfo
         private readonly string equipmentDataPath;
         private readonly string relicDataPath;
         private readonly string nameDataPath;
-        private readonly string translationDataPath;
 
         public string JWT; // JWT is the security key, store this as email+pw combo
         private readonly WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
@@ -80,7 +78,6 @@ namespace WFInfo
             equipmentDataPath = applicationDirectory + @"\eqmt_data.json";
             relicDataPath = applicationDirectory + @"\relic_data.json";
             nameDataPath = applicationDirectory + @"\name_data.json";
-            translationDataPath = applicationDirectory + @"\translation_data.json";
 
             Directory.CreateDirectory(applicationDirectory);
 
@@ -302,8 +299,6 @@ namespace WFInfo
                 relicData = File.Exists(relicDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(relicDataPath)) : new JObject();
             if (nameData == null)
                 nameData = File.Exists(nameDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(nameDataPath)) : new JObject();
-            if (translationData == null)
-                translationData = File.Exists(translationDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(translationDataPath)) : new JObject();
             // fill in equipmentData (NO OVERWRITE)
             // fill in nameData
             // fill in relicData
@@ -316,7 +311,6 @@ namespace WFInfo
                 equipmentData["timestamp"] = DateTime.Now;
                 relicData["timestamp"] = DateTime.Now;
                 nameData = new JObject();
-                translationData = new JObject();
                 foreach (KeyValuePair<string, JToken> era in allFiltered["relics"].ToObject<JObject>())
                 {
                     relicData[era.Key] = new JObject();
@@ -362,7 +356,6 @@ namespace WFInfo
                         {
                             nameData[gameName] = partName;
                             string localeRelicName = Translator.TranslateParName(gameName, _settings.Locale);
-                            translationData[localeRelicName] = partName;
                             marketData[partName]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
                         }
                     }
@@ -372,28 +365,12 @@ namespace WFInfo
                 foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
                 {
                     nameData[ignored.Key] = ignored.Key;
-                    translationData[ignored.Key] = ignored.Key;
                 }
-                translationData["locale"]=_settings.Locale;
                 Main.AddLog("Prime Database has been downloaded");
                 return true;
             }
             Main.AddLog("Prime Database is up to date");
             return false;
-        }
-        public void UpdateTranslationdb()
-        {
-            if (translationData["locale"].ToString() != _settings.Locale)
-            {
-                translationData = new JObject();
-                foreach (KeyValuePair<string, JToken> englishNames in nameData)
-                {
-                    string localeRelicName = Translator.TranslateParName(englishNames.Key, _settings.Locale);
-                    translationData[localeRelicName] = englishNames.Value.ToString();
-                }
-                translationData["locale"] = _settings.Locale;
-                SaveDatabase(translationDataPath, translationData);
-            } 
         }
         private void RefreshMarketDucats()
         {
@@ -498,7 +475,6 @@ namespace WFInfo
             SaveDatabase(nameDataPath, nameData);
             SaveDatabase(marketItemsPath, marketItems);
             SaveDatabase(marketDataPath, marketData);
-            SaveDatabase(translationDataPath, translationData);
         }
 
         public void ForceEquipmentUpdate()
@@ -616,11 +592,19 @@ namespace WFInfo
                 case "ko":
                     // for korean
                     return LevenshteinDistanceKorean(s, t);
+                case "fr":
+                    return LevenshteinDistanceFrench(s, t);
                 default:
                     return LevenshteinDistanceDefault(s, t);
             }
         }
-
+        int LevenshteinDistanceFrench(string firstWord, string secondWord)
+        {
+            firstWord = getLocaleNameData(firstWord);
+            firstWord = firstWord.Replace("Schéma", "").Replace("-", "").Trim();
+            secondWord = secondWord.Replace("Schéma", "").Trim();
+            return LevenshteinDistanceDefault(firstWord, secondWord);
+        }
         public int LevenshteinDistanceDefault(string s, string t)
         {
             // Levenshtein Distance determines how many character changes it takes to form a known result
@@ -678,6 +662,10 @@ namespace WFInfo
             if (0xAC00 <= c && c <= 0xD7A3) return true;
             return false;
         }
+        /*
+         * Returns the locale market name of s
+         * s is the market name in english
+         */
         public string getLocaleNameData(string s)
         {
             bool saveDatabases = false;
@@ -687,7 +675,7 @@ namespace WFInfo
                 if (marketItem.Key == "version")
                     continue;
                 string[] split = marketItem.Value.ToString().Split('|');
-                if (split[0] == s)
+                if (split[0].Replace("Blueprint", "").Trim() == s.Replace("Blueprint", "").Trim())
                 {
                     if (split.Length == 3)
                     {
@@ -874,18 +862,7 @@ namespace WFInfo
             string lowest = null;
             string lowest_unfiltered = null;
             low = 9999;
-            JObject namesData;
-            switch (_settings.Locale)
-            {
-                case "fr":
-                    namesData = translationData;
-                    break;
-                default:
-                    namesData = nameData;
-                    break;  
-            }
-
-            foreach (KeyValuePair<string, JToken> prop in namesData)
+            foreach (KeyValuePair<string, JToken> prop in nameData)
             {
                 int val = LevenshteinDistance(prop.Key, name);
                 if (val < low)
@@ -900,7 +877,6 @@ namespace WFInfo
                     lowest_unfiltered = prop.Key;
                 }
             }
-
             if (!suppressLogging)
                 Main.AddLog("Found part(" + low + "): \"" + lowest_unfiltered + "\" from \"" + name + "\"");
             return lowest;
