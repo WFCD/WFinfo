@@ -1437,11 +1437,31 @@ namespace WFInfo
             for (int i = 0; i < foundParts.Count; i++)
             {
                 InventoryItem part = foundParts[i];
-                if (!PartNameValid(part.Name + " Blueprint"))
-                    continue;
-                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity, true); //add blueprint to name to check against prime drop table
-                string checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out int primeProximity, true); //also add prime to check if that gives better match. If so, this is a non-prime
-                Main.AddLog("Checking \"" + part.Name.Trim() +"\", (" + proximity +")\"" + name + "\", +prime (" + primeProximity + ")\"" + checkName + "\"");
+                string name;
+                string checkName;
+                int proximity;
+                int primeProximity;
+                switch (_settings.Locale)
+                {
+                    case "fr":
+                        if (!PartNameValid(part.Name + " Schéma"))
+                            continue;
+                        name = Main.dataBase.GetPartName(part.Name + " Schéma", out proximity, true); //add blueprint to name to check against prime drop table
+                        checkName = Main.dataBase.GetPartName(part.Name + " prime Schéma", out primeProximity, true); //also add prime to check if that gives better match. If so, this is a non-prime
+                        break;
+                    case "en":
+                        if (!PartNameValid(part.Name + " Blueprint"))
+                            continue;
+                        name = Main.dataBase.GetPartName(part.Name + " Blueprint", out proximity, true); //add blueprint to name to check against prime drop table
+                        checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out primeProximity, true); //also add prime to check if that gives better match. If so, this is a non-prime
+                        break;
+                    default:
+                        if (!PartNameValid(part.Name + " Blueprint"))
+                            continue;
+                        name = Main.dataBase.GetPartName(part.Name + " Blueprint", out proximity, true); //add blueprint to name to check against prime drop table
+                        checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out primeProximity, true); //also add prime to check if that gives better match. If so, this is a non-prime
+                        break;
+                }
 
                 //Decide if item is an actual prime, if so mark as mastered
                 if (proximity < 3 && proximity < primeProximity && part.Name.Length > 6 && name.Contains("Prime"))
@@ -1702,7 +1722,7 @@ namespace WFInfo
 
 
                             //do OCR
-                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&");
+                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&îïÎÏôÔöÖâäàÂêëËÊéèÉÈ");
                             using (var page = _tesseractService.FirstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                             {
                                 using (var iterator = page.GetIterator())
