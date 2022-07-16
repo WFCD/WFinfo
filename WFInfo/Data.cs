@@ -263,11 +263,13 @@ namespace WFInfo
         {
             Main.AddLog("Load missing market item: " + item_name);
 
+            Thread.Sleep(333);
             JObject stats =
                 JsonConvert.DeserializeObject<JObject>(
                     webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"));
             stats = stats["payload"]["statistics_closed"]["90days"].Last.ToObject<JObject>();
 
+            Thread.Sleep(333);
             JObject ducats = JsonConvert.DeserializeObject<JObject>(
                 webClient.DownloadString("https://api.warframe.market/v1/items/" + url));
             ducats = ducats["payload"]["item"].ToObject<JObject>();
@@ -286,7 +288,8 @@ namespace WFInfo
             marketData[item_name] = new JObject
             {
                 { "ducats", ducat },
-                { "plat", stats["avg_price"] }
+                { "plat", stats["avg_price"] },
+                { "volume", stats["volume"] }
             };
         }
 
@@ -336,6 +339,18 @@ namespace WFInfo
                     foreach (KeyValuePair<string, JToken> part in prime.Value["parts"].ToObject<JObject>())
                     {
                         string partName = part.Key;
+                        string gameName = part.Key;
+
+                        if (prime.Value["type"].ToString() == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")) && !part.Key.Contains("Blueprint"))
+                        {
+                            gameName += " Blueprint";
+                            partName += " Blueprint";
+                        }
+                        else if (prime.Value["type"].ToString() == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")) && !part.Key.Contains("Blueprint"))
+                        {
+                            gameName += " Blueprint";
+                            partName += " Blueprint";
+                        }
                         if (!equipmentData[primeName]["parts"].ToObject<JObject>().TryGetValue(partName, out _))
                             equipmentData[primeName]["parts"][partName] = new JObject();
                         if (!equipmentData[primeName]["parts"][partName].ToObject<JObject>().TryGetValue("owned", out _))
@@ -344,16 +359,6 @@ namespace WFInfo
                         equipmentData[primeName]["parts"][partName]["count"] = part.Value["count"];
                         equipmentData[primeName]["parts"][partName]["ducats"] = part.Value["ducats"];
 
-
-                        string gameName = part.Key;
-                        if (prime.Value["type"].ToString() == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")))
-                        {
-                            gameName += " Blueprint";
-                        }
-                        else if (prime.Value["type"].ToString() == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
-                        {
-                            gameName += " Blueprint";
-                        }
                         if (marketData.TryGetValue(partName, out _))
                         {
                             nameData[gameName] = partName;
