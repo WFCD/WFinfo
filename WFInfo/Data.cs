@@ -277,12 +277,14 @@ namespace WFInfo
         {
             Main.AddLog("Load missing market item: " + item_name);
 
+            Thread.Sleep(333);
             WebClient webClient = createWfmClient();
             JObject stats =
                 JsonConvert.DeserializeObject<JObject>(
                     webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"));
             stats = stats["payload"]["statistics_closed"]["90days"].Last.ToObject<JObject>();
 
+            Thread.Sleep(333);
             webClient = createWfmClient();
             JObject ducats = JsonConvert.DeserializeObject<JObject>(
                 webClient.DownloadString("https://api.warframe.market/v1/items/" + url));
@@ -302,7 +304,8 @@ namespace WFInfo
             marketData[item_name] = new JObject
             {
                 { "ducats", ducat },
-                { "plat", stats["avg_price"] }
+                { "plat", stats["avg_price"] },
+                { "volume", stats["volume"] }
             };
         }
 
