@@ -246,6 +246,16 @@ namespace WFInfo
                         {"ducats", 0},
                         {"volume", int.Parse(row["yesterday_vol"].ToString(), Main.culture) + int.Parse(row["today_vol"].ToString(), Main.culture)}
                     };
+                    if (!name.EndsWith(" Blueprint"))
+                    {
+                        name += " Blueprint";
+                        marketData[name] = new JObject
+                        {
+                            {"plat", double.Parse(row["custom_avg"].ToString(), Main.culture)},
+                            {"ducats", 0},
+                            {"volume", int.Parse(row["yesterday_vol"].ToString(), Main.culture) + int.Parse(row["today_vol"].ToString(), Main.culture)}
+                        };
+                    }
                 }
             }
 
