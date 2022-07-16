@@ -61,12 +61,19 @@ namespace WFInfo
         private readonly string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
         public string inGameName = string.Empty;
         readonly HttpClient client;
-        readonly WebClient webClient;
         private string githubVersion;
         public bool rememberMe;
         private LogCapture EElogWatcher;
         private Task autoThread;
         private readonly IReadOnlyApplicationSettings _settings;
+
+        public WebClient createWfmClient()
+        {
+            WebClient webClient = CustomEntrypoint.createNewWebClient();
+            webClient.Headers.Add("platform", "pc");
+            webClient.Headers.Add("language", "en");
+            return webClient;
+        }
 
         public Data(IReadOnlyApplicationSettings settings)
         {
@@ -79,10 +86,6 @@ namespace WFInfo
             nameDataPath = applicationDirectory + @"\name_data.json";
 
             Directory.CreateDirectory(applicationDirectory);
-
-            webClient = CustomEntrypoint.createNewWebClient();
-            webClient.Headers.Add("platform", "pc");
-            webClient.Headers.Add("language", "en");
 
             // Create websocket for WFM
             WebProxy proxy = null;
@@ -137,10 +140,10 @@ namespace WFInfo
 
         public int GetGithubVersion()
         {
-            webClient.Headers.Add("User-Agent", "WFCD");
+            WebClient githubWebClient = CustomEntrypoint.createNewWebClient();
             JObject github =
                 JsonConvert.DeserializeObject<JObject>(
-                    webClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases/latest"));
+                    githubWebClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases/latest"));
             if (github.ContainsKey("tag_name"))
             {
                 githubVersion = github["tag_name"]?.ToObject<string>();
@@ -153,7 +156,7 @@ namespace WFInfo
         public void ReloadItems()
         {
             marketItems = new JObject();
-
+            WebClient webClient = createWfmClient();
             JObject obj =
                 JsonConvert.DeserializeObject<JObject>(
                     webClient.DownloadString("https://api.warframe.market/v1/items"));
@@ -229,6 +232,7 @@ namespace WFInfo
             }
             ReloadItems();
             marketData = new JObject();
+            WebClient webClient = CustomEntrypoint.createNewWebClient();
             JArray rows = JsonConvert.DeserializeObject<JArray>(webClient.DownloadString(sheetJsonUrl));
 
             foreach (var row in rows)
@@ -242,6 +246,16 @@ namespace WFInfo
                         {"ducats", 0},
                         {"volume", int.Parse(row["yesterday_vol"].ToString(), Main.culture) + int.Parse(row["today_vol"].ToString(), Main.culture)}
                     };
+                    if (!name.EndsWith(" Blueprint"))
+                    {
+                        name += " Blueprint";
+                        marketData[name] = new JObject
+                        {
+                            {"plat", double.Parse(row["custom_avg"].ToString(), Main.culture)},
+                            {"ducats", 0},
+                            {"volume", int.Parse(row["yesterday_vol"].ToString(), Main.culture) + int.Parse(row["today_vol"].ToString(), Main.culture)}
+                        };
+                    }
                 }
             }
 
@@ -263,11 +277,15 @@ namespace WFInfo
         {
             Main.AddLog("Load missing market item: " + item_name);
 
+            Thread.Sleep(333);
+            WebClient webClient = createWfmClient();
             JObject stats =
                 JsonConvert.DeserializeObject<JObject>(
                     webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"));
             stats = stats["payload"]["statistics_closed"]["90days"].Last.ToObject<JObject>();
 
+            Thread.Sleep(333);
+            webClient = createWfmClient();
             JObject ducats = JsonConvert.DeserializeObject<JObject>(
                 webClient.DownloadString("https://api.warframe.market/v1/items/" + url));
             ducats = ducats["payload"]["item"].ToObject<JObject>();
@@ -286,7 +304,8 @@ namespace WFInfo
             marketData[item_name] = new JObject
             {
                 { "ducats", ducat },
-                { "plat", stats["avg_price"] }
+                { "plat", stats["avg_price"] },
+                { "volume", stats["volume"] }
             };
         }
 
@@ -388,6 +407,7 @@ namespace WFInfo
         public bool Update()
         {
             Main.AddLog("Checking for Updates to Databases");
+            WebClient webClient = CustomEntrypoint.createNewWebClient();
             JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
             bool saveDatabases = LoadMarket(allFiltered);
 
@@ -430,6 +450,7 @@ namespace WFInfo
             try
             {
                 Main.AddLog("Forcing market update");
+                WebClient webClient = CustomEntrypoint.createNewWebClient();
                 JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
                 LoadMarket(allFiltered, true);
 
@@ -485,6 +506,7 @@ namespace WFInfo
             try
             {
                 Main.AddLog("Forcing equipment update");
+                WebClient webClient = CustomEntrypoint.createNewWebClient();
                 JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
                 LoadEqmtData(allFiltered, true);
                 SaveAllJSONs();
