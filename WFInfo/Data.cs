@@ -287,7 +287,7 @@ namespace WFInfo
             {
                 stats = new JObject
                 {
-                    { "plat", 999 },
+                    { "avg_price", 999 },
                     { "volume", 0 }
                 };
             } 
