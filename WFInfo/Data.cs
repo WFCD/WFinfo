@@ -166,7 +166,13 @@ namespace WFInfo
             {
                 string name = item["item_name"].ToString();
                 if (name.Contains("Prime "))
+                {
+                    if ((name.Contains("Neuroptics") || name.Contains("Chassis") || name.Contains("Systems") || name.Contains("Harness") || name.Contains("Wings")))
+                    {
+                        name = name.Replace(" Blueprint", "");
+                    }
                     marketItems[item["id"].ToString()] = name + "|" + item["url_name"];
+                }
             }
 
             try
@@ -240,22 +246,16 @@ namespace WFInfo
                 string name = row["name"].ToString();
                 if (name.Contains("Prime "))
                 {
+                    if ((name.Contains("Neuroptics") || name.Contains("Chassis") || name.Contains("Systems") || name.Contains("Harness") || name.Contains("Wings")))
+                    {
+                       name = name.Replace(" Blueprint", "");
+                    }
                     marketData[name] = new JObject
                     {
                         {"plat", double.Parse(row["custom_avg"].ToString(), Main.culture)},
                         {"ducats", 0},
                         {"volume", int.Parse(row["yesterday_vol"].ToString(), Main.culture) + int.Parse(row["today_vol"].ToString(), Main.culture)}
                     };
-                    if (!name.EndsWith(" Blueprint"))
-                    {
-                        name += " Blueprint";
-                        marketData[name] = new JObject
-                        {
-                            {"plat", double.Parse(row["custom_avg"].ToString(), Main.culture)},
-                            {"ducats", 0},
-                            {"volume", int.Parse(row["yesterday_vol"].ToString(), Main.culture) + int.Parse(row["today_vol"].ToString(), Main.culture)}
-                        };
-                    }
                 }
             }
 
@@ -282,7 +282,19 @@ namespace WFInfo
             JObject stats =
                 JsonConvert.DeserializeObject<JObject>(
                     webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"));
-            stats = stats["payload"]["statistics_closed"]["90days"].Last.ToObject<JObject>();
+            JToken latestStats = stats["payload"]["statistics_closed"]["90days"].LastOrDefault();
+            if (latestStats == null)
+            {
+                stats = new JObject
+                {
+                    { "plat", 999 },
+                    { "volume", 0 }
+                };
+            } 
+            else
+            {
+                stats = latestStats.ToObject<JObject>();
+            }
 
             Thread.Sleep(333);
             webClient = createWfmClient();
