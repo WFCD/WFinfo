@@ -866,11 +866,13 @@ namespace WFInfo
                 });
             }
 
-            if (_settings.DoSnapItCount)
-                Main.RunOnUIThread(() =>
-                {
-                    VerifyCount.ShowVerifyCount(foundParts);
-                 });
+            // Temporarily disabled due to UI changes
+            // Requires rewrite
+            //if (_settings.DoSnapItCount)
+            //    Main.RunOnUIThread(() =>
+            //    {
+            //        VerifyCount.ShowVerifyCount(foundParts);
+            //     });
 
             if (Main.snapItOverlayWindow.tempImage != null)
                 Main.snapItOverlayWindow.tempImage.Dispose();
@@ -1173,10 +1175,12 @@ namespace WFInfo
                 results.Add(new InventoryItem(name, itemGroup.Item2));
             }
 
-            if ( _settings.DoSnapItCount)
-            {
-                GetItemCounts(filteredImage, filteredImageClean, results, font, _settings.SnapItCountThreshold);
-            }
+            // Temporarily disabled due to UI changes
+            // Requires rewrite
+            //if ( _settings.DoSnapItCount)
+            //{
+            //    GetItemCounts(filteredImage, filteredImageClean, results, font, _settings.SnapItCountThreshold);
+           // }
 
             filteredImageClean.Dispose();
             red.Dispose();
