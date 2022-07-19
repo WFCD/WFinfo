@@ -56,7 +56,7 @@ namespace WFInfo
 
         private static readonly InitialDialogue dialogue = new InitialDialogue();
         public static CancellationTokenSource stopDownloadTask;
-
+        public static string build_version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         public static void cleanLegacyTesseractIfNeeded()
         {
@@ -207,7 +207,9 @@ namespace WFInfo
             {
                 proxy = new WebProxy(new Uri(proxy_string));
             }
-            return new WebClient() { Proxy = proxy };
+            WebClient webClient = new WebClient() { Proxy = proxy };
+            webClient.Headers.Add("User-Agent", "WFInfo/" + build_version);
+            return webClient;
         }
 
         public static bool isAVX2Available()

@@ -29,11 +29,11 @@ namespace WFInfo
             }
             catch (FileNotFoundException e)
             {
-                Main.AddLog($"{e.Message}, JWT not set");
+                Main.AddLog($"{e.Message} JWT not set");
             }
             catch (CryptographicException e)
             {
-                Main.AddLog($"{e.Message}, JWT decryption failed");
+                Main.AddLog($"{e.Message} JWT decryption failed");
             }
 
             return null;
