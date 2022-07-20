@@ -186,7 +186,12 @@ namespace WFInfo.Settings
             string oldLocale = _viewModel.Locale;
             _viewModel.Locale = selectedLocale;
             Save();
+            //Set default culture of all new Thread to the selected culture and chage the culture of this thread
+            CultureInfo culture = CultureInfo.GetCultureInfo(selectedLocale);
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(selectedLocale);
+
             _ = OCR.updateEngineAsync();
             _ = Task.Run(async () =>
             {
