@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-
+using System.Threading;
+using System.Globalization;
 namespace WFInfo.Settings
 {
     /// <summary>
@@ -182,14 +183,17 @@ namespace WFInfo.Settings
             ComboBoxItem item = (ComboBoxItem) localeCombobox.SelectedItem;
             
             string selectedLocale = item.Tag.ToString();
+            string oldLocale = _viewModel.Locale;
             _viewModel.Locale = selectedLocale;
             Save();
-
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(selectedLocale);
             _ = OCR.updateEngineAsync();
             _ = Task.Run(async () =>
             {
                 Main.dataBase.ReloadItems();
             });
+            if(selectedLocale != oldLocale) 
+                Main.StatusUpdate(Properties.strings.Changed_locale, 0);
         }
 
 

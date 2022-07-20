@@ -196,6 +196,9 @@ namespace WFInfo
         private void EquipmentClick(object sender, RoutedEventArgs e)
         {
             if (Main.dataBase.equipmentData == null) { ChangeStatus("Equipment data not yet loaded in", 2); return; }
+            Main.equipmentWindow?.Close();
+            Main.equipmentWindow = new EquipmentWindow();
+            Main.equipmentWindow.populate();
             Main.equipmentWindow.Show();
         }
 

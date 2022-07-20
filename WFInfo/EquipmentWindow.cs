@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -50,7 +51,6 @@ namespace WFInfo
 
         public void populate()
         {
-
             primeTypes = new Dictionary<string, TreeNode>();
             foreach (KeyValuePair<string, JToken> prime in Main.dataBase.equipmentData)
             {
@@ -78,11 +78,21 @@ namespace WFInfo
                     foreach (KeyValuePair<string, JToken> primePart in prime.Value["parts"].ToObject<JObject>())
                     {
                         string partName = primePart.Key;
+                        switch (ApplicationSettings.GlobalReadonlySettings.Locale)
+                        {
+                            case "fr":
+                                partName = Main.dataBase.getLocaleNameData(partName);
+                                partName = partName.Replace("-", "").Trim();
+                                break;
+                            default:
+                                break;
+                        }
+                        
                         if (primePart.Key.IndexOf("Prime") + 6 < primePart.Key.Length)
                             partName = partName.Substring(primePart.Key.IndexOf("Prime") + 6);
 
                         if (partName.Contains("Kubrow"))
-                            partName = partName.Substring(partName.IndexOf(" Blueprint") + 1);
+                            partName = partName.Substring(partName.IndexOf(" "+ Properties.strings.Blueprint) + 1);
                         TreeNode partNode = new TreeNode(partName, primePart.Value["vaulted"].ToObject<bool>() ? "Vaulted" : "", false, 0);
                         partNode.MakeClickable(primePart.Key);
                         if (Main.dataBase.marketData.TryGetValue(primePart.Key.ToString(), out JToken marketValues))
