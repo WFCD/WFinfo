@@ -46,9 +46,7 @@ namespace WFInfo.Settings
         double MaximumEfficiencyValue { get; }
         double MinimumEfficiencyValue { get; }
         bool DoSnapItCount { get; }
-        int SnapItCountThreshold { get; }
-        int SnapItEdgeWidth { get; }
-        int SnapItEdgeRadius { get; }
+        int SnapItDelay { get; }
         double SnapItHorizontalNameMargin { get; }
         bool DoCustomNumberBoxWidth { get; }
         double SnapItNumberBoxWidth { get; }

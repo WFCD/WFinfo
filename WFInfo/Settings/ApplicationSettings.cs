@@ -71,9 +71,7 @@ namespace WFInfo.Settings
         public double MaximumEfficiencyValue { get; set; } = 9.5;
         public double MinimumEfficiencyValue { get; set; } = 4.5;
         public bool DoSnapItCount { get; set; } = false;
-        public int SnapItCountThreshold { get; set; } = 4;
-        public int SnapItEdgeWidth { get; set; } = 1;
-        public int SnapItEdgeRadius { get; set; } = 1;
+        public int SnapItDelay { get; set; } = 20000;
         public double SnapItHorizontalNameMargin { get; set; } = 0;
         public bool DoCustomNumberBoxWidth { get; set; } = false;
         public double SnapItNumberBoxWidth { get; set; } = 0.4;

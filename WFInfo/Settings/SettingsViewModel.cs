@@ -296,29 +296,11 @@ namespace WFInfo.Settings
             }
         }
 
-        public int SnapItCountThreshold
+        public int SnapItDelay
         {
-            get => _settings.SnapItCountThreshold;
+            get => _settings.SnapItDelay;
             set { 
-                _settings.SnapItCountThreshold = value;
-                RaisePropertyChanged(); 
-            }
-        }
-
-        public int SnapItEdgeWidth
-        {
-            get => _settings.SnapItEdgeWidth;
-            set { 
-                _settings.SnapItEdgeWidth = value;
-                RaisePropertyChanged(); 
-            }
-        }
-
-        public int SnapItEdgeRadius
-        {
-            get => _settings.SnapItEdgeRadius;
-            set { 
-                _settings.SnapItEdgeRadius = value;
+                _settings.SnapItDelay = value;
                 RaisePropertyChanged(); 
             }
         }
