@@ -98,7 +98,10 @@ namespace WFInfo
             {
                 Proxy = proxy
             };
+            handler.UseCookies = false;
             client = new HttpClient(handler);
+
+            marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.None;
         }
 
         public void EnableLogCapture()
