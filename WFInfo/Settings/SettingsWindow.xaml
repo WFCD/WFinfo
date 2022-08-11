@@ -132,8 +132,7 @@
         <ScrollViewer Grid.Row="1"
                       Grid.Column="0">
             <StackPanel Orientation="Vertical">
-                <Border DockPanel.Dock="Top"
-                        Padding="15 5 25 5">
+                <Border DockPanel.Dock="Top">
                     <DockPanel>
                         <Grid DockPanel.Dock="Bottom"
                               HorizontalAlignment="Stretch">
@@ -175,8 +174,7 @@
                                Margin="0,0,-1,0" />
                     </DockPanel>
                 </Border>
-                <Border DockPanel.Dock="Top"
-                        Padding="15 5 25 5">
+                <Border DockPanel.Dock="Top">
                     <UniformGrid>
                         <Label Content="Display time" />
                         <TextBox x:Name="Displaytime_number_box"
@@ -195,8 +193,7 @@
                     </UniformGrid>
                 </Border>
                 <Border x:Name="Overlay_sliders"
-                        DockPanel.Dock="Top"
-                        Padding="15 5 25 5">
+                        DockPanel.Dock="Top">
                     <DockPanel LastChildFill="False">
                         <Label Content="Overlay Offset"
                                DockPanel.Dock="Top"
@@ -233,13 +230,13 @@
                         </DockPanel>
                     </DockPanel>
                 </Border>
-                <Border DockPanel.Dock="Top" 
-                        Padding="15 5 25 5">
+                <Border DockPanel.Dock="Top">
                     <UniformGrid>
-                        <Label Content="Display time (snap)"/>
-                        <TextBox x:Name="SnapItDisplaytime_number_box"
-                                 ToolTip="The time in milliseconds the overlays will be displayed on screen"
-                                 Text="{Binding SettingsViewModel.SnapItDelay, Mode=TwoWay}"
+                        <Label Content="Snap Noise"
+                               ToolTip="Snap-It item count noise filtering threshhold" />
+                        <TextBox x:Name="SnapItCountThreshold_number_box"
+                                 ToolTip="Threshold for number detection noise filtering. Higher = More aggressive, 3 or 4 usually works best"
+                                 Text="{Binding SettingsViewModel.SnapItCountThreshold, Mode=TwoWay}"
                                  components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
                                  VerticalAlignment="Top" />
 
@@ -334,8 +331,7 @@
                     </Grid>
                 </Border>
                 <Border DockPanel.Dock="Top"
-                        Width="334"
-                        Padding="15 5 25 5">
+                        Width="334">
                     <UniformGrid>
                         <Label Content="Efficiency min" />
                         <Label Content="Efficiency max" />
@@ -384,6 +380,10 @@
                                                   Background="#FF1B1B1B" />
                                     <ComboBoxItem Tag="ko"
                                                   Content="한국어"
+                                                  FontSize="14"
+                                                  Background="#FF1B1B1B" />
+                                    <ComboBoxItem Tag="ru"
+                                                  Content="Russian"
                                                   FontSize="14"
                                                   Background="#FF1B1B1B" />
                                 </ComboBox>

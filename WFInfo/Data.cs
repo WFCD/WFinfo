@@ -10,7 +10,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
@@ -57,23 +56,16 @@ namespace WFInfo
         private readonly string nameDataPath;
         public string JWT; // JWT is the security key, store this as email+pw combo
         private readonly WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
-        private readonly string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
-        private readonly string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
+        private readonly string filterAllJSON = "https://docs.google.com/uc?id=1w_cSmhsULIoSt4tyNgnh7xY2N98Mfpbf&export=download";
         public string inGameName = string.Empty;
-        readonly HttpClient client;
+        static readonly HttpClient client = new HttpClient();
+        readonly WebClient WebClient;
+        private readonly Sheets sheetsApi;
         private string githubVersion;
         public bool rememberMe;
         private LogCapture EElogWatcher;
         private Task autoThread;
         private readonly IReadOnlyApplicationSettings _settings;
-
-        public WebClient createWfmClient()
-        {
-            WebClient webClient = CustomEntrypoint.createNewWebClient();
-            webClient.Headers.Add("platform", "pc");
-            webClient.Headers.Add("language", "en");
-            return webClient;
-        }
 
         public Data(IReadOnlyApplicationSettings settings)
         {
@@ -87,21 +79,12 @@ namespace WFInfo
 
             Directory.CreateDirectory(applicationDirectory);
 
-            // Create websocket for WFM
-            WebProxy proxy = null;
-            String proxy_string = Environment.GetEnvironmentVariable("http_proxy");
-            if (proxy_string != null)
-            {
-                proxy = new WebProxy(new Uri(proxy_string));
-            }
-            HttpClientHandler handler = new HttpClientHandler
-            {
-                Proxy = proxy
-            };
-            handler.UseCookies = false;
-            client = new HttpClient(handler);
+            WebClient = new WebClient();
+            WebClient.Headers.Add("platform", "pc");
+            WebClient.Headers.Add("language", "en");
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-            marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.None;
+            sheetsApi = new Sheets();
         }
 
         public void EnableLogCapture()
@@ -136,17 +119,17 @@ namespace WFInfo
             File.WriteAllText(path, JsonConvert.SerializeObject(db, Formatting.Indented));
         }
 
-        public bool IsJwtLoggedIn()
+        public bool IsJwtAvailable()
         {
-            return JWT != null && JWT.Length > 300; //check if the token is of the right length
+            return JWT.Length > 500; //check if the token is of the right length
         }
 
         public int GetGithubVersion()
         {
-            WebClient githubWebClient = CustomEntrypoint.createNewWebClient();
+            WebClient.Headers.Add("User-Agent", "WFCD");
             JObject github =
                 JsonConvert.DeserializeObject<JObject>(
-                    githubWebClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases/latest"));
+                    WebClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases/latest"));
             if (github.ContainsKey("tag_name"))
             {
                 githubVersion = github["tag_name"]?.ToObject<string>();
@@ -159,23 +142,17 @@ namespace WFInfo
         public void ReloadItems()
         {
             marketItems = new JObject();
-            WebClient webClient = createWfmClient();
+
             JObject obj =
                 JsonConvert.DeserializeObject<JObject>(
-                    webClient.DownloadString("https://api.warframe.market/v1/items"));
+                    WebClient.DownloadString("https://api.warframe.market/v1/items"));
 
             JArray items = JArray.FromObject(obj["payload"]["items"]);
             foreach (var item in items)
             {
                 string name = item["item_name"].ToString();
                 if (name.Contains("Prime "))
-                {
-                    if ((name.Contains("Neuroptics") || name.Contains("Chassis") || name.Contains("Systems") || name.Contains("Harness") || name.Contains("Wings")))
-                    {
-                        name = name.Replace(" Blueprint", "");
-                    }
                     marketItems[item["id"].ToString()] = name + "|" + item["url_name"];
-                }
             }
 
             try
@@ -241,23 +218,21 @@ namespace WFInfo
             }
             ReloadItems();
             marketData = new JObject();
-            WebClient webClient = CustomEntrypoint.createNewWebClient();
-            JArray rows = JsonConvert.DeserializeObject<JArray>(webClient.DownloadString(sheetJsonUrl));
+            IList<IList<object>> sheet;
 
-            foreach (var row in rows)
+            sheet = sheetsApi.GetSheet("prices!A:I");
+
+
+            foreach (IList<object> row in sheet)
             {
-                string name = row["name"].ToString();
+                string name = row[0].ToString();
                 if (name.Contains("Prime "))
                 {
-                    if ((name.Contains("Neuroptics") || name.Contains("Chassis") || name.Contains("Systems") || name.Contains("Harness") || name.Contains("Wings")))
-                    {
-                       name = name.Replace(" Blueprint", "");
-                    }
                     marketData[name] = new JObject
                     {
-                        {"plat", double.Parse(row["custom_avg"].ToString(), Main.culture)},
+                        {"plat", double.Parse(row[8].ToString(), Main.culture)},
                         {"ducats", 0},
-                        {"volume", int.Parse(row["yesterday_vol"].ToString(), Main.culture) + int.Parse(row["today_vol"].ToString(), Main.culture)}
+                        {"volume", int.Parse(row[4].ToString(), Main.culture) + int.Parse(row[6].ToString(), Main.culture)}
                     };
                 }
             }
@@ -280,29 +255,13 @@ namespace WFInfo
         {
             Main.AddLog("Load missing market item: " + item_name);
 
-            Thread.Sleep(333);
-            WebClient webClient = createWfmClient();
             JObject stats =
                 JsonConvert.DeserializeObject<JObject>(
-                    webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"));
-            JToken latestStats = stats["payload"]["statistics_closed"]["90days"].LastOrDefault();
-            if (latestStats == null)
-            {
-                stats = new JObject
-                {
-                    { "avg_price", 999 },
-                    { "volume", 0 }
-                };
-            } 
-            else
-            {
-                stats = latestStats.ToObject<JObject>();
-            }
+                    WebClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"));
+            stats = stats["payload"]["statistics_closed"]["90days"].Last.ToObject<JObject>();
 
-            Thread.Sleep(333);
-            webClient = createWfmClient();
             JObject ducats = JsonConvert.DeserializeObject<JObject>(
-                webClient.DownloadString("https://api.warframe.market/v1/items/" + url));
+                WebClient.DownloadString("https://api.warframe.market/v1/items/" + url));
             ducats = ducats["payload"]["item"].ToObject<JObject>();
             string id = ducats["id"].ToObject<string>();
             ducats = ducats["items_in_set"].AsParallel().First(part => (string)part["id"] == id).ToObject<JObject>();
@@ -319,8 +278,7 @@ namespace WFInfo
             marketData[item_name] = new JObject
             {
                 { "ducats", ducat },
-                { "plat", stats["avg_price"] },
-                { "volume", stats["volume"] }
+                { "plat", stats["avg_price"] }
             };
         }
 
@@ -422,8 +380,7 @@ namespace WFInfo
         public bool Update()
         {
             Main.AddLog("Checking for Updates to Databases");
-            WebClient webClient = CustomEntrypoint.createNewWebClient();
-            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
+            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
             bool saveDatabases = LoadMarket(allFiltered);
 
             foreach (KeyValuePair<string, JToken> elem in marketItems)
@@ -465,8 +422,7 @@ namespace WFInfo
             try
             {
                 Main.AddLog("Forcing market update");
-                WebClient webClient = CustomEntrypoint.createNewWebClient();
-                JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
+                JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
                 LoadMarket(allFiltered, true);
 
                 foreach (KeyValuePair<string, JToken> elem in marketItems)
@@ -521,8 +477,7 @@ namespace WFInfo
             try
             {
                 Main.AddLog("Forcing equipment update");
-                WebClient webClient = CustomEntrypoint.createNewWebClient();
-                JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
+                JObject allFiltered = JsonConvert.DeserializeObject<JObject>(WebClient.DownloadString(filterAllJSON));
                 LoadEqmtData(allFiltered, true);
                 SaveAllJSONs();
                 Main.RunOnUIThread(() =>
@@ -627,14 +582,25 @@ namespace WFInfo
 
         public int LevenshteinDistance(string s, string t)
         {
-            switch (_settings.Locale)
-            {
+            switch(_settings.Locale)
+            {      
+                case "ru":
+                    //for russian
+                    return LevenshteinDistanceRussian(s, t);
                 case "ko":
                     // for korean
                     return LevenshteinDistanceKorean(s, t);
                 default:
                     return LevenshteinDistanceDefault(s, t);
             }
+        }
+
+        int LevenshteinDistanceRussian(string firstWord, string secondWord)
+        {
+            firstWord = getLocaleNameData(firstWord);
+            firstWord = firstWord.Replace("Чертеж", "").Replace(":","").Trim();
+            secondWord = secondWord.Replace("Чертеж", "").Trim();
+            return LevenshteinDistanceDefault(firstWord, secondWord);    
         }
 
         public int LevenshteinDistanceDefault(string s, string t)
@@ -681,9 +647,14 @@ namespace WFInfo
                     d[i, j] = Math.Min(Math.Min(opt1, opt2), opt3);
                 }
 
-
-
             return d[n, m];
+        }
+        //I don't know why this method exists but korean does so does my
+        public static bool isRussian(String str) 
+        {
+            char c = str[0];
+            if (0x0400 <= c && c <= 0x045F) return true;
+            return false;
         }
 
         public static bool isKorean(String str)
@@ -703,7 +674,8 @@ namespace WFInfo
                 if (marketItem.Key == "version")
                     continue;
                 string[] split = marketItem.Value.ToString().Split('|');
-                if (split[0] == s)
+                //So the first names can end with the Bluperint while second can start with Blueprint (or maybe vice versa, I forgot), I really don't want to fugure out why is that
+                if (split[0].Replace("Blueprint", "").Trim() == s.Replace("Blueprint", "").Trim())
                 {
                     if (split.Length == 3)
                     {
@@ -1013,7 +985,7 @@ namespace WFInfo
 
             return lowest;
         }
-
+        
         private void LogChanged(object sender, string line)
         {
             if (autoThread != null && !autoThread.IsCompleted) return;
@@ -1067,40 +1039,35 @@ namespace WFInfo
             });
         }
 
-        public static void AutoTriggered()
-        {
-            try
-            {
-                var watch = Stopwatch.StartNew();
-                long stop = watch.ElapsedMilliseconds + 5000;
-                long wait = watch.ElapsedMilliseconds;
+		public static void AutoTriggered() {
+			try {
+				var watch = Stopwatch.StartNew();
+				long stop = watch.ElapsedMilliseconds + 5000;
+				long wait = watch.ElapsedMilliseconds;
 
-                OCR.UpdateWindow();
+				OCR.UpdateWindow();
 
-                while (watch.ElapsedMilliseconds < stop)
-                {
-                    if (watch.ElapsedMilliseconds <= wait) continue;
-                    wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
-                    OCR.GetThemeWeighted(out double diff);
-                    if (!(diff > 40)) continue;
-                    while (watch.ElapsedMilliseconds < wait) ;
-                    Main.AddLog("started auto processing");
-                    OCR.ProcessRewardScreen();
-                    break;
-                }
-                watch.Stop();
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog("AUTO FAILED");
-                Main.AddLog(ex.ToString());
-                Main.StatusUpdate("Auto Detection Failed", 0);
-                Main.RunOnUIThread(() =>
-                {
-                    _ = new ErrorDialogue(DateTime.Now, 0);
-                });
-            }
-        }
+				while (watch.ElapsedMilliseconds < stop) {
+					if (watch.ElapsedMilliseconds <= wait) continue;
+					wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
+					OCR.GetThemeWeighted(out double diff);
+					if (!(diff > 40)) continue;
+					while (watch.ElapsedMilliseconds < wait) ;
+					Main.AddLog("started auto processing");
+					OCR.ProcessRewardScreen();
+					break;
+				}
+				watch.Stop();
+			}
+			catch (Exception ex) {
+				Main.AddLog("AUTO FAILED");
+				Main.AddLog(ex.ToString());
+				Main.StatusUpdate("Auto Detection Failed", 0);
+				Main.RunOnUIThread(() => {
+					_ = new ErrorDialogue(DateTime.Now, 0);
+				});
+			}
+		}
 
         /// <summary>
         ///	Get's the user's login JWT to authenticate future API calls.
@@ -1125,9 +1092,6 @@ namespace WFInfo
             request.Headers.Add("auth_type", "header");
             var response = await client.SendAsync(request);
             var responseBody = await response.Content.ReadAsStringAsync();
-            Regex rgxBody = new Regex("\"check_code\": \".*?\"");
-            string censoredResponse = rgxBody.Replace(responseBody, "\"check_code\": \"REDACTED\"");
-            Main.AddLog(censoredResponse);
             if (response.IsSuccessStatusCode)
             {
                 SetJWT(response.Headers);
@@ -1135,9 +1099,7 @@ namespace WFInfo
             }
             else
             {
-                Regex rgxEmail = new Regex("[a-zA-Z0-9]");
-                string censoredEmail = rgxEmail.Replace(email, "*");
-                throw new Exception("GetUserLogin, " + responseBody + $"Email: {censoredEmail}, Pw length: {password.Length}");
+                throw new Exception("GetUserLogin, " + responseBody + $"Email: {email}, Pw length: {password.Length}");
             }
             request.Dispose();
         }
@@ -1146,13 +1108,14 @@ namespace WFInfo
         /// Attempts to connect the user's account to the websocket
         /// </summary>
         /// <returns>A task to be awaited</returns>
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> OpenWebSocket()
         {
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             Main.AddLog("Connecting to websocket");
+            marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 
-            if (marketSocket.IsAlive)
+            if (marketSocket.IsAlive || marketSocket.ReadyState == WebSocketState.Connecting)
             {
                 return false;
             }
@@ -1208,7 +1171,7 @@ namespace WFInfo
         {
             foreach (var item in headers)
             {
-                if (!item.Key.ToLower(Main.culture).Contains("authorization")) continue;
+                if (!item.Key.Contains("Authorization")) continue;
                 var temp = item.Value.First();
                 JWT = temp.Substring(4);
                 return;
@@ -1323,17 +1286,16 @@ namespace WFInfo
         /// </summary>
         /// <param name="status">
         /// </param>
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> SetWebsocketStatus(string status)
         {
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            if (!IsJwtLoggedIn())
+        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+            if (!IsJwtAvailable())
                 return false;
 
             var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
             switch (status)
             {
-                case "ingame":
                 case "in game":
                     message += "ingame\"}";
                     break;
@@ -1365,6 +1327,13 @@ namespace WFInfo
             Debug.WriteLine("Sending: " + data + " to websocket.");
             try
             {
+                if (marketSocket.ReadyState == WebSocketState.Closed || marketSocket.ReadyState != WebSocketState.Open)
+                {
+                    marketSocket.Close();
+                    OpenWebSocket();
+                }
+                while (marketSocket.ReadyState == WebSocketState.Connecting) //Make sure that the socket is actually connected before sending any data.
+                    Thread.Sleep(1);
                 marketSocket.Send(data);
             }
             catch (InvalidOperationException e)
@@ -1377,13 +1346,18 @@ namespace WFInfo
         /// </summary>
         public void Disconnect()
         {
-            if (marketSocket.ReadyState == WebSocketState.Open)
-            { //only send disconnect message if the socket is connected
+            if (marketSocket.ReadyState == WebSocketState.Open) { //only send disconnect message if the socket is connected
                 SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
                 JWT = null;
                 rememberMe = false;
                 inGameName = string.Empty;
                 marketSocket.Close(1006);
+
+                //delete the jwt token if user logs out
+                if (File.Exists(Main.AppPath + @"\jwt_encrpyted"))
+                {
+                    File.Delete(Main.AppPath + @"\jwt_encrpyted");
+                }
             }
         }
 
@@ -1453,7 +1427,7 @@ namespace WFInfo
                     SetJWT(response.Headers);
                     var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
                     profile["profile"]["check_code"] = "REDACTED"; // remnove the code that can compromise an account.
-                    Debug.WriteLine($"JWT check response: {profile["profile"]}");
+                    Main.AddLog($"JWT check response: {profile["profile"]}");
                     return !(bool)profile["profile"]["anonymous"];
                 }
             }
