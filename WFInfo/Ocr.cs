@@ -1814,7 +1814,7 @@ namespace WFInfo
                                 hitRatio = hits / (double)(rightEdge - leftEdge );
                                 hitRatios.Add(hitRatio);
 
-                                if (hitRatio > 0.5 && rightMostHit+1 < rightEdge && rightEdge - leftEdge > 100) //make sure the innermost right edge is used (avoid bright part of frame overlapping with edge)
+                                if (hitRatio > 0.2 && rightMostHit+1 < rightEdge && rightEdge - leftEdge > 100) //make sure the innermost right edge is used (avoid bright part of frame overlapping with edge)
                                 {
                                     g.DrawLine(red, rightEdge, bottomEdge, rightMostHit, bottomEdge);
                                     rightEdge = rightMostHit;
@@ -1822,7 +1822,7 @@ namespace WFInfo
                                     hitRatios.Clear();
                                     hitRatios.Add(1);
                                 }
-                                if (hitRatio > 0.5 && leftMostHit > leftEdge && rightEdge - leftEdge > 100) //make sure the innermost left edge is used (avoid bright part of frame overlapping with edge)
+                                if (hitRatio > 0.2 && leftMostHit > leftEdge && rightEdge - leftEdge > 100) //make sure the innermost left edge is used (avoid bright part of frame overlapping with edge)
                                 {
                                     g.DrawLine(red, leftEdge, bottomEdge, leftMostHit, bottomEdge);
                                     leftEdge = leftMostHit;
@@ -1830,7 +1830,7 @@ namespace WFInfo
                                     hitRatios.Clear();
                                     hitRatios.Add(1);
                                 }
-                            } while (bottomEdge+2 < ProfileImageClean.Height && hitRatios.Last() > 0.5);
+                            } while (bottomEdge+2 < ProfileImageClean.Height && hitRatios.Last() > 0.2);
                             hitRatios.RemoveAt(hitRatios.Count - 1);
                             //find if/where it transitions from text (some misses) to no text (basically no misses) then back to text (some misses). This is proof it's an owned item and marks the bottom edge of the text
                             int ratioChanges = 0;
@@ -1853,7 +1853,7 @@ namespace WFInfo
                             int width = rightEdge - leftEdge;
                             int height = bottomEdge - topEdge;
 
-                            if (ratioChanges != 4 || width < 4 * height || width > 6 * height)
+                            if (ratioChanges != 4 || width < 2.4 * height || width > 4 * height)
                             {
                                 g.DrawRectangle(pink, leftEdge, topEdge, width, height);
                                 x = Math.Max(rightEdge, x);
@@ -1917,7 +1917,6 @@ namespace WFInfo
 
                                     g.FillRectangle(Brushes.LightGray, cloneRect.X, cloneRect.Y + cloneRect.Height, cloneRect.Width, cloneRect.Height);
                                     g.DrawString(rawText, font, Brushes.DarkBlue, new Point(cloneRect.X, cloneRect.Y + cloneRect.Height));
-
 
                                 }
                             }
