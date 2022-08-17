@@ -846,15 +846,15 @@ namespace WFInfo
                 }
 
                 int width = (int)(part.Bounding.Width * screenScaling);
-                if (width < 120)
+                if (width < _settings.MinOverlayWidth)
                 {
-                    if (width < 50)
-                        continue;
-                    width = 120;
+                    //if (width < 50)
+                    //    continue;
+                    width = _settings.MinOverlayWidth;
                 }
-                else if (width > 160)
+                else if (width > _settings.MaxOverlayWidth)
                 {
-                    width = 160;
+                    width = _settings.MaxOverlayWidth;
                 }
 
 

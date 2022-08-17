@@ -54,6 +54,8 @@ namespace WFInfo.Settings
         double SnapRowTextDensity { get; }
         double SnapRowEmptyDensity { get; }
         double SnapColEmptyDensity { get; }
+        int MinOverlayWidth { get; }
+        int MaxOverlayWidth { get; }
         string Ignored { get; }
     }
 }

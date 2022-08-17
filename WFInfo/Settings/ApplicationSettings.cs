@@ -79,6 +79,8 @@ namespace WFInfo.Settings
         public double SnapRowTextDensity { get; set; } = 0.015;
         public double SnapRowEmptyDensity { get; set; } = 0.01;
         public double SnapColEmptyDensity { get; set; } = 0.005;
+        public int MinOverlayWidth { get; set; } = 120;
+        public int MaxOverlayWidth { get; set; } = 160;
         public string Ignored { get; set; } = null;
         [OnError]
         internal void OnError(StreamingContext context, ErrorContext errorContext)

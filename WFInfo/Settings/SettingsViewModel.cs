@@ -368,6 +368,26 @@ namespace WFInfo.Settings
             }
         }
 
+        public int MinOverlayWidth
+        {
+            get => _settings.MinOverlayWidth;
+            set
+            {
+                _settings.MinOverlayWidth = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public int MaxOverlayWidth
+        {
+            get => _settings.MaxOverlayWidth;
+            set
+            {
+                _settings.MaxOverlayWidth = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public string Ignored{
             get => _settings.Ignored;
             set { 
