@@ -1393,6 +1393,7 @@ namespace WFInfo
                         //find "center of mass" for just the circle+checkmark icon
                         int xCenterNew = x;
                         int yCenterNew = y;
+                        int rightmost = 0; //rightmost edge of circle+checkmark icon
                         sumBlack = 1;
                         //use "flood search" approach from the pixel found above to find the whole checkmark+circle icon
                         Stack<Point> searchSpace = new Stack<Point>();
@@ -1418,6 +1419,8 @@ namespace WFInfo
                                                 xCenterNew += p.X + xOff;
                                                 yCenterNew += p.Y + yOff;
                                                 sumBlack++;
+                                                if (p.X + xOff > rightmost)
+                                                    rightmost = p.X + xOff;
                                             }
                                         }
                                     }
@@ -1429,6 +1432,28 @@ namespace WFInfo
 
                         xCenterNew = xCenterNew / sumBlack;
                         yCenterNew = yCenterNew / sumBlack;
+
+                        //Search slight bit up and down to get well within the long line of the checkmark
+                        int lowest = yCenterNew + 1000;
+                        int highest = yCenterNew - 1000;
+                        for (int yOff = -5; yOff < 5; yOff++)
+                        {
+                            int checkY = yCenterNew + yOff;
+                            if (checkY > 0 && checkY < imgHeight)
+                            {
+                                index = 4 * (xCenterNew + (checkY) * imgWidth);
+                                if (LockedBitmapBytes[index] == 0 && LockedBitmapBytes[index + 1] == 0 && LockedBitmapBytes[index + 2] == 0 && LockedBitmapBytes[index + 3] == 255)
+                                {
+                                    if (checkY > highest)
+                                        highest = checkY;
+
+                                    if (checkY < lowest)
+                                        lowest = checkY;
+                                }
+                            }
+                        }
+                        yCenterNew = (highest + lowest) / 2;
+
 
                         //mark second-pass center
                         filteredImage.SetPixel(Left + xCenterNew, Top + yCenterNew, Color.Magenta);
@@ -1507,6 +1532,7 @@ namespace WFInfo
                         unfilteredImage.UnlockBits(lockedBitmapData);
 
                         //recalculate centers to be relative to whole image
+                        rightmost = rightmost + Left + 1;
                         xCenter = xCenter + Left;
                         yCenter = yCenter + Top;
                         xCenterNew = xCenterNew + Left;
@@ -1555,6 +1581,8 @@ namespace WFInfo
                             index = 4 * (Left + (Top + Height) * imgWidth);
                         }
                         Height-= 2;
+
+                        Left = rightmost; // cut out checkmark+circle icon
                         index = 4 * (Left + (Top + Height) * imgWidth);
 
                         //search for width
