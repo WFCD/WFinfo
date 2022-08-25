@@ -32,15 +32,6 @@ namespace WFInfo
 
         public MainWindow()
         {
-
-            string thisprocessname = Process.GetCurrentProcess().ProcessName;
-            if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
-            {
-                Main.AddLog("Duplicate process found");
-                Close();
-            }
-
-
             INSTANCE = this;
             main = new Main();
             listener = new LowLevelListener(); //publisher
