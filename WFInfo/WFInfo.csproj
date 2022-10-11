@@ -49,6 +49,10 @@
     <Resource Include="Resources\*" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Remove="Resources\strings.fr.resx" />
+    <EmbeddedResource Remove="Resources\strings.resx" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="WFLogo.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +68,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Update="Properties\strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\achievment_03.wav" />
   </ItemGroup>
   <ItemGroup>
@@ -96,5 +104,12 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="6.0.1" /> 
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>strings.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

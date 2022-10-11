@@ -9,6 +9,8 @@ using System.Text.RegularExpressions;
 using AutoUpdaterDotNET;
 using System.Windows;
 using System.Windows.Forms;
+using System.Threading;
+using System.Globalization;
 using WebSocketSharp;
 using WFInfo.Resources;
 using WFInfo.Settings;
@@ -54,6 +56,9 @@ namespace WFInfo
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
 
             Task.Factory.StartNew(ThreadedDataLoad);
+
+            //string str = Properties.strings.Primary; To localize all hard coded text
+
         }
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
@@ -65,7 +70,7 @@ namespace WFInfo
         {
             try
             {
-                StatusUpdate("Updating Databases...", 0);
+                StatusUpdate(Properties.strings.Update_databases, 0);
 
                 dataBase.Update();
 
@@ -79,7 +84,7 @@ namespace WFInfo
                     OCR.VerifyWarframe();
                     LoggedIn();
                 }
-                StatusUpdate("WFInfo Initialization Complete", 0);
+                StatusUpdate(Properties.strings.Init_complete, 0);
                 AddLog("WFInfo has launched successfully");
                 FinishedLoading();
 

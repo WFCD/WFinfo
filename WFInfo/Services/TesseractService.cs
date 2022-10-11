@@ -93,7 +93,8 @@ namespace WFInfo
             JObject traineddata_checksums = new JObject
             {
                 {"en", "7af2ad02d11702c7092a5f8dd044d52f"},
-                {"ko", "c776744205668b7e76b190cc648765da"}
+                {"ko", "c776744205668b7e76b190cc648765da"},
+                {"fr", "a73e70c872f262895d93976febeb1638"}
             };
 
             // get trainned data

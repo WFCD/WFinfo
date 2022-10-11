@@ -14,7 +14,8 @@ using System.Windows.Media;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using WFInfo.Settings;
-
+using System.Globalization;
+using System.Threading;
 namespace WFInfo
 {
     /// <summary>
@@ -39,7 +40,11 @@ namespace WFInfo
                 Main.AddLog("Duplicate process found");
                 Close();
             }
-
+            //Set default culture of all new Thread to the selected culture and chage the culture of this thread
+            CultureInfo culture = CultureInfo.GetCultureInfo(_settingsViewModel.Locale);
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
 
             INSTANCE = this;
             main = new Main();
@@ -196,6 +201,9 @@ namespace WFInfo
         private void EquipmentClick(object sender, RoutedEventArgs e)
         {
             if (Main.dataBase.equipmentData == null) { ChangeStatus("Equipment data not yet loaded in", 2); return; }
+            Main.equipmentWindow?.Close();
+            Main.equipmentWindow = new EquipmentWindow();
+            Main.equipmentWindow.populate();
             Main.equipmentWindow.Show();
         }
 
