@@ -1500,12 +1500,13 @@ namespace WFInfo
                     var body = await response.Content.ReadAsStringAsync();
                     var payload = JsonConvert.DeserializeObject<JObject>(body);
                     var sellOrders = (JArray)payload?["payload"]?["sell_orders"];
+                    string itemID = PrimeItemToItemID(primeName);
 
                     if (sellOrders != null)
                     {
                         foreach (var listing in sellOrders)
                         {
-                            if (primeName == (string)listing?["item"]?["en"]?["item_name"])
+                            if (itemID == (string)listing?["item"]?["id"])
                             {
                                 request.Dispose();
                                 return listing;
