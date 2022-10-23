@@ -57,7 +57,7 @@ namespace WFInfo.Settings
         public bool Clipboard { get; set; } = false;
         public long AutoDelay { get; set; } = 250L;
         public int ImageRetentionTime { get; set; } = 12;
-        public string ClipboardTemplate { get; set; } = "-- PC 48 hours avg price by WFM (c) WFInfo"
+        public string ClipboardTemplate { get; set; } = "-- PC 48 hours avg price by WFM (c) WFInfo";
         public bool SnapitExport { get; set; } = false;
         public int Delay { get; set; } = 10000;
         public bool HighlightRewards { get; set; } = true;
