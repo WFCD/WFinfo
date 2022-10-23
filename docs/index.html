@@ -55,7 +55,7 @@
                     <h2>Usage </h2>
                     <p>Download the latest release from above, WFinfo requires some aditional software to function properly:
                     </br>
-                    Download Microsoft Visual C++ Redistributable 2019 from microsoft <a href="https://aka.ms/vs/16/release/VC_redist.x64.exe" rel="nofollow" style="text-decoration: underline">x64</a> and <a href="https://aka.ms/vs/16/release/VC_redist.x86.exe" rel="nofollow" style="text-decoration: underline">x86</a>
+                    Download Microsoft Visual C++ Redistributable 2019 (or later) from microsoft <a href="https://aka.ms/vs/16/release/VC_redist.x64.exe" rel="nofollow" style="text-decoration: underline">x64</a> and <a href="https://aka.ms/vs/16/release/VC_redist.x86.exe" rel="nofollow" style="text-decoration: underline">x86</a>
                     </br>
                     For Windows 7 users: <a href="https://docs.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings" rel="nofollow">Enable TLS in registry</a> and ensure you have installed <a href="https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer" rel="nofollow" style="text-decoration: underline">.NET Framework Runtime 4.8</a>
                     </br>
@@ -100,12 +100,13 @@
                         <li><a href="#" data-tab="tab-3">Snap-it</a></li>
                         <li><a href="#" data-tab="tab-4">WFM conectivity</a></li>
                         <li><a href="#" data-tab="tab-5">Search-it</a></li>
+                        <li><a href="#" data-tab="tab-6">Master-it</a></li>
                     </ul>
                     <div class="tabs">
                         <!-- Tab 1 -->
                         <div class="tab tab-1 active" style="justify-content:center">
                             <p class="caption">
-                                <a href="https://www.youtube.com/channel/UCiED7CqmvQSsSHUiQ42EWbw" style="text-decoration: underline">TheKengineer</a> made an excelent video showcasing the program and all of it's features here! <br/>
+                                <a href="https://www.youtube.com/channel/UCiED7CqmvQSsSHUiQ42EWbw" style="text-decoration: underline">TheKengineer</a> made an excelent video showcasing the program and it's features as of v9.4.1 <br/>
                                 <iframe width="1120" height="630" src="https://www.youtube-nocookie.com/embed/WOsORVciUNw?start=23" title="YouTube video player" frameborder="0" allow="clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                 Note! This video wasn't sponsored by the WFInfo developers, we are not affiliated with TheKengineer just found it and thought it explained our application very well! 
                             </p>
@@ -120,9 +121,12 @@
                         <!-- Tab 3 -->
                         <div class="tab tab-3" style="justify-content:center">
                             <p class="caption">
-                                Snap-it is the same functionality as the original but then ported over to work inside of an inventory! Hold the modification key (default: left CTRL) and then press the activation key (default: print screen) to start snap-it. 
-                                Once started snap-it will change your cursor to a cross. Use this cross to drag a rectangle over the items you wish to scan (Item labels have to be on!) It will then take those items
-                                and apply the same processing to them, overlaying the values. Note: This does require borderless fullscreen as there is no other way to display over the game. 
+                                Snap-it brings the power of WFInfo to your inventory!  <br>
+                                Hold the modification key (default: left CTRL) and then press the activation key (default: print screen) to start snap-it. Once started, a transparent overlay will appear. 
+                                Drag with your cursor to mark a rectangle containing the items you wish to scan. After processing, this will show an overlay the info about those items. 
+                                If you have the Count Item setting enabled, it will also try to scan the amount of each item and offer to let you save how many you own.
+                                <br> <br>
+                                Snap-it requires Item labels enabled and does not work if the game is set to fullscreen, as there is no way to display over it. 
                             </p>
                         </div>
                         <!-- Tab 4 -->
@@ -132,14 +136,22 @@
                                 Manage the statues you're displaying on the website inside of WFinfo and the ability to post sell listings from within WFinfo. 
                                 You can create sell listings through a couple of ways, by playing a mission and getting prime rewards scanned WFinfo will remember these items for a while.
                                 Then once you open up listing window (the treasure chest) It will bring those rewards back up to prompt you to create an sell listing. If the item got mismatched you can change it.
-                                If you want to list an item without running a mission you can start list-it.
+                                If you want to list an item without running a mission you can start search-it.
                             </p>
                         </div>
                         <!-- Tab 5 -->
                         <div class="tab tab-5" style="justify-content:center">
                             <p class="caption">
-                                List-it was originally a development tool used to quickly test the ability to create listings. But it was proven to be so handy it stayed. Spawn this menu by holding the modification key (default: tilde (`)),
+                                Search-it was originally a development tool used to quickly test the ability to create listings. But it was proven to be so handy it stayed. Spawn this menu by holding the modification key (default: tilde (`)),
                                 then pressing the activation key (default: print screen). A box will appear in which you can type any prime item part. It will then show the listing window where you can enter in a platinum value.
+                            </p>
+                        </div>
+                        <!-- Tab 6 -->
+                        <div class="tab tab-6" style="justify-content:center">
+                            <p class="caption">
+                                Master-it is a tool for telling WFInfo which prime items you have crafter or mastered in bulk. Open your profile screen, 
+                                then activate it by holding the modification key (default: right CTRL) then pressing the activation key (default: print screen). 
+                                This will check the screen for any prime items with mastery progress and mark them as such in the WFInfo inventory panel. This marking can also be manually toggled with the checkmark that appear on each item set.
                             </p>
                         </div>
                     </div>
@@ -158,11 +170,13 @@
                     <!-- Tabbed Video Section -->
                     <div class="flex flex-tabs">
                         <ul class="tab-list">
-                            <li><a href="#" data-tab="tab-1" class="active">Display mode</a></li>
-                            <li><a href="#" data-tab="tab-2">Overlay options</a></li>
-                            <li><a href="#" data-tab="tab-3">Activation hotkeys</a></li>
-                            <li><a href="#" data-tab="tab-4">Snap-it efficiency</a></li>
-                            <li><a href="#" data-tab="tab-5">Miscellaneous</a></li>
+                            <li><a href="#" data-tab="tab-1" class="active">Overview</a></li>
+                            <li><a href="#" data-tab="tab-2">Display mode</a></li>
+                            <li><a href="#" data-tab="tab-3">Overlay options</a></li>
+                            <li><a href="#" data-tab="tab-4">Snap-it options</a></li>
+                            <li><a href="#" data-tab="tab-5">Activation hotkeys</a></li>
+                            <li><a href="#" data-tab="tab-6">Snap-it efficiency</a></li>
+                            <li><a href="#" data-tab="tab-7">Miscellaneous</a></li>
                         </ul>
                         <div class="tabs">
 
@@ -170,7 +184,19 @@
                             <div class="tab tab-1 active" style="justify-content:center">
                                 <div class="image highlight">
                                     <div class="image fit">
-                                        <img src="images/WFInfo_2020-07-04_01-34-51.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                        <img src="images/Settings/Unmarked.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        Settings menu is vertically resizable and scrollable, see individual sections for explanations.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 2 -->
+                            <div class="tab tab-2" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/Settings/DisplayMode.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
                                     </div>
                                     <p class="caption">
                                         Choose between the rewards showing up as an overlay on top of Warframe,
@@ -180,38 +206,29 @@
                                 </div>
                             </div>
 
-                            <!-- Tab 2 -->
-                            <div class="tab tab-2" style="justify-content:center">
-                                <div class="image highlight">
-                                    <div class="image fit">
-                                        <img src="images/WFInfo_2020-07-04_01-35-01.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
-                                    </div>
-                                    <p class="caption">
-                                        Change how long the overlay stays displayed. Change to high contrast mode to improve readability and change whether or not items get highlighted. 
-                                    </p>
-                                </div>
-                            </div>
-
                             <!-- Tab 3 -->
                             <div class="tab tab-3" style="justify-content:center">
                                 <div class="image highlight">
                                     <div class="image fit">
-                                        <img src="images/WFInfo_2020-07-04_01-35-09.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                        <img src="images/Settings/OverlayOptions.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
                                     </div>
                                     <p class="caption">
-                                        Choose your preferred hotkey to activate WFInfo's reward detection. We recommend printscreen by default but you can use almost any keyboard key and even some mouse buttons!
+                                        Change how long the overlay stays displayed. Change to high contrast mode to improve readability and change whether or not items get highlighted. 
+                                        <br> If display mode is set to Overlay, you can adjust where the result overlay appears.
                                     </p>
                                 </div>
                             </div>
 
-                            <!-- Tab 4 -->
-                            <div class="tab tab-4" style="justify-content:center">
+                             <!-- Tab 4 -->
+                             <div class="tab tab-4" style="justify-content:center">
                                 <div class="image highlight">
                                     <div class="image fit">
-                                        <img src="images/WFInfo_2020-07-04_01-35-18.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                        <img src="images/Settings/SnapSettings.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
                                     </div>
                                     <p class="caption">
-                                        Snap-it efficiency, these are ducats per plat values. Anything under the min value will display as red and anything above the max value will display as green.
+                                        Choose the minimum and maximum allowed size for the snap-it results overlay. Change how long the snap-it results stay displayed for. 
+                                        <br> Change if you want snap-it to attempt to detect how many of each item you have, and let WFInfo remember that. 
+                                        <br> Choose if snap-it is allowed to use more of your CPU at once for faster results.
                                     </p>
                                 </div>
                             </div>
@@ -220,7 +237,32 @@
                             <div class="tab tab-5" style="justify-content:center">
                                 <div class="image highlight">
                                     <div class="image fit">
-                                        <img src="images/WFInfo_2020-07-04_01-35-29.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                        <img src="images/Settings/ActivationHotkeys.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        Choose your preferred hotkey to activate WFInfo's reward detection. We recommend printscreen by default but you can use almost any keyboard key and even some mouse buttons! 
+                                        <br> Avoid setting your activation key you'd frequently press for other reasons.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 6 -->
+                            <div class="tab tab-6" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/Settings/SnapItEfficiency.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        Snap-it efficiency, these are ducats per plat values. Anything under the min value will display as red and anything above the max value will display as green.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 7 -->
+                            <div class="tab tab-7" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/Settings/Miscellaneous.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
                                     </div>
                                     <p class="caption">
                                         Auto will use the logs created by Warframe to detect when the reward screen is being displayed and run the program for you! </br>
@@ -271,7 +313,7 @@
                             </li>
                             <li>
                                 <b>Why is it showing wrong rewards (for snap-it)?</b><br />
-                                The program is not perfect, however, there are steps you can take to improve the results. The most impactfull one is to increese resolution, either by increesing the game resolution or by increasing menu scaling. Another way to increasing performance is to change your theme to one with higher contrast, the default Vitruvian works well.
+                                The program is not perfect, however, there are steps you can take to improve the results. The most impactful one is to increase resolution, either by increasing the game resolution or by increasing menu scaling. Another way to increasing performance is to change your theme to one with higher contrast, the default Vitruvian works well.
                             </li>
                             <li>
                                 <b>Will this work with multiple monitors? / Will this work with 21:9?</b><br />
@@ -318,7 +360,7 @@
                                                             <img src="images/rider64_2020-07-04_02-02-36.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
                                                         </div>
                                                         <p class="caption">
-                                                            By running a fissure mission wfinfo will store the results from the rewardscreen till you activate it by clicking the chest icon or having auto list triger. A dialog with the top 5 current sellers is listed, allowing you to make an informed decision on price.
+                                                            By running a fissure mission wfinfo will store the results from the rewardscreen until you activate it by clicking the chest icon or having auto list triger. A dialog with the top 5 current sellers is listed, allowing you to make an informed decision on price.
                                                             It is also possible to spawn this screen without running missions, helpful if you're listing from your inventory!
                                                             Clicking the search icon or combining the search it keybinding with the hotkey will spawn a search box. Type in any prime item and hit enter. A similar dialog will spawn but with only the item you searched.
                                                         </p>
@@ -357,6 +399,149 @@
                         <p>What was added in the latest releases?</p>
                     </header>
 
+                    <div class="inner" id="UNRELEASED">
+                        <div class="align-center">
+                            <h2 style="margin-bottom: 0px">UNRELEASED</h2>
+                        </div>
+                        <div class="flex flex-2">
+                            <div class="image col">
+                                <p class="caption">
+                                    Fix Master-it, was broken due to in-game UI changes
+                                    <br> Fix extra WFM listings being created instead of existing ones updating
+                                </p>
+                            </div>
+                            <div class="image col">
+                                <p class="caption">
+                                    Allow snap-it listing size to be adjusted, Improve reliability of Count Item
+                                    <br> Fix detection of already-running WFInfo instances on startup
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inner" id="9.5.5">
+                        <div class="align-center">
+                            <h2 style="margin-bottom: 0px">9.5.5</h2>
+                        </div>
+                        <div class="flex flex-2">
+                            <div class="image col">
+                                <p class="caption">
+                                    Fix Count Item, was broken due to in-game UI changes
+                                    <br> Separate display time setting for snap-it
+                                </p>
+                            </div>
+                            <div class="image col">
+                                <p class="caption">
+                                    Improved stability of WFM login sessions
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inner" id="9.5.4">
+                        <div class="align-center">
+                            <h2 style="margin-bottom: 0px">9.5.4</h2>
+                        </div>
+                        <div class="flex flex-2">
+                            <div class="image col">
+                                <p class="caption">
+                                    Improve behaviour when new items get added to WFM
+                                </p>
+                            </div>
+                            <div class="image col">
+                                <p class="caption">
+                                    Temporarily disabled Count Item due to in-game UI changes
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inner" id="9.5.3">
+                        <div class="align-center">
+                            <h2 style="margin-bottom: 0px">9.5.3</h2>
+                        </div>
+                        <div class="flex flex-2">
+                            <div class="image col">
+                                <p class="caption">
+                                    Switched item/price data distribution to WFCD / warframestat.us API
+                                </p>
+                            </div>
+                            <div class="image col">
+                                <p class="caption">
+                                    Proxy support, reduce log spam from WFM activity
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inner" id="9.5.2">
+                        <div class="align-center">
+                            <h2 style="margin-bottom: 0px">9.5.2</h2>
+                        </div>
+                        <div class="flex flex-2">
+                            <div class="image col">
+                                <p class="caption">
+                                    Fix rare crash from scrolling in Relics/Equipment menu
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inner" id="9.5.1">
+                        <div class="align-center">
+                            <h2 style="margin-bottom: 0px">9.5.1</h2>
+                        </div>
+                        <div class="flex flex-2">
+                            <div class="image col">
+                                <p class="caption">
+                                    Make AVX2 detection work properly on 64-bit systems.
+                                </p>
+                            </div>
+                            <div class="image col">
+                                <p class="caption">
+                                    Fix minor logging bug
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inner" id="9.5.0">
+                        <div class="align-center">
+                            <h2 style="margin-bottom: 0px">9.5.0</h2>
+                        </div>
+                        <div class="flex flex-2">
+                            <div class="image col">
+                                <p class="caption">
+                                    Revamp of code for various parts of the UI, modernize project files to work with Visual Studio 2022 
+                                </p>
+                            </div>
+                            <div class="image col">
+                                <p class="caption">
+                                    Added multithreading to Snap-it
+                                    <br> Various improvements and fixes to existing functionality
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inner" id="9.4.2">
+                        <div class="align-center">
+                            <h2 style="margin-bottom: 0px">9.4.2</h2>
+                        </div>
+                        <div class="flex flex-2">
+                            <div class="image col">
+                                <p class="caption">
+                                    Added Mastered status marking
+                                </p>
+                            </div>
+                            <div class="image col">
+                                <p class="caption">
+                                    Added Master-it
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="inner" id="9.4.1">
                         <div class="align-center">
                             <h2 style="margin-bottom: 0px">9.4.1</h2>
@@ -364,7 +549,7 @@
                         <div class="flex flex-2">
                             <div class="image col">
                                 <p class="caption">
-                                    Added snap-it to equipment scaning
+                                    Added snap-it to equipment scanning
                                 </p>
                             </div>
                             <div class="image col">
@@ -426,7 +611,7 @@
                             </div>
                             <div class="image col">
                                 <div class="image fit">
-                                <img src="images/WFInfo_2020-07-04_01-27-29.png" alt="" style="" />
+                                <img src="images/WFInfo_2020-07-04_01-27-29.png" alt="" />
                                 </div>
                                 <p class="caption">
                                     Allowed more settings to be tweaked in app.
@@ -450,7 +635,7 @@
                             </div>
                             <div class="image col">
                                 <div class="image fit">
-                                    <img src="images/stabilty.jpg" alt="" style="" />
+                                    <img src="images/stabilty.jpg" alt="" />
                                 </div>
                                 <p class="caption">
                                     General stability and preformance updates
