@@ -57,7 +57,7 @@ namespace WFInfo.Settings
         public bool Clipboard { get; set; } = false;
         public long AutoDelay { get; set; } = 250L;
         public int ImageRetentionTime { get; set; } = 12;
-        public string ClipboardTemplate { get; set; } = "-- PC 48 hours avg price by WFM (c) WFInfo"
+        public string ClipboardTemplate { get; set; } = "-- PC 48 hours avg price by WFM (c) WFInfo";
         public bool SnapitExport { get; set; } = false;
         public int Delay { get; set; } = 10000;
         public bool HighlightRewards { get; set; } = true;
@@ -79,6 +79,8 @@ namespace WFInfo.Settings
         public double SnapRowTextDensity { get; set; } = 0.015;
         public double SnapRowEmptyDensity { get; set; } = 0.01;
         public double SnapColEmptyDensity { get; set; } = 0.005;
+        public int MinOverlayWidth { get; set; } = 120;
+        public int MaxOverlayWidth { get; set; } = 160;
         public string Ignored { get; set; } = null;
         [OnError]
         internal void OnError(StreamingContext context, ErrorContext errorContext)

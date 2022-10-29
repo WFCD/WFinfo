@@ -846,15 +846,15 @@ namespace WFInfo
                 }
 
                 int width = (int)(part.Bounding.Width * screenScaling);
-                if (width < 120)
+                if (width < _settings.MinOverlayWidth)
                 {
-                    if (width < 50)
-                        continue;
-                    width = 120;
+                    //if (width < 50)
+                    //    continue;
+                    width = _settings.MinOverlayWidth;
                 }
-                else if (width > 160)
+                else if (width > _settings.MaxOverlayWidth)
                 {
-                    width = 160;
+                    width = _settings.MaxOverlayWidth;
                 }
 
 
@@ -1393,6 +1393,7 @@ namespace WFInfo
                         //find "center of mass" for just the circle+checkmark icon
                         int xCenterNew = x;
                         int yCenterNew = y;
+                        int rightmost = 0; //rightmost edge of circle+checkmark icon
                         sumBlack = 1;
                         //use "flood search" approach from the pixel found above to find the whole checkmark+circle icon
                         Stack<Point> searchSpace = new Stack<Point>();
@@ -1418,6 +1419,8 @@ namespace WFInfo
                                                 xCenterNew += p.X + xOff;
                                                 yCenterNew += p.Y + yOff;
                                                 sumBlack++;
+                                                if (p.X + xOff > rightmost)
+                                                    rightmost = p.X + xOff;
                                             }
                                         }
                                     }
@@ -1429,6 +1432,28 @@ namespace WFInfo
 
                         xCenterNew = xCenterNew / sumBlack;
                         yCenterNew = yCenterNew / sumBlack;
+
+                        //Search slight bit up and down to get well within the long line of the checkmark
+                        int lowest = yCenterNew + 1000;
+                        int highest = yCenterNew - 1000;
+                        for (int yOff = -5; yOff < 5; yOff++)
+                        {
+                            int checkY = yCenterNew + yOff;
+                            if (checkY > 0 && checkY < imgHeight)
+                            {
+                                index = 4 * (xCenterNew + (checkY) * imgWidth);
+                                if (LockedBitmapBytes[index] == 0 && LockedBitmapBytes[index + 1] == 0 && LockedBitmapBytes[index + 2] == 0 && LockedBitmapBytes[index + 3] == 255)
+                                {
+                                    if (checkY > highest)
+                                        highest = checkY;
+
+                                    if (checkY < lowest)
+                                        lowest = checkY;
+                                }
+                            }
+                        }
+                        yCenterNew = (highest + lowest) / 2;
+
 
                         //mark second-pass center
                         filteredImage.SetPixel(Left + xCenterNew, Top + yCenterNew, Color.Magenta);
@@ -1507,6 +1532,7 @@ namespace WFInfo
                         unfilteredImage.UnlockBits(lockedBitmapData);
 
                         //recalculate centers to be relative to whole image
+                        rightmost = rightmost + Left + 1;
                         xCenter = xCenter + Left;
                         yCenter = yCenter + Top;
                         xCenterNew = xCenterNew + Left;
@@ -1555,6 +1581,8 @@ namespace WFInfo
                             index = 4 * (Left + (Top + Height) * imgWidth);
                         }
                         Height-= 2;
+
+                        Left = rightmost; // cut out checkmark+circle icon
                         index = 4 * (Left + (Top + Height) * imgWidth);
 
                         //search for width
@@ -1814,7 +1842,7 @@ namespace WFInfo
                                 hitRatio = hits / (double)(rightEdge - leftEdge );
                                 hitRatios.Add(hitRatio);
 
-                                if (hitRatio > 0.5 && rightMostHit+1 < rightEdge && rightEdge - leftEdge > 100) //make sure the innermost right edge is used (avoid bright part of frame overlapping with edge)
+                                if (hitRatio > 0.2 && rightMostHit+1 < rightEdge && rightEdge - leftEdge > 100) //make sure the innermost right edge is used (avoid bright part of frame overlapping with edge)
                                 {
                                     g.DrawLine(red, rightEdge, bottomEdge, rightMostHit, bottomEdge);
                                     rightEdge = rightMostHit;
@@ -1822,7 +1850,7 @@ namespace WFInfo
                                     hitRatios.Clear();
                                     hitRatios.Add(1);
                                 }
-                                if (hitRatio > 0.5 && leftMostHit > leftEdge && rightEdge - leftEdge > 100) //make sure the innermost left edge is used (avoid bright part of frame overlapping with edge)
+                                if (hitRatio > 0.2 && leftMostHit > leftEdge && rightEdge - leftEdge > 100) //make sure the innermost left edge is used (avoid bright part of frame overlapping with edge)
                                 {
                                     g.DrawLine(red, leftEdge, bottomEdge, leftMostHit, bottomEdge);
                                     leftEdge = leftMostHit;
@@ -1830,7 +1858,7 @@ namespace WFInfo
                                     hitRatios.Clear();
                                     hitRatios.Add(1);
                                 }
-                            } while (bottomEdge+2 < ProfileImageClean.Height && hitRatios.Last() > 0.5);
+                            } while (bottomEdge+2 < ProfileImageClean.Height && hitRatios.Last() > 0.2);
                             hitRatios.RemoveAt(hitRatios.Count - 1);
                             //find if/where it transitions from text (some misses) to no text (basically no misses) then back to text (some misses). This is proof it's an owned item and marks the bottom edge of the text
                             int ratioChanges = 0;
@@ -1853,7 +1881,7 @@ namespace WFInfo
                             int width = rightEdge - leftEdge;
                             int height = bottomEdge - topEdge;
 
-                            if (ratioChanges != 4 || width < 4 * height || width > 6 * height)
+                            if (ratioChanges != 4 || width < 2.4 * height || width > 4 * height)
                             {
                                 g.DrawRectangle(pink, leftEdge, topEdge, width, height);
                                 x = Math.Max(rightEdge, x);
@@ -1917,7 +1945,6 @@ namespace WFInfo
 
                                     g.FillRectangle(Brushes.LightGray, cloneRect.X, cloneRect.Y + cloneRect.Height, cloneRect.Width, cloneRect.Height);
                                     g.DrawString(rawText, font, Brushes.DarkBlue, new Point(cloneRect.X, cloneRect.Y + cloneRect.Height));
-
 
                                 }
                             }

@@ -236,6 +236,25 @@
                 <Border DockPanel.Dock="Top" 
                         Padding="15 5 25 5">
                     <UniformGrid>
+                        <Label Content="Min Width (snap)"/>
+                        <TextBox x:Name="MinOverlayWidth_number_box"
+                                 ToolTip="The minimum width in pixels snap-it overlays will be displayed on screen"
+                                 Text="{Binding SettingsViewModel.MinOverlayWidth, Mode=TwoWay}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
+                                 VerticalAlignment="Top" />
+
+                        <Label Content="Max Width (snap)"/>
+                        <TextBox x:Name="MaxOverlayWidth_number_box"
+                                 ToolTip="The maximum width in pixels snap-it overlays will be displayed on screen"
+                                 Text="{Binding SettingsViewModel.MaxOverlayWidth, Mode=TwoWay}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
+                                 VerticalAlignment="Top" />
+
+                    </UniformGrid>
+                </Border>
+                <Border DockPanel.Dock="Top" 
+                        Padding="15 5 25 5">
+                    <UniformGrid>
                         <Label Content="Display time (snap)"/>
                         <TextBox x:Name="SnapItDisplaytime_number_box"
                                  ToolTip="The time in milliseconds the overlays will be displayed on screen"

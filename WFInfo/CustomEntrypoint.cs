@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Management;
 using Microsoft.Win32;
+using System.Windows;
+using System.Linq;
 
 namespace WFInfo
 {
@@ -89,6 +91,19 @@ namespace WFInfo
             currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
 
             Directory.CreateDirectory(appPath);
+
+            string thisprocessname = Process.GetCurrentProcess().ProcessName;
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
+            {
+                using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+                {
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "]   Duplicate process found - start canceled. Version: " + version);
+                }
+                MessageBox.Show("Another instance of WFInfo is already running, close it and try again", "WFInfo V" + version);
+                return;
+            }
+
             Directory.CreateDirectory(app_data_tesseract_catalog);
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x86");
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x64");
