@@ -213,7 +213,6 @@ namespace WFInfo
             if (searchTimer.Enabled)
             {
                 searchTimer.Stop();
-                Main.AddLog("Stopped timer through change");
             }
 
             searchTimer.Interval = searchTimerDurationMS;
@@ -222,7 +221,6 @@ namespace WFInfo
             {
                 searchTimer.Enabled = false;
                 searchTimer.Stop();
-                Console.WriteLine("Stopped timer naturally");
                 ReapplyFilters();
             };
         }
