@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Forms;
 
 namespace WFInfo
 {
@@ -16,6 +17,8 @@ namespace WFInfo
         private Dictionary<string, TreeNode> primeTypes;
         private bool searchActive = false;
         private bool showAllEqmt = false;
+        private int searchTimerDurationMS = 500;
+        public static Timer searchTimer = new Timer();
         public static string[] searchText;
         public static EquipmentWindow INSTANCE;
 
@@ -32,7 +35,8 @@ namespace WFInfo
 
         public void reloadItems()
         {
-            if (primeTypes != null) {
+            if (primeTypes != null)
+            {
                 foreach (TreeNode category in primeTypes.Values)
                 {
                     foreach (TreeNode prime in category.Children)
@@ -201,6 +205,28 @@ namespace WFInfo
                 ReapplyFilters();
         }
 
+        /// <summary>
+        /// Starts a timer to wait to apply changes to filters on search bar
+        /// </summary>
+        private void StartSearchReapplyTimer()
+        {
+            if (searchTimer.Enabled)
+            {
+                searchTimer.Stop();
+                Main.AddLog("Stopped timer through change");
+            }
+
+            searchTimer.Interval = searchTimerDurationMS;
+            searchTimer.Enabled = true;
+            searchTimer.Tick += (s, e) =>
+            {
+                searchTimer.Enabled = false;
+                searchTimer.Stop();
+                Console.WriteLine("Stopped timer naturally");
+                ReapplyFilters();
+            };
+        }
+
         private void TextboxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             searchActive = textBox.Text.Length > 0 && textBox.Text != "Filter Terms";
@@ -212,7 +238,7 @@ namespace WFInfo
                         searchText = textBox.Text.Split(' ');
                     else
                         searchText = null;
-                    ReapplyFilters();
+                    StartSearchReapplyTimer();
                 }
             }
         }
@@ -343,6 +369,6 @@ namespace WFInfo
         {
             populate();
         }
-        
+
     }
 }
