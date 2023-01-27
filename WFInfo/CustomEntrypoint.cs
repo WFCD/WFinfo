@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Management;
 using Microsoft.Win32;
+using System.Windows;
+using System.Linq;
 
 namespace WFInfo
 {
@@ -56,7 +58,7 @@ namespace WFInfo
 
         private static readonly InitialDialogue dialogue = new InitialDialogue();
         public static CancellationTokenSource stopDownloadTask;
-
+        public static string build_version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         public static void cleanLegacyTesseractIfNeeded()
         {
@@ -89,6 +91,19 @@ namespace WFInfo
             currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
 
             Directory.CreateDirectory(appPath);
+
+            string thisprocessname = Process.GetCurrentProcess().ProcessName;
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)
+            {
+                using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
+                {
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "]   Duplicate process found - start canceled. Version: " + version);
+                }
+                MessageBox.Show("Another instance of WFInfo is already running, close it and try again", "WFInfo V" + version);
+                return;
+            }
+
             Directory.CreateDirectory(app_data_tesseract_catalog);
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x86");
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x64");
@@ -199,25 +214,58 @@ namespace WFInfo
                 sw.WriteLineAsync("[" + DateTime.UtcNow + " - Still in custom entrypoint]   " + argm);
         }
 
+        public static WebClient createNewWebClient()
+        {
+            WebProxy proxy = null;
+            String proxy_string = Environment.GetEnvironmentVariable("http_proxy");
+            if (proxy_string != null)
+            {
+                proxy = new WebProxy(new Uri(proxy_string));
+            }
+            WebClient webClient = new WebClient() { Proxy = proxy };
+            webClient.Headers.Add("User-Agent", "WFInfo/" + build_version);
+            return webClient;
+        }
+
         public static bool isAVX2Available()
         {
-            string dll = "CustomCPUID.dll";
-            string path = app_data_tesseract_catalog + @"\" + dll;
-            string md5 = "745d1bdb33e1d2c8df1a90ce1a6cebcd";
+            string dll;
+            string path;
+            string md5;
+            if (Environment.Is64BitProcess)
+            {
+                dll = "CustomCPUID_x64.dll";
+                md5 = "c4dffc5941729493b0ae1513855bb9a2";
+            } else
+            {
+                dll = "CustomCPUID_x86.dll";
+                md5 = "745d1bdb33e1d2c8df1a90ce1a6cebcd";    
+            }
+            path = app_data_tesseract_catalog + @"\" + dll;
+
             // Redownload if DLL is not present or got corrupted
             using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
             {
                 sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
-                ManagementObjectSearcher mos = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_Processor");
-                foreach (ManagementObject mo in mos.Get())
+
+                try
                 {
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] CPU model name is " + mo["Name"]);
+                    ManagementObjectSearcher mos = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_Processor");
+                    foreach (ManagementObject mo in mos.Get())
+                    {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + "] CPU model is " + mo["Name"]);
+                    }
                 }
+                catch (Exception e)
+                {
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] Unable to fetch CPU model due to:" + e);
+                }
+
 
                 if (!File.Exists(path) || GetMD5hash(path) != md5)
                 {
                     sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL is missing or corrupted, downloading");
-                    WebClient webClient = new WebClient();
+                    WebClient webClient = createNewWebClient();
                     webClient.DownloadFile(libs_hotlink_prefix + "/" + dll, path);
                 }
 
@@ -225,6 +273,7 @@ namespace WFInfo
                 IntPtr pDll = NativeMethods.LoadLibrary(path);
                 if (pDll == IntPtr.Zero)
                 {
+                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] Marshal Error Code - " + Marshal.GetLastWin32Error().ToString());
                     sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL Pointer is pointing to null, fallback to SSE");
                     return false;
                     // throw new Exception("DLL pointer to CustomCPUID.dll is not identified");
@@ -243,25 +292,55 @@ namespace WFInfo
 
                 //Log .net Version
                 using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\")) {
-                    int releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
-                    if (true) {
-                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Detected .net version: {CheckFor45DotVersion(releaseKey)}");
+                    try
+                    {
+                        int releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
+                        if (true)
+                        {
+                            sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Detected .net version: {CheckFor45DotVersion(releaseKey)}");
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Unable to fetch .net version due to: {e}");
+                    }
+
                 }
 
                 //Log C++ x64 runtimes 14.29
-                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies\\VC,redist.x86,x86,14.29,bundle")) {
-                    string displayName = ndpKey.GetValue("DisplayName").ToString();
-                    if (ndpKey.ToString() != null) {
-                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] {displayName}");
+                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies")) {
+                    try
+                    {
+                        foreach (var item in ndpKey.GetSubKeyNames()) // VC,redist.x64,amd64,14.30,bundle
+                        {
+                            if (item.Contains("VC,redist.x64,amd64"))
+                            {
+                                sw.WriteLineAsync("[" + DateTime.UtcNow + $"] {ndpKey.OpenSubKey(item).GetValue("DisplayName")}");
+                            }
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Unable to fetch x64 runtime due to: {e}");
+                    }
+
                 }
 
                 //Log C++ x86 runtimes 14.29
-                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies\\VC,redist.x64,amd64,14.29,bundle")) {
-                    string displayName = ndpKey.GetValue("DisplayName").ToString();
-                    if (ndpKey.ToString() != null) {
-                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] {displayName}");
+                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies")) {
+                    try
+                    {
+                        foreach (var item in ndpKey.GetSubKeyNames()) // VC,redist.x86,x86,14.30,bundle
+                        {
+                            if (item.Contains("VC,redist.x86,x86"))
+                            {
+                                sw.WriteLineAsync("[" + DateTime.UtcNow + $"] {ndpKey.OpenSubKey(item).GetValue("DisplayName")}");
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Unable to fetch x86 runtime due to: {e}");
                     }
                 }
 
@@ -274,7 +353,7 @@ namespace WFInfo
         }
         static class NativeMethods
         {
-            [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
+            [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
             public static extern IntPtr LoadLibrary(string dllToLoad);
 
             [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -298,7 +377,7 @@ namespace WFInfo
         public static string GetMD5hashByURL(string url)
         {
             Debug.WriteLine(url);
-            WebClient webClient = new WebClient();
+            WebClient webClient = createNewWebClient();
             using (var md5 = MD5.Create())
             {
                 byte[] stream = webClient.DownloadData(url);
@@ -315,7 +394,7 @@ namespace WFInfo
 
         private static async void RefreshTesseractDlls(CancellationToken token, bool AvxSupport)
         {
-            WebClient webClient = new WebClient();
+            WebClient webClient = createNewWebClient();
             webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgressCallback);
             token.Register(webClient.CancelAsync);
 

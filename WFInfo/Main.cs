@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Forms;
 using WebSocketSharp;
 using WFInfo.Resources;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -19,11 +20,11 @@ namespace WFInfo
         public static Main INSTANCE;
         public static string AppPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static Data dataBase = new Data();
+        public static Data dataBase = new Data(ApplicationSettings.GlobalReadonlySettings);
         public static RewardWindow window = new RewardWindow();
         public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
-        public static Settings settingsWindow = new Settings();
+        public static SettingsWindow settingsWindow = new SettingsWindow();
         public static VerifyCount verifyCount = new VerifyCount();
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;
@@ -36,9 +37,12 @@ namespace WFInfo
         public static PlusOne plusOne = new PlusOne();
         public static System.Threading.Timer timer;
         public static System.Drawing.Point lastClick;
-        private static int minutesTillAfk = 7;
+        private const int minutesTillAfk = 7;
 
         private static bool UserAway { get; set; }
+        private static string LastMarketStatus { get; set; } = "invisible";
+        private static string LastMarketStatusB4AFK { get; set; } = "invisible";
+        private readonly IReadOnlyApplicationSettings _settings = ApplicationSettings.GlobalReadonlySettings;
 
         public Main()
         {
@@ -66,33 +70,30 @@ namespace WFInfo
                 dataBase.Update();
 
                 //RelicsWindow.LoadNodesOnThread();
-                OCR.Init(new TesseractService(), new SoundPlayer());
+                OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings);
 
-                if ((bool)Settings.settingsObj["Auto"])
+                if (ApplicationSettings.GlobalReadonlySettings.Auto)
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
                     OCR.VerifyWarframe();
-                    latestActive = DateTime.UtcNow.AddMinutes(1);
                     LoggedIn();
-
-                    var startTimeSpan = TimeSpan.Zero;
-                    var periodTimeSpan = TimeSpan.FromMinutes(1);
-
-                    timer = new System.Threading.Timer((e) =>
-                    {
-                        TimeoutCheck();
-                    }, null, startTimeSpan, periodTimeSpan);
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
                 FinishedLoading();
+
+                if (dataBase.JWT != null)// if token is loaded in, connect to websocket
+                {
+                    bool result = dataBase.OpenWebSocket().Result;
+                    Debug.WriteLine("Logging into websocket success: " + result);
+                }
             }
             catch (Exception ex)
             {
                 AddLog("LOADING FAILED");
                 AddLog(ex.ToString());
-                StatusUpdate(ex.ToString().Contains("invalid_grant") ? "System clock invalid - Please resync": "Launch Failure - Please Restart", 0);
+                StatusUpdate(ex.ToString().Contains("invalid_grant") ? "System time out of sync with server\nResync system clock in windows settings": "Launch Failure - Please Restart", 0);
                 RunOnUIThread(() =>
                 {
                     _ = new ErrorDialogue(DateTime.Now, 0);
@@ -101,40 +102,68 @@ namespace WFInfo
         }
         private static async void TimeoutCheck()
         {
-            if (!await dataBase.IsJWTvalid())
+            if (!await dataBase.IsJWTvalid().ConfigureAwait(true))
                 return;
-            var now = DateTime.UtcNow;
+            DateTime now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
 
-            if (OCR.Warframe != null && OCR.Warframe.HasExited)
+            if (OCR.Warframe != null && OCR.Warframe.HasExited && LastMarketStatus != "invisible")
             {//set user offline if Warframe has closed but no new game was found
+                Debug.WriteLine($"Warframe was detected as closed");
+
                 await Task.Run(async () =>
                 {
-                    if (!await dataBase.IsJWTvalid())
+                    if (!await dataBase.IsJWTvalid().ConfigureAwait(true))
                         return;
-                    await dataBase.SetWebsocketStatus("invisible");
+                    //IDE0058 - computed value is never used.  Ever. Consider changing the return signature of SetWebsocketStatus to void instead
+                    await dataBase.SetWebsocketStatus("invisible").ConfigureAwait(false);
                     StatusUpdate("WFM status set offline, Warframe was closed", 0);
-                });
+                }).ConfigureAwait(false);
             }
-            
-            if (latestActive <= now)
-            {//set users offline if afk for longer than set timer
-                await Task.Run(async () =>
-                {
-                UserAway = true;
-                await dataBase.SetWebsocketStatus("invisible");
-                StatusUpdate($"User has been inactive for {minutesTillAfk} minutes", 0);
-                });
-            }
-            if (UserAway)
+            else if (UserAway && latestActive > now)
             {
-                await Task.Run(async () =>
+                Debug.WriteLine($"User has returned. Last Status was: {LastMarketStatusB4AFK}");
+ 
+                UserAway = false;
+                if (LastMarketStatusB4AFK != "invisible")
                 {
-                    UserAway = false;
-                    await dataBase.SetWebsocketStatus("online");
-                    var user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
-                StatusUpdate($"Welcome back {user}, we've put you online", 0);
-                });
+                    await Task.Run(async () =>
+                    {
+                        await dataBase.SetWebsocketStatus(LastMarketStatusB4AFK).ConfigureAwait(false);
+                        string user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
+                        StatusUpdate($"Welcome back {user}, restored as {LastMarketStatusB4AFK}", 0);
+                    }).ConfigureAwait(false);
+                }
+                else
+                {
+                    StatusUpdate($"Welcome back user", 0);
+                }
+            }
+            else if (!UserAway && latestActive <= now)
+            {//set users offline if afk for longer than set timer
+                LastMarketStatusB4AFK = LastMarketStatus;
+                Debug.WriteLine($"User is now away - Storing last known user status as: {LastMarketStatusB4AFK}");
+                
+                UserAway = true;
+                if (LastMarketStatus != "invisible")
+                {
+                    await Task.Run(async () =>
+                    {
+                        await dataBase.SetWebsocketStatus("invisible").ConfigureAwait(false);
+                        StatusUpdate($"User has been inactive for {minutesTillAfk} minutes", 0);
+                    }).ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                if (UserAway)
+                {
+                    Debug.WriteLine($"User is away - no status change needed.  Last known status was: {LastMarketStatusB4AFK}");
+                }
+                else
+                {
+                    Debug.WriteLine($"User is active - no status change needed");
+                }
             }
         }
 
@@ -185,10 +214,10 @@ namespace WFInfo
             //Log activation. Can't set activation key to left or right mouse button via UI so not differentiating between MouseButton and Key should be fine
             Main.AddLog($"User is activating with pressing key: {key} and is holding down:\n" +
                 $"Delete:{Keyboard.IsKeyDown(Key.Delete)}\n" +
-                $"Snapit, {Settings.SnapitModifierKey}:{Keyboard.IsKeyDown(Settings.SnapitModifierKey)}\n" +
-                $"Searchit, {Settings.SearchItModifierKey}:{Keyboard.IsKeyDown(Settings.SearchItModifierKey)}\n" +
-                $"Masterit, {Settings.MasterItModifierKey}:{Keyboard.IsKeyDown(Settings.MasterItModifierKey)}\n" +
-                $"debug, {Settings.DebugModifierKey}:{Keyboard.IsKeyDown(Settings.DebugModifierKey)}");
+                $"Snapit, {_settings.SnapitModifierKey}:{Keyboard.IsKeyDown(_settings.SnapitModifierKey)}\n" +
+                $"Searchit, {_settings.SearchItModifierKey}:{Keyboard.IsKeyDown(_settings.SearchItModifierKey)}\n" +
+                $"Masterit, {_settings.MasterItModifierKey}:{Keyboard.IsKeyDown(_settings.MasterItModifierKey)}\n" +
+                $"debug, {_settings.DebugModifierKey}:{Keyboard.IsKeyDown(_settings.DebugModifierKey)}");
 
             if (Keyboard.IsKeyDown(Key.Delete))
             { 
@@ -204,37 +233,37 @@ namespace WFInfo
                 return;
             }
 
-            if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+            if (_settings.Debug && Keyboard.IsKeyDown(_settings.DebugModifierKey) && Keyboard.IsKeyDown(_settings.SnapitModifierKey))
             { //snapit debug
                 AddLog("Loading screenshot from file for snapit");
                 StatusUpdate("Offline testing with screenshot for snapit", 0);
                 LoadScreenshot(ScreenshotType.SNAPIT);
             } 
-            else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey) && Keyboard.IsKeyDown(Settings.MasterItModifierKey))
+            else if (_settings.Debug && Keyboard.IsKeyDown(_settings.DebugModifierKey) && Keyboard.IsKeyDown(_settings.MasterItModifierKey))
             { //master debug
                 AddLog("Loading screenshot from file for masterit");
                 StatusUpdate("Offline testing with screenshot for masterit", 0);
                 LoadScreenshot(ScreenshotType.MASTERIT);
             }
-            else if (Settings.debug && Keyboard.IsKeyDown(Settings.DebugModifierKey))
+            else if (_settings.Debug && Keyboard.IsKeyDown(_settings.DebugModifierKey))
             {//normal debug
                 AddLog("Loading screenshot from file");
                 StatusUpdate("Offline testing with screenshot", 0);
                 LoadScreenshot(ScreenshotType.NORMAL);
             }
-            else if (Keyboard.IsKeyDown(Settings.SnapitModifierKey))
+            else if (Keyboard.IsKeyDown(_settings.SnapitModifierKey))
             {//snapit
                 AddLog("Starting snap it");
                 StatusUpdate("Starting snap it", 0);
                 OCR.SnapScreenshot();
             }
-            else if (Keyboard.IsKeyDown(Settings.SearchItModifierKey))
+            else if (Keyboard.IsKeyDown(_settings.SearchItModifierKey))
             { //Searchit  
                 AddLog("Starting search it");
                 StatusUpdate("Starting search it", 0);
                 searchBox.Start();
             }
-            else if (Keyboard.IsKeyDown(Settings.MasterItModifierKey))
+            else if (Keyboard.IsKeyDown(_settings.MasterItModifierKey))
             {//masterit
                 AddLog("Starting master it");
                 StatusUpdate("Starting master it", 0);
@@ -244,7 +273,7 @@ namespace WFInfo
                     bigScreenshot.Dispose();
                 });
             }
-            else if (Settings.debug || OCR.VerifyWarframe())
+            else if (_settings.Debug || OCR.VerifyWarframe())
             {
                 Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
             }
@@ -254,7 +283,7 @@ namespace WFInfo
         {
             latestActive = DateTime.UtcNow.AddMinutes(minutesTillAfk);
 
-            if (Settings.ActivationMouseButton != MouseButton.Left && key == Settings.ActivationMouseButton)
+            if (_settings.ActivationMouseButton != null && key == _settings.ActivationMouseButton)
             { //check if user pressed activation key
 
 
@@ -278,7 +307,7 @@ namespace WFInfo
                 Task.Run((() =>
                 {
                     lastClick = System.Windows.Forms.Cursor.Position;
-                    var index = OCR.GetSelectedReward(lastClick);
+                    int index = OCR.GetSelectedReward(lastClick);
                     Debug.WriteLine(index);
                     if (index < 0) return;
                     listingHelper.SelectedRewardIndex = (short)index;
@@ -310,7 +339,7 @@ namespace WFInfo
             }
 
             
-            if (key == Settings.ActivationKey)
+            if (key == _settings.ActivationKeyKey)
             { //check if user pressed activation key
 
                 ActivationKeyPressed(key);
@@ -400,9 +429,20 @@ namespace WFInfo
             }
         }
 
+        // Switch to logged in mode for warfrane.market systems
         public static void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
+
+            // start the AFK timer
+            latestActive = DateTime.UtcNow.AddMinutes(1);
+            TimeSpan startTimeSpan = TimeSpan.Zero;
+            TimeSpan periodTimeSpan = TimeSpan.FromMinutes(1);
+            
+            timer = new System.Threading.Timer((e) =>
+            {
+                TimeoutCheck();
+            }, null, startTimeSpan, periodTimeSpan);
         }
 
 
@@ -412,6 +452,13 @@ namespace WFInfo
         }
         public static void UpdateMarketStatus(string msg)
         {
+            Debug.WriteLine($"New market status received: {msg}");
+            if (!UserAway)
+            {
+                // AFK system only cares about a status that the user set
+                LastMarketStatus = msg;
+                Debug.WriteLine($"User is not away. last known market status will be: {LastMarketStatus}");
+            }
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.UpdateMarketStatus(msg); });
         }
 

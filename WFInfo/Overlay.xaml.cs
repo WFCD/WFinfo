@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using WFInfo.Settings;
 
 namespace WFInfo
 {
@@ -69,6 +70,7 @@ namespace WFInfo
         private readonly DispatcherTimer hider = new DispatcherTimer();
 
         public static bool rewardsDisplaying;
+        private readonly IReadOnlyApplicationSettings _settings = ApplicationSettings.GlobalReadonlySettings;
 
 
         public Overlay()
@@ -122,7 +124,7 @@ namespace WFInfo
             partText.Foreground = bluBrush;
             partText.FontWeight = FontWeights.Normal;
 
-            if (Settings.highContrast)
+            if (_settings.HighContrast)
             {
                 Debug.WriteLine("Turning high contrast on");
                 BackgroundGrid.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
@@ -180,11 +182,11 @@ namespace WFInfo
             var efficiency = $"{Math.Round(duc / platinum, 1)}";
             var color = Color.FromArgb(100, 174, 199, 206);
 
-            if (duc / platinum > Settings.maximumEfficiencyValue)
+            if (duc / platinum > _settings.MaximumEfficiencyValue)
             {
                 color = Colors.LawnGreen;
             }
-            else if (duc / platinum < Settings.minimumEfficiencyValue)
+            else if (duc / platinum < _settings.MinimumEfficiencyValue)
             {
                 color = Colors.DarkRed;
             }

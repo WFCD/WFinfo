@@ -31,7 +31,7 @@ namespace WFInfo
             Main.searchBox.Show();
             MainWindow.INSTANCE.Topmost = true;
             Main.searchBox.placeholder.Content = "Search for warframe.market Items";
-            if (!Main.dataBase.IsJwtAvailable())
+            if (!Main.dataBase.IsJwtLoggedIn())
             {
                 Main.searchBox.placeholder.Content = "Please log in first";
                 Main.login.MoveLogin(Left, Main.searchBox.Top - 130);
