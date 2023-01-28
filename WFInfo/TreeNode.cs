@@ -297,10 +297,15 @@ namespace WFInfo
             Col2_Img1_Shown = "Visible";
         }
 
-        public void GetSetInfo()
+        public bool GetSetInfo()
         {
             string primeSetName = Main.dataBase.GetSetName(Name);
-            JObject primeSet = Main.dataBase.marketData.GetValue(primeSetName).ToObject<JObject>();
+            if (!Main.dataBase.marketData.TryGetValue(primeSetName, out JToken primeSetJToken))
+            {
+                return false; // This is not a set
+            }
+            JObject primeSet = (JObject)primeSetJToken;
+
             string primeSetPlat = primeSet["plat"].ToObject<string>();
 
             Grid_Shown = "Visible";
@@ -313,7 +318,6 @@ namespace WFInfo
             Mastered = Main.dataBase.equipmentData[this.dataRef]["mastered"].ToObject<bool>();
             foreach (TreeNode kid in Children)
             {
-                //Plat_Val += kid.Plat_Val * kid.Count_Val;
                 Owned_Capped_Val += kid.Owned_Capped_Val;
                 Owned_Plat_Val += kid.Owned_Plat_Val;
                 Owned_Ducat_Val += kid.Owned_Ducat_Val;
@@ -326,6 +330,7 @@ namespace WFInfo
 
             Col1_Img1 = PLAT_SRC;
             Col1_Img1_Shown = "Visible";
+            return true;
         }
 
         internal void SetPrimeEqmt(double plat, double ducat, int owned, int count)

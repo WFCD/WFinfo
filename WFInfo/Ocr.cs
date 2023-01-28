@@ -244,8 +244,8 @@ namespace WFInfo
                         #region found a part
                         string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false);
                         string primeSetName = Main.dataBase.GetSetName(correctName);
-                        JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
-                        JObject primeSet = Main.dataBase.marketData.GetValue(primeSetName).ToObject<JObject>();
+                        JObject job = (JObject)Main.dataBase.marketData.GetValue(correctName);
+                        JObject primeSet = (JObject)Main.dataBase.marketData.GetValue(primeSetName);
                         string ducats = job["ducats"].ToObject<string>();
                         if (int.Parse(ducats, Main.culture) == 0)
                         {
@@ -254,7 +254,11 @@ namespace WFInfo
                         //else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
                         primeRewards.Add(correctName);
                         string plat = job["plat"].ToObject<string>();
-                        string primeSetPlat = primeSet["plat"].ToObject<string>();
+                        string primeSetPlat = null;
+                        if (primeSet != null)
+                        {
+                            primeSetPlat = (string)primeSet["plat"];
+                        }
                         double platinum = double.Parse(plat, styles, Main.culture);
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(correctName);
@@ -293,7 +297,11 @@ namespace WFInfo
                             if (!string.IsNullOrEmpty(clipboard)) { clipboard += "-  "; }
 
                             clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
-                            clipboard += "[" + primeSetName.Replace(" Set", "") + "]: " + primeSetPlat + ":platinum: ";
+
+                            if (primeSetPlat != null)
+                            {
+                                clipboard += "Set: " + primeSetPlat + ":platinum: ";
+                            }
 
                             if (_settings.ClipboardVaulted)
                             {
@@ -559,10 +567,14 @@ namespace WFInfo
                         //if (secondProximity[i] < firstProximity[i])
                         //{
                         JObject job = Main.dataBase.marketData.GetValue(secondName).ToObject<JObject>();
-                        JObject primeSet = Main.dataBase.marketData.GetValue(primeSetName).ToObject<JObject>();
+                        JObject primeSet = (JObject)Main.dataBase.marketData.GetValue(primeSetName);
                         string ducats = job["ducats"].ToObject<string>();
                         string plat = job["plat"].ToObject<string>();
-                        string primeSetPlat = primeSet["plat"].ToObject<string>();
+                        string primeSetPlat = null;
+                        if (primeSet != null)
+                        {
+                            primeSetPlat = (string)primeSet["plat"];
+                        }
                         string volume = job["volume"].ToObject<string>();
                         bool vaulted = Main.dataBase.IsPartVaulted(secondName);
                         bool mastered = Main.dataBase.IsPartMastered(secondName);
@@ -839,9 +851,13 @@ namespace WFInfo
                 part.Name = name;
                 foundParts[i] = part;
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
-                JObject primeSet = Main.dataBase.marketData.GetValue(primeSetName).ToObject<JObject>();
+                JObject primeSet = (JObject)Main.dataBase.marketData.GetValue(primeSetName);
                 string plat = job["plat"].ToObject<string>();
-                string primeSetPlat = primeSet["plat"].ToObject<string>();
+                string primeSetPlat = null;
+                if (primeSet != null)
+                {
+                    primeSetPlat = (string)primeSet["plat"];
+                }
                 string ducats = job["ducats"].ToObject<string>();
                 string volume = job["volume"].ToObject<string>();
                 bool vaulted = Main.dataBase.IsPartVaulted(name);

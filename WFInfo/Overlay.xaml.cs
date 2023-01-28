@@ -150,7 +150,11 @@ namespace WFInfo
             else
             {
                 platText.Visibility = Visibility.Visible;
-                primeSetPlatText.Visibility = Visibility.Visible;
+                if (primeSetPlat != null)
+                {
+                    primeSetPlatText.Text = "Full set price: " + primeSetPlat;
+                    primeSetPlatText.Visibility = Visibility.Visible;
+                }
                 setPlatImage.Visibility = Visibility.Visible;
                 ducatText.Visibility = Visibility.Visible;
                 volumeText.Visibility = Visibility.Visible;
@@ -158,7 +162,6 @@ namespace WFInfo
                 platImage.Visibility = Visibility.Visible;
                 ducatImage.Visibility = Visibility.Visible;
                 platText.Text = plat;
-                primeSetPlatText.Text = "Full set price: " + primeSetPlat;
                 ducatText.Text = ducats;
                 volumeText.Text = volume + " sold last 48hrs";
                 if (vaulted)
