@@ -568,6 +568,11 @@ namespace WFInfo
             }
             Main.AddLog("CLOSEST THEME(" + max.ToString("F2", Main.culture) + "): " + active.ToString());
             closestThresh = max;
+            if (_settings.ThemeSelection != WFtheme.AUTO)
+            {
+                Main.AddLog("Theme overwrite present, setting to: " + _settings.ThemeSelection.ToString());
+                return _settings.ThemeSelection;
+            }
             return active;
         }
 #pragma warning disable IDE0044 // Add readonly modifier
@@ -1795,8 +1800,48 @@ namespace WFInfo
             return Math.Abs(test.R - thresh.R) + Math.Abs(test.G - thresh.G) + Math.Abs(test.B - thresh.B);
         }
 
+        public static bool CustomThresholdFilter(Color test)
+        {
+            if (_settings.CF_usePrimaryHSL)
+            {
+                if (_settings.CF_pHueMax >= test.GetHue() && test.GetHue() >= _settings.CF_pHueMin &&
+                    _settings.CF_pSatMax >= test.GetSaturation() && test.GetSaturation() >= _settings.CF_pSatMin &&
+                    _settings.CF_pBrightMax >= test.GetBrightness() && test.GetBrightness() >= _settings.CF_pBrightMin)
+                    return true;
+            }
+
+            if (_settings.CF_usePrimaryRGB)
+            {
+                if (_settings.CF_pRMax >= test.R && test.R >= _settings.CF_pRMin &&
+                    _settings.CF_pGMax >= test.G && test.G >= _settings.CF_pGMin &&
+                    _settings.CF_pBMax >= test.B && test.B >= _settings.CF_pBMin)
+                    return true;
+            }
+
+            if (_settings.CF_useSecondaryHSL)
+            {
+                if (_settings.CF_sHueMax >= test.GetHue() && test.GetHue() >= _settings.CF_sHueMin &&
+                    _settings.CF_sSatMax >= test.GetSaturation() && test.GetSaturation() >= _settings.CF_sSatMin &&
+                    _settings.CF_sBrightMax >= test.GetBrightness() && test.GetBrightness() >= _settings.CF_sBrightMin)
+                    return true;
+            }
+
+            if (_settings.CF_useSecondaryRGB)
+            {
+                if (_settings.CF_sRMax >= test.R && test.R >= _settings.CF_sRMin &&
+                    _settings.CF_sGMax >= test.G && test.G >= _settings.CF_sGMin &&
+                    _settings.CF_sBMax >= test.B && test.B >= _settings.CF_sBMin)
+                    return true;
+            }
+
+
+            return false;
+        }
+
         public static bool ThemeThresholdFilter(Color test, WFtheme theme)
         {
+            if (theme == WFtheme.CUSTOM)
+                return CustomThresholdFilter(test);
             Color primary = ThemePrimary[(int)theme];
             Color secondary = ThemeSecondary[(int)theme];
 
@@ -1947,7 +1992,6 @@ namespace WFInfo
             start = watch.ElapsedMilliseconds;
             
             active = GetThemeWeighted(out var closest, fullScreen);
-            Main.AddLog("CLOSEST THEME(" + closest.ToString("F2", Main.culture) + "): " + active);
 
             end = watch.ElapsedMilliseconds;
             Main.AddLog("Got theme " + (end - start) + "ms");

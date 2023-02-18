@@ -57,6 +57,34 @@ namespace WFInfo.Settings
         int MinOverlayWidth { get; }
         int MaxOverlayWidth { get; }
         WFtheme ThemeSelection { get; }
+        bool CF_usePrimaryHSL { get; }
+        bool CF_usePrimaryRGB { get; }
+        bool CF_useSecondaryHSL { get; }
+        bool CF_useSecondaryRGB { get; }
+        float CF_pHueMax { get; }
+        float CF_pHueMin { get; }
+        float CF_pSatMax { get; }
+        float CF_pSatMin { get; }
+        float CF_pBrightMax { get; }
+        float CF_pBrightMin { get; }
+        int CF_pRMax { get; }
+        int CF_pRMin { get; }
+        int CF_pGMax { get; }
+        int CF_pGMin { get; }
+        int CF_pBMax { get; }
+        int CF_pBMin { get; }
+        float CF_sHueMax { get; }
+        float CF_sHueMin { get; }
+        float CF_sSatMax { get; }
+        float CF_sSatMin { get; }
+        float CF_sBrightMax { get; }
+        float CF_sBrightMin { get; }
+        int CF_sRMax { get; }
+        int CF_sRMin { get; }
+        int CF_sGMax { get; }
+        int CF_sGMin { get; }
+        int CF_sBMax { get; }
+        int CF_sBMin { get; }
         string Ignored { get; }
     }
 }

@@ -11,7 +11,7 @@
         MaxWidth="334"
         MinWidth="334"
         Width="334"
-        Height="900"
+        Height="634"
         BorderBrush="#FF707070"
         WindowStyle="None"
         FontSize="16"
@@ -382,10 +382,15 @@
                 <Border Padding="0"
                         DockPanel.Dock="Top">
                     <DockPanel>
-                        <UniformGrid DockPanel.Dock="Top"
-                                         Rows="1">
-                            <Label Content="Theme" DockPanel.Dock="Left"/>
-                            <Label x:Name="ConfigureTheme_button"  MouseLeftButtonDown="ConfigureTheme_button_MouseLeftButtonDown" ToolTip="Configure Custom Theme" Margin="0,5,10,5" Padding="3"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+                        <Grid DockPanel.Dock="Top">
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="6*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="Theme" Grid.Column="0"/>
+                            <Label x:Name="ConfigureTheme_button" Grid.Column="1" MouseLeftButtonDown="ConfigureTheme_button_MouseLeftButtonDown" ToolTip="Configure Custom Theme" Margin="0,5,10,5" Padding="3"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
                                 <Label.Style>
                                     <Style>
                                         <Setter Property="ContentControl.Content">
@@ -410,7 +415,7 @@
                                 </Label.Style>
                             </Label>
                             <ComboBox 
-                                          DockPanel.Dock="Right"
+                                          Grid.Column="2"
                                           x:Name="themeSelectionComboBox"
                                           FontSize="14"
                                           FontFamily="{DynamicResource Roboto}"
@@ -418,10 +423,10 @@
                                           BorderBrush="#FF0F0F0F"
                                           ItemsSource="{Binding Source={StaticResource enumWFTheme}}"
                                           SelectedItem="{Binding SettingsViewModel.ThemeSelection}"
-                                          Margin="0,4" Template="{DynamicResource ComboBoxTemplate}" Style="{DynamicResource ComboBoxStyle1}">
+                                          Margin="5,4" Template="{DynamicResource ComboBoxTemplate}" Style="{DynamicResource ComboBoxStyle1}">
 
                             </ComboBox>
-                        </UniformGrid>
+                        </Grid>
                         <Label MouseLeftButtonDown="ClickCreateDebug"
                                Padding="5"
                                DockPanel.Dock="Right"
