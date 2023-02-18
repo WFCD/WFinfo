@@ -249,5 +249,10 @@ namespace WFInfo.Settings
             _viewModel.MasterItModifierKey = key;
             hidden.Focus();
         }
+
+        private void ConfigureTheme_button_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            //TODO open custom theme configuration
+        }
     }
 }

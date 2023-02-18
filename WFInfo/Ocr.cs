@@ -26,6 +26,29 @@ using Size = System.Drawing.Size;
 
 namespace WFInfo
 {
+    public enum WFtheme : int
+    {
+        VITRUVIAN,
+        STALKER,
+        BARUUK,
+        CORPUS,
+        FORTUNA,
+        GRINEER,
+        LOTUS,
+        NIDUS,
+        OROKIN,
+        TENNO,
+        HIGH_CONTRAST,
+        LEGACY,
+        EQUINOX,
+        DARK_LOTUS,
+        ZEPHYR,
+        UNKNOWN = -1,
+        AUTO = -2,
+        CUSTOM = -3
+
+    }
+
     class OCR
     {
         private static readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
@@ -33,25 +56,7 @@ namespace WFInfo
         private static Screen wfScreen = Screen.PrimaryScreen;
 
         #region variabels and sizzle
-        public enum WFtheme : int
-        {
-            VITRUVIAN,
-            STALKER,
-            BARUUK,
-            CORPUS,
-            FORTUNA,
-            GRINEER,
-            LOTUS,
-            NIDUS,
-            OROKIN,
-            TENNO,
-            HIGH_CONTRAST,
-            LEGACY,
-            EQUINOX,
-            DARK_LOTUS,
-            ZEPHYR,
-            UNKNOWN = -1
-        }
+
 
         // Colors for the top left "profile bar"
         public static Color[] ThemePrimary = new Color[] {  Color.FromArgb(190, 169, 102),		//VITRUVIAN		
@@ -582,7 +587,7 @@ namespace WFInfo
 
             foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
             {
-                if (theme != WFtheme.UNKNOWN)
+                if ((int)theme >= 0) //ignore special theme values
                 {
                     Color themeColor = ThemePrimary[(int)theme];
                     int tempThresh = ColorDifference(clr, themeColor);

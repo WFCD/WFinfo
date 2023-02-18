@@ -56,6 +56,7 @@ namespace WFInfo.Settings
         double SnapColEmptyDensity { get; }
         int MinOverlayWidth { get; }
         int MaxOverlayWidth { get; }
+        WFtheme ThemeSelection { get; }
         string Ignored { get; }
     }
 }

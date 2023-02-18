@@ -10,14 +10,21 @@
         Title="Settings"
         MaxWidth="334"
         MinWidth="334"
-
-        Height="634"
+        Width="334"
+        Height="900"
         BorderBrush="#FF707070"
         WindowStyle="None"
         FontSize="16"
         d:DataContext="{d:DesignInstance Type=settings:SettingsWindow}"
         AllowsTransparency="True"
         ResizeMode="CanResizeWithGrip">
+    <Window.Resources>
+        <ObjectDataProvider x:Key="enumWFTheme" MethodName="GetValues" ObjectType="{x:Type wfInfo:WFtheme}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="wfInfo:WFtheme"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
     <Grid MouseDown="MouseDown"
           PreviewMouseDown="ActivationMouseDown"
           Background="#FF1B1B1B"
@@ -375,6 +382,46 @@
                 <Border Padding="0"
                         DockPanel.Dock="Top">
                     <DockPanel>
+                        <UniformGrid DockPanel.Dock="Top"
+                                         Rows="1">
+                            <Label Content="Theme" DockPanel.Dock="Left"/>
+                            <Label x:Name="ConfigureTheme_button"  MouseLeftButtonDown="ConfigureTheme_button_MouseLeftButtonDown" ToolTip="Configure Custom Theme" Margin="0,5,10,5" Padding="3"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+                                <Label.Style>
+                                    <Style>
+                                        <Setter Property="ContentControl.Content">
+                                            <Setter.Value>
+                                                <Image Source="../Resources/Settings.png" Stretch="Uniform" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                                    <Condition Property="UIElement.IsEnabled" Value="True"/>
+                                                </MultiTrigger.Conditions>
+                                                <Setter Property="ContentControl.Content">
+                                                    <Setter.Value>
+                                                        <Image Source="../Resources/Settings_h.png" Stretch="Uniform" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </MultiTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Label.Style>
+                            </Label>
+                            <ComboBox 
+                                          DockPanel.Dock="Right"
+                                          x:Name="themeSelectionComboBox"
+                                          FontSize="14"
+                                          FontFamily="{DynamicResource Roboto}"
+                                          Background="#FF1B1B1B"
+                                          BorderBrush="#FF0F0F0F"
+                                          ItemsSource="{Binding Source={StaticResource enumWFTheme}}"
+                                          SelectedItem="{Binding SettingsViewModel.ThemeSelection}"
+                                          Margin="0,4" Template="{DynamicResource ComboBoxTemplate}" Style="{DynamicResource ComboBoxStyle1}">
+
+                            </ComboBox>
+                        </UniformGrid>
                         <Label MouseLeftButtonDown="ClickCreateDebug"
                                Padding="5"
                                DockPanel.Dock="Right"

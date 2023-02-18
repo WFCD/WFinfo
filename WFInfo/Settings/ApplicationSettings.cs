@@ -81,6 +81,8 @@ namespace WFInfo.Settings
         public double SnapColEmptyDensity { get; set; } = 0.005;
         public int MinOverlayWidth { get; set; } = 120;
         public int MaxOverlayWidth { get; set; } = 160;
+
+        public WFtheme ThemeSelection { get; set; } = WFtheme.AUTO;
         public string Ignored { get; set; } = null;
         [OnError]
         internal void OnError(StreamingContext context, ErrorContext errorContext)

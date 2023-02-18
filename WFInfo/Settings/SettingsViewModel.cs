@@ -379,6 +379,16 @@ namespace WFInfo.Settings
             }
         }
 
+        public WFtheme ThemeSelection
+        {
+            get => _settings.ThemeSelection;
+            set
+            {
+                _settings.ThemeSelection = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public string Ignored{
             get => _settings.Ignored;
             set { 
