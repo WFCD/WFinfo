@@ -242,15 +242,6 @@ namespace WFInfo.Settings
             }
         }
 
-        public bool DoDoubleCheck
-        {
-            get => _settings.DoDoubleCheck;
-            set { 
-                _settings.DoDoubleCheck = value;
-                RaisePropertyChanged(); 
-            }
-        }
-
         public double MaximumEfficiencyValue
         {
             get => _settings.MaximumEfficiencyValue;
