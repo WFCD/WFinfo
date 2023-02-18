@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Data;
+using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
 using WebSocketSharp;
 
@@ -20,11 +21,31 @@ namespace WFInfo
 
         private bool _initialized = false;
         private string _filterText = "";
+        private int searchTimerDurationMS = 500;
         private bool _showAllRelics;
         private readonly List<TreeNode> _relicTreeItems;
         private int _sortBoxSelectedIndex;
         private bool _hideVaulted = true;
         private readonly List<TreeNode> _rawRelicNodes = new List<TreeNode>();
+
+        public static Timer searchTimer = new Timer();
+
+        private void StartSearchReapplyTimer()
+        {
+            if (searchTimer.Enabled)
+            {
+                searchTimer.Stop();
+            }
+
+            searchTimer.Interval = searchTimerDurationMS;
+            searchTimer.Enabled = true;
+            searchTimer.Tick += (s, e) =>
+            {
+                searchTimer.Enabled = false;
+                searchTimer.Stop();
+                ReapplyFilters();
+            };
+        }
 
         public string FilterText
         {
@@ -32,7 +53,7 @@ namespace WFInfo
             set
             {
                 this.SetField(ref _filterText, value);
-                ReapplyFilters();
+                StartSearchReapplyTimer();
                 RaisePropertyChanged(nameof(IsFilterEmpty));
             }
         }
