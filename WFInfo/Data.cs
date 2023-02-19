@@ -1029,7 +1029,8 @@ namespace WFInfo
                 Overlay.rewardsDisplaying = true;
             }
 
-            if (!line.Contains("MatchingService::EndSession") || !_settings.AutoList) return;
+            //abort if autolist disabled, or line doesn't contain end-of-session message or timer finished message
+            if (!(line.Contains("MatchingService::EndSession") || line.Contains("Relic timer closed")) || !_settings.AutoList) return;
 
             if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
@@ -1048,7 +1049,14 @@ namespace WFInfo
                 Main.AddLog("Looping through rewards");
                 foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
                 {
-                    Main.AddLog(rewardscreen.ToString());
+                    string rewards = "";
+                    for(int i = 0; i < rewardscreen.Count; i++)
+                    {
+                        rewards += rewardscreen[i];
+                        if (i + 1 < rewardscreen.Count)
+                            rewards += " || ";
+                    }
+                    Main.AddLog(rewards);
                     var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
                     if (rewardCollection.PrimeNames.Count == 0)
                         return;

@@ -203,8 +203,8 @@ namespace WFInfo
             }
             Task.WaitAll(tasks);
 
-            // Remove any empty items from the array
-            firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s)).ToArray();
+            // Remove any empty (or suspiciously short) items from the array
+            firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s) && s.Replace(" ", "").Length > 6).ToArray();
             if (firstChecks == null || firstChecks.Length == 0 || CheckIfError())
             {
                 processingActive = false;
@@ -229,11 +229,12 @@ namespace WFInfo
             #region processing data
             if (firstChecks.Length > 0)
             {
+                numberOfRewardsDisplayed = firstChecks.Length;
                 clipboard = string.Empty;
                 int width = (int)(pixleRewardWidth * screenScaling * uiScaling) + 10;
                 int startX = center.X - width / 2 + (int)(width * 0.004);
-                if (firstChecks.Length == 3 && firstChecks[0].Length > 0) { startX += width / 8; }
-                if (firstChecks.Length == 4 && firstChecks[0].Replace(" ", "").Length < 6) { startX += 2 * (width / 8); }
+                if (firstChecks.Length % 2 == 1) { startX += width / 8; }
+                if (firstChecks.Length <= 2) { startX += 2 * (width / 8); }
                 int overWid = (int)(width / (4.1 * dpiScaling));
                 int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScaling);
                 int partNumber = 0;
@@ -241,98 +242,94 @@ namespace WFInfo
                 for (int i = 0; i < firstChecks.Length; i++)
                 {
                     string part = firstChecks[i];
-                    if (part.Replace(" ", "").Length > 6)
+                    #region found a part
+                    string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false);
+                    JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
+                    string ducats = job["ducats"].ToObject<string>();
+                    if (int.Parse(ducats, Main.culture) == 0)
                     {
-                        #region found a part
-                        string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false);
-                        JObject job = Main.dataBase.marketData.GetValue(correctName).ToObject<JObject>();
-                        string ducats = job["ducats"].ToObject<string>();
-                        if (int.Parse(ducats, Main.culture) == 0)
-                        {
-                            hideRewardInfo = true;
-                        }
-                        //else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
-                        primeRewards.Add(correctName);
-                        string plat = job["plat"].ToObject<string>();
-                        double platinum = double.Parse(plat, styles, Main.culture);
-                        string volume = job["volume"].ToObject<string>();
-                        bool vaulted = Main.dataBase.IsPartVaulted(correctName);
-                        bool mastered = Main.dataBase.IsPartMastered(correctName);
-                        string partsOwned = Main.dataBase.PartsOwned(correctName);
-                        string partsCount = Main.dataBase.PartsCount(correctName);
-                        int duc = int.Parse(ducats, Main.culture);
-                        numberOfRewardsDisplayed++;
-                        #endregion
+                        hideRewardInfo = true;
+                    }
+                    //else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
+                    primeRewards.Add(correctName);
+                    string plat = job["plat"].ToObject<string>();
+                    double platinum = double.Parse(plat, styles, Main.culture);
+                    string volume = job["volume"].ToObject<string>();
+                    bool vaulted = Main.dataBase.IsPartVaulted(correctName);
+                    bool mastered = Main.dataBase.IsPartMastered(correctName);
+                    string partsOwned = Main.dataBase.PartsOwned(correctName);
+                    string partsCount = Main.dataBase.PartsCount(correctName);
+                    int duc = int.Parse(ducats, Main.culture);
+                    #endregion
 
-                        #region hilighting
-                        if (platinum >= bestPlat)
-                        {
-                            bestPlat = platinum; bestPlatItem = i;
-                            if (duc >= bestDucat)
-                            {
-                                bestDucat = duc; bestDucatItem = i;
-                            }
-                        }
-                        if (duc > bestDucat)
+                    #region hilighting
+                    if (platinum >= bestPlat)
+                    {
+                        bestPlat = platinum; bestPlatItem = i;
+                        if (duc >= bestDucat)
                         {
                             bestDucat = duc; bestDucatItem = i;
                         }
-                        if (duc > 0)
-                        {
-                            if (!mastered && int.Parse(partsOwned, Main.culture) < int.Parse(partsCount, Main.culture))
-                            {
-                                unownedItems.Add(i);
-                            }
-                        }
-                        #endregion
-
-                        #region clipboard
-                        if (platinum > 0)
-                        {
-                            if (!string.IsNullOrEmpty(clipboard)) { clipboard += "-  "; }
-
-                            clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
-
-                            if (_settings.ClipboardVaulted)
-                            {
-                                clipboard += ducats + ":ducats:";
-                                if (vaulted)
-                                    clipboard += "(V)";
-                            }
-                        }
-
-                        if ((partNumber == firstChecks.Length - 1) && (!string.IsNullOrEmpty(clipboard)))
-                        {
-                            clipboard += _settings.ClipboardTemplate;
-                        }
-                        #endregion
-
-                        #region display part
-                        Main.RunOnUIThread(() =>
-                        {
-                            Overlay.rewardsDisplaying = true;
-
-                            if (_settings.IsOverlaySelected)
-                            {
-                                Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
-                                Main.overlays[partNumber].Resize(overWid);
-                                Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / dpiScaling), startY + (int)(_settings.OverlayYOffsetValue / dpiScaling), _settings.Delay);
-                            }
-                            else if (!_settings.IsLightSelected)
-                            {
-                                Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
-                            }
-                            //else
-                                //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
-
-                            if (_settings.Clipboard && !string.IsNullOrEmpty(clipboard))
-                                Clipboard.SetText(clipboard);
-
-                        });
-                        partNumber++;
-                        hideRewardInfo = false;
-                        #endregion
                     }
+                    if (duc > bestDucat)
+                    {
+                        bestDucat = duc; bestDucatItem = i;
+                    }
+                    if (duc > 0)
+                    {
+                        if (!mastered && int.Parse(partsOwned, Main.culture) < int.Parse(partsCount, Main.culture))
+                        {
+                            unownedItems.Add(i);
+                        }
+                    }
+                    #endregion
+
+                    #region clipboard
+                    if (platinum > 0)
+                    {
+                        if (!string.IsNullOrEmpty(clipboard)) { clipboard += "-  "; }
+
+                        clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
+
+                        if (_settings.ClipboardVaulted)
+                        {
+                            clipboard += ducats + ":ducats:";
+                            if (vaulted)
+                                clipboard += "(V)";
+                        }
+                    }
+
+                    if ((partNumber == firstChecks.Length - 1) && (!string.IsNullOrEmpty(clipboard)))
+                    {
+                        clipboard += _settings.ClipboardTemplate;
+                    }
+                    #endregion
+
+                    #region display part
+                    Main.RunOnUIThread(() =>
+                    {
+                        Overlay.rewardsDisplaying = true;
+
+                        if (_settings.IsOverlaySelected)
+                        {
+                            Main.overlays[partNumber].LoadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                            Main.overlays[partNumber].Resize(overWid);
+                            Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / dpiScaling), startY + (int)(_settings.OverlayYOffsetValue / dpiScaling), _settings.Delay);
+                        }
+                        else if (!_settings.IsLightSelected)
+                        {
+                            Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
+                        }
+                        //else
+                            //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
+
+                        if (_settings.Clipboard && !string.IsNullOrEmpty(clipboard))
+                            Clipboard.SetText(clipboard);
+
+                    });
+                    partNumber++;
+                    hideRewardInfo = false;
+                    #endregion
                 }
                 var end = watch.ElapsedMilliseconds;
                 Main.StatusUpdate("Completed processing (" + (end - start) + "ms)", 0);
@@ -417,7 +414,11 @@ namespace WFInfo
 
             var lowestDistance = int.MaxValue;
             var lowestDistancePoint = new Point();
-            if (numberOfRewardsDisplayed != 3)
+            if (numberOfRewardsDisplayed == 1) //rare, but can happen if others don't get enough traces
+            {
+                primeRewardIndex = 0;
+            }
+            else if (numberOfRewardsDisplayed != 3)
             {
                 foreach (var pnt in RewardPoints4)
                 {

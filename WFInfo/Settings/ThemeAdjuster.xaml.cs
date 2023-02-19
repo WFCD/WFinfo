@@ -162,6 +162,13 @@ namespace WFInfo
 
         private void Hide(object sender, RoutedEventArgs e)
         {
+            if (unfiltered != null)
+            {
+                unfiltered.Dispose();
+            }
+            unfiltered = null;
+            displayImage = null;
+            previewImage.Source = null;
             Hide();
         }
 
