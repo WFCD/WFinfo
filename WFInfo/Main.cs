@@ -25,6 +25,7 @@ namespace WFInfo
         public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
         public static SettingsWindow settingsWindow = new SettingsWindow();
+        public static ThemeAdjuster themeAdjuster = new ThemeAdjuster();
         public static VerifyCount verifyCount = new VerifyCount();
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;

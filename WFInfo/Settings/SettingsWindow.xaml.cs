@@ -252,7 +252,7 @@ namespace WFInfo.Settings
 
         private void ConfigureTheme_button_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            //TODO open custom theme configuration
+            ThemeAdjuster.ShowThemeAdjuster();
         }
     }
 }
