@@ -1029,8 +1029,8 @@ namespace WFInfo
                 Overlay.rewardsDisplaying = true;
             }
 
-            //abort if autolist disabled, or line doesn't contain end-of-session message or timer finished message
-            if (!(line.Contains("MatchingService::EndSession") || line.Contains("Relic timer closed")) || !_settings.AutoList) return;
+            //abort if autolist and autocsv disabled, or line doesn't contain end-of-session message or timer finished message
+            if (!(line.Contains("MatchingService::EndSession") || line.Contains("Relic timer closed")) || ! (_settings.AutoList || _settings.AutoCSV)) return;
 
             if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
@@ -1046,32 +1046,66 @@ namespace WFInfo
                     }
 
                 Overlay.rewardsDisplaying = false;
+                string csv = "";
                 Main.AddLog("Looping through rewards");
                 foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
                 {
                     string rewards = "";
-                    for(int i = 0; i < rewardscreen.Count; i++)
+                    for (int i = 0; i < rewardscreen.Count; i++)
                     {
                         rewards += rewardscreen[i];
                         if (i + 1 < rewardscreen.Count)
                             rewards += " || ";
                     }
                     Main.AddLog(rewards);
-                    var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-                    if (rewardCollection.PrimeNames.Count == 0)
-                        return;
-                    Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                    if (_settings.AutoList)
+                    {
+
+                        var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+                        if (rewardCollection.PrimeNames.Count == 0)
+                            continue;
+
+                        Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                    }
+
+                    if (_settings.AutoCSV)
+                    {
+                        if (csv.Length == 0 && !File.Exists(applicationDirectory + @"\rewardExport.csv"))
+                            csv += "Timestamp,ChosenIndex,Reward_0_Name,Reward_0_Plat,Reward_0_Ducats,Reward_1_Name,Reward_1_Plat,Reward_1_Ducats,Reward_2_Name,Reward_2_Plat,Reward_2_Ducats,Reward_3_Name,Reward_3_Plat,Reward_3_Ducats" + Environment.NewLine;
+                        csv += DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + "," + Main.listingHelper.SelectedRewardIndex;
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (i < rewardscreen.Count)
+                            {
+                                JObject job = Main.dataBase.marketData.GetValue(rewardscreen[i]).ToObject<JObject>();
+                                string plat = job["plat"].ToObject<string>();
+                                string ducats = job["ducats"].ToObject<string>();
+                                csv += "," + rewardscreen[i] + "," + plat + "," + ducats;
+                            }
+                            else
+                            {
+                                csv += ",\"\",0,0"; //fill empty slots with "",0,0
+                            }
+                        }
+                        csv += Environment.NewLine;
+                    }
+                    
                 }
 
-                Main.RunOnUIThread(() =>
+                if (_settings.AutoCSV)
                 {
-                    if (Main.listingHelper.ScreensList.Count == 1)
-                        Main.listingHelper.SetScreen(0);
-                    Main.listingHelper.PrimeRewards.Clear();
-                    Main.listingHelper.Show();
-                    Main.listingHelper.Topmost = true;
-                    Main.listingHelper.Topmost = false;
-                });
+                    File.AppendAllText(applicationDirectory + @"\rewardExport.csv", csv);
+                }
+                if (_settings.AutoList)
+                    Main.RunOnUIThread(() =>
+                    {
+                        if (Main.listingHelper.ScreensList.Count == 1)
+                            Main.listingHelper.SetScreen(0);
+                        Main.listingHelper.PrimeRewards.Clear();
+                        Main.listingHelper.Show();
+                        Main.listingHelper.Topmost = true;
+                        Main.listingHelper.Topmost = false;
+                    });
             });
         }
 

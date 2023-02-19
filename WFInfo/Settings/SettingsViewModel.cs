@@ -236,9 +236,21 @@ namespace WFInfo.Settings
         public bool AutoList
         {
             get => _settings.AutoList;
-            set { 
+            set
+            {
                 _settings.AutoList = value;
-                RaisePropertyChanged(); 
+                RaisePropertyChanged();
+            }
+        }
+
+
+        public bool AutoCSV
+        {
+            get => _settings.AutoCSV;
+            set
+            {
+                _settings.AutoCSV = value;
+                RaisePropertyChanged();
             }
         }
 

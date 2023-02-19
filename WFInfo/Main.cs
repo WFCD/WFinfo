@@ -311,7 +311,7 @@ namespace WFInfo
             }
             else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying)
             {
-                if (_settings.Display != Display.Overlay && _settings.AutoList == false)
+                if (_settings.Display != Display.Overlay && !_settings.AutoList && !_settings.AutoCSV)
                 {
                     Overlay.rewardsDisplaying = false; //only "naturally" set to false on overlay disappearing and/or specific log message with auto-list enabled
                     return;

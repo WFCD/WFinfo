@@ -470,18 +470,20 @@
                         </Border>
                         <Border DockPanel.Dock="Top"
                                 Style="{StaticResource NestedBorder}">
-                            <UniformGrid Rows="1">
+                            <UniformGrid Rows="2">
 
                                 <CheckBox x:Name="autoCheckbox"
-                                          DockPanel.Dock="Right"
                                           Content="Auto"
                                           ToolTip="Automatically detects when the relic screen is visible."
                                           Click="AutoClicked" />
                                 <CheckBox x:Name="Autolist"
-                                          DockPanel.Dock="Left"
                                           Content="Auto list"
                                           ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto"
                                           IsChecked="{Binding SettingsViewModel.AutoList, Mode=TwoWay}" />
+                                <CheckBox x:Name="Autocsv"
+                                          Content="Auto CSV"
+                                          ToolTip="Save reward options and choice to CSV file in application directory (%appdata%/WFInfo%)"
+                                          IsChecked="{Binding SettingsViewModel.AutoCSV, Mode=TwoWay}" />
                             </UniformGrid>
                         </Border>
                     </DockPanel>
