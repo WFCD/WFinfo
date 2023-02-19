@@ -111,6 +111,12 @@ namespace WFInfo
             if (OCR.Warframe != null && OCR.Warframe.HasExited && LastMarketStatus != "invisible")
             {//set user offline if Warframe has closed but no new game was found
                 Debug.WriteLine($"Warframe was detected as closed");
+                //reset warframe process variables, and reset LogCapture so new game process gets noticed
+                dataBase.DisableLogCapture();
+                OCR.Warframe.Dispose();
+                OCR.Warframe = null;
+                if (ApplicationSettings.GlobalReadonlySettings.Auto)
+                    dataBase.EnableLogCapture();
 
                 await Task.Run(async () =>
                 {

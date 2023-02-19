@@ -2434,6 +2434,16 @@ namespace WFInfo
             if (Warframe != null && !Warframe.HasExited) { // don't update status
                 return true;
             }
+            if (Warframe!= null && Warframe.HasExited)
+            {
+                //reset warframe process variables, and reset LogCapture so new game process gets noticed
+                Main.dataBase.DisableLogCapture();
+                Warframe.Dispose();
+                Warframe = null;
+                if (ApplicationSettings.GlobalReadonlySettings.Auto)
+                    Main.dataBase.EnableLogCapture();
+            }
+
             Task.Run(() => {
                 foreach (Process process in Process.GetProcesses())
                     if (process.ProcessName == "Warframe.x64") {
@@ -2459,6 +2469,7 @@ namespace WFInfo
                                 return true;
                             }
                             catch (System.ComponentModel.Win32Exception e) {
+                                Warframe = null;
                                 Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
                                 Main.StatusUpdate("Restart Warframe without admin privileges", 1);
                                 return _settings.Debug ? true : false;
