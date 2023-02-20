@@ -262,7 +262,7 @@ namespace WFInfo
                     int duc = int.Parse(ducats, Main.culture);
                     #endregion
 
-                    #region hilighting
+                    #region highlighting
                     if (platinum >= bestPlat)
                     {
                         bestPlat = platinum; bestPlatItem = i;
