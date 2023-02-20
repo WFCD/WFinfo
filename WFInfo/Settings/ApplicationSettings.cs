@@ -68,6 +68,7 @@ namespace WFInfo.Settings
         public int OverlayYOffsetValue { get; set; } = 0;
         public bool AutoList { get; set; } = false;
         public bool AutoCSV { get; set; } = false;
+        public bool AutoCount { get; set; } = false;
         public bool DoDoubleCheck { get; set; } = true;
         public double MaximumEfficiencyValue { get; set; } = 9.5;
         public double MinimumEfficiencyValue { get; set; } = 4.5;

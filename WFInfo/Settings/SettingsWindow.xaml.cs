@@ -47,11 +47,13 @@ namespace WFInfo.Settings
                 autoCheckbox.IsChecked = true;
                 Autolist.IsEnabled = true;
                 Autocsv.IsEnabled = true;
+                Autoadd.IsEnabled = true;
             }
             else
             {
                 Autolist.IsEnabled = false;
                 Autocsv.IsEnabled = false;
+                Autoadd.IsEnabled = false;
             }
 
             foreach (ComboBoxItem localeItem in localeCombobox.Items)
@@ -118,6 +120,7 @@ namespace WFInfo.Settings
                     Main.dataBase.EnableLogCapture();
                     Autolist.IsEnabled = true;
                     Autocsv.IsEnabled = true;
+                    Autoadd.IsEnabled = true;
                 }
                 else
                 {
@@ -126,11 +129,15 @@ namespace WFInfo.Settings
                     Main.dataBase.DisableLogCapture();
                     Autolist.IsEnabled = false;
                     Autocsv.IsEnabled = false;
+                    Autoadd.IsEnabled = false;
                 }
             }
             else
             {
                 _viewModel.Auto = false;
+                Autolist.IsEnabled = false;
+                Autocsv.IsEnabled = false;
+                Autoadd.IsEnabled = false;
                 Main.dataBase.DisableLogCapture();
             }
             Save();

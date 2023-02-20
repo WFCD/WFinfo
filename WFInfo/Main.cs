@@ -27,6 +27,7 @@ namespace WFInfo
         public static SettingsWindow settingsWindow = new SettingsWindow();
         public static ThemeAdjuster themeAdjuster = new ThemeAdjuster();
         public static VerifyCount verifyCount = new VerifyCount();
+        public static AutoCount autoCount = new AutoCount();
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;
         public static UpdateDialogue update;
@@ -311,7 +312,7 @@ namespace WFInfo
             }
             else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying)
             {
-                if (_settings.Display != Display.Overlay && !_settings.AutoList && !_settings.AutoCSV)
+                if (_settings.Display != Display.Overlay && !_settings.AutoList && !_settings.AutoCSV && !_settings.AutoCount)
                 {
                     Overlay.rewardsDisplaying = false; //only "naturally" set to false on overlay disappearing and/or specific log message with auto-list enabled
                     return;

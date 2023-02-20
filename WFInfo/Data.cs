@@ -1030,7 +1030,7 @@ namespace WFInfo
             }
 
             //abort if autolist and autocsv disabled, or line doesn't contain end-of-session message or timer finished message
-            if (!(line.Contains("MatchingService::EndSession") || line.Contains("Relic timer closed")) || ! (_settings.AutoList || _settings.AutoCSV)) return;
+            if (!(line.Contains("MatchingService::EndSession") || line.Contains("Relic timer closed")) || ! (_settings.AutoList || _settings.AutoCSV || _settings.AutoCount)) return;
 
             if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
@@ -1039,7 +1039,7 @@ namespace WFInfo
 
             Task.Run(async () =>
             {
-                if (inGameName.IsNullOrEmpty())
+                if (_settings.AutoList && inGameName.IsNullOrEmpty())
                     if (!await IsJWTvalid())
                     {
                         Disconnect();
@@ -1048,6 +1048,7 @@ namespace WFInfo
                 Overlay.rewardsDisplaying = false;
                 string csv = "";
                 Main.AddLog("Looping through rewards");
+                Main.AddLog("AutoList: " + _settings.AutoList + ", AutoCSV: " + _settings.AutoCSV + ", AutoCount: " + _settings.AutoCount);
                 foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
                 {
                     string rewards = "";
@@ -1057,16 +1058,8 @@ namespace WFInfo
                         if (i + 1 < rewardscreen.Count)
                             rewards += " || ";
                     }
-                    Main.AddLog(rewards);
-                    if (_settings.AutoList)
-                    {
+                    Main.AddLog(rewards + ", detected choice: " + Main.listingHelper.SelectedRewardIndex);
 
-                        var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-                        if (rewardCollection.PrimeNames.Count == 0)
-                            continue;
-
-                        Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
-                    }
 
                     if (_settings.AutoCSV)
                     {
@@ -1089,23 +1082,61 @@ namespace WFInfo
                         }
                         csv += Environment.NewLine;
                     }
-                    
+
+                    if (_settings.AutoCount)
+                    {
+                        Main.RunOnUIThread(() =>
+                        {
+                            Main.autoCount.viewModel.addItem(new AutoAddSingleItem(rewardscreen, Main.listingHelper.SelectedRewardIndex, Main.autoCount.viewModel));
+                        });
+                    }
+
+                    if (_settings.AutoList)
+                    {
+
+                        var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+                        if (rewardCollection.PrimeNames.Count == 0)
+                            continue;
+
+                        Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                    }
+
+                }
+
+                if (_settings.AutoCount)
+                {
+                    Main.AddLog("Opening AutoCount interface");
+                    Main.RunOnUIThread(() =>
+                    {
+                        AutoCount.ShowAutoCount();
+                    });
                 }
 
                 if (_settings.AutoCSV)
                 {
+                    Main.AddLog("appending rewardExport.csv");
                     File.AppendAllText(applicationDirectory + @"\rewardExport.csv", csv);
                 }
+
                 if (_settings.AutoList)
+                {
+                    Main.AddLog("Opening AutoList interface");
                     Main.RunOnUIThread(() =>
                     {
                         if (Main.listingHelper.ScreensList.Count == 1)
                             Main.listingHelper.SetScreen(0);
-                        Main.listingHelper.PrimeRewards.Clear();
                         Main.listingHelper.Show();
                         Main.listingHelper.Topmost = true;
                         Main.listingHelper.Topmost = false;
                     });
+                }
+
+                Main.AddLog("Clearing listingHelper.PrimeRewards");
+                Main.RunOnUIThread(() =>
+                {
+                    Main.listingHelper.PrimeRewards.Clear();
+                });
+
             });
         }
 

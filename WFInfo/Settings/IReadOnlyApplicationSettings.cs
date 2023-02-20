@@ -43,6 +43,7 @@ namespace WFInfo.Settings
         int OverlayYOffsetValue { get; }
         bool AutoList { get; }
         bool AutoCSV { get; }
+        bool AutoCount { get; }
         bool DoDoubleCheck { get; }
         double MaximumEfficiencyValue { get; }
         double MinimumEfficiencyValue { get; }

@@ -253,6 +253,15 @@ namespace WFInfo.Settings
                 RaisePropertyChanged();
             }
         }
+        public bool AutoCount
+        {
+            get => _settings.AutoCount;
+            set
+            {
+                _settings.AutoCount = value;
+                RaisePropertyChanged();
+            }
+        }
 
         public double MaximumEfficiencyValue
         {
