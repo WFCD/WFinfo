@@ -477,7 +477,7 @@
                                           ToolTip="Automatically detects when the relic screen is visible."
                                           Click="AutoClicked" />
                                 <CheckBox x:Name="Autolist"
-                                          Content="Auto list"
+                                          Content="Auto List"
                                           ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto"
                                           IsChecked="{Binding SettingsViewModel.AutoList, Mode=TwoWay}" />
                                 <CheckBox x:Name="Autocsv"
@@ -485,7 +485,7 @@
                                           ToolTip="Save reward options and choice to CSV file in application directory (%appdata%/WFInfo%)"
                                           IsChecked="{Binding SettingsViewModel.AutoCSV, Mode=TwoWay}" />
                                 <CheckBox x:Name="Autoadd"
-                                          Content="Auto add"
+                                          Content="Auto Add"
                                           ToolTip="Spawns a dialogue for increasing owned item count whenever the end of mission is detected, requires auto"
                                           IsChecked="{Binding SettingsViewModel.AutoCount, Mode=TwoWay}" />
                             </UniformGrid>
