@@ -15,28 +15,33 @@ namespace WFInfo
     public partial class Overlay : Window
     {
         private static double window_wid = 243.0;
-        private static double window_hei = 141.0;
+        private static double window_hei = 160.0;
         private static double part_line_hei = 20.0; // TBD
         private static double partMarginTop = 39.0;
-        private static double partMarginBottom = 80.0;
+        private static double partMarginBottom = 100.0;
         private static double volumeMarginTop = 104.0;
-        private static double volumeMarginBottom = 17.0;
+        private static double volumeMarginBottom = 37.0;
         private static double platMarginRight = 163.0;
         private static double platMarginTop = 77.0;
-        private static double platMarginBottom = 43.0;
+        private static double platMarginBottom = 63.0;
         private static double ducatMarginRight = 78.0;
         private static double ducatMarginTop = 77.0;
-        private static double ducatMarginbottom = 43.0;
+        private static double ducatMarginbottom = 63.0;
         private static double cornerMarginSide = 23.0;
         private static double cornerMarginTop = 15.0;
-        private static double cornerMarginBottom = 110.0;
+        private static double cornerMarginBottom = 130.0;
+        private static double primeSetMarginTop = 130.0;
+        private static double primeSetMarginBottom = 15.0;
 
         private static double platImageMarginLeft = 88.0;
-        private static double platImageMarginBottom = 44.0;
+        private static double platImageMarginBottom = 64.0;
         private static double platImageHeightWidth = 20.0;
         private static double ducatImageMarginLeft = 172.0;
-        private static double ducatImageMarginBottom = 44.0;
+        private static double ducatImageMarginBottom = 64.0;
         private static double ducatImageHeightWidth = 20.0;
+        private static double setPlatImageMarginLeft = 115.0;
+        private static double setPlatImageBottom = 15.0;
+        private static double setPlatImageHeightWidth = 15.0;
 
         private static double platMarginRightSanpit = 187.0;
         private static double platMarginLeftSanpit = 30.0;
@@ -49,10 +54,10 @@ namespace WFInfo
         private static double platImageMarginLeftSanpit = 61.0;
         private static double ducatImageMarginLeftSanpit = 130.0;
         private static double EfficiencyplatImageMarginLeft = 206.0;
-        private static double EfficiencyplatImageMarginBottom = 44.0;
+        private static double EfficiencyplatImageMarginBottom = 64.0;
         private static double EfficiencyplatImageHeightWidth = 12.0;
         private static double EfficiencyducatImageMarginLeft = 197.0;
-        private static double EfficiencyducatImageMarginBottom = 52.0;
+        private static double EfficiencyducatImageMarginBottom = 72.0;
         private static double EfficiencyducatImageHeightWidth = 12.0;
 
         private static double largefont = 18.0;
@@ -106,12 +111,14 @@ namespace WFInfo
             partText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 215));
         }
 
-        public void LoadTextData(string name, string plat, string ducats, string volume, bool vaulted, bool mastered, string owned, string detected, bool hideRewardInfo)
+        public void LoadTextData(string name, string plat, string primeSetPlat, string ducats, string volume, bool vaulted, bool mastered, string owned, string detected, bool hideRewardInfo)
         {
             ducatText.Foreground = bluBrush;
             ducatText.FontWeight = FontWeights.Normal;
             platText.Foreground = bluBrush;
             platText.FontWeight = FontWeights.Normal;
+            primeSetPlatText.Foreground = bluBrush;
+            primeSetPlatText.FontWeight = FontWeights.Normal;
             ownedText.Foreground = bluBrush;
             ownedText.FontWeight = FontWeights.Normal;
             partText.Foreground = bluBrush;
@@ -131,6 +138,8 @@ namespace WFInfo
             if (hideRewardInfo)
             {
                 platText.Visibility = Visibility.Hidden;
+                primeSetPlatText.Visibility = Visibility.Hidden;
+                setPlatImage.Visibility = Visibility.Hidden;
                 ducatText.Visibility = Visibility.Hidden;
                 volumeText.Visibility = Visibility.Hidden;
                 vaultedMargin.Visibility = Visibility.Hidden;
@@ -141,6 +150,12 @@ namespace WFInfo
             else
             {
                 platText.Visibility = Visibility.Visible;
+                if (primeSetPlat != null)
+                {
+                    primeSetPlatText.Text = "Full set price: " + primeSetPlat;
+                    primeSetPlatText.Visibility = Visibility.Visible;
+                }
+                setPlatImage.Visibility = Visibility.Visible;
                 ducatText.Visibility = Visibility.Visible;
                 volumeText.Visibility = Visibility.Visible;
                 vaultedMargin.Visibility = Visibility.Visible;
@@ -190,6 +205,8 @@ namespace WFInfo
             ducatText.FontWeight = FontWeights.Normal;
             platText.Foreground = bluBrush;
             platText.FontWeight = FontWeights.Normal;
+            primeSetPlatText.Foreground = bluBrush;
+            primeSetPlatText.FontWeight = FontWeights.Normal;
             ownedText.Foreground = bluBrush;
             ownedText.FontWeight = FontWeights.Normal;
             partText.Foreground = bluBrush;
@@ -241,6 +258,12 @@ namespace WFInfo
             platMargin.Margin = margin;
             platText.FontSize = mediumFont * scale;
 
+            // Set_Plat_Text
+            margin = primeSetMargin.Margin;
+            margin.Top = primeSetMarginTop * scale;
+            margin.Bottom = primeSetMarginBottom * scale;
+            primeSetMargin.Margin = margin;
+            primeSetPlatText.FontSize = mediumFont * scale;
 
             // Ducat_Text
             margin = ducatMargin.Margin;
@@ -257,6 +280,14 @@ namespace WFInfo
             platImage.Margin = margin;
             platImage.Height = platImageHeightWidth * scale;
             platImage.Width = platImage.Height;
+
+            // Set_Plat_IMG
+            margin = setPlatImage.Margin;
+            margin.Bottom = setPlatImageBottom * scale;
+            margin.Left = setPlatImageMarginLeft * scale;
+            setPlatImage.Margin = margin;
+            setPlatImage.Height = setPlatImageHeightWidth * scale;
+            setPlatImage.Width = setPlatImage.Height;
 
             // Ducat_IMG
             margin = ducatImage.Margin;
