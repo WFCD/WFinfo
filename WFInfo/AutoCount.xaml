@@ -6,7 +6,7 @@
         xmlns:wfInfo="clr-namespace:WFInfo"
         xmlns:components="clr-namespace:WFInfo.Components"
         mc:Ignorable="d"
-        Title="Theme Adjuster"
+        Title="Auto Add"
         MaxWidth="400"
         MinWidth="400"
         Width="400"
