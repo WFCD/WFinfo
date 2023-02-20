@@ -37,7 +37,8 @@ namespace WFInfo
             RemoveAll = new SimpleCommand(() => RemoveFromParentAll());
             IncrementAll = new SimpleCommand(() => AddCountAll());
 
-            for (int i = 0; i < 30; i++)
+            /*
+            for (int i = 0; i < 30; i++) //test fill block
             {
                 List<string> tmp = new List<string>();
                 tmp.Add("Ivara Prime Blueprint");
@@ -46,6 +47,7 @@ namespace WFInfo
                 AutoAddSingleItem tmpItem = new AutoAddSingleItem(tmp, i % 5, viewModel);
                 viewModel.addItem(tmpItem);
             }
+            */
             InitializeComponent();
         }
         public static void ShowAutoCount()
