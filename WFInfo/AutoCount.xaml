@@ -124,7 +124,7 @@
                        Style="{StaticResource Label_Button}"
                        VerticalContentAlignment="Stretch"
                        DockPanel.Dock="Right" />
-                <TextBlock Text="Theme Adjuster"
+                <TextBlock Text="Auto Add"
                            VerticalAlignment="Center"
                            FontSize="16"
                            FontFamily="{StaticResource Roboto_Black}"
