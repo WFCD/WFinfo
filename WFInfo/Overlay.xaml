@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo"
         mc:Ignorable="d"
-        Title="Overlay" Height="141" Width="243" WindowStyle="None" AllowsTransparency="True" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" IsTabStop="False" Focusable="False">
+        Title="Overlay" Height="160" Width="243" WindowStyle="None" AllowsTransparency="True" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" IsTabStop="False" Focusable="False">
     <Window.Background>
         <ImageBrush  ImageSource="Resources/background.jpg"/>
     </Window.Background>
@@ -15,40 +15,45 @@
                 <Setter Property="FontFamily" Value="{StaticResource Roboto_Condensed}" />
             </Style>
         </Grid.Resources>
-        <Viewbox x:Name="partMargin" Margin="0,39,0,82" HorizontalAlignment="Center">
+        <Viewbox x:Name="partMargin" Margin="0,39,0,100" HorizontalAlignment="Center">
             <TextBlock x:Name="partText" Text="Part name"/>
         </Viewbox>
-        <Viewbox x:Name="volumeMargin" Margin="0,104,0,17" >
+        <Viewbox x:Name="volumeMargin" Margin="0,104,0,37" >
             <TextBlock x:Name="volumeText" Text="XX sold last 48hrs"/>
         </Viewbox>
-        <Viewbox x:Name="vaultedMargin" Margin="0,15,23,110" HorizontalAlignment="Right" Visibility="Hidden" >
+        <Viewbox x:Name="vaultedMargin" Margin="0,15,23,130" HorizontalAlignment="Right" Visibility="Hidden" >
             <TextBlock x:Name="vaultedText" Text="VAULTED" Foreground="#FF828C96" FontFamily="{StaticResource Roboto}"/>
         </Viewbox>
-        <Viewbox x:Name="ownedMargin" Margin="23,15,0,110" HorizontalAlignment="Left" >
+        <Viewbox x:Name="ownedMargin" Margin="23,15,0,130" HorizontalAlignment="Left" >
             <TextBlock x:Name="ownedText" Text="Number of owned" Foreground="#FF828C96" FontFamily="{StaticResource Roboto}"/>
         </Viewbox>
-        <Viewbox x:Name="platMargin" Margin="0,77,162,43" HorizontalAlignment="Right">
+        <Viewbox x:Name="platMargin" Margin="0,77,162,63" HorizontalAlignment="Right">
             <TextBlock x:Name="platText" Text="100"/>
         </Viewbox>
-        <Viewbox x:Name="ducatMargin" Margin="0,77,78,43" HorizontalAlignment="Right">
+        <Viewbox x:Name="ducatMargin" Margin="0,77,78,63" HorizontalAlignment="Right">
             <TextBlock x:Name="ducatText" Text="100"/>
         </Viewbox>
-        <Image x:Name="ducatImage" Source="Resources/ducat_w.gif" Margin="172,0,0,44" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
-        <Image x:Name="platImage"  Source="Resources/plat.gif"     Margin="88,0,0,44" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
-        <Viewbox x:Name="PlatMargineSnap" Visibility="Collapsed" Margin="30,77,0,43" HorizontalAlignment="Left" Width="26">
+        <Image x:Name="ducatImage" Source="Resources/ducat_w.gif" Margin="172,0,0,64" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+        <Image x:Name="platImage"  Source="Resources/plat.gif"     Margin="88,0,0,64" Height="20" Width="20" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+        <Viewbox x:Name="PlatMargineSnap" Visibility="Collapsed" Margin="30,77,0,63" HorizontalAlignment="Left" Width="26">
             <TextBlock x:Name="PlatTextSnap" Text="090"/>
         </Viewbox>
-        <Image x:Name="PlatImageSnap" Visibility="Collapsed"  Source="Resources/plat.gif"     Margin="61,0,0,44" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="20"/>
-        <Viewbox x:Name="DucatMargineSnap" Visibility="Collapsed"  Margin="98,77,0,43" HorizontalAlignment="Left" Width="26">
+        <Image x:Name="PlatImageSnap" Visibility="Collapsed"  Source="Resources/plat.gif"     Margin="61,0,0,64" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="20"/>
+        <Viewbox x:Name="DucatMargineSnap" Visibility="Collapsed"  Margin="98,77,0,63" HorizontalAlignment="Left" Width="26">
             <TextBlock x:Name="DucatTextSnap" Text="090" Foreground="#FFB1D0D2"/>
         </Viewbox>
 
 
-        <Image x:Name="DucatImageSnap" Visibility="Collapsed" Source="Resources/ducat_w.gif" Margin="130,0,0,44" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="20"/>
-        <Viewbox x:Name="EfficiencyMargin" Visibility="Collapsed" Margin="0,77,51,43" HorizontalAlignment="Right" Width="28">
+        <Image x:Name="DucatImageSnap" Visibility="Collapsed" Source="Resources/ducat_w.gif" Margin="130,0,0,64" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="20"/>
+        <Viewbox x:Name="EfficiencyMargin" Visibility="Collapsed" Margin="0,77,51,63" HorizontalAlignment="Right" Width="28">
             <TextBlock x:Name="EfficiencyText" Text="009" Foreground="#FFB1D0D2"/>
         </Viewbox>
-        <Image x:Name="EfficiencyDucatImage" Visibility="Collapsed" Source="Resources/ducat_w.gif" Margin="198,0,0,52" Height="12" Width="12" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
-        <Image x:Name="EfficiencyPlatinumImage" Visibility="Collapsed"  Source="Resources/plat.gif"     Margin="206,0,0,44" Height="12" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="12"/>
+        <Image x:Name="EfficiencyDucatImage" Visibility="Collapsed" Source="Resources/ducat_w.gif" Margin="198,0,0,72" Height="12" Width="12" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+        <Image x:Name="EfficiencyPlatinumImage" Visibility="Collapsed" Source="Resources/plat.gif" Margin="206,0,0,64" Height="12" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="12"/>
+
+        <Viewbox x:Name="primeSetMargin" Margin="0,130,0,15" >
+            <TextBlock x:Name="primeSetPlatText" Text="Full set price: XXX"/>
+        </Viewbox>
+        <Image x:Name="setPlatImage" Source="Resources/plat.gif" Margin="115,0,0,15" Height="15" Width="15" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
     </Grid>
 </Window>

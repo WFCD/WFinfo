@@ -950,6 +950,12 @@ namespace WFInfo
         public string GetSetName(string name)
         {
             string result = name.ToLower(Main.culture);
+
+            if (result.Contains("kavasa"))
+            {
+                return "Kavasa Prime Kubrow Collar Set";
+            }
+
             result = result.Replace("lower limb", "");
             result = result.Replace("upper limb", "");
             result = result.Replace("neuroptics", "");
@@ -973,8 +979,10 @@ namespace WFInfo
             result = result.Replace("wings", "");
             result = result.Replace("blades", "");
             result = result.Replace("hilt", "");
+            result = result.Replace("link", "");
             result = result.TrimEnd();
             result = Main.culture.TextInfo.ToTitleCase(result);
+            result += " Set";
             return result;
         }
 
