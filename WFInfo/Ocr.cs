@@ -1815,7 +1815,7 @@ namespace WFInfo
             return foundItems;
         }
 
-            private static int ColorDifference(Color test, Color thresh)
+        private static int ColorDifference(Color test, Color thresh)
         {
             return Math.Abs(test.R - thresh.R) + Math.Abs(test.G - thresh.G) + Math.Abs(test.B - thresh.B);
         }
@@ -1860,7 +1860,7 @@ namespace WFInfo
 
         public static bool ThemeThresholdFilter(Color test, WFtheme theme)
         {
-            if (theme == WFtheme.CUSTOM)
+            if (theme == WFtheme.CUSTOM || theme == WFtheme.UNKNOWN) //treat unknown as custom, for safety
                 return CustomThresholdFilter(test);
             Color primary = ThemePrimary[(int)theme];
             Color secondary = ThemeSecondary[(int)theme];

@@ -1107,6 +1107,9 @@ namespace WFInfo
                             continue;
 
                         Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                    } else
+                    {
+                        Main.listingHelper.SelectedRewardIndex = 0; //otherwise done by GetRewardCollection, but that calls WFM API
                     }
 
                 }
