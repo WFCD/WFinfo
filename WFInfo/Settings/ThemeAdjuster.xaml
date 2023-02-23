@@ -1,0 +1,488 @@
+<Window x:Class="WFInfo.ThemeAdjuster"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wfInfo="clr-namespace:WFInfo"
+        xmlns:settings="clr-namespace:WFInfo.Settings"
+        xmlns:components="clr-namespace:WFInfo.Components"
+        mc:Ignorable="d"
+        Title="Theme Adjuster"
+        Width="800"
+        Height="634"
+        BorderBrush="#FF707070"
+        WindowStyle="None"
+        FontSize="16"
+        d:DataContext="{d:DesignInstance Type=settings:SettingsWindow}"
+        AllowsTransparency="True"
+        ResizeMode="CanResizeWithGrip">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+    <Grid MouseDown="MouseDown"
+          Background="#FF1B1B1B"
+          MinWidth="334">
+        <Grid.Resources>
+
+            <Style x:Key="NestedBorder"
+                   TargetType="Border">
+                <Setter Property="BorderBrush"
+                        Value="#FF646464" />
+                <Setter Property="Padding"
+                        Value="5, 2" />
+                <Setter Property="BorderThickness"
+                        Value="1" />
+            </Style>
+            <Style TargetType="Border">
+                <Setter Property="BorderBrush"
+                        Value="#FF646464" />
+                <Setter Property="Padding"
+                        Value="25, 5" />
+                <Setter Property="BorderThickness"
+                        Value="1" />
+            </Style>
+            <Style x:Key="AllTextBoxes"
+                   BasedOn="{StaticResource baseStyle}"
+                   TargetType="TextBox">
+                <Setter Property="Background"
+                        Value="#FF0F0F0F" />
+                <Setter Property="BorderBrush"
+                        Value="#FFB1D0D9" />
+                <Setter Property="VerticalContentAlignment"
+                        Value="Center" />
+                <Setter Property="HorizontalContentAlignment"
+                        Value="Center" />
+                <Setter Property="Margin"
+                        Value="0, 5" />
+                <Setter Property="Padding"
+                        Value="0,1,0,2.5" />
+                <Setter Property="Cursor"
+                        Value="Arrow" />
+                <Setter Property="TextWrapping"
+                        Value="Wrap" />
+                <Setter Property="FontFamily"
+                        Value="{StaticResource Roboto}" />
+                <Setter Property="components:SelectTextOnFocus.Active"
+                        Value="True" />
+                <Setter Property="wfInfo:FocusAdvancement.AdvancesByEnterKey"
+                        Value="True" />
+            </Style>
+
+            <Style TargetType="CheckBox"
+                   BasedOn="{StaticResource baseStyle}">
+                <Setter Property="Background"
+                        Value="#FFB1D0D9" />
+                <Setter Property="BorderBrush"
+                        Value="#FF0F0F0F" />
+                <Setter Property="VerticalContentAlignment"
+                        Value="Center" />
+            </Style>
+            <Style BasedOn="{StaticResource AllTextBoxes}"
+                   TargetType="TextBox" />
+            <Style x:Key="KeyBindTextboxStyle"
+                   BasedOn="{StaticResource AllTextBoxes}"
+                   TargetType="TextBox">
+                <Setter Property="components:SelectTextOnFocus.Active"
+                        Value="False" />
+                <Style.Triggers>
+                    <Trigger Property="IsFocused"
+                             Value="True">
+                        <Setter Property="Foreground"
+                                Value="Transparent">
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <components:NegateIntConverter x:Key="NegateIntConverter" />
+            <components:KeyStringConverter x:Key="KeyStringConverter" />
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid VerticalAlignment="Top"
+              Grid.Row="0"
+              Grid.ColumnSpan="2"
+              Grid.Column="0">
+            <Rectangle Fill="#FF0F0F0F"
+                       Stroke="#FF646464" />
+            <DockPanel>
+                <Image HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Width="26"
+                       DockPanel.Dock="Left"
+                       Margin="2,0,5,1"
+                       Source="../Resources/WFLogo.png" />
+                <Label MouseLeftButtonDown="Hide"
+                       Content="x"
+                       Width="30"
+                       Style="{StaticResource Label_Button}"
+                       VerticalContentAlignment="Stretch"
+                       DockPanel.Dock="Right" />
+                <TextBlock Text="Theme Adjuster"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           FontFamily="{StaticResource Roboto_Black}"
+                           FontWeight="Bold" />
+            </DockPanel>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="6*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <Border>
+                <Image Grid.Column="0" Margin="0,0" x:Name="previewImage"></Image>
+            </Border>
+            <ScrollViewer Grid.Column="1">
+                <StackPanel>
+                    <CheckBox Content="Primary HSL Filter"
+                                  ToolTip="Use(and reveal) primary filter based on HSL colour values" Margin="5,5"
+                                  IsChecked="{Binding SettingsViewModel.CF_usePrimaryHSL, Mode=TwoWay}" />
+                    <Border>
+                        <StackPanel  Visibility="{Binding Path=SettingsViewModel.CF_usePrimaryHSL, Converter={StaticResource BoolToVis}}">
+
+                            <Label Content="Primary Hue Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pHueMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                     components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                     VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="360" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pHueMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Primary Hue Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pHueMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                     components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                     VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="360" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pHueMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Primary Saturation Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pSatMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                     components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                     VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pSatMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Primary Saturation Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pSatMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                     components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                     VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pSatMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Primary Brightness Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pBrightMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                     components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                     VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pBrightMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Primary Brightness Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pBrightMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                     components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                     VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pBrightMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <CheckBox Content="Primary RGB Filter"
+                                  ToolTip="Use(and reveal) primary filter based on RGB colour values" Margin="5,5"
+                                  IsChecked="{Binding SettingsViewModel.CF_usePrimaryRGB, Mode=TwoWay}" />
+                    <Border>
+                        <StackPanel  Visibility="{Binding Path=SettingsViewModel.CF_usePrimaryRGB, Converter={StaticResource BoolToVis}}">
+
+                            <Label Content="Primary Red Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pRMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pRMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Primary Red Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pRMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pRMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+
+                            <Label Content="Primary Green Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pGMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pGMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Primary Green Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pGMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pGMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+
+                            <Label Content="Primary Blue Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pBMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pBMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Primary Blue Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_pBMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_pBMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <CheckBox Content="Secondary HSL Filter"
+                                  ToolTip="Use(and reveal) secondary filter based on HSL colour values" Margin="5,5"
+                                  IsChecked="{Binding SettingsViewModel.CF_useSecondaryHSL, Mode=TwoWay}" />
+                    <Border>
+                        <StackPanel  Visibility="{Binding Path=SettingsViewModel.CF_useSecondaryHSL, Converter={StaticResource BoolToVis}}">
+
+                            <Label Content="Secondary Hue Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sHueMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="360" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sHueMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Secondary Hue Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sHueMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="360" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sHueMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Secondary Saturation Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sSatMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sSatMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Secondary Saturation Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sSatMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sSatMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Secondary Brightness Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sBrightMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sBrightMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Secondary Brightness Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sBrightMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sBrightMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <CheckBox Content="Secondary RGB Filter"
+                                  ToolTip="Use(and reveal) secondary filter based on RGB colour values" Margin="5,5"
+                                  IsChecked="{Binding SettingsViewModel.CF_useSecondaryRGB, Mode=TwoWay}" />
+                    <Border>
+                        <StackPanel  Visibility="{Binding Path=SettingsViewModel.CF_useSecondaryRGB, Converter={StaticResource BoolToVis}}">
+
+                            <Label Content="Secondary Red Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sRMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sRMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Secondary Red Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sRMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sRMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+
+                            <Label Content="Secondary Green Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sGMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sGMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Secondary Green Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sGMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sGMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+
+                            <Label Content="Secondary Blue Max"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sBMax, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sBMax, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                            <Label Content="Secondary Blue Min"></Label>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SettingsViewModel.CF_sBMin, Mode=TwoWay, Delay=250, UpdateSourceTrigger=PropertyChanged}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$"
+                                 VerticalAlignment="Top" />
+                                <Slider Grid.Column="1" Minimum="0" Maximum="255" Margin="10,10" VerticalAlignment="Center" Value="{Binding SettingsViewModel.CF_sBMin, Mode=TwoWay, Delay=200, UpdateSourceTrigger=PropertyChanged}"></Slider>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        
+                        <StackPanel Grid.Column="1">
+                            <Label MouseLeftButtonDown="ShowUnfiltered"
+                                Padding="5"
+                                DockPanel.Dock="Right"
+                                Content="Show Unfiltered"
+                                FontWeight="Regular"
+                                Style="{StaticResource Label_Button}" />
+                            <Label MouseLeftButtonDown="ApplyFilter"
+                                Padding="5"
+                                DockPanel.Dock="Right"
+                                Content="Apply Filter"
+                                FontWeight="Regular"
+                                Grid.Column="1"
+                                Style="{StaticResource Label_Button}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="0">
+                            <Label MouseLeftButtonDown="LoadLatest"
+                                Padding="5"
+                                DockPanel.Dock="Right"
+                                Content="Load Last Use"
+                                FontWeight="Regular"
+                                Style="{StaticResource Label_Button}" />
+                            <Label MouseLeftButtonDown="LoadFromFile"
+                                Padding="5"
+                                DockPanel.Dock="Right"
+                                Content="Load From File"
+                                FontWeight="Regular"
+                                Style="{StaticResource Label_Button}" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

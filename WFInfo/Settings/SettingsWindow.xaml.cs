@@ -46,10 +46,14 @@ namespace WFInfo.Settings
             {
                 autoCheckbox.IsChecked = true;
                 Autolist.IsEnabled = true;
+                Autocsv.IsEnabled = true;
+                Autoadd.IsEnabled = true;
             }
             else
             {
                 Autolist.IsEnabled = false;
+                Autocsv.IsEnabled = false;
+                Autoadd.IsEnabled = false;
             }
 
             foreach (ComboBoxItem localeItem in localeCombobox.Items)
@@ -115,6 +119,8 @@ namespace WFInfo.Settings
                 {
                     Main.dataBase.EnableLogCapture();
                     Autolist.IsEnabled = true;
+                    Autocsv.IsEnabled = true;
+                    Autoadd.IsEnabled = true;
                 }
                 else
                 {
@@ -122,11 +128,16 @@ namespace WFInfo.Settings
                     autoCheckbox.IsChecked = false;
                     Main.dataBase.DisableLogCapture();
                     Autolist.IsEnabled = false;
+                    Autocsv.IsEnabled = false;
+                    Autoadd.IsEnabled = false;
                 }
             }
             else
             {
                 _viewModel.Auto = false;
+                Autolist.IsEnabled = false;
+                Autocsv.IsEnabled = false;
+                Autoadd.IsEnabled = false;
                 Main.dataBase.DisableLogCapture();
             }
             Save();
@@ -248,6 +259,11 @@ namespace WFInfo.Settings
             Key key = e.Key != Key.System ? e.Key : e.SystemKey;
             _viewModel.MasterItModifierKey = key;
             hidden.Focus();
+        }
+
+        private void ConfigureTheme_button_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            ThemeAdjuster.ShowThemeAdjuster();
         }
     }
 }

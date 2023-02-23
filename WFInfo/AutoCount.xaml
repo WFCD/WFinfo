@@ -1,0 +1,214 @@
+﻿<Window x:Class="WFInfo.AutoCount"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wfInfo="clr-namespace:WFInfo"
+        xmlns:components="clr-namespace:WFInfo.Components"
+        mc:Ignorable="d"
+        Title="Auto Add"
+        MaxWidth="400"
+        MinWidth="400"
+        Width="400"
+        Height="634"
+        BorderBrush="#FF707070"
+        WindowStyle="None"
+        FontSize="16"
+        AllowsTransparency="True"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        ResizeMode="CanResizeWithGrip">
+    <Window.Resources>
+    </Window.Resources>
+    <Grid MouseDown="MouseDown"
+          Background="#FF1B1B1B"
+          MinWidth="334">
+        <Grid.Resources>
+
+            <Style x:Key="NestedBorder"
+                   TargetType="Border">
+                <Setter Property="BorderBrush"
+                        Value="#FF646464" />
+                <Setter Property="Padding"
+                        Value="5, 2" />
+                <Setter Property="BorderThickness"
+                        Value="1" />
+            </Style>
+            <Style TargetType="Border">
+                <Setter Property="BorderBrush"
+                        Value="#FF646464" />
+                <Setter Property="Padding"
+                        Value="25, 5" />
+                <Setter Property="BorderThickness"
+                        Value="1" />
+            </Style>
+            <Style x:Key="AllTextBoxes"
+                   BasedOn="{StaticResource baseStyle}"
+                   TargetType="TextBox">
+                <Setter Property="Background"
+                        Value="#FF0F0F0F" />
+                <Setter Property="BorderBrush"
+                        Value="#FFB1D0D9" />
+                <Setter Property="VerticalContentAlignment"
+                        Value="Center" />
+                <Setter Property="HorizontalContentAlignment"
+                        Value="Center" />
+                <Setter Property="Margin"
+                        Value="0, 5" />
+                <Setter Property="Padding"
+                        Value="0,1,0,2.5" />
+                <Setter Property="Cursor"
+                        Value="Arrow" />
+                <Setter Property="TextWrapping"
+                        Value="Wrap" />
+                <Setter Property="FontFamily"
+                        Value="{StaticResource Roboto}" />
+                <Setter Property="components:SelectTextOnFocus.Active"
+                        Value="True" />
+                <Setter Property="wfInfo:FocusAdvancement.AdvancesByEnterKey"
+                        Value="True" />
+            </Style>
+
+            <Style TargetType="CheckBox"
+                   BasedOn="{StaticResource baseStyle}">
+                <Setter Property="Background"
+                        Value="#FFB1D0D9" />
+                <Setter Property="BorderBrush"
+                        Value="#FF0F0F0F" />
+                <Setter Property="VerticalContentAlignment"
+                        Value="Center" />
+            </Style>
+            <Style BasedOn="{StaticResource AllTextBoxes}"
+                   TargetType="TextBox" />
+            <Style x:Key="KeyBindTextboxStyle"
+                   BasedOn="{StaticResource AllTextBoxes}"
+                   TargetType="TextBox">
+                <Setter Property="components:SelectTextOnFocus.Active"
+                        Value="False" />
+                <Style.Triggers>
+                    <Trigger Property="IsFocused"
+                             Value="True">
+                        <Setter Property="Foreground"
+                                Value="Transparent">
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <components:NegateIntConverter x:Key="NegateIntConverter" />
+            <components:KeyStringConverter x:Key="KeyStringConverter" />
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30"> </RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid VerticalAlignment="Top"
+              Grid.Row="0"
+              Grid.ColumnSpan="2"
+              Grid.Column="0">
+            <Rectangle Fill="#FF0F0F0F"
+                       Stroke="#FF646464" />
+            <DockPanel>
+                <Image HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Width="26"
+                       DockPanel.Dock="Left"
+                       Margin="2,0,5,1"
+                       Source="Resources/WFLogo.png" />
+                <Label MouseLeftButtonDown="Hide"
+                       Content="x"
+                       Width="30"
+                       Style="{StaticResource Label_Button}"
+                       VerticalContentAlignment="Stretch"
+                       DockPanel.Dock="Right" />
+                <TextBlock Text="Auto Add"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           FontFamily="{StaticResource Roboto_Black}"
+                           FontWeight="Bold" />
+            </DockPanel>
+        </Grid>
+        <ScrollViewer Grid.Row="1">
+            
+        <DataGrid ItemsSource="{Binding viewModel.ItemList}" AutoGenerateColumns="False" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Stretch" HeadersVisibility="Column" PreviewMouseWheel="RedirectScrollToParent">
+            <DataGrid.Resources>
+                <ResourceDictionary>
+                    <Style BasedOn="{StaticResource baseStyle}" TargetType="{x:Type DataGridColumnHeader}">
+                        <Setter Property="Background" Value="#FF1B1B1B" />
+                    </Style>
+                    <Style TargetType="{x:Type DataGridCell}">
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource Self}, Path=Foreground}"/>
+                                <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource Self}, Path=Background}"/>
+                                <Setter Property="BorderBrush" Value="{Binding RelativeSource={RelativeSource Self}, Path=BorderBrush}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ResourceDictionary>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                    <DataGridTemplateColumn Header=" Items" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox 
+                                    x:Name="themeSelectionComboBox"
+                                    FontSize="14"
+                                    FontFamily="{DynamicResource Roboto}"
+                                    Background="#FF1B1B1B"
+                                    BorderBrush="#FF0F0F0F"
+                                    HorizontalAlignment="Stretch"
+                                    ItemsSource="{Binding RewardOptions}"
+                                    SelectedItem="{Binding ActiveOption, Mode=TwoWay}"
+                                    Margin="5,3" Template="{DynamicResource ComboBoxTemplate}" Style="{DynamicResource ComboBoxStyle1}">
+                                </ComboBox>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Save" Width="70">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label Grid.Column="1" Content="✓" Foreground="#506464" FontSize="14" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"   Style="{StaticResource Label_Button}">
+                                    <Label.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick" Command="{Binding Increment}" />
+                                    </Label.InputBindings>
+                                </Label>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Dismiss" Width="70">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label Grid.Column="2" Content="X" Foreground="#506464" FontSize="14" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"   Style="{StaticResource Label_Button}">
+                                    <Label.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick" Command="{Binding Remove}" />
+                                    </Label.InputBindings>
+                                </Label>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </ScrollViewer>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Content="Save all" Foreground="#506464" FontSize="14" Style="{StaticResource Label_Button}">
+                <Label.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding IncrementAll}" />
+                </Label.InputBindings>
+            </Label>
+
+            <Label Grid.Column="1" Content="Dismiss all" Foreground="#506464" FontSize="14" Style="{StaticResource Label_Button}">
+                <Label.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding RemoveAll}" />
+                </Label.InputBindings>
+            </Label>
+        </Grid>
+        </Grid>
+</Window>

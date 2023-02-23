@@ -1037,7 +1037,8 @@ namespace WFInfo
                 Overlay.rewardsDisplaying = true;
             }
 
-            if (!line.Contains("MatchingService::EndSession") || !_settings.AutoList) return;
+            //abort if autolist and autocsv disabled, or line doesn't contain end-of-session message or timer finished message
+            if (!(line.Contains("MatchingService::EndSession") || line.Contains("Relic timer closed")) || ! (_settings.AutoList || _settings.AutoCSV || _settings.AutoCount)) return;
 
             if (Main.listingHelper.PrimeRewards == null || Main.listingHelper.PrimeRewards.Count == 0)
             {
@@ -1046,32 +1047,107 @@ namespace WFInfo
 
             Task.Run(async () =>
             {
-                if (inGameName.IsNullOrEmpty())
+                if (_settings.AutoList && inGameName.IsNullOrEmpty())
                     if (!await IsJWTvalid())
                     {
                         Disconnect();
                     }
 
                 Overlay.rewardsDisplaying = false;
+                string csv = "";
                 Main.AddLog("Looping through rewards");
+                Main.AddLog("AutoList: " + _settings.AutoList + ", AutoCSV: " + _settings.AutoCSV + ", AutoCount: " + _settings.AutoCount);
                 foreach (var rewardscreen in Main.listingHelper.PrimeRewards)
                 {
-                    Main.AddLog(rewardscreen.ToString());
-                    var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
-                    if (rewardCollection.PrimeNames.Count == 0)
-                        return;
-                    Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                    string rewards = "";
+                    for (int i = 0; i < rewardscreen.Count; i++)
+                    {
+                        rewards += rewardscreen[i];
+                        if (i + 1 < rewardscreen.Count)
+                            rewards += " || ";
+                    }
+                    Main.AddLog(rewards + ", detected choice: " + Main.listingHelper.SelectedRewardIndex);
+
+
+                    if (_settings.AutoCSV)
+                    {
+                        if (csv.Length == 0 && !File.Exists(applicationDirectory + @"\rewardExport.csv"))
+                            csv += "Timestamp,ChosenIndex,Reward_0_Name,Reward_0_Plat,Reward_0_Ducats,Reward_1_Name,Reward_1_Plat,Reward_1_Ducats,Reward_2_Name,Reward_2_Plat,Reward_2_Ducats,Reward_3_Name,Reward_3_Plat,Reward_3_Ducats" + Environment.NewLine;
+                        csv += DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + "," + Main.listingHelper.SelectedRewardIndex;
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (i < rewardscreen.Count)
+                            {
+                                JObject job = Main.dataBase.marketData.GetValue(rewardscreen[i]).ToObject<JObject>();
+                                string plat = job["plat"].ToObject<string>();
+                                string ducats = job["ducats"].ToObject<string>();
+                                csv += "," + rewardscreen[i] + "," + plat + "," + ducats;
+                            }
+                            else
+                            {
+                                csv += ",\"\",0,0"; //fill empty slots with "",0,0
+                            }
+                        }
+                        csv += Environment.NewLine;
+                    }
+
+                    if (_settings.AutoCount)
+                    {
+                        Main.RunOnUIThread(() =>
+                        {
+                            Main.autoCount.viewModel.addItem(new AutoAddSingleItem(rewardscreen, Main.listingHelper.SelectedRewardIndex, Main.autoCount.viewModel));
+                        });
+                    }
+
+                    if (_settings.AutoList)
+                    {
+
+                        var rewardCollection = Task.Run(() => Main.listingHelper.GetRewardCollection(rewardscreen)).Result;
+                        if (rewardCollection.PrimeNames.Count == 0)
+                            continue;
+
+                        Main.listingHelper.ScreensList.Add(new KeyValuePair<string, RewardCollection>("", rewardCollection));
+                    } else
+                    {
+                        Main.listingHelper.SelectedRewardIndex = 0; //otherwise done by GetRewardCollection, but that calls WFM API
+                    }
+
                 }
 
+                if (_settings.AutoCount)
+                {
+                    Main.AddLog("Opening AutoCount interface");
+                    Main.RunOnUIThread(() =>
+                    {
+                        AutoCount.ShowAutoCount();
+                    });
+                }
+
+                if (_settings.AutoCSV)
+                {
+                    Main.AddLog("appending rewardExport.csv");
+                    File.AppendAllText(applicationDirectory + @"\rewardExport.csv", csv);
+                }
+
+                if (_settings.AutoList)
+                {
+                    Main.AddLog("Opening AutoList interface");
+                    Main.RunOnUIThread(() =>
+                    {
+                        if (Main.listingHelper.ScreensList.Count == 1)
+                            Main.listingHelper.SetScreen(0);
+                        Main.listingHelper.Show();
+                        Main.listingHelper.Topmost = true;
+                        Main.listingHelper.Topmost = false;
+                    });
+                }
+
+                Main.AddLog("Clearing listingHelper.PrimeRewards");
                 Main.RunOnUIThread(() =>
                 {
-                    if (Main.listingHelper.ScreensList.Count == 1)
-                        Main.listingHelper.SetScreen(0);
                     Main.listingHelper.PrimeRewards.Clear();
-                    Main.listingHelper.Show();
-                    Main.listingHelper.Topmost = true;
-                    Main.listingHelper.Topmost = false;
                 });
+
             });
         }
 

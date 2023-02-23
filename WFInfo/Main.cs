@@ -25,7 +25,9 @@ namespace WFInfo
         public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
         public static SettingsWindow settingsWindow = new SettingsWindow();
+        public static ThemeAdjuster themeAdjuster = new ThemeAdjuster();
         public static VerifyCount verifyCount = new VerifyCount();
+        public static AutoCount autoCount = new AutoCount();
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;
         public static UpdateDialogue update;
@@ -110,6 +112,12 @@ namespace WFInfo
             if (OCR.Warframe != null && OCR.Warframe.HasExited && LastMarketStatus != "invisible")
             {//set user offline if Warframe has closed but no new game was found
                 Debug.WriteLine($"Warframe was detected as closed");
+                //reset warframe process variables, and reset LogCapture so new game process gets noticed
+                dataBase.DisableLogCapture();
+                OCR.Warframe.Dispose();
+                OCR.Warframe = null;
+                if (ApplicationSettings.GlobalReadonlySettings.Auto)
+                    dataBase.EnableLogCapture();
 
                 await Task.Run(async () =>
                 {
@@ -304,11 +312,16 @@ namespace WFInfo
             }
             else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying)
             {
+                if (_settings.Display != Display.Overlay && !_settings.AutoList && !_settings.AutoCSV && !_settings.AutoCount)
+                {
+                    Overlay.rewardsDisplaying = false; //only "naturally" set to false on overlay disappearing and/or specific log message with auto-list enabled
+                    return;
+                }
                 Task.Run((() =>
                 {
                     lastClick = System.Windows.Forms.Cursor.Position;
                     int index = OCR.GetSelectedReward(lastClick);
-                    Debug.WriteLine(index);
+                    Main.AddLog("Chosen reward index: " + index);
                     if (index < 0) return;
                     listingHelper.SelectedRewardIndex = (short)index;
                 }));

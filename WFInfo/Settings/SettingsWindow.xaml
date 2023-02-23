@@ -10,6 +10,7 @@
         Title="Settings"
         MaxWidth="334"
         MinWidth="334"
+        Width="334"
         Height="634"
         BorderBrush="#FF707070"
         WindowStyle="None"
@@ -17,6 +18,13 @@
         d:DataContext="{d:DesignInstance Type=settings:SettingsWindow}"
         AllowsTransparency="True"
         ResizeMode="CanResizeWithGrip">
+    <Window.Resources>
+        <ObjectDataProvider x:Key="enumWFTheme" MethodName="GetValues" ObjectType="{x:Type wfInfo:WFtheme}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="wfInfo:WFtheme"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
     <Grid MouseDown="MouseDown"
           PreviewMouseDown="ActivationMouseDown"
           Background="#FF1B1B1B"
@@ -374,6 +382,51 @@
                 <Border Padding="0"
                         DockPanel.Dock="Top">
                     <DockPanel>
+                        <Grid DockPanel.Dock="Top">
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="6*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="Theme" Grid.Column="0"/>
+                            <Label x:Name="ConfigureTheme_button" Grid.Column="1" MouseLeftButtonDown="ConfigureTheme_button_MouseLeftButtonDown" ToolTip="Configure Custom Theme" Margin="0,5,10,5" Padding="3"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+                                <Label.Style>
+                                    <Style>
+                                        <Setter Property="ContentControl.Content">
+                                            <Setter.Value>
+                                                <Image Source="../Resources/Settings.png" Stretch="Uniform" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                                    <Condition Property="UIElement.IsEnabled" Value="True"/>
+                                                </MultiTrigger.Conditions>
+                                                <Setter Property="ContentControl.Content">
+                                                    <Setter.Value>
+                                                        <Image Source="../Resources/Settings_h.png" Stretch="Uniform" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </MultiTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Label.Style>
+                            </Label>
+                            <ComboBox 
+                                          Grid.Column="2"
+                                          x:Name="themeSelectionComboBox"
+                                          FontSize="14"
+                                          FontFamily="{DynamicResource Roboto}"
+                                          Background="#FF1B1B1B"
+                                          BorderBrush="#FF0F0F0F"
+                                          ItemsSource="{Binding Source={StaticResource enumWFTheme}}"
+                                          SelectedItem="{Binding SettingsViewModel.ThemeSelection}"
+                                          Margin="5,4" Template="{DynamicResource ComboBoxTemplate}" Style="{DynamicResource ComboBoxStyle1}">
+
+                            </ComboBox>
+                        </Grid>
                         <Label MouseLeftButtonDown="ClickCreateDebug"
                                Padding="5"
                                DockPanel.Dock="Right"
@@ -417,18 +470,24 @@
                         </Border>
                         <Border DockPanel.Dock="Top"
                                 Style="{StaticResource NestedBorder}">
-                            <UniformGrid Rows="1">
+                            <UniformGrid Rows="2">
 
                                 <CheckBox x:Name="autoCheckbox"
-                                          DockPanel.Dock="Right"
                                           Content="Auto"
                                           ToolTip="Automatically detects when the relic screen is visible."
                                           Click="AutoClicked" />
                                 <CheckBox x:Name="Autolist"
-                                          DockPanel.Dock="Left"
-                                          Content="Auto list"
+                                          Content="Auto List"
                                           ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto"
                                           IsChecked="{Binding SettingsViewModel.AutoList, Mode=TwoWay}" />
+                                <CheckBox x:Name="Autocsv"
+                                          Content="Auto CSV"
+                                          ToolTip="Save reward options and choice to CSV file in application directory (%appdata%/WFInfo%)"
+                                          IsChecked="{Binding SettingsViewModel.AutoCSV, Mode=TwoWay}" />
+                                <CheckBox x:Name="Autoadd"
+                                          Content="Auto Add"
+                                          ToolTip="Spawns a dialogue for increasing owned item count whenever the end of mission is detected, requires auto"
+                                          IsChecked="{Binding SettingsViewModel.AutoCount, Mode=TwoWay}" />
                             </UniformGrid>
                         </Border>
                     </DockPanel>

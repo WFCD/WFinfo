@@ -236,18 +236,30 @@ namespace WFInfo.Settings
         public bool AutoList
         {
             get => _settings.AutoList;
-            set { 
+            set
+            {
                 _settings.AutoList = value;
-                RaisePropertyChanged(); 
+                RaisePropertyChanged();
             }
         }
 
-        public bool DoDoubleCheck
+
+        public bool AutoCSV
         {
-            get => _settings.DoDoubleCheck;
-            set { 
-                _settings.DoDoubleCheck = value;
-                RaisePropertyChanged(); 
+            get => _settings.AutoCSV;
+            set
+            {
+                _settings.AutoCSV = value;
+                RaisePropertyChanged();
+            }
+        }
+        public bool AutoCount
+        {
+            get => _settings.AutoCount;
+            set
+            {
+                _settings.AutoCount = value;
+                RaisePropertyChanged();
             }
         }
 
@@ -384,6 +396,267 @@ namespace WFInfo.Settings
             set
             {
                 _settings.MaxOverlayWidth = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public WFtheme ThemeSelection
+        {
+            get => _settings.ThemeSelection;
+            set
+            {
+                _settings.ThemeSelection = value;
+                RaisePropertyChanged();
+            }
+        }
+        public bool CF_usePrimaryHSL { get => _settings.CF_usePrimaryHSL;
+            set 
+            {
+                _settings.CF_usePrimaryHSL = value;
+                RaisePropertyChanged();
+            }
+        }
+        public bool CF_usePrimaryRGB
+        {
+            get => _settings.CF_usePrimaryRGB;
+            set
+            {
+                _settings.CF_usePrimaryRGB = value;
+                RaisePropertyChanged();
+            }
+        }
+        public bool CF_useSecondaryHSL
+        {
+            get => _settings.CF_useSecondaryHSL;
+            set
+            {
+                _settings.CF_useSecondaryHSL = value;
+                RaisePropertyChanged();
+            }
+        }
+        public bool CF_useSecondaryRGB
+        {
+            get => _settings.CF_useSecondaryRGB;
+            set
+            {
+                _settings.CF_useSecondaryRGB = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_pHueMax
+        {
+            get => _settings.CF_pHueMax;
+            set
+            {
+                _settings.CF_pHueMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_pHueMin
+        {
+            get => _settings.CF_pHueMin;
+            set
+            {
+                _settings.CF_pHueMin = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_pSatMax
+        {
+            get => _settings.CF_pSatMax;
+            set
+            {
+                _settings.CF_pSatMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_pSatMin
+        {
+            get => _settings.CF_pSatMin;
+            set
+            {
+                _settings.CF_pSatMin = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_pBrightMax
+        {
+            get => _settings.CF_pBrightMax;
+            set
+            {
+                _settings.CF_pBrightMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_pBrightMin
+        {
+            get => _settings.CF_pBrightMin;
+            set
+            {
+                _settings.CF_pBrightMin = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_pRMax
+        {
+            get => _settings.CF_pRMax;
+            set
+            {
+                _settings.CF_pRMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_pRMin
+        {
+            get => _settings.CF_pRMin;
+            set
+            {
+                _settings.CF_pRMin = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_pGMax
+        {
+            get => _settings.CF_pGMax;
+            set
+            {
+                _settings.CF_pGMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_pGMin
+        {
+            get => _settings.CF_pGMin;
+            set
+            {
+                _settings.CF_pGMin = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_pBMax
+        {
+            get => _settings.CF_pBMax;
+            set
+            {
+                _settings.CF_pBMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_pBMin
+        {
+            get => _settings.CF_pBMin;
+            set
+            {
+                _settings.CF_pBMin = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public float CF_sHueMax
+        {
+            get => _settings.CF_sHueMax;
+            set
+            {
+                _settings.CF_sHueMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_sHueMin
+        {
+            get => _settings.CF_sHueMin;
+            set
+            {
+                _settings.CF_sHueMin = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_sSatMax
+        {
+            get => _settings.CF_sSatMax;
+            set
+            {
+                _settings.CF_sSatMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_sSatMin
+        {
+            get => _settings.CF_sSatMin;
+            set
+            {
+                _settings.CF_sSatMin = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_sBrightMax
+        {
+            get => _settings.CF_sBrightMax;
+            set
+            {
+                _settings.CF_sBrightMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public float CF_sBrightMin
+        {
+            get => _settings.CF_sBrightMin;
+            set
+            {
+                _settings.CF_sBrightMin = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_sRMax
+        {
+            get => _settings.CF_sRMax;
+            set
+            {
+                _settings.CF_sRMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_sRMin
+        {
+            get => _settings.CF_sRMin;
+            set
+            {
+                _settings.CF_sRMin = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_sGMax
+        {
+            get => _settings.CF_sGMax;
+            set
+            {
+                _settings.CF_sGMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_sGMin
+        {
+            get => _settings.CF_sGMin;
+            set
+            {
+                _settings.CF_sGMin = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_sBMax
+        {
+            get => _settings.CF_sBMax;
+            set
+            {
+                _settings.CF_sBMax = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int CF_sBMin
+        {
+            get => _settings.CF_sBMin;
+            set
+            {
+                _settings.CF_sBMin = value;
                 RaisePropertyChanged();
             }
         }

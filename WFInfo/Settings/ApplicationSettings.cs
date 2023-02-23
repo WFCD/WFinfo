@@ -67,6 +67,8 @@ namespace WFInfo.Settings
         public int OverlayXOffsetValue { get; set; } = 0;
         public int OverlayYOffsetValue { get; set; } = 0;
         public bool AutoList { get; set; } = false;
+        public bool AutoCSV { get; set; } = false;
+        public bool AutoCount { get; set; } = false;
         public bool DoDoubleCheck { get; set; } = true;
         public double MaximumEfficiencyValue { get; set; } = 9.5;
         public double MinimumEfficiencyValue { get; set; } = 4.5;
@@ -81,6 +83,36 @@ namespace WFInfo.Settings
         public double SnapColEmptyDensity { get; set; } = 0.005;
         public int MinOverlayWidth { get; set; } = 120;
         public int MaxOverlayWidth { get; set; } = 160;
+
+        public WFtheme ThemeSelection { get; set; } = WFtheme.AUTO;
+        public bool CF_usePrimaryHSL { get; set; } = false;
+        public bool CF_usePrimaryRGB { get; set; } = false;
+        public bool CF_useSecondaryHSL { get; set; } = false;
+        public bool CF_useSecondaryRGB { get; set; } = false;
+        public float CF_pHueMax { get; set; } = 360.0F;
+        public float CF_pHueMin { get; set; } = 0.0F;
+        public float CF_pSatMax { get; set; } = 1.0F;
+        public float CF_pSatMin { get; set; } = 0.0F;
+        public float CF_pBrightMax { get; set; } = 1.0F;
+        public float CF_pBrightMin { get; set; } = 0.0F;
+        public int CF_pRMax { get; set; } = 255;
+        public int CF_pRMin { get; set; } = 0;
+        public int CF_pGMax { get; set; } = 255;
+        public int CF_pGMin { get; set; } = 0;
+        public int CF_pBMax { get; set; } = 255;
+        public int CF_pBMin { get; set; } = 0;
+        public float CF_sHueMax { get; set; } = 360.0F;
+        public float CF_sHueMin { get; set; } = 0.0F;
+        public float CF_sSatMax { get; set; } = 1.0F;
+        public float CF_sSatMin { get; set; } = 0.0F;
+        public float CF_sBrightMax { get; set; } = 1.0F;
+        public float CF_sBrightMin { get; set; } = 0.0F;
+        public int CF_sRMax { get; set; } = 255;
+        public int CF_sRMin { get; set; } = 0;
+        public int CF_sGMax { get; set; } = 255;
+        public int CF_sGMin { get; set; } = 0;
+        public int CF_sBMax { get; set; } = 255;
+        public int CF_sBMin { get; set; } = 0;
         public string Ignored { get; set; } = null;
         [OnError]
         internal void OnError(StreamingContext context, ErrorContext errorContext)
