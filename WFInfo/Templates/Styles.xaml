@@ -373,7 +373,7 @@
     <SolidColorBrush x:Key="GlyphBrush" Color="#444" />
     <SolidColorBrush x:Key="NormalBrush" Color="#888" />
     <SolidColorBrush x:Key="NormalBorderBrush" Color="#888" />
-    <SolidColorBrush x:Key="HorizontalNormalBrush" Color="#FF686868" />
+    <SolidColorBrush x:Key="HorizontalNormalBrush" Color="#FF1E80D2" />
     <SolidColorBrush x:Key="HorizontalNormalBorderBrush" Color="#888" />
 
     <LinearGradientBrush x:Key="ListBoxBackgroundBrush" StartPoint="0,0" EndPoint="1,0.001">

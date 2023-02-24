@@ -109,6 +109,7 @@ namespace WFInfo
             if (image != null)
             {
                 unfiltered = image;
+                Main.RunOnUIThread(() => { ShowUnfiltered(null, null); });
             }
 
         }
@@ -150,6 +151,7 @@ namespace WFInfo
                             if (image != null)
                             {
                                 unfiltered = image;
+                                Main.RunOnUIThread(() => { ShowUnfiltered(null, null); });
                             }
                         });
                 }
@@ -157,6 +159,125 @@ namespace WFInfo
                 {
                     Main.StatusUpdate("Failed to load image", 1);
                 }
+            }
+        }
+
+        private void ExportFilterJson(object sender, RoutedEventArgs e)
+        {
+            JObject exp = new JObject
+                {
+                    { "CF_usePrimaryHSL", _viewModel.CF_usePrimaryHSL },
+                    { "CF_pHueMax", _viewModel.CF_pHueMax },
+                    { "CF_pHueMin", _viewModel.CF_pHueMin },
+                    { "CF_pSatMax", _viewModel.CF_pSatMax },
+                    { "CF_pSatMin", _viewModel.CF_pSatMin },
+                    { "CF_pBrightMax", _viewModel.CF_pBrightMax },
+                    { "CF_pBrightMin", _viewModel.CF_pBrightMin },
+
+                    { "CF_usePrimaryRGB", _viewModel.CF_usePrimaryRGB },
+                    { "CF_pRMax", _viewModel.CF_pRMax },
+                    { "CF_pRMin", _viewModel.CF_pRMin },
+                    { "CF_pGMax", _viewModel.CF_pGMax },
+                    { "CF_pGMin", _viewModel.CF_pGMin },
+                    { "CF_pBMax", _viewModel.CF_pBMax },
+                    { "CF_pBMin", _viewModel.CF_pBMin },
+
+                    { "CF_useSecondaryHSL", _viewModel.CF_useSecondaryHSL },
+                    { "CF_sHueMax", _viewModel.CF_sHueMax },
+                    { "CF_sHueMin", _viewModel.CF_sHueMin },
+                    { "CF_sSatMax", _viewModel.CF_sSatMax },
+                    { "CF_sSatMin", _viewModel.CF_sSatMin },
+                    { "CF_sBrightMax", _viewModel.CF_sBrightMax },
+                    { "CF_sBrightMin", _viewModel.CF_sBrightMin },
+
+                    { "CF_useSecondaryRGB", _viewModel.CF_useSecondaryRGB },
+                    { "CF_sRMax", _viewModel.CF_sRMax },
+                    { "CF_sRMin", _viewModel.CF_sRMin },
+                    { "CF_sGMax", _viewModel.CF_sGMax },
+                    { "CF_sGMin", _viewModel.CF_sGMin },
+                    { "CF_sBMax", _viewModel.CF_sBMax },
+                    { "CF_sBMin", _viewModel.CF_sBMin }
+                };
+            filterTextBox.Text = JsonConvert.SerializeObject(exp, Formatting.None);
+        }
+
+        private void ImportFilterJson(object sender, RoutedEventArgs e)
+        {
+            string input = filterTextBox.Text;
+            try
+            {
+                //try to read all parameters to temporary variables
+                JObject json = JsonConvert.DeserializeObject<JObject>(input);
+                bool CF_usePrimaryHSL = json["CF_usePrimaryHSL"].ToObject<bool>();
+                float CF_pHueMax = json["CF_pHueMax"].ToObject<float>();
+                float CF_pHueMin = json["CF_pHueMin"].ToObject<float>();
+                float CF_pSatMax = json["CF_pSatMax"].ToObject<float>();
+                float CF_pSatMin = json["CF_pSatMin"].ToObject<float>();
+                float CF_pBrightMax = json["CF_pBrightMax"].ToObject<float>();
+                float CF_pBrightMin = json["CF_pBrightMin"].ToObject<float>();
+
+                bool CF_usePrimaryRGB = json["CF_usePrimaryRGB"].ToObject<bool>();
+                int CF_pRMax = json["CF_pRMax"].ToObject<int>();
+                int CF_pRMin = json["CF_pRMin"].ToObject<int>();
+                int CF_pGMax = json["CF_pGMax"].ToObject<int>();
+                int CF_pGMin = json["CF_pGMin"].ToObject<int>();
+                int CF_pBMax = json["CF_pBMax"].ToObject<int>();
+                int CF_pBMin = json["CF_pBMin"].ToObject<int>();
+
+                bool CF_useSecondaryHSL = json["CF_useSecondaryHSL"].ToObject<bool>();
+                float CF_sHueMax = json["CF_sHueMax"].ToObject<float>();
+                float CF_sHueMin = json["CF_sHueMin"].ToObject<float>();
+                float CF_sSatMax = json["CF_sSatMax"].ToObject<float>();
+                float CF_sSatMin = json["CF_sSatMin"].ToObject<float>();
+                float CF_sBrightMax = json["CF_sBrightMax"].ToObject<float>();
+                float CF_sBrightMin = json["CF_sBrightMin"].ToObject<float>();
+
+                bool CF_useSecondaryRGB = json["CF_useSecondaryRGB"].ToObject<bool>();
+                int CF_sRMax = json["CF_sRMax"].ToObject<int>();
+                int CF_sRMin = json["CF_sRMin"].ToObject<int>();
+                int CF_sGMax = json["CF_sGMax"].ToObject<int>();
+                int CF_sGMin = json["CF_sGMin"].ToObject<int>();
+                int CF_sBMax = json["CF_sBMax"].ToObject<int>();
+                int CF_sBMin = json["CF_sBMin"].ToObject<int>();
+
+
+                //all parameters read successfully, apply to actual settings
+                _viewModel.CF_usePrimaryHSL = CF_usePrimaryHSL;
+                _viewModel.CF_pHueMax = CF_pHueMax;
+                _viewModel.CF_pHueMin = CF_pHueMin;
+                _viewModel.CF_pSatMax = CF_pSatMax;
+                _viewModel.CF_pSatMin = CF_pSatMin;
+                _viewModel.CF_pBrightMax = CF_pBrightMax;
+                _viewModel.CF_pBrightMin = CF_pBrightMin;
+
+                _viewModel.CF_usePrimaryRGB = CF_usePrimaryRGB;
+                _viewModel.CF_pRMax = CF_pRMax;
+                _viewModel.CF_pRMin = CF_pRMin;
+                _viewModel.CF_pGMax = CF_pGMax;
+                _viewModel.CF_pGMin = CF_pGMin;
+                _viewModel.CF_pBMax = CF_pBMax;
+                _viewModel.CF_pBMin = CF_pBMin;
+
+                _viewModel.CF_useSecondaryHSL = CF_useSecondaryHSL;
+                _viewModel.CF_sHueMax = CF_sHueMax;
+                _viewModel.CF_sHueMin = CF_sHueMin;
+                _viewModel.CF_sSatMax = CF_sSatMax;
+                _viewModel.CF_sSatMin = CF_sSatMin;
+                _viewModel.CF_sBrightMax = CF_sBrightMax;
+                _viewModel.CF_sBrightMin = CF_sBrightMin;
+
+                _viewModel.CF_useSecondaryRGB = CF_useSecondaryRGB;
+                _viewModel.CF_sRMax = CF_sRMax;
+                _viewModel.CF_sRMin = CF_sRMin;
+                _viewModel.CF_sGMax = CF_sGMax;
+                _viewModel.CF_sGMin = CF_sGMin;
+                _viewModel.CF_sBMax = CF_sBMax;
+                _viewModel.CF_sBMin = CF_sBMin;
+            }
+            catch (Exception exc)
+            {
+                Main.AddLog("Custom Filter Import failed. Input: " + Environment.NewLine + input + Environment.NewLine + "Custom filter import error message: " + exc.Message);
+                Main.SpawnErrorPopup(DateTime.UtcNow);
             }
         }
 
