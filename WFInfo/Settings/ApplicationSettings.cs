@@ -113,6 +113,7 @@ namespace WFInfo.Settings
         public int CF_sGMin { get; set; } = 0;
         public int CF_sBMax { get; set; } = 255;
         public int CF_sBMin { get; set; } = 0;
+        public long FixedAutoDelay { get; set; } = 2000L;
         public string Ignored { get; set; } = null;
         [OnError]
         internal void OnError(StreamingContext context, ErrorContext errorContext)
