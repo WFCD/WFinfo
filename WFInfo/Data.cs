@@ -1158,19 +1158,28 @@ namespace WFInfo
                 var watch = Stopwatch.StartNew();
                 long stop = watch.ElapsedMilliseconds + 5000;
                 long wait = watch.ElapsedMilliseconds;
+                long fixedStop = watch.ElapsedMilliseconds + ApplicationSettings.GlobalReadonlySettings.FixedAutoDelay;
 
                 OCR.UpdateWindow();
 
-                while (watch.ElapsedMilliseconds < stop)
+                if (ApplicationSettings.GlobalReadonlySettings.ThemeSelection == WFtheme.AUTO)
                 {
-                    if (watch.ElapsedMilliseconds <= wait) continue;
-                    wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
-                    OCR.GetThemeWeighted(out double diff);
-                    if (!(diff > 40)) continue;
-                    while (watch.ElapsedMilliseconds < wait) ;
-                    Main.AddLog("started auto processing");
+                    while (watch.ElapsedMilliseconds < stop)
+                    {
+                        if (watch.ElapsedMilliseconds <= wait) continue;
+                        wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
+                        OCR.GetThemeWeighted(out double diff);
+                        if (!(diff > 40)) continue;
+                        while (watch.ElapsedMilliseconds < wait) ;
+                        Main.AddLog("started auto processing");
+                        OCR.ProcessRewardScreen();
+                        break;
+                    }
+                } else
+                {
+                    while (watch.ElapsedMilliseconds < fixedStop) ;
+                    Main.AddLog("started auto processing (fixed delay)");
                     OCR.ProcessRewardScreen();
-                    break;
                 }
                 watch.Stop();
             }

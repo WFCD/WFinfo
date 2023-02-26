@@ -87,6 +87,7 @@ namespace WFInfo.Settings
         int CF_sGMin { get; }
         int CF_sBMax { get; }
         int CF_sBMin { get; }
+        long FixedAutoDelay { get; }
         string Ignored { get; }
     }
 }
