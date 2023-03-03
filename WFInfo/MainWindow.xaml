@@ -171,7 +171,7 @@
         </Label>
         <TextBlock                 Text=" Status:"    FontSize="13" Margin="1,0,0,1"
                                    Grid.Column="0" FontFamily="{StaticResource Roboto_Condensed_Bold}" Height="32" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="43" ToolTip="The latest status update provided from the program"/>
-        <TextBlock x:Name="Status" Text="Loading..." FontSize="13" Margin="44,0,43,1"     FontFamily="{StaticResource Roboto_Condensed}" Height="32" VerticalAlignment="Bottom" ToolTip="Click to open data folder" MouseLeftButtonDown="OpenAppDataFolder"/>
+        <TextBlock x:Name="Status" Text="Loading..." TextWrapping="Wrap" FontSize="13" Margin="44,0,43,1"     FontFamily="{StaticResource Roboto_Condensed}" Height="32" VerticalAlignment="Bottom" ToolTip="Click to open data folder" MouseLeftButtonDown="OpenAppDataFolder"/>
         <Label Content="Market Data:" Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="26,24,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="24" Width="101"/>
         <Label x:Name="MarketData"       Content="Loading..."   Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="132,24,0,0" VerticalAlignment="Top" Height="26" HorizontalAlignment="Left" Width="156"/>
         <Label Content="Prime Data:"  Background="{x:Null}" Padding="5,2,5,5" FontSize="16" Margin="26,48,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="23" Width="101"/>
