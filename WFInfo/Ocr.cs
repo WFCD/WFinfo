@@ -2520,6 +2520,10 @@ namespace WFInfo
                     } else if (process.MainWindowTitle.Contains("Warframe") && process.MainWindowTitle.Contains("GeForce NOW"))
                     {
                         GameIsStreamed = true;
+                        Main.RunOnUIThread(() =>
+                        {
+                            Main.SpawnGFNWarning();
+                        });
                         Main.AddLog("GFN -- Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
 
                         HandleRef tmpHandle = new HandleRef(process, process.MainWindowHandle);

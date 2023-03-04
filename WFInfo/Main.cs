@@ -30,6 +30,7 @@ namespace WFInfo
         public static AutoCount autoCount = new AutoCount();
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;
+        public static GFNWarning gfnWarning;
         public static UpdateDialogue update;
         public static SnapItOverlay snapItOverlayWindow = new SnapItOverlay();
         public static SearchIt searchBox = new SearchIt();
@@ -369,6 +370,11 @@ namespace WFInfo
         public static void SpawnFullscreenReminder()
         {
             fullscreenpopup = new FullscreenReminder();
+        }
+
+        public static void SpawnGFNWarning()
+        {
+            gfnWarning = new GFNWarning();
         }
 
 
