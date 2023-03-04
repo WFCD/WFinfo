@@ -55,5 +55,7 @@
             <TextBlock x:Name="primeSetPlatText" Text="Full set price: XXX"/>
         </Viewbox>
         <Image x:Name="setPlatImage" Source="Resources/plat.gif" Margin="115,0,0,15" Height="15" Width="15" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+
+        <Image x:Name="warningImage" Visibility="Visible" ToolTip="This item has higher-than-normal probability of being a misread" Source="Resources/warning-sign.png" Margin="0,0,180,15" Height="30" Width="30" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
     </Grid>
 </Window>

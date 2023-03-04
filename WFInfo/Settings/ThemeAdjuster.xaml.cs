@@ -86,7 +86,7 @@ namespace WFInfo
                 .Where(f => f.Name.Contains("FullScreenShot"))
                 .ToList();
             files = files.OrderBy(f => f.CreationTimeUtc).ToList();
-
+            files.Reverse();
 
             Bitmap image = null;
             try

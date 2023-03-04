@@ -885,11 +885,12 @@ namespace WFInfo
         //	return GetPartNameHuman(searchQuery, out _);
         //}
 
-        public string GetPartName(string name, out int low, bool suppressLogging)
+        public string GetPartName(string name, out int low, bool suppressLogging, out bool multipleLowest)
         { // Checks the Levenshtein Distance of a string and returns the index in Names() of the closest part
             string lowest = null;
             string lowest_unfiltered = null;
             low = 9999;
+            multipleLowest = false;
             foreach (KeyValuePair<string, JToken> prop in nameData)
             {
                 int val = LevenshteinDistance(prop.Key, name);
@@ -898,7 +899,13 @@ namespace WFInfo
                     low = val;
                     lowest = prop.Value.ToObject<string>();
                     lowest_unfiltered = prop.Key;
+                    multipleLowest = false;
                 }
+                else if (val == low)
+                {
+                    multipleLowest = true;
+                }
+
                 if (val == low && lowest.StartsWith("Gara") && prop.Key.StartsWith("Ivara")) //If both
                 {
                     lowest = prop.Value.ToObject<string>();
@@ -1274,7 +1281,7 @@ namespace WFInfo
 
             marketSocket.OnOpen += (sender, e) =>
             {
-                marketSocket.Send(OCR.VerifyWarframe()
+                marketSocket.Send( (OCR.VerifyWarframe() && !OCR.GameIsStreamed)
                     ? "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}"
                     : "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
             };

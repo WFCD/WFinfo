@@ -43,6 +43,10 @@ namespace WFInfo
         private static double setPlatImageBottom = 15.0;
         private static double setPlatImageHeightWidth = 15.0;
 
+        private static double warningImageMarginRight = 180.0;
+        private static double warningImageBottom = 15.0;
+        private static double warningImageHeightWidth = 30.0;
+
         private static double platMarginRightSanpit = 187.0;
         private static double platMarginLeftSanpit = 30.0;
 
@@ -111,7 +115,7 @@ namespace WFInfo
             partText.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 215));
         }
 
-        public void LoadTextData(string name, string plat, string primeSetPlat, string ducats, string volume, bool vaulted, bool mastered, string owned, string detected, bool hideRewardInfo)
+        public void LoadTextData(string name, string plat, string primeSetPlat, string ducats, string volume, bool vaulted, bool mastered, string owned, string detected, bool hideRewardInfo, bool showWarningTriangle)
         {
             ducatText.Foreground = bluBrush;
             ducatText.FontWeight = FontWeights.Normal;
@@ -132,6 +136,14 @@ namespace WFInfo
             else
             {
                 BackgroundGrid.Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+            }
+
+            if (showWarningTriangle)
+            {
+                warningImage.Visibility = Visibility.Visible;
+            } else
+            {
+                warningImage.Visibility = Visibility.Hidden;
             }
 
             partText.Text = name;
@@ -288,6 +300,14 @@ namespace WFInfo
             setPlatImage.Margin = margin;
             setPlatImage.Height = setPlatImageHeightWidth * scale;
             setPlatImage.Width = setPlatImage.Height;
+
+            // Warning_Triangle_IMG
+            margin = warningImage.Margin;
+            margin.Bottom = warningImageBottom * scale;
+            margin.Right = warningImageMarginRight * scale;
+            warningImage.Margin = margin;
+            warningImage.Height = warningImageHeightWidth * scale;
+            warningImage.Width = warningImage.Height;
 
             // Ducat_IMG
             margin = ducatImage.Margin;

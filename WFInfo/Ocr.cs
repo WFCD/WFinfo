@@ -104,6 +104,7 @@ namespace WFInfo
         }
         public static HandleRef HandleRef { get; private set; }
         public static Process Warframe = null;
+        public static bool GameIsStreamed = false;
         public static Point center;
         public static Rectangle window;
 
@@ -243,7 +244,7 @@ namespace WFInfo
                 {
                     string part = firstChecks[i];
                     #region found a part
-                    string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false);
+                    string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false, out _);
                     string primeSetName = Main.dataBase.GetSetName(correctName);
                     JObject job = (JObject)Main.dataBase.marketData.GetValue(correctName);
                     JObject primeSet = (JObject)Main.dataBase.marketData.GetValue(primeSetName);
@@ -324,7 +325,7 @@ namespace WFInfo
 
                         if (_settings.IsOverlaySelected)
                         {
-                            Main.overlays[partNumber].LoadTextData(correctName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo);
+                            Main.overlays[partNumber].LoadTextData(correctName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo, false);
                             Main.overlays[partNumber].Resize(overWid);
                             Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / dpiScaling), startY + (int)(_settings.OverlayYOffsetValue / dpiScaling), _settings.Delay);
                         }
@@ -658,17 +659,25 @@ namespace WFInfo
             snapItImageFiltered.Dispose();
             if (!File.Exists(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv") && _settings.SnapitExport)
                 csv += "ItemName,Plat,Ducats,Volume,Vaulted,Owned,partsDetected" + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + Environment.NewLine;
+            int resultCount = foundParts.Count;
             for (int i = 0; i < foundParts.Count; i++)
             {
                 var part = foundParts[i];
                 if (!PartNameValid(part.Name))
                 {
                     foundParts.RemoveAt(i--); //remove invalid part from list to not clog VerifyCount. Decrement to not skip any entries
+                    resultCount--;
                     continue;
                 }
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
-                string name = Main.dataBase.GetPartName(part.Name, out firstProximity[0], false);
+                string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool multipleLowest);
                 string primeSetName = Main.dataBase.GetSetName(name);
+                if (levenDist > Math.Min(part.Name.Length, name.Length) / 3 || multipleLowest)
+                {
+                    //show warning triangle if the result is of questionable accuracy. The limit is basically arbitrary
+                    part.Warning = true;
+                }
+                bool doWarn = part.Warning;
                 part.Name = name;
                 foundParts[i] = part;
                 JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
@@ -708,15 +717,14 @@ namespace WFInfo
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, primeSetPlat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false);
+                    itemOverlay.LoadTextData(name, plat, primeSetPlat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false, doWarn);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), _settings.SnapItDelay);
                 });
             }
 
-
-            if (_settings.DoSnapItCount)
+            if (_settings.DoSnapItCount && resultCount > 0)
                 Main.RunOnUIThread(() =>
                 {
                     VerifyCount.ShowVerifyCount(foundParts);
@@ -725,8 +733,21 @@ namespace WFInfo
             if (Main.snapItOverlayWindow.tempImage != null)
                 Main.snapItOverlayWindow.tempImage.Dispose();
             end = watch.ElapsedMilliseconds;
-            Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
+            if (resultCount == 0)
+            {
+                Main.StatusUpdate("Couldn't find any items to display (took " + (end - start) + "ms) ", 1);
+                Main.RunOnUIThread(() =>
+                {
+                    Main.SpawnErrorPopup(DateTime.UtcNow);
+                });
+
+            } 
+            else
+            {
+                Main.StatusUpdate("Completed snapit Displaying(" + (end - start) + "ms)", 0);
+            }
             watch.Stop();
+            Main.AddLog("Snap-it finished, displayed reward count:" + resultCount + ", time: " + (end - start) + "ms");
             if (_settings.SnapitExport)
             {
                 File.AppendAllText(applicationDirectory + @"\export " + DateTime.UtcNow.ToString("yyyy-MM-dd", Main.culture) + ".csv", csv);
@@ -1036,12 +1057,8 @@ namespace WFInfo
             font.Dispose();
             if (numberTooLarge > .3 * foundItems.Count || numberTooFewCharacters > .4 * foundItems.Count)
             {
+                //Log old noise level heuristics
                 Main.AddLog("numberTooLarge: " + numberTooLarge + ", numberTooFewCharacters: " + numberTooFewCharacters + ", numberTooLargeButEnoughCharacters: " + numberTooLargeButEnoughCharacters + ", foundItems.Count: " + foundItems.Count);
-                //If there's a too large % of any error make a pop-up. These precentages are arbritary at the moment, a rough index.
-                Main.RunOnUIThread(() =>
-                {
-                    Main.SpawnErrorPopup(time);
-                });
             }
 
             filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
@@ -1517,8 +1534,8 @@ namespace WFInfo
                 InventoryItem part = foundParts[i];
                 if (!PartNameValid(part.Name + " Blueprint"))
                     continue;
-                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity, true); //add blueprint to name to check against prime drop table
-                string checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out int primeProximity, true); //also add prime to check if that gives better match. If so, this is a non-prime
+                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity, true, out _); //add blueprint to name to check against prime drop table
+                string checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out int primeProximity, true, out _); //also add prime to check if that gives better match. If so, this is a non-prime
                 Main.AddLog("Checking \"" + part.Name.Trim() +"\", (" + proximity +")\"" + name + "\", +prime (" + primeProximity + ")\"" + checkName + "\"");
 
                 //Decide if item is an actual prime, if so mark as mastered
@@ -2465,11 +2482,15 @@ namespace WFInfo
 
             Task.Run(() => {
                 foreach (Process process in Process.GetProcesses())
-                    if (process.ProcessName == "Warframe.x64") {
-                        if (process.MainWindowTitle == "Warframe") {
+                {
+                    if (process.ProcessName == "Warframe.x64")
+                    {
+                        if (process.MainWindowTitle == "Warframe")
+                        {
                             HandleRef = new HandleRef(process, process.MainWindowHandle);
 
                             Warframe = process;
+                            GameIsStreamed = false;
                             if (Main.dataBase.GetSocketAliveStatus())
                                 Debug.WriteLine("Socket was open in verify warframe");
                             Task.Run(async () =>
@@ -2479,22 +2500,58 @@ namespace WFInfo
                             Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
 
                             wfScreen = Screen.FromHandle(HandleRef.Handle);
-                            string screenType = (wfScreen == Screen.PrimaryScreen ? "primary" : "secondary");
+                            string screenType = (wfScreen.Primary ? "primary" : "secondary");
                             Main.AddLog("Warframe display: " + wfScreen.DeviceName + ", " + screenType);
 
                             //try and catch any UAC related issues
-                            try {
+                            try
+                            {
                                 bool _ = Warframe.HasExited;
                                 return true;
                             }
-                            catch (System.ComponentModel.Win32Exception e) {
+                            catch (System.ComponentModel.Win32Exception e)
+                            {
                                 Warframe = null;
                                 Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
                                 Main.StatusUpdate("Restart Warframe without admin privileges", 1);
                                 return _settings.Debug ? true : false;
                             }
                         }
+                    } else if (process.MainWindowTitle.Contains("Warframe") && process.MainWindowTitle.Contains("GeForce NOW"))
+                    {
+                        GameIsStreamed = true;
+                        Main.RunOnUIThread(() =>
+                        {
+                            Main.SpawnGFNWarning();
+                        });
+                        Main.AddLog("GFN -- Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
+
+                        HandleRef tmpHandle = new HandleRef(process, process.MainWindowHandle);
+                        Screen tmpScreen = Screen.FromHandle(tmpHandle.Handle);
+                        string screenType = (tmpScreen.Primary ? "primary" : "secondary");
+                        Main.AddLog("GFN -- Warframe display: " + tmpScreen.DeviceName + ", " + screenType);
+
+                        HandleRef = tmpHandle;
+                        wfScreen = tmpScreen;
+                        Warframe = process;
+                        //TODO: spawn popup about GeForce Now limitations
+
+                        //try and catch any UAC related issues
+                        try
+                        {
+                            bool _ = Warframe.HasExited;
+                            return true;
+                        }
+                        catch (System.ComponentModel.Win32Exception e)
+                        {
+                            Warframe = null;
+                            Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
+                            Main.StatusUpdate("Restart Warframe without admin privileges, or WFInfo with admin privileges", 1);
+                            return _settings.Debug ? true : false;
+                        }
                     }
+                }
+                    
                 if (!_settings.Debug) {
                     Main.AddLog("Did Not Detect Warframe Process");
                     Main.StatusUpdate("Unable to Detect Warframe Process", 1);
@@ -2626,11 +2683,12 @@ namespace WFInfo
 
     public struct InventoryItem
     {
-        public InventoryItem(string itemName, Rectangle boundingbox)
+        public InventoryItem(string itemName, Rectangle boundingbox, bool showWarning = false)
         {
             Name = itemName;
             Bounding = boundingbox;
             Count = 1; //if no label found, assume 1
+            Warning = showWarning;
         }
 
         static public T DeepCopy<T>(T obje)
@@ -2649,5 +2707,6 @@ namespace WFInfo
         public string Name { get; set; }
         public Rectangle Bounding { get; set; }
         public int Count { get; set; }
+        public bool Warning { get; set; }
     }
 }
