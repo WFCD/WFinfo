@@ -60,7 +60,7 @@ namespace WFInfo
                         continue;
                     }
 
-                    if (OCR.Warframe != null)
+                    if (OCR.Warframe != null && !OCR.GameIsStreamed)
                     {
                         using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
                         {

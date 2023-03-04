@@ -104,7 +104,7 @@ namespace WFInfo
         }
         private static async void TimeoutCheck()
         {
-            if (!await dataBase.IsJWTvalid().ConfigureAwait(true))
+            if (!await dataBase.IsJWTvalid().ConfigureAwait(true) || !OCR.GameIsStreamed)
                 return;
             DateTime now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
@@ -310,7 +310,7 @@ namespace WFInfo
 
 
             }
-            else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && Overlay.rewardsDisplaying)
+            else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && !OCR.GameIsStreamed && Overlay.rewardsDisplaying)
             {
                 if (_settings.Display != Display.Overlay && !_settings.AutoList && !_settings.AutoCSV && !_settings.AutoCount)
                 {

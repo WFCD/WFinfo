@@ -104,6 +104,7 @@ namespace WFInfo
         }
         public static HandleRef HandleRef { get; private set; }
         public static Process Warframe = null;
+        public static bool GameIsStreamed = false;
         public static Point center;
         public static Rectangle window;
 
@@ -2481,11 +2482,15 @@ namespace WFInfo
 
             Task.Run(() => {
                 foreach (Process process in Process.GetProcesses())
-                    if (process.ProcessName == "Warframe.x64") {
-                        if (process.MainWindowTitle == "Warframe") {
+                {
+                    if (process.ProcessName == "Warframe.x64")
+                    {
+                        if (process.MainWindowTitle == "Warframe")
+                        {
                             HandleRef = new HandleRef(process, process.MainWindowHandle);
 
                             Warframe = process;
+                            GameIsStreamed = false;
                             if (Main.dataBase.GetSocketAliveStatus())
                                 Debug.WriteLine("Socket was open in verify warframe");
                             Task.Run(async () =>
@@ -2495,22 +2500,54 @@ namespace WFInfo
                             Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
 
                             wfScreen = Screen.FromHandle(HandleRef.Handle);
-                            string screenType = (wfScreen == Screen.PrimaryScreen ? "primary" : "secondary");
+                            string screenType = (wfScreen.Primary ? "primary" : "secondary");
                             Main.AddLog("Warframe display: " + wfScreen.DeviceName + ", " + screenType);
 
                             //try and catch any UAC related issues
-                            try {
+                            try
+                            {
                                 bool _ = Warframe.HasExited;
                                 return true;
                             }
-                            catch (System.ComponentModel.Win32Exception e) {
+                            catch (System.ComponentModel.Win32Exception e)
+                            {
                                 Warframe = null;
                                 Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
                                 Main.StatusUpdate("Restart Warframe without admin privileges", 1);
                                 return _settings.Debug ? true : false;
                             }
                         }
+                    } else if (process.MainWindowTitle.Contains("Warframe") && process.MainWindowTitle.Contains("GeForce NOW"))
+                    {
+                        GameIsStreamed = true;
+                        Main.AddLog("GFN -- Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
+
+                        HandleRef tmpHandle = new HandleRef(process, process.MainWindowHandle);
+                        Screen tmpScreen = Screen.FromHandle(tmpHandle.Handle);
+                        string screenType = (tmpScreen.Primary ? "primary" : "secondary");
+                        Main.AddLog("GFN -- Warframe display: " + tmpScreen.DeviceName + ", " + screenType);
+
+                        HandleRef = tmpHandle;
+                        wfScreen = tmpScreen;
+                        Warframe = process;
+                        //TODO: spawn popup about GeForce Now limitations
+
+                        //try and catch any UAC related issues
+                        try
+                        {
+                            bool _ = Warframe.HasExited;
+                            return true;
+                        }
+                        catch (System.ComponentModel.Win32Exception e)
+                        {
+                            Warframe = null;
+                            Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
+                            Main.StatusUpdate("Restart Warframe without admin privileges, or WFInfo with admin privileges", 1);
+                            return _settings.Debug ? true : false;
+                        }
                     }
+                }
+                    
                 if (!_settings.Debug) {
                     Main.AddLog("Did Not Detect Warframe Process");
                     Main.StatusUpdate("Unable to Detect Warframe Process", 1);

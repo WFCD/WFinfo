@@ -1281,7 +1281,7 @@ namespace WFInfo
 
             marketSocket.OnOpen += (sender, e) =>
             {
-                marketSocket.Send(OCR.VerifyWarframe()
+                marketSocket.Send( (OCR.VerifyWarframe() && !OCR.GameIsStreamed)
                     ? "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}"
                     : "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
             };
