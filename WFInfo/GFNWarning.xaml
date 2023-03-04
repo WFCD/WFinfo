@@ -49,6 +49,7 @@
                            &#x0a;- Auto activation, and anything relying on it, does not work
                            &#x0a;  - This includes Auto List, Auto CSV and Auto Count
                            &#x0a;- Count Item component of Snap It is not expected to work
+                           &#x0a;- Snap It area selection may not focus on its own, requiring alt+tab
                            &#x0a;- Master It is not expected to work
                            &#x0a;- Closing and restarting of game may not be detected"
                            >
