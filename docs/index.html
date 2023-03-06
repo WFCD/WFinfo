@@ -176,7 +176,8 @@
                             <li><a href="#" data-tab="tab-4">Snap-it options</a></li>
                             <li><a href="#" data-tab="tab-5">Activation hotkeys</a></li>
                             <li><a href="#" data-tab="tab-6">Snap-it efficiency</a></li>
-                            <li><a href="#" data-tab="tab-7">Miscellaneous</a></li>
+                            <li><a href="#" data-tab="tab-7">Theme options</a></li>
+                            <li><a href="#" data-tab="tab-8">Miscellaneous</a></li>
                         </ul>
                         <div class="tabs">
 
@@ -262,6 +263,22 @@
                             <div class="tab tab-7" style="justify-content:center">
                                 <div class="image highlight">
                                     <div class="image fit">
+                                        <img src="images/Settings/ThemeSettings.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        Useful in cases where you have issues with theme detection or the standard theme presets. </br>
+
+                                        Use dropdown menu to override the automatic theme detection. In most cases, this should be left on <code>AUTO</code> </br>
+
+                                        Use the cog (settings icon) to modify the <code>CUSTOM</code> theme option, if the standard options are insufficent
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 8 -->
+                            <div class="tab tab-8" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
                                         <img src="images/Settings/Miscellaneous.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
                                     </div>
                                     <p class="caption">
@@ -269,10 +286,195 @@
                                         
                                         Clipboard will copy the results into your clipboard allowing you to paste it into the chat for other players (Ctrl + V)</br>
                                         
-                                        Auto list will only work with auto enabled, it wil spawn a listing screen whenever it detected rewards and an end of mission</br>
+                                        Auto List will only work with Auto enabled, it wil spawn a listing screen whenever it detected rewards and an end of mission</br>
+                                        
+                                        Auto CSV will only work with Auto enabled, it will record information about your reward choice in <code>%appdata%/WFInfo/rewardExport.csv</code></br>
+                                        
+                                        Auto Add will only work with Auto enabled, whenever it detected rewards and an end of mission, it will open an interface for increasing how many of the chosen reward you own according to WFInfo. 
+                                        See <code>Count Item</code> feature found under <code>Snap-it options</code></br>
                                         
                                         If you ever run into a problem running WFinfo then you might be asked by the developers for a "Debug zip", this contains information useful to the developers for debugging what went wrong.
                                         This button will generate a series of zip files that can be sent over discord (All are under 8mb)
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+         <!-- theme adjuster guide  -->
+         <div id="themeAdjuster">
+            <section class="wrapper style2">
+                <div class="inner">
+                    <header>
+                        <h2>Theme Adjuster guide</h2>
+                        <p>Configuring WFInfo to work together with Colorblind mode and any other color-changing effects. 
+                            <br> Open by pressing the cog in the Theme section within the Settings menu
+                        </p>
+                    </header>
+                    <!-- Tabbed Video Section -->
+                    <div class="flex flex-tabs">
+                        <ul class="tab-list">
+                            <li><a href="#" data-tab="tab-1" class="active">Overview</a></li>
+                            <li><a href="#" data-tab="tab-2">Loading a test image</a></li>
+                            <li><a href="#" data-tab="tab-3">Enabling and testing a filter</a></li>
+                            <li><a href="#" data-tab="tab-4">Adjusting a filter: Part 1</a></li>
+                            <li><a href="#" data-tab="tab-5">Adjusting a filter: Part 2</a></li>
+                            <li><a href="#" data-tab="tab-6">Adjusting a filter: Part 3</a></li>
+                            <li><a href="#" data-tab="tab-7">Adjusting a filter: Part 4</a></li>
+                            <li><a href="#" data-tab="tab-8">Using your custom theme filter</a></li>
+                            <li><a href="#" data-tab="tab-9">Sharing and importing</a></li>
+                        </ul>
+                        <div class="tabs">
+
+                            <!-- Tab 1 -->
+                            <div class="tab tab-1 active" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/FullView.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        The left side of this window is used for viewing the results of your custom theme filter
+                                        <br> The right side contains everything for controlling this menu and your custom theme filter
+                                        <br> What each button does will be explained in the later steps
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 2 -->
+                            <div class="tab tab-2" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/LoadButtons.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        To configure a theme properly, we need an image to test it on. 
+                                        <br> If you have recently tried using the reward screen scanning or snap-it feature, click <code>Load Last Use</code> to use it for testing. 
+                                        <br> If you want to use some other image instead, click <code>Load From File</code> and select which image you want to use.
+                                        <br>
+                                        <br> After using one of these buttons, the image will display on the left
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 3 -->
+                            <div class="tab tab-3" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/EnableAndShow.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        There are 4 filters in total, two that use RGB for describing colours and two that use HSL. 
+                                        <br> To start off with, select one of these filters and click the checkbox to enable it. Which one you select isn't important
+                                        <br> RGB and HSL describe colours in different ways, which could affect how good of a filter you can make. If you can't get a good enough result with one, you should try using the other
+                                        <br>
+                                        <br> <code>Show Unfiltered</code>> can be pressed at any time to show your original test image
+                                        <br> <code>Apply Filter</code> can be pressed to apply the active filters. A pixel will be black if it was within the assigned range for all parameters for at least one of the enabled filters, otherwise it will be white
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 4 -->
+                            <div class="tab tab-4" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/AdjustExample1.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        Here, I picked Primary HSL Filter and have resized the window to better see what the filter will be doing. The image in this example is using the Vitruvian theme with Tritanopia colorblind compensation
+                                        <br>
+                                        <br> I am now going to do the following:
+                                        <br> 1. Adjust one of the sliders, in this example I will be changing Primary Hue Max to about half. You can also write a number in the corresponding textbox, using <code>.</code> for decimals
+                                        <br> 2. Click <code>Apply Filter</code>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 5 -->
+                            <div class="tab tab-5" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/AdjustExample2.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        As we can see, the text is still black in this image, but so is a lot of other things. For you, the entire image may be black!
+                                        <br>
+                                        <br> We will now repeat this process, trying to find when the text switches from black to white
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 6 -->
+                            <div class="tab tab-6" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/AdjustExample3.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        After adjusting and applying the filter a few times, this time the text turned white!
+                                        <br> I know I'm close to the correct value for what I'm adjusting right now, so I'll adjust it just a bit more and it should be perfect!
+                                    </p>
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/AdjustExample4.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        There we go! Time to repeat the process for each of the other sliders. Don't forget that the min value should always be lower than its corresponding max value
+                                        <br>
+                                        <br> You may notice the text for Pyrana Prime Barrel in the bottom-right corner is still white. We'll cover that later
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 7 -->
+                            <div class="tab tab-7" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/AdjustExample5.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        After adjusting all the other values, and this filter turned out very well.
+                                        <br>
+                                        <br> However, the Pyrana Prime Barrel in the bottom-right corner isn't visible. Why is that?
+                                        <br> In the original image, I was hovering over the Pyrana Prime Barrel. The game uses a different color for this, so we'll need to use a second filter.
+                                        <br> To do this, simply enable another one of the filter options and repeat the adjustment steps, this time focusing on just the text for the hovered item.
+                                    </p>
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/AdjustExample6.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        Now this filter is complete, and ready for use!
+                                        <br> This example turned out really well. Even if you get a lot more noise than this, it can still be enough for WFInfo to work well.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 8 -->
+                            <div class="tab tab-8" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/ThemeOverride.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        Once you're done adjusting your custom filter, simply select <code>CUSTOM</code> in the Theme section of the settings menu
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Tab 9 -->
+                            <div class="tab tab-9" style="justify-content:center">
+                                <div class="image highlight">
+                                    <div class="image fit">
+                                        <img src="images/ThemeAdjuster/ImportExport.png" alt="" style="max-width:600px; margin-left: auto; margin-right: auto"/>
+                                    </div>
+                                    <p class="caption">
+                                        To share your newly customized filter with someone, click <code>Export Filter</code>. 
+                                        <br> The exported filter will appear in the text box above the buttons. 
+                                        <br>
+                                        <br> To import a filter, clear the textbox above the buttons, paste the filter into the text box above the button and click <code>Import Filter</code>
+                                        <br> <b>Importing a filter will delete your old filter</b>
                                     </p>
                                 </div>
                             </div>
@@ -398,6 +600,29 @@
                         <h2>WFInfo change log</h2>
                         <p>What was added in the latest releases?</p>
                     </header>
+
+                    <div class="inner" id="9.6.0">
+                        <div class="align-center">
+                            <h2 style="margin-bottom: 0px">9.6.0</h2>
+                        </div>
+                        <div class="flex flex-2">
+                            <div class="image col">
+                                <p class="caption">
+                                    Improve performance of searching equipment window
+                                    <br> Show set price on overlay
+                                    <br> Added Auto-CSV and Auto-Add
+                                    <br> Detect game close and reopen
+                                </p>
+                            </div>
+                            <div class="image col">
+                                <p class="caption">
+                                    Added limited GeForce Now support
+                                    <br> Added option to override theme detection
+                                    <br> Added Theme Adjuster, allowing manual configuration to support colorblind mode and any other color-changing effects
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="inner" id="9.5.6">
                         <div class="align-center">
