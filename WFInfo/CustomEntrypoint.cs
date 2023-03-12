@@ -17,9 +17,9 @@ namespace WFInfo
 {
     public class CustomEntrypoint
     {
-        private const string liblept = "leptonica-1.80.0";
-        private const string libtesseract = "tesseract41";
-        private const string tesseract_version_folder = "tesseract4";
+        private const string liblept = "leptonica-1.82.0";
+        private const string libtesseract = "tesseract50";
+        private const string tesseract_version_folder = "tesseract5";
 
         private static string[] list_of_dlls = new string[]
         {
@@ -32,11 +32,11 @@ namespace WFInfo
 
         private static string[] list_of_checksums = new string[]
         {
-                "f236077a6e5c1a558d5461841245a3d0",     //  x86/tesseract41
-                "bfc156ebfe3b86fbce3f24b475c19f20",     //  x86/leptonica-1.80.0
-                "a5dbd2c4a232f03913c206ed27eacb40",     //  x64/tesseract41
-                "35e3f58d3d868e244b103f901fb2c66d",     //  x64/leptonica-1.80.0
-                "02633504a3bb24517de50530bf6bc57c"      //  Tesseract
+                "a87ba6ac613b8ecb5ed033e57b871e6f",     //  x86/tesseract50
+                "e62f9ef3dd31df439fa2a37793b035db",     //  x86/leptonica-1.82.0
+                "446370b590a3c14e0fda0a2029b8e6fa",     //  x64/tesseract50
+                "2813455700fb7c1bc09738ca56ae7da7",     //  x64/leptonica-1.82.0
+                "528d4d1eb0e07cfe1370b592da6f49fd"      //  Tesseract
         };
 
         private static string[] list_of_checksums_AVX_free = new string[]
@@ -50,7 +50,7 @@ namespace WFInfo
 
         private static readonly string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         private static readonly string libs_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/libs";
-        private static readonly string tesseract_hotlink_prefix = libs_hotlink_prefix + @"/tesseract41/";
+        private static readonly string tesseract_hotlink_prefix = libs_hotlink_prefix + @"/" + libtesseract + @"/";
         private static string tesseract_hotlink_platform_specific_prefix;
         private static readonly string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
 
