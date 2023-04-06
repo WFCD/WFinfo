@@ -1408,8 +1408,10 @@ namespace WFInfo
         {
             foreach (var marketItem in marketItems)
             {
-                if (marketItem.Value.ToString().Contains(primeItem))
+                if (marketItem.Value.ToString().Split('|').First().Equals(primeItem, StringComparison.OrdinalIgnoreCase))
+                {
                     return marketItem.Key;
+                }
             }
             throw new Exception($"PrimeItemToItemID, Prime item \"{primeItem}\" does not exist in marketItem");
         }
@@ -1489,7 +1491,15 @@ namespace WFInfo
 
         public string GetUrlName(string primeName)
         {
-            return primeName.ToLower(Main.culture).Replace(' ', '_'); //seems to work for now but might need to be changed.
+            foreach (var marketItem in marketItems)
+            {
+                string[] vals = marketItem.Value.ToString().Split('|');
+                if (vals.Length > 2 && vals[0].Equals(primeName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return vals[1];
+                }
+            }
+            throw new Exception($"GetUrlName, Prime item \"{primeName}\" does not exist in marketItem");
         }
 
         /// <summary>
