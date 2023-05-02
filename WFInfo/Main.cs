@@ -12,6 +12,9 @@ using System.Windows.Forms;
 using WebSocketSharp;
 using WFInfo.Resources;
 using WFInfo.Settings;
+using WFInfo.Services.Screenshot;
+using WFInfo.Services.WarframeProcess;
+using WFInfo.Services.WindowInfo;
 
 namespace WFInfo
 {
@@ -20,7 +23,7 @@ namespace WFInfo
         public static Main INSTANCE;
         public static string AppPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static Data dataBase = new Data(ApplicationSettings.GlobalReadonlySettings);
+        public static Data dataBase;
         public static RewardWindow window = new RewardWindow();
         public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
@@ -32,7 +35,7 @@ namespace WFInfo
         public static FullscreenReminder fullscreenpopup;
         public static GFNWarning gfnWarning;
         public static UpdateDialogue update;
-        public static SnapItOverlay snapItOverlayWindow = new SnapItOverlay();
+        public static SnapItOverlay snapItOverlayWindow;
         public static SearchIt searchBox = new SearchIt();
         public static Login login = new Login();
         public static ListingHelper listingHelper = new ListingHelper();
@@ -47,6 +50,10 @@ namespace WFInfo
         private static string LastMarketStatusB4AFK { get; set; } = "invisible";
         private readonly IReadOnlyApplicationSettings _settings = ApplicationSettings.GlobalReadonlySettings;
 
+        private static IScreenshotService _screenshot;
+        private static IProcessFinder _process;
+        private static IWindowInfoService _windowInfo;
+
         public Main()
         {
             INSTANCE = this;
@@ -56,6 +63,18 @@ namespace WFInfo
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
 
+            _process = new WarframeProcessFinder(ApplicationSettings.GlobalReadonlySettings);
+            _windowInfo = new Win32WindowInfoService(_process, ApplicationSettings.GlobalReadonlySettings);
+            dataBase = new Data(ApplicationSettings.GlobalReadonlySettings, _process, _windowInfo);
+
+            SettingsViewModel.Instance.InjectServices(_windowInfo, _process);
+            snapItOverlayWindow = new SnapItOverlay(_windowInfo);
+
+            // TODO: Properly detect HDR including Windows Auto HDR
+            _windowInfo.UpdateWindow();
+            //_screenshot = new WindowsCaptureScreenshotService(_process, false);
+            _screenshot = new GdiScreenshotService(_process, _windowInfo, ApplicationSettings.GlobalReadonlySettings);
+
             Task.Factory.StartNew(ThreadedDataLoad);
         }
 
@@ -64,7 +83,7 @@ namespace WFInfo
             update = new UpdateDialogue(args);
         }
 
-        public static void ThreadedDataLoad()
+        public void ThreadedDataLoad()
         {
             try
             {
@@ -73,13 +92,12 @@ namespace WFInfo
                 dataBase.Update();
 
                 //RelicsWindow.LoadNodesOnThread();
-                OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings);
+                OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings, _screenshot, _windowInfo);
 
                 if (ApplicationSettings.GlobalReadonlySettings.Auto)
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
-                    OCR.VerifyWarframe();
                     LoggedIn();
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
@@ -105,18 +123,16 @@ namespace WFInfo
         }
         private static async void TimeoutCheck()
         {
-            if (!await dataBase.IsJWTvalid().ConfigureAwait(true) || !OCR.GameIsStreamed)
+            if (!await dataBase.IsJWTvalid().ConfigureAwait(true) || !_process.GameIsStreamed)
                 return;
             DateTime now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
 
-            if (OCR.Warframe != null && OCR.Warframe.HasExited && LastMarketStatus != "invisible")
+            if (!_process.IsRunning && LastMarketStatus != "invisible")
             {//set user offline if Warframe has closed but no new game was found
                 Debug.WriteLine($"Warframe was detected as closed");
                 //reset warframe process variables, and reset LogCapture so new game process gets noticed
                 dataBase.DisableLogCapture();
-                OCR.Warframe.Dispose();
-                OCR.Warframe = null;
                 if (ApplicationSettings.GlobalReadonlySettings.Auto)
                     dataBase.EnableLogCapture();
 
@@ -282,7 +298,7 @@ namespace WFInfo
                     bigScreenshot.Dispose();
                 });
             }
-            else if (_settings.Debug || OCR.VerifyWarframe())
+            else if (_settings.Debug || _process.IsRunning)
             {
                 Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
             }
@@ -311,7 +327,7 @@ namespace WFInfo
 
 
             }
-            else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && !OCR.GameIsStreamed && Overlay.rewardsDisplaying)
+            else if (key == MouseButton.Left && _process.Warframe != null && !_process.Warframe.HasExited && !_process.GameIsStreamed && Overlay.rewardsDisplaying)
             {
                 if (_settings.Display != Display.Overlay && !_settings.AutoList && !_settings.AutoCSV && !_settings.AutoCount)
                 {
@@ -402,6 +418,7 @@ namespace WFInfo
                     {
                         try
                         {
+                            // TODO: This
                             foreach (string file in openFileDialog.FileNames)
                             {
                                 if (type == ScreenshotType.NORMAL)
@@ -410,21 +427,21 @@ namespace WFInfo
 
                                     //Get the path of specified file
                                     Bitmap image = new Bitmap(file);
-                                    OCR.UpdateWindow(image);
+                                    _windowInfo.UseImage(image);
                                     OCR.ProcessRewardScreen(image);
                                 } else if (type == ScreenshotType.SNAPIT)
                                 {
                                     AddLog("Testing snapit on file: " + file);
 
                                     Bitmap image = new Bitmap(file);
-                                    OCR.UpdateWindow(image);
+                                    _windowInfo.UseImage(image);
                                     OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
                                 } else if (type == ScreenshotType.MASTERIT)
                                 {
                                     AddLog("Testing masterit on file: " + file);
 
                                     Bitmap image = new Bitmap(file);
-                                    OCR.UpdateWindow(image);
+                                    _windowInfo.UseImage(image);
                                     OCR.ProcessProfileScreen(image);
                                 }
                             }
