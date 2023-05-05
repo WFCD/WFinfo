@@ -15,6 +15,8 @@ using WFInfo.Settings;
 using WFInfo.Services.Screenshot;
 using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
+using Microsoft.Extensions.DependencyInjection;
+using WFInfo.Services;
 
 namespace WFInfo
 {
@@ -48,11 +50,16 @@ namespace WFInfo
         private static bool UserAway { get; set; }
         private static string LastMarketStatus { get; set; } = "invisible";
         private static string LastMarketStatusB4AFK { get; set; } = "invisible";
-        private readonly IReadOnlyApplicationSettings _settings = ApplicationSettings.GlobalReadonlySettings;
 
-        private static IScreenshotService _screenshot;
-        private static IProcessFinder _process;
-        private static IWindowInfoService _windowInfo;
+        // Main service provider
+        // TODO: Move to CustomEntryPoint
+        private IServiceProvider _services;
+
+        // Instance services
+        private IReadOnlyApplicationSettings _settings;
+        private IScreenshotService _screenshot;
+        private IProcessFinder _process;
+        private IWindowInfoService _windowInfo;
 
         public Main()
         {
@@ -63,19 +70,36 @@ namespace WFInfo
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
 
-            _process = new WarframeProcessFinder(ApplicationSettings.GlobalReadonlySettings);
-            _windowInfo = new Win32WindowInfoService(_process, ApplicationSettings.GlobalReadonlySettings);
-            dataBase = new Data(ApplicationSettings.GlobalReadonlySettings, _process, _windowInfo);
-
-            SettingsViewModel.Instance.InjectServices(_windowInfo, _process);
-            snapItOverlayWindow = new SnapItOverlay(_windowInfo);
-
-            // TODO: Properly detect HDR including Windows Auto HDR
-            _windowInfo.UpdateWindow();
-            //_screenshot = new WindowsCaptureScreenshotService(_process, false);
-            _screenshot = new GdiScreenshotService(_process, _windowInfo, ApplicationSettings.GlobalReadonlySettings);
+            _services = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
+            InitializeLegacyServices(_services);
 
             Task.Factory.StartNew(ThreadedDataLoad);
+        }
+
+        private IServiceCollection ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton(ApplicationSettings.GlobalReadonlySettings);
+            services.AddProcessFinder();
+            services.AddWin32WindowInfo();
+
+            // TODO: Properly detect HDR including Windows Auto HDR
+            services.AddGDIScreenshots();
+            //services.AddWindowsCaptureScreenshots();
+
+            return services;
+        }
+
+        private void InitializeLegacyServices(IServiceProvider services)
+        {
+            // TODO: Ideally we also inject into Main
+            _settings = services.GetRequiredService<IReadOnlyApplicationSettings>();
+            _process = services.GetRequiredService<IProcessFinder>();
+            _windowInfo = services.GetRequiredService<IWindowInfoService>();
+            _screenshot = services.GetRequiredService<IScreenshotService>();
+
+            dataBase = new Data(ApplicationSettings.GlobalReadonlySettings, _process, _windowInfo);
+            SettingsViewModel.Instance.InjectServices(_windowInfo, _process);
+            snapItOverlayWindow = new SnapItOverlay(_windowInfo);
         }
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
@@ -121,7 +145,7 @@ namespace WFInfo
                 });
             }
         }
-        private static async void TimeoutCheck()
+        private async void TimeoutCheck()
         {
             if (!await dataBase.IsJWTvalid().ConfigureAwait(true) || !_process.GameIsStreamed)
                 return;
@@ -466,7 +490,7 @@ namespace WFInfo
         }
 
         // Switch to logged in mode for warfrane.market systems
-        public static void LoggedIn()
+        public void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
 
