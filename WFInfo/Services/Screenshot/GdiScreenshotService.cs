@@ -1,30 +1,23 @@
-﻿using SharpDX.DXGI;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
-using WFInfo.Settings;
 
 namespace WFInfo.Services.Screenshot
 {
     public class GdiScreenshotService : IScreenshotService
     {
-        private static IReadOnlyApplicationSettings _settings;
-        private static IProcessFinder _process;
         private static IWindowInfoService _window;
 
-        public GdiScreenshotService(IProcessFinder process, IWindowInfoService window, IReadOnlyApplicationSettings settings) 
+        public GdiScreenshotService(IWindowInfoService window) 
         {
-            _process = process;
             _window = window;
-            _settings = settings;
         }
 
         public Task<List<Bitmap>> CaptureScreenshot()
         {
+            _window.UpdateWindow();
+
             var window = _window.Window;
             var center = _window.Center;
 
