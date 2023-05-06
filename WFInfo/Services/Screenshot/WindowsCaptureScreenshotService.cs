@@ -50,11 +50,13 @@ namespace WFInfo.Services.Screenshot
         public Task<List<Bitmap>> CaptureScreenshot()
         {
             Texture2D cpuTexture = null;
-            var width = _frame.ContentSize.Width;
-            var height = _frame.ContentSize.Height;
+            int width, height;
 
             lock (_frameLock)
             {
+                width = _frame.ContentSize.Width;
+                height = _frame.ContentSize.Height;
+
                 // Copy resource into memory that can be accessed by the CPU
                 using (var capturedTexture = Direct3D11Helper.CreateSharpDXTexture2D(_frame.Surface))
                 {
