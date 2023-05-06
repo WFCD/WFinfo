@@ -95,11 +95,12 @@ namespace WFInfo
             _settings = services.GetRequiredService<IReadOnlyApplicationSettings>();
             _process = services.GetRequiredService<IProcessFinder>();
             _windowInfo = services.GetRequiredService<IWindowInfoService>();
-            _screenshot = services.GetRequiredService<IScreenshotService>();
 
             dataBase = new Data(ApplicationSettings.GlobalReadonlySettings, _process, _windowInfo);
             SettingsViewModel.Instance.InjectServices(_windowInfo, _process);
             snapItOverlayWindow = new SnapItOverlay(_windowInfo);
+
+            _screenshot = services.GetRequiredService<IScreenshotService>();
         }
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
