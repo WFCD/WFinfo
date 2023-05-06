@@ -112,12 +112,13 @@ namespace WFInfo
         {
             try
             {
-                StatusUpdate("Updating Databases...", 0);
-
-                dataBase.Update();
-
                 //RelicsWindow.LoadNodesOnThread();
+
+                StatusUpdate("Initializing OCR engine...", 0);
                 OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings, _screenshot, _windowInfo);
+
+                StatusUpdate("Updating Databases...", 0);
+                dataBase.Update();
 
                 if (ApplicationSettings.GlobalReadonlySettings.Auto)
                     dataBase.EnableLogCapture();
