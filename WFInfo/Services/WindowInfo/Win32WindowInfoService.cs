@@ -9,7 +9,16 @@ namespace WFInfo.Services.WindowInfo
     public class Win32WindowInfoService : IWindowInfoService
     {
         public double DpiScaling { get; private set; }
-        public double ScreenScaling { get; private set; }
+        public double ScreenScaling 
+        { 
+            get
+            {
+                if (Window.Width * 9 > Window.Height * 16)  // image is less than 16:9 aspect
+                    return Window.Height / 1080.0;
+                else
+                    return Window.Width / 1920.0; //image is higher than 16:9 aspect
+            }
+        }
 
         public Rectangle Window { get; private set; }
         public Point Center => new Point(Window.X + Window.Width / 2, Window.Y + Window.Height / 2);
@@ -48,13 +57,14 @@ namespace WFInfo.Services.WindowInfo
         {
             int width = image?.Width ?? Screen.Bounds.Width;
             int height = image?.Height ?? Screen.Bounds.Height;
+
             Window = new Rectangle(0, 0, width, height);
+            DpiScaling = 1;
+
             if (image != null)
                 Main.AddLog("DETECTED LOADED IMAGE BOUNDS: " + Window.ToString());
             else
                 Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + Window.ToString() + " Named: " + Screen.DeviceName);
-
-            RefreshScaling();
         }
 
         private void GetWindowRect()
@@ -64,7 +74,6 @@ namespace WFInfo.Services.WindowInfo
                 if (_settings.Debug)
                 { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
                     GetFullscreenRect();
-                    RefreshScaling();
                     return;
                 }
                 else
@@ -113,8 +122,6 @@ namespace WFInfo.Services.WindowInfo
                         });
                     }
                 }
-
-                RefreshScaling();
             }
         }
 
@@ -122,22 +129,11 @@ namespace WFInfo.Services.WindowInfo
         {
             int width = Screen.Bounds.Width;
             int height = Screen.Bounds.Height;
+
             Window = new Rectangle(0, 0, width, height);
+            DpiScaling = 1;
+
             Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + Window.ToString() + " Named: " + Screen.DeviceName);
-
-            RefreshScaling();
-        }
-
-        private void RefreshScaling()
-        {
-            if (Window.Width * 9 > Window.Height * 16)  // image is less than 16:9 aspect
-                ScreenScaling = Window.Height / 1080.0;
-            else
-                ScreenScaling = Window.Width / 1920.0; //image is higher than 16:9 aspect
-
-            // TODO: UI Scaling?
-            //Main.AddLog("SCALING VALUES UPDATED: Screen_Scaling = " + (ScreenScaling * 100).ToString("F2", Main.culture) + "%, DPI_Scaling = " + (DpiScaling * 100).ToString("F2", Main.culture) + "%, UI_Scaling = " + (UiScaling * 100).ToString("F0", Main.culture) + "%");
-            Main.AddLog("SCALING VALUES UPDATED: Screen_Scaling = " + (ScreenScaling * 100).ToString("F2", Main.culture) + "%, DPI_Scaling = " + (DpiScaling * 100).ToString("F2", Main.culture) + "%");
         }
 
         private void RefreshDPIScaling()

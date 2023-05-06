@@ -128,6 +128,17 @@ namespace WFInfo.Services.WarframeProcess
                 Main.AddLog("Did Not Detect Warframe Process");
                 Main.StatusUpdate("Unable to Detect Warframe Process", 1);
             }
+            else
+            {
+                // Substitute process for debug purposes
+                if (_settings.Debug)
+                {
+                    Main.AddLog($"Substituting Warframe process with WFInfo process for debug purposes.");
+                    _warframe = Process.GetCurrentProcess();
+                }
+
+                OnProcessChanged?.Invoke(_warframe);
+            }
         }
     }
 }
