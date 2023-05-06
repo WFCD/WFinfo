@@ -1,4 +1,5 @@
 using Composition.WindowsRuntimeHelpers;
+using SharpDX;
 using SharpDX.Direct3D11;
 using System;
 using System.Collections.Generic;
@@ -6,12 +7,14 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using WFInfo.Services.WarframeProcess;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX;
 using Windows.Graphics.DirectX.Direct3D11;
+
+using Point = System.Drawing.Point;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace WFInfo.Services.Screenshot
 {
@@ -66,15 +69,27 @@ namespace WFInfo.Services.Screenshot
                 }
             }
 
-            var mapSource = _d3dDevice.ImmediateContext.MapSubresource(cpuTexture, 0, MapMode.Read, MapFlags.None);
-            byte[] data = new byte[mapSource.SlicePitch];
-            Marshal.Copy(mapSource.DataPointer, data, 0, mapSource.SlicePitch);
-            _d3dDevice.ImmediateContext.UnmapSubresource(cpuTexture, 0);
+            unsafe
+            {
+                var mapSource = _d3dDevice.ImmediateContext.MapSubresource(cpuTexture, 0, MapMode.Read, MapFlags.None);
 
-            var bitmap = _useHdr ? CaptureHdr(data, width, height, mapSource.RowPitch) : CaptureSdr(data, width, height, mapSource.RowPitch);
+                Bitmap bitmap;
+                if (_useHdr)
+                {
+                    var data = new Span<ushort>(mapSource.DataPointer.ToPointer(), mapSource.SlicePitch / 2);
+                    bitmap = CaptureHdr(data, width, height, mapSource.RowPitch / 2);
+                }
+                else
+                {
+                    var data = new Span<byte>(mapSource.DataPointer.ToPointer(), mapSource.SlicePitch);
+                    bitmap = CaptureSdr(data, width, height, mapSource.RowPitch);
+                }
 
-            var result = new List<Bitmap> { bitmap };
-            return Task.FromResult(result);
+                _d3dDevice.ImmediateContext.UnmapSubresource(cpuTexture, 0);
+
+                var result = new List<Bitmap> { bitmap };
+                return Task.FromResult(result);
+            }
         }
 
         private void CreateCaptureSession(Process process)
@@ -101,7 +116,7 @@ namespace WFInfo.Services.Screenshot
             }
         }
 
-        private Bitmap CaptureSdr(byte[] data, int width, int height, int rowPitch)
+        private Bitmap CaptureSdr(Span<byte> data, int width, int height, int rowPitch)
         {
             var bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
             var imageRect = new Rectangle(Point.Empty, bitmap.Size);
@@ -114,7 +129,7 @@ namespace WFInfo.Services.Screenshot
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        Span<byte> span = data.AsSpan(y * rowPitch + x * 4, 3);
+                        Span<byte> span = data.Slice(y * rowPitch + x * 4, 3);
                         *ptr++ = span[2];
                         *ptr++ = span[1];
                         *ptr++ = span[0];
@@ -126,32 +141,36 @@ namespace WFInfo.Services.Screenshot
             return bitmap;
         }
 
-        private Bitmap CaptureHdr(byte[] data, int width, int height, int rowPitch)
+        private Bitmap CaptureHdr(Span<ushort> data, int width, int height, int rowPitch)
         {
             var bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            float[] floats = new float[data.Length / 2];
-            float largest = float.MinValue;
+            float[] floats = new float[data.Length / 4 * 3]; // Pixel components (RGB) as floats
+            float[] luminances = new float[data.Length / 4]; // Luminance of individual pixels
+            float largestLuminance = float.MinValue;
 
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    var r = DecodeHalfFloat(data[y * rowPitch + x * 8 + 0], data[y * rowPitch + x * 8 + 1]);
-                    var g = DecodeHalfFloat(data[y * rowPitch + x * 8 + 2], data[y * rowPitch + x * 8 + 3]);
-                    var b = DecodeHalfFloat(data[y * rowPitch + x * 8 + 4], data[y * rowPitch + x * 8 + 5]);
+                    var r = new Half(data[y * rowPitch + x * 4 + 0]);
+                    var g = new Half(data[y * rowPitch + x * 4 + 1]);
+                    var b = new Half(data[y * rowPitch + x * 4 + 2]);
 
                     Span<float> span = floats.AsSpan((y * width * 3) + x * 3, 3);
+
                     span[0] = r;
                     span[1] = g;
                     span[2] = b;
 
-                    var lum = GetPixelLuminance(span);
-                    if (lum > largest) largest = lum;
+                    var luminance = GetPixelLuminance(span);
+                    luminances[y * width + x] = luminance;
+                    if (luminance > largestLuminance) largestLuminance = luminance;
                 }
             }
 
             var imageRect = new Rectangle(Point.Empty, bitmap.Size);
             var bitmapData = bitmap.LockBits(imageRect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+            var largestLuminanceSquared = largestLuminance * largestLuminance;
 
             unsafe
             {
@@ -161,7 +180,7 @@ namespace WFInfo.Services.Screenshot
                     for (int x = 0; x < width; x++)
                     {
                         Span<float> span = floats.AsSpan((y * width * 3) + x * 3, 3);
-                        ReinhardToneMap(span, largest);
+                        ReinhardToneMap(span, luminances[y * width + x], largestLuminanceSquared);
 
                         *ptr++ = (byte)(span[2] * 255f);
                         *ptr++ = (byte)(span[1] * 255f);
@@ -184,21 +203,6 @@ namespace WFInfo.Services.Screenshot
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private float DecodeHalfFloat(byte byte2, byte byte1)
-        {
-            ushort half = (ushort)((byte1 << 8) | byte2);
-            int sign = (half >> 15) & 1;
-            int exp = (half >> 10) & 0x1F;
-            int mantissa = half & 0x3FF;
-
-            int singleExp = (exp == 0 || exp == 31) ? (exp << 1) - 1 : 127 - 15 + exp;
-            int singleMantissa = (exp == 0) ? (mantissa << (23 - 10)) & 0x7FFFFF : mantissa << 13;
-
-            int single = (sign << 31) | (singleExp << 23) | singleMantissa;
-            return BitConverter.ToSingle(BitConverter.GetBytes(single), 0);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private float GetPixelLuminance(Span<float> pixel)
         {
             return 0.2126f * pixel[0] + 0.7152f * pixel[1] + 0.0722f * pixel[2];
@@ -206,28 +210,21 @@ namespace WFInfo.Services.Screenshot
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private float ChangeLuminance(float c_in, float l_out, float l_in)
+        private float ChangeLuminance(float c_in, float l_ratio)
         {
-            return ClampToUnit(c_in * (l_out / l_in));
-        }
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private float ClampToUnit(float f)
-        {
-            return Math.Max(Math.Min(f, 1.0f), 0.0f);
+            return MathUtil.Clamp(c_in * l_ratio, 0.0f, 1.0f);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ReinhardToneMap(Span<float> pixel, float max_white_l)
+        private void ReinhardToneMap(Span<float> pixel, float l_old, float max_white_l_squared)
         {
-            float l_old = GetPixelLuminance(pixel);
-            float numerator = l_old * (1.0f + (l_old / (max_white_l * max_white_l)));
+            float numerator = l_old * (1.0f + (l_old / max_white_l_squared));
             float l_new = numerator / (1.0f + l_old);
+            float l_ratio = l_new / l_old;
 
-            pixel[0] = ChangeLuminance(pixel[0], l_new, l_old);
-            pixel[1] = ChangeLuminance(pixel[1], l_new, l_old);
-            pixel[2] = ChangeLuminance(pixel[2], l_new, l_old);
+            pixel[0] = ChangeLuminance(pixel[0], l_ratio);
+            pixel[1] = ChangeLuminance(pixel[1], l_ratio);
+            pixel[2] = ChangeLuminance(pixel[2], l_ratio);
         }
     }
 }
