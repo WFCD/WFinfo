@@ -1,4 +1,4 @@
-﻿using Composition.WindowsRuntimeHelpers;
+using Composition.WindowsRuntimeHelpers;
 using SharpDX.Direct3D11;
 using System;
 using System.Collections.Generic;
@@ -26,10 +26,13 @@ namespace WFInfo.Services.Screenshot
         private Direct3D11CaptureFramePool _framePool;
         private GraphicsCaptureSession _session;
         private GraphicsCaptureItem _item;
+
+        private object _frameLock = new object();
+        private Direct3D11CaptureFrame _frame;
         
         private DirectXPixelFormat pixelFormat => _useHdr ? DirectXPixelFormat.R16G16B16A16Float : DirectXPixelFormat.R8G8B8A8UIntNormalized;
 
-        public WindowsCaptureScreenshotService(IProcessFinder process, bool useHdr)
+        public WindowsCaptureScreenshotService(IProcessFinder process, bool useHdr = true)
         {
             _process = process;
             _useHdr = useHdr;
@@ -43,14 +46,14 @@ namespace WFInfo.Services.Screenshot
 
         public Task<List<Bitmap>> CaptureScreenshot()
         {
-            using (var frame = _framePool.TryGetNextFrame())
-            {
-                var width = frame.ContentSize.Width;
-                var height = frame.ContentSize.Height;
+            Texture2D cpuTexture = null;
+            var width = _frame.ContentSize.Width;
+            var height = _frame.ContentSize.Height;
 
+            lock (_frameLock)
+            {
                 // Copy resource into memory that can be accessed by the CPU
-                Texture2D cpuTexture = null;
-                using (var capturedTexture = Direct3D11Helper.CreateSharpDXTexture2D(frame.Surface))
+                using (var capturedTexture = Direct3D11Helper.CreateSharpDXTexture2D(_frame.Surface))
                 {
                     var desc = capturedTexture.Description;
                     desc.CpuAccessFlags = CpuAccessFlags.Read;
@@ -61,17 +64,17 @@ namespace WFInfo.Services.Screenshot
                     cpuTexture = new Texture2D(_d3dDevice, desc);
                     _d3dDevice.ImmediateContext.CopyResource(capturedTexture, cpuTexture);
                 }
-
-                var mapSource = _d3dDevice.ImmediateContext.MapSubresource(cpuTexture, 0, MapMode.Read, MapFlags.None);
-                byte[] data = new byte[mapSource.SlicePitch];
-                Marshal.Copy(mapSource.DataPointer, data, 0, mapSource.SlicePitch);
-                _d3dDevice.ImmediateContext.UnmapSubresource(cpuTexture, 0);
-
-                var bitmap = _useHdr ? CaptureHdr(data, width, height, mapSource.RowPitch) : CaptureSdr(data, width, height, mapSource.RowPitch);
-
-                var result = new List<Bitmap> { bitmap };
-                return Task.FromResult(result);
             }
+
+            var mapSource = _d3dDevice.ImmediateContext.MapSubresource(cpuTexture, 0, MapMode.Read, MapFlags.None);
+            byte[] data = new byte[mapSource.SlicePitch];
+            Marshal.Copy(mapSource.DataPointer, data, 0, mapSource.SlicePitch);
+            _d3dDevice.ImmediateContext.UnmapSubresource(cpuTexture, 0);
+
+            var bitmap = _useHdr ? CaptureHdr(data, width, height, mapSource.RowPitch) : CaptureSdr(data, width, height, mapSource.RowPitch);
+
+            var result = new List<Bitmap> { bitmap };
+            return Task.FromResult(result);
         }
 
         private void CreateCaptureSession(Process process)
@@ -79,13 +82,23 @@ namespace WFInfo.Services.Screenshot
             _session?.Dispose();
             _framePool?.Dispose();
 
-            _item = CaptureHelper.CreateItemForWindow(process.Handle);
+            _item = CaptureHelper.CreateItemForWindow(process.MainWindowHandle);
             _framePool = Direct3D11CaptureFramePool.CreateFreeThreaded(_device, pixelFormat, 2, _item.Size);
+            _framePool.FrameArrived += FrameArrived;
 
             _session = _framePool.CreateCaptureSession(_item);
             _session.IsBorderRequired = false;
             _session.IsCursorCaptureEnabled = false;
             _session.StartCapture();
+        }
+
+        private void FrameArrived(Direct3D11CaptureFramePool sender, object args)
+        {
+            lock (_frameLock)
+            {
+                _frame?.Dispose();
+                _frame = _framePool.TryGetNextFrame();
+            }
         }
 
         private Bitmap CaptureSdr(byte[] data, int width, int height, int rowPitch)
