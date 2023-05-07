@@ -17,6 +17,9 @@ using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
 using Microsoft.Extensions.DependencyInjection;
 using WFInfo.Services;
+using WFInfo.Services.HDRDetection;
+using System.Linq;
+using Windows.Foundation.Metadata;
 
 namespace WFInfo
 {
@@ -57,9 +60,13 @@ namespace WFInfo
 
         // Instance services
         private IReadOnlyApplicationSettings _settings;
-        private IScreenshotService _screenshot;
         private IProcessFinder _process;
         private IWindowInfoService _windowInfo;
+        private IHDRDetectorService _detector;
+
+        // See comment on Ocr.Init for explanation
+        private GdiScreenshotService _gdiScreenshot;
+        private WindowsCaptureScreenshotService _windowsScreenshot;
 
         public Main()
         {
@@ -81,10 +88,15 @@ namespace WFInfo
             services.AddSingleton(ApplicationSettings.GlobalReadonlySettings);
             services.AddProcessFinder();
             services.AddWin32WindowInfo();
+            services.AddHDRDetection();
 
-            // TODO: Properly detect HDR including Windows Auto HDR
             services.AddGDIScreenshots();
-            //services.AddWindowsCaptureScreenshots();
+
+            // Only add windows capture on supported plarforms (W10+)
+            if (ApiInformation.IsTypePresent("Windows.Graphics.Capture.GraphicsCaptureSession"))
+            {
+                services.AddWindowsCaptureScreenshots();
+            }
 
             return services;
         }
@@ -95,12 +107,16 @@ namespace WFInfo
             _settings = services.GetRequiredService<IReadOnlyApplicationSettings>();
             _process = services.GetRequiredService<IProcessFinder>();
             _windowInfo = services.GetRequiredService<IWindowInfoService>();
+            _detector = services.GetRequiredService<IHDRDetectorService>();
 
             dataBase = new Data(ApplicationSettings.GlobalReadonlySettings, _process, _windowInfo);
             SettingsViewModel.Instance.InjectServices(_windowInfo, _process);
             snapItOverlayWindow = new SnapItOverlay(_windowInfo);
 
-            _screenshot = services.GetRequiredService<IScreenshotService>();
+            // See comment on Ocr.Init for explanation
+            var screenshotServices = services.GetServices<IScreenshotService>();
+            _gdiScreenshot = screenshotServices.First(ss => ss is GdiScreenshotService) as GdiScreenshotService;
+            _windowsScreenshot = screenshotServices.FirstOrDefault(ss => ss is WindowsCaptureScreenshotService) as WindowsCaptureScreenshotService;
         }
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
@@ -114,8 +130,9 @@ namespace WFInfo
             {
                 //RelicsWindow.LoadNodesOnThread();
 
+                // Too many dependencies?
                 StatusUpdate("Initializing OCR engine...", 0);
-                OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings, _screenshot, _windowInfo);
+                OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings, _windowInfo, _detector, _gdiScreenshot, _windowsScreenshot);
 
                 StatusUpdate("Updating Databases...", 0);
                 dataBase.Update();

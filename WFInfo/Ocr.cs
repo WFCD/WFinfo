@@ -12,6 +12,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tesseract;
+using WFInfo.Services.HDRDetection;
 using WFInfo.Services.Screenshot;
 using WFInfo.Services.WindowInfo;
 using WFInfo.Settings;
@@ -124,18 +125,29 @@ namespace WFInfo
         private static ITesseractService _tesseractService;
         private static ISoundPlayer _soundPlayer;
         private static IReadOnlyApplicationSettings _settings;
-        private static IScreenshotService _screenshot;
         private static IWindowInfoService _window;
+        private static IHDRDetectorService _hdrDetector;
 
-        public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer, IReadOnlyApplicationSettings settings, IScreenshotService screenshot, IWindowInfoService window)
+        private static IScreenshotService _gdiScreenshot;
+        private static IScreenshotService _windowsScreenshot;
+
+        // You might be asking yourself "Why are you injecting specific services? That's not good practice at all!"
+        // Now I can either do this and switch between these two based on settings
+        // Or I can make this a scoped service, with each scope being a new screenshot request and dynamically choose the right service using a IScreenshotServiceFactory
+        // Unfortunately option 2 means rewriting like half of this thing so I'm sticking with a hack
+        public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer, IReadOnlyApplicationSettings settings,
+            IWindowInfoService window, IHDRDetectorService hdrDetector, GdiScreenshotService gdiScreenshot, WindowsCaptureScreenshotService windowsScreenshot = null)
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
             _tesseractService = tesseractService;
             _tesseractService.Init();
             _soundPlayer = soundPlayer;
             _settings = settings;
-            _screenshot = screenshot;
             _window = window;
+            _hdrDetector = hdrDetector;
+
+            _gdiScreenshot = gdiScreenshot;
+            _windowsScreenshot = windowsScreenshot;
         }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
@@ -2406,7 +2418,38 @@ namespace WFInfo
         internal static Bitmap CaptureScreenshot()
         {
             _window.UpdateWindow();
-            var image = _screenshot.CaptureScreenshot().Result.First();
+
+            // HACK: Should be already injected instead of switching here
+            IScreenshotService screenshot;
+            if (_windowsScreenshot == null)
+            {
+                // W8.1 and lower
+                screenshot = _gdiScreenshot;
+            }
+            else
+            {
+                switch (_settings.HdrSupport)
+                {
+                    case HdrSupportEnum.On:
+                        Main.AddLog("Using new windows capture API for an HDR screenshot");
+                        screenshot = _windowsScreenshot;
+                        break;
+                    case HdrSupportEnum.Off:
+                        Main.AddLog("Using old GDI service for a SDR screenshot");
+                        screenshot = _gdiScreenshot;
+                        break;
+                    case HdrSupportEnum.Auto:
+                        var isHdr = _hdrDetector.IsHDR;
+                        Main.AddLog($"Automatically determining HDR status: {isHdr} | Using corresponding service");
+                        screenshot = isHdr ? _windowsScreenshot : _gdiScreenshot;
+                        break;
+                    default:
+                        throw new NotImplementedException($"HDR support option '{_settings.HdrSupport}' does not have a corresponding screenshot service.");
+                }
+            }
+            
+
+            var image = screenshot.CaptureScreenshot().Result.First();
             image.Save(Main.AppPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + ".png");
             return image;
         }
