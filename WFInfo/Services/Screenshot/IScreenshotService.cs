@@ -4,6 +4,13 @@ using System.Threading.Tasks;
 
 namespace WFInfo.Services.Screenshot
 {
+    public enum HdrSupportEnum
+    {
+        Auto,
+        On,
+        Off
+    }
+
     /// <summary>
     /// Provides game screenshots.
     /// </summary>

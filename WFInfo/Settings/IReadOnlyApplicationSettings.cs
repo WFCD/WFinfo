@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using WFInfo.Services.Screenshot;
 
 namespace WFInfo.Settings
 {
@@ -89,5 +90,6 @@ namespace WFInfo.Settings
         int CF_sBMin { get; }
         long FixedAutoDelay { get; }
         string Ignored { get; }
+        HdrSupportEnum HdrSupport { get; }
     }
 }

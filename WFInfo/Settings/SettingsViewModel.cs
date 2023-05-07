@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using WFInfo.Components;
+using WFInfo.Services.Screenshot;
 using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
 
@@ -672,7 +673,17 @@ namespace WFInfo.Settings
                 RaisePropertyChanged(); 
             }
         }
-        
+
+        public HdrSupportEnum HdrSupport
+        {
+            get => _settings.HdrSupport;
+            set
+            {
+                _settings.HdrSupport = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         public SettingsViewModel(ApplicationSettings settings)
         {
