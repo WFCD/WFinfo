@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using WFInfo.Services.HDRDetection;
 using WFInfo.Services.Screenshot;
 using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
@@ -38,6 +39,11 @@ namespace WFInfo.Services
         public static void AddProcessFinder(this IServiceCollection services)
         {
             services.AddSingleton<IProcessFinder, WarframeProcessFinder>();
+        }
+
+        public static void AddHDRDetection(this IServiceCollection services)
+        {
+            services.AddSingleton<IHDRDetectorService, SchemeHDRDetector>();
         }
 
         // TODO: Convert old services
