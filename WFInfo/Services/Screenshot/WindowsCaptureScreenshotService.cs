@@ -181,13 +181,16 @@ namespace WFInfo.Services.Screenshot
                 {
                     for (int x = 0; x < width; x++)
                     {
+                        byte* pixelPtr = ptr + x * 3;
                         Span<float> span = floats.AsSpan((y * width * 3) + x * 3, 3);
                         ReinhardToneMap(span, luminances[y * width + x], largestLuminanceSquared);
 
-                        *ptr++ = (byte)(span[2] * 255f);
-                        *ptr++ = (byte)(span[1] * 255f);
-                        *ptr++ = (byte)(span[0] * 255f);
+                        *pixelPtr++ = (byte)(span[2] * 255f);
+                        *pixelPtr++ = (byte)(span[1] * 255f);
+                        *pixelPtr++ = (byte)(span[0] * 255f);
                     }
+
+                    ptr += bitmapData.Stride;
                 }
             }
 
