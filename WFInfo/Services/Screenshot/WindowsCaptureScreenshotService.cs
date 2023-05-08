@@ -71,27 +71,24 @@ namespace WFInfo.Services.Screenshot
                 }
             }
 
+            var mapSource = _d3dDevice.ImmediateContext.MapSubresource(cpuTexture, 0, MapMode.Read, MapFlags.None);
+            Span<ushort> hdrSpan;
+            Span<byte> sdrSpan;
+
             unsafe
             {
-                var mapSource = _d3dDevice.ImmediateContext.MapSubresource(cpuTexture, 0, MapMode.Read, MapFlags.None);
-
-                Bitmap bitmap;
-                if (_useHdr)
-                {
-                    var data = new Span<ushort>(mapSource.DataPointer.ToPointer(), mapSource.SlicePitch / 2);
-                    bitmap = CaptureHdr(data, width, height, mapSource.RowPitch / 2);
-                }
-                else
-                {
-                    var data = new Span<byte>(mapSource.DataPointer.ToPointer(), mapSource.SlicePitch);
-                    bitmap = CaptureSdr(data, width, height, mapSource.RowPitch);
-                }
-
-                _d3dDevice.ImmediateContext.UnmapSubresource(cpuTexture, 0);
-
-                var result = new List<Bitmap> { bitmap };
-                return Task.FromResult(result);
+                hdrSpan = new Span<ushort>(mapSource.DataPointer.ToPointer(), mapSource.SlicePitch / sizeof(ushort));
+                sdrSpan = new Span<byte>(mapSource.DataPointer.ToPointer(), mapSource.SlicePitch);
             }
+
+            Bitmap bitmap;
+            if (_useHdr) bitmap = CaptureHdr(hdrSpan, width, height, mapSource.RowPitch / sizeof(ushort));
+            else bitmap = CaptureSdr(sdrSpan, width, height, mapSource.RowPitch);
+
+            _d3dDevice.ImmediateContext.UnmapSubresource(cpuTexture, 0);
+
+            var result = new List<Bitmap> { bitmap };
+            return Task.FromResult(result);
         }
 
         private void CreateCaptureSession(Process process)
@@ -118,24 +115,28 @@ namespace WFInfo.Services.Screenshot
             }
         }
 
-        private Bitmap CaptureSdr(Span<byte> data, int width, int height, int rowPitch)
+        private Bitmap CaptureSdr(Span<byte> textureData, int width, int height, int rowPitch)
         {
             var bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
             var imageRect = new Rectangle(Point.Empty, bitmap.Size);
             var bitmapData = bitmap.LockBits(imageRect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+            Span<byte> bitmapSpan;
 
             unsafe
             {
-                byte* ptr = (byte*)bitmapData.Scan0;
-                for (int y = 0; y < height; y++)
+                bitmapSpan = new Span<byte>(bitmapData.Scan0.ToPointer(), bitmapData.Height * bitmapData.Stride);
+            }
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
                 {
-                    for (int x = 0; x < width; x++)
-                    {
-                        Span<byte> span = data.Slice(y * rowPitch + x * 4, 3);
-                        *ptr++ = span[2];
-                        *ptr++ = span[1];
-                        *ptr++ = span[0];
-                    }
+                    var pixel = bitmapSpan.Slice(y * bitmapData.Stride + x * 3, 3);
+                    var sdrPixel = textureData.Slice(y * rowPitch + x * 4, 4);
+
+                    pixel[0] = sdrPixel[2];
+                    pixel[1] = sdrPixel[1];
+                    pixel[2] = sdrPixel[0];
                 }
             }
 
@@ -143,28 +144,27 @@ namespace WFInfo.Services.Screenshot
             return bitmap;
         }
 
-        private Bitmap CaptureHdr(Span<ushort> data, int width, int height, int rowPitch)
+        private Bitmap CaptureHdr(Span<ushort> textureData, int width, int height, int rowPitch)
         {
             var bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            float[] floats = new float[data.Length / 4 * 3]; // Pixel components (RGB) as floats
-            float[] luminances = new float[data.Length / 4]; // Luminance of individual pixels
+            float[] floats = new float[textureData.Length / 4 * 3]; // Pixel components (RGB) as floats
+            float[] luminances = new float[textureData.Length / 4]; // Luminance of individual pixels
             float largestLuminance = float.MinValue;
 
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    var r = new Half(data[y * rowPitch + x * 4 + 0]);
-                    var g = new Half(data[y * rowPitch + x * 4 + 1]);
-                    var b = new Half(data[y * rowPitch + x * 4 + 2]);
+                    var r = new Half(textureData[y * rowPitch + x * 4 + 0]);
+                    var g = new Half(textureData[y * rowPitch + x * 4 + 1]);
+                    var b = new Half(textureData[y * rowPitch + x * 4 + 2]);
 
-                    Span<float> span = floats.AsSpan((y * width * 3) + x * 3, 3);
+                    var hdrPixel = floats.AsSpan((y * width * 3) + x * 3, 3);
+                    hdrPixel[0] = r;
+                    hdrPixel[1] = g;
+                    hdrPixel[2] = b;
 
-                    span[0] = r;
-                    span[1] = g;
-                    span[2] = b;
-
-                    var luminance = GetPixelLuminance(span);
+                    var luminance = GetPixelLuminance(hdrPixel);
                     luminances[y * width + x] = luminance;
                     if (luminance > largestLuminance) largestLuminance = luminance;
                 }
@@ -173,24 +173,25 @@ namespace WFInfo.Services.Screenshot
             var imageRect = new Rectangle(Point.Empty, bitmap.Size);
             var bitmapData = bitmap.LockBits(imageRect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
             var largestLuminanceSquared = largestLuminance * largestLuminance;
+            Span<byte> bitmapSpan;
+
 
             unsafe
             {
-                byte* ptr = (byte*)bitmapData.Scan0;
-                for (int y = 0; y < height; y++)
+                bitmapSpan = new Span<byte>(bitmapData.Scan0.ToPointer(), bitmapData.Height * bitmapData.Stride);
+            }
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
                 {
-                    for (int x = 0; x < width; x++)
-                    {
-                        byte* pixelPtr = ptr + x * 3;
-                        Span<float> span = floats.AsSpan((y * width * 3) + x * 3, 3);
-                        ReinhardToneMap(span, luminances[y * width + x], largestLuminanceSquared);
+                    var pixel = bitmapSpan.Slice(y * bitmapData.Stride + x * 3, 3);
+                    var hdrPixel = floats.AsSpan((y * width * 3) + x * 3, 3);
+                    ReinhardToneMap(hdrPixel, luminances[y * width + x], largestLuminanceSquared);
 
-                        *pixelPtr++ = (byte)(span[2] * 255f);
-                        *pixelPtr++ = (byte)(span[1] * 255f);
-                        *pixelPtr++ = (byte)(span[0] * 255f);
-                    }
-
-                    ptr += bitmapData.Stride;
+                    pixel[0] = (byte)(hdrPixel[2] * 255f);
+                    pixel[1] = (byte)(hdrPixel[1] * 255f);
+                    pixel[2] = (byte)(hdrPixel[0] * 255f);
                 }
             }
 
