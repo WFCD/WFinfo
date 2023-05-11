@@ -108,6 +108,7 @@
             </Style>
             <components:NegateIntConverter x:Key="NegateIntConverter" />
             <components:KeyStringConverter x:Key="KeyStringConverter" />
+            <components:BoolVisibilityConverter x:Key="BoolVisibilityConverter" />
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -436,10 +437,35 @@
 
                             </ComboBox>
 
-                            <Label Content="HDR" Grid.Column="0" Grid.Row="1"/>
+                            <Label Visibility="{Binding SettingsViewModel.OsSupportsHDR, Converter={StaticResource BoolVisibilityConverter}}" Content="HDR" Grid.Column="0" Grid.Row="1"/>
+                            <Label Visibility="{Binding SettingsViewModel.OsSupportsHDR, Converter={StaticResource BoolVisibilityConverter}}" Grid.Row="1" Grid.Column="1" ToolTip="Auto - Detect based on game settings&#x0a;On - Always use HDR capture (will slightly change colors) &#x0a;Off - Always use SDR capture (will result in overblown HDR screenshots) &#x0a;&#x0a;It is recommended to use a custom theme with HDR enabled, this mode only compresses the dynamic color range." Margin="0,5,10,5" Padding="3"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+                                <Label.Style>
+                                    <Style>
+                                        <Setter Property="ContentControl.Content">
+                                            <Setter.Value>
+                                                <Image Source="../Resources/info.png" Stretch="Uniform" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="UIElement.IsMouseOver" Value="True"/>
+                                                    <Condition Property="UIElement.IsEnabled" Value="True"/>
+                                                </MultiTrigger.Conditions>
+                                                <Setter Property="ContentControl.Content">
+                                                    <Setter.Value>
+                                                        <Image Source="../Resources/info_h.png" Stretch="Uniform" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </MultiTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Label.Style>
+                            </Label>
                             <ComboBox 
                                           Grid.Column="2"
                                           Grid.Row="1"
+                                          Visibility="{Binding SettingsViewModel.OsSupportsHDR, Converter={StaticResource BoolVisibilityConverter}}"
                                           x:Name="hdrSelectionComboBox"
                                           FontSize="14"
                                           FontFamily="{DynamicResource Roboto}"

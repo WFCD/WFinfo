@@ -11,6 +11,7 @@ using WFInfo.Components;
 using WFInfo.Services.Screenshot;
 using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
+using Windows.Foundation.Metadata;
 
 namespace WFInfo.Settings
 {
@@ -683,6 +684,8 @@ namespace WFInfo.Settings
                 RaisePropertyChanged();
             }
         }
+
+        public bool OsSupportsHDR => ApiInformation.IsTypePresent("Windows.Graphics.Capture.GraphicsCaptureSession");
 
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         public SettingsViewModel(ApplicationSettings settings)
