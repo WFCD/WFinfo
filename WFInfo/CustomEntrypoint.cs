@@ -12,6 +12,8 @@ using System.Management;
 using Microsoft.Win32;
 using System.Windows;
 using System.Linq;
+using System.CodeDom;
+using Tesseract;
 
 namespace WFInfo
 {
@@ -180,11 +182,12 @@ namespace WFInfo
                 }, stopDownloadTask.Token);
                 dialogue.ShowDialog();
             }
+            
             if (stopDownloadTask == null || !stopDownloadTask.IsCancellationRequested)
             {
                 AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve_Tesseract;
                 AppDomain.CurrentDomain.AssemblyResolve += OnResolveAssembly;
-                InteropDotNet.LibraryLoader.Instance.CustomSearchPath = app_data_tesseract_catalog;
+                TesseractEnviornment.CustomSearchPath = app_data_tesseract_catalog;
                 App.Main();
             }
 

@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
-using Google.Apis.Auth;
 using Microsoft.Win32;
 using System.Windows.Media;
 using WFInfo.Settings;

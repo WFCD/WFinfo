@@ -411,7 +411,8 @@ namespace WFInfo
     }
 
     /// <summary>
-    /// Class to represent a single "sheet" of the create listing screen, consisting of up to 4 possible rewards for which are unique plat, quantity and market listings 
+    /// Class to represent a single "
+    /// " of the create listing screen, consisting of up to 4 possible rewards for which are unique plat, quantity and market listings 
     /// </summary>
     public class RewardCollection
     {
