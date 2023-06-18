@@ -95,7 +95,6 @@ namespace WFInfo
 
     private static int numberOfRewardsDisplayed;
 
-
         public static WindowStyle currentStyle;
         public enum WindowStyle
         {
