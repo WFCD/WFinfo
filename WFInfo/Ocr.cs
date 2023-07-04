@@ -2189,16 +2189,20 @@ namespace WFInfo
             double totalEven = 0;
             double totalOdd = 0;
 
-            Bitmap filtered = new Bitmap(partBox.Width, partBox.Height);
-            for (int x = 0; x < filtered.Width; x++)
+            int width = partBox.Width;
+            int height = partBox.Height;
+            int[] counts = new int[height];
+            Bitmap filtered = new Bitmap(width, height);
+            for (int x = 0; x < width; x++)
             {
                 int count = 0;
-                for (int y = 0; y < filtered.Height; y++)
+                for (int y = 0; y < height; y++)
                 {
                     clr = partBox.GetPixel(x, y);
                     if (ThemeThresholdFilter(clr, active))
                     {
                         filtered.SetPixel(x, y, Color.Black);
+                        counts[y]++;
                         count++;
                     }
                     else
@@ -2214,6 +2218,22 @@ namespace WFInfo
                     totalEven -= sinVal * count;
                 else if (sinVal > 0)
                     totalOdd += sinVal * count;
+            }
+
+            // Rarely, the selection box on certain themes can get included in the detected reward area.
+            // Therefore, we check the bottom 10% of the image for this potential issue
+            for (int y = height - 1; y > height * 0.9; --y)
+            {
+                // Assumed to be this issue if both the following criteria are met:
+                // 1. A lot more black pixels than the next line up, going with 5x for the moment. The issue is almost entirely on a single line in the cases I've seen so far
+                // 2. The problematic line should have a meaningful amount of black pixels. At least twice the height should be pretty good. (We don't yet know the number of players, so can't directly base it on width)
+                if (counts[y] > 5 * counts[y-1] && counts[y] > height * 2)
+                {
+                    Bitmap tmp = filtered.Clone(new Rectangle(0, 0, width, y), filtered.PixelFormat);
+                    Main.AddLog("Possible selection border in image, cropping height to: " + y + " (was " + height + ")");
+                    filtered.Dispose();
+                    filtered = tmp;
+                }
             }
 
             if (totalEven == 0 || totalOdd == 0)
