@@ -41,15 +41,6 @@ namespace WFInfo
                 "528d4d1eb0e07cfe1370b592da6f49fd"      //  Tesseract
         };
 
-        private static string[] list_of_checksums_AVX_free = new string[]
-        {
-                "298c0d71957cb2d82654373582c2313d",     //  x86/tesseract41
-                "bfc156ebfe3b86fbce3f24b475c19f20",     //  x86/leptonica-1.80.0
-                "3255fefb5dda0bb81adfbb1722fe45ef",     //  x64/tesseract41
-                "35e3f58d3d868e244b103f901fb2c66d",     //  x64/leptonica-1.80.0
-                "02633504a3bb24517de50530bf6bc57c"      //  Tesseract
-        };
-
         private static readonly string appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         private static readonly string libs_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/libs";
         private static readonly string tesseract_hotlink_prefix = libs_hotlink_prefix + @"/" + libtesseract + @"/";
@@ -113,22 +104,8 @@ namespace WFInfo
             Directory.CreateDirectory(appdata_tessdata_folder);
 
             cleanLegacyTesseractIfNeeded();
-            bool AvxSupport = isAVX2Available();
-
-            if (!AvxSupport || File.Exists(appPath + @"\useSSE.txt"))
-            {
-                using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
-                {
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + "]   " + "CPU doesn't support AVX optimizations, falling back to SSE2");
-                }
-
-                // SSE2 version without AVX optimizations - for very old pre-2013 CPUs
-                tesseract_hotlink_platform_specific_prefix = tesseract_hotlink_prefix + @"/sse2";
-            }
-            else
-            {
-                tesseract_hotlink_platform_specific_prefix = tesseract_hotlink_prefix + @"/avx2";
-            }
+            CollectDebugInfo();
+            tesseract_hotlink_platform_specific_prefix = tesseract_hotlink_prefix;
 
             // Refresh traineddata structure
             // This is temporary, to be removed in half year from now
@@ -148,7 +125,7 @@ namespace WFInfo
             {
                 string dll = list_of_dlls[i];
                 string path = app_data_tesseract_catalog + dll;
-                string md5 = AvxSupport ? list_of_checksums[i] : list_of_checksums_AVX_free[i];
+                string md5 = list_of_checksums[i];
                 if (!File.Exists(path) || GetMD5hash(path) != md5)
                     filesNeeded++;
             }
@@ -160,7 +137,7 @@ namespace WFInfo
                 {
                     try
                     {
-                        RefreshTesseractDlls(stopDownloadTask.Token, AvxSupport);
+                        RefreshTesseractDlls(stopDownloadTask.Token);
                     }
                     catch (Exception ex)
                     {
@@ -192,11 +169,6 @@ namespace WFInfo
             }
 
         }
-
-        // External method from DLL to identify AVX2 support
-        // Source code can be found on https://github.com/dimon222/CustomCPUID
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool isAVX2supported();
 
         static void MyHandler(object sender, UnhandledExceptionEventArgs args)
         {
@@ -230,22 +202,8 @@ namespace WFInfo
             return webClient;
         }
 
-        public static bool isAVX2Available()
+        public static void CollectDebugInfo()
         {
-            string dll;
-            string path;
-            string md5;
-            if (Environment.Is64BitProcess)
-            {
-                dll = "CustomCPUID_x64.dll";
-                md5 = "c4dffc5941729493b0ae1513855bb9a2";
-            } else
-            {
-                dll = "CustomCPUID_x86.dll";
-                md5 = "745d1bdb33e1d2c8df1a90ce1a6cebcd";    
-            }
-            path = app_data_tesseract_catalog + @"\" + dll;
-
             // Redownload if DLL is not present or got corrupted
             using (StreamWriter sw = File.AppendText(appPath + @"\debug.log"))
             {
@@ -262,32 +220,6 @@ namespace WFInfo
                 catch (Exception e)
                 {
                     sw.WriteLineAsync("[" + DateTime.UtcNow + "] Unable to fetch CPU model due to:" + e);
-                }
-
-
-                if (!File.Exists(path) || GetMD5hash(path) != md5)
-                {
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL is missing or corrupted, downloading");
-                    WebClient webClient = createNewWebClient();
-                    webClient.DownloadFile(libs_hotlink_prefix + "/" + dll, path);
-                }
-
-                // Import DLL that includes low level check for AVX2 support
-                IntPtr pDll = NativeMethods.LoadLibrary(path);
-                if (pDll == IntPtr.Zero)
-                {
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] Marshal Error Code - " + Marshal.GetLastWin32Error().ToString());
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL Pointer is pointing to null, fallback to SSE");
-                    return false;
-                    // throw new Exception("DLL pointer to CustomCPUID.dll is not identified");
-                }
-
-                IntPtr pAddressOfFunctionToCall = NativeMethods.GetProcAddress(pDll, "isAVX2supported");
-                if (pAddressOfFunctionToCall == IntPtr.Zero)
-                {
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + "] AVX2 DLL Function Pointer is pointing to null, fallback to SSE");
-                    return false;
-                    // throw new Exception("DLL function pointer in CustomCPUID.dll is not identified");
                 }
 
                 //Log OS version
@@ -346,24 +278,7 @@ namespace WFInfo
                         sw.WriteLineAsync("[" + DateTime.UtcNow + $"] Unable to fetch x86 runtime due to: {e}");
                     }
                 }
-
-                isAVX2supported isAvx2Supported = (isAVX2supported)Marshal.GetDelegateForFunctionPointer(
-                    pAddressOfFunctionToCall,
-                    typeof(isAVX2supported));
-
-                return isAvx2Supported();
             }
-        }
-        static class NativeMethods
-        {
-            [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
-            public static extern IntPtr LoadLibrary(string dllToLoad);
-
-            [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
-            public static extern IntPtr GetProcAddress(IntPtr hModule, string procedureName);
-
-            [DllImport("kernel32.dll")]
-            public static extern bool FreeLibrary(IntPtr hModule);
         }
 
         public static string GetMD5hash(string filePath)
@@ -395,7 +310,7 @@ namespace WFInfo
             dialogue.Dispatcher.Invoke(() => { dialogue.UpdatePercentage(e.ProgressPercentage); });
         }
 
-        private static async void RefreshTesseractDlls(CancellationToken token, bool AvxSupport)
+        private static async void RefreshTesseractDlls(CancellationToken token)
         {
             WebClient webClient = createNewWebClient();
             webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgressCallback);
@@ -407,7 +322,7 @@ namespace WFInfo
                     break;
                 string dll = list_of_dlls[i];
                 string path = app_data_tesseract_catalog + dll;
-                string md5 = AvxSupport ? list_of_checksums[i] : list_of_checksums_AVX_free[i];
+                string md5 = list_of_checksums[i];
                 if (!File.Exists(path) || GetMD5hash(path) != md5)
                 {
                     if (File.Exists(path))
