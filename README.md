@@ -106,7 +106,7 @@ If you really like this software, you even can post a review on the devs profile
 
 **Kekasi:** u/RandomFacades (Reddit), Kekasi (Warframe), Kek#5390 (Discord)
 
-**Dapal-003:** u/Dapal-003 (Reddit), Dapal003 (Warframe), ダパール・Dapal-003#0001 (Discord)
+**Dapal-003:** u/Dapal-003 (Reddit), Dapal003 (Warframe), ダパール・Dapal-003#0695 (Discord)
 
 **Dimon222:** u/dimon222 (Reddit), dimon222 (Warframe), dimon222#8256 (Discord)
 
