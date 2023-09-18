@@ -12,6 +12,14 @@ using System.Windows.Forms;
 using WebSocketSharp;
 using WFInfo.Resources;
 using WFInfo.Settings;
+using WFInfo.Services.Screenshot;
+using WFInfo.Services.WarframeProcess;
+using WFInfo.Services.WindowInfo;
+using Microsoft.Extensions.DependencyInjection;
+using WFInfo.Services;
+using WFInfo.Services.HDRDetection;
+using System.Linq;
+using Windows.Foundation.Metadata;
 
 namespace WFInfo
 {
@@ -20,7 +28,7 @@ namespace WFInfo
         public static Main INSTANCE;
         public static string AppPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static Data dataBase = new Data(ApplicationSettings.GlobalReadonlySettings);
+        public static Data dataBase;
         public static RewardWindow window = new RewardWindow();
         public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
         public static EquipmentWindow equipmentWindow = new EquipmentWindow();
@@ -32,7 +40,7 @@ namespace WFInfo
         public static FullscreenReminder fullscreenpopup;
         public static GFNWarning gfnWarning;
         public static UpdateDialogue update;
-        public static SnapItOverlay snapItOverlayWindow = new SnapItOverlay();
+        public static SnapItOverlay snapItOverlayWindow;
         public static SearchIt searchBox = new SearchIt();
         public static Login login = new Login();
         public static ListingHelper listingHelper = new ListingHelper();
@@ -45,7 +53,20 @@ namespace WFInfo
         private static bool UserAway { get; set; }
         private static string LastMarketStatus { get; set; } = "invisible";
         private static string LastMarketStatusB4AFK { get; set; } = "invisible";
-        private readonly IReadOnlyApplicationSettings _settings = ApplicationSettings.GlobalReadonlySettings;
+
+        // Main service provider
+        // TODO: Move to CustomEntryPoint
+        private IServiceProvider _services;
+
+        // Instance services
+        private IReadOnlyApplicationSettings _settings;
+        private IProcessFinder _process;
+        private IWindowInfoService _windowInfo;
+        private IHDRDetectorService _detector;
+
+        // See comment on Ocr.Init for explanation
+        private GdiScreenshotService _gdiScreenshot;
+        private WindowsCaptureScreenshotService _windowsScreenshot;
 
         public Main()
         {
@@ -56,7 +77,46 @@ namespace WFInfo
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start("https://github.com/WFCD/WFinfo/releases/latest/download/update.xml");
 
+            _services = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
+            InitializeLegacyServices(_services);
+
             Task.Factory.StartNew(ThreadedDataLoad);
+        }
+
+        private IServiceCollection ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton(ApplicationSettings.GlobalReadonlySettings);
+            services.AddProcessFinder();
+            services.AddWin32WindowInfo();
+            services.AddHDRDetection();
+
+            services.AddGDIScreenshots();
+
+            // Only add windows capture on supported plarforms (W10+)
+            if (ApiInformation.IsTypePresent("Windows.Graphics.Capture.GraphicsCaptureSession"))
+            {
+                services.AddWindowsCaptureScreenshots();
+            }
+
+            return services;
+        }
+
+        private void InitializeLegacyServices(IServiceProvider services)
+        {
+            // TODO: Ideally we also inject into Main
+            _settings = services.GetRequiredService<IReadOnlyApplicationSettings>();
+            _process = services.GetRequiredService<IProcessFinder>();
+            _windowInfo = services.GetRequiredService<IWindowInfoService>();
+            _detector = services.GetRequiredService<IHDRDetectorService>();
+
+            dataBase = new Data(ApplicationSettings.GlobalReadonlySettings, _process, _windowInfo);
+            SettingsViewModel.Instance.InjectServices(_windowInfo, _process);
+            snapItOverlayWindow = new SnapItOverlay(_windowInfo);
+
+            // See comment on Ocr.Init for explanation
+            var screenshotServices = services.GetServices<IScreenshotService>();
+            _gdiScreenshot = screenshotServices.First(ss => ss is GdiScreenshotService) as GdiScreenshotService;
+            _windowsScreenshot = screenshotServices.FirstOrDefault(ss => ss is WindowsCaptureScreenshotService) as WindowsCaptureScreenshotService;
         }
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
@@ -64,22 +124,23 @@ namespace WFInfo
             update = new UpdateDialogue(args);
         }
 
-        public static void ThreadedDataLoad()
+        public void ThreadedDataLoad()
         {
             try
             {
-                StatusUpdate("Updating Databases...", 0);
-
-                dataBase.Update();
-
                 //RelicsWindow.LoadNodesOnThread();
-                OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings);
+
+                // Too many dependencies?
+                StatusUpdate("Initializing OCR engine...", 0);
+                OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings, _windowInfo, _detector, _gdiScreenshot, _windowsScreenshot);
+
+                StatusUpdate("Updating Databases...", 0);
+                dataBase.Update();
 
                 if (ApplicationSettings.GlobalReadonlySettings.Auto)
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
-                    OCR.VerifyWarframe();
                     LoggedIn();
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
@@ -103,20 +164,18 @@ namespace WFInfo
                 });
             }
         }
-        private static async void TimeoutCheck()
+        private async void TimeoutCheck()
         {
-            if (!await dataBase.IsJWTvalid().ConfigureAwait(true) || !OCR.GameIsStreamed)
+            if (!await dataBase.IsJWTvalid().ConfigureAwait(true) || !_process.GameIsStreamed)
                 return;
             DateTime now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");
 
-            if (OCR.Warframe != null && OCR.Warframe.HasExited && LastMarketStatus != "invisible")
+            if (!_process.IsRunning && LastMarketStatus != "invisible")
             {//set user offline if Warframe has closed but no new game was found
                 Debug.WriteLine($"Warframe was detected as closed");
                 //reset warframe process variables, and reset LogCapture so new game process gets noticed
                 dataBase.DisableLogCapture();
-                OCR.Warframe.Dispose();
-                OCR.Warframe = null;
                 if (ApplicationSettings.GlobalReadonlySettings.Auto)
                     dataBase.EnableLogCapture();
 
@@ -282,7 +341,7 @@ namespace WFInfo
                     bigScreenshot.Dispose();
                 });
             }
-            else if (_settings.Debug || OCR.VerifyWarframe())
+            else if (_settings.Debug || _process.IsRunning)
             {
                 Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
             }
@@ -311,7 +370,7 @@ namespace WFInfo
 
 
             }
-            else if (key == MouseButton.Left && OCR.Warframe != null && !OCR.Warframe.HasExited && !OCR.GameIsStreamed && Overlay.rewardsDisplaying)
+            else if (key == MouseButton.Left && _process.Warframe != null && !_process.Warframe.HasExited && !_process.GameIsStreamed && Overlay.rewardsDisplaying)
             {
                 if (_settings.Display != Display.Overlay && !_settings.AutoList && !_settings.AutoCSV && !_settings.AutoCount)
                 {
@@ -402,6 +461,7 @@ namespace WFInfo
                     {
                         try
                         {
+                            // TODO: This
                             foreach (string file in openFileDialog.FileNames)
                             {
                                 if (type == ScreenshotType.NORMAL)
@@ -410,21 +470,21 @@ namespace WFInfo
 
                                     //Get the path of specified file
                                     Bitmap image = new Bitmap(file);
-                                    OCR.UpdateWindow(image);
+                                    _windowInfo.UseImage(image);
                                     OCR.ProcessRewardScreen(image);
                                 } else if (type == ScreenshotType.SNAPIT)
                                 {
                                     AddLog("Testing snapit on file: " + file);
 
                                     Bitmap image = new Bitmap(file);
-                                    OCR.UpdateWindow(image);
+                                    _windowInfo.UseImage(image);
                                     OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
                                 } else if (type == ScreenshotType.MASTERIT)
                                 {
                                     AddLog("Testing masterit on file: " + file);
 
                                     Bitmap image = new Bitmap(file);
-                                    OCR.UpdateWindow(image);
+                                    _windowInfo.UseImage(image);
                                     OCR.ProcessProfileScreen(image);
                                 }
                             }
@@ -449,7 +509,7 @@ namespace WFInfo
         }
 
         // Switch to logged in mode for warfrane.market systems
-        public static void LoggedIn()
+        public void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
             MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
 

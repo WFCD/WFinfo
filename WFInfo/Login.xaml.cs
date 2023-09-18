@@ -54,7 +54,7 @@ namespace WFInfo
             try
             {
                 await Main.dataBase.GetUserLogin(Email.Text, Password.Password);
-                Main.LoggedIn();
+                Main.INSTANCE.LoggedIn();
                 Email.Text = "Email";
                 Password.Password = "";
                 Main.dataBase.rememberMe = RememberMe.IsChecked.Value;

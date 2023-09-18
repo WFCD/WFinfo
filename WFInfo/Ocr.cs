@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,14 +7,14 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Tesseract;
+using WFInfo.Services.HDRDetection;
+using WFInfo.Services.Screenshot;
+using WFInfo.Services.WindowInfo;
 using WFInfo.Settings;
 using Brushes = System.Drawing.Brushes;
 using Clipboard = System.Windows.Forms.Clipboard;
@@ -22,7 +22,6 @@ using Color = System.Drawing.Color;
 using Pen = System.Drawing.Pen;
 using Point = System.Drawing.Point;
 using Rect = Tesseract.Rect;
-using Size = System.Drawing.Size;
 
 namespace WFInfo
 {
@@ -52,8 +51,6 @@ namespace WFInfo
     class OCR
     {
         private static readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
-
-        private static Screen wfScreen = Screen.PrimaryScreen;
 
         #region variabels and sizzle
 
@@ -95,31 +92,10 @@ namespace WFInfo
 
     private static int numberOfRewardsDisplayed;
 
-        public static WindowStyle currentStyle;
-        public enum WindowStyle
-        {
-            FULLSCREEN,
-            BORDERLESS,
-            WINDOWED
-        }
-        public static HandleRef HandleRef { get; private set; }
-        public static Process Warframe = null;
-        public static bool GameIsStreamed = false;
-        public static Point center;
-        public static Rectangle window;
-
         private const NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
 
-        //public static float dpi;
-        //private static double ScreenScaling; // Additional to settings.scaling this is used to calculate any widescreen or 4:3 aspect content.
-        //private static double TotalScaling;
-
-        // DPI - Only used to display on screen or to get the "actual" screen bounds
-        public static double dpiScaling;
         // UI - Scaling used in Warframe
         public static double uiScaling;
-        // Screen / Resolution Scaling - Used to adjust pixel values to each person's monitor
-        public static double screenScaling;
 
         public static Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -149,14 +125,29 @@ namespace WFInfo
         private static ITesseractService _tesseractService;
         private static ISoundPlayer _soundPlayer;
         private static IReadOnlyApplicationSettings _settings;
+        private static IWindowInfoService _window;
+        private static IHDRDetectorService _hdrDetector;
 
-        public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer, IReadOnlyApplicationSettings settings)
+        private static IScreenshotService _gdiScreenshot;
+        private static IScreenshotService _windowsScreenshot;
+
+        // You might be asking yourself "Why are you injecting specific services? That's not good practice at all!"
+        // Now I can either do this and switch between these two based on settings
+        // Or I can make this a scoped service, with each scope being a new screenshot request and dynamically choose the right service using a IScreenshotServiceFactory
+        // Unfortunately option 2 means rewriting like half of this thing so I'm sticking with a hack
+        public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer, IReadOnlyApplicationSettings settings,
+            IWindowInfoService window, IHDRDetectorService hdrDetector, GdiScreenshotService gdiScreenshot, WindowsCaptureScreenshotService windowsScreenshot = null)
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
             _tesseractService = tesseractService;
             _tesseractService.Init();
             _soundPlayer = soundPlayer;
             _settings = settings;
+            _window = window;
+            _hdrDetector = hdrDetector;
+
+            _gdiScreenshot = gdiScreenshot;
+            _windowsScreenshot = windowsScreenshot;
         }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
@@ -232,12 +223,12 @@ namespace WFInfo
             {
                 numberOfRewardsDisplayed = firstChecks.Length;
                 clipboard = string.Empty;
-                int width = (int)(pixleRewardWidth * screenScaling * uiScaling) + 10;
-                int startX = center.X - width / 2 + (int)(width * 0.004);
+                int width = (int)(pixleRewardWidth * _window.ScreenScaling * uiScaling) + 10;
+                int startX = _window.Center.X - width / 2 + (int)(width * 0.004);
                 if (firstChecks.Length % 2 == 1) { startX += width / 8; }
                 if (firstChecks.Length <= 2) { startX += 2 * (width / 8); }
-                int overWid = (int)(width / (4.1 * dpiScaling));
-                int startY = (int)(center.Y / dpiScaling - 20 * screenScaling * uiScaling);
+                int overWid = (int)(width / (4.1 * _window.DpiScaling));
+                int startY = (int)(_window.Center.Y / _window.DpiScaling - 20 * _window.ScreenScaling * uiScaling);
                 int partNumber = 0;
                 bool hideRewardInfo = false;
                 for (int i = 0; i < firstChecks.Length; i++)
@@ -327,7 +318,7 @@ namespace WFInfo
                         {
                             Main.overlays[partNumber].LoadTextData(correctName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo, false);
                             Main.overlays[partNumber].Resize(overWid);
-                            Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / dpiScaling), startY + (int)(_settings.OverlayYOffsetValue / dpiScaling), _settings.Delay);
+                            Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / _window.DpiScaling), startY + (int)(_settings.OverlayYOffsetValue / _window.DpiScaling), _settings.Delay);
                         }
                         else if (!_settings.IsLightSelected)
                         {
@@ -394,13 +385,13 @@ namespace WFInfo
         {
             Debug.WriteLine(lastClick.ToString());
             var primeRewardIndex = 0;
-            lastClick.Offset(-window.X, -window.Y);
-            var width = window.Width * (int)dpiScaling;
-            var height = window.Height * (int)dpiScaling;
-            var mostWidth = (int)(pixleRewardWidth * screenScaling * uiScaling);
+            lastClick.Offset(-_window.Window.X, -_window.Window.Y);
+            var width = _window.Window.Width * (int)_window.DpiScaling;
+            var height = _window.Window.Height * (int)_window.DpiScaling;
+            var mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling * uiScaling);
             var mostLeft = (width / 2) - (mostWidth / 2);
-            var bottom = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5 * uiScaling);
-            var top = height / 2 - (int)((pixleRewardYDisplay) * screenScaling * uiScaling);
+            var bottom = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * 0.5 * uiScaling);
+            var top = height / 2 - (int)((pixleRewardYDisplay) * _window.ScreenScaling * uiScaling);
             var selectionRectangle = new Rectangle(mostLeft, top, mostWidth, bottom / 2);
             if (numberOfRewardsDisplayed == 3)
             {
@@ -531,13 +522,13 @@ namespace WFInfo
         /// <returns></returns>
         public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
-            // int width = image == null ? window.Width * (int)dpiScaling : image.Width;
-            // int height = image == null ? window.Height * (int)dpiScaling : image.Height;
-            int mostWidth = (int)(pixleRewardWidth * screenScaling);
+            int lineHeight = (int)(pixelRewardLineHeight / 2 * _window.ScreenScaling);
+            // int width = image == null ? window.Width * (int)_window.DpiScaling : image.Width;
+            // int height = image == null ? window.Height * (int)_window.DpiScaling : image.Height;
+            int mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling);
             // int mostLeft = (width / 2) - (mostWidth / 2);
-            // int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
-            // int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
+            // int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * _window.ScreenScaling);
+            // int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * 0.5);
 
             if (image == null)
             {
@@ -701,7 +692,7 @@ namespace WFInfo
                     csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + "," + partsDetected + ", \"\"" + Environment.NewLine;
                 }
 
-                int width = (int)(part.Bounding.Width * screenScaling);
+                int width = (int)(part.Bounding.Width * _window.ScreenScaling);
                 if (width < _settings.MinOverlayWidth)
                 {
                     //if (width < 50)
@@ -720,7 +711,7 @@ namespace WFInfo
                     itemOverlay.LoadTextData(name, plat, primeSetPlat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false, doWarn);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
-                    itemOverlay.Display((int)(window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / dpiScaling), (int)((window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / dpiScaling), _settings.SnapItDelay);
+                    itemOverlay.Display((int)(_window.Window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / _window.DpiScaling), (int)((_window.Window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / _window.DpiScaling), _settings.SnapItDelay);
                 });
             }
 
@@ -965,7 +956,7 @@ namespace WFInfo
 
                     using (Graphics g = Graphics.FromImage(filteredImage))
                     {
-                        if (paddedBounds.Height > 50 * screenScaling || paddedBounds.Width > 84 * screenScaling)
+                        if (paddedBounds.Height > 50 * _window.ScreenScaling || paddedBounds.Width > 84 * _window.ScreenScaling)
                         { //Determine whether or not the box is too large, false positives in OCR can scan items (such as neuroptics, chassis or systems) as a character(s).
                             if (currentWord.Length > 3)
                             { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
@@ -1997,17 +1988,17 @@ namespace WFInfo
             long start = watch.ElapsedMilliseconds;
             long beginning = start;
 
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * screenScaling);
+            int lineHeight = (int)(pixelRewardLineHeight / 2 * _window.ScreenScaling);
 
             Color clr;
-            int width = window.Width;
-            int height = window.Height;
-            int mostWidth = (int)(pixleRewardWidth * screenScaling);
+            int width = _window.Window.Width;
+            int height = _window.Window.Height;
+            int mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling);
             int mostLeft = (width / 2) - (mostWidth / 2 );
             // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
             //                   (316          -        235        +       44)    *    1.1    =    137
-            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling);
-            int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * 0.5);
+            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * _window.ScreenScaling);
+            int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * 0.5);
             //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
             var rectangle = new Rectangle((int)(mostLeft), (int)(mostTop), mostWidth, mostBot - mostTop);
             Bitmap preFilter;
@@ -2072,7 +2063,7 @@ namespace WFInfo
 
             scaling = -1;
             double lowestWeight = 0;
-            Rectangle uidebug = new Rectangle((topLine_100 - topLine_50) / 50 + topLine_50, (int)(preFilter.Height/screenScaling), preFilter.Width, 50);
+            Rectangle uidebug = new Rectangle((topLine_100 - topLine_50) / 50 + topLine_50, (int)(preFilter.Height/_window.ScreenScaling), preFilter.Width, 50);
             for (int i = 0; i <= 50; i++)
             {
                 int yFromTop = preFilter.Height - (i * (topLine_100 - topLine_50) / 50 + topLine_50);
@@ -2080,10 +2071,10 @@ namespace WFInfo
                 int scale = (50 + i);
                 int scaleWidth = preFilter.Width * scale / 100;
 
-                int textTop = (int)(screenScaling * TextSegments[0] * scale / 100);
-                int textTopBot = (int)(screenScaling * TextSegments[1] * scale / 100);
-                int textBothBot = (int)(screenScaling * TextSegments[2] * scale / 100);
-                int textTailBot = (int)(screenScaling * TextSegments[3] * scale / 100);
+                int textTop = (int)(_window.ScreenScaling * TextSegments[0] * scale / 100);
+                int textTopBot = (int)(_window.ScreenScaling * TextSegments[1] * scale / 100);
+                int textBothBot = (int)(_window.ScreenScaling * TextSegments[2] * scale / 100);
+                int textTailBot = (int)(_window.ScreenScaling * TextSegments[3] * scale / 100);
 
                 int loc = textTop;
                 for (; loc <= textTopBot; loc++)
@@ -2155,10 +2146,10 @@ namespace WFInfo
             double highScaling = scaling < 1.0 ? scaling + 0.01 : scaling;
             double lowScaling = scaling > 0.5 ? scaling - 0.01 : scaling;
 
-            int cropWidth = (int)(pixleRewardWidth * screenScaling * highScaling);
+            int cropWidth = (int)(pixleRewardWidth * _window.ScreenScaling * highScaling);
             int cropLeft = (preFilter.Width / 2) - (cropWidth / 2);
-            int cropTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * screenScaling * highScaling);
-            int cropBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * screenScaling * lowScaling);
+            int cropTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * _window.ScreenScaling * highScaling);
+            int cropBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * lowScaling);
             int cropHei = cropBot - cropTop;
             cropTop -= mostTop;
             try
@@ -2279,10 +2270,10 @@ namespace WFInfo
 
         //private static List<Bitmap> FilterAndSeparateParts(Bitmap image, WFtheme active)
         //{
-        //    int width = (int)(pixleRewardWidth * screenScaling * uiScaling);
-        //    int lineHeight = (int)(pixelRewardLineHeight * screenScaling * uiScaling);
+        //    int width = (int)(pixleRewardWidth * _window.ScreenScaling * uiScaling);
+        //    int lineHeight = (int)(pixelRewardLineHeight * _window.ScreenScaling * uiScaling);
         //    int left = (image.Width / 2) - (width / 2);
-        //    int top = (image.Height / 2) - (int)(pixleRewardYDisplay * screenScaling * uiScaling) + (int)(pixleRewardHeight * screenScaling * uiScaling) - lineHeight;
+        //    int top = (image.Height / 2) - (int)(pixleRewardYDisplay * _window.ScreenScaling * uiScaling) + (int)(pixleRewardHeight * _window.ScreenScaling * uiScaling) - lineHeight;
 
         //    partialScreenshot = new Bitmap(width, lineHeight);
 
@@ -2446,24 +2437,39 @@ namespace WFInfo
 
         internal static Bitmap CaptureScreenshot()
         {
-            UpdateWindow();
+            _window.UpdateWindow();
 
-            int width = window.Width;
-            int height = window.Height;
-
-            if (window == null || window.Width == 0 || window.Height == 0)
+            // HACK: Should be already injected instead of switching here
+            IScreenshotService screenshot;
+            if (_windowsScreenshot == null)
             {
-                window = wfScreen.Bounds;
-                center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
-
-                width *= (int)dpiScaling;
-                height *= (int)dpiScaling;
+                // W8.1 and lower
+                screenshot = _gdiScreenshot;
             }
+            else
+            {
+                switch (_settings.HdrSupport)
+                {
+                    case HdrSupportEnum.On:
+                        Main.AddLog("Using new windows capture API for an HDR screenshot");
+                        screenshot = _windowsScreenshot;
+                        break;
+                    case HdrSupportEnum.Off:
+                        Main.AddLog("Using old GDI service for a SDR screenshot");
+                        screenshot = _gdiScreenshot;
+                        break;
+                    case HdrSupportEnum.Auto:
+                        var isHdr = _hdrDetector.IsHDR;
+                        Main.AddLog($"Automatically determining HDR status: {isHdr} | Using corresponding service");
+                        screenshot = isHdr ? _windowsScreenshot : _gdiScreenshot;
+                        break;
+                    default:
+                        throw new NotImplementedException($"HDR support option '{_settings.HdrSupport}' does not have a corresponding screenshot service.");
+                }
+            }
+            
 
-            Bitmap image = new Bitmap(width, height);
-            Size FullscreenSize = new Size(image.Width, image.Height);
-            using (Graphics graphics = Graphics.FromImage(image))
-                graphics.CopyFromScreen(window.Left, window.Top, 0, 0, FullscreenSize, CopyPixelOperation.SourceCopy);
+            var image = screenshot.CaptureScreenshot().Result.First();
             image.Save(Main.AppPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + ".png");
             return image;
         }
@@ -2471,10 +2477,10 @@ namespace WFInfo
         internal static void SnapScreenshot()
         {
             Main.snapItOverlayWindow.Populate(CaptureScreenshot());
-            Main.snapItOverlayWindow.Left = window.Left / dpiScaling;
-            Main.snapItOverlayWindow.Top = window.Top / dpiScaling;
-            Main.snapItOverlayWindow.Width = window.Width / dpiScaling;
-            Main.snapItOverlayWindow.Height = window.Height / dpiScaling;
+            Main.snapItOverlayWindow.Left = _window.Window.Left / _window.DpiScaling;
+            Main.snapItOverlayWindow.Top = _window.Window.Top / _window.DpiScaling;
+            Main.snapItOverlayWindow.Width = _window.Window.Width / _window.DpiScaling;
+            Main.snapItOverlayWindow.Height = _window.Window.Height / _window.DpiScaling;
             Main.snapItOverlayWindow.Topmost = true;
             Main.snapItOverlayWindow.Focusable = true;
             Main.snapItOverlayWindow.Show();
@@ -2484,220 +2490,6 @@ namespace WFInfo
         public static async Task updateEngineAsync()
         {
             _tesseractService.ReloadEngines();
-        }
-
-        public static bool VerifyWarframe() {
-            if (Warframe != null && !Warframe.HasExited) { // don't update status
-                return true;
-            }
-            if (Warframe!= null && Warframe.HasExited)
-            {
-                //reset warframe process variables, and reset LogCapture so new game process gets noticed
-                Main.dataBase.DisableLogCapture();
-                Warframe.Dispose();
-                Warframe = null;
-                if (ApplicationSettings.GlobalReadonlySettings.Auto)
-                    Main.dataBase.EnableLogCapture();
-            }
-
-            Task.Run(() => {
-                foreach (Process process in Process.GetProcesses())
-                {
-                    if (process.ProcessName == "Warframe.x64")
-                    {
-                        if (process.MainWindowTitle == "Warframe")
-                        {
-                            HandleRef = new HandleRef(process, process.MainWindowHandle);
-
-                            Warframe = process;
-                            GameIsStreamed = false;
-                            if (Main.dataBase.GetSocketAliveStatus())
-                                Debug.WriteLine("Socket was open in verify warframe");
-                            Task.Run(async () =>
-                            {
-                                await Main.dataBase.SetWebsocketStatus("in game");
-                            });
-                            Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
-
-                            wfScreen = Screen.FromHandle(HandleRef.Handle);
-                            string screenType = (wfScreen.Primary ? "primary" : "secondary");
-                            Main.AddLog("Warframe display: " + wfScreen.DeviceName + ", " + screenType);
-
-                            //try and catch any UAC related issues
-                            try
-                            {
-                                bool _ = Warframe.HasExited;
-                                return true;
-                            }
-                            catch (System.ComponentModel.Win32Exception e)
-                            {
-                                Warframe = null;
-                                Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
-                                Main.StatusUpdate("Restart Warframe without admin privileges", 1);
-                                return _settings.Debug ? true : false;
-                            }
-                        }
-                    } else if (process.MainWindowTitle.Contains("Warframe") && process.MainWindowTitle.Contains("GeForce NOW"))
-                    {
-                        GameIsStreamed = true;
-                        Main.RunOnUIThread(() =>
-                        {
-                            Main.SpawnGFNWarning();
-                        });
-                        Main.AddLog("GFN -- Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
-
-                        HandleRef tmpHandle = new HandleRef(process, process.MainWindowHandle);
-                        Screen tmpScreen = Screen.FromHandle(tmpHandle.Handle);
-                        string screenType = (tmpScreen.Primary ? "primary" : "secondary");
-                        Main.AddLog("GFN -- Warframe display: " + tmpScreen.DeviceName + ", " + screenType);
-
-                        HandleRef = tmpHandle;
-                        wfScreen = tmpScreen;
-                        Warframe = process;
-                        //TODO: spawn popup about GeForce Now limitations
-
-                        //try and catch any UAC related issues
-                        try
-                        {
-                            bool _ = Warframe.HasExited;
-                            return true;
-                        }
-                        catch (System.ComponentModel.Win32Exception e)
-                        {
-                            Warframe = null;
-                            Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
-                            Main.StatusUpdate("Restart Warframe without admin privileges, or WFInfo with admin privileges", 1);
-                            return _settings.Debug ? true : false;
-                        }
-                    }
-                }
-                    
-                if (!_settings.Debug) {
-                    Main.AddLog("Did Not Detect Warframe Process");
-                    Main.StatusUpdate("Unable to Detect Warframe Process", 1);
-                }
-                return false;
-            });
-            return false;
-        }
-
-        private static void RefreshDPIScaling()
-        {
-            try
-            {
-                var mon = Win32.MonitorFromPoint(new Point(wfScreen.Bounds.Left+1, wfScreen.Bounds.Top+1), 2);
-                Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
-                //Win32.GetDpiForMonitor(mon, Win32.DpiType.Angular, out var dpiXAngular, out _);
-                //Win32.GetDpiForMonitor(mon, Win32.DpiType.Raw, out var dpiXRaw, out _);
-
-                Main.AddLog($"Effective dpi, X:{dpiXEffective}\n Which is %: {dpiXEffective / 96.0}");
-                //Main.AddLog($"Raw dpi, X:{dpiXRaw}\n Which is %: {dpiXRaw / 96.0}");
-                //Main.AddLog($"Angular dpi, X:{dpiXAngular}\n Which is %: {dpiXAngular / 96.0}");
-                dpiScaling = dpiXEffective / 96.0; // assuming that y and x axis dpi scaling will be uniform. So only need to check one value
-            }
-            catch (Exception e)
-            {
-                Main.AddLog($"Was unable to set a new dpi scaling, defaulting to 100% zoom, exception: {e}");
-                dpiScaling = 1;
-            }
-        }
-
-        private static void RefreshScaling()
-        {
-            if (window.Width * 9 > window.Height * 16)  // image is less than 16:9 aspect
-                screenScaling = window.Height / 1080.0;
-            else
-                screenScaling = window.Width / 1920.0; //image is higher than 16:9 aspect
-
-            Main.AddLog("SCALING VALUES UPDATED: Screen_Scaling = " + (screenScaling * 100).ToString("F2", Main.culture) + "%, DPI_Scaling = " + (dpiScaling * 100).ToString("F2", Main.culture) + "%, UI_Scaling = " + (uiScaling * 100).ToString("F0", Main.culture) + "%");
-        }
-
-        public static void UpdateWindow(Bitmap image = null)
-        {
-            bool warframeOk = VerifyWarframe();
-            RefreshDPIScaling();
-            if (image != null || !warframeOk)
-            {
-                int width = image?.Width ?? wfScreen.Bounds.Width;
-                int height = image?.Height ?? wfScreen.Bounds.Height;
-                window = new Rectangle(0, 0, width, height);
-                center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
-                if (image != null)
-                    Main.AddLog("DETECTED LOADED IMAGE BOUNDS: " + window.ToString());
-                else
-                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + wfScreen.DeviceName);
-
-                RefreshScaling();
-                return;
-            }
-
-            if (!Win32.GetWindowRect(HandleRef, out Win32.R osRect))
-            { // get window size of warframe
-                if (_settings.Debug)
-                { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
-                    int width = wfScreen.Bounds.Width * (int)dpiScaling;
-                    int height = wfScreen.Bounds.Height * (int)dpiScaling;
-                    window = new Rectangle(0, 0, width, height);
-                    center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
-                    Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + window.ToString() + " Named: " + wfScreen.DeviceName);
-                    RefreshScaling();
-                    return;
-                }
-                else
-                {
-                    Main.AddLog("Failed to get window bounds");
-                    Main.StatusUpdate("Failed to get window bounds", 1);
-                    return;
-                }
-            }
-
-            if (osRect.Left < -20000 || osRect.Top < -20000)
-            { // if the window is in the VOID delete current process and re-set window to nothing
-                Warframe = null;
-                window = Rectangle.Empty;
-            }
-            else if (window == null || window.Left != osRect.Left || window.Right != osRect.Right || window.Top != osRect.Top || window.Bottom != osRect.Bottom)
-            { // checks if old window size is the right size if not change it
-                window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
-                                                                                                                         // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
-                int GWL_style = -16;
-                uint WS_BORDER = 0x00800000;
-                uint WS_POPUP = 0x80000000;
-
-
-                uint styles = Win32.GetWindowLongPtr(HandleRef, GWL_style);
-                if ((styles & WS_POPUP) != 0)
-                {
-                    // Borderless, don't do anything
-                    currentStyle = WindowStyle.BORDERLESS;
-                    Main.AddLog($"Borderless detected (0x{styles.ToString("X8", Main.culture)}, {window.ToString()}");
-                }
-                else if ((styles & WS_BORDER) != 0)
-                {
-                    // Windowed, adjust for thicc border
-                    window = new Rectangle(window.Left + 8, window.Top + 30, window.Width - 16, window.Height - 38);
-                    Main.AddLog($"Windowed detected (0x{styles.ToString("X8", Main.culture)}, adjusting window to: {window.ToString()}");
-                    currentStyle = WindowStyle.WINDOWED;
-                }
-                else
-                {
-                    // Assume Fullscreen, don't do anything
-                    Main.AddLog($"Fullscreen detected (0x{styles.ToString("X8", Main.culture)}, {window.ToString()}");
-                    currentStyle = WindowStyle.FULLSCREEN;
-                    //Show the Fullscreen prompt
-                    if (_settings.IsOverlaySelected)
-                    {
-                        Main.AddLog($"Showing the Fullscreen Reminder");
-                        Main.RunOnUIThread(() =>
-                        {
-                            Main.SpawnFullscreenReminder();
-                        });
-                    }
-                }
-
-                center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
-                RefreshScaling();
-            }
         }
     }
 

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using WFInfo.Services.Screenshot;
 
 namespace WFInfo.Settings
 {
@@ -115,6 +116,7 @@ namespace WFInfo.Settings
         public int CF_sBMin { get; set; } = 0;
         public long FixedAutoDelay { get; set; } = 2000L;
         public string Ignored { get; set; } = null;
+        public HdrSupportEnum HdrSupport { get; set; } = HdrSupportEnum.Auto;
         [OnError]
         internal void OnError(StreamingContext context, ErrorContext errorContext)
         {

@@ -8,6 +8,10 @@ using System.Windows.Input;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using WFInfo.Components;
+using WFInfo.Services.Screenshot;
+using WFInfo.Services.WarframeProcess;
+using WFInfo.Services.WindowInfo;
+using Windows.Foundation.Metadata;
 
 namespace WFInfo.Settings
 {
@@ -17,6 +21,8 @@ namespace WFInfo.Settings
     public class SettingsViewModel : INPC, INotifyDataErrorInfo
     {
         private ApplicationSettings _settings;
+        private IProcessFinder _process;
+        private IWindowInfoService _windowInfo;
 
         public Display Display
         {
@@ -202,13 +208,13 @@ namespace WFInfo.Settings
             get => _settings.OverlayXOffsetValue;
             set { 
                 int width = 2000; // presume bounding
-                if (OCR.VerifyWarframe())
+                if (_process.IsRunning)
                 {
-                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
+                    if (_windowInfo.Window == null || _windowInfo.Window.Width == 0 || _windowInfo.Window.Height == 0)
                     {
-                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
+                        _windowInfo.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
                     }
-                    width = OCR.window.Width;
+                    width = _windowInfo.Window.Width;
                 }
                 _settings.OverlayXOffsetValue = (value <= -1 * width / 2) ? (-1 * width / 2) : (value >= width / 2) ? (width / 2) : value; // clamp value to valid bound
                 RaisePropertyChanged(); 
@@ -220,13 +226,13 @@ namespace WFInfo.Settings
             get => _settings.OverlayYOffsetValue;
             set { 
                 int height = 2000; // presume bounding
-                if (OCR.VerifyWarframe())
+                if (_process.IsRunning)
                 {
-                    if (OCR.window == null || OCR.window.Width == 0 || OCR.window.Height == 0)
+                    if (_windowInfo.Window == null || _windowInfo.Window.Width == 0 || _windowInfo.Window.Height == 0)
                     {
-                        OCR.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
+                        _windowInfo.UpdateWindow(); // ensures our window bounds are set, or at least marked for BS
                     }
-                    height = OCR.window.Height;
+                    height = _windowInfo.Window.Height;
                 }
                 _settings.OverlayYOffsetValue = (value <= -1 * height / 2) ? (-1 * height / 2) : (value >= height / 2) ? (height / 2) : value; // clamp value to valid bound
                 RaisePropertyChanged(); 
@@ -668,12 +674,30 @@ namespace WFInfo.Settings
                 RaisePropertyChanged(); 
             }
         }
-        
+
+        public HdrSupportEnum HdrSupport
+        {
+            get => _settings.HdrSupport;
+            set
+            {
+                _settings.HdrSupport = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public bool OsSupportsHDR => ApiInformation.IsTypePresent("Windows.Graphics.Capture.GraphicsCaptureSession");
+
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
         public SettingsViewModel(ApplicationSettings settings)
         {
             _settings = settings;
             this.PropertyChanged += (sender, args) => Save();
+        }
+
+        public void InjectServices(IWindowInfoService windowInfo, IProcessFinder process)
+        {
+            _windowInfo = windowInfo;
+            _process = process;
         }
 
         public void Save()

@@ -5,6 +5,7 @@ using System.IO.MemoryMappedFiles;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WFInfo.Services.WarframeProcess;
 
 namespace WFInfo
 {
@@ -20,8 +21,12 @@ namespace WFInfo
         private readonly Timer timer;
         public event LogWatcherEventHandler TextChanged;
 
-        public LogCapture()
+        private readonly IProcessFinder _process;
+
+        public LogCapture(IProcessFinder process)
         {
+            _process = process;
+
             token = tokenSource.Token;
             Main.AddLog("Starting LogCapture");
             memoryMappedFile = MemoryMappedFile.CreateOrOpen("DBWIN_BUFFER", 4096L);
@@ -60,14 +65,14 @@ namespace WFInfo
                         continue;
                     }
 
-                    if (OCR.Warframe != null && !OCR.GameIsStreamed)
+                    if (_process.Warframe != null && !_process.GameIsStreamed)
                     {
                         using (MemoryMappedViewStream stream = memoryMappedFile.CreateViewStream())
                         {
                             using (BinaryReader reader = new BinaryReader(stream, Encoding.Default))
                             {
                                 uint processId = reader.ReadUInt32();
-                                if (processId == OCR.Warframe.Id)
+                                if (processId == _process.Warframe.Id)
                                 {
                                     char[] chars = reader.ReadChars(4092);
                                     int index = Array.IndexOf(chars, '\0');
@@ -103,11 +108,7 @@ namespace WFInfo
 
         private void GetProcess()
         {
-            if ((OCR.Warframe == null) || (OCR.Warframe.HasExited))
-            {
-                if (!OCR.VerifyWarframe())
-                    return;
-            }
+            if (!_process.IsRunning) return;
             dataReadyEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DBWIN_DATA_READY", out Boolean createdData);
 
             if (!createdData)

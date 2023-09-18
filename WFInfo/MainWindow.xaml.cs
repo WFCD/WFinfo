@@ -136,6 +136,7 @@ namespace WFInfo
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
         public void ChangeStatus(string status, int severity)
         {
+            if (Status == null) return;
             Debug.WriteLine("Status message: " + status);
             Status.Text = status;
             switch (severity)

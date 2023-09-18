@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using WFInfo.Services.WindowInfo;
 
 namespace WFInfo
 {
@@ -18,8 +19,12 @@ namespace WFInfo
         public Bitmap tempImage;
         private System.Windows.Point startDrag;
         private System.Drawing.Point topLeft;
-        public SnapItOverlay()
+
+        private readonly IWindowInfoService _window;
+
+        public SnapItOverlay(IWindowInfoService window)
         {
+            _window = window;
             WindowStartupLocation = WindowStartupLocation.Manual;
 
             Left = 0;
@@ -83,7 +88,7 @@ namespace WFInfo
                 Main.StatusUpdate("Please slecet a larger area to scan", 2);
                 return;
             }
-            Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * OCR.dpiScaling), (int)(topLeft.Y * OCR.dpiScaling), (int)(rectangle.Width * OCR.dpiScaling), (int)(rectangle.Height * OCR.dpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
+            Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * _window.DpiScaling), (int)(topLeft.Y * _window.DpiScaling), (int)(rectangle.Width * _window.DpiScaling), (int)(rectangle.Height * _window.DpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
             Task.Factory.StartNew(() => OCR.ProcessSnapIt(cutout, tempImage, topLeft));
 
             closeOverlay();

@@ -14,6 +14,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
+using WFInfo.Services.WarframeProcess;
+using WFInfo.Services.WindowInfo;
 using WFInfo.Settings;
 
 namespace WFInfo
@@ -65,7 +67,10 @@ namespace WFInfo
         public bool rememberMe;
         private LogCapture EElogWatcher;
         private Task autoThread;
+
         private readonly IReadOnlyApplicationSettings _settings;
+        private readonly IProcessFinder _process;
+        private readonly IWindowInfoService _window;
 
         public WebClient createWfmClient()
         {
@@ -75,9 +80,12 @@ namespace WFInfo
             return webClient;
         }
 
-        public Data(IReadOnlyApplicationSettings settings)
+        public Data(IReadOnlyApplicationSettings settings, IProcessFinder process, IWindowInfoService window)
         {
             _settings = settings;
+            _process = process;
+            _window = window;
+
             Main.AddLog("Initializing Databases");
             marketItemsPath = applicationDirectory + @"\market_items.json";
             marketDataPath = applicationDirectory + @"\market_data.json";
@@ -110,7 +118,7 @@ namespace WFInfo
             {
                 try
                 {
-                    EElogWatcher = new LogCapture();
+                    EElogWatcher = new LogCapture(_process);
                     EElogWatcher.TextChanged += LogChanged;
                 }
                 catch (Exception ex)
@@ -1158,7 +1166,7 @@ namespace WFInfo
             });
         }
 
-        public static void AutoTriggered()
+        public void AutoTriggered()
         {
             try
             {
@@ -1167,7 +1175,7 @@ namespace WFInfo
                 long wait = watch.ElapsedMilliseconds;
                 long fixedStop = watch.ElapsedMilliseconds + ApplicationSettings.GlobalReadonlySettings.FixedAutoDelay;
 
-                OCR.UpdateWindow();
+                _window.UpdateWindow();
 
                 if (ApplicationSettings.GlobalReadonlySettings.ThemeSelection == WFtheme.AUTO)
                 {
@@ -1281,7 +1289,7 @@ namespace WFInfo
 
             marketSocket.OnOpen += (sender, e) =>
             {
-                marketSocket.Send( (OCR.VerifyWarframe() && !OCR.GameIsStreamed)
+                marketSocket.Send( (_process.IsRunning && !_process.GameIsStreamed)
                     ? "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}"
                     : "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
             };
