@@ -92,8 +92,8 @@ namespace WFInfo
 
             services.AddGDIScreenshots();
 
-            // Only add windows capture on supported plarforms (W10+)
-            if (ApiInformation.IsTypePresent("Windows.Graphics.Capture.GraphicsCaptureSession"))
+            // Only add windows capture on supported plarforms (W10+ 2004 / Build 20348 and above)
+            if (ApiInformation.IsTypePresent("Windows.Graphics.Capture.GraphicsCaptureSession") && ApiInformation.IsPropertyPresent("Windows.Graphics.Capture.GraphicsCaptureSession", "IsBorderRequired"))
             {
                 services.AddWindowsCaptureScreenshots();
             }

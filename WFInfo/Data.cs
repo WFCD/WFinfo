@@ -247,7 +247,14 @@ namespace WFInfo
                     }
                 }
             }
-            ReloadItems();
+            try
+            {
+                ReloadItems();
+            }
+            catch
+            {
+                Main.AddLog("Failed to refresh items from warframe.market, skipping WFM update for now. Some items might have incomplete info.");
+            }
             marketData = new JObject();
             WebClient webClient = CustomEntrypoint.createNewWebClient();
             JArray rows = JsonConvert.DeserializeObject<JArray>(webClient.DownloadString(sheetJsonUrl));
