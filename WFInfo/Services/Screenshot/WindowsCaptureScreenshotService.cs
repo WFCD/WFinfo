@@ -86,6 +86,7 @@ namespace WFInfo.Services.Screenshot
             else bitmap = CaptureSdr(sdrSpan, width, height, mapSource.RowPitch);
 
             _d3dDevice.ImmediateContext.UnmapSubresource(cpuTexture, 0);
+            cpuTexture.Dispose();
 
             var result = new List<Bitmap> { bitmap };
             return Task.FromResult(result);
