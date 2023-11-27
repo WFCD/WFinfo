@@ -433,9 +433,7 @@
                                           BorderBrush="#FF0F0F0F"
                                           ItemsSource="{Binding Source={StaticResource enumWFTheme}}"
                                           SelectedItem="{Binding SettingsViewModel.ThemeSelection}"
-                                          Margin="5,4" Template="{DynamicResource ComboBoxTemplate}" Style="{DynamicResource ComboBoxStyle1}">
-
-                            </ComboBox>
+                                          Margin="5,4" Template="{DynamicResource ComboBoxTemplate}" Style="{DynamicResource ComboBoxStyle1}" DropDownClosed="ThemeSelectionComboBox_OnDropDownClosed"/>
 
                             <Label Visibility="{Binding SettingsViewModel.OsSupportsHDR, Converter={StaticResource BoolVisibilityConverter}}" Content="HDR" Grid.Column="0" Grid.Row="1"/>
                             <Label Visibility="{Binding SettingsViewModel.OsSupportsHDR, Converter={StaticResource BoolVisibilityConverter}}" Grid.Row="1" Grid.Column="1" ToolTip="Auto - Detect based on game settings&#x0a;On - Always use HDR capture (will slightly change colors) &#x0a;Off - Always use SDR capture (will result in overblown HDR screenshots) &#x0a;&#x0a;It is recommended to use a custom theme with HDR enabled, this mode only compresses the dynamic color range." Margin="0,5,10,5" Padding="3"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
