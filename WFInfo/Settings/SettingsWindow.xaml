@@ -359,7 +359,7 @@
                                  Style="{StaticResource KeyBindTextboxStyle}"
                                  Grid.Row="3"
                                  Grid.Column="1"
-                                 ToolTip="Modifier to hold down to start Snap it"
+                                 ToolTip="Modifier to hold down to start Master it"
                                  Text="{Binding SettingsViewModel.MasterItModifierKey,
                                 Converter={StaticResource KeyStringConverter}}"
                                  IsReadOnly="True"
