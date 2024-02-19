@@ -102,7 +102,7 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="Tesseract" Version="5.2.0" />
     <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="7.0.12" /> 
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="8.0.2" /> 
   </ItemGroup>
   <ItemGroup>
     <None Update="$(HOME)\.nuget\packages\tesseract\5.2.0\build\\..\x64\leptonica-1.82.0.dll">
