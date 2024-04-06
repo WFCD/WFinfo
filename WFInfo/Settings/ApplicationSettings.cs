@@ -48,7 +48,20 @@ namespace WFInfo.Settings
         [JsonIgnore]
         public Key? ActivationKeyKey => Enum.TryParse<Key>(ActivationKey, out var res) ? res : (Key?)null;
         [JsonIgnore]
-        public MouseButton? ActivationMouseButton => Enum.TryParse<MouseButton>(ActivationKey, out var res) ? res : (MouseButton?)null;
+        public MouseButton? ActivationMouseButton 
+        { 
+            get 
+            { 
+                var result = Enum.TryParse<MouseButton>(ActivationKey, out var res) ? res : (MouseButton?)null; 
+                if (result is MouseButton.Left || result is MouseButton.Right)
+                {
+                    // Prevent Key.Left and Key.Right (arrow keys) from being misinterpreted as the mouse buttons.
+                    // Using these mouse buttons as activation key is a bad idea anyway
+                    return null;
+                }
+                return result;
+            }
+        }
         public Key DebugModifierKey { get; set; } = Key.LeftShift;
         public Key SearchItModifierKey { get; set; } = Key.OemTilde;
         public Key SnapitModifierKey { get; set; } = Key.LeftCtrl;
