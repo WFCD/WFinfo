@@ -91,7 +91,7 @@ namespace WFInfo
                     
                     zip.AddFile(startPath + @"\..\debug.log", "");
                     zip.Comment = "This zip was created at " + closest.ToString("yyyy-MM-dd_HH-mm-ssff");
-                    zip.MaxOutputSegmentSize64 = 25000 * 1024; // 8m segments
+                    zip.MaxOutputSegmentSize64 = 10000 * 1024; // 8m segments
                     zip.Save(fullZipPath + ".zip");
                 }
             }
