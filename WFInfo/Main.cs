@@ -166,7 +166,7 @@ namespace WFInfo
         }
         private async void TimeoutCheck()
         {
-            if (!await dataBase.IsJWTvalid().ConfigureAwait(true) || _process.GameIsStreamed)
+            if (!await dataBase.IsJWTvalid().ConfigureAwait(true))
                 return;
             DateTime now = DateTime.UtcNow;
             Debug.WriteLine($"Checking if the user has been inactive \nNow: {now}, Lastactive: {latestActive}");

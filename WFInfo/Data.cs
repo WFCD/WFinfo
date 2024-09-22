@@ -1296,7 +1296,7 @@ namespace WFInfo
 
             marketSocket.OnOpen += (sender, e) =>
             {
-                marketSocket.Send( (_process.IsRunning && !_process.GameIsStreamed)
+                marketSocket.Send( (_process.IsRunning)
                     ? "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}"
                     : "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
             };
