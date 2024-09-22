@@ -9,6 +9,8 @@ namespace WFInfo.Services.Screenshot
 {
     public class ImageScreenshotService : IScreenshotService
     {
+        public bool IsAvailable => true;
+
         public async Task<List<Bitmap>> CaptureScreenshot()
         {
             // Using WinForms for the openFileDialog because it's simpler and much easier

@@ -21,5 +21,7 @@ namespace WFInfo.Services.Screenshot
         /// </summary>
         /// <returns>Captured screenshots</returns>
         Task<List<Bitmap>> CaptureScreenshot();
+
+        bool IsAvailable { get; }
     }
 }

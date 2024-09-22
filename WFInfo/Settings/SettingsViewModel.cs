@@ -411,10 +411,32 @@ namespace WFInfo.Settings
             get => _settings.ThemeSelection;
             set
             {
+                if (_settings.ThemeSelection == value)
+                {
+                    return;
+                }
+
+                // No need to verify intent when switching to AUTO
+                if (value != WFtheme.AUTO && !ConfirmThemeChangeIntentional(_settings.ThemeSelection, value))
+                {
+                    return;
+                }
+
                 _settings.ThemeSelection = value;
                 RaisePropertyChanged();
             }
         }
+
+        private bool ConfirmThemeChangeIntentional(WFtheme oldTheme, WFtheme newTheme)
+        {
+            MessageBoxResult messageBoxResult = MessageBox.Show("You are about to force WFInfo to think you're using the " + newTheme + " theme in-game." + Environment.NewLine + Environment.NewLine
+                + "If this is wrong, WFInfo will not be able to do its job." + Environment.NewLine + Environment.NewLine
+                + "We STRONGLY recommend setting this to AUTO." + Environment.NewLine + Environment.NewLine
+                + "Are you sure?",
+                "Change of target theme", MessageBoxButton.OKCancel);
+            return messageBoxResult == MessageBoxResult.OK;
+        }
+
         public bool CF_usePrimaryHSL { get => _settings.CF_usePrimaryHSL;
             set 
             {

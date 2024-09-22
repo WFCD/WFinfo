@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using WFInfo.Settings;
@@ -65,8 +66,6 @@ namespace WFInfo.Services.WarframeProcess
                     try
                     {
                         bool _ = _warframe.HasExited;
-                        OnProcessChanged?.Invoke(_warframe);
-                        return;
                     }
                     catch (System.ComponentModel.Win32Exception e)
                     {
@@ -75,16 +74,9 @@ namespace WFInfo.Services.WarframeProcess
                         Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
                         Main.StatusUpdate("Restart Warframe without admin privileges", 1);
 
-                        // Substitute process for debug purposes
-                        if (_settings.Debug)
-                        {
-                            Main.AddLog($"Substituting Warframe process with WFInfo process for debug purposes.");
-                            _warframe = Process.GetCurrentProcess();
-                        }
-
-                        OnProcessChanged?.Invoke(_warframe);
-                        return;
                     }
+                    OnProcessChanged?.Invoke(_warframe);
+                    return;
                 }
                 else if (process.MainWindowTitle.Contains("Warframe") && process.MainWindowTitle.Contains("GeForce NOW"))
                 {
@@ -100,8 +92,6 @@ namespace WFInfo.Services.WarframeProcess
                     try
                     {
                         bool _ = _warframe.HasExited;
-                        OnProcessChanged?.Invoke(_warframe);
-                        return;
                     }
                     catch (System.ComponentModel.Win32Exception e)
                     {
@@ -110,16 +100,9 @@ namespace WFInfo.Services.WarframeProcess
                         Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
                         Main.StatusUpdate("Restart Warframe without admin privileges, or WFInfo with admin privileges", 1);
 
-                        // Substitute process for debug purposes
-                        if (_settings.Debug)
-                        {
-                            Main.AddLog($"Substituting Warframe process with WFInfo process for debug purposes.");
-                            _warframe = Process.GetCurrentProcess();
-                        }
-
-                        OnProcessChanged?.Invoke(_warframe);
-                        return;
                     }
+                    OnProcessChanged?.Invoke(_warframe);
+                    return;
                 }
             }
 
@@ -127,17 +110,6 @@ namespace WFInfo.Services.WarframeProcess
             {
                 Main.AddLog("Did Not Detect Warframe Process");
                 Main.StatusUpdate("Unable to Detect Warframe Process", 1);
-            }
-            else
-            {
-                // Substitute process for debug purposes
-                if (_settings.Debug)
-                {
-                    Main.AddLog($"Substituting Warframe process with WFInfo process for debug purposes.");
-                    _warframe = Process.GetCurrentProcess();
-                }
-
-                OnProcessChanged?.Invoke(_warframe);
             }
         }
     }

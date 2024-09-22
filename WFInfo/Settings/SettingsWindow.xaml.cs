@@ -266,9 +266,13 @@ namespace WFInfo.Settings
             ThemeAdjuster.ShowThemeAdjuster();
         }
 
-        private void ThemeSelectionComboBox_OnDropDownClosed(object sender, EventArgs e)
+        private void themeSelectionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            MessageBoxResult messageBoxResult = MessageBox.Show("This option will not change WFInfo screen style. It will force app to think you have selected this theme in Warframe (and will use its pixel colors for item scanning). Unless you know what you're doing, leave Auto selected.", "Change of target theme", System.Windows.MessageBoxButton.OK);
+            // mismatch only occurs if we intentionally suppress the change in the viewmodel. If that happens, reset selected value
+            if ((WFtheme)themeSelectionComboBox.SelectedValue != SettingsViewModel.ThemeSelection)
+            {
+                themeSelectionComboBox.SelectedValue = SettingsViewModel.ThemeSelection;
+            }
         }
     }
 }

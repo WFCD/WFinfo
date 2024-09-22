@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace WFInfo
 {
@@ -107,12 +109,14 @@ namespace WFInfo
 
         protected static void OnKeyAction(Key key)
         {
-            KeyEvent?.Invoke(key);
+            // Bounce via InvokeAsync, to avoid being in an "input-synchronous call" state which can cause crash on certain actions
+            Application.Current.Dispatcher.InvokeAsync(() => { KeyEvent?.Invoke(key); });
         }
 
         protected static void OnMouseAction(MouseButton key)
         {
-            MouseEvent?.Invoke(key);
+            // Bounce via InvokeAsync, to avoid being in an "input-synchronous call" state which can cause crash on certain actions
+            Application.Current.Dispatcher.InvokeAsync(() => { MouseEvent?.Invoke(key); });
         }
 
         private static IntPtr HookCallbackM(int nCode, IntPtr wParam, IntPtr lParam) //handels mouse input

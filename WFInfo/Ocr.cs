@@ -173,7 +173,20 @@ namespace WFInfo
 
             List<Bitmap> parts;
 
-            bigScreenshot = file ?? CaptureScreenshot();
+            if (file != null)
+            {
+                bigScreenshot = file;
+            } else
+            {
+                var screenshot = CaptureScreenshot();
+                if (screenshot == null)
+                {
+                    Main.AddLog("Processing failed: Screenshot failed");
+                    return;
+                }
+                bigScreenshot = screenshot;
+            }
+
             try
             {
 				    parts = ExtractPartBoxAutomatically(out uiScaling, out _, bigScreenshot);
@@ -536,6 +549,12 @@ namespace WFInfo
                 //     using (Graphics graphics = Graphics.FromImage(image))
                 //         graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(image.Width, image.Height));
                 image = CaptureScreenshot();
+
+                if (image == null)
+                {
+                    closestThresh = 0;
+                    return WFtheme.UNKNOWN;
+                }
             }
 
 
@@ -639,6 +658,12 @@ namespace WFInfo
             //timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
             WFtheme theme = GetThemeWeighted(out _, fullShot);
+            if (theme == WFtheme.UNKNOWN)
+            {
+                Main.AddLog("SnapIt: Theme detection failed");
+                return;
+            }
+
             snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
@@ -2467,16 +2492,34 @@ namespace WFInfo
                         throw new NotImplementedException($"HDR support option '{_settings.HdrSupport}' does not have a corresponding screenshot service.");
                 }
             }
-            
 
-            var image = screenshot.CaptureScreenshot().Result.First();
+            if (ReferenceEquals(screenshot, _windowsScreenshot) && !screenshot.IsAvailable)
+            {
+                Main.AddLog("HDR-compliant screenshot service chosen, but unavailable. Falling back to GDI");
+                screenshot = _gdiScreenshot;
+            }
+
+
+            var images = screenshot.CaptureScreenshot().Result;
+            if (images.Count == 0)
+            {
+                Main.AddLog("CaptureScreenshot returned no image. Screenshot type: " + screenshot.GetType().Name);
+                return null;
+            }
+            var image = images.First();
             image.Save(Main.AppPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + ".png");
             return image;
         }
 
         internal static void SnapScreenshot()
         {
-            Main.snapItOverlayWindow.Populate(CaptureScreenshot());
+            var image = CaptureScreenshot();
+            if (image == null)
+            {
+                Main.AddLog("SnapIt activation failed: Screenshot failed");
+                return;
+            }
+            Main.snapItOverlayWindow.Populate(image);
             Main.snapItOverlayWindow.Left = _window.Window.Left / _window.DpiScaling;
             Main.snapItOverlayWindow.Top = _window.Window.Top / _window.DpiScaling;
             Main.snapItOverlayWindow.Width = _window.Window.Width / _window.DpiScaling;

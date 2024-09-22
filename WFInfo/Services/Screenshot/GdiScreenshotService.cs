@@ -2,17 +2,22 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using WFInfo.Services.WindowInfo;
+using WFInfo.Settings;
 
 namespace WFInfo.Services.Screenshot
 {
     public class GdiScreenshotService : IScreenshotService
     {
         private static IWindowInfoService _window;
+        private static IReadOnlyApplicationSettings _settings;
 
-        public GdiScreenshotService(IWindowInfoService window) 
+        public GdiScreenshotService(IWindowInfoService window, IReadOnlyApplicationSettings settings) 
         {
             _window = window;
+            _settings = settings;
         }
+
+        public bool IsAvailable => true;
 
         public Task<List<Bitmap>> CaptureScreenshot()
         {
@@ -24,9 +29,16 @@ namespace WFInfo.Services.Screenshot
             int width = window.Width;
             int height = window.Height;
 
-            if (window == null || window.Width == 0 || window.Height == 0)
+            if (width == 0 || height == 0)
             {
+                if (!_settings.Debug) 
+                {
+                    return Task.FromResult(new List<Bitmap>());
+                }
+
                 window = _window.Screen.Bounds;
+                width = window.Width;
+                height = window.Height;
                 center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
 
                 width *= (int)_window.DpiScaling;
