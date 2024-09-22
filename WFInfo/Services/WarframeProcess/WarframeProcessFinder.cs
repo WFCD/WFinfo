@@ -44,7 +44,7 @@ namespace WFInfo.Services.WarframeProcess
                 }
             }
 
-            Main.AddLog("Yes i'm finding a process now");
+            //Main.AddLog("FindProcess have been triggered");
 
             Process _identified_process = null;
             // Search for Warframe related process
