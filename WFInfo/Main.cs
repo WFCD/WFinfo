@@ -337,6 +337,11 @@ namespace WFInfo
                 StatusUpdate("Starting master it", 0);
                 Task.Factory.StartNew(() => {
                     Bitmap bigScreenshot = OCR.CaptureScreenshot();
+                    if (bigScreenshot == null)
+                    {
+                        AddLog("MasterIt activation failed: Screenshot failed");
+                        return;
+                    }
                     OCR.ProcessProfileScreen(bigScreenshot);
                     bigScreenshot.Dispose();
                 });

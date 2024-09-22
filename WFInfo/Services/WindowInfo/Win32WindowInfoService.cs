@@ -8,7 +8,7 @@ namespace WFInfo.Services.WindowInfo
 {
     public class Win32WindowInfoService : IWindowInfoService
     {
-        public double DpiScaling { get; private set; }
+        public double DpiScaling { get; private set; } = 1;
         public double ScreenScaling 
         { 
             get

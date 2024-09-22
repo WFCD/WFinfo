@@ -47,8 +47,15 @@ namespace WFInfo.Services.Screenshot
             _process.OnProcessChanged += CreateCaptureSession;
         }
 
+        public bool IsAvailable { get; private set; }
+
         public Task<List<Bitmap>> CaptureScreenshot()
         {
+            if (!IsAvailable)
+            {
+                return Task.FromResult(new List<Bitmap>());
+            }
+
             Texture2D cpuTexture = null;
             int width, height;
 
@@ -96,6 +103,14 @@ namespace WFInfo.Services.Screenshot
         {
             _session?.Dispose();
             _framePool?.Dispose();
+            _session = null;
+            _framePool = null;
+
+            IsAvailable = process != null;
+            if (!IsAvailable)
+            {
+                return;
+            }
 
             _item = CaptureHelper.CreateItemForWindow(process.MainWindowHandle);
             _framePool = Direct3D11CaptureFramePool.CreateFreeThreaded(_device, pixelFormat, 2, _item.Size);
