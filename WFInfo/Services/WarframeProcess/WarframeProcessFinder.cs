@@ -25,19 +25,15 @@ namespace WFInfo.Services.WarframeProcess
         private Process _warframe;
 
         private readonly IReadOnlyApplicationSettings _settings;
-        private DispatcherTimer find_process_timer;
+        private System.Threading.Timer find_process_timer;
 
         public WarframeProcessFinder(IReadOnlyApplicationSettings settings)
         {
             _settings = settings;
-            find_process_timer = new DispatcherTimer();
-            find_process_timer.Interval = TimeSpan.FromSeconds(30);
-            find_process_timer.Tick += FindProcess;
-            find_process_timer.Start();
-            FindProcess(find_process_timer, new EventArgs());
+            find_process_timer = new System.Threading.Timer(FindProcess, null, 0, 30000);
         }
 
-        private void FindProcess(object sender, EventArgs ea)
+        private void FindProcess(Object stateInfo)
         {
             // process already found
             if (_warframe != null)
