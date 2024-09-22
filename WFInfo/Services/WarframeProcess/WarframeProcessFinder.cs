@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using WFInfo.Settings;
+using System.Windows.Threading;
 
 namespace WFInfo.Services.WarframeProcess
 {
@@ -12,7 +13,6 @@ namespace WFInfo.Services.WarframeProcess
         {
             get
             {
-                FindProcess();
                 return _warframe;
             }
         }
@@ -25,13 +25,19 @@ namespace WFInfo.Services.WarframeProcess
         private Process _warframe;
 
         private readonly IReadOnlyApplicationSettings _settings;
+        private DispatcherTimer find_process_timer;
 
         public WarframeProcessFinder(IReadOnlyApplicationSettings settings)
         {
             _settings = settings;
+            find_process_timer = new DispatcherTimer();
+            find_process_timer.Interval = TimeSpan.FromSeconds(30);
+            find_process_timer.Tick += FindProcess;
+            find_process_timer.Start();
+            FindProcess(find_process_timer, new EventArgs());
         }
 
-        private void FindProcess()
+        private void FindProcess(object sender, EventArgs ea)
         {
             // process already found
             if (_warframe != null)
@@ -47,7 +53,7 @@ namespace WFInfo.Services.WarframeProcess
                 }
                 else return; // Current process is still good
             }
-
+            Main.AddLog("Yes i'm finding a process now");
             foreach (Process process in Process.GetProcesses())
             {
                 if (process.ProcessName == "Warframe.x64" && process.MainWindowTitle == "Warframe")
