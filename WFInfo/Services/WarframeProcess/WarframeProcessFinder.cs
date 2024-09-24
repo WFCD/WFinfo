@@ -15,11 +15,53 @@ namespace WFInfo.Services.WarframeProcess
             {
                 return _warframe;
             }
+            private set
+            {
+                if (_warframe == value)
+                {
+                    // nothing to do if process didn't change
+                    return;
+                }
+
+                if (_warframe != null)
+                {
+                    // Old warframe process is still cached, lets dispose it
+                    Main.dataBase.DisableLogCapture();
+                    _warframe.Dispose();
+                    _warframe = null;
+                }
+
+                // actually switching process
+                _warframe = value;
+                // cache new GameIsStreamed value. No need to constantly re-check title
+                GameIsStreamed = _warframe?.MainWindowTitle.Contains("GeForce NOW") ?? false;
+
+                if (_warframe != null)
+                {
+                    // New process found
+                    if (Main.dataBase.GetSocketAliveStatus()) 
+                    {
+                        Debug.WriteLine("Socket was open in verify warframe");
+                    }
+                    Task.Run(async () =>
+                    {
+                        await Main.dataBase.SetWebsocketStatus("in game");
+                    });
+
+                    if (_settings.Auto && !GameIsStreamed)
+                    {
+                        Main.dataBase.EnableLogCapture(); 
+                    }
+                }
+
+                // Invoking action
+                OnProcessChanged?.Invoke(_warframe);
+            }
         }
 
         public HandleRef HandleRef => IsRunning ? new HandleRef(Warframe, Warframe.MainWindowHandle) : new HandleRef();
         public bool IsRunning => Warframe != null && !Warframe.HasExited;
-        public bool GameIsStreamed => Warframe?.MainWindowTitle.Contains("GeForce NOW") ?? false;
+        public bool GameIsStreamed { get; private set; }
         public event ProcessChangedArgs OnProcessChanged;
 
         private Process _warframe;
@@ -91,34 +133,9 @@ namespace WFInfo.Services.WarframeProcess
                     Main.StatusUpdate("Unable to Detect Warframe Process", 1);
                 }
             }
-
-            // Old warframe process is still cached, lets dispose it and refer to new process
-            if (_warframe != null)
-            {
-                // This is for HasExited scenario
-                Main.dataBase.DisableLogCapture();
-                _warframe.Dispose();
-                _warframe = null;
-            }
             
-            // New process found? lets refer to it
-            if (identified_process != null)
-            {
-                _warframe = identified_process;
-                if (Main.dataBase.GetSocketAliveStatus())
-                    Debug.WriteLine("Socket was open in verify warframe");
-                Task.Run(async () =>
-                {
-                    await Main.dataBase.SetWebsocketStatus("in game");
-                });
-
-                if (_settings.Auto && !GameIsStreamed)
-                    Main.dataBase.EnableLogCapture();
-            }
-
-            // Invoking action
-            OnProcessChanged?.Invoke(_warframe);
-            return;
+            // set new process, or null if none found
+            Warframe = identified_process;
         }
     }
 }
