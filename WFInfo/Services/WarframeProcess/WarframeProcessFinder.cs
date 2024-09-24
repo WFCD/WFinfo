@@ -46,13 +46,13 @@ namespace WFInfo.Services.WarframeProcess
 
             //Main.AddLog("FindProcess have been triggered");
 
-            Process _identified_process = null;
+            Process identified_process = null;
             // Search for Warframe related process
             foreach (Process process in Process.GetProcesses())
             {
                 if (process.ProcessName == "Warframe.x64" && process.MainWindowTitle == "Warframe")
                 {
-                    _identified_process = process;
+                    identified_process = process;
                     Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
                     break;
                 }
@@ -63,21 +63,21 @@ namespace WFInfo.Services.WarframeProcess
                         Main.SpawnGFNWarning();
                     });
                     Main.AddLog("GFN -- Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
-                    _identified_process = process;
+                    identified_process = process;
                     break;
                 }
             }
 
             // Try and catch any UAC related issues
-            if (_identified_process != null)
+            if (identified_process != null)
             {
                 try
                 {
-                    bool _ = _identified_process.HasExited;
+                    bool _ = identified_process.HasExited;
                 }
                 catch (System.ComponentModel.Win32Exception e)
                 {
-                    _identified_process = null;
+                    identified_process = null;
 
                     Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
                     Main.StatusUpdate("Restart Warframe without admin privileges, or WFInfo with admin privileges", 1);
@@ -93,20 +93,17 @@ namespace WFInfo.Services.WarframeProcess
             }
 
             // Old warframe process is still cached, lets dispose it and refer to new process
-            if (_warframe != null)
+            if (_warframe.HasExited)
             {
-                if (_warframe.HasExited)
-                {
-                    Main.dataBase.DisableLogCapture();
-                    _warframe.Dispose();
-                    _warframe = null;
-                }
+                Main.dataBase.DisableLogCapture();
+                _warframe.Dispose();
+                _warframe = null;
             }
             
             // New process found? lets refer to it
-            if (_identified_process != null)
+            if (identified_process != null)
             {
-                _warframe = _identified_process;
+                _warframe = identified_process;
                 if (Main.dataBase.GetSocketAliveStatus())
                     Debug.WriteLine("Socket was open in verify warframe");
                 Task.Run(async () =>
