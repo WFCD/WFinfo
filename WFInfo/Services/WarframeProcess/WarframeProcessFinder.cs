@@ -93,11 +93,14 @@ namespace WFInfo.Services.WarframeProcess
             }
 
             // Old warframe process is still cached, lets dispose it and refer to new process
-            if (_warframe.HasExited)
+            if (_warframe != null)
             {
-                Main.dataBase.DisableLogCapture();
-                _warframe.Dispose();
-                _warframe = null;
+                if (_warframe.HasExited)
+                {
+                    Main.dataBase.DisableLogCapture();
+                    _warframe.Dispose();
+                    _warframe = null;
+                }
             }
             
             // New process found? lets refer to it
