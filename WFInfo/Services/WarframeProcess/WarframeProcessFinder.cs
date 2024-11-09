@@ -72,7 +72,7 @@ namespace WFInfo.Services.WarframeProcess
         public WarframeProcessFinder(IReadOnlyApplicationSettings settings)
         {
             _settings = settings;
-            find_process_timer = new System.Threading.Timer(FindProcess, null, 0, 40000);
+            find_process_timer = new System.Threading.Timer(FindProcess, null, 25000, 40000);
         }
 
         private void FindProcess(Object stateInfo)
