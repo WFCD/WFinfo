@@ -48,6 +48,9 @@ namespace WFInfo
         public static PlusOne plusOne = new PlusOne();
         public static System.Threading.Timer timer;
         public static System.Drawing.Point lastClick;
+
+        public static bool Initialized;
+        private static event EventHandler onInitialized;
         private const int minutesTillAfk = 7;
 
         private static bool UserAway { get; set; }
@@ -529,10 +532,35 @@ namespace WFInfo
             }, null, startTimeSpan, periodTimeSpan);
         }
 
+        /// <summary>
+        /// Register a callback to be ran once initialization (including data load) is complete. 
+        /// If initialization is already done, callback gets invoked immediately
+        /// The callback is always ran on the GUI thread
+        /// </summary>
+        /// <param name="onLoading">The callback</param>
+        public static void RegisterOnFinishedLoading(EventHandler onLoading)
+        {
+            System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                if (Initialized)
+                {
+                    onLoading(null, EventArgs.Empty);
+                }
+                else
+                {
+                    onInitialized += onLoading;
+                }
+            });
+        }
+
 
         public static void FinishedLoading()
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.FinishedLoading(); });
+            System.Windows.Application.Current.Dispatcher.Invoke(() => 
+            { 
+                Initialized = true;
+                onInitialized?.Invoke(null, EventArgs.Empty);
+            });
         }
         public static void UpdateMarketStatus(string msg)
         {
