@@ -71,6 +71,7 @@ namespace WFInfo
             }
             
             Application.Current.MainWindow = this;
+            Main.RegisterOnFinishedLoading(FinishedLoading);
         }
 
 
@@ -354,7 +355,7 @@ namespace WFInfo
             Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
         }
 
-        internal void FinishedLoading()
+        internal void FinishedLoading(object sender, EventArgs e)
         {
             Login.IsEnabled = true;
         }

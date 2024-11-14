@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using WFInfo.Settings;
-using System.Windows.Threading;
+using System.Threading;
 
 namespace WFInfo.Services.WarframeProcess
 {
@@ -67,12 +67,21 @@ namespace WFInfo.Services.WarframeProcess
         private Process _warframe;
 
         private readonly IReadOnlyApplicationSettings _settings;
-        private System.Threading.Timer find_process_timer;
+        private Timer find_process_timer;
+        private const int FindProcessTimerDuration = 40000; // ms
 
         public WarframeProcessFinder(IReadOnlyApplicationSettings settings)
         {
             _settings = settings;
-            find_process_timer = new System.Threading.Timer(FindProcess, null, 0, 40000);
+            // create timer, but don't start yet. Some static fields may not be ready yet
+            find_process_timer = new Timer(FindProcess, null, Timeout.Infinite, FindProcessTimerDuration);
+            Main.RegisterOnFinishedLoading(Main_OnInitialized);
+        }
+
+        private void Main_OnInitialized(object sender, EventArgs e)
+        {
+            // main is Initialized, start timer
+            find_process_timer.Change(0, FindProcessTimerDuration); 
         }
 
         private void FindProcess(Object stateInfo)
