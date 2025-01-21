@@ -95,7 +95,7 @@
     <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
     <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
     <PackageReference Include="System.Management" Version="9.0.0" />
-    <PackageReference Include="System.Resources.Extensions" Version="9.0.0" />
+    <PackageReference Include="System.Resources.Extensions" Version="9.0.1" />
     <PackageReference Include="Tesseract" Version="5.2.0">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
