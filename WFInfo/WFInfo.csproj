@@ -100,7 +100,7 @@
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
     <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="9.0.3" /> 
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="9.0.4" /> 
   </ItemGroup>
   <ItemGroup>
     <None Update="$(HOME)\.nuget\packages\tesseract\5.2.0\build\\..\x64\leptonica-1.82.0.dll">
