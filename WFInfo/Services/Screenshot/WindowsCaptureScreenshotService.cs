@@ -95,7 +95,14 @@ namespace WFInfo.Services.Screenshot
             _d3dDevice.ImmediateContext.UnmapSubresource(cpuTexture, 0);
             cpuTexture.Dispose();
 
-            var result = new List<Bitmap> { bitmap };
+            Bitmap correctedPixelFormat = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
+            using (Graphics graphics = Graphics.FromImage(correctedPixelFormat))
+            {
+                graphics.DrawImage(bitmap, 0, 0);
+            }
+            bitmap.Dispose();
+
+            var result = new List<Bitmap> { correctedPixelFormat };
             return Task.FromResult(result);
         }
 

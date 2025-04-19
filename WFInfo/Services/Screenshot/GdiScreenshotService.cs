@@ -45,7 +45,7 @@ namespace WFInfo.Services.Screenshot
                 height *= (int)_window.DpiScaling;
             }
 
-            Bitmap image = new Bitmap(width, height);
+            Bitmap image = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             Size FullscreenSize = new Size(image.Width, image.Height);
 
             using (Graphics graphics = Graphics.FromImage(image))
