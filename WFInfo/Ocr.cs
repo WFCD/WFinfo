@@ -1917,7 +1917,7 @@ namespace WFInfo
                     return test.GetSaturation() <= 0.2 && test.GetBrightness() >= 0.55;
                 case WFtheme.DARK_LOTUS:
                     return (Math.Abs(test.GetHue() - primary.GetHue()) < 15 && test.GetBrightness() >= 0.35 && test.GetBrightness() <= 0.55 && test.GetBrightness() >= 0.40 && test.GetSaturation() <= 0.20 && test.GetSaturation() >= 0.05)
-                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.60 && test.GetSaturation() >= 0.30 && test.GetSaturation() <= 70);
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.60 && test.GetSaturation() >= 0.30 && test.GetSaturation() <= 0.70);
                 case WFtheme.FORTUNA:
                     return ((Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.35) || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.15)) && test.GetSaturation() >= 0.20;
                 case WFtheme.HIGH_CONTRAST:
