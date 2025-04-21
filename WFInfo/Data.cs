@@ -1231,7 +1231,7 @@ namespace WFInfo
                 RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
                 Method = HttpMethod.Post,
             };
-            var content = $"{{ \"email\":\"{email}\",\"password\":\"{password.Replace(@"\", @"\\")}\", \"auth_type\": \"header\"}}";
+            var content = $"{{ \"email\":\"{email}\",\"password\":\"{password.Replace(@"\", @"\\").Replace("\"", "\\\"")}\", \"auth_type\": \"header\"}}";
             request.Content = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
             request.Headers.Add("Authorization", "JWT");
             request.Headers.Add("language", "en");
