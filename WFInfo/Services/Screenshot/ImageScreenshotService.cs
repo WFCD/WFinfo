@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,7 +27,18 @@ namespace WFInfo.Services.Screenshot
                 {
                     try
                     {
-                        var tasks = openFileDialog.FileNames.Select(file => Task.Run(() => new Bitmap(file)));
+                        var tasks = openFileDialog.FileNames.Select(file => Task.Run(() =>
+                        {
+                            using (Bitmap rawImage = new Bitmap(file))
+                            {
+                                Bitmap correctedPixelFormat = new Bitmap(rawImage.Width, rawImage.Height, PixelFormat.Format32bppArgb);
+                                using (Graphics graphics = Graphics.FromImage(correctedPixelFormat))
+                                {
+                                    graphics.DrawImage(rawImage, 0, 0);
+                                }
+                                return correctedPixelFormat;
+                            }
+                        }));
                         var images = await Task.WhenAll(tasks);
                         return images.ToList();
                     }

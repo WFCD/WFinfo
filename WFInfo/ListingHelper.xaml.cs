@@ -377,7 +377,7 @@ namespace WFInfo
             Debug.WriteLine($"Getting listing for {primeName}");
             var results = Task.Run(async () => await Main.dataBase.GetTopListings(primeName)).Result;
             var listings = new List<MarketListing>();
-            var sellOrders = new JArray(results["payload"]["sell_orders"].Children());
+            var sellOrders = new JArray(results["data"]["sell"].Children());
             foreach (var item in sellOrders)
             {
                 var platinum = item.Value<short>("platinum");
