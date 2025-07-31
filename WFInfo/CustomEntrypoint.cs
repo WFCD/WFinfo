@@ -47,8 +47,6 @@ namespace WFInfo
         private static string tesseract_hotlink_platform_specific_prefix;
         private static readonly string app_data_tesseract_catalog = appPath + @"\" + tesseract_version_folder;
 
-        public static readonly string appdata_tessdata_folder = appPath + @"\tessdata";
-
         private static readonly InitialDialogue dialogue = new InitialDialogue();
         public static CancellationTokenSource stopDownloadTask;
         public static string build_version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -101,24 +99,11 @@ namespace WFInfo
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x86");
             Directory.CreateDirectory(app_data_tesseract_catalog + @"\x64");
 
-            Directory.CreateDirectory(appdata_tessdata_folder);
+            // TrainedData folder/content handled by TesseractService
 
             cleanLegacyTesseractIfNeeded();
             CollectDebugInfo();
             tesseract_hotlink_platform_specific_prefix = tesseract_hotlink_prefix;
-
-            // Refresh traineddata structure
-            // This is temporary, to be removed in half year from now
-            if (File.Exists(appdata_tessdata_folder + @"\engbest.traineddata"))
-            {
-                // To avoid conflicts for folks who like to experiment...
-                if (File.Exists(appdata_tessdata_folder + @"\en.traineddata"))
-                {
-                    File.Delete(appdata_tessdata_folder + @"\en.traineddata");
-                }
-                File.Move(appdata_tessdata_folder + @"\engbest.traineddata", appdata_tessdata_folder + @"\en.traineddata");
-            }
-            //
 
             int filesNeeded = 0;
             for (int i = 0; i < list_of_dlls.Length; i++)

@@ -66,7 +66,7 @@ namespace WFInfo
 															Color.FromArgb(140,  38,  92),  	//NIDUS			
 															Color.FromArgb( 20,  41,  29),  	//OROKIN		
 															Color.FromArgb(  9,  78, 106),  	//TENNO			
-															Color.FromArgb(  2, 127, 217),  	//HIGH_CONTRAST	
+															Color.FromArgb(102, 176, 255),  	//HIGH_CONTRAST	
 															Color.FromArgb(255, 255, 255),  	//LEGACY		
 															Color.FromArgb(158, 159, 167),  	//EQUINOX		
 															Color.FromArgb(140, 119, 147),      //DARK_LOTUS
@@ -86,7 +86,7 @@ namespace WFInfo
 															Color.FromArgb(255, 255,   0),  	//HIGH_CONTRAST	
 															Color.FromArgb(232, 213,  93),  	//LEGACY		
 															Color.FromArgb(232, 227, 227),  	//EQUINOX		
-															Color.FromArgb(189, 169, 237),      //DARK_LOTUS	
+															Color.FromArgb(200, 169, 237),      //DARK_LOTUS	
                                                             Color.FromArgb(255,  53,   0) };    //ZEPHER	
 
 
@@ -1916,12 +1916,12 @@ namespace WFInfo
                 case WFtheme.EQUINOX:
                     return test.GetSaturation() <= 0.2 && test.GetBrightness() >= 0.55;
                 case WFtheme.DARK_LOTUS:
-                    return (Math.Abs(test.GetHue() - secondary.GetHue()) < 20 && test.GetBrightness() >= 0.35 && test.GetBrightness() <= 0.55 && test.GetSaturation() <= 0.25 && test.GetSaturation() >= 0.05)
-                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.50 && test.GetSaturation() >= 0.20);
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 15 && test.GetBrightness() >= 0.35 && test.GetBrightness() <= 0.55 && test.GetBrightness() >= 0.40 && test.GetSaturation() <= 0.20 && test.GetSaturation() >= 0.05)
+                        || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.60 && test.GetSaturation() >= 0.30 && test.GetSaturation() <= 0.70);
                 case WFtheme.FORTUNA:
                     return ((Math.Abs(test.GetHue() - primary.GetHue()) < 3 && test.GetBrightness() >= 0.35) || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetBrightness() >= 0.15)) && test.GetSaturation() >= 0.20;
                 case WFtheme.HIGH_CONTRAST:
-                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.75 && test.GetBrightness() >= 0.35; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
+                    return (Math.Abs(test.GetHue() - primary.GetHue()) < 3 || Math.Abs(test.GetHue() - secondary.GetHue()) < 2) && test.GetSaturation() >= 0.49 && test.GetBrightness() >= 0.35; // || Math.Abs(test.GetHue() - secondary.GetHue()) < 2;
                 case WFtheme.LEGACY:    // TO CHECK
                     return (test.GetBrightness() >= 0.65)
                         || (Math.Abs(test.GetHue() - secondary.GetHue()) < 6 && test.GetBrightness() >= 0.5 && test.GetSaturation() >= 0.5);
