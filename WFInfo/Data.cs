@@ -1231,7 +1231,7 @@ namespace WFInfo
                 RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
                 Method = HttpMethod.Post,
             };
-            var content = $"{{ \"email\":\"{email}\",\"password\":\"{password.Replace(@"\", @"\\")}\", \"auth_type\": \"header\"}}";
+            var content = $"{{ \"email\":\"{email}\",\"password\":\"{password.Replace(@"\", @"\\").Replace("\"", "\\\"")}\", \"auth_type\": \"header\"}}";
             request.Content = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
             request.Headers.Add("Authorization", "JWT");
             request.Headers.Add("language", "en");
@@ -1522,7 +1522,7 @@ namespace WFInfo
         /// </summary>
         /// <param name="primeName"></param>
         /// <returns></returns>
-        public async Task<JObject> GetTopListings(string primeName) //https://api.warframe.market/v1/items/ prime_name /orders/top
+        public async Task<JObject> GetTopListings(string primeName)
         {
             var urlName = GetUrlName(primeName);
 
@@ -1530,7 +1530,7 @@ namespace WFInfo
             {
                 using (var request = new HttpRequestMessage()
                 {
-                    RequestUri = new Uri("https://api.warframe.market/v1/items/" + urlName + "/orders/top"),
+                    RequestUri = new Uri("https://api.warframe.market/v2/orders/item/" + urlName + "/top"),
                     Method = HttpMethod.Get
                 })
                 {

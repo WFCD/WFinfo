@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using Tesseract;
@@ -48,14 +49,54 @@ namespace WFInfo
         public TesseractEngine[] Engines { get; } = new TesseractEngine[4];
 
         private static string Locale => ApplicationSettings.GlobalReadonlySettings.Locale;
-        private static string AppdataTessdataFolder => CustomEntrypoint.appdata_tessdata_folder;
         private static readonly string ApplicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
-        private static readonly string DataPath = ApplicationDirectory + @"\tessdata";
+        private static readonly string NormalDataPath = ApplicationDirectory + @"\tessdata";
+
+        private static readonly string FallbackDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\WFInfo" + @"\tessdata";
+        private string DataPath;
 
         public TesseractService()
         {
+            Directory.CreateDirectory(NormalDataPath);
+            DataPath = NormalDataPath;
             getLocaleTessdata();
-            FirstEngine = CreateEngine();
+            try
+            {
+                FirstEngine = CreateEngine();
+            }
+            catch (TesseractException e) 
+            {
+                // Tesseract doesn't like characters from non-english languages in the file path to tessdata.
+                // Since we store those in %appdata% and that contains the username, we sometimes get issues with that.
+                // In such cases, we copy the tessdata to a different file path to circumvent the issue.
+                Main.AddLog("Exception during first engine creation, Switching to fallback path: " + FallbackDataPath);
+                DirectoryInfo fallbackDir = Directory.CreateDirectory(FallbackDataPath);
+                FileInfo[] normalDirFiles = new DirectoryInfo(NormalDataPath).GetFiles();
+
+                // Delete any files that exist within fallback location, but not in the normal location
+                FileInfo[] fallbackExtraFiles = fallbackDir.GetFiles().Where(fallbackFile => normalDirFiles.All(normalFile => normalFile.Name != fallbackFile.Name)).ToArray();
+                foreach (FileInfo extraFile in fallbackExtraFiles)
+                {
+                    extraFile.Delete();
+                }
+
+                // Copy files from normal location to fallback location
+                foreach (FileInfo file in normalDirFiles)
+                {
+                    string newFullName = Path.Combine(fallbackDir.FullName, file.Name);
+
+                    // if file is missing or is different, copy it over (with overwrite)
+                    if (!File.Exists(newFullName) 
+                        ||  CustomEntrypoint.GetMD5hash(newFullName) != CustomEntrypoint.GetMD5hash(file.FullName))
+                    {
+                        file.CopyTo(newFullName, true);
+                    }
+                }
+
+                DataPath = FallbackDataPath;
+
+                FirstEngine = CreateEngine();
+            }
             SecondEngine = CreateEngine();
         }
 
@@ -98,7 +139,8 @@ namespace WFInfo
 
             // get trainned data
             string traineddata_hotlink = traineddata_hotlink_prefix + Locale + ".traineddata";
-            string app_data_traineddata_path = AppdataTessdataFolder + @"\" + Locale + ".traineddata";
+            string app_data_traineddata_path = NormalDataPath + @"\" + Locale + ".traineddata";
+            string curr_data_traineddata_path = DataPath + @"\" + Locale + ".traineddata";
 
             WebClient webClient = CustomEntrypoint.createNewWebClient();
 
@@ -107,6 +149,11 @@ namespace WFInfo
                 try
                 {
                     webClient.DownloadFile(traineddata_hotlink, app_data_traineddata_path);
+                    // We download to normal data path. If current data path differs, copy it to there too
+                    if (curr_data_traineddata_path != app_data_traineddata_path)
+                    {
+                        File.Copy(app_data_traineddata_path, curr_data_traineddata_path, true);
+                    }
                 }
                 catch (Exception) { }
             }
