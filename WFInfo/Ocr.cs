@@ -249,7 +249,7 @@ namespace WFInfo
                     string part = firstChecks[i];
                     #region found a part
                     string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false, out _);
-                    string primeSetName = Main.dataBase.GetSetName(correctName);
+                    string primeSetName = Data.GetSetName(correctName);
                     JObject job = (JObject)Main.dataBase.marketData.GetValue(correctName);
                     JObject primeSet = (JObject)Main.dataBase.marketData.GetValue(primeSetName);
                     string ducats = job["ducats"].ToObject<string>();
@@ -687,7 +687,7 @@ namespace WFInfo
                 }
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool multipleLowest);
-                string primeSetName = Main.dataBase.GetSetName(name);
+                string primeSetName = Data.GetSetName(name);
                 if (levenDist > Math.Min(part.Name.Length, name.Length) / 3 || multipleLowest)
                 {
                     //show warning triangle if the result is of questionable accuracy. The limit is basically arbitrary
@@ -2532,7 +2532,8 @@ namespace WFInfo
 
         public static async Task updateEngineAsync()
         {
-            _tesseractService.ReloadEngines();
+            //_tesseractService.ReloadEngines();
+            await Task.Run(() => _tesseractService.ReloadEngines());
         }
     }
 

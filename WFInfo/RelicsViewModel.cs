@@ -233,9 +233,6 @@ namespace WFInfo
             int eraNum = 0;
             foreach (TreeNode head in _rawRelicNodes)
             {
-                double sumIntact = 0;
-                double sumRad = 0;
-            
                 head.SortNum = eraNum++;
                 foreach (JProperty prop in Main.dataBase.relicData[head.Name])
                 {

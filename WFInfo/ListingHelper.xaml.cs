@@ -335,7 +335,7 @@ namespace WFInfo
                     marketListings.Add(tempListings);
                     platinumValues.Add(tempListings[0].Platinum);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Main.RunOnUIThread(() =>
                     {

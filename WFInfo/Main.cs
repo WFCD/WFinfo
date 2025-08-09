@@ -50,7 +50,7 @@ namespace WFInfo
         public static System.Drawing.Point lastClick;
 
         public static bool Initialized;
-        private static event EventHandler onInitialized;
+        private static event EventHandler OnInitialized;
         private const int minutesTillAfk = 7;
 
         private static bool UserAway { get; set; }
@@ -59,7 +59,7 @@ namespace WFInfo
 
         // Main service provider
         // TODO: Move to CustomEntryPoint
-        private IServiceProvider _services;
+        private readonly IServiceProvider _services;
 
         // Instance services
         private IReadOnlyApplicationSettings _settings;
@@ -86,7 +86,7 @@ namespace WFInfo
             Task.Factory.StartNew(ThreadedDataLoad);
         }
 
-        private IServiceCollection ConfigureServices(IServiceCollection services)
+        private static IServiceCollection ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(ApplicationSettings.GlobalReadonlySettings);
             services.AddProcessFinder();
@@ -548,7 +548,7 @@ namespace WFInfo
                 }
                 else
                 {
-                    onInitialized += onLoading;
+                    OnInitialized += onLoading;
                 }
             });
         }
@@ -559,7 +559,7 @@ namespace WFInfo
             System.Windows.Application.Current.Dispatcher.Invoke(() => 
             { 
                 Initialized = true;
-                onInitialized?.Invoke(null, EventArgs.Empty);
+                OnInitialized?.Invoke(null, EventArgs.Empty);
             });
         }
         public static void UpdateMarketStatus(string msg)
