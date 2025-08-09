@@ -121,7 +121,7 @@ namespace WFInfo
         private static string clipboard;
         #endregion
 
-       
+        private static readonly System.Threading.SemaphoreSlim ReloadSemaphore = new System.Threading.SemaphoreSlim(1, 1);
         private static ITesseractService _tesseractService;
         private static ISoundPlayer _soundPlayer;
         private static IReadOnlyApplicationSettings _settings;
@@ -2532,8 +2532,13 @@ namespace WFInfo
 
         public static async Task updateEngineAsync()
         {
-            //_tesseractService.ReloadEngines();
-            await Task.Run(() => _tesseractService.ReloadEngines());
+            await ReloadSemaphore.WaitAsync().ConfigureAwait(false);
+            try {
+                 await Task.Run(() => _tesseractService.ReloadEngines()).ConfigureAwait(false);
+            }
+            finally {
+                ReloadSemaphore.Release();
+            }
         }
     }
 

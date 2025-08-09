@@ -68,7 +68,7 @@ namespace WFInfo
                     );
 
                     zip.MaxOutputSegmentSize64 = segmentSize; // 8m segments
-                    zip.Save(fullZipPath + ".zip");
+                    zip.Save(fullZipPath);
                 }
             }
             catch (Exception ex)

@@ -55,7 +55,7 @@ namespace WFInfo
 
         private static double EfficiencyMarginRight = 51.0;
 
-        //private static double platImageMarginLeftSanpit = 61.0;
+        private static double platImageMarginLeftSanpit = 61;
         private static double ducatImageMarginLeftSanpit = 130.0;
         private static double EfficiencyplatImageMarginLeft = 206.0;
         private static double EfficiencyplatImageMarginBottom = 64.0;
@@ -353,7 +353,7 @@ namespace WFInfo
             //snapit plat image
             margin = platImage.Margin;
             margin.Bottom = platImageMarginBottom * scale;
-            margin.Left = 61 * scale;
+            margin.Left = platImageMarginLeftSanpit * scale;
             PlatImageSnap.Margin = margin;
             PlatImageSnap.Height = platImageHeightWidth * scale;
             PlatImageSnap.Width = platImage.Height;

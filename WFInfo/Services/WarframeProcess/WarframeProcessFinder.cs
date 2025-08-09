@@ -45,7 +45,7 @@ namespace WFInfo.Services.WarframeProcess
                     }
                     Task.Run(async () =>
                     {
-                        await Main.dataBase.SetWebsocketStatus("in game");
+                        await Main.dataBase.SetWebsocketStatus("ingame");
                     });
 
                     if (_settings.Auto && !GameIsStreamed)

@@ -1357,7 +1357,7 @@ namespace WFInfo
                     var json = JsonConvert.SerializeObject(new
                     {
                         type = "sell",
-                        itemId = itemId,
+                        itemId,
                         platinum,
                         quantity
                     });
