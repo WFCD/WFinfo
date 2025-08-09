@@ -16,7 +16,7 @@ namespace WFInfo
     {
         private static double window_wid = 243.0;
         private static double window_hei = 160.0;
-        private static double part_line_hei = 20.0; // TBD
+        //private static double part_line_hei = 20.0; // TBD
         private static double partMarginTop = 39.0;
         private static double partMarginBottom = 100.0;
         private static double volumeMarginTop = 104.0;
@@ -47,15 +47,15 @@ namespace WFInfo
         private static double warningImageBottom = 15.0;
         private static double warningImageHeightWidth = 30.0;
 
-        private static double platMarginRightSanpit = 187.0;
+        //private static double platMarginRightSanpit = 187.0;
         private static double platMarginLeftSanpit = 30.0;
 
-        private static double ducatMargineRightSanpit = 119.0;
+        //private static double ducatMargineRightSanpit = 119.0;
         private static double ducatMargineLeftSanpit = 98.0;
 
         private static double EfficiencyMarginRight = 51.0;
 
-        private static double platImageMarginLeftSanpit = 61.0;
+        //private static double platImageMarginLeftSanpit = 61.0;
         private static double ducatImageMarginLeftSanpit = 130.0;
         private static double EfficiencyplatImageMarginLeft = 206.0;
         private static double EfficiencyplatImageMarginBottom = 64.0;
@@ -64,7 +64,7 @@ namespace WFInfo
         private static double EfficiencyducatImageMarginBottom = 72.0;
         private static double EfficiencyducatImageHeightWidth = 12.0;
 
-        private static double largefont = 18.0;
+        //private static double largefont = 18.0;
         private static double mediumFont = 17.0;
         private static double smallFont = 14.0;
 

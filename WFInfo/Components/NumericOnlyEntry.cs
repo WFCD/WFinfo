@@ -59,8 +59,6 @@ namespace WFInfo.Components
             e.Handled = !ValidateText(GetText(textBox) ,text);
         }
 
-        private static string _emptyValue = "";
-
         /// <summary>
         ///     Handle text selection
         /// </summary>
