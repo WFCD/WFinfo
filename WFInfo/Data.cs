@@ -104,7 +104,7 @@ namespace WFInfo
             HttpClientHandler handler = new HttpClientHandler
             {
                 Proxy = proxy,
-                UseCookies = false
+                UseCookies = true
             };
             client = new HttpClient(handler);
 
@@ -315,13 +315,11 @@ namespace WFInfo
 
             Thread.Sleep(333);
             webClient = CreateWfmClient();
-            JObject ducats = JsonConvert.DeserializeObject<JObject>(
-                webClient.DownloadString("https://api.warframe.market/v1/items/" + url));
-            ducats = ducats["payload"]["item"].ToObject<JObject>();
-            string id = ducats["id"].ToObject<string>();
-            ducats = ducats["items_in_set"].AsParallel().First(part => (string)part["id"] == id).ToObject<JObject>();
+            JObject responseJObject = JsonConvert.DeserializeObject<JObject>(
+                webClient.DownloadString("https://api.warframe.market/v2/item/" + url)
+            );
             string ducat;
-            if (!ducats.TryGetValue("ducats", out JToken temp))
+            if (!responseJObject["data"].ToObject<JObject>().TryGetValue("ducats", out JToken temp))
             {
                 ducat = "0";
             }
@@ -1234,14 +1232,14 @@ namespace WFInfo
             {
                 email,
                 password,
-                device_id = "wfinfo"
+                device_id = "wfinfo",
+                auth_type = "header"
             });
             request.Content = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
             request.Headers.Add("Authorization", "JWT");
             request.Headers.Add("language", "en");
             request.Headers.Add("accept", "application/json");
             request.Headers.Add("platform", "pc");
-            //request.Headers.Add("auth_type", "header");
             var response = await client.SendAsync(request);
             var responseBody = await response.Content.ReadAsStringAsync();
             Regex rgxBody = new Regex("\"check_code\": \".*?\"");
@@ -1300,9 +1298,13 @@ namespace WFInfo
 
             marketSocket.OnOpen += (sender, e) =>
             {
-                marketSocket.Send( (_process.IsRunning && !_process.GameIsStreamed)
-                    ? "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}"
-                    : "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
+                if (_process.IsRunning && !_process.GameIsStreamed)
+                {
+                    _ = SetWebsocketStatus("invisible");
+                } else
+                {
+                    _ = SetWebsocketStatus("invisible");
+                }
             };
 
             try
@@ -1347,20 +1349,20 @@ namespace WFInfo
             {
                 using (var request = new HttpRequestMessage()
                 {
-                    RequestUri = new Uri("https://api.warframe.market/v1/profile/orders"),
+                    RequestUri = new Uri("https://api.warframe.market/v2/order"),
                     Method = HttpMethod.Post,
                 })
                 {
                     var itemId = PrimeItemToItemID(primeItem);
                     var json = JsonConvert.SerializeObject(new
                     {
-                        order_type = "sell",
-                        item_id = itemId,
+                        type = "sell",
+                        itemId = itemId,
                         platinum,
                         quantity
                     });
                     request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    request.Headers.Add("Authorization", "JWT " + JWT);
+                    request.Headers.Add("Authorization", "Bearer " + JWT);
                     request.Headers.Add("language", "en");
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
@@ -1395,7 +1397,7 @@ namespace WFInfo
             {
                 using (var request = new HttpRequestMessage()
                 {
-                    RequestUri = new Uri("https://api.warframe.market/v1/profile/orders/" + listingId),
+                    RequestUri = new Uri("https://api.warframe.market/v2/order/" + listingId),
                     Method = HttpMethod.Put,
                 })
                 {
@@ -1407,7 +1409,7 @@ namespace WFInfo
                         visible = true
                     });
                     request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    request.Headers.Add("Authorization", "JWT " + JWT);
+                    request.Headers.Add("Authorization", "Bearer " + JWT);
                     request.Headers.Add("language", "en");
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
@@ -1463,20 +1465,26 @@ namespace WFInfo
             if (!IsJwtLoggedIn())
                 return false;
 
-            var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
+            string status_to_set;
             switch (status)
             {
                 case "ingame":
                 case "in game":
-                    message += "ingame\"}";
+                    status_to_set = "ingame";
                     break;
                 case "online":
-                    message += "online\"}";
+                    status_to_set = "online";
                     break;
                 default:
-                    message += "invisible\"}";
+                    status_to_set = "invisible";
                     break;
             }
+            var message = JsonConvert.SerializeObject(new
+            {
+                type = "@WS/USER/SET_STATUS",
+                payload = status_to_set
+            });
+            
             try
             {
                 SendMessage(message);
@@ -1512,7 +1520,7 @@ namespace WFInfo
         {
             if (marketSocket.ReadyState == WebSocketState.Open)
             { //only send disconnect message if the socket is connected
-                SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
+                _ = SetWebsocketStatus("invisible");
                 JWT = null;
                 rememberMe = false;
                 inGameName = string.Empty;
@@ -1550,7 +1558,7 @@ namespace WFInfo
                     Method = HttpMethod.Get
                 })
                 {
-                    request.Headers.Add("Authorization", "JWT " + JWT);
+                    request.Headers.Add("Authorization", "Bearer " + JWT);
                     request.Headers.Add("language", "en");
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
@@ -1585,17 +1593,24 @@ namespace WFInfo
             {
                 using (var request = new HttpRequestMessage()
                 {
-                    RequestUri = new Uri("https://api.warframe.market/v1/profile"),
+                    RequestUri = new Uri("https://api.warframe.market/v2/me"),
                     Method = HttpMethod.Get,
                 })
                 {
-                    request.Headers.Add("Authorization", "JWT " + JWT);
+                    request.Headers.Add("Authorization", "Bearer " + JWT);
                     var response = await client.SendAsync(request);
-                    SetJWT(response.Headers);
-                    var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-                    profile["profile"]["check_code"] = "REDACTED"; // remnove the code that can compromise an account.
-                    Debug.WriteLine($"JWT check response: {profile["profile"]}");
-                    return !(bool)profile["profile"]["anonymous"];
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        Main.AddLog($"JWT is invalidated or expired");
+                        return false;
+                    } else
+                    {
+                        SetJWT(response.Headers);
+                        var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
+                        profile["data"]["checkCode"] = "REDACTED"; // remove the code that can compromise an account.
+                        Debug.WriteLine($"JWT check response: {profile["data"]}");
+                        return true;
+                    }
                 }
             }
             catch (Exception e)
@@ -1628,11 +1643,11 @@ namespace WFInfo
 
                 using (var request = new HttpRequestMessage()
                 {
-                    RequestUri = new Uri("https://api.warframe.market/v1/profile/" + inGameName + "/orders"),
+                    RequestUri = new Uri("https://api.warframe.market/v2/orders/my"),
                     Method = HttpMethod.Get
                 })
                 {
-                    request.Headers.Add("Authorization", "JWT " + JWT);
+                    request.Headers.Add("Authorization", "Bearer " + JWT);
                     request.Headers.Add("language", "en");
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
@@ -1640,14 +1655,14 @@ namespace WFInfo
                     var response = await client.SendAsync(request);
                     var body = await response.Content.ReadAsStringAsync();
                     var payload = JsonConvert.DeserializeObject<JObject>(body);
-                    var sellOrders = (JArray)payload?["payload"]?["sell_orders"];
+                    var allOrders = (JArray)payload?["data"];
                     string itemID = PrimeItemToItemID(primeName);
 
-                    if (sellOrders != null)
+                    if (allOrders != null)
                     {
-                        foreach (var listing in sellOrders)
+                        foreach (var listing in allOrders)
                         {
-                            if (itemID == (string)listing?["item"]?["id"])
+                            if ((string)listing["type"] == "sell" && itemID == (string)listing?["itemId"])
                             {
                                 request.Dispose();
                                 return listing;
@@ -1722,11 +1737,11 @@ namespace WFInfo
         {
             using (var request = new HttpRequestMessage()
             {
-                RequestUri = new Uri("https://api.warframe.market/v1/profile"),
+                RequestUri = new Uri("https://api.warframe.market/v2/me"),
                 Method = HttpMethod.Get
             })
             {
-                request.Headers.Add("Authorization", "JWT " + JWT);
+                request.Headers.Add("Authorization", "Bearer " + JWT);
                 request.Headers.Add("language", "en");
                 request.Headers.Add("accept", "application/json");
                 request.Headers.Add("platform", "pc");
@@ -1734,7 +1749,7 @@ namespace WFInfo
                 var response = await client.SendAsync(request);
                 //setJWT(response.Headers);
                 var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-                inGameName = profile["profile"]?.Value<string>("ingame_name");
+                inGameName = profile["data"]?.Value<string>("ingameName");
             }
         }
 

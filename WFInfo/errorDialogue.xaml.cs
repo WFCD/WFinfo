@@ -17,7 +17,7 @@ namespace WFInfo
 
         string startPath = Main.AppPath + @"\Debug";
         string zipPath = Main.AppPath + @"\generatedZip";
-        int segmentSize = 10000 * 1024; // 8m segments
+        readonly int segmentSize = 10000 * 1024; // 8m segments
 
         private int distance;
         private DateTime closest;
