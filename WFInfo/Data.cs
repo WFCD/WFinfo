@@ -1300,10 +1300,10 @@ namespace WFInfo
             {
                 if (_process.IsRunning && !_process.GameIsStreamed)
                 {
-                    _ = SetWebsocketStatus("invisible");
+                    _ = SetWebsocketStatus("ingame");
                 } else
                 {
-                    _ = SetWebsocketStatus("invisible");
+                    _ = SetWebsocketStatus("online");
                 }
             };
 
@@ -1372,7 +1372,7 @@ namespace WFInfo
                     var responseBody = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode) throw new Exception(responseBody);
-                    SetJWT(response.Headers);
+                    //SetJWT(response.Headers);
                     return true;
                 }
             }
@@ -1420,7 +1420,7 @@ namespace WFInfo
 
                     if (!response.IsSuccessStatusCode) throw new Exception(responseBody);
 
-                    SetJWT(response.Headers);
+                    //SetJWT(response.Headers);
                     request.Dispose();
                 }
                 return true;
@@ -1605,7 +1605,7 @@ namespace WFInfo
                         return false;
                     } else
                     {
-                        SetJWT(response.Headers);
+                        //SetJWT(response.Headers);
                         var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
                         profile["data"]["checkCode"] = "REDACTED"; // remove the code that can compromise an account.
                         Debug.WriteLine($"JWT check response: {profile["data"]}");
