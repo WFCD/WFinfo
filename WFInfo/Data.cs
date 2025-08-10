@@ -1331,7 +1331,9 @@ namespace WFInfo
             {
                 if (!item.Key.ToLower(Main.culture).Contains("authorization")) continue;
                 var temp = item.Value.First();
-                JWT = temp.Substring(4);
+                // Split the second part of expression ("JWT ..." or "Bearer ...")
+                JWT = temp.Split(' ')[1];
+                //JWT = temp.Substring(4);
                 return;
             }
         }
