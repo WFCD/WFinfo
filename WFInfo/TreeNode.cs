@@ -299,7 +299,7 @@ namespace WFInfo
 
         public bool GetSetInfo()
         {
-            string primeSetName = Main.dataBase.GetSetName(Name);
+            string primeSetName = Data.GetSetName(Name);
             if (!Main.dataBase.marketData.TryGetValue(primeSetName, out JToken primeSetJToken))
             {
                 return false; // This is not a set

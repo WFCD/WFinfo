@@ -23,7 +23,7 @@ namespace WFInfo
         private const string libtesseract = "tesseract50";
         private const string tesseract_version_folder = "tesseract5";
 
-        private static string[] list_of_dlls = new string[]
+        private static readonly string[] list_of_dlls = new string[]
         {
                 @"\x86\" + libtesseract + ".dll",
                 @"\x86\" + liblept + ".dll",
@@ -32,7 +32,7 @@ namespace WFInfo
                 @"\Tesseract.dll"
         };
 
-        private static string[] list_of_checksums = new string[]
+        private static readonly string[] list_of_checksums = new string[]
         {
                 "a87ba6ac613b8ecb5ed033e57b871e6f",     //  x86/tesseract50
                 "e62f9ef3dd31df439fa2a37793b035db",     //  x86/leptonica-1.82.0

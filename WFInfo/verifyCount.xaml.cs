@@ -57,7 +57,7 @@ namespace WFInfo
                     {
                         Main.dataBase.equipmentData[primeName]["parts"][partName]["owned"] = item.Count;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         Main.AddLog("FAILED to save count. Count: " + item.Count + ", Name: " + item.Name + ", primeName: " + primeName + ", partName: " + partName);
                         saveFailed = true;

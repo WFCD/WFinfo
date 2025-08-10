@@ -9,7 +9,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,7 +28,7 @@ namespace WFInfo
         public JObject equipmentData; // Contains equipmentData from Warframe PC Drops          {<EQMT>: {"vaulted": true, "PARTS": {<NAME>:{"relic_name":<name>|"","count":<num>}, ...}},  ...}
         public JObject nameData; // Contains relic to market name translation          {<relic_name>: <market_name>}
 
-        private static List<Dictionary<int, List<int>>> korean = new List<Dictionary<int, List<int>>>() {
+        private static readonly List<Dictionary<int, List<int>>> korean = new List<Dictionary<int, List<int>>>() {
             new Dictionary<int, List<int>>() {
                 { 0, new List<int>{ 6, 7, 8, 16 } }, // ㅁ, ㅂ, ㅃ, ㅍ
                 { 1, new List<int>{ 2, 3, 4, 16, 5, 9, 10 } }, // ㄴ, ㄷ, ㄸ, ㅌ, ㄹ, ㅅ, ㅆ
@@ -72,7 +71,7 @@ namespace WFInfo
         private readonly IProcessFinder _process;
         private readonly IWindowInfoService _window;
 
-        public WebClient createWfmClient()
+        public static WebClient CreateWfmClient()
         {
             WebClient webClient = CustomEntrypoint.createNewWebClient();
             webClient.Headers.Add("platform", "pc");
@@ -104,9 +103,9 @@ namespace WFInfo
             }
             HttpClientHandler handler = new HttpClientHandler
             {
-                Proxy = proxy
+                Proxy = proxy,
+                UseCookies = true
             };
-            handler.UseCookies = false;
             client = new HttpClient(handler);
 
             marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.None;
@@ -139,7 +138,7 @@ namespace WFInfo
             }
         }
 
-        private void SaveDatabase(string path, object db)
+        private static void SaveDatabase(string path, object db)
         {
             File.WriteAllText(path, JsonConvert.SerializeObject(db, Formatting.Indented));
         }
@@ -167,22 +166,22 @@ namespace WFInfo
         public void ReloadItems()
         {
             marketItems = new JObject();
-            WebClient webClient = createWfmClient();
+            WebClient webClient = CreateWfmClient();
             JObject obj =
                 JsonConvert.DeserializeObject<JObject>(
-                    webClient.DownloadString("https://api.warframe.market/v1/items"));
+                    webClient.DownloadString("https://api.warframe.market/v2/items"));
 
-            JArray items = JArray.FromObject(obj["payload"]["items"]);
+            JArray items = JArray.FromObject(obj["data"]);
             foreach (var item in items)
             {
-                string name = item["item_name"].ToString();
+                string name = item["i18n"]["en"]["name"].ToString();
                 if (name.Contains("Prime "))
                 {
                     if ((name.Contains("Neuroptics") || name.Contains("Chassis") || name.Contains("Systems") || name.Contains("Harness") || name.Contains("Wings")))
                     {
                         name = name.Replace(" Blueprint", "");
                     }
-                    marketItems[item["id"].ToString()] = name + "|" + item["url_name"];
+                    marketItems[item["id"].ToString()] = name + "|" + item["slug"];
                 }
             }
 
@@ -190,7 +189,7 @@ namespace WFInfo
             {
                 using (var request = new HttpRequestMessage()
                 {
-                    RequestUri = new Uri("https://api.warframe.market/v1/items"),
+                    RequestUri = new Uri("https://api.warframe.market/v2/items"),
                     Method = HttpMethod.Get
                 })
                 {
@@ -208,12 +207,12 @@ namespace WFInfo
                     Debug.WriteLine(body);
 
                     obj = JsonConvert.DeserializeObject<JObject>(body);
-                    items = JArray.FromObject(obj["payload"]["items"]);
+                    items = JArray.FromObject(obj["data"]);
                     foreach (var item in items)
                     {
-                        string name = item["url_name"].ToString();
+                        string name = item["slug"].ToString();
                         if (name.Contains("prime") && marketItems.ContainsKey(item["id"].ToString()))
-                            marketItems[item["id"].ToString()] = marketItems[item["id"].ToString()] + "|" + item["item_name"];
+                            marketItems[item["id"].ToString()] = marketItems[item["id"].ToString()] + "|" + item["i18n"][_settings.Locale]["name"];
                     }
                 }
             }
@@ -296,7 +295,7 @@ namespace WFInfo
             Main.AddLog("Load missing market item: " + item_name);
 
             Thread.Sleep(333);
-            WebClient webClient = createWfmClient();
+            WebClient webClient = CreateWfmClient();
             JObject stats =
                 JsonConvert.DeserializeObject<JObject>(
                     webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"));
@@ -315,14 +314,12 @@ namespace WFInfo
             }
 
             Thread.Sleep(333);
-            webClient = createWfmClient();
-            JObject ducats = JsonConvert.DeserializeObject<JObject>(
-                webClient.DownloadString("https://api.warframe.market/v1/items/" + url));
-            ducats = ducats["payload"]["item"].ToObject<JObject>();
-            string id = ducats["id"].ToObject<string>();
-            ducats = ducats["items_in_set"].AsParallel().First(part => (string)part["id"] == id).ToObject<JObject>();
+            webClient = CreateWfmClient();
+            JObject responseJObject = JsonConvert.DeserializeObject<JObject>(
+                webClient.DownloadString("https://api.warframe.market/v2/item/" + url)
+            );
             string ducat;
-            if (!ducats.TryGetValue("ducats", out JToken temp))
+            if (!responseJObject["data"].ToObject<JObject>().TryGetValue("ducats", out JToken temp))
             {
                 ducat = "0";
             }
@@ -599,7 +596,7 @@ namespace WFInfo
             return count;
         }
 
-        private void AddElement(int[,] d, List<int> xList, List<int> yList, int x, int y)
+        private static void AddElement(int[,] d, List<int> xList, List<int> yList, int x, int y)
         {
             int loc = 0;
             int temp = d[x, y];
@@ -652,7 +649,7 @@ namespace WFInfo
             }
         }
 
-        public int LevenshteinDistanceDefault(string s, string t)
+        public static int LevenshteinDistanceDefault(string s, string t)
         {
             // Levenshtein Distance determines how many character changes it takes to form a known result
             // For example: Nuvo Prime is closer to Nova Prime (2) then Ash Prime (4)
@@ -701,7 +698,7 @@ namespace WFInfo
             return d[n, m];
         }
 
-        public static bool isKorean(String str)
+        public static bool IsKorean(String str)
         {
             char c = str[0];
             if (0x1100 <= c && c <= 0x11FF) return true;
@@ -709,7 +706,7 @@ namespace WFInfo
             if (0xAC00 <= c && c <= 0xD7A3) return true;
             return false;
         }
-        public string getLocaleNameData(string s)
+        public string GetLocaleNameData(string s)
         {
             bool saveDatabases = false;
             string localeName = "";
@@ -740,7 +737,7 @@ namespace WFInfo
         public int LevenshteinDistanceKorean(string s, string t)
         {
             // NameData s 를 한글명으로 가져옴
-            s = getLocaleNameData(s);
+            s = GetLocaleNameData(s);
 
             // i18n korean edit distance algorithm
             s = " " + s.Replace("설계도", "").Replace(" ", "");
@@ -810,7 +807,7 @@ namespace WFInfo
             return d[s.Length - 1, t.Length - 1];
         }
 
-        private bool GroupEquals(Dictionary<int, List<int>> group, int ak, int bk)
+        private static bool GroupEquals(Dictionary<int, List<int>> group, int ak, int bk)
         {
             foreach (var entry in group)
             {
@@ -969,7 +966,7 @@ namespace WFInfo
             return lowest;
         }
 
-        public string GetSetName(string name)
+        public static string GetSetName(string name)
         {
             string result = name.ToLower(Main.culture);
 
@@ -1231,13 +1228,18 @@ namespace WFInfo
                 RequestUri = new Uri("https://api.warframe.market/v1/auth/signin"),
                 Method = HttpMethod.Post,
             };
-            var content = $"{{ \"email\":\"{email}\",\"password\":\"{password.Replace(@"\", @"\\").Replace("\"", "\\\"")}\", \"auth_type\": \"header\"}}";
+            var content = JsonConvert.SerializeObject(new
+            {
+                email,
+                password,
+                device_id = "wfinfo",
+                auth_type = "header"
+            });
             request.Content = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
             request.Headers.Add("Authorization", "JWT");
             request.Headers.Add("language", "en");
             request.Headers.Add("accept", "application/json");
             request.Headers.Add("platform", "pc");
-            request.Headers.Add("auth_type", "header");
             var response = await client.SendAsync(request);
             var responseBody = await response.Content.ReadAsStringAsync();
             Regex rgxBody = new Regex("\"check_code\": \".*?\"");
@@ -1296,9 +1298,13 @@ namespace WFInfo
 
             marketSocket.OnOpen += (sender, e) =>
             {
-                marketSocket.Send( (_process.IsRunning && !_process.GameIsStreamed)
-                    ? "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"ingame\"}"
-                    : "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"online\"}");
+                if (_process.IsRunning && !_process.GameIsStreamed)
+                {
+                    _ = SetWebsocketStatus("ingame");
+                } else
+                {
+                    _ = SetWebsocketStatus("online");
+                }
             };
 
             try
@@ -1325,7 +1331,9 @@ namespace WFInfo
             {
                 if (!item.Key.ToLower(Main.culture).Contains("authorization")) continue;
                 var temp = item.Value.First();
-                JWT = temp.Substring(4);
+                // Split the second part of expression ("JWT ..." or "Bearer ...")
+                JWT = temp.Split(' ')[1];
+                //JWT = temp.Substring(4);
                 return;
             }
         }
@@ -1343,14 +1351,20 @@ namespace WFInfo
             {
                 using (var request = new HttpRequestMessage()
                 {
-                    RequestUri = new Uri("https://api.warframe.market/v1/profile/orders"),
+                    RequestUri = new Uri("https://api.warframe.market/v2/order"),
                     Method = HttpMethod.Post,
                 })
                 {
                     var itemId = PrimeItemToItemID(primeItem);
-                    var json = $"{{\"order_type\":\"sell\",\"item_id\":\"{itemId}\",\"platinum\":{platinum},\"quantity\":{quantity}}}";
+                    var json = JsonConvert.SerializeObject(new
+                    {
+                        type = "sell",
+                        itemId,
+                        platinum,
+                        quantity
+                    });
                     request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    request.Headers.Add("Authorization", "JWT " + JWT);
+                    request.Headers.Add("Authorization", "Bearer " + JWT);
                     request.Headers.Add("language", "en");
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
@@ -1360,7 +1374,7 @@ namespace WFInfo
                     var responseBody = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode) throw new Exception(responseBody);
-                    SetJWT(response.Headers);
+                    //SetJWT(response.Headers);
                     return true;
                 }
             }
@@ -1385,13 +1399,19 @@ namespace WFInfo
             {
                 using (var request = new HttpRequestMessage()
                 {
-                    RequestUri = new Uri("https://api.warframe.market/v1/profile/orders/" + listingId),
+                    RequestUri = new Uri("https://api.warframe.market/v2/order/" + listingId),
                     Method = HttpMethod.Put,
                 })
                 {
-                    var json = $"{{\"order_id\":\"{listingId}\", \"platinum\": {platinum}, \"quantity\":{quantity + 1}, \"visible\":true}}";
+                    var json = JsonConvert.SerializeObject(new
+                    {
+                        order_id = listingId,
+                        platinum,
+                        quantity = quantity + 1,
+                        visible = true
+                    });
                     request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    request.Headers.Add("Authorization", "JWT " + JWT);
+                    request.Headers.Add("Authorization", "Bearer " + JWT);
                     request.Headers.Add("language", "en");
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
@@ -1402,7 +1422,7 @@ namespace WFInfo
 
                     if (!response.IsSuccessStatusCode) throw new Exception(responseBody);
 
-                    SetJWT(response.Headers);
+                    //SetJWT(response.Headers);
                     request.Dispose();
                 }
                 return true;
@@ -1447,20 +1467,26 @@ namespace WFInfo
             if (!IsJwtLoggedIn())
                 return false;
 
-            var message = "{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"";
+            string status_to_set;
             switch (status)
             {
                 case "ingame":
                 case "in game":
-                    message += "ingame\"}";
+                    status_to_set = "ingame";
                     break;
                 case "online":
-                    message += "online\"}";
+                    status_to_set = "online";
                     break;
                 default:
-                    message += "invisible\"}";
+                    status_to_set = "invisible";
                     break;
             }
+            var message = JsonConvert.SerializeObject(new
+            {
+                type = "@WS/USER/SET_STATUS",
+                payload = status_to_set
+            });
+            
             try
             {
                 SendMessage(message);
@@ -1496,7 +1522,7 @@ namespace WFInfo
         {
             if (marketSocket.ReadyState == WebSocketState.Open)
             { //only send disconnect message if the socket is connected
-                SendMessage("{\"type\":\"@WS/USER/SET_STATUS\",\"payload\":\"invisible\"}");
+                _ = SetWebsocketStatus("invisible");
                 JWT = null;
                 rememberMe = false;
                 inGameName = string.Empty;
@@ -1534,7 +1560,7 @@ namespace WFInfo
                     Method = HttpMethod.Get
                 })
                 {
-                    request.Headers.Add("Authorization", "JWT " + JWT);
+                    request.Headers.Add("Authorization", "Bearer " + JWT);
                     request.Headers.Add("language", "en");
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
@@ -1569,17 +1595,24 @@ namespace WFInfo
             {
                 using (var request = new HttpRequestMessage()
                 {
-                    RequestUri = new Uri("https://api.warframe.market/v1/profile"),
+                    RequestUri = new Uri("https://api.warframe.market/v2/me"),
                     Method = HttpMethod.Get,
                 })
                 {
-                    request.Headers.Add("Authorization", "JWT " + JWT);
+                    request.Headers.Add("Authorization", "Bearer " + JWT);
                     var response = await client.SendAsync(request);
-                    SetJWT(response.Headers);
-                    var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-                    profile["profile"]["check_code"] = "REDACTED"; // remnove the code that can compromise an account.
-                    Debug.WriteLine($"JWT check response: {profile["profile"]}");
-                    return !(bool)profile["profile"]["anonymous"];
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        Main.AddLog($"JWT is invalidated or expired");
+                        return false;
+                    } else
+                    {
+                        //SetJWT(response.Headers);
+                        var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
+                        profile["data"]["checkCode"] = "REDACTED"; // remove the code that can compromise an account.
+                        Debug.WriteLine($"JWT check response: {profile["data"]}");
+                        return true;
+                    }
                 }
             }
             catch (Exception e)
@@ -1612,11 +1645,11 @@ namespace WFInfo
 
                 using (var request = new HttpRequestMessage()
                 {
-                    RequestUri = new Uri("https://api.warframe.market/v1/profile/" + inGameName + "/orders"),
+                    RequestUri = new Uri("https://api.warframe.market/v2/orders/my"),
                     Method = HttpMethod.Get
                 })
                 {
-                    request.Headers.Add("Authorization", "JWT " + JWT);
+                    request.Headers.Add("Authorization", "Bearer " + JWT);
                     request.Headers.Add("language", "en");
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
@@ -1624,14 +1657,14 @@ namespace WFInfo
                     var response = await client.SendAsync(request);
                     var body = await response.Content.ReadAsStringAsync();
                     var payload = JsonConvert.DeserializeObject<JObject>(body);
-                    var sellOrders = (JArray)payload?["payload"]?["sell_orders"];
+                    var allOrders = (JArray)payload?["data"];
                     string itemID = PrimeItemToItemID(primeName);
 
-                    if (sellOrders != null)
+                    if (allOrders != null)
                     {
-                        foreach (var listing in sellOrders)
+                        foreach (var listing in allOrders)
                         {
-                            if (itemID == (string)listing?["item"]?["id"])
+                            if ((string)listing["type"] == "sell" && itemID == (string)listing?["itemId"])
                             {
                                 request.Dispose();
                                 return listing;
@@ -1667,7 +1700,7 @@ namespace WFInfo
         public async Task<bool> PostReview(string message = "Thank you for WFinfo!")
         {
             var msg = $"{{\"text\":\"{message}\",\"review_type\":\"1\"}}";
-            var developers = new List<string> { "dimon222", "Dapal003", "Kekasi" };
+            var developers = new List<string> { "dimon222", "Dapal003", "Kekasi", "D1firehail" };
             foreach (var developer in developers)
             {
                 try
@@ -1706,11 +1739,11 @@ namespace WFInfo
         {
             using (var request = new HttpRequestMessage()
             {
-                RequestUri = new Uri("https://api.warframe.market/v1/profile"),
+                RequestUri = new Uri("https://api.warframe.market/v2/me"),
                 Method = HttpMethod.Get
             })
             {
-                request.Headers.Add("Authorization", "JWT " + JWT);
+                request.Headers.Add("Authorization", "Bearer " + JWT);
                 request.Headers.Add("language", "en");
                 request.Headers.Add("accept", "application/json");
                 request.Headers.Add("platform", "pc");
@@ -1718,7 +1751,7 @@ namespace WFInfo
                 var response = await client.SendAsync(request);
                 //setJWT(response.Headers);
                 var profile = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
-                inGameName = profile["profile"]?.Value<string>("ingame_name");
+                inGameName = profile["data"]?.Value<string>("ingameName");
             }
         }
 
