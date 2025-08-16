@@ -1286,7 +1286,7 @@ namespace WFInfo
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> OpenWebSocket()
         {
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+            #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             Main.AddLog("Connecting to websocket");
 
             if (marketSocket.State == WebSocketState.Open)
@@ -1299,8 +1299,9 @@ namespace WFInfo
             marketSocket.Options.SetRequestHeader("Authorization", "Bearer " + JWT);
             SetUserAgent(marketSocket.Options, "WFInfo/" + Main.BuildVersion);
             Uri marketSocketUri = new Uri("wss://warframe.market/socket-v2");
-            marketSocketOpenEvent.Set();
+            marketSocketOpenEvent.Reset();
             await marketSocket.ConnectAsync(marketSocketUri, CancellationToken.None);
+            marketSocketOpenEvent.Set();
             SendMessage(
                 JsonConvert.SerializeObject(new
                     {
@@ -1501,7 +1502,7 @@ namespace WFInfo
             
             try
             {
-                if (marketSocketOpenEvent.WaitOne(60000))
+                if (marketSocketOpenEvent.WaitOne(60000) && marketSocket.State == WebSocketState.Open)
                     SendMessage(message);
             }
             catch (Exception e)
@@ -1550,6 +1551,7 @@ namespace WFInfo
                 marketSocket.CloseAsync(
                     WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None
                 );
+                marketSocketOpenEvent.Reset();
             }
         }
 
