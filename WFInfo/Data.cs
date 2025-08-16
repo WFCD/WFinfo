@@ -1302,7 +1302,7 @@ namespace WFInfo
             marketSocketOpenEvent.Reset();
             await marketSocket.ConnectAsync(marketSocketUri, CancellationToken.None);
             marketSocketOpenEvent.Set();
-            SendMessage(
+            await SendMessage(
                 JsonConvert.SerializeObject(new
                     {
                         route = "@wfm|cmd/auth/signIn",
@@ -1503,7 +1503,7 @@ namespace WFInfo
             try
             {
                 if (marketSocketOpenEvent.WaitOne(60000) && marketSocket.State == WebSocketState.Open)
-                    SendMessage(message);
+                    await SendMessage(message);
             }
             catch (Exception e)
             {
@@ -1517,7 +1517,7 @@ namespace WFInfo
         /// Dummy method to make it so that you log send messages
         /// </summary>
         /// <param name="data">The JSON string of data being sent over websocket</param>
-        private void SendMessage(string data)
+        private async Task SendMessage(string data)
         {
             Debug.WriteLine("Sending: " + data + " to websocket.");
             try
@@ -1525,7 +1525,7 @@ namespace WFInfo
                 byte[] buffer = Encoding.UTF8.GetBytes(data);
                 var segment = new ArraySegment<byte>(buffer);
 
-                marketSocket.SendAsync(
+                await marketSocket.SendAsync(
                     segment,
                     WebSocketMessageType.Text,
                     endOfMessage: true,
