@@ -333,13 +333,14 @@ namespace WFInfo
                     marketListings.Add(tempListings);
                     platinumValues.Add(tempListings[0].Platinum);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     Main.RunOnUIThread(() =>
                     {
                         Main.searchBox.placeholder.Content = $"Could not find {primeItem}";
                         Main.searchBox.searchField.Text = string.Empty;
                     });
+                    Main.AddLog($"GetRewardCollection failed for {primeItem}: {ex.Message}");
                 }
 
             }
