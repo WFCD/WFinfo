@@ -708,6 +708,7 @@ namespace WFInfo
         }
         public string GetLocaleNameData(string s)
         {
+            // Why is this here?! Might require review why its never saving json
             bool saveDatabases = false;
             string localeName = "";
             foreach (var marketItem in marketItems)
@@ -1413,7 +1414,7 @@ namespace WFInfo
                     {
                         order_id = listingId,
                         platinum,
-                        quantity = quantity + 1,
+                        quantity = quantity,
                         visible = true
                     });
                     request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");

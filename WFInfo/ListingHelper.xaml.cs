@@ -395,11 +395,20 @@ namespace WFInfo
         private async Task<bool> PlaceListing(string primeItem, int platinum)
         {
             var listing = await Main.dataBase.GetCurrentListing(primeItem);
-            if (listing == null) return await Main.dataBase.ListItem(primeItem, platinum, 1);
-            //listing already exists, thus update it
-            var listingId = (string)listing["id"];
-            var quantity = (int)listing["quantity"];
-            return await Main.dataBase.UpdateListing(listingId, platinum, quantity);
+            if (listing == null)
+            {
+                // Create new listing
+                return await Main.dataBase.ListItem(primeItem, platinum, 1);
+            }
+            else
+            {
+                // Listing already exists, thus update it
+                var listingId = (string)listing["id"];
+                // Current quantity
+                var quantity = (int)listing["quantity"];
+                // Increase the quantity
+                return await Main.dataBase.UpdateListing(listingId, platinum, quantity + 1);
+            }
         }
 
         private void PlatinumTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
