@@ -6,9 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
-using WebSocketSharp;
 
 namespace WFInfo
 {
@@ -74,7 +72,7 @@ namespace WFInfo
             updating = true;
             ComboBox.Items.Clear();
             ComboBox.SelectedIndex = screen.Value.RewardIndex;
-            foreach (var primeItem in screen.Value.PrimeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
+            foreach (var primeItem in screen.Value.PrimeNames.Where(primeItem => !string.IsNullOrEmpty(primeItem)))
             {
                 ComboBox.Items.Add(primeItem);
             }
@@ -437,7 +435,7 @@ namespace WFInfo
             var msg = "Reward collection screen:\n";
             foreach (var item in PrimeNames)
             {
-                if (item.IsNullOrEmpty())
+                if (string.IsNullOrEmpty(item))
                     continue;
                 var index = PrimeNames.IndexOf(item);
 

@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using AutoUpdaterDotNET;
 using System.Windows;
 using System.Windows.Forms;
-using WebSocketSharp;
 using WFInfo.Resources;
 using WFInfo.Settings;
 using WFInfo.Services.Screenshot;
@@ -201,7 +200,7 @@ namespace WFInfo
                     await Task.Run(async () =>
                     {
                         await dataBase.SetWebsocketStatus(LastMarketStatusB4AFK).ConfigureAwait(false);
-                        string user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
+                        string user = string.IsNullOrEmpty(dataBase.inGameName) ? "user" : dataBase.inGameName;
                         StatusUpdate($"Welcome back {user}, restored as {LastMarketStatusB4AFK}", 0);
                     }).ConfigureAwait(false);
                 }

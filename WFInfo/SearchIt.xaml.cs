@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Navigation;
-using WebSocketSharp;
 
 namespace WFInfo
 {
@@ -89,7 +87,7 @@ namespace WFInfo
         /// <param name="e"></param>
         private void TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!searchField.Text.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(searchField.Text))
                 placeholder.Visibility = Visibility.Hidden;
         }
     }

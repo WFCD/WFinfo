@@ -8,11 +8,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Authentication;
+using System.Net.WebSockets;
+using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using WebSocketSharp;
 using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
 using WFInfo.Settings;
@@ -56,8 +57,9 @@ namespace WFInfo
         private readonly string equipmentDataPath;
         private readonly string relicDataPath;
         private readonly string nameDataPath;
-        public string JWT; // JWT is the security key, store this as email+pw combo
-        private readonly WebSocket marketSocket = new WebSocket("wss://warframe.market/socket?platform=pc");
+        public string JWT; // JWT is the security key, store this as email+pw combo'
+        private readonly ClientWebSocket marketSocket = new ClientWebSocket();
+        private ManualResetEvent marketSocketOpenEvent = new ManualResetEvent(false);
         private readonly string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
         private readonly string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
         public string inGameName = string.Empty;
@@ -107,8 +109,6 @@ namespace WFInfo
                 UseCookies = true
             };
             client = new HttpClient(handler);
-
-            marketSocket.SslConfiguration.EnabledSslProtocols = SslProtocols.None;
         }
 
         public void EnableLogCapture()
@@ -204,7 +204,7 @@ namespace WFInfo
                     respTask.Wait();
                     var body = respTask.Result;
                     var payload = JsonConvert.DeserializeObject<JObject>(body);
-                    Debug.WriteLine(body);
+                    //Debug.WriteLine(body);
 
                     obj = JsonConvert.DeserializeObject<JObject>(body);
                     items = JArray.FromObject(obj["data"]);
@@ -1066,7 +1066,7 @@ namespace WFInfo
 
             Task.Run(async () =>
             {
-                if (_settings.AutoList && inGameName.IsNullOrEmpty())
+                if (_settings.AutoList && string.IsNullOrEmpty(inGameName))
                     if (!await IsJWTvalid())
                     {
                         Disconnect();
@@ -1259,6 +1259,25 @@ namespace WFInfo
             request.Dispose();
         }
 
+
+        // Some vibe-coded reflection modification for userAgent
+        public static void SetUserAgent(ClientWebSocketOptions options, string userAgent)
+        {
+            var headers = options.GetType()
+                .GetField("_requestHeaders", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
+                .GetValue(options) as System.Collections.Specialized.NameValueCollection;
+
+            if (headers == null)
+            {
+                headers = new System.Collections.Specialized.NameValueCollection();
+                options.GetType()
+                    .GetField("_requestHeaders", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.SetValue(options, headers);
+            }
+
+            headers["User-Agent"] = userAgent;
+        }
+
         /// <summary>
         /// Attempts to connect the user's account to the websocket
         /// </summary>
@@ -1269,54 +1288,40 @@ namespace WFInfo
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             Main.AddLog("Connecting to websocket");
 
-            if (marketSocket.IsAlive)
+            if (marketSocket.State == WebSocketState.Open)
             {
-                return false;
+                return true;
             }
 
-            marketSocket.OnMessage += (sender, e) =>
-            {
-                if (e.Data.Contains("@WS/ERROR")) // error checking, report back to main.status
-                {
-                    Main.AddLog(e.Data);
-                    Disconnect();
-                    Main.SignOut();
-                }
-            };
+            marketSocket.Options.AddSubProtocol("wfm");
 
-            marketSocket.OnMessage += (sender, e) =>
-            {
-                Debug.WriteLine("warframe.market: " + e.Data);
-                if (!e.Data.Contains("SET_STATUS")) return;
-                var message = JsonConvert.DeserializeObject<JObject>(e.Data);
-                Main.RunOnUIThread(() =>
-                {
-                    Main.UpdateMarketStatus(message.GetValue("payload").ToString());
-                });
+            marketSocket.Options.SetRequestHeader("Authorization", "Bearer " + JWT);
+            SetUserAgent(marketSocket.Options, "WFInfo/" + Main.BuildVersion);
+            Uri marketSocketUri = new Uri("wss://warframe.market/socket-v2");
+            marketSocketOpenEvent.Set();
+            await marketSocket.ConnectAsync(marketSocketUri, CancellationToken.None);
+            SendMessage(
+                JsonConvert.SerializeObject(new
+                    {
+                        route = "@wfm|cmd/auth/signIn",
+                        payload = new
+                        {
+                            token = JWT,
+                            deviceId = "wfinfo"
+                        }
+                    }
+                )
+            );
 
-            };
-
-            marketSocket.OnOpen += (sender, e) =>
+            if (_process.IsRunning && !_process.GameIsStreamed)
             {
-                if (_process.IsRunning && !_process.GameIsStreamed)
-                {
-                    _ = SetWebsocketStatus("ingame");
-                } else
-                {
-                    _ = SetWebsocketStatus("online");
-                }
-            };
-
-            try
-            {
-                marketSocket.SetCookie(new WebSocketSharp.Net.Cookie("JWT", JWT));
-                marketSocket.ConnectAsync();
+                _ = SetWebsocketStatus("ingame");
             }
-            catch (Exception e)
+            else
             {
-                Main.AddLog("Unable to connect to socket: " + e.Message);
-                return false;
+                _ = SetWebsocketStatus("online");
             }
+
             return true;
         }
 
@@ -1329,6 +1334,7 @@ namespace WFInfo
         {
             foreach (var item in headers)
             {
+                //Debug.WriteLine(item.Key);
                 if (!item.Key.ToLower(Main.culture).Contains("authorization")) continue;
                 var temp = item.Value.First();
                 // Split the second part of expression ("JWT ..." or "Bearer ...")
@@ -1483,13 +1489,19 @@ namespace WFInfo
             }
             var message = JsonConvert.SerializeObject(new
             {
-                type = "@WS/USER/SET_STATUS",
-                payload = status_to_set
+                route = "@wfm|cmd/status/set",
+                payload = new
+                {
+                    status = status_to_set
+                    //,duration = 1800,
+                    //activity = status_to_set
+                }
             });
             
             try
             {
-                SendMessage(message);
+                if (marketSocketOpenEvent.WaitOne(60000))
+                    SendMessage(message);
             }
             catch (Exception e)
             {
@@ -1508,9 +1520,17 @@ namespace WFInfo
             Debug.WriteLine("Sending: " + data + " to websocket.");
             try
             {
-                marketSocket.Send(data);
+                byte[] buffer = Encoding.UTF8.GetBytes(data);
+                var segment = new ArraySegment<byte>(buffer);
+
+                marketSocket.SendAsync(
+                    segment,
+                    WebSocketMessageType.Text,
+                    endOfMessage: true,
+                    cancellationToken: CancellationToken.None
+                );
             }
-            catch (InvalidOperationException e)
+            catch (Exception e)
             {
                 Debug.WriteLine($"Was unable to send message due to: {e}");
             }
@@ -1520,13 +1540,15 @@ namespace WFInfo
         /// </summary>
         public void Disconnect()
         {
-            if (marketSocket.ReadyState == WebSocketState.Open)
+            if (marketSocket.State == WebSocketState.Open)
             { //only send disconnect message if the socket is connected
                 _ = SetWebsocketStatus("invisible");
                 JWT = null;
                 rememberMe = false;
                 inGameName = string.Empty;
-                marketSocket.Close(1006);
+                marketSocket.CloseAsync(
+                    WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None
+                );
             }
         }
 
@@ -1570,7 +1592,7 @@ namespace WFInfo
                     var payload = JsonConvert.DeserializeObject<JObject>(body);
                     if (body.Length < 3)
                         throw new Exception("No sell orders found: " + payload);
-                    Debug.WriteLine(body);
+                    //Debug.WriteLine(body);
 
                     return JsonConvert.DeserializeObject<JObject>(body);
                 }
@@ -1638,7 +1660,7 @@ namespace WFInfo
         {
             try
             {
-                if (inGameName.IsNullOrEmpty())
+                if (string.IsNullOrEmpty(inGameName))
                 {
                     await SetIngameName();
                 }
@@ -1689,7 +1711,7 @@ namespace WFInfo
 
         public bool GetSocketAliveStatus()
         {
-            return marketSocket.IsAlive;
+            return marketSocket.State == WebSocketState.Open;
         }
 
         /// <summary>

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows.Data;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
-using WebSocketSharp;
 
 namespace WFInfo
 {
@@ -57,7 +56,7 @@ namespace WFInfo
                 RaisePropertyChanged(nameof(IsFilterEmpty));
             }
         }
-        public bool IsFilterEmpty => FilterText.IsNullOrEmpty();
+        public bool IsFilterEmpty => string.IsNullOrEmpty(FilterText);
 
         public SimpleCommand ExpandAllCommand { get; }
         public SimpleCommand CollapseAllCommand { get; }
@@ -210,7 +209,7 @@ namespace WFInfo
                 era.ResetFilter();
                 if(HideVaulted)
                     era.FilterOutVaulted(true);
-                if(!FilterText.IsNullOrEmpty())
+                if(!string.IsNullOrEmpty(FilterText))
                 {
                     var searchText = FilterText.Split(' ');
                     era.FilterSearchText(searchText, false, true);
