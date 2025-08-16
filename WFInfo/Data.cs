@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
 using WFInfo.Settings;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace WFInfo
 {
@@ -109,6 +110,7 @@ namespace WFInfo
                 UseCookies = true
             };
             client = new HttpClient(handler);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("WFInfo/" + Main.BuildVersion);
         }
 
         public void EnableLogCapture()
@@ -196,13 +198,8 @@ namespace WFInfo
                     request.Headers.Add("language", _settings.Locale);
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
-                    var task = Task.Run(() => client.SendAsync(request));
-                    task.Wait();
-                    var response = task.Result;
-
-                    var respTask = Task.Run(() => response.Content.ReadAsStringAsync());
-                    respTask.Wait();
-                    var body = respTask.Result;
+                    var response = client.SendAsync(request).GetAwaiter().GetResult();
+                    var body = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                     var payload = JsonConvert.DeserializeObject<JObject>(body);
                     //Debug.WriteLine(body);
 
