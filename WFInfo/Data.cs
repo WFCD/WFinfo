@@ -59,7 +59,7 @@ namespace WFInfo
         private readonly string relicDataPath;
         private readonly string nameDataPath;
         public string JWT; // JWT is the security key, store this as email+pw combo'
-        private readonly ClientWebSocket marketSocket = new ClientWebSocket();
+        private ClientWebSocket marketSocket = new ClientWebSocket();
         private ManualResetEvent marketSocketOpenEvent = new ManualResetEvent(false);
         private readonly string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
         private readonly string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
@@ -1292,6 +1292,11 @@ namespace WFInfo
                 return true;
             }
 
+            if (marketSocket.State == WebSocketState.Closed || marketSocket.State == WebSocketState.Aborted)
+            {
+                marketSocket.Dispose();
+                marketSocket = new ClientWebSocket();
+            }
             marketSocket.Options.AddSubProtocol("wfm");
 
             marketSocket.Options.SetRequestHeader("Authorization", "Bearer " + JWT);
@@ -1339,7 +1344,6 @@ namespace WFInfo
                 var temp = item.Value.First();
                 // Split the second part of expression ("JWT ..." or "Bearer ...")
                 JWT = temp.Split(' ')[1];
-                //JWT = temp.Substring(4);
                 return;
             }
         }
@@ -1411,9 +1415,8 @@ namespace WFInfo
                 {
                     var json = JsonConvert.SerializeObject(new
                     {
-                        order_id = listingId,
                         platinum,
-                        quantity = quantity,
+                        quantity,
                         visible = true
                     });
                     request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
@@ -1546,10 +1549,12 @@ namespace WFInfo
                 JWT = null;
                 rememberMe = false;
                 inGameName = string.Empty;
-                marketSocket.CloseAsync(
+                _ = marketSocket.CloseAsync(
                     WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None
                 );
                 marketSocketOpenEvent.Reset();
+                marketSocket.Dispose();
+                marketSocket = new ClientWebSocket();
             }
         }
 
