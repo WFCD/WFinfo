@@ -200,11 +200,8 @@ namespace WFInfo
                     request.Headers.Add("platform", "pc");
                     var response = client.SendAsync(request).GetAwaiter().GetResult();
                     var body = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                    var payload = JsonConvert.DeserializeObject<JObject>(body);
-                    //Debug.WriteLine(body);
-
-                    obj = JsonConvert.DeserializeObject<JObject>(body);
-                    items = JArray.FromObject(obj["data"]);
+                    var parsed = JsonConvert.DeserializeObject<JObject>(body);
+                    items = JArray.FromObject(parsed["data"]);
                     foreach (var item in items)
                     {
                         string name = item["slug"].ToString();
@@ -695,14 +692,18 @@ namespace WFInfo
             return d[n, m];
         }
 
+        // This isn't used anymore?!
         public static bool IsKorean(String str)
         {
+            // Safeguard for empty strings that will give false positives and/or crashes
+            if (string.IsNullOrEmpty(str)) return false;
             char c = str[0];
             if (0x1100 <= c && c <= 0x11FF) return true;
             if (0x3130 <= c && c <= 0x318F) return true;
             if (0xAC00 <= c && c <= 0xD7A3) return true;
             return false;
         }
+
         public string GetLocaleNameData(string s)
         {
             // Why is this here?! Might require review why its never saving json
