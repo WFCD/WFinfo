@@ -60,6 +60,7 @@ namespace WFInfo
         private readonly string nameDataPath;
         public string JWT; // JWT is the security key, store this as email+pw combo'
         private ClientWebSocket marketSocket = new ClientWebSocket();
+        private CancellationTokenSource marketSocketCancellation = new CancellationTokenSource();
         private ManualResetEvent marketSocketOpenEvent = new ManualResetEvent(false);
         private readonly string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
         private readonly string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
@@ -1277,6 +1278,54 @@ namespace WFInfo
             headers["User-Agent"] = userAgent;
         }
 
+        // Listener to track messages coming back
+        private async Task StartWebSocketListener()
+        {
+            var buffer = new byte[1024 * 4];
+
+            try
+            {
+                while (marketSocket.State == WebSocketState.Open && !marketSocketCancellation.Token.IsCancellationRequested)
+                {
+                    var result = await marketSocket.ReceiveAsync(new ArraySegment<byte>(buffer), marketSocketCancellation.Token);
+
+                    if (result.MessageType == WebSocketMessageType.Text)
+                    {
+                        var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        await HandleWebSocketMessage(message);
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected when cancellation token is triggered
+            }
+            catch (Exception e)
+            {
+                Main.AddLog($"WebSocket listener error: {e.Message}");
+            }
+        }
+
+        // Add this method to handle incoming websocket messages
+        private async Task HandleWebSocketMessage(string message)
+        {
+            try
+            {
+                var messageObj = JsonConvert.DeserializeObject<JObject>(message);
+
+                // Handle status change messages from the server
+                if (!string.IsNullOrEmpty(messageObj["payload"]?["status"]?.ToString()))
+                {
+                    Main.UpdateMarketStatus(messageObj["payload"]["status"].ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                Main.AddLog($"Error handling websocket message: {e.Message}");
+            }
+        }
+
+
         /// <summary>
         /// Attempts to connect the user's account to the websocket
         /// </summary>
@@ -1325,6 +1374,14 @@ namespace WFInfo
             else
             {
                 _ = SetWebsocketStatus("online");
+            }
+
+
+            // After successful connection, start the message listener
+            if (marketSocket.State == WebSocketState.Open)
+            {
+                Debug.WriteLine("Opening reading socket");
+                _ = Task.Run(StartWebSocketListener); // Start listening for messages
             }
 
             return true;
@@ -1463,9 +1520,9 @@ namespace WFInfo
         /// <summary>
         /// Sets the status of WFM websocket. Will try to reconnect if it is not already connected.
         /// Accepts the following values:
-        /// offline, set's player status to be hidden on the site.  
+        /// invisible, set's player status to be hidden on the site.  
         /// online, set's player status to be online on the site.   
-        /// in game, set's player status to be online and ingame on the site
+        /// ingame, set's player status to be online and ingame on the site
         /// </summary>
         /// <param name="status">
         /// </param>
@@ -1480,13 +1537,16 @@ namespace WFInfo
             switch (status)
             {
                 case "ingame":
-                case "in game":
                     status_to_set = "ingame";
                     break;
                 case "online":
                     status_to_set = "online";
                     break;
+                case "invisible":
+                    status_to_set = "invisible";
+                    break;
                 default:
+                    Debug.WriteLine("Defaulting WFM status, this shouldn't be reachable please report it as bug!");
                     status_to_set = "invisible";
                     break;
             }
@@ -1543,6 +1603,7 @@ namespace WFInfo
         /// </summary>
         public void Disconnect()
         {
+            marketSocketCancellation?.Cancel(); // Stop message listener
             if (marketSocket.State == WebSocketState.Open)
             { //only send disconnect message if the socket is connected
                 _ = SetWebsocketStatus("invisible");
@@ -1556,6 +1617,9 @@ namespace WFInfo
                 marketSocket.Dispose();
                 marketSocket = new ClientWebSocket();
             }
+
+            marketSocketCancellation?.Dispose();
+            marketSocketCancellation = new CancellationTokenSource();
         }
 
         public string GetUrlName(string primeName)

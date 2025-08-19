@@ -9,6 +9,7 @@
         x:Class="WFInfo.MainWindow"
         Title="WFInfo" Height="110" Width="334" ResizeMode="NoResize" Icon="Resources/WFLogo.png" WindowStyle="None" BorderBrush="#FF707070" LocationChanged="OnLocationChanged" ContentRendered="OnContentRendered">
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>
 
     <Grid Background="#FF1B1B1B" MouseDown="MouseDown">
@@ -267,9 +268,9 @@
             </Label.Style>
         </Label>
         <ComboBox x:Name="ComboBox"  SelectionChanged="ComboBoxOnSelectionChanged" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top" Width="82" Height="22" Background="#FF0F0F0F" Foreground="#FFAFD0D9" BorderBrush="{x:Null}" Style="{DynamicResource ComboBoxStyle1}" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}" Margin="210,0,0,0" >
-            <ComboBoxItem Content="In game"/>
+            <ComboBoxItem Content="Ingame"/>
             <ComboBoxItem IsSelected="True" Content="Online"/>
-            <ComboBoxItem Content="Offline"/>
+            <ComboBoxItem Content="Invisible"/>
             <ComboBoxItem Content="Log out"/>
         </ComboBox>
         <Label x:Name="SearchItButton" ToolTip="Launch search it" MouseLeftButtonDown="SearchItButton_MouseLeftButtonDown" Margin="0,62,1,0" Padding="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" Visibility="Collapsed" HorizontalAlignment="Right" Width="20">
