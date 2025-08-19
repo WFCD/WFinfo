@@ -1281,18 +1281,34 @@ namespace WFInfo
         // Listener to track messages coming back
         private async Task StartWebSocketListener()
         {
-            var buffer = new byte[1024 * 4];
+            var buffer = new byte[8192];
 
             try
             {
-                while (marketSocket.State == WebSocketState.Open && !marketSocketCancellation.Token.IsCancellationRequested)
+                while (!marketSocketCancellation.Token.IsCancellationRequested)
                 {
-                    var result = await marketSocket.ReceiveAsync(new ArraySegment<byte>(buffer), marketSocketCancellation.Token);
+                    if (marketSocket.State != WebSocketState.Open) break;
 
-                    if (result.MessageType == WebSocketMessageType.Text)
+                    var sb = new StringBuilder();
+                    WebSocketReceiveResult result;
+                    do
                     {
-                        var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                        await HandleWebSocketMessage(message);
+                        result = await marketSocket.ReceiveAsync(new ArraySegment<byte>(buffer), marketSocketCancellation.Token);
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            // Acknowledge and exit gracefully
+                            await marketSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Ack close", CancellationToken.None);
+                            return;
+                        }
+                        if (result.MessageType == WebSocketMessageType.Text && result.Count > 0)
+                        {
+                            sb.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+                        }
+                    } while (!result.EndOfMessage && !marketSocketCancellation.Token.IsCancellationRequested) ;
+
+                    if (sb.Length > 0)
+                    {
+                        await HandleWebSocketMessage(sb.ToString());
                     }
                 }
             }
