@@ -204,7 +204,7 @@ namespace WFInfo
                         return;
                     //IDE0058 - computed value is never used.  Ever. Consider changing the return signature of SetWebsocketStatus to void instead
                     await dataBase.SetWebsocketStatus("invisible").ConfigureAwait(false);
-                    StatusUpdate("WFM status set offline, Warframe was closed", 0);
+                    StatusUpdate("WFM status set invisible, Warframe was closed", 0);
                 }).ConfigureAwait(false);
             }
             else if (UserAway && latestActive > now)

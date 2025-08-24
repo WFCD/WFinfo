@@ -61,6 +61,8 @@ namespace WFInfo
         private ClientWebSocket marketSocket = new ClientWebSocket();
         private CancellationTokenSource marketSocketCancellation = new CancellationTokenSource();
         private readonly ManualResetEvent marketSocketOpenEvent = new ManualResetEvent(false);
+        private TaskCompletionSource<bool> _authenticationCompletionSource;
+        private bool _isWebSocketAuthenticated = false;
         private readonly string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
         private readonly string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
         public string inGameName = string.Empty;
@@ -1336,17 +1338,43 @@ namespace WFInfo
                     JsonConvert.DeserializeObject<JObject>(message)
                 ).ConfigureAwait(false);
 
-                // Handle status change messages from the server
-                var statusPayload = messageObj["payload"]?["status"]?.ToString();
-                if (!string.IsNullOrEmpty(statusPayload))
+                // Check for authentication success response
+                var route = messageObj["route"]?.ToString();
+                var payload = messageObj["payload"];
+
+                if (route == "@wfm|cmd/auth/signIn" || route?.Contains("auth") == true)
                 {
-                    // Make the status update async
-                    await Main.UpdateMarketStatusAsync(statusPayload).ConfigureAwait(false);
+                    // Check if authentication was successful
+                    var success = payload?["success"]?.ToObject<bool>() ??
+                                 (payload?["error"] == null); // No error means success
+
+                    if (success)
+                    {
+                        Main.AddLog("WebSocket authentication successful");
+                        Main.dataBase._isWebSocketAuthenticated = true;
+                        Main.dataBase._authenticationCompletionSource?.SetResult(true);
+                    }
+                    else
+                    {
+                        var error = payload?["error"]?.ToString() ?? "Unknown authentication error";
+                        Main.AddLog($"WebSocket authentication failed: {error}");
+                        Main.dataBase._authenticationCompletionSource?.SetResult(false);
+                    }
+                }
+
+                // Handle status change messages from the server (only if authenticated)
+                if (Main.dataBase._isWebSocketAuthenticated)
+                {
+                    var statusPayload = messageObj["payload"]?["status"]?.ToString();
+                    if (!string.IsNullOrEmpty(statusPayload))
+                    {
+                        await Main.UpdateMarketStatusAsync(statusPayload).ConfigureAwait(false);
+                    }
                 }
             }
             catch (Exception e)
             {
-                // Make logging async too
+                // Async logging
                 await Task.Run(() =>
                     Main.AddLog($"Error handling websocket message: {e.Message}")
                 ).ConfigureAwait(false);
@@ -1361,7 +1389,7 @@ namespace WFInfo
         {
             Main.AddLog("Connecting to websocket");
 
-            if (marketSocket.State == WebSocketState.Open)
+            if (marketSocket.State == WebSocketState.Open && _isWebSocketAuthenticated)
             {
                 return true;
             }
@@ -1371,23 +1399,29 @@ namespace WFInfo
                 marketSocket.Dispose();
                 marketSocket = new ClientWebSocket();
             }
-            marketSocket.Options.AddSubProtocol("wfm");
 
+            // Reset authentication state
+            _isWebSocketAuthenticated = false;
+            _authenticationCompletionSource = new TaskCompletionSource<bool>();
+
+            marketSocket.Options.AddSubProtocol("wfm");
             marketSocket.Options.SetRequestHeader("Authorization", "Bearer " + JWT);
             SetUserAgent(marketSocket.Options, "WFInfo/" + Main.BuildVersion);
+
             Uri marketSocketUri = new Uri("wss://warframe.market/socket-v2");
             marketSocketOpenEvent.Reset();
             await marketSocket.ConnectAsync(marketSocketUri, CancellationToken.None);
             marketSocketOpenEvent.Set();
+
             // Kickoff listener in background
             if (marketSocket.State == WebSocketState.Open)
             {
                 Debug.WriteLine("Opening reading socket");
-                _ = Task.Run(StartWebSocketListener); // Start listening for messages
-            }
+                _ = Task.Run(StartWebSocketListener);
 
-            await SendMessage(
-                JsonConvert.SerializeObject(new
+                // Send authentication message
+                await SendMessage(
+                    JsonConvert.SerializeObject(new
                     {
                         route = "@wfm|cmd/auth/signIn",
                         payload = new
@@ -1396,19 +1430,50 @@ namespace WFInfo
                             deviceId = "wfinfo"
                         }
                     }
-                )
-            );
+                    )
+                );
 
-            if (_process.IsRunning && !_process.GameIsStreamed)
-            {
-                _ = SetWebsocketStatus("ingame");
-            }
-            else
-            {
-                _ = SetWebsocketStatus("online");
+                // Wait for authentication to complete (with timeout)
+                bool authSuccess = false;
+                try
+                {
+                    var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
+                    var completedTask = await Task.WhenAny(_authenticationCompletionSource.Task, timeoutTask).ConfigureAwait(false);
+
+                    if (completedTask == timeoutTask)
+                    {
+                        // Timeout occurred
+                        authSuccess = false; // or throw TimeoutException
+                    }
+                    else
+                    {
+                        // Auth completed before timeout
+                        authSuccess = await _authenticationCompletionSource.Task.ConfigureAwait(false);
+                    }
+                }
+                catch (TimeoutException)
+                {
+                    Main.AddLog("WebSocket authentication timed out");
+                    return false;
+                }
+
+                if (authSuccess)
+                {
+                    // Now it's safe to send status updates
+                    if (_process.IsRunning && !_process.GameIsStreamed)
+                    {
+                        await SetWebsocketStatus("ingame");
+                    }
+                    else
+                    {
+                        await SetWebsocketStatus("online");
+                    }
+                }
+
+                return authSuccess;
             }
 
-            return true;
+            return false;
         }
 
 
@@ -1555,6 +1620,13 @@ namespace WFInfo
             if (!IsJwtLoggedIn())
                 return false;
 
+            // Don't send status updates if not authenticated yet
+            if (!_isWebSocketAuthenticated)
+            {
+                Main.AddLog("Skipping status update - WebSocket not authenticated yet");
+                return false;
+            }
+
             string status_to_set;
             switch (status)
             {
@@ -1596,28 +1668,41 @@ namespace WFInfo
             return true;
         }
 
-        /// <summary>
-        /// Dummy method to make it so that you log send messages
-        /// </summary>
-        /// <param name="data">The JSON string of data being sent over websocket</param>
-        private async Task SendMessage(string data)
+        private readonly SemaphoreSlim _sendSemaphore = new SemaphoreSlim(1, 1);
+
+        // Update your SendMessage method to use the semaphore
+        private async Task SendMessage(string message)
         {
-            Debug.WriteLine("Sending: " + data + " to websocket.");
+            if (marketSocket.State != WebSocketState.Open)
+            {
+                Main.AddLog("Cannot send message: WebSocket is not open");
+                return;
+            }
+
+            // Acquire the semaphore to ensure only one send operation at a time
+            await _sendSemaphore.WaitAsync().ConfigureAwait(false);
+
             try
             {
-                byte[] buffer = Encoding.UTF8.GetBytes(data);
-                var segment = new ArraySegment<byte>(buffer);
-
+                var bytes = Encoding.UTF8.GetBytes(message);
                 await marketSocket.SendAsync(
-                    segment,
+                    new ArraySegment<byte>(bytes),
                     WebSocketMessageType.Text,
-                    endOfMessage: true,
-                    cancellationToken: CancellationToken.None
-                );
+                    true,
+                    CancellationToken.None
+                ).ConfigureAwait(false);
+
+                Debug.WriteLine($"WebSocket message sent: {message}");
             }
             catch (Exception e)
             {
-                Debug.WriteLine($"Was unable to send message due to: {e}");
+                Main.AddLog($"Was unable to send message due to: {e}");
+                throw;
+            }
+            finally
+            {
+                // Always release the semaphore
+                _sendSemaphore.Release();
             }
         }
         /// <summary>
@@ -1625,6 +1710,10 @@ namespace WFInfo
         /// </summary>
         public void Disconnect()
         {
+            // Reset authentication state
+            _isWebSocketAuthenticated = false;
+            _authenticationCompletionSource?.SetResult(false);
+
             marketSocketCancellation?.Cancel(); // Stop message listener
             if (marketSocket.State == WebSocketState.Open)
             { //only send disconnect message if the socket is connected
