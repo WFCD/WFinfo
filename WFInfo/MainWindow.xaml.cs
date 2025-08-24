@@ -28,7 +28,7 @@ namespace WFInfo
         public static LowLevelListener listener;
         private static bool updatesupression;
         private RelicsWindow _relicsWindow = new RelicsWindow();
-        private SettingsViewModel _settingsViewModel = SettingsViewModel.Instance;
+        private readonly SettingsViewModel _settingsViewModel = SettingsViewModel.Instance;
 
         public MainWindow()
         {

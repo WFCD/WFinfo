@@ -165,7 +165,7 @@ namespace WFInfo
         }
 
         // Load item list from Sheets
-        public void ReloadItems()
+        public async void ReloadItems()
         {
             marketItems = new JObject();
             WebClient webClient = CreateWfmClient();
@@ -198,8 +198,8 @@ namespace WFInfo
                     request.Headers.Add("language", _settings.Locale);
                     request.Headers.Add("accept", "application/json");
                     request.Headers.Add("platform", "pc");
-                    var response = client.SendAsync(request).GetAwaiter().GetResult();
-                    var body = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    var response = await client.SendAsync(request).ConfigureAwait(false);
+                    var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var parsed = JsonConvert.DeserializeObject<JObject>(body);
                     items = JArray.FromObject(parsed["data"]);
                     foreach (var item in items)
@@ -212,7 +212,7 @@ namespace WFInfo
             }
             catch (Exception e)
             {
-                Main.AddLog("GetTopListings: " + e.Message);
+                Main.AddLog("ReloadItems: " + e.Message);
             }
 
 
@@ -1262,17 +1262,24 @@ namespace WFInfo
         // Some vibe-coded reflection modification for userAgent
         public static void SetUserAgent(ClientWebSocketOptions options, string userAgent)
         {
-            if (!(options.GetType()
-                .GetField("_requestHeaders", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
-                .GetValue(options) is System.Collections.Specialized.NameValueCollection headers))
+            try
             {
-                headers = new System.Collections.Specialized.NameValueCollection();
-                options.GetType()
-                    .GetField("_requestHeaders", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.SetValue(options, headers);
+                options.SetRequestHeader("User-Agent", userAgent);
+                return;
             }
-
-            headers["User-Agent"] = userAgent;
+            catch (System.ArgumentException ex)
+            {
+                //Debug.WriteLine(ex.ToString());
+                // Fallback to reflection if User-Agent is not settable
+                var field = options.GetType().GetField("_requestHeaders", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (field != null)
+                {
+                    var headers = field.GetValue(options) as System.Collections.Specialized.NameValueCollection
+                                  ?? new System.Collections.Specialized.NameValueCollection();
+                    headers["User-Agent"] = userAgent;
+                    field.SetValue(options, headers);
+                }
+            }
         }
 
         // Listener to track messages coming back
@@ -1372,6 +1379,13 @@ namespace WFInfo
             marketSocketOpenEvent.Reset();
             await marketSocket.ConnectAsync(marketSocketUri, CancellationToken.None);
             marketSocketOpenEvent.Set();
+            // Kickoff listener in background
+            if (marketSocket.State == WebSocketState.Open)
+            {
+                Debug.WriteLine("Opening reading socket");
+                _ = Task.Run(StartWebSocketListener); // Start listening for messages
+            }
+
             await SendMessage(
                 JsonConvert.SerializeObject(new
                     {
@@ -1392,14 +1406,6 @@ namespace WFInfo
             else
             {
                 _ = SetWebsocketStatus("online");
-            }
-
-
-            // After successful connection, start the message listener
-            if (marketSocket.State == WebSocketState.Open)
-            {
-                Debug.WriteLine("Opening reading socket");
-                _ = Task.Run(StartWebSocketListener); // Start listening for messages
             }
 
             return true;

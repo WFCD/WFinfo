@@ -580,14 +580,7 @@ namespace WFInfo
         }
         public static void UpdateMarketStatus(string msg)
         {
-            Debug.WriteLine($"New market status received: {msg}");
-            if (!UserAway)
-            {
-                // AFK system only cares about a status that the user set
-                LastMarketStatus = msg;
-                Debug.WriteLine($"User is not away. last known market status will be: {LastMarketStatus}");
-            }
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.UpdateMarketStatus(msg); });
+            _ = UpdateMarketStatusAsync(msg);
         }
 
         public static string BuildVersion { get => buildVersion; }
