@@ -51,7 +51,6 @@ namespace WFInfo
         private static string Locale => ApplicationSettings.GlobalReadonlySettings.Locale;
         private static readonly string ApplicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         private static readonly string NormalDataPath = ApplicationDirectory + @"\tessdata";
-
         private static readonly string FallbackDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\WFInfo" + @"\tessdata";
         private string DataPath;
 
@@ -64,7 +63,7 @@ namespace WFInfo
             {
                 FirstEngine = CreateEngine();
             }
-            catch (TesseractException e) 
+            catch (TesseractException) 
             {
                 // Tesseract doesn't like characters from non-english languages in the file path to tessdata.
                 // Since we store those in %appdata% and that contains the username, we sometimes get issues with that.
@@ -142,7 +141,7 @@ namespace WFInfo
             string app_data_traineddata_path = NormalDataPath + @"\" + Locale + ".traineddata";
             string curr_data_traineddata_path = DataPath + @"\" + Locale + ".traineddata";
 
-            WebClient webClient = CustomEntrypoint.createNewWebClient();
+            WebClient webClient = CustomEntrypoint.CreateNewWebClient();
 
             if (!File.Exists(app_data_traineddata_path) || CustomEntrypoint.GetMD5hash(app_data_traineddata_path) != traineddata_checksums.GetValue(Locale).ToObject<string>())
             {

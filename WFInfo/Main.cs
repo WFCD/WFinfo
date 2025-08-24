@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using AutoUpdaterDotNET;
 using System.Windows;
 using System.Windows.Forms;
-using WebSocketSharp;
 using WFInfo.Resources;
 using WFInfo.Settings;
 using WFInfo.Services.Screenshot;
@@ -50,7 +49,7 @@ namespace WFInfo
         public static System.Drawing.Point lastClick;
 
         public static bool Initialized;
-        private static event EventHandler onInitialized;
+        private static event EventHandler OnInitialized;
         private const int minutesTillAfk = 7;
 
         private static bool UserAway { get; set; }
@@ -59,7 +58,7 @@ namespace WFInfo
 
         // Main service provider
         // TODO: Move to CustomEntryPoint
-        private IServiceProvider _services;
+        private readonly IServiceProvider _services;
 
         // Instance services
         private IReadOnlyApplicationSettings _settings;
@@ -86,7 +85,24 @@ namespace WFInfo
             Task.Factory.StartNew(ThreadedDataLoad);
         }
 
-        private IServiceCollection ConfigureServices(IServiceCollection services)
+        public static async Task UpdateMarketStatusAsync(string msg)
+        {
+            Debug.WriteLine($"New market status received: {msg}");
+            if (!UserAway)
+            {
+                // AFK system only cares about a status that the user set
+                LastMarketStatus = msg;
+                Debug.WriteLine($"User is not away. last known market status will be: {LastMarketStatus}");
+            }
+
+            // Use async UI dispatcher call
+            await MainWindow.INSTANCE.Dispatcher.InvokeAsync(() =>
+            {
+                MainWindow.INSTANCE.UpdateMarketStatus(msg);
+            });
+        }
+
+        private static IServiceCollection ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(ApplicationSettings.GlobalReadonlySettings);
             services.AddProcessFinder();
@@ -201,7 +217,7 @@ namespace WFInfo
                     await Task.Run(async () =>
                     {
                         await dataBase.SetWebsocketStatus(LastMarketStatusB4AFK).ConfigureAwait(false);
-                        string user = dataBase.inGameName.IsNullOrEmpty() ? "user" : dataBase.inGameName;
+                        string user = string.IsNullOrEmpty(dataBase.inGameName) ? "user" : dataBase.inGameName;
                         StatusUpdate($"Welcome back {user}, restored as {LastMarketStatusB4AFK}", 0);
                     }).ConfigureAwait(false);
                 }
@@ -548,7 +564,7 @@ namespace WFInfo
                 }
                 else
                 {
-                    onInitialized += onLoading;
+                    OnInitialized += onLoading;
                 }
             });
         }
@@ -559,19 +575,12 @@ namespace WFInfo
             System.Windows.Application.Current.Dispatcher.Invoke(() => 
             { 
                 Initialized = true;
-                onInitialized?.Invoke(null, EventArgs.Empty);
+                OnInitialized?.Invoke(null, EventArgs.Empty);
             });
         }
         public static void UpdateMarketStatus(string msg)
         {
-            Debug.WriteLine($"New market status received: {msg}");
-            if (!UserAway)
-            {
-                // AFK system only cares about a status that the user set
-                LastMarketStatus = msg;
-                Debug.WriteLine($"User is not away. last known market status will be: {LastMarketStatus}");
-            }
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.UpdateMarketStatus(msg); });
+            _ = UpdateMarketStatusAsync(msg);
         }
 
         public static string BuildVersion { get => buildVersion; }

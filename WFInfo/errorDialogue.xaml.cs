@@ -17,6 +17,7 @@ namespace WFInfo
 
         string startPath = Main.AppPath + @"\Debug";
         string zipPath = Main.AppPath + @"\generatedZip";
+        const int segmentSize = 8 * 1024 * 1024; // 8m segments
 
         private int distance;
         private DateTime closest;
@@ -35,64 +36,39 @@ namespace WFInfo
         {
             Directory.CreateDirectory(zipPath);
 
-            List<FileInfo> files = (new DirectoryInfo(Main.AppPath + @"\Debug\")).GetFiles()
+            List<FileInfo> files = (new DirectoryInfo(startPath)).GetFiles()
                 .Where(f => f.CreationTimeUtc > closest.AddSeconds(-1 * distance))
                 .Where(f => f.CreationTimeUtc < closest.AddSeconds(distance))
                 .ToList();
 
-            var fullZipPath = zipPath + @"\WFInfoError_" + closest.ToString("yyyy-MM-dd_HH-mm-ssff");
             try
             {
+                var filePathsToCheck = new List<string>
+                {
+                    startPath + @"\..\eqmt_data.json",
+                    startPath + @"\..\market_data.json",
+                    startPath + @"\..\market_items.json",
+                    startPath + @"\..\name_data.json",
+                    startPath + @"\..\relic_data.json",
+                    startPath + @"\..\settings.json",
+                    startPath + @"\..\debug.log"
+                };
+
+                var fullZipPath = zipPath + @"\WFInfoError_" + closest.ToString("yyyy-MM-dd_HH-mm-ssff") + ".zip";
                 using (ZipFile zip = new ZipFile())
                 {
-                    foreach (FileInfo file in files)
-                        zip.AddFile(file.FullName, "");
-                    if (File.Exists(startPath + @"\..\eqmt_data.json"))
-                    {
-                        zip.AddFile(startPath + @"\..\eqmt_data.json", "");
-                    }
-                    else
-                        Main.AddLog(startPath + "eqmt_data.json didn't exist.");
-                    
-                    if (File.Exists(startPath + @"\..\market_data.json"))
-                    {
-                        zip.AddFile(startPath + @"\..\market_data.json", "");
-                    }
-                    else
-                        Main.AddLog(startPath + "market_data.json didn't exist.");
-                    
-                    if (File.Exists(startPath  + @"\..\market_items.json"))
-                    {
-                        zip.AddFile(startPath + @"\..\market_items.json", "");
-                    }
-                    else
-                        Main.AddLog(startPath + "market_items.json didn't exist.");
-                    
-                    if (File.Exists(startPath + @"\..\name_data.json"))
-                    {
-                        zip.AddFile(startPath + @"\..\name_data.json", "");
-                    }
-                    else
-                        Main.AddLog(startPath + "name_data.json didn't exist.");
-                    
-                    if (File.Exists(startPath + @"\..\relic_data.json"))
-                    {
-                        zip.AddFile(startPath + @"\..\relic_data.json", "");
-                    }
-                    else
-                        Main.AddLog(startPath + "relic_data.json didn't exist.");
-                    
-                    if (File.Exists(startPath + @"\..\settings.json"))
-                    {
-                        zip.AddFile(startPath + @"\..\settings.json", "");
-                    }
-                    else
-                        Main.AddLog( startPath + "settings.json didn't exist.");
-                    
-                    zip.AddFile(startPath + @"\..\debug.log", "");
-                    zip.Comment = "This zip was created at " + closest.ToString("yyyy-MM-dd_HH-mm-ssff");
-                    zip.MaxOutputSegmentSize64 = 10000 * 1024; // 8m segments
-                    zip.Save(fullZipPath + ".zip");
+                    filePathsToCheck.Where(
+                        path => File.Exists(path)
+                    ).ToList().Concat(
+                        files.Select(
+                            file => file.FullName
+                        )
+                    ).ToList().ForEach(
+                        filename => zip.AddFile(filename, "")
+                    );
+
+                    zip.MaxOutputSegmentSize64 = segmentSize; // 8m segments
+                    zip.Save(fullZipPath);
                 }
             }
             catch (Exception ex)
@@ -101,7 +77,7 @@ namespace WFInfo
                 throw;
             }
 
-            Process.Start(Main.AppPath + @"\generatedZip");
+            Process.Start(zipPath);
             Close();
         }
 

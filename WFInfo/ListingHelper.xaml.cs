@@ -6,9 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
-using WebSocketSharp;
 
 namespace WFInfo
 {
@@ -74,7 +72,7 @@ namespace WFInfo
             updating = true;
             ComboBox.Items.Clear();
             ComboBox.SelectedIndex = screen.Value.RewardIndex;
-            foreach (var primeItem in screen.Value.PrimeNames.Where(primeItem => !primeItem.IsNullOrEmpty()))
+            foreach (var primeItem in screen.Value.PrimeNames.Where(primeItem => !string.IsNullOrEmpty(primeItem)))
             {
                 ComboBox.Items.Add(primeItem);
             }
@@ -335,13 +333,14 @@ namespace WFInfo
                     marketListings.Add(tempListings);
                     platinumValues.Add(tempListings[0].Platinum);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
                     Main.RunOnUIThread(() =>
                     {
                         Main.searchBox.placeholder.Content = $"Could not find {primeItem}";
                         Main.searchBox.searchField.Text = string.Empty;
                     });
+                    Main.AddLog($"GetRewardCollection failed for {primeItem}: {ex.Message}");
                 }
 
             }
@@ -397,11 +396,20 @@ namespace WFInfo
         private async Task<bool> PlaceListing(string primeItem, int platinum)
         {
             var listing = await Main.dataBase.GetCurrentListing(primeItem);
-            if (listing == null) return await Main.dataBase.ListItem(primeItem, platinum, 1);
-            //listing already exists, thus update it
-            var listingId = (string)listing["id"];
-            var quantity = (int)listing["quantity"];
-            return await Main.dataBase.UpdateListing(listingId, platinum, quantity);
+            if (listing == null)
+            {
+                // Create new listing
+                return await Main.dataBase.ListItem(primeItem, platinum, 1);
+            }
+            else
+            {
+                // Listing already exists, thus update it
+                var listingId = (string)listing["id"];
+                // Current quantity
+                var quantity = (int)listing["quantity"];
+                // Increase the quantity
+                return await Main.dataBase.UpdateListing(listingId, platinum, quantity + 1);
+            }
         }
 
         private void PlatinumTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -437,7 +445,7 @@ namespace WFInfo
             var msg = "Reward collection screen:\n";
             foreach (var item in PrimeNames)
             {
-                if (item.IsNullOrEmpty())
+                if (string.IsNullOrEmpty(item))
                     continue;
                 var index = PrimeNames.IndexOf(item);
 

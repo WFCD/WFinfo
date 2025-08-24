@@ -28,7 +28,7 @@ namespace WFInfo
         public static LowLevelListener listener;
         private static bool updatesupression;
         private RelicsWindow _relicsWindow = new RelicsWindow();
-        private SettingsViewModel _settingsViewModel = SettingsViewModel.Instance;
+        private readonly SettingsViewModel _settingsViewModel = SettingsViewModel.Instance;
 
         public MainWindow()
         {
@@ -317,10 +317,10 @@ namespace WFInfo
                 return;
             switch (ComboBox.SelectedIndex)
             {
-                case 0: //Online in game
+                case 0: //Online ingame
                     Task.Run(async () =>
                     {
-                        await Main.dataBase.SetWebsocketStatus("in game");
+                        await Main.dataBase.SetWebsocketStatus("ingame");
                     });
                     break;
                 case 1: //Online
@@ -332,7 +332,7 @@ namespace WFInfo
                 case 2: //Invisible
                     Task.Run(async () =>
                     {
-                        await Main.dataBase.SetWebsocketStatus("offline");
+                        await Main.dataBase.SetWebsocketStatus("invisible");
                     });
                     break;
                 case 3: //Sign out
