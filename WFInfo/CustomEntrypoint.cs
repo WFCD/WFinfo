@@ -426,7 +426,7 @@ namespace WFInfo
             AssemblyName assemblyName = new AssemblyName(args.Name);
 
             string path = assemblyName.Name + ".dll";
-            if (!assemblyName.CultureInfo.Equals(CultureInfo.InvariantCulture))
+            if (assemblyName.CultureInfo != null && !assemblyName.CultureInfo.Equals(CultureInfo.InvariantCulture))
                 path = string.Format(@"{0}\{1}", assemblyName.CultureInfo, path);
 
             using (Stream stream = executingAssembly.GetManifestResourceStream(path))
