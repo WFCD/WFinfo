@@ -17,7 +17,6 @@ using System.Threading.Tasks;
 using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
 using WFInfo.Settings;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace WFInfo
 {
@@ -61,7 +60,7 @@ namespace WFInfo
         public string JWT; // JWT is the security key, store this as email+pw combo'
         private ClientWebSocket marketSocket = new ClientWebSocket();
         private CancellationTokenSource marketSocketCancellation = new CancellationTokenSource();
-        private ManualResetEvent marketSocketOpenEvent = new ManualResetEvent(false);
+        private readonly ManualResetEvent marketSocketOpenEvent = new ManualResetEvent(false);
         private readonly string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
         private readonly string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
         public string inGameName = string.Empty;
@@ -77,7 +76,7 @@ namespace WFInfo
 
         public static WebClient CreateWfmClient()
         {
-            WebClient webClient = CustomEntrypoint.createNewWebClient();
+            WebClient webClient = CustomEntrypoint.CreateNewWebClient();
             webClient.Headers.Add("platform", "pc");
             webClient.Headers.Add("language", "en");
             return webClient;
@@ -108,7 +107,7 @@ namespace WFInfo
             HttpClientHandler handler = new HttpClientHandler
             {
                 Proxy = proxy,
-                UseCookies = true
+                UseCookies = false
             };
             client = new HttpClient(handler);
             client.DefaultRequestHeaders.UserAgent.ParseAdd("WFInfo/" + Main.BuildVersion);
@@ -153,7 +152,7 @@ namespace WFInfo
 
         public int GetGithubVersion()
         {
-            WebClient githubWebClient = CustomEntrypoint.createNewWebClient();
+            WebClient githubWebClient = CustomEntrypoint.CreateNewWebClient();
             JObject github =
                 JsonConvert.DeserializeObject<JObject>(
                     githubWebClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases/latest"));
@@ -250,7 +249,7 @@ namespace WFInfo
                 Main.AddLog("Failed to refresh items from warframe.market, skipping WFM update for now. Some items might have incomplete info.");
             }
             marketData = new JObject();
-            WebClient webClient = CustomEntrypoint.createNewWebClient();
+            WebClient webClient = CustomEntrypoint.CreateNewWebClient();
             JArray rows = JsonConvert.DeserializeObject<JArray>(webClient.DownloadString(sheetJsonUrl));
 
             foreach (var row in rows)
@@ -429,7 +428,7 @@ namespace WFInfo
         public bool Update()
         {
             Main.AddLog("Checking for Updates to Databases");
-            WebClient webClient = CustomEntrypoint.createNewWebClient();
+            WebClient webClient = CustomEntrypoint.CreateNewWebClient();
             JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
             bool saveDatabases = LoadMarket(allFiltered);
 
@@ -472,7 +471,7 @@ namespace WFInfo
             try
             {
                 Main.AddLog("Forcing market update");
-                WebClient webClient = CustomEntrypoint.createNewWebClient();
+                WebClient webClient = CustomEntrypoint.CreateNewWebClient();
                 JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
                 LoadMarket(allFiltered, true);
 
@@ -528,7 +527,7 @@ namespace WFInfo
             try
             {
                 Main.AddLog("Forcing equipment update");
-                WebClient webClient = CustomEntrypoint.createNewWebClient();
+                WebClient webClient = CustomEntrypoint.CreateNewWebClient();
                 JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
                 LoadEqmtData(allFiltered, true);
                 SaveAllJSONs();
@@ -1263,11 +1262,9 @@ namespace WFInfo
         // Some vibe-coded reflection modification for userAgent
         public static void SetUserAgent(ClientWebSocketOptions options, string userAgent)
         {
-            var headers = options.GetType()
+            if (!(options.GetType()
                 .GetField("_requestHeaders", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
-                .GetValue(options) as System.Collections.Specialized.NameValueCollection;
-
-            if (headers == null)
+                .GetValue(options) is System.Collections.Specialized.NameValueCollection headers))
             {
                 headers = new System.Collections.Specialized.NameValueCollection();
                 options.GetType()
@@ -1323,7 +1320,7 @@ namespace WFInfo
         }
 
         // Add this method to handle incoming websocket messages
-        private async Task HandleWebSocketMessage(string message)
+        private static async Task HandleWebSocketMessage(string message)
         {
             try
             {
@@ -1346,10 +1343,8 @@ namespace WFInfo
         /// Attempts to connect the user's account to the websocket
         /// </summary>
         /// <returns>A task to be awaited</returns>
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> OpenWebSocket()
         {
-            #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             Main.AddLog("Connecting to websocket");
 
             if (marketSocket.State == WebSocketState.Open)
@@ -1542,10 +1537,8 @@ namespace WFInfo
         /// </summary>
         /// <param name="status">
         /// </param>
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<bool> SetWebsocketStatus(string status)
         {
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             if (!IsJwtLoggedIn())
                 return false;
 

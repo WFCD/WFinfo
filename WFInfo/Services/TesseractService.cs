@@ -141,7 +141,7 @@ namespace WFInfo
             string app_data_traineddata_path = NormalDataPath + @"\" + Locale + ".traineddata";
             string curr_data_traineddata_path = DataPath + @"\" + Locale + ".traineddata";
 
-            WebClient webClient = CustomEntrypoint.createNewWebClient();
+            WebClient webClient = CustomEntrypoint.CreateNewWebClient();
 
             if (!File.Exists(app_data_traineddata_path) || CustomEntrypoint.GetMD5hash(app_data_traineddata_path) != traineddata_checksums.GetValue(Locale).ToObject<string>())
             {

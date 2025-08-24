@@ -51,7 +51,7 @@ namespace WFInfo
         public static CancellationTokenSource stopDownloadTask;
         public static string build_version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-        public static void cleanLegacyTesseractIfNeeded()
+        public static void CleanLegacyTesseractIfNeeded()
         {
             string[] legacy_dll_names = new string[]
             {
@@ -101,7 +101,7 @@ namespace WFInfo
 
             // TrainedData folder/content handled by TesseractService
 
-            cleanLegacyTesseractIfNeeded();
+            CleanLegacyTesseractIfNeeded();
             CollectDebugInfo();
             tesseract_hotlink_platform_specific_prefix = tesseract_hotlink_prefix;
 
@@ -174,7 +174,7 @@ namespace WFInfo
                 sw.WriteLineAsync("[" + DateTime.UtcNow + " - Still in custom entrypoint]   " + argm);
         }
 
-        public static WebClient createNewWebClient()
+        public static WebClient CreateNewWebClient()
         {
             WebProxy proxy = null;
             String proxy_string = Environment.GetEnvironmentVariable("http_proxy");
@@ -197,7 +197,7 @@ namespace WFInfo
                 try
                 {
                     ManagementObjectSearcher mos = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_Processor");
-                    foreach (ManagementObject mo in mos.Get())
+                    foreach (ManagementObject mo in mos.Get().Cast<ManagementObject>())
                     {
                         sw.WriteLineAsync("[" + DateTime.UtcNow + "] CPU model is " + mo["Name"]);
                     }
@@ -280,7 +280,7 @@ namespace WFInfo
         public static string GetMD5hashByURL(string url)
         {
             Debug.WriteLine(url);
-            WebClient webClient = createNewWebClient();
+            WebClient webClient = CreateNewWebClient();
             using (var md5 = MD5.Create())
             {
                 byte[] stream = webClient.DownloadData(url);
@@ -297,7 +297,7 @@ namespace WFInfo
 
         private static async void RefreshTesseractDlls(CancellationToken token)
         {
-            WebClient webClient = createNewWebClient();
+            WebClient webClient = CreateNewWebClient();
             webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgressCallback);
             token.Register(webClient.CancelAsync);
 
@@ -426,17 +426,19 @@ namespace WFInfo
             AssemblyName assemblyName = new AssemblyName(args.Name);
 
             string path = assemblyName.Name + ".dll";
-            if (assemblyName.CultureInfo.Equals(CultureInfo.InvariantCulture) == false)
-                path = String.Format(@"{0}\{1}", assemblyName.CultureInfo, path);
+            if (!assemblyName.CultureInfo.Equals(CultureInfo.InvariantCulture))
+                path = string.Format(@"{0}\{1}", assemblyName.CultureInfo, path);
 
             using (Stream stream = executingAssembly.GetManifestResourceStream(path))
             {
                 if (stream == null)
                     return null;
 
-                byte[] assemblyRawBytes = new byte[stream.Length];
-                stream.Read(assemblyRawBytes, 0, assemblyRawBytes.Length);
-                return Assembly.Load(assemblyRawBytes);
+                using (var memoryStream = new MemoryStream())
+                {
+                    stream.CopyTo(memoryStream);  // Ensures full stream is read safely
+                    return Assembly.Load(memoryStream.ToArray());
+                }
             }
         }
     }

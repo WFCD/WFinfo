@@ -32,7 +32,7 @@ namespace WFInfo
             NewVersionText.Text = "WFInfo version " + version + " has been released!";
             OldVersionText.Text = "You have version " + Main.BuildVersion + " installed.";
 
-            WebClient = CustomEntrypoint.createNewWebClient();
+            WebClient = CustomEntrypoint.CreateNewWebClient();
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             JArray releases = JsonConvert.DeserializeObject<JArray>(WebClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases"));
             foreach (JObject prop in releases)
