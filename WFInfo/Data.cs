@@ -1623,7 +1623,7 @@ namespace WFInfo
             // Don't send status updates if not authenticated yet
             if (!_isWebSocketAuthenticated)
             {
-                Main.AddLog("Skipping status update - WebSocket not authenticated yet");
+                Debug.WriteLine("Skipping status update - WebSocket not authenticated yet");
                 return false;
             }
 
