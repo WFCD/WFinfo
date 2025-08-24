@@ -1324,20 +1324,27 @@ namespace WFInfo
         {
             try
             {
-                var messageObj = JsonConvert.DeserializeObject<JObject>(message);
+                // Make JSON parsing async by running it on a background thread
+                var messageObj = await Task.Run(() =>
+                    JsonConvert.DeserializeObject<JObject>(message)
+                ).ConfigureAwait(false);
 
                 // Handle status change messages from the server
-                if (!string.IsNullOrEmpty(messageObj["payload"]?["status"]?.ToString()))
+                var statusPayload = messageObj["payload"]?["status"]?.ToString();
+                if (!string.IsNullOrEmpty(statusPayload))
                 {
-                    Main.UpdateMarketStatus(messageObj["payload"]["status"].ToString());
+                    // Make the status update async
+                    await Main.UpdateMarketStatusAsync(statusPayload).ConfigureAwait(false);
                 }
             }
             catch (Exception e)
             {
-                Main.AddLog($"Error handling websocket message: {e.Message}");
+                // Make logging async too
+                await Task.Run(() =>
+                    Main.AddLog($"Error handling websocket message: {e.Message}")
+                ).ConfigureAwait(false);
             }
         }
-
 
         /// <summary>
         /// Attempts to connect the user's account to the websocket

@@ -85,6 +85,23 @@ namespace WFInfo
             Task.Factory.StartNew(ThreadedDataLoad);
         }
 
+        public static async Task UpdateMarketStatusAsync(string msg)
+        {
+            Debug.WriteLine($"New market status received: {msg}");
+            if (!UserAway)
+            {
+                // AFK system only cares about a status that the user set
+                LastMarketStatus = msg;
+                Debug.WriteLine($"User is not away. last known market status will be: {LastMarketStatus}");
+            }
+
+            // Use async UI dispatcher call
+            await MainWindow.INSTANCE.Dispatcher.InvokeAsync(() =>
+            {
+                MainWindow.INSTANCE.UpdateMarketStatus(msg);
+            });
+        }
+
         private static IServiceCollection ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(ApplicationSettings.GlobalReadonlySettings);
