@@ -11,7 +11,55 @@
         <Setter Property="TextElement.Foreground" Value="#FFB1D0D9"/>
         <Setter Property="TextElement.FontFamily" Value="{StaticResource Roboto}"/>
     </Style>
-    <Style TargetType="CheckBox" BasedOn="{StaticResource baseStyle}"/>
+    <Style x:Key="checkBoxStyle" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="#000"/>
+        <Setter Property="Background" Value="#FFB1D0D9"/>
+        <Setter Property="BorderBrush" Value="#FF0F0F0F"/>
+        <Setter Property="FontFamily" Value="{StaticResource Roboto}"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <BulletDecorator Background="Transparent" VerticalAlignment="Center">
+                        <BulletDecorator.Bullet>
+                            <Border x:Name="CheckBoxBorder"
+                                Width="16" Height="16"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                VerticalAlignment="Center">
+                                <Path x:Name="CheckMark"
+                                  Data="M 0 4 L 4 8 L 12 0"
+                                  Stroke="{TemplateBinding Foreground}"
+                                  StrokeThickness="2"
+                                  Visibility="Collapsed"
+                                  SnapsToDevicePixels="True"
+                                  Stretch="Uniform" />
+                            </Border>
+                        </BulletDecorator.Bullet>
+
+                        <ContentPresenter VerticalAlignment="Center"
+                                      RecognizesAccessKey="True"
+                                      Content="{TemplateBinding Content}"
+                                      Margin="0,0,0,0" />
+                    </BulletDecorator>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="CheckBoxBorder" Property="Background" Value="#FFD0E8F0" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="RadioButton" BasedOn="{StaticResource baseStyle}"/>
     <Style TargetType="Label" BasedOn="{StaticResource baseStyle}"/>
     <Style TargetType="TextBox" BasedOn="{StaticResource baseStyle}"/>
