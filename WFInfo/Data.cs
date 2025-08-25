@@ -1334,6 +1334,7 @@ namespace WFInfo
         {
             try
             {
+                Debug.WriteLine(message);
                 // Make JSON parsing async by running it on a background thread
                 var messageObj = await Task.Run(() =>
                     JsonConvert.DeserializeObject<JObject>(message)
