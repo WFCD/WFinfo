@@ -61,6 +61,8 @@ namespace WFInfo
         private ClientWebSocket marketSocket = new ClientWebSocket();
         private CancellationTokenSource marketSocketCancellation = new CancellationTokenSource();
         private readonly ManualResetEvent marketSocketOpenEvent = new ManualResetEvent(false);
+        private TaskCompletionSource<bool> _authenticationCompletionSource;
+        private bool _isWebSocketAuthenticated = false;
         private readonly string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
         private readonly string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
         public string inGameName = string.Empty;
@@ -69,6 +71,17 @@ namespace WFInfo
         public bool rememberMe;
         private LogCapture EElogWatcher;
         private Task autoThread;
+
+        // Reconnection mechanics for websocket
+        // Exponential backoff
+        private Timer _reconnectionTimer;
+        private volatile bool _intentionalDisconnect = false;
+        private volatile bool _reconnectionInProgress = false;
+        private int _reconnectionAttempts = 0;
+        private readonly int[] _reconnectionDelays = { 1000, 2000, 4000, 8000, 15000, 30000 }; // milliseconds
+        private DateTime _lastConnectionTime = DateTime.UtcNow;
+        private readonly object _reconnectionLock = new object();
+        //
 
         private readonly IReadOnlyApplicationSettings _settings;
         private readonly IProcessFinder _process;
@@ -1285,44 +1298,147 @@ namespace WFInfo
         // Listener to track messages coming back
         private async Task StartWebSocketListener()
         {
-            var buffer = new byte[8192];
+            var buffer = new byte[1024 * 4];
 
             try
             {
-                while (!marketSocketCancellation.Token.IsCancellationRequested)
+                while (marketSocket.State == WebSocketState.Open && !marketSocketCancellation.Token.IsCancellationRequested)
                 {
-                    if (marketSocket.State != WebSocketState.Open) break;
+                    var result = await marketSocket.ReceiveAsync(new ArraySegment<byte>(buffer), marketSocketCancellation.Token).ConfigureAwait(false);
 
-                    var sb = new StringBuilder();
-                    WebSocketReceiveResult result;
-                    do
+                    if (result.MessageType == WebSocketMessageType.Text)
                     {
-                        result = await marketSocket.ReceiveAsync(new ArraySegment<byte>(buffer), marketSocketCancellation.Token);
-                        if (result.MessageType == WebSocketMessageType.Close)
-                        {
-                            // Acknowledge and exit gracefully
-                            await marketSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Ack close", CancellationToken.None);
-                            return;
-                        }
-                        if (result.MessageType == WebSocketMessageType.Text && result.Count > 0)
-                        {
-                            sb.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
-                        }
-                    } while (!result.EndOfMessage && !marketSocketCancellation.Token.IsCancellationRequested) ;
+                        var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        Debug.WriteLine($"Received: {message}");
+                        await HandleWebSocketMessage(message).ConfigureAwait(false);
 
-                    if (sb.Length > 0)
+                        // Update last successful communication time
+                        _lastConnectionTime = DateTime.UtcNow;
+                    }
+                    else if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        await HandleWebSocketMessage(sb.ToString());
+                        Debug.WriteLine("WebSocket close message received");
+                        break;
                     }
                 }
             }
             catch (OperationCanceledException)
             {
-                // Expected when cancellation token is triggered
+                // Expected during intentional shutdown
+                Debug.WriteLine("WebSocket listener cancelled");
             }
-            catch (Exception e)
+            catch (WebSocketException wsEx)
             {
-                Main.AddLog($"WebSocket listener error: {e.Message}");
+                Main.AddLog($"WebSocket connection error: {wsEx.Message}");
+            }
+            catch (ObjectDisposedException)
+            {
+                // Expected during shutdown
+                Debug.WriteLine("WebSocket was disposed");
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"Unexpected error in WebSocket listener: {ex.Message}");
+            }
+            finally
+            {
+                // Connection lost - trigger reconnection if not intentional
+                if (!_intentionalDisconnect && IsJwtLoggedIn())
+                {
+                    Main.AddLog("WebSocket connection lost unexpectedly, starting reconnection attempts");
+                    _ = Task.Run(StartReconnectionProcess);
+                }
+            }
+        }
+
+        private async Task StartReconnectionProcess()
+        {
+            lock (_reconnectionLock)
+            {
+                if (_reconnectionInProgress || _intentionalDisconnect)
+                {
+                    return;
+                }
+                _reconnectionInProgress = true;
+                _reconnectionAttempts = 0;
+            }
+
+            try
+            {
+                while (_reconnectionAttempts < _reconnectionDelays.Length && !_intentionalDisconnect)
+                {
+                    _reconnectionAttempts++;
+                    var delay = _reconnectionDelays[_reconnectionAttempts - 1];
+
+                    Main.AddLog($"Attempting reconnection #{_reconnectionAttempts} in {delay / 1000} seconds...");
+
+                    // Wait before attempting reconnection
+                    await Task.Delay(delay);
+
+                    // Check if we should still reconnect
+                    if (_intentionalDisconnect || !IsJwtLoggedIn())
+                    {
+                        Main.AddLog("Reconnection cancelled - user disconnected or logged out");
+                        break;
+                    }
+
+                    try
+                    {
+                        // Reset websocket state for reconnection
+                        _isWebSocketAuthenticated = false;
+
+                        // Clean up existing websocket
+                        if (marketSocket != null)
+                        {
+                            try
+                            {
+                                if (marketSocket.State == WebSocketState.Open)
+                                {
+                                    await marketSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Reconnecting", CancellationToken.None);
+                                }
+                                marketSocket.Dispose();
+                            }
+                            catch
+                            {
+                                // Ignore cleanup errors
+                            }
+                        }
+
+                        // Attempt reconnection
+                        bool reconnected = await OpenWebSocket();
+
+                        if (reconnected)
+                        {
+                            Main.AddLog($"WebSocket reconnected successfully after {_reconnectionAttempts} attempts");
+                            _reconnectionAttempts = 0;
+                            break;
+                        }
+                        else
+                        {
+                            Main.AddLog($"Reconnection attempt #{_reconnectionAttempts} failed");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Main.AddLog($"Reconnection attempt #{_reconnectionAttempts} error: {ex.Message}");
+                    }
+                }
+
+                // If all attempts failed
+                if (_reconnectionAttempts >= _reconnectionDelays.Length && !_intentionalDisconnect)
+                {
+                    Main.AddLog("All reconnection attempts failed. Please check your connection and try logging in again.");
+
+                    // Optional: Show user notification about connection failure
+                    // You might want to update UI state here
+                }
+            }
+            finally
+            {
+                lock (_reconnectionLock)
+                {
+                    _reconnectionInProgress = false;
+                }
             }
         }
 
@@ -1336,17 +1452,43 @@ namespace WFInfo
                     JsonConvert.DeserializeObject<JObject>(message)
                 ).ConfigureAwait(false);
 
-                // Handle status change messages from the server
-                var statusPayload = messageObj["payload"]?["status"]?.ToString();
-                if (!string.IsNullOrEmpty(statusPayload))
+                // Check for authentication success response
+                var route = messageObj["route"]?.ToString();
+                var payload = messageObj["payload"];
+
+                if (route == "@wfm|cmd/auth/signIn" || route?.Contains("auth") == true)
                 {
-                    // Make the status update async
-                    await Main.UpdateMarketStatusAsync(statusPayload).ConfigureAwait(false);
+                    // Check if authentication was successful
+                    var success = payload?["success"]?.ToObject<bool>() ??
+                                 (payload?["error"] == null); // No error means success
+
+                    if (success)
+                    {
+                        Main.AddLog("WebSocket authentication successful");
+                        Main.dataBase._isWebSocketAuthenticated = true;
+                        Main.dataBase._authenticationCompletionSource?.SetResult(true);
+                    }
+                    else
+                    {
+                        var error = payload?["error"]?.ToString() ?? "Unknown authentication error";
+                        Main.AddLog($"WebSocket authentication failed: {error}");
+                        Main.dataBase._authenticationCompletionSource?.SetResult(false);
+                    }
+                }
+
+                // Handle status change messages from the server (only if authenticated)
+                if (Main.dataBase._isWebSocketAuthenticated)
+                {
+                    var statusPayload = messageObj["payload"]?["status"]?.ToString();
+                    if (!string.IsNullOrEmpty(statusPayload))
+                    {
+                        await Main.UpdateMarketStatusAsync(statusPayload).ConfigureAwait(false);
+                    }
                 }
             }
             catch (Exception e)
             {
-                // Make logging async too
+                // Async logging
                 await Task.Run(() =>
                     Main.AddLog($"Error handling websocket message: {e.Message}")
                 ).ConfigureAwait(false);
@@ -1361,33 +1503,114 @@ namespace WFInfo
         {
             Main.AddLog("Connecting to websocket");
 
-            if (marketSocket.State == WebSocketState.Open)
+            // Reset reconnection state for new connection attempts
+            _intentionalDisconnect = false;
+
+            // If already connected and authenticated, return true
+            if (marketSocket != null && marketSocket.State == WebSocketState.Open && _isWebSocketAuthenticated)
             {
                 return true;
             }
 
-            if (marketSocket.State == WebSocketState.Closed || marketSocket.State == WebSocketState.Aborted)
+            // Clean up existing websocket if needed
+            if (marketSocket != null)
             {
-                marketSocket.Dispose();
-                marketSocket = new ClientWebSocket();
+                try
+                {
+                    var currentState = marketSocket.State;
+                    if (currentState == WebSocketState.Open || currentState == WebSocketState.Connecting)
+                    {
+                        await marketSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Reconnecting", CancellationToken.None);
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    // Expected when websocket is not in correct state
+                }
+                catch (Exception ex)
+                {
+                    Main.AddLog($"Non-critical error closing existing websocket: {ex.Message}");
+                }
+                finally
+                {
+                    try
+                    {
+                        marketSocket.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        Main.AddLog($"Error disposing websocket: {ex.Message}");
+                    }
+                    marketSocket = null;
+                }
             }
-            marketSocket.Options.AddSubProtocol("wfm");
 
-            marketSocket.Options.SetRequestHeader("Authorization", "Bearer " + JWT);
-            SetUserAgent(marketSocket.Options, "WFInfo/" + Main.BuildVersion);
-            Uri marketSocketUri = new Uri("wss://warframe.market/socket-v2");
-            marketSocketOpenEvent.Reset();
-            await marketSocket.ConnectAsync(marketSocketUri, CancellationToken.None);
-            marketSocketOpenEvent.Set();
-            // Kickoff listener in background
-            if (marketSocket.State == WebSocketState.Open)
+            // Create new websocket
+            marketSocket = new ClientWebSocket();
+
+            // Reset authentication state
+            _isWebSocketAuthenticated = false;
+            _authenticationCompletionSource = new TaskCompletionSource<bool>();
+
+            try
             {
-                Debug.WriteLine("Opening reading socket");
-                _ = Task.Run(StartWebSocketListener); // Start listening for messages
+                marketSocket.Options.AddSubProtocol("wfm");
+                marketSocket.Options.SetRequestHeader("Authorization", "Bearer " + JWT);
+                SetUserAgent(marketSocket.Options, "WFInfo/" + Main.BuildVersion);
+
+                Uri marketSocketUri = new Uri("wss://warframe.market/socket-v2");
+                marketSocketOpenEvent.Reset();
+
+                await marketSocket.ConnectAsync(marketSocketUri, CancellationToken.None);
+                marketSocketOpenEvent.Set();
+
+                if (marketSocket.State == WebSocketState.Open)
+                {
+                    Debug.WriteLine("Opening reading socket");
+                    _webSocketListenerTask = Task.Run(StartWebSocketListener);
+
+                    // Send authentication
+                    bool authSuccess = await AuthenticateWebSocket();
+
+                    if (authSuccess)
+                    {
+                        Main.AddLog("WebSocket connected and authenticated successfully");
+                        _lastConnectionTime = DateTime.UtcNow;
+
+                        // Send initial status update after a small delay
+                        _ = Task.Delay(500).ContinueWith(async _ =>
+                        {
+                            if (_process.IsRunning && !_process.GameIsStreamed)
+                            {
+                                await SetWebsocketStatus("ingame");
+                            }
+                            else
+                            {
+                                await SetWebsocketStatus("online");
+                            }
+                        });
+                    }
+
+                    return authSuccess;
+                }
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"Error connecting to websocket: {ex.Message}");
+                marketSocket?.Dispose();
+                marketSocket = null;
+                return false;
             }
 
-            await SendMessage(
-                JsonConvert.SerializeObject(new
+            return false;
+        }
+
+        private async Task<bool> AuthenticateWebSocket()
+        {
+            try
+            {
+                bool authMessageSent = await SendMessage(
+                    JsonConvert.SerializeObject(new
                     {
                         route = "@wfm|cmd/auth/signIn",
                         payload = new
@@ -1395,20 +1618,32 @@ namespace WFInfo
                             token = JWT,
                             deviceId = "wfinfo"
                         }
-                    }
-                )
-            );
+                    })
+                );
 
-            if (_process.IsRunning && !_process.GameIsStreamed)
-            {
-                _ = SetWebsocketStatus("ingame");
-            }
-            else
-            {
-                _ = SetWebsocketStatus("online");
-            }
+                if (!authMessageSent)
+                {
+                    Main.AddLog("Failed to send authentication message");
+                    return false;
+                }
 
-            return true;
+                // Wait for authentication completion
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
+                var completedTask = await Task.WhenAny(_authenticationCompletionSource.Task, timeoutTask);
+
+                if (completedTask == timeoutTask)
+                {
+                    Main.AddLog("WebSocket authentication timed out");
+                    return false;
+                }
+
+                return await _authenticationCompletionSource.Task;
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"WebSocket authentication error: {ex.Message}");
+                return false;
+            }
         }
 
 
@@ -1541,107 +1776,255 @@ namespace WFInfo
             throw new Exception($"PrimeItemToItemID, Prime item \"{primeItem}\" does not exist in marketItem");
         }
 
-        /// <summary>
-        /// Sets the status of WFM websocket. Will try to reconnect if it is not already connected.
-        /// Accepts the following values:
-        /// invisible, set's player status to be hidden on the site.  
-        /// online, set's player status to be online on the site.   
-        /// ingame, set's player status to be online and ingame on the site
-        /// </summary>
-        /// <param name="status">
-        /// </param>
-        public async Task<bool> SetWebsocketStatus(string status)
+        private readonly object _statusUpdateLock = new object();
+        private DateTime _lastStatusUpdate = DateTime.MinValue;
+        private string _lastStatusSent = "";
+        private volatile bool _statusUpdateInProgress = false;
+        public async Task SetWebsocketStatus(string status)
         {
-            if (!IsJwtLoggedIn())
-                return false;
-
-            string status_to_set;
-            switch (status)
+            if (!_isWebSocketAuthenticated)
             {
-                case "ingame":
-                    status_to_set = "ingame";
-                    break;
-                case "online":
-                    status_to_set = "online";
-                    break;
-                case "invisible":
-                    status_to_set = "invisible";
-                    break;
-                default:
-                    Debug.WriteLine("Defaulting WFM status, this shouldn't be reachable please report it as bug!");
-                    status_to_set = "invisible";
-                    break;
+                Debug.WriteLine("Cannot set websocket status: Not authenticated");
+                return;
             }
-            var message = JsonConvert.SerializeObject(new
+
+            // Prevent simultaneous calls
+            lock (_statusUpdateLock)
             {
-                route = "@wfm|cmd/status/set",
-                payload = new
+                if (_statusUpdateInProgress)
                 {
-                    status = status_to_set
-                    //,duration = 1800,
-                    //activity = status_to_set
+                    Debug.WriteLine($"Status update already in progress, skipping: {status}");
+                    return;
                 }
-            });
-            
+
+                // Prevent duplicate status within short timeframe
+                var now = DateTime.UtcNow;
+                if (_lastStatusSent == status && (now - _lastStatusUpdate).TotalMilliseconds < 500)
+                {
+                    Debug.WriteLine($"Skipping duplicate status update: {status}");
+                    return;
+                }
+
+                _statusUpdateInProgress = true;
+                _lastStatusUpdate = now;
+                _lastStatusSent = status;
+            }
+
             try
             {
-                if (marketSocketOpenEvent.WaitOne(60000) && marketSocket.State == WebSocketState.Open)
-                    await SendMessage(message);
+                var payload = new { route = "@wfm|cmd/status/set", payload = new { status = status } };
+                string message = JsonConvert.SerializeObject(payload);
+
+                bool success = await SendMessage(message);
+                if (success)
+                {
+                    Debug.WriteLine($"WebSocket status set to: {status}");
+                }
+                else
+                {
+                    Main.AddLog($"Failed to set websocket status to: {status}");
+                }
             }
-            catch (Exception e)
+            finally
             {
-                Main.AddLog("SetWebsocketStatus, Was unable to set status due to: " + e);
-                throw;
+                lock (_statusUpdateLock)
+                {
+                    _statusUpdateInProgress = false;
+                }
             }
-            return true;
         }
 
-        /// <summary>
-        /// Dummy method to make it so that you log send messages
-        /// </summary>
-        /// <param name="data">The JSON string of data being sent over websocket</param>
-        private async Task SendMessage(string data)
+        private SemaphoreSlim _sendSemaphore = new SemaphoreSlim(1, 1);
+
+        // Update your SendMessage method to use the semaphore
+        private async Task<bool> SendMessage(string message)
         {
-            Debug.WriteLine("Sending: " + data + " to websocket.");
+            if (marketSocket == null)
+            {
+                Main.AddLog("Cannot send message: WebSocket is null");
+                return false;
+            }
+
+            if (marketSocket.State != WebSocketState.Open)
+            {
+                Main.AddLog($"Cannot send message: WebSocket state is {marketSocket.State}");
+                return false;
+            }
+
+            bool acquired = false;
             try
             {
-                byte[] buffer = Encoding.UTF8.GetBytes(data);
-                var segment = new ArraySegment<byte>(buffer);
+                // Acquire semaphore with timeout to prevent indefinite blocking
+                acquired = await _sendSemaphore.WaitAsync(TimeSpan.FromSeconds(10));
+                if (!acquired)
+                {
+                    Main.AddLog("Failed to acquire send semaphore within timeout");
+                    return false;
+                }
 
-                await marketSocket.SendAsync(
-                    segment,
-                    WebSocketMessageType.Text,
-                    endOfMessage: true,
-                    cancellationToken: CancellationToken.None
-                );
+                // Double-check websocket state after acquiring semaphore
+                if (marketSocket == null || marketSocket.State != WebSocketState.Open)
+                {
+                    Main.AddLog("WebSocket state changed while waiting for semaphore");
+                    return false;
+                }
+
+                var messageBytes = Encoding.UTF8.GetBytes(message);
+                var buffer = new ArraySegment<byte>(messageBytes);
+
+                // Send with timeout using CancellationToken
+                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15)))
+                {
+                    await marketSocket.SendAsync(buffer, WebSocketMessageType.Text, true, cts.Token);
+                }
+
+                Debug.WriteLine($"WebSocket message sent successfully: {message}");
+                return true;
             }
-            catch (Exception e)
+            catch (OperationCanceledException)
             {
-                Debug.WriteLine($"Was unable to send message due to: {e}");
+                Main.AddLog("WebSocket send operation timed out");
+                return false;
+            }
+            catch (WebSocketException wsEx)
+            {
+                Main.AddLog($"WebSocket error while sending message: {wsEx.Message}");
+                return false;
+            }
+            catch (ObjectDisposedException)
+            {
+                Main.AddLog("Cannot send message: WebSocket has been disposed");
+                return false;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Main.AddLog($"Invalid WebSocket operation: {ex.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"Unexpected error while sending WebSocket message: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                if (acquired)
+                {
+                    _sendSemaphore.Release();
+                }
             }
         }
         /// <summary>
         /// Disconnects the user from websocket and sets JWT to null
         /// </summary>
+        // Add this field to track the listener task
+        private Task _webSocketListenerTask;
+
         public void Disconnect()
         {
-            marketSocketCancellation?.Cancel(); // Stop message listener
-            if (marketSocket.State == WebSocketState.Open)
-            { //only send disconnect message if the socket is connected
-                _ = SetWebsocketStatus("invisible");
+            try
+            {
+                // Mark as intentional disconnect to prevent auto-reconnection
+                _intentionalDisconnect = true;
+
+                // Stop any ongoing reconnection attempts
+                _reconnectionTimer?.Dispose();
+                _reconnectionTimer = null;
+
+                // Send invisible status first while everything is still operational
+                if (marketSocket != null && marketSocket.State == WebSocketState.Open && _isWebSocketAuthenticated && IsJwtLoggedIn())
+                {
+                    try
+                    {
+                        var task = SetWebsocketStatus("invisible");
+                        task.Wait(2000);
+                    }
+                    catch (Exception ex)
+                    {
+                        Main.AddLog($"Could not send invisible status: {ex.Message}");
+                    }
+                }
+
+                // Reset authentication state
+                _isWebSocketAuthenticated = false;
+
+                // Complete the authentication task safely
+                if (_authenticationCompletionSource != null && !_authenticationCompletionSource.Task.IsCompleted)
+                {
+                    _authenticationCompletionSource.TrySetResult(false);
+                }
+                _authenticationCompletionSource = null;
+
+                // Cancel background operations
+                marketSocketCancellation?.Cancel();
+
+                // Dispose the send semaphore to prevent further operations
+                try
+                {
+                    _sendSemaphore?.Dispose();
+                    _sendSemaphore = new SemaphoreSlim(1, 1);
+                }
+                catch
+                {
+                    // Suppress semaphore disposal exceptions
+                }
+
+                // Wait for the listener task to complete
+                if (_webSocketListenerTask != null && !_webSocketListenerTask.IsCompleted)
+                {
+                    try
+                    {
+                        _webSocketListenerTask.Wait(2000);
+                    }
+                    catch
+                    {
+                        // Suppress listener shutdown exceptions
+                    }
+                }
+
+                // Dispose the websocket
+                if (marketSocket != null)
+                {
+                    try
+                    {
+                        marketSocket.Dispose();
+                    }
+                    catch
+                    {
+                        // Suppress disposal exceptions
+                    }
+                    finally
+                    {
+                        marketSocket = null;
+                        _webSocketListenerTask = null;
+                    }
+                }
+
+                // Clear user data
                 JWT = null;
                 rememberMe = false;
                 inGameName = string.Empty;
-                _ = marketSocket.CloseAsync(
-                    WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None
-                );
-                marketSocketOpenEvent.Reset();
-                marketSocket.Dispose();
-                marketSocket = new ClientWebSocket();
-            }
 
-            marketSocketCancellation?.Dispose();
-            marketSocketCancellation = new CancellationTokenSource();
+                // Clean up other resources
+                try { marketSocketOpenEvent?.Reset(); } catch { }
+                try
+                {
+                    marketSocketCancellation?.Dispose();
+                    marketSocketCancellation = new CancellationTokenSource();
+                }
+                catch { }
+
+                Main.AddLog("WebSocket disconnected successfully");
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"Error during disconnect: {ex.Message}");
+            }
+            finally
+            {
+                // Reset the intentional disconnect flag after cleanup
+                _intentionalDisconnect = false;
+            }
         }
 
         public string GetUrlName(string primeName)
