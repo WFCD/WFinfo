@@ -500,9 +500,14 @@ namespace WFInfo
                         if (split.Length < 2) continue;
                         string itemName = split[0];
                         string itemUrl = split[1];
-                        if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out _))
+                        if (!itemName.Contains(" Set"))
                         {
-                            missing.Add((itemName, itemUrl));
+                            // Try direct lookup first, then try with " Blueprint" appended
+                            if (!marketData.TryGetValue(itemName, out _) &&
+                                !marketData.TryGetValue(itemName + " Blueprint", out _))
+                            {
+                                missing.Add((itemName, itemUrl));
+                            }
                         }
                     }
                 }
@@ -567,10 +572,14 @@ namespace WFInfo
                             var itemUrl = split[1];
                             // Only queue Prime items (not sets) that aren't already in marketData
                             if (!itemName.Contains(" Set") &&
-                                itemName.Contains("Prime") &&
-                                !marketData.TryGetValue(itemName, out _))
+                                itemName.Contains("Prime"))
                             {
-                                missing.Add((itemName, itemUrl));
+                                // Try direct lookup first, then try with " Blueprint" appended
+                                if (!marketData.TryGetValue(itemName, out _) &&
+                                    !marketData.TryGetValue(itemName + " Blueprint", out _))
+                                {
+                                    missing.Add((itemName, itemUrl));
+                                }
                             }
                         }
                     }
@@ -641,7 +650,9 @@ namespace WFInfo
                 Main.StatusUpdate("Prime Update Failed", 0);
                 Main.RunOnUIThread(() =>
                 {
-                    _ = new ErrorDialogue(DateTime.Now, 0);
+                   _ = new ErrorDialogue(DateTime.Now, 0);
+                    MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
+                    MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
                 });
             }
         }
