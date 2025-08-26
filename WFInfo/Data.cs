@@ -189,9 +189,17 @@ namespace WFInfo
             }
 
             WebClient webClient = CreateWfmClient();
-            JObject obj = JsonConvert.DeserializeObject<JObject>(
-                webClient.DownloadString("https://api.warframe.market/v2/items"));
-
+            JObject obj;
+            try
+            {
+                obj = JsonConvert.DeserializeObject<JObject>(
+                    webClient.DownloadString("https://api.warframe.market/v2/items"));
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog("ReloadItems: failed to download item list (en). " + ex.Message);
+                return; // keep previous items; swap will be skipped
+            }
             JObject tempMarketItems = new JObject();
             JArray items = JArray.FromObject(obj["data"]);
 
@@ -299,7 +307,15 @@ namespace WFInfo
                 webClient.DownloadString(sheetJsonUrl));
             foreach (var item in sheetData)
             {
-                marketData[item["name"].ToString()] = item;
+                var key = item["name"].ToString();
+                marketData[key] = item;
+                // Add a “Blueprint”-stripped alias to match ReloadItems’ normalization
+                var alias = key.Replace(" Blueprint", "");
+                if (!string.Equals(alias, key, StringComparison.Ordinal)
+                    && !marketData.TryGetValue(alias, out _))
+                {
+                    marketData[alias] = item;
+                }
             }
 
             // Load ignored items
@@ -468,29 +484,33 @@ namespace WFInfo
             bool saveDatabases = await LoadMarket(allFiltered);
 
             // Thread-safe enumeration of marketItems with null check
+                        var missing = new List<(string Name, string Url)>();
             lock (marketItemsLock)
             {
-                if (marketItems != null)
-                {
-                    foreach (KeyValuePair<string, JToken> elem in marketItems)
-                    {
-                        if (elem.Key != "version")
-                        {
-                            string[] split = elem.Value.ToString().Split('|');
-                            string itemName = split[0];
-                            string itemUrl = split[1];
-                            if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out _))
-                            {
-                                LoadMarketItem(itemName, itemUrl);
-                                saveDatabases = true;
-                            }
-                        }
-                    }
-                }
-                else
+                if (marketItems == null)
                 {
                     Main.AddLog("marketItems is null, skipping item enumeration");
                 }
+                else
+                {
+                    foreach (KeyValuePair<string, JToken> elem in marketItems)
+                    {
+                        if (elem.Key == "version") continue;
+                        string[] split = elem.Value.ToString().Split('|');
+                        if (split.Length < 2) continue;
+                        string itemName = split[0];
+                        string itemUrl = split[1];
+                        if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out _))
+                        {
+                            missing.Add((itemName, itemUrl));
+                        }
+                    }
+                }
+            }
+            foreach (var m in missing)
+            {
+                LoadMarketItem(m.Name, m.Url);
+                saveDatabases = true;
             }
 
             if (marketData["timestamp"] == null)
@@ -527,37 +547,42 @@ namespace WFInfo
                 Main.AddLog($"Base market data loaded from sheet, filling gaps from WFM...");
 
                 // Only download PRIME items that are missing from the sheet data
+                var missing = new List<(string Name, string Url)>();
                 lock (marketItemsLock)
                 {
-                    if (marketItems != null)
-                    {
-                        int downloadCount = 0;
-                        foreach (KeyValuePair<string, JToken> elem in marketItems)
-                        {
-                            if (elem.Key != "version")
-                            {
-                                string[] split = elem.Value.ToString().Split('|');
-                                string itemName = split[0];
-                                string itemUrl = split[1];
-
-                                // Only download Prime items (not sets) that aren't in marketData
-                                if (!itemName.Contains(" Set") &&
-                                    itemName.Contains("Prime") &&
-                                    !marketData.TryGetValue(itemName, out _))
-                                {
-                                    LoadMarketItem(itemName, itemUrl);
-                                    downloadCount++;
-                                    Main.AddLog($"Downloaded missing Prime item: {itemName}");
-                                }
-                            }
-                        }
-                        Main.AddLog($"Downloaded {downloadCount} missing Prime items from WFM");
-                    }
-                    else
+                    if (marketItems == null)
                     {
                         Main.AddLog("marketItems is null, no items to force update");
                     }
+                    else
+                    {
+                        foreach (var elem in marketItems)
+                        {
+                            if (elem.Key == "version")
+                                continue;
+                            var split = elem.Value.ToString().Split('|');
+                            if (split.Length < 2)
+                                continue;
+                            var itemName = split[0];
+                            var itemUrl = split[1];
+                            // Only queue Prime items (not sets) that aren't already in marketData
+                            if (!itemName.Contains(" Set") &&
+                                itemName.Contains("Prime") &&
+                                !marketData.TryGetValue(itemName, out _))
+                            {
+                                missing.Add((itemName, itemUrl));
+                            }
+                        }
+                    }
                 }
+                int downloadCount = 0;
+                foreach (var (name, url) in missing)
+                {
+                    LoadMarketItem(name, url);
+                    downloadCount++;
+                    Main.AddLog($"Downloaded missing Prime item: {name}");
+                }
+                Main.AddLog($"Downloaded {downloadCount} missing Prime items from WFM");
 
                 RefreshMarketDucats();
 
