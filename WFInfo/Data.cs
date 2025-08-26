@@ -309,13 +309,22 @@ namespace WFInfo
             foreach (var item in sheetData)
             {
                 var key = item["name"].ToString();
-                marketData[key] = item;
-                // Add a “Blueprint”-stripped alias to match ReloadItems’ normalization
+                var transformedItem = new JObject
+                {
+                    ["name"] = item["name"],
+                    ["plat"] = item["custom_avg"], // Map custom_avg → plat
+                    ["volume"] = item["today_vol"],
+                    ["ducats"] = 0 // Will be filled by RefreshMarketDucats()
+                };
+
+                marketData[key] = transformedItem;
+
+                // Add a "Blueprint"-stripped alias
                 var alias = key.Replace(" Blueprint", "");
                 if (!string.Equals(alias, key, StringComparison.Ordinal)
                     && !marketData.TryGetValue(alias, out _))
                 {
-                    marketData[alias] = item;
+                    marketData[alias] = transformedItem;
                 }
             }
 
