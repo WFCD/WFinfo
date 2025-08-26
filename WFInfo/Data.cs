@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -448,10 +449,16 @@ namespace WFInfo
                                 gameName += " Blueprint";
                             }
 
+                            string targetKey = null;
                             if (marketData.TryGetValue(partName, out _))
+                                targetKey = partName;
+                            else if (marketData.TryGetValue(partName + " Blueprint", out _))
+                                targetKey = partName + " Blueprint";
+
+                            if (targetKey != null)
                             {
                                 nameData[gameName] = partName;
-                                marketData[partName]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
+                                marketData[targetKey]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
                             }
                         }
                     }
@@ -477,7 +484,19 @@ namespace WFInfo
                 if (prime.Key != "timestamp")
                     foreach (KeyValuePair<string, JToken> part in equipmentData[prime.Key]["parts"].ToObject<JObject>())
                         if (marketData.TryGetValue(part.Key, out _))
-                            marketData[part.Key]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
+                        {
+                            // In RefreshMarketDucats() method:
+                            string ducatsStr = part.Value["ducats"]?.ToString();
+                            if (!string.IsNullOrEmpty(ducatsStr) && int.TryParse(ducatsStr, NumberStyles.Integer, Main.culture, out int ducatsValue))
+                            {
+                                marketData[part.Key]["ducats"] = ducatsValue;
+                            }
+                            else
+                            {
+                                Main.AddLog($"Invalid ducats value for {part.Key}: '{ducatsStr ?? "null"}'");
+                                marketData[part.Key]["ducats"] = 0;
+                            }
+                        }
         }
 
         public async Task<bool> Update()
