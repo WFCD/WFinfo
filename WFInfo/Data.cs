@@ -434,19 +434,25 @@ namespace WFInfo
                         equipmentData[primeName]["parts"][partName]["ducats"] = part.Value["ducats"];
 
 
-                        string gameName = part.Key;
-                        if (prime.Value["type"].ToString() == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")))
+                        if (part.Key != null && prime.Value?["type"] != null && part.Value?["ducats"] != null)
                         {
-                            gameName += " Blueprint";
-                        }
-                        else if (prime.Value["type"].ToString() == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
-                        {
-                            gameName += " Blueprint";
-                        }
-                        if (marketData.TryGetValue(partName, out _))
-                        {
-                            nameData[gameName] = partName;
-                            marketData[partName]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
+                            string gameName = part.Key;
+                            string partType = prime.Value["type"].ToString();
+
+                            if (partType == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")))
+                            {
+                                gameName += " Blueprint";
+                            }
+                            else if (partType == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
+                            {
+                                gameName += " Blueprint";
+                            }
+
+                            if (marketData.TryGetValue(partName, out _))
+                            {
+                                nameData[gameName] = partName;
+                                marketData[partName]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
+                            }
                         }
                     }
                 }
