@@ -209,7 +209,7 @@ namespace WFInfo
             ReloadMarket.IsEnabled = false;
             MarketData.Content = "Loading...";
             Main.StatusUpdate("Forcing Market Update", 0);
-            Task.Factory.StartNew(Main.dataBase.ForceMarketUpdate);
+            Task.Run(async () => await Main.dataBase.ForceMarketUpdate());
         }
 
         private void ReloadDropClick(object sender, RoutedEventArgs e)

@@ -82,11 +82,7 @@
             </Style>
 
             <Style TargetType="CheckBox"
-                   BasedOn="{StaticResource baseStyle}">
-                <Setter Property="Background"
-                        Value="#FFB1D0D9" />
-                <Setter Property="BorderBrush"
-                        Value="#FF0F0F0F" />
+                   BasedOn="{StaticResource checkBoxStyle}">
                 <Setter Property="VerticalContentAlignment"
                         Value="Center" />
             </Style>
