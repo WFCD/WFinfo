@@ -143,7 +143,7 @@ namespace WFInfo
             update = new UpdateDialogue(args);
         }
 
-        public void ThreadedDataLoad()
+        public async void ThreadedDataLoad()
         {
             try
             {
@@ -154,35 +154,28 @@ namespace WFInfo
                 OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings, _windowInfo, _detector, _gdiScreenshot, _windowsScreenshot);
 
                 StatusUpdate("Updating Databases...", 0);
-                dataBase.Update();
+
+                // Properly await the async Update method
+                await dataBase.Update();
 
                 if (ApplicationSettings.GlobalReadonlySettings.Auto)
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
-                    LoggedIn();
+                    // Marshal UI call to UI thread
+                    RunOnUIThread(() => MainWindow.INSTANCE.LoggedIn());
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
-                FinishedLoading();
-
-                if (dataBase.JWT != null)// if token is loaded in, connect to websocket
-                {
-                    bool result = dataBase.OpenWebSocket().Result;
-                    Debug.WriteLine("Logging into websocket success: " + result);
-                }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                AddLog("LOADING FAILED");
-                AddLog(ex.ToString());
-                StatusUpdate(ex.ToString().Contains("invalid_grant") ? "System time out of sync with server\nResync system clock in windows settings": "Launch Failure - Please Restart", 0);
-                RunOnUIThread(() =>
-                {
-                    _ = new ErrorDialogue(DateTime.Now, 0);
-                });
+                StatusUpdate("WFInfo Failed to Initialize", 0);
+                AddLog(e.ToString());
+                SpawnErrorPopup(DateTime.UtcNow, 1800);
             }
         }
+
         private async void TimeoutCheck()
         {
             if (!await dataBase.IsJWTvalid().ConfigureAwait(true) || _process.GameIsStreamed)

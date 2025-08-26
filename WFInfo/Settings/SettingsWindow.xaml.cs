@@ -190,17 +190,18 @@ namespace WFInfo.Settings
 
         private void localeComboboxSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            ComboBoxItem item = (ComboBoxItem) localeCombobox.SelectedItem;
-            
+            ComboBoxItem item = (ComboBoxItem)localeCombobox.SelectedItem;
+
             string selectedLocale = item.Tag.ToString();
             _viewModel.Locale = selectedLocale;
             Save();
 
             _ = OCR.updateEngineAsync();
 
-            _ = Task.Run(() =>
+            // Use .Wait() to make it synchronous
+            Task.Run(() =>
             {
-                Main.dataBase.ReloadItems();
+                Main.dataBase.ReloadItems().Wait();
             });
         }
 

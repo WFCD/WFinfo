@@ -72,6 +72,9 @@ namespace WFInfo
         private LogCapture EElogWatcher;
         private Task autoThread;
 
+        // marketItems lock to ensure avoiding race conditions
+        private static readonly object marketItemsLock = new object();
+
         // Reconnection mechanics for websocket
         // Exponential backoff
         private Timer _reconnectionTimer;
@@ -178,25 +181,41 @@ namespace WFInfo
         }
 
         // Load item list from Sheets
-        public async void ReloadItems()
+        public async Task ReloadItems()
         {
-            marketItems = new JObject();
-            WebClient webClient = CreateWfmClient();
-            JObject obj =
-                JsonConvert.DeserializeObject<JObject>(
-                    webClient.DownloadString("https://api.warframe.market/v2/items"));
+            lock (marketItemsLock)
+            {
+                marketItems = new JObject();
+            }
 
+            WebClient webClient = CreateWfmClient();
+            JObject obj = JsonConvert.DeserializeObject<JObject>(
+                webClient.DownloadString("https://api.warframe.market/v2/items"));
+
+            JObject tempMarketItems = new JObject();
             JArray items = JArray.FromObject(obj["data"]);
+
+            int primeCount = 0;
+            int totalCount = 0;
+
             foreach (var item in items)
             {
+                totalCount++;
                 string name = item["i18n"]["en"]["name"].ToString();
-                if (name.Contains("Prime "))
+
+                // STRICT prime filtering - must contain " Prime" (with space)
+                if (name.Contains(" Prime") && !name.Contains(" Set"))
                 {
-                    if ((name.Contains("Neuroptics") || name.Contains("Chassis") || name.Contains("Systems") || name.Contains("Harness") || name.Contains("Wings")))
+                    if ((name.Contains("Neuroptics") || name.Contains("Chassis") ||
+                         name.Contains("Systems") || name.Contains("Harness") ||
+                         name.Contains("Wings")))
                     {
                         name = name.Replace(" Blueprint", "");
                     }
-                    marketItems[item["id"].ToString()] = name + "|" + item["slug"];
+
+                    tempMarketItems[item["id"].ToString()] = name + "|" + item["slug"];
+                    primeCount++;
+                    //Main.AddLog($"Added Prime item: {name}");
                 }
             }
 
@@ -218,8 +237,8 @@ namespace WFInfo
                     foreach (var item in items)
                     {
                         string name = item["slug"].ToString();
-                        if (name.Contains("prime") && marketItems.ContainsKey(item["id"].ToString()))
-                            marketItems[item["id"].ToString()] = marketItems[item["id"].ToString()] + "|" + item["i18n"][_settings.Locale]["name"];
+                        if (name.Contains("prime") && tempMarketItems.ContainsKey(item["id"].ToString()))
+                            tempMarketItems[item["id"].ToString()] = tempMarketItems[item["id"].ToString()] + "|" + item["i18n"][_settings.Locale]["name"];
                     }
                 }
             }
@@ -228,13 +247,20 @@ namespace WFInfo
                 Main.AddLog("ReloadItems: " + e.Message);
             }
 
+            tempMarketItems["version"] = Main.BuildVersion;
 
-            marketItems["version"] = Main.BuildVersion;
+            // Atomically replace marketItems under lock
+            lock (marketItemsLock)
+            {
+                marketItems = tempMarketItems;
+            }
+
             Main.AddLog("Item database has been downloaded");
         }
 
         // Load market data from Sheets
-        private bool LoadMarket(JObject allFiltered, bool force = false)
+        // Load market data from Sheets
+        private async Task<bool> LoadMarket(JObject allFiltered, bool force = false)
         {
             if (!force && File.Exists(marketDataPath) && File.Exists(marketItemsPath))
             {
@@ -253,42 +279,36 @@ namespace WFInfo
                     }
                 }
             }
+
             try
             {
-                ReloadItems();
+                // CRITICAL: Await ReloadItems() to ensure marketItems is populated FIRST
+                await ReloadItems();
             }
-            catch
+            catch (Exception e)
             {
                 Main.AddLog("Failed to refresh items from warframe.market, skipping WFM update for now. Some items might have incomplete info.");
+                Main.AddLog(e.ToString());
             }
+
+            // Initialize market data
             marketData = new JObject();
-            WebClient webClient = CustomEntrypoint.CreateNewWebClient();
-            JArray rows = JsonConvert.DeserializeObject<JArray>(webClient.DownloadString(sheetJsonUrl));
 
-            foreach (var row in rows)
+            WebClient webClient = CreateWfmClient();
+            JArray sheetData = JsonConvert.DeserializeObject<JArray>(
+                webClient.DownloadString(sheetJsonUrl));
+            foreach (var item in sheetData)
             {
-                string name = row["name"].ToString();
-                if (name.Contains("Prime "))
-                {
-                    if ((name.Contains("Neuroptics") || name.Contains("Chassis") || name.Contains("Systems") || name.Contains("Harness") || name.Contains("Wings")))
-                    {
-                       name = name.Replace(" Blueprint", "");
-                    }
-                    marketData[name] = new JObject
-                    {
-                        {"plat", double.Parse(row["custom_avg"].ToString(), Main.culture)},
-                        {"ducats", 0},
-                        {"volume", int.Parse(row["yesterday_vol"].ToString(), Main.culture) + int.Parse(row["today_vol"].ToString(), Main.culture)}
-                    };
-                }
+                marketData[item["name"].ToString()] = item;
             }
 
-            // Add default values for ignored items
+            // Load ignored items
             foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
             {
                 marketData[ignored.Key] = ignored.Value;
             }
 
+            // Set timestamp AFTER all async operations complete
             marketData["timestamp"] = DateTime.Now;
             marketData["version"] = Main.BuildVersion;
 
@@ -438,25 +458,38 @@ namespace WFInfo
                             marketData[part.Key]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
         }
 
-        public bool Update()
+        public async Task<bool> Update()
         {
             Main.AddLog("Checking for Updates to Databases");
             WebClient webClient = CustomEntrypoint.CreateNewWebClient();
             JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
-            bool saveDatabases = LoadMarket(allFiltered);
 
-            foreach (KeyValuePair<string, JToken> elem in marketItems)
+            // Await the async LoadMarket method
+            bool saveDatabases = await LoadMarket(allFiltered);
+
+            // Thread-safe enumeration of marketItems with null check
+            lock (marketItemsLock)
             {
-                if (elem.Key != "version")
+                if (marketItems != null)
                 {
-                    string[] split = elem.Value.ToString().Split('|');
-                    string itemName = split[0];
-                    string itemUrl = split[1];
-                    if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out _))
+                    foreach (KeyValuePair<string, JToken> elem in marketItems)
                     {
-                        LoadMarketItem(itemName, itemUrl);
-                        saveDatabases = true;
+                        if (elem.Key != "version")
+                        {
+                            string[] split = elem.Value.ToString().Split('|');
+                            string itemName = split[0];
+                            string itemUrl = split[1];
+                            if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out _))
+                            {
+                                LoadMarketItem(itemName, itemUrl);
+                                saveDatabases = true;
+                            }
+                        }
                     }
+                }
+                else
+                {
+                    Main.AddLog("marketItems is null, skipping item enumeration");
                 }
             }
 
@@ -464,10 +497,10 @@ namespace WFInfo
             {
                 Main.RunOnUIThread(() => { MainWindow.INSTANCE.MarketData.Content = "VERIFY"; });
                 Main.RunOnUIThread(() => { MainWindow.INSTANCE.DropData.Content = "TIME"; });
-
                 return false;
             }
 
+            // This UI update will now happen AFTER ReloadItems completes
             Main.RunOnUIThread(() => { MainWindow.INSTANCE.MarketData.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
 
             saveDatabases = LoadEqmtData(allFiltered, saveDatabases);
@@ -479,26 +512,50 @@ namespace WFInfo
             return saveDatabases;
         }
 
-        public void ForceMarketUpdate()
+        public async Task ForceMarketUpdate()
         {
             try
             {
                 Main.AddLog("Forcing market update");
                 WebClient webClient = CustomEntrypoint.CreateNewWebClient();
                 JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
-                LoadMarket(allFiltered, true);
 
-                foreach (KeyValuePair<string, JToken> elem in marketItems)
+                Main.AddLog("Before calling LoadMarket");
+                // Await the async LoadMarket method
+                await LoadMarket(allFiltered, true);
+
+                Main.AddLog($"Base market data loaded from sheet, filling gaps from WFM...");
+
+                // Only download PRIME items that are missing from the sheet data
+                lock (marketItemsLock)
                 {
-                    if (elem.Key != "version")
+                    if (marketItems != null)
                     {
-                        string[] split = elem.Value.ToString().Split('|');
-                        string itemName = split[0];
-                        string itemUrl = split[1];
-                        if (!itemName.Contains(" Set") && !marketData.TryGetValue(itemName, out _))
+                        int downloadCount = 0;
+                        foreach (KeyValuePair<string, JToken> elem in marketItems)
                         {
-                            LoadMarketItem(itemName, itemUrl);
+                            if (elem.Key != "version")
+                            {
+                                string[] split = elem.Value.ToString().Split('|');
+                                string itemName = split[0];
+                                string itemUrl = split[1];
+
+                                // Only download Prime items (not sets) that aren't in marketData
+                                if (!itemName.Contains(" Set") &&
+                                    itemName.Contains("Prime") &&
+                                    !marketData.TryGetValue(itemName, out _))
+                                {
+                                    LoadMarketItem(itemName, itemUrl);
+                                    downloadCount++;
+                                    Main.AddLog($"Downloaded missing Prime item: {itemName}");
+                                }
+                            }
                         }
+                        Main.AddLog($"Downloaded {downloadCount} missing Prime items from WFM");
+                    }
+                    else
+                    {
+                        Main.AddLog("marketItems is null, no items to force update");
                     }
                 }
 
@@ -516,12 +573,11 @@ namespace WFInfo
             }
             catch (Exception ex)
             {
-                Main.AddLog("Market Update Failed");
-                Main.AddLog(ex.ToString());
-                Main.StatusUpdate("Market Update Failed", 0);
+                Main.AddLog("ForceMarketUpdate FAILED " + ex);
                 Main.RunOnUIThread(() =>
                 {
-                    _ = new ErrorDialogue(DateTime.Now, 0);
+                    MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
+                    MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
                 });
             }
         }
@@ -719,29 +775,26 @@ namespace WFInfo
 
         public string GetLocaleNameData(string s)
         {
-            // Why is this here?! Might require review why its never saving json
-            bool saveDatabases = false;
             string localeName = "";
-            foreach (var marketItem in marketItems)
+
+            lock (marketItemsLock)
             {
-                if (marketItem.Key == "version")
-                    continue;
-                string[] split = marketItem.Value.ToString().Split('|');
-                if (split[0] == s)
+                if (marketItems != null) // Add null check
                 {
-                    if (split.Length == 3)
+                    foreach (var marketItem in marketItems)
                     {
-                        localeName = split[2];
+                        if (marketItem.Key == "version")
+                            continue;
+                        string[] split = marketItem.Value.ToString().Split('|');
+                        if (split[0] == s)
+                        {
+                            localeName = split.Length > 2 ? split[2] : "";
+                            break;
+                        }
                     }
-                    else
-                    {
-                        localeName = split[0];
-                    }
-                    break;
                 }
             }
-            if (saveDatabases)
-                SaveAllJSONs();
+
             return localeName;
         }
         private protected static string e = "A?s/,;j_<Z3Q4z&)";
@@ -1766,11 +1819,17 @@ namespace WFInfo
         /// <returns>Warframe.market prime item ID</returns>
         public string PrimeItemToItemID(string primeItem)
         {
-            foreach (var marketItem in marketItems)
+            lock (marketItemsLock)
             {
-                if (marketItem.Value.ToString().Split('|').First().Equals(primeItem, StringComparison.OrdinalIgnoreCase))
+                if (marketItems != null) // Add null check
                 {
-                    return marketItem.Key;
+                    foreach (var marketItem in marketItems)
+                    {
+                        if (marketItem.Value.ToString().Split('|').First().Equals(primeItem, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return marketItem.Key;
+                        }
+                    }
                 }
             }
             throw new Exception($"PrimeItemToItemID, Prime item \"{primeItem}\" does not exist in marketItem");
@@ -2029,12 +2088,18 @@ namespace WFInfo
 
         public string GetUrlName(string primeName)
         {
-            foreach (var marketItem in marketItems)
+            lock (marketItemsLock)
             {
-                string[] vals = marketItem.Value.ToString().Split('|');
-                if (vals.Length > 2 && vals[0].Equals(primeName, StringComparison.OrdinalIgnoreCase))
+                if (marketItems != null) // Add null check
                 {
-                    return vals[1];
+                    foreach (var marketItem in marketItems)
+                    {
+                        string[] vals = marketItem.Value.ToString().Split('|');
+                        if (vals.Length > 2 && vals[0].Equals(primeName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return vals[1];
+                        }
+                    }
                 }
             }
             throw new Exception($"GetUrlName, Prime item \"{primeName}\" does not exist in marketItem");
