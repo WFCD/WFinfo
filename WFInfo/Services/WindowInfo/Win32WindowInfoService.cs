@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using WFInfo.Services.WarframeProcess;
 using WFInfo.Settings;
@@ -51,18 +52,7 @@ namespace WFInfo.Services.WindowInfo
                 GetFullscreenRect();
             }
 
-            try
-            {
-                using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))
-                {
-                    DpiScaling = g.DpiX / 96.0;
-                }
-            }
-            catch (Exception e)
-            {
-                Main.AddLog($"Was unable to set a new dpi scaling, defaulting to 100% zoom, exception: {e}");
-                DpiScaling = 1;
-            }
+            RefreshDPIScaling();
         }
 
         public void UseImage(Bitmap image)
@@ -101,15 +91,22 @@ namespace WFInfo.Services.WindowInfo
             {
                 Window = Rectangle.Empty;
             }
-            else if (Window == null || Window.Left != windowRect.Left || Window.Right != windowRect.Right || Window.Top != windowRect.Top || Window.Bottom != windowRect.Bottom)
+            else if (Window.IsEmpty || Window.Left != windowRect.Left || Window.Right != windowRect.Right || Window.Top != windowRect.Top || Window.Bottom != windowRect.Bottom)
             {
                 // Get client rect in client coordinates (0,0 based)
                 Win32.R clientRect;
-                Win32.GetClientRect(_process.HandleRef, out clientRect);
+                var gotClient = Win32.GetClientRect(_process.HandleRef, out clientRect);
 
                 // Convert client area top-left to screen coordinates
                 Win32.Point clientScreenPos = new Win32.Point { X = 0, Y = 0 };
-                Win32.ClientToScreen(_process.HandleRef, ref clientScreenPos);
+                var gotScreen = Win32.ClientToScreen(_process.HandleRef, ref clientScreenPos);
+
+                if (!gotClient || !gotScreen)
+                {
+                    Main.AddLog($"GetClientRect/ClientToScreen failed; using window rect (GetLastError={Marshal.GetLastWin32Error()})");
+                    clientRect = new Win32.R { Left = 0, Top = 0, Right = windowRect.Right - windowRect.Left, Bottom = windowRect.Bottom - windowRect.Top };
+                    clientScreenPos = new Win32.Point { X = windowRect.Left, Y = windowRect.Top };
+                }
 
                 int GWL_style = -16;
                 uint WS_BORDER = 0x00800000;
@@ -167,13 +164,13 @@ namespace WFInfo.Services.WindowInfo
         {
             try
             {
-                var mon = Win32.MonitorFromPoint(new Point(Screen.Bounds.Left + 1, Screen.Bounds.Top + 1), 2);
+                // Use current window center to select the monitor
+                var center = new Point(Window.Left + Window.Width / 2, Window.Top + Window.Height / 2);
+                var mon = Win32.MonitorFromPoint(center, 2 /*MONITOR_DEFAULT_TONEAREST*/);
                 Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
 
-                Main.AddLog($"Effective dpi, X:{dpiXEffective}\n Which is %: {dpiXEffective / 96.0}");
-                //Main.AddLog($"Raw dpi, X:{dpiXRaw}\n Which is %: {dpiXRaw / 96.0}");
-                //Main.AddLog($"Angular dpi, X:{dpiXAngular}\n Which is %: {dpiXAngular / 96.0}");
-                DpiScaling = dpiXEffective / 96.0; // assuming that y and x axis dpi scaling will be uniform. So only need to check one value
+                DpiScaling = dpiXEffective / 96.0;
+                Main.AddLog($"Effective DPI: {dpiXEffective} ({DpiScaling:P0}) on monitor containing {Window}");
             }
             catch (Exception e)
             {
