@@ -43,6 +43,19 @@ namespace WFInfo
         [DllImport("user32.dll")]
         static extern bool SetForegroundWindow(IntPtr hWnd);
 
+        [DllImport("user32.dll")]
+        public static extern bool GetClientRect(HandleRef hWnd, out R lpRect);
+
+        [DllImport("user32.dll")]
+        public static extern bool ClientToScreen(HandleRef hWnd, ref Point lpPoint);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Point
+        {
+            public int X;
+            public int Y;
+        }
+
         public static void BringToFront(Process pTemp)
         {
             SetForegroundWindow(pTemp.MainWindowHandle);
