@@ -167,8 +167,13 @@ namespace WFInfo.Services.WindowInfo
                 // Use current window center to select the monitor
                 var center = new Point(Window.Left + Window.Width / 2, Window.Top + Window.Height / 2);
                 var mon = Win32.MonitorFromPoint(center, 2 /*MONITOR_DEFAULT_TONEAREST*/);
-                Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
-
+                var hr = Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
+                if (hr != 0 || dpiXEffective == 0)
+                {
+                    Main.AddLog($"GetDpiForMonitor failed (hr=0x{hr:X8}); defaulting to 100%.");
+                    DpiScaling = 1;
+                    return;
+                }
                 DpiScaling = dpiXEffective / 96.0;
                 Main.AddLog($"Effective DPI: {dpiXEffective} ({DpiScaling:P0}) on monitor containing {Window}");
             }
