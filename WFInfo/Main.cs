@@ -82,7 +82,7 @@ namespace WFInfo
             _services = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
             InitializeLegacyServices(_services);
 
-            Task.Factory.StartNew(ThreadedDataLoad);
+            Task.Run(ThreadedDataLoad);
         }
 
         public static async Task UpdateMarketStatusAsync(string msg)
