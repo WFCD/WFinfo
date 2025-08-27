@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
-using System.Runtime.InteropServices;
 
 namespace WFInfo
 {
@@ -60,21 +58,23 @@ namespace WFInfo
             if (!hooked)
             {
                 _hookIDKeyboard = SetHookKB(_procKeyboard);
+                int kbErr = Marshal.GetLastWin32Error();
                 _hookIDMouse = SetHookM(_procMouse);
+                int msErr = Marshal.GetLastWin32Error();
 
                 // Validate keyboard hook
                 if (_hookIDKeyboard == IntPtr.Zero)
                 {
-                    var error = Marshal.GetLastWin32Error();
-                    Main.AddLog($"ERROR: Failed to install keyboard hook (Error: {error}) - keyboard hotkeys will not work");
+                    var msg = new System.ComponentModel.Win32Exception(kbErr).Message;
+                    Main.AddLog($"ERROR: Failed to install keyboard hook (Error {kbErr}: {msg}) - keyboard hotkeys will not work");
                     Main.AddLog("This is commonly caused by antivirus software or insufficient privileges");
                 }
 
                 // Validate mouse hook
                 if (_hookIDMouse == IntPtr.Zero)
                 {
-                    var error = Marshal.GetLastWin32Error();
-                    Main.AddLog($"ERROR: Failed to install mouse hook (Error: {error}) - mouse hotkeys will not work");
+                    var msg = new System.ComponentModel.Win32Exception(msErr).Message;
+                    Main.AddLog($"ERROR: Failed to install mouse hook (Error {msErr}: {msg}) - mouse hotkeys will not work");
                     Main.AddLog("This is commonly caused by antivirus software or insufficient privileges");
                 }
 
