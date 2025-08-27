@@ -174,6 +174,10 @@ namespace WFInfo
                 AddLog(e.ToString());
                 SpawnErrorPopup(DateTime.UtcNow, 1800);
             }
+            finally
+            {
+                FinishedLoading();
+            }
         }
 
         private async void TimeoutCheck()
