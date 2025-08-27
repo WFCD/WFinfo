@@ -82,7 +82,7 @@ namespace WFInfo
             _services = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
             InitializeLegacyServices(_services);
 
-            Task.Factory.StartNew(ThreadedDataLoad);
+            Task.Run(ThreadedDataLoad);
         }
 
         public static async Task UpdateMarketStatusAsync(string msg)
@@ -173,6 +173,10 @@ namespace WFInfo
                 StatusUpdate("WFInfo Failed to Initialize", 0);
                 AddLog(e.ToString());
                 SpawnErrorPopup(DateTime.UtcNow, 1800);
+            }
+            finally
+            {
+                FinishedLoading();
             }
         }
 

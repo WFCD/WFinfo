@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using WFInfo.Services.WarframeProcess;
 using WFInfo.Settings;
@@ -42,15 +43,16 @@ namespace WFInfo.Services.WindowInfo
                 Main.StatusUpdate("Failed to find warframe process for window info", 1);
                 return;
             }
-
-            Screen = Screen.FromHandle(_process.HandleRef.Handle);
-            string screenType = Screen.Primary ? "primary" : "secondary";
-
-            if (_process.GameIsStreamed) Main.AddLog($"GFN -- Warframe display: {Screen.DeviceName}, {screenType}");
-            else Main.AddLog($"Warframe display: {Screen.DeviceName}, {screenType}");
+            else if (_process.IsRunning)
+            {
+                GetWindowRect();
+            }
+            else if (_settings.Debug)
+            {
+                GetFullscreenRect();
+            }
 
             RefreshDPIScaling();
-            GetWindowRect();
         }
 
         public void UseImage(Bitmap image)
@@ -67,12 +69,13 @@ namespace WFInfo.Services.WindowInfo
                 Main.AddLog("Couldn't Detect Warframe Process. Using Primary Screen Bounds: " + Window.ToString() + " Named: " + Screen.DeviceName);
         }
 
+
         private void GetWindowRect()
         {
-            if (!Win32.GetWindowRect(_process.HandleRef, out Win32.R osRect))
+            if (!Win32.GetWindowRect(_process.HandleRef, out Win32.R windowRect))
             {
                 if (_settings.Debug)
-                { //if debug is on AND warframe is not detected, sillently ignore missing process and use main monitor center.
+                {
                     GetFullscreenRect();
                     return;
                 }
@@ -84,14 +87,27 @@ namespace WFInfo.Services.WindowInfo
                 }
             }
 
-            if (osRect.Left < -20000 || osRect.Top < -20000)
-            { // if the window is in the VOID delete current process and re-set window to nothing
+            if (windowRect.Left < -20000 || windowRect.Top < -20000)
+            {
                 Window = Rectangle.Empty;
             }
-            else if (Window == null || Window.Left != osRect.Left || Window.Right != osRect.Right || Window.Top != osRect.Top || Window.Bottom != osRect.Bottom)
-            { // checks if old window size is the right size if not change it
-                Window = new Rectangle(osRect.Left, osRect.Top, osRect.Right - osRect.Left, osRect.Bottom - osRect.Top); // get Rectangle out of rect
-                                                                                                                         // Rectangle is (x, y, width, height) RECT is (x, y, x+width, y+height) 
+            else if (Window.IsEmpty || Window.Left != windowRect.Left || Window.Right != windowRect.Right || Window.Top != windowRect.Top || Window.Bottom != windowRect.Bottom)
+            {
+                // Get client rect in client coordinates (0,0 based)
+                Win32.R clientRect;
+                var gotClient = Win32.GetClientRect(_process.HandleRef, out clientRect);
+
+                // Convert client area top-left to screen coordinates
+                Win32.Point clientScreenPos = new Win32.Point { X = 0, Y = 0 };
+                var gotScreen = Win32.ClientToScreen(_process.HandleRef, ref clientScreenPos);
+
+                if (!gotClient || !gotScreen)
+                {
+                    Main.AddLog($"GetClientRect/ClientToScreen failed; using window rect (GetLastError={Marshal.GetLastWin32Error()})");
+                    clientRect = new Win32.R { Left = 0, Top = 0, Right = windowRect.Right - windowRect.Left, Bottom = windowRect.Bottom - windowRect.Top };
+                    clientScreenPos = new Win32.Point { X = windowRect.Left, Y = windowRect.Top };
+                }
+
                 int GWL_style = -16;
                 uint WS_BORDER = 0x00800000;
                 uint WS_POPUP = 0x80000000;
@@ -99,20 +115,28 @@ namespace WFInfo.Services.WindowInfo
                 uint styles = Win32.GetWindowLongPtr(_process.HandleRef, GWL_style);
                 if ((styles & WS_POPUP) != 0)
                 {
-                    // Borderless, don't do anything
+                    // Borderless - use window rect as is
+                    Window = new Rectangle(windowRect.Left, windowRect.Top,
+                                          windowRect.Right - windowRect.Left,
+                                          windowRect.Bottom - windowRect.Top);
                     Main.AddLog($"Borderless detected (0x{styles.ToString("X8", Main.culture)}, {Window.ToString()}");
                 }
                 else if ((styles & WS_BORDER) != 0)
                 {
-                    // Windowed, adjust for thicc border
-                    Window = new Rectangle(Window.Left + 8, Window.Top + 30, Window.Width - 16, Window.Height - 38);
-                    Main.AddLog($"Windowed detected (0x{styles.ToString("X8", Main.culture)}, adjusting window to: {Window.ToString()}");
+                    // Windowed - use actual client area screen coordinates
+                    Window = new Rectangle(clientScreenPos.X, clientScreenPos.Y,
+                                          clientRect.Right - clientRect.Left,
+                                          clientRect.Bottom - clientRect.Top);
+                    Main.AddLog($"Windowed detected - using client area at ({clientScreenPos.X}, {clientScreenPos.Y})");
                 }
                 else
                 {
-                    // Assume Fullscreen, don't do anything
+                    // Fullscreen - use window rect
+                    Window = new Rectangle(windowRect.Left, windowRect.Top,
+                                          windowRect.Right - windowRect.Left,
+                                          windowRect.Bottom - windowRect.Top);
                     Main.AddLog($"Fullscreen detected (0x{styles.ToString("X8", Main.culture)}, {Window.ToString()}");
-                    //Show the Fullscreen prompt
+
                     if (_settings.IsOverlaySelected)
                     {
                         Main.AddLog($"Showing the Fullscreen Reminder");
@@ -140,13 +164,18 @@ namespace WFInfo.Services.WindowInfo
         {
             try
             {
-                var mon = Win32.MonitorFromPoint(new Point(Screen.Bounds.Left + 1, Screen.Bounds.Top + 1), 2);
-                Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
-
-                Main.AddLog($"Effective dpi, X:{dpiXEffective}\n Which is %: {dpiXEffective / 96.0}");
-                //Main.AddLog($"Raw dpi, X:{dpiXRaw}\n Which is %: {dpiXRaw / 96.0}");
-                //Main.AddLog($"Angular dpi, X:{dpiXAngular}\n Which is %: {dpiXAngular / 96.0}");
-                DpiScaling = dpiXEffective / 96.0; // assuming that y and x axis dpi scaling will be uniform. So only need to check one value
+                // Use current window center to select the monitor
+                var center = new Point(Window.Left + Window.Width / 2, Window.Top + Window.Height / 2);
+                var mon = Win32.MonitorFromPoint(center, 2 /*MONITOR_DEFAULT_TONEAREST*/);
+                var hr = Win32.GetDpiForMonitor(mon, Win32.DpiType.Effective, out var dpiXEffective, out _);
+                if (hr != 0 || dpiXEffective == 0)
+                {
+                    Main.AddLog($"GetDpiForMonitor failed (hr=0x{hr:X8}); defaulting to 100%.");
+                    DpiScaling = 1;
+                    return;
+                }
+                DpiScaling = dpiXEffective / 96.0;
+                Main.AddLog($"Effective DPI: {dpiXEffective} ({DpiScaling:P0}) on monitor containing {Window}");
             }
             catch (Exception e)
             {

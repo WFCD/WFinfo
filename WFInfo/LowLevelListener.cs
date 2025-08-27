@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace WFInfo
 {
@@ -59,8 +58,34 @@ namespace WFInfo
             if (!hooked)
             {
                 _hookIDKeyboard = SetHookKB(_procKeyboard);
+                int kbErr = Marshal.GetLastWin32Error();
                 _hookIDMouse = SetHookM(_procMouse);
-                hooked = true;
+                int msErr = Marshal.GetLastWin32Error();
+
+                // Validate keyboard hook
+                if (_hookIDKeyboard == IntPtr.Zero)
+                {
+                    var msg = new System.ComponentModel.Win32Exception(kbErr).Message;
+                    Main.AddLog($"ERROR: Failed to install keyboard hook (Error {kbErr}: {msg}) - keyboard hotkeys will not work");
+                    Main.AddLog("This is commonly caused by antivirus software or insufficient privileges");
+                }
+
+                // Validate mouse hook
+                if (_hookIDMouse == IntPtr.Zero)
+                {
+                    var msg = new System.ComponentModel.Win32Exception(msErr).Message;
+                    Main.AddLog($"ERROR: Failed to install mouse hook (Error {msErr}: {msg}) - mouse hotkeys will not work");
+                    Main.AddLog("This is commonly caused by antivirus software or insufficient privileges");
+                }
+
+                // Only set hooked=true if at least one hook succeeded
+                hooked = (_hookIDKeyboard != IntPtr.Zero || _hookIDMouse != IntPtr.Zero);
+
+                if (!hooked)
+                {
+                    Main.AddLog("CRITICAL: All input hooks failed to install - no hotkeys will work!");
+                    Main.AddLog("Try running WFInfo as Administrator or check antivirus settings");
+                }
             }
         }
 
