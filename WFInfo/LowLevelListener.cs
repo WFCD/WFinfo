@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Runtime.InteropServices;
 
 namespace WFInfo
 {
@@ -60,7 +61,31 @@ namespace WFInfo
             {
                 _hookIDKeyboard = SetHookKB(_procKeyboard);
                 _hookIDMouse = SetHookM(_procMouse);
-                hooked = true;
+
+                // Validate keyboard hook
+                if (_hookIDKeyboard == IntPtr.Zero)
+                {
+                    var error = Marshal.GetLastWin32Error();
+                    Main.AddLog($"ERROR: Failed to install keyboard hook (Error: {error}) - keyboard hotkeys will not work");
+                    Main.AddLog("This is commonly caused by antivirus software or insufficient privileges");
+                }
+
+                // Validate mouse hook
+                if (_hookIDMouse == IntPtr.Zero)
+                {
+                    var error = Marshal.GetLastWin32Error();
+                    Main.AddLog($"ERROR: Failed to install mouse hook (Error: {error}) - mouse hotkeys will not work");
+                    Main.AddLog("This is commonly caused by antivirus software or insufficient privileges");
+                }
+
+                // Only set hooked=true if at least one hook succeeded
+                hooked = (_hookIDKeyboard != IntPtr.Zero || _hookIDMouse != IntPtr.Zero);
+
+                if (!hooked)
+                {
+                    Main.AddLog("CRITICAL: All input hooks failed to install - no hotkeys will work!");
+                    Main.AddLog("Try running WFInfo as Administrator or check antivirus settings");
+                }
             }
         }
 
