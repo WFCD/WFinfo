@@ -15,8 +15,8 @@ namespace WFInfo
     public partial class ErrorDialogue : Window
     {
 
-        string startPath = Main.AppPath + @"\Debug";
-        string zipPath = Main.AppPath + @"\generatedZip";
+        readonly string startPath = Main.AppPath + @"\Debug";
+        readonly string zipPath = Main.AppPath + @"\generatedZip";
         const int segmentSize = 8 * 1024 * 1024; // 8m segments
 
         private int distance;

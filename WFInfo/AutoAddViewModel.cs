@@ -128,10 +128,7 @@ namespace WFInfo
 
         private void RemoveFromParent()
         {
-            if (_parent != null)
-            {
-                _parent.removeItem(this);
-            }
+            _parent?.removeItem(this);
             RaisePropertyChanged();
         }
     }

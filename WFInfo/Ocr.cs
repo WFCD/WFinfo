@@ -430,7 +430,7 @@ namespace WFInfo
             new Point(mostLeft + 6 * length, middelHeight)};
 
             var lowestDistance = int.MaxValue;
-            var lowestDistancePoint = new Point();
+            Point lowestDistancePoint;
             if (numberOfRewardsDisplayed == 1) //rare, but can happen if others don't get enough traces
             {
                 primeRewardIndex = 0;
@@ -602,7 +602,6 @@ namespace WFInfo
 #pragma warning disable IDE0044 // Add readonly modifier
         private static short[,,] GetThemeCache = new short[256, 256, 256];
         private static short[,,] GetThresholdCache = new short[256, 256, 256];
-#pragma warning disable IDE0044 // Add readonly modifier
 
         private static WFtheme GetClosestTheme(Color clr, out int threshold)
         {
@@ -746,8 +745,7 @@ namespace WFInfo
                     VerifyCount.ShowVerifyCount(foundParts);
                  });
 
-            if (Main.snapItOverlayWindow.tempImage != null)
-                Main.snapItOverlayWindow.tempImage.Dispose();
+            Main.snapItOverlayWindow.tempImage?.Dispose();
             end = watch.ElapsedMilliseconds;
             if (resultCount == 0)
             {
@@ -800,7 +798,7 @@ namespace WFInfo
                     i++;
                 }
             }
-            rowHeight = rowHeight / Math.Max(rows.Count, 1);
+            rowHeight /= Math.Max(rows.Count, 1);
 
             //combine adjacent rows into one block of text
             i = 0;
@@ -945,8 +943,10 @@ namespace WFInfo
                 snapThreads = 4;
             } else
             {
-                zones = new List<Tuple<Bitmap, Rectangle>>();
-                zones.Add( Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height) ) );
+                zones = new List<Tuple<Bitmap, Rectangle>>
+                {
+                    Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height))
+                };
                 snapThreads = 1;
             }
             Task < List<Tuple<String, Rectangle>>>[] snapTasks = new Task<List<Tuple<String, Rectangle>>>[snapThreads];
@@ -1029,8 +1029,10 @@ namespace WFInfo
 
                         Rectangle combinedBounds = new Rectangle(left, top, right - left, bot - top);
                                     
-                        List<InventoryItem> tempList = new List<InventoryItem>(foundItems[i].Item1);
-                        tempList.Add(new InventoryItem(currentWord, paddedBounds));
+                        List<InventoryItem> tempList = new List<InventoryItem>(foundItems[i].Item1)
+                        {
+                            new InventoryItem(currentWord, paddedBounds)
+                        };
                         foundItems.RemoveAt(i);
                         foundItems.Add(Tuple.Create(tempList, combinedBounds));
                     }
@@ -1042,7 +1044,7 @@ namespace WFInfo
             foreach( Tuple<List<InventoryItem>, Rectangle> itemGroup in foundItems)
             {
                 //Sort order for component words to appear in. If large height difference, sort vertically. If small height difference, sort horizontally
-                itemGroup.Item1.Sort( (InventoryItem i1, InventoryItem i2) => 
+                itemGroup.Item1.Sort((i1, i2) =>
                 {
                     return Math.Abs(i1.Bounding.Top - i2.Bounding.Top) > i1.Bounding.Height/8
                         ? i1.Bounding.Top - i2.Bounding.Top
@@ -1223,8 +1225,8 @@ namespace WFInfo
                                 sumBlack++;
                             }
                         }
-                        xCenter = xCenter / sumBlack;
-                        yCenter = yCenter / sumBlack;
+                        xCenter /= sumBlack;
+                        yCenter /= sumBlack;
 
 
                         if (sumBlack < Height ) continue; //not enough black = ignore and move on
@@ -1310,8 +1312,8 @@ namespace WFInfo
 
                         if (sumBlack < Height) continue; //not enough black = ignore and move on
 
-                        xCenterNew = xCenterNew / sumBlack;
-                        yCenterNew = yCenterNew / sumBlack;
+                        xCenterNew /= sumBlack;
+                        yCenterNew /= sumBlack;
 
                         //Search slight bit up and down to get well within the long line of the checkmark
                         int lowest = yCenterNew + 1000;
@@ -1413,10 +1415,10 @@ namespace WFInfo
 
                         //recalculate centers to be relative to whole image
                         rightmost = rightmost + Left + 1;
-                        xCenter = xCenter + Left;
-                        yCenter = yCenter + Top;
-                        xCenterNew = xCenterNew + Left;
-                        yCenterNew = yCenterNew + Top;
+                        xCenter += Left;
+                        yCenter += Top;
+                        xCenterNew += Left;
+                        yCenterNew += Top;
                         Debug.WriteLine("Old Center" + xCenter + ", " + yCenter);
                         Debug.WriteLine("New Center" + xCenterNew + ", " + yCenterNew);
                         
@@ -1699,8 +1701,10 @@ namespace WFInfo
                             //find bottom edge and hit ratio of all rows
                             int topEdge = y;
                             int bottomEdge = y;
-                            List<double> hitRatios = new List<double>();
-                            hitRatios.Add(1);
+                            List<double> hitRatios = new List<double>
+                            {
+                                1
+                            };
                             do
                             {
                                 int rightMostHit = 0;
@@ -1719,7 +1723,7 @@ namespace WFInfo
                                         }
                                     }
                                 }
-                                hitRatio = hits / (double)(rightEdge - leftEdge );
+                                hitRatio = hits / (double)(rightEdge - leftEdge);
                                 hitRatios.Add(hitRatio);
 
                                 if (hitRatio > 0.2 && rightMostHit+1 < rightEdge && rightEdge - leftEdge > 100) //make sure the innermost right edge is used (avoid bright part of frame overlapping with edge)

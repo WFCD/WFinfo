@@ -546,9 +546,9 @@ namespace WFInfo
                     }
                 }
             }
-            foreach (var m in missing)
+            foreach (var (Name, Url) in missing)
             {
-                LoadMarketItem(m.Name, m.Url);
+                LoadMarketItem(Name, Url);
                 saveDatabases = true;
             }
 
@@ -1941,7 +1941,7 @@ namespace WFInfo
 
             try
             {
-                var payload = new { route = "@wfm|cmd/status/set", payload = new { status = status } };
+                var payload = new { route = "@wfm|cmd/status/set", payload = new { status } };
                 string message = JsonConvert.SerializeObject(payload);
 
                 bool success = await SendMessage(message);
