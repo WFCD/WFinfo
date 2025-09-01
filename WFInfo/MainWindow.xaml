@@ -122,31 +122,7 @@
                 </Style>
             </Label.Style>
         </Label>
-        <Label x:Name="ReloadMarket" ToolTip="Reloads market data" Grid.Column="0" Foreground="{x:Null}" MouseLeftButtonDown="ReloadMarketClick" Margin="6,26,0,0" Padding="3" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20">
-            <Label.Style>
-                <Style>
-                    <Setter Property="ContentControl.Content">
-                        <Setter.Value>
-                            <Image Source="Resources/Reload.png" Stretch="Uniform" />
-                        </Setter.Value>
-                    </Setter>
-                    <Style.Triggers>
-                        <MultiTrigger>
-                            <MultiTrigger.Conditions>
-                                <Condition Property="UIElement.IsMouseOver" Value="True"/>
-                                <Condition Property="UIElement.IsEnabled" Value="True"/>
-                            </MultiTrigger.Conditions>
-                            <Setter Property="ContentControl.Content">
-                                <Setter.Value>
-                                    <Image Source="Resources/Reload_h.png" Stretch="Uniform" />
-                                </Setter.Value>
-                            </Setter>
-                        </MultiTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Label.Style>
-        </Label>
-        <Label x:Name="ReloadDrop" ToolTip="Reloads prime data" Grid.Column="0" Foreground="{x:Null}" MouseLeftButtonDown="ReloadDropClick" Margin="6,49,0,0" Padding="3" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20">
+        <Label x:Name="ReloadMarket" ToolTip="Reloads market and prime data" Grid.Column="0" Foreground="{x:Null}" MouseLeftButtonDown="ReloadDataClick" Margin="6,26,0,0" Padding="3" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20">
             <Label.Style>
                 <Style>
                     <Setter Property="ContentControl.Content">

@@ -38,7 +38,6 @@ namespace WFInfo
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;
         public static GFNWarning gfnWarning;
-        public static UpdateDialogue update;
         public static SnapItOverlay snapItOverlayWindow;
         public static SearchIt searchBox = new SearchIt();
         public static Login login = new Login();
@@ -140,7 +139,19 @@ namespace WFInfo
 
         private void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
         {
-            update = new UpdateDialogue(args);
+            if (args.Error != null)
+            {
+                AddLog("Update info error arg: " + args.Error);
+            }
+            try
+            {
+                _ = new UpdateDialogue(args);
+            }
+            catch (Exception e) 
+            { 
+                AddLog("Update checker error: " + e);
+                SpawnErrorPopup(DateTime.Now, 0);
+            }
         }
 
         public async void ThreadedDataLoad()
@@ -167,16 +178,13 @@ namespace WFInfo
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
+                FinishedLoading();
             }
             catch (Exception e)
             {
                 StatusUpdate("WFInfo Failed to Initialize", 0);
                 AddLog(e.ToString());
-                SpawnErrorPopup(DateTime.UtcNow, 1800);
-            }
-            finally
-            {
-                FinishedLoading();
+                RunOnUIThread(() => SpawnErrorPopup(DateTime.UtcNow, 1800));
             }
         }
 

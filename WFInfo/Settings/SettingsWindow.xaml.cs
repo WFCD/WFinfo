@@ -198,10 +198,18 @@ namespace WFInfo.Settings
 
             _ = OCR.updateEngineAsync();
 
-            // Use .Wait() to make it synchronous
-            Task.Run(() =>
+            Task.Run(async() =>
             {
-                Main.dataBase.ReloadItems().Wait();
+                try
+                {
+                    await Main.dataBase.ReloadItems();
+                }
+                catch (Exception ex)
+                {
+                    Main.AddLog("Locale change failed: " + ex);
+                    Main.StatusUpdate("Locale change failed", 2);
+                    Main.RunOnUIThread(() => Main.SpawnErrorPopup(DateTime.Now, 0));
+                }
             });
         }
 
