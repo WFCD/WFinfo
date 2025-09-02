@@ -701,7 +701,7 @@ namespace WFInfo
             // Skip writing timestamp if fallback data files were relied on
             if (!allFiltered.IsFallback && !sheetData.IsFallback && !marketItemsIsFallback)
             {
-                newMarketData["timespan"] = now;
+                newMarketData["timestamp"] = now;
                 marketTimeText = now.ToString("MMM dd - HH:mm", Main.culture);
             }
             else
