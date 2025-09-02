@@ -598,9 +598,9 @@ namespace WFInfo
             }
             lock (marketItemsLock)
             {
-                if (marketData == null)
-                { 
-                    marketItems = ParseFileOrMakeNew(marketItemsPath, ref parseHasFailed); 
+                if (marketItems == null)
+                {
+                    marketItems = ParseFileOrMakeNew(marketItemsPath, ref parseHasFailed);
                 }
             }
             if (equipmentData == null)
