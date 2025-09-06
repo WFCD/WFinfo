@@ -203,22 +203,13 @@ namespace WFInfo
             Main.settingsWindow.Show();
         }
 
-        private void ReloadMarketClick(object sender, RoutedEventArgs e)
+        private void ReloadDataClick(object sender, RoutedEventArgs e)
         {
-            ReloadDrop.IsEnabled = false;
             ReloadMarket.IsEnabled = false;
             MarketData.Content = "Loading...";
-            Main.StatusUpdate("Forcing Market Update", 0);
-            Task.Run(async () => await Main.dataBase.ForceMarketUpdate());
-        }
-
-        private void ReloadDropClick(object sender, RoutedEventArgs e)
-        {
-            ReloadDrop.IsEnabled = false;
-            ReloadMarket.IsEnabled = false;
             DropData.Content = "Loading...";
-            Main.StatusUpdate("Forcing Prime Update", 0);
-            Task.Factory.StartNew(Main.dataBase.ForceEquipmentUpdate);
+            Main.StatusUpdate("Forcing Data Update", 0);
+            Task.Run(async () => await Main.dataBase.ForceDataUpdate());
         }
 
         // Allows the draging of the window

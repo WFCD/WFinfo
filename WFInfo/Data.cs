@@ -58,14 +58,18 @@ namespace WFInfo
         private readonly string equipmentDataPath;
         private readonly string relicDataPath;
         private readonly string nameDataPath;
+        private readonly string filterAllJsonFallbackPath;
+        private readonly string sheetJsonFallbackPath;
+        private readonly Dictionary<string, string> wfmItemsFallbackPaths;
         public string JWT; // JWT is the security key, store this as email+pw combo'
         private ClientWebSocket marketSocket = new ClientWebSocket();
         private CancellationTokenSource marketSocketCancellation = new CancellationTokenSource();
         private readonly ManualResetEvent marketSocketOpenEvent = new ManualResetEvent(false);
         private TaskCompletionSource<bool> _authenticationCompletionSource;
         private bool _isWebSocketAuthenticated = false;
-        private readonly string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
-        private readonly string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
+        private const string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
+        private const string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
+        private const string wfmItemsUrl = "https://api.warframe.market/v2/items";
         public string inGameName = string.Empty;
         readonly HttpClient client;
         private string githubVersion;
@@ -111,6 +115,14 @@ namespace WFInfo
             equipmentDataPath = applicationDirectory + @"\eqmt_data.json";
             relicDataPath = applicationDirectory + @"\relic_data.json";
             nameDataPath = applicationDirectory + @"\name_data.json";
+            filterAllJsonFallbackPath = applicationDirectory + @"\fallback_equipment_list.json";
+            sheetJsonFallbackPath = applicationDirectory + @"\fallback_price_sheet.json";
+            wfmItemsFallbackPaths = new Dictionary<string, string>();
+            string[] locales = new string[] { "en", "ko" };
+            foreach (string locale in locales)
+            {
+                wfmItemsFallbackPaths[locale] = applicationDirectory + @"\fallback_names_" + locale + ".json";
+            }
 
             Directory.CreateDirectory(applicationDirectory);
 
@@ -182,27 +194,13 @@ namespace WFInfo
         }
 
         // Load item list from Sheets
-        public async Task ReloadItems()
+        public async Task<bool> ReloadItems()
         {
-            lock (marketItemsLock)
-            {
-                marketItems = new JObject();
-            }
+            var enItems = await GetWfmItemList("en");
+            var localizedItems = _settings.Locale == "en" ? enItems : await GetWfmItemList(_settings.Locale);
 
-            WebClient webClient = CreateWfmClient();
-            JObject obj;
-            try
-            {
-                obj = JsonConvert.DeserializeObject<JObject>(
-                    webClient.DownloadString("https://api.warframe.market/v2/items"));
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog("ReloadItems: failed to download item list (en). " + ex.Message);
-                return; // keep previous items; swap will be skipped
-            }
             JObject tempMarketItems = new JObject();
-            JArray items = JArray.FromObject(obj["data"]);
+            JArray items = JArray.FromObject(enItems.Data["data"]);
 
             int primeCount = 0;
             int totalCount = 0;
@@ -216,8 +214,8 @@ namespace WFInfo
                 if (name.Contains(" Prime") && !name.Contains(" Set"))
                 {
                     if ((name.Contains("Neuroptics") || name.Contains("Chassis") ||
-                         name.Contains("Systems") || name.Contains("Harness") ||
-                         name.Contains("Wings")))
+                            name.Contains("Systems") || name.Contains("Harness") ||
+                            name.Contains("Wings")))
                     {
                         name = name.Replace(" Blueprint", "");
                     }
@@ -228,35 +226,13 @@ namespace WFInfo
                 }
             }
 
-            try
+            items = JArray.FromObject(localizedItems.Data["data"]);
+            foreach (var item in items)
             {
-                using (var request = new HttpRequestMessage()
-                {
-                    RequestUri = new Uri("https://api.warframe.market/v2/items"),
-                    Method = HttpMethod.Get
-                })
-                {
-                    request.Headers.Add("language", _settings.Locale);
-                    request.Headers.Add("accept", "application/json");
-                    request.Headers.Add("platform", "pc");
-                    var response = await client.SendAsync(request).ConfigureAwait(false);
-                    var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var parsed = JsonConvert.DeserializeObject<JObject>(body);
-                    items = JArray.FromObject(parsed["data"]);
-                    foreach (var item in items)
-                    {
-                        string name = item["slug"].ToString();
-                        if (name.Contains("prime") && tempMarketItems.ContainsKey(item["id"].ToString()))
-                            tempMarketItems[item["id"].ToString()] = tempMarketItems[item["id"].ToString()] + "|" + item["i18n"][_settings.Locale]["name"];
-                    }
-                }
+                string name = item["slug"].ToString();
+                if (name.Contains("prime") && tempMarketItems.ContainsKey(item["id"].ToString()))
+                    tempMarketItems[item["id"].ToString()] = tempMarketItems[item["id"].ToString()] + "|" + item["i18n"][_settings.Locale]["name"];
             }
-            catch (Exception e)
-            {
-                Main.AddLog("ReloadItems: " + e.Message);
-            }
-
-            tempMarketItems["version"] = Main.BuildVersion;
 
             // Atomically replace marketItems under lock
             lock (marketItemsLock)
@@ -265,47 +241,15 @@ namespace WFInfo
             }
 
             Main.AddLog("Item database has been downloaded");
+            return enItems.IsFallback || localizedItems.IsFallback;
         }
 
         // Load market data from Sheets
-        // Load market data from Sheets
-        private async Task<bool> LoadMarket(JObject allFiltered, bool force = false)
+        private JObject LoadMarket(JObject allFiltered, JArray sheetData)
         {
-            if (!force && File.Exists(marketDataPath) && File.Exists(marketItemsPath))
-            {
-                if (marketData == null)
-                    marketData = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(marketDataPath));
-                if (marketItems == null)
-                    marketItems = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(marketItemsPath));
-
-                if (marketData.TryGetValue("version", out _) && (marketData["version"].ToObject<string>() == Main.BuildVersion))
-                {
-                    DateTime timestamp = marketData["timestamp"].ToObject<DateTime>();
-                    if (timestamp > DateTime.Now.AddHours(-12))
-                    {
-                        Main.AddLog("Market Databases are up to date");
-                        return false;
-                    }
-                }
-            }
-
-            try
-            {
-                // CRITICAL: Await ReloadItems() to ensure marketItems is populated FIRST
-                await ReloadItems();
-            }
-            catch (Exception e)
-            {
-                Main.AddLog("Failed to refresh items from warframe.market, skipping WFM update for now. Some items might have incomplete info.");
-                Main.AddLog(e.ToString());
-            }
-
             // Initialize market data
-            marketData = new JObject();
+            var newMarketData = new JObject();
 
-            WebClient webClient = CreateWfmClient();
-            JArray sheetData = JsonConvert.DeserializeObject<JArray>(
-                webClient.DownloadString(sheetJsonUrl));
             foreach (var item in sheetData)
             {
                 var key = item["name"].ToString();
@@ -314,74 +258,83 @@ namespace WFInfo
                     ["name"] = item["name"],
                     ["plat"] = item["custom_avg"], // Map custom_avg → plat
                     ["volume"] = item["today_vol"],
-                    ["ducats"] = 0 // Will be filled by RefreshMarketDucats()
+                    ["ducats"] = 0 // Will be filled by LoadEqmtData
                 };
 
-                marketData[key] = transformedItem;
+                newMarketData[key] = transformedItem;
 
                 // Add a "Blueprint"-stripped alias
                 var alias = key.Replace(" Blueprint", "");
                 if (!string.Equals(alias, key, StringComparison.Ordinal)
-                    && !marketData.TryGetValue(alias, out _))
+                    && !newMarketData.TryGetValue(alias, out _))
                 {
-                    marketData[alias] = transformedItem;
+                    newMarketData[alias] = transformedItem;
                 }
             }
 
             // Load ignored items
             foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
             {
-                marketData[ignored.Key] = ignored.Value;
+                newMarketData[ignored.Key] = ignored.Value;
             }
-
-            // Set timestamp AFTER all async operations complete
-            marketData["timestamp"] = DateTime.Now;
-            marketData["version"] = Main.BuildVersion;
 
             Main.AddLog("Plat database has been downloaded");
 
-            return true;
+            return newMarketData;
         }
 
-        private void LoadMarketItem(string item_name, string url)
+        private async Task<JObject> LoadMarketItem(string url)
         {
-            Main.AddLog("Load missing market item: " + item_name);
+            
 
-            Thread.Sleep(333);
-            WebClient webClient = CreateWfmClient();
-            JObject stats =
-                JsonConvert.DeserializeObject<JObject>(
-                    webClient.DownloadString("https://api.warframe.market/v1/items/" + url + "/statistics"));
-            JToken latestStats = stats["payload"]["statistics_closed"]["90days"].LastOrDefault();
-            if (latestStats == null)
-            {
-                stats = new JObject
+            JObject stats = new JObject
                 {
                     { "avg_price", 999 },
                     { "volume", 0 }
                 };
-            } 
-            else
+
+            try
             {
-                stats = latestStats.ToObject<JObject>();
+                await Task.Delay(333);
+                string statsResponse = await client.GetStringAsync("https://api.warframe.market/v1/items/" + url + "/statistics");
+                JObject allStats = JsonConvert.DeserializeObject<JObject>(statsResponse);
+                JToken latestStats = allStats["payload"]["statistics_closed"]["90days"].LastOrDefault();
+                if (latestStats != null)
+                {
+                    stats = latestStats.ToObject<JObject>();
+                } 
+                else
+                {
+                    Main.AddLog("Using placeholder stats");
+                }
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog("Failed to fetch stats " + Environment.NewLine + ex.ToString());
             }
 
-            Thread.Sleep(333);
-            webClient = CreateWfmClient();
-            JObject responseJObject = JsonConvert.DeserializeObject<JObject>(
-                webClient.DownloadString("https://api.warframe.market/v2/item/" + url)
-            );
-            string ducat;
-            if (!responseJObject["data"].ToObject<JObject>().TryGetValue("ducats", out JToken temp))
+            string ducat = "0";
+            try
             {
-                ducat = "0";
+                await Task.Delay(333);
+                string itemResponse = await client.GetStringAsync("https://api.warframe.market/v2/item/" + url);
+                JObject responseJObject = JsonConvert.DeserializeObject<JObject>(itemResponse);
+                if (responseJObject["data"].ToObject<JObject>().TryGetValue("ducats", out JToken temp))
+                {
+                    ducat = temp.ToObject<string>();
+                }
+                else
+                {
+                    Main.AddLog("Using placeholder ducats ");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ducat = temp.ToObject<string>();
+                Main.AddLog("Failed to fetch ducats " + Environment.NewLine + ex.ToString());
             }
 
-            marketData[item_name] = new JObject
+
+            return new JObject
             {
                 { "ducats", ducat },
                 { "plat", stats["avg_price"] },
@@ -389,265 +342,401 @@ namespace WFInfo
             };
         }
 
-        private bool LoadEqmtData(JObject allFiltered, bool force = false)
+        private (JObject RelicData, JObject NameData) LoadEqmtData(JObject allFiltered, JObject mrktData, JObject eqmtData)
         {
-            if (equipmentData == null)
-                equipmentData = File.Exists(equipmentDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(equipmentDataPath)) : new JObject();
-            if (relicData == null)
-                relicData = File.Exists(relicDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(relicDataPath)) : new JObject();
-            if (nameData == null)
-                nameData = File.Exists(nameDataPath) ? JsonConvert.DeserializeObject<JObject>(File.ReadAllText(nameDataPath)) : new JObject();
-
             // fill in equipmentData (NO OVERWRITE)
             // fill in nameData
             // fill in relicData
 
-            DateTime filteredDate = allFiltered["timestamp"].ToObject<DateTime>().ToLocalTime().AddHours(-1);
-            DateTime eqmtDate = equipmentData.TryGetValue("timestamp", out _) ? equipmentData["timestamp"].ToObject<DateTime>() : filteredDate;
+            var newRelicData = new JObject();
+            var newNameData = new JObject();
 
-            if (force || eqmtDate.CompareTo(filteredDate) <= 0)
+            foreach (KeyValuePair<string, JToken> era in allFiltered["relics"].ToObject<JObject>())
             {
-                equipmentData["timestamp"] = DateTime.Now;
-                relicData["timestamp"] = DateTime.Now;
-                nameData = new JObject();
-
-                foreach (KeyValuePair<string, JToken> era in allFiltered["relics"].ToObject<JObject>())
-                {
-                    relicData[era.Key] = new JObject();
-                    foreach (KeyValuePair<string, JToken> relic in era.Value.ToObject<JObject>())
-                        relicData[era.Key][relic.Key] = relic.Value;
-                }
-
-                foreach (KeyValuePair<string, JToken> prime in allFiltered["eqmt"].ToObject<JObject>())
-                {
-                    string primeName = prime.Key.Substring(0, prime.Key.IndexOf("Prime") + 5);
-                    if (!equipmentData.TryGetValue(primeName, out _))
-                        equipmentData[primeName] = new JObject();
-                    equipmentData[primeName]["vaulted"] = prime.Value["vaulted"];
-                    equipmentData[primeName]["type"] = prime.Value["type"];
-                    if (!equipmentData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
-                        equipmentData[primeName]["mastered"] = false;
-
-                    if (!equipmentData[primeName].ToObject<JObject>().TryGetValue("parts", out _))
-                        equipmentData[primeName]["parts"] = new JObject();
-
-
-                    foreach (KeyValuePair<string, JToken> part in prime.Value["parts"].ToObject<JObject>())
-                    {
-                        string partName = part.Key;
-                        if (!equipmentData[primeName]["parts"].ToObject<JObject>().TryGetValue(partName, out _))
-                            equipmentData[primeName]["parts"][partName] = new JObject();
-                        if (!equipmentData[primeName]["parts"][partName].ToObject<JObject>().TryGetValue("owned", out _))
-                            equipmentData[primeName]["parts"][partName]["owned"] = 0;
-                        equipmentData[primeName]["parts"][partName]["vaulted"] = part.Value["vaulted"];
-                        equipmentData[primeName]["parts"][partName]["count"] = part.Value["count"];
-                        equipmentData[primeName]["parts"][partName]["ducats"] = part.Value["ducats"];
-
-
-                        if (part.Key != null && prime.Value?["type"] != null && part.Value?["ducats"] != null)
-                        {
-                            string gameName = part.Key;
-                            string partType = prime.Value["type"].ToString();
-
-                            if (partType == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")))
-                            {
-                                gameName += " Blueprint";
-                            }
-                            else if (partType == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
-                            {
-                                gameName += " Blueprint";
-                            }
-
-                            string targetKey = null;
-                            if (marketData.TryGetValue(partName, out _))
-                                targetKey = partName;
-                            else if (marketData.TryGetValue(partName + " Blueprint", out _))
-                                targetKey = partName + " Blueprint";
-
-                            if (targetKey != null)
-                            {
-                                nameData[gameName] = partName;
-                                marketData[targetKey]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
-                            }
-                        }
-                    }
-                }
-
-                // Add default values for ignored items
-                foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
-                {
-                    nameData[ignored.Key] = ignored.Key;
-                }
-
-                Main.AddLog("Prime Database has been downloaded");
-                return true;
+                newRelicData[era.Key] = new JObject();
+                foreach (KeyValuePair<string, JToken> relic in era.Value.ToObject<JObject>())
+                    newRelicData[era.Key][relic.Key] = relic.Value;
             }
-            Main.AddLog("Prime Database is up to date");
-            return false;
-        }
 
-        private void RefreshMarketDucats()
-        {
-            //equipmentData[primeName]["parts"][partName]["ducats"]
-            foreach (KeyValuePair<string, JToken> prime in equipmentData)
-                if (prime.Key != "timestamp")
-                    foreach (KeyValuePair<string, JToken> part in equipmentData[prime.Key]["parts"].ToObject<JObject>())
-                        if (marketData.TryGetValue(part.Key, out _))
-                        {
-                            // In RefreshMarketDucats() method:
-                            string ducatsStr = part.Value["ducats"]?.ToString();
-                            if (!string.IsNullOrEmpty(ducatsStr) && int.TryParse(ducatsStr, NumberStyles.Integer, Main.culture, out int ducatsValue))
-                            {
-                                marketData[part.Key]["ducats"] = ducatsValue;
-                            }
-                            else
-                            {
-                                Main.AddLog($"Invalid ducats value for {part.Key}: '{ducatsStr ?? "null"}'");
-                                marketData[part.Key]["ducats"] = 0;
-                            }
-                        }
-        }
-
-        public async Task<bool> Update()
-        {
-            Main.AddLog("Checking for Updates to Databases");
-            WebClient webClient = CustomEntrypoint.CreateNewWebClient();
-            JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
-
-            // Await the async LoadMarket method
-            bool saveDatabases = await LoadMarket(allFiltered);
-
-            // Thread-safe enumeration of marketItems with null check
-                        var missing = new List<(string Name, string Url)>();
-            lock (marketItemsLock)
+            foreach (KeyValuePair<string, JToken> prime in allFiltered["eqmt"].ToObject<JObject>())
             {
-                if (marketItems == null)
+                string primeName = prime.Key.Substring(0, prime.Key.IndexOf("Prime") + 5);
+                if (!eqmtData.TryGetValue(primeName, out _))
+                    eqmtData[primeName] = new JObject();
+                eqmtData[primeName]["vaulted"] = prime.Value["vaulted"];
+                eqmtData[primeName]["type"] = prime.Value["type"];
+                if (!eqmtData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
+                    eqmtData[primeName]["mastered"] = false;
+
+                if (!eqmtData[primeName].ToObject<JObject>().TryGetValue("parts", out _))
+                    eqmtData[primeName]["parts"] = new JObject();
+
+
+                foreach (KeyValuePair<string, JToken> part in prime.Value["parts"].ToObject<JObject>())
                 {
-                    Main.AddLog("marketItems is null, skipping item enumeration");
-                }
-                else
-                {
-                    foreach (KeyValuePair<string, JToken> elem in marketItems)
+                    string partName = part.Key;
+                    if (!eqmtData[primeName]["parts"].ToObject<JObject>().TryGetValue(partName, out _))
+                        eqmtData[primeName]["parts"][partName] = new JObject();
+                    if (!eqmtData[primeName]["parts"][partName].ToObject<JObject>().TryGetValue("owned", out _))
+                        eqmtData[primeName]["parts"][partName]["owned"] = 0;
+                    eqmtData[primeName]["parts"][partName]["vaulted"] = part.Value["vaulted"];
+                    eqmtData[primeName]["parts"][partName]["count"] = part.Value["count"];
+                    eqmtData[primeName]["parts"][partName]["ducats"] = part.Value["ducats"];
+
+
+                    if (part.Key != null && prime.Value?["type"] != null && part.Value?["ducats"] != null)
                     {
-                        if (elem.Key == "version") continue;
-                        string[] split = elem.Value.ToString().Split('|');
-                        if (split.Length < 2) continue;
-                        string itemName = split[0];
-                        string itemUrl = split[1];
-                        if (!itemName.Contains(" Set"))
+                        string gameName = part.Key;
+                        string partType = prime.Value["type"].ToString();
+
+                        if (partType == "Archwing" && (part.Key.Contains("Systems") || part.Key.Contains("Harness") || part.Key.Contains("Wings")))
                         {
-                            // Try direct lookup first, then try with " Blueprint" appended
-                            if (!marketData.TryGetValue(itemName, out _) &&
-                                !marketData.TryGetValue(itemName + " Blueprint", out _))
-                            {
-                                missing.Add((itemName, itemUrl));
-                            }
+                            gameName += " Blueprint";
+                        }
+                        else if (partType == "Warframes" && (part.Key.Contains("Systems") || part.Key.Contains("Neuroptics") || part.Key.Contains("Chassis")))
+                        {
+                            gameName += " Blueprint";
+                        }
+
+                        string targetKey = null;
+                        if (mrktData.TryGetValue(partName, out _))
+                            targetKey = partName;
+                        else if (mrktData.TryGetValue(partName + " Blueprint", out _))
+                            targetKey = partName + " Blueprint";
+
+                        if (targetKey != null)
+                        {
+                            newNameData[gameName] = partName;
+                            mrktData[targetKey]["ducats"] = Convert.ToInt32(part.Value["ducats"].ToString(), Main.culture);
                         }
                     }
                 }
             }
-            foreach (var m in missing)
+
+            // Add default values for ignored items
+            foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
             {
-                LoadMarketItem(m.Name, m.Url);
-                saveDatabases = true;
+                newNameData[ignored.Key] = ignored.Key;
             }
 
-            if (marketData["timestamp"] == null)
-            {
-                Main.RunOnUIThread(() => { MainWindow.INSTANCE.MarketData.Content = "VERIFY"; });
-                Main.RunOnUIThread(() => { MainWindow.INSTANCE.DropData.Content = "TIME"; });
-                return false;
-            }
-
-            // This UI update will now happen AFTER ReloadItems completes
-            Main.RunOnUIThread(() => { MainWindow.INSTANCE.MarketData.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
-
-            saveDatabases = LoadEqmtData(allFiltered, saveDatabases);
-            Main.RunOnUIThread(() => { MainWindow.INSTANCE.DropData.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture); });
-
-            if (saveDatabases)
-                SaveAllJSONs();
-
-            return saveDatabases;
+            Main.AddLog("Prime Database has been downloaded");
+            return (newRelicData, newNameData);
         }
 
-        public async Task ForceMarketUpdate()
+        private async Task<(JObject Data, bool IsFallback)> GetWfmItemList(string locale)
         {
             try
             {
-                Main.AddLog("Forcing market update");
-                WebClient webClient = CustomEntrypoint.CreateNewWebClient();
-                JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
-
-                Main.AddLog("Before calling LoadMarket");
-                // Await the async LoadMarket method
-                await LoadMarket(allFiltered, true);
-
-                Main.AddLog($"Base market data loaded from sheet, filling gaps from WFM...");
-
-                // Only download PRIME items that are missing from the sheet data
-                var missing = new List<(string Name, string Url)>();
-                lock (marketItemsLock)
+                using (var request = new HttpRequestMessage()
                 {
-                    if (marketItems == null)
+                    RequestUri = new Uri(wfmItemsUrl),
+                    Method = HttpMethod.Get
+                })
+                {
+                    request.Headers.Add("language", locale);
+                    request.Headers.Add("accept", "application/json");
+                    request.Headers.Add("platform", "pc");
+                    await Task.Delay(333);
+                    var response = await client.SendAsync(request).ConfigureAwait(false);
+                    var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var data = JsonConvert.DeserializeObject<JObject>(body);
+                    if (wfmItemsFallbackPaths.TryGetValue(locale, out var fallbackPath)) 
                     {
-                        Main.AddLog("marketItems is null, no items to force update");
+                        File.WriteAllText(fallbackPath, body);
                     }
-                    else
+                    return (data, false);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (wfmItemsFallbackPaths.TryGetValue(locale, out var fallbackPath))
+                {
+                    Main.AddLog("Failed to fetch/parse " + wfmItemsUrl + ", using file " + fallbackPath + Environment.NewLine + ex.ToString());
+                    if (File.Exists(fallbackPath))
                     {
-                        foreach (var elem in marketItems)
-                        {
-                            if (elem.Key == "version")
-                                continue;
-                            var split = elem.Value.ToString().Split('|');
-                            if (split.Length < 2)
-                                continue;
-                            var itemName = split[0];
-                            var itemUrl = split[1];
-                            // Only queue Prime items (not sets) that aren't already in marketData
-                            if (!itemName.Contains(" Set") &&
-                                itemName.Contains("Prime"))
-                            {
-                                // Try direct lookup first, then try with " Blueprint" appended
-                                if (!marketData.TryGetValue(itemName, out _) &&
-                                    !marketData.TryGetValue(itemName + " Blueprint", out _))
-                                {
-                                    missing.Add((itemName, itemUrl));
-                                }
-                            }
-                        }
+                        string response = File.ReadAllText(fallbackPath);
+                        JObject data = JsonConvert.DeserializeObject<JObject>(response);
+                        return (data, true);
                     }
                 }
-                int downloadCount = 0;
-                foreach (var (name, url) in missing)
+                else
                 {
-                    LoadMarketItem(name, url);
-                    downloadCount++;
-                    Main.AddLog($"Downloaded missing Prime item: {name}");
+                    Main.AddLog("Failed to fetch/parse " + wfmItemsUrl + ", and no fallback path found for locale: " + locale + Environment.NewLine + ex.ToString());
                 }
-                Main.AddLog($"Downloaded {downloadCount} missing Prime items from WFM");
+                throw new AggregateException("No local fallback found", ex);
+            }
+        }
 
-                RefreshMarketDucats();
+        private async Task<(JObject Data, bool IsFallback)> GetAllFiltered()
+        {
+            try
+            {
+                string response = await client.GetStringAsync(filterAllJSON);
+                JObject data = JsonConvert.DeserializeObject<JObject>(response);
+                File.WriteAllText(filterAllJsonFallbackPath, response);
+                return (data, false);
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog("Failed to fetch/parse " + filterAllJSON + ", using file " + filterAllJsonFallbackPath + Environment.NewLine + ex.ToString());
+                if (File.Exists(filterAllJsonFallbackPath))
+                {
+                    string response = File.ReadAllText(filterAllJsonFallbackPath);
+                    JObject data = JsonConvert.DeserializeObject<JObject>(response);
+                    return (data, true);
+                }
+                else
+                {
+                    throw new AggregateException("No local fallback found", ex);
+                }
+            }
+            
+        }
 
-                SaveDatabase(marketItemsPath, marketItems);
-                SaveDatabase(marketDataPath, marketData);
+        private async Task<(JArray Data, bool IsFallback)> GetSheetData()
+        {
+            try
+            {
+                string response = await client.GetStringAsync(sheetJsonUrl);
+                JArray data = JsonConvert.DeserializeObject<JArray>(response);
+                File.WriteAllText(sheetJsonFallbackPath, response);
+                return (data, false);
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog("Failed to fetch/parse " + sheetJsonUrl + ", using file " + sheetJsonFallbackPath + Environment.NewLine + ex.ToString());
+                if (File.Exists(sheetJsonFallbackPath))
+                {
+                    string response = File.ReadAllText(sheetJsonFallbackPath);
+                    JArray data = JsonConvert.DeserializeObject<JArray>(response);
+                    return (data, true);
+                }
+                else
+                {
+                    throw new AggregateException("No local fallback found", ex);
+                }
+            }
+
+        }
+
+        private SemaphoreSlim _DataUpdateSema = new SemaphoreSlim(1);
+
+        public async Task Update()
+        {
+            await _DataUpdateSema.WaitAsync();
+            try
+            {
+                await UpdateInner(false);
+            }
+            finally
+            {
+                _DataUpdateSema.Release();
+            }
+        }
+
+        public async Task ForceDataUpdate()
+        {
+            var acquired = await _DataUpdateSema.WaitAsync(TimeSpan.Zero);
+            if (!acquired)
+            {
+                Main.AddLog("Data Update already in progress");
+                Main.StatusUpdate("Data Update already in progress", 3);
                 Main.RunOnUIThread(() =>
                 {
-                    MainWindow.INSTANCE.MarketData.Content = marketData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
-                    Main.StatusUpdate("Market Update Complete", 0);
-                    MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
+                    MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
+                });
+                return;
+            }
+
+            try
+            {
+                await UpdateInner(true);
+                Main.RunOnUIThread(() =>
+                {
                     MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
                 });
             }
             catch (Exception ex)
             {
-                Main.AddLog("ForceMarketUpdate FAILED " + ex);
+                Main.AddLog( nameof(ForceDataUpdate)+ " FAILED " + ex);
+                Main.StatusUpdate("Data Update Failed", 0);
                 Main.RunOnUIThread(() =>
                 {
-                    MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
+                    Main.SpawnErrorPopup(DateTime.Now, 0);
                     MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
                 });
             }
+            finally
+            {
+                _DataUpdateSema.Release();
+            }
+        }
+
+        private JObject ParseFileOrMakeNew(string path, ref bool parseHasFailed)
+        {
+            if (File.Exists(path))
+            {
+                return JsonConvert.DeserializeObject<JObject>(File.ReadAllText(path));
+            }
+            Main.AddLog(path + " missing, loading blank");
+            parseHasFailed = true;
+            return new JObject();
+        }
+
+
+        public async Task UpdateInner(bool force)
+        {
+            Main.AddLog("Starting UpdateInner, force: " + force);
+            DateTime now = DateTime.Now;
+
+            bool parseHasFailed = false;
+
+            // Init core data objects, if necessary
+            if (marketData == null)
+            {
+                marketData = ParseFileOrMakeNew(marketDataPath, ref parseHasFailed);
+            }
+            lock (marketItemsLock)
+            {
+                if (marketItems == null)
+                {
+                    marketItems = ParseFileOrMakeNew(marketItemsPath, ref parseHasFailed);
+                }
+            }
+            if (equipmentData == null)
+            {
+                equipmentData = ParseFileOrMakeNew(equipmentDataPath, ref parseHasFailed);
+            }
+            if (relicData == null)
+            {
+                relicData = ParseFileOrMakeNew(relicDataPath, ref parseHasFailed);
+            }
+            if (nameData == null)
+            {
+                nameData = ParseFileOrMakeNew(nameDataPath, ref parseHasFailed);
+            }
+
+            string oldMarketTimeText;
+            bool marketIsRecent = false;
+            if (marketData.TryGetValue("version", out _) && (marketData["version"].ToObject<string>() == Main.BuildVersion)
+                && marketData.TryGetValue("timestamp", out var timestamp) && timestamp.ToObject<DateTime>() > now.AddHours(-12))
+            {
+                // market data confirmed to be updated less than 12 hours ago. Actual data age can vary, due to pipeline delays
+                marketIsRecent = true;
+                oldMarketTimeText = timestamp.ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+            }
+            else
+            {
+                oldMarketTimeText = "UNKNOWN";
+            }
+
+                string oldEquipmentTimeText;
+            bool equipmentIsRecent = false;
+            if (equipmentData.TryGetValue("timestamp", out var equipmentTimestamp) && equipmentTimestamp.ToObject<DateTime>() > now.AddHours(-12))
+            {
+                // equipment data confirmed to be updated less than 12 hours ago. Actual data age can vary, due to pipeline delays
+                equipmentIsRecent = true;
+                oldEquipmentTimeText = equipmentTimestamp.ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+            }
+            else
+            {
+                oldEquipmentTimeText = "UNKNOWN";
+            }
+
+            if (!parseHasFailed && !force && marketIsRecent && equipmentIsRecent)
+            {
+                Main.RunOnUIThread(() =>
+                {
+                    MainWindow.INSTANCE.MarketData.Content = oldMarketTimeText;
+                    MainWindow.INSTANCE.DropData.Content = oldEquipmentTimeText;
+                });
+                return;
+            }
+
+            var allFiltered = await GetAllFiltered();
+            var sheetData = await GetSheetData();
+
+            var marketItemsIsFallback = await ReloadItems();
+
+            var newMarketData = LoadMarket(allFiltered.Data, sheetData.Data);
+
+            // check for any items reported by WFM name table, but missing from LoadMarket results
+            var missing = new List<(string Name, string Url)>();
+            lock (marketItemsLock)
+            {
+                foreach (KeyValuePair<string, JToken> elem in marketItems)
+                {
+                    if (elem.Key == "version") continue;
+                    string[] split = elem.Value.ToString().Split('|');
+                    if (split.Length < 2) continue;
+                    string itemName = split[0];
+                    string itemUrl = split[1];
+                    if (!itemName.Contains(" Set"))
+                    {
+                        // Try direct lookup first, then try with " Blueprint" appended
+                        if (!newMarketData.ContainsKey(itemName) &&
+                            !newMarketData.ContainsKey(itemName + " Blueprint"))
+                        {
+                            missing.Add((itemName, itemUrl));
+                        }
+                    }
+                }
+            }
+            // retrieve missing item data directly from WFM
+            foreach (var m in missing)
+            {
+                Main.AddLog("Load missing market item: " + m.Name);
+                newMarketData[m.Name] = await LoadMarketItem(m.Url);
+            }
+
+            // to preserve owned count and mastery status while being cautious about thread safety, make copy of equipment data to update
+            var newEquipmentData = (JObject)equipmentData.DeepClone();
+
+            // get/update remaining info
+            var (newRelicData, newNameData) = LoadEqmtData(allFiltered.Data, newMarketData, newEquipmentData);
+
+
+            string marketTimeText;
+            string equipmentTimeText;
+            // Skip writing timestamp if fallback data files were relied on
+            if (!allFiltered.IsFallback && !sheetData.IsFallback && !marketItemsIsFallback)
+            {
+                newMarketData["timestamp"] = now;
+                marketTimeText = now.ToString("MMM dd - HH:mm", Main.culture);
+            }
+            else
+            {
+                marketTimeText = "FALLBACK";
+            }
+
+            if (!allFiltered.IsFallback)
+            {
+                newEquipmentData["timestamp"] = now;
+                equipmentTimeText = now.ToString("MMM dd - HH:mm", Main.culture);
+            }
+            else
+            {
+                equipmentTimeText = "FALLBACK";
+            }
+
+            newMarketData["version"] = Main.BuildVersion;
+
+            // swap to new data files. marketItems excluded because ReloadItems does that immediately
+            marketData = newMarketData;
+            equipmentData = newEquipmentData;
+            relicData = newRelicData;
+            nameData = newNameData;
+
+            SaveAllJSONs();
+
+            Main.RunOnUIThread(() => 
+            {
+                MainWindow.INSTANCE.MarketData.Content = marketTimeText;
+                MainWindow.INSTANCE.DropData.Content = equipmentTimeText;
+            });
+
+            Main.AddLog("Data Update Complete");
+            Main.StatusUpdate("Data Update Complete", 0);
         }
 
         public void SaveAllJSONs()
@@ -657,38 +746,6 @@ namespace WFInfo
             SaveDatabase(nameDataPath, nameData);
             SaveDatabase(marketItemsPath, marketItems);
             SaveDatabase(marketDataPath, marketData);
-        }
-
-        public void ForceEquipmentUpdate()
-        {
-            try
-            {
-                Main.AddLog("Forcing equipment update");
-                WebClient webClient = CustomEntrypoint.CreateNewWebClient();
-                JObject allFiltered = JsonConvert.DeserializeObject<JObject>(webClient.DownloadString(filterAllJSON));
-                LoadEqmtData(allFiltered, true);
-                SaveAllJSONs();
-                Main.RunOnUIThread(() =>
-                {
-                    MainWindow.INSTANCE.DropData.Content = equipmentData["timestamp"].ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
-                    Main.StatusUpdate("Prime Update Complete", 0);
-
-                    MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
-                    MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
-                });
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog("Prime Update Failed");
-                Main.AddLog(ex.ToString());
-                Main.StatusUpdate("Prime Update Failed", 0);
-                Main.RunOnUIThread(() =>
-                {
-                   _ = new ErrorDialogue(DateTime.Now, 0);
-                    MainWindow.INSTANCE.ReloadDrop.IsEnabled = true;
-                    MainWindow.INSTANCE.ReloadMarket.IsEnabled = true;
-                });
-            }
         }
 
         public bool IsPartVaulted(string name)
