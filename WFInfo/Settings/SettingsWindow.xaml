@@ -498,6 +498,10 @@
                                                   Content="English"
                                                   FontSize="14"
                                                   Background="#FF1B1B1B" />
+                                    <ComboBoxItem Tag="de"
+                                                  Content="Deutsch"
+                                                  FontSize="14"
+                                                  Background="#FF1B1B1B" />
                                     <ComboBoxItem Tag="ko"
                                                   Content="한국어"
                                                   FontSize="14"
