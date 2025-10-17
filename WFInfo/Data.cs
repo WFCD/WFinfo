@@ -118,7 +118,7 @@ namespace WFInfo
             filterAllJsonFallbackPath = applicationDirectory + @"\fallback_equipment_list.json";
             sheetJsonFallbackPath = applicationDirectory + @"\fallback_price_sheet.json";
             wfmItemsFallbackPaths = new Dictionary<string, string>();
-            string[] locales = new string[] { "en", "ko" };
+            string[] locales = new string[] { "en", "de", "ko" };
             foreach (string locale in locales)
             {
                 wfmItemsFallbackPaths[locale] = applicationDirectory + @"\fallback_names_" + locale + ".json";
