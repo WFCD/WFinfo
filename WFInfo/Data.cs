@@ -834,6 +834,9 @@ namespace WFInfo
                 case "ko":
                     // for korean
                     return LevenshteinDistanceKorean(s, t);
+                case "de":
+                    // for german
+                    return LevenshteinDistanceGerman(s, t);
                 default:
                     return LevenshteinDistanceDefault(s, t);
             }
@@ -888,6 +891,13 @@ namespace WFInfo
             return d[n, m];
         }
 
+        public int LevenshteinDistanceGerman(string s, string t)
+        {
+            s = GetLocaleNameData(s);
+
+            return LevenshteinDistanceDefault(s, t);
+        }
+
         // This isn't used anymore?!
         public static bool IsKorean(String str)
         {
@@ -924,6 +934,7 @@ namespace WFInfo
 
             return localeName;
         }
+
         private protected static string e = "A?s/,;j_<Z3Q4z&)";
 
         public int LevenshteinDistanceKorean(string s, string t)
@@ -1097,7 +1108,9 @@ namespace WFInfo
             multipleLowest = false;
             foreach (KeyValuePair<string, JToken> prop in nameData)
             {
-                int val = LevenshteinDistance(prop.Key, name);
+                // Potent. Fix? Dont wanna break compatibility.
+                int val = LevenshteinDistance(prop.Value.ToObject<string>(), name);
+                //int val = LevenshteinDistance(prop.Key, name);
                 if (val < low)
                 {
                     low = val;

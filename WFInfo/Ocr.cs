@@ -97,7 +97,7 @@ namespace WFInfo
         // UI - Scaling used in Warframe
         public static double uiScaling;
 
-        public static Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static Regex RE = new Regex("[^a-zäöüß:가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
         public const int pixleRewardWidth = 968;
@@ -639,7 +639,10 @@ namespace WFInfo
         /// <returns>If part name is close enough to valid to actually process</returns>
         internal static bool PartNameValid (string partName)
         {
-            if ((partName.Length < 13 && _settings.Locale == "en") || (partName.Replace(" ", "").Length < 6 && _settings.Locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
+            // if part name is smaller than "Bo prime handle" skip current part
+            if ((partName.Length < 13 && _settings.Locale == "en") ||
+                (partName.Length < 13 && _settings.Locale == "de") ||
+                (partName.Replace(" ", "").Length < 6 && _settings.Locale == "ko")) 
                 //TODO: Add a min character for other locale here.
                 return false;
             return true;
@@ -688,11 +691,21 @@ namespace WFInfo
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool multipleLowest);
                 string primeSetName = Data.GetSetName(name);
-                if (levenDist > Math.Min(part.Name.Length, name.Length) / 3 || multipleLowest)
+
+                if (_settings.Locale != "en")
                 {
-                    //show warning triangle if the result is of questionable accuracy. The limit is basically arbitrary
+                    if (levenDist > Math.Min(part.Name.Length, Main.dataBase.GetLocaleNameData(name).Length) / 3 || multipleLowest)
+                    {
+                        // show warning triangle if the result is of questionable accuracy. The limit is basically arbitrary
+                        part.Warning = true;
+                    }
+                }
+                else if (levenDist > Math.Min(part.Name.Length, name.Length) / 3 || multipleLowest)
+                {
+                    // show warning triangle if the result is of questionable accuracy. The limit is basically arbitrary
                     part.Warning = true;
                 }
+
                 bool doWarn = part.Warning;
                 part.Name = name;
                 foundParts[i] = part;
@@ -729,15 +742,29 @@ namespace WFInfo
                     width = _settings.MaxOverlayWidth;
                 }
 
-
-                Main.RunOnUIThread(() =>
+                if (_settings.Locale != "en")
                 {
-                    Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, primeSetPlat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false, doWarn);
-                    itemOverlay.toSnapit();
-                    itemOverlay.Resize(width);
-                    itemOverlay.Display((int)(_window.Window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / _window.DpiScaling), (int)((_window.Window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / _window.DpiScaling), _settings.SnapItDelay);
-                });
+                    Main.RunOnUIThread(() =>
+                    {
+                        Overlay itemOverlay = new Overlay();
+                        itemOverlay.LoadTextData(Main.dataBase.GetLocaleNameData(name), plat, primeSetPlat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false, doWarn);
+                        itemOverlay.toSnapit();
+                        itemOverlay.Resize(width);
+                        itemOverlay.Display((int)(_window.Window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / _window.DpiScaling), (int)((_window.Window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / _window.DpiScaling), _settings.SnapItDelay);
+                    });
+                }
+                else
+                {
+                    Main.RunOnUIThread(() =>
+                    {
+                        Overlay itemOverlay = new Overlay();
+                        itemOverlay.LoadTextData(name, plat, primeSetPlat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false, doWarn);
+                        itemOverlay.toSnapit();
+                        itemOverlay.Resize(width);
+                        itemOverlay.Display((int)(_window.Window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / _window.DpiScaling), (int)((_window.Window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / _window.DpiScaling), _settings.SnapItDelay);
+                    });
+                }
+
             }
 
             if (_settings.DoSnapItCount && resultCount > 0)
@@ -1548,9 +1575,12 @@ namespace WFInfo
             for (int i = 0; i < foundParts.Count; i++)
             {
                 InventoryItem part = foundParts[i];
+
                 if (!PartNameValid(part.Name + " Blueprint"))
                     continue;
                 string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity, true, out _); //add blueprint to name to check against prime drop table
+                
+                
                 string checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out int primeProximity, true, out _); //also add prime to check if that gives better match. If so, this is a non-prime
                 Main.AddLog("Checking \"" + part.Name.Trim() +"\", (" + proximity +")\"" + name + "\", +prime (" + primeProximity + ")\"" + checkName + "\"");
 
@@ -1813,7 +1843,7 @@ namespace WFInfo
 
 
                             //do OCR
-                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&");
+                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&ÄÖÜ:");
                             using (var page = _tesseractService.FirstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                             {
                                 using (var iterator = page.GetIterator())
