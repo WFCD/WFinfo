@@ -1603,31 +1603,82 @@ namespace WFInfo
             {
                 InventoryItem part = foundParts[i];
 
-                if (!PartNameValid(part.Name + " Blueprint"))
-                    continue;
-                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity, true, out _); //add blueprint to name to check against prime drop table
-                
-                
-                string checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out int primeProximity, true, out _); //also add prime to check if that gives better match. If so, this is a non-prime
-                Main.AddLog("Checking \"" + part.Name.Trim() +"\", (" + proximity +")\"" + name + "\", +prime (" + primeProximity + ")\"" + checkName + "\"");
-
-                //Decide if item is an actual prime, if so mark as mastered
-                if (proximity < 3 && proximity < primeProximity && part.Name.Length > 6 && name.Contains("Prime"))
+                if (_settings.Locale != "en")
                 {
-                    //mark as mastered
-                    string[] nameParts = name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
-                    string primeName = nameParts[0] + "Prime";
+                    string blueprintTranslated = null;
+                    string primeTranslated = null;
 
-                    if (Main.dataBase.equipmentData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
+                    switch (_settings.Locale)
                     {
-                        Main.dataBase.equipmentData[primeName]["mastered"] = true;
+                        case "de":
+                            blueprintTranslated = "Blaupause";
+                            primeTranslated = "Prime";
+                            break;
+                        default:
+                            break;
+                    }
 
-                        Main.AddLog("Marked \"" + primeName + "\" as mastered");
-                    } else
+                    if (!PartNameValid(part.Name + $" {blueprintTranslated}"))
+                        continue;
+                    string name = Main.dataBase.GetPartName(part.Name + $" {blueprintTranslated}", out int proximity, true, out _); //add blueprint to name to check against prime drop table
+
+
+                    string checkName = Main.dataBase.GetPartName(part.Name + $" {primeTranslated} {blueprintTranslated}", out int primeProximity, true, out _); //also add prime to check if that gives better match. If so, this is a non-prime
+                    Main.AddLog("Checking \"" + part.Name.Trim() + "\", (" + proximity + ")\"" + name + "\", +prime (" + primeProximity + ")\"" + checkName + "\"");
+
+                    //Decide if item is an actual prime, if so mark as mastered
+                    if (proximity < 3 && proximity < primeProximity && part.Name.Length > 6 && name.Contains(primeTranslated))
                     {
-                        Main.AddLog("Failed to mark \"" + primeName + "\" as mastered");
+                        // We want the english name part in equipment marked with the name of the locale
+                        // Translate backwards? _settings.locale -> english
+                        // Currently Works becaus the Names of the Equipent are both the same in English / German | latin?
+                        // TODO: Implementing a function to get the english name of the part we want to check
+
+                        //mark as mastered
+                        string[] nameParts = name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
+                        string primeName = nameParts[0] + "Prime";
+
+                        if (Main.dataBase.equipmentData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
+                        {
+                            Main.dataBase.equipmentData[primeName]["mastered"] = true;
+
+                            Main.AddLog("Marked \"" + primeName + "\" as mastered");
+                        }
+                        else
+                        {
+                            Main.AddLog("Failed to mark \"" + primeName + "\" as mastered");
+                        }
                     }
                 }
+                else
+                {
+                    if (!PartNameValid(part.Name + " Blueprint"))
+                        continue;
+                    string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity, true, out _); //add blueprint to name to check against prime drop table
+                
+                
+                    string checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out int primeProximity, true, out _); //also add prime to check if that gives better match. If so, this is a non-prime
+                    Main.AddLog("Checking \"" + part.Name.Trim() +"\", (" + proximity +")\"" + name + "\", +prime (" + primeProximity + ")\"" + checkName + "\"");
+
+                    //Decide if item is an actual prime, if so mark as mastered
+                    if (proximity < 3 && proximity < primeProximity && part.Name.Length > 6 && name.Contains("Prime"))
+                    {
+                        //mark as mastered
+                        string[] nameParts = name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
+                        string primeName = nameParts[0] + "Prime";
+
+                        if (Main.dataBase.equipmentData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
+                        {
+                            Main.dataBase.equipmentData[primeName]["mastered"] = true;
+
+                            Main.AddLog("Marked \"" + primeName + "\" as mastered");
+                        } else
+                        {
+                            Main.AddLog("Failed to mark \"" + primeName + "\" as mastered");
+                        }
+                    }
+                }
+
             }
             Main.dataBase.SaveAllJSONs();
             Main.RunOnUIThread(() =>
