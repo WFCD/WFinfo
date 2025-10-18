@@ -323,6 +323,8 @@ namespace WFInfo
                     #endregion
 
                     #region display part
+
+                    // Display the translated item name when the user's selected locale is not English
                     if (_settings.Locale != "en")
                     {
                         Main.RunOnUIThread(() =>
@@ -719,6 +721,7 @@ namespace WFInfo
                 string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool multipleLowest);
                 string primeSetName = Data.GetSetName(name);
 
+                // Get the translated item name when the user's selected locale is not English
                 if (_settings.Locale != "en")
                 {
                     if (levenDist > Math.Min(part.Name.Length, Main.dataBase.GetLocaleNameData(name).Length) / 3 || multipleLowest)
@@ -769,6 +772,7 @@ namespace WFInfo
                     width = _settings.MaxOverlayWidth;
                 }
 
+                // Display the translated item name when the user's selected locale is not English
                 if (_settings.Locale != "en")
                 {
                     Main.RunOnUIThread(() =>
@@ -1603,6 +1607,7 @@ namespace WFInfo
             {
                 InventoryItem part = foundParts[i];
 
+                // Translated part names when the user's selected locale is not English
                 if (_settings.Locale != "en")
                 {
                     string blueprintTranslated = null;
@@ -1629,10 +1634,10 @@ namespace WFInfo
                     //Decide if item is an actual prime, if so mark as mastered
                     if (proximity < 3 && proximity < primeProximity && part.Name.Length > 6 && name.Contains(primeTranslated))
                     {
-                        // We want the english name part in equipment marked with the name of the locale
-                        // Translate backwards? _settings.locale -> english
-                        // Currently Works becaus the Names of the Equipent are both the same in English / German | latin?
-                        // TODO: Implementing a function to get the english name of the part we want to check
+                        // We want the English name of the equipment part to be marked with the corresponding locale name.
+                        // Should we translate backwards? (_settings.Locale -> English)
+                        // Currently works because the equipment names are the same in English and German (Latin-based languages?).
+                        // Consider implementing a function to retrieve the English name of the part we want to mark as "checked".
 
                         //mark as mastered
                         string[] nameParts = name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);

@@ -832,10 +832,10 @@ namespace WFInfo
             switch (_settings.Locale)
             {
                 case "ko":
-                    // for korean
+                    // Korean
                     return LevenshteinDistanceKorean(s, t);
                 case "de":
-                    // for german
+                    // German
                     return LevenshteinDistanceGerman(s, t);
                 default:
                     return LevenshteinDistanceDefault(s, t);
@@ -893,6 +893,7 @@ namespace WFInfo
 
         public int LevenshteinDistanceGerman(string s, string t)
         {
+            // Edge Case: there is no translation for "Forma Blueprint"
             if (s == "Forma Blueprint")
             {
                 s = "Forma Blaupause";
