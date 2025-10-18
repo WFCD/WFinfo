@@ -893,7 +893,14 @@ namespace WFInfo
 
         public int LevenshteinDistanceGerman(string s, string t)
         {
-            s = GetLocaleNameData(s);
+            if (s == "Forma Blueprint")
+            {
+                s = "Forma Blaupause";
+            }
+            else
+            {
+                s = GetLocaleNameData(s);
+            }
 
             return LevenshteinDistanceDefault(s, t);
         }
