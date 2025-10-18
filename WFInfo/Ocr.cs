@@ -323,27 +323,54 @@ namespace WFInfo
                     #endregion
 
                     #region display part
-                    Main.RunOnUIThread(() =>
+                    if (_settings.Locale != "en")
                     {
-                        Overlay.rewardsDisplaying = true;
-
-                        if (_settings.IsOverlaySelected)
+                        Main.RunOnUIThread(() =>
                         {
-                            Main.overlays[partNumber].LoadTextData(correctName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo, false);
-                            Main.overlays[partNumber].Resize(overWid);
-                            Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / _window.DpiScaling), startY + (int)(_settings.OverlayYOffsetValue / _window.DpiScaling), _settings.Delay);
-                        }
-                        else if (!_settings.IsLightSelected)
+                            Overlay.rewardsDisplaying = true;
+
+                            if (_settings.IsOverlaySelected)
+                            {
+                                Main.overlays[partNumber].LoadTextData(Main.dataBase.GetLocaleNameData(correctName), plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo, false);
+                                Main.overlays[partNumber].Resize(overWid);
+                                Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / _window.DpiScaling), startY + (int)(_settings.OverlayYOffsetValue / _window.DpiScaling), _settings.Delay);
+                            }
+                            else if (!_settings.IsLightSelected)
+                            {
+                                Main.window.loadTextData(Main.dataBase.GetLocaleNameData(correctName), plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
+                            }
+                            //else
+                            //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
+
+                            if (_settings.Clipboard && !string.IsNullOrEmpty(clipboard))
+                                Clipboard.SetText(clipboard);
+
+                        });
+                    }
+                    else
+                    {
+                        Main.RunOnUIThread(() =>
                         {
-                            Main.window.loadTextData(correctName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
-                        }
-                        //else
-                        //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
+                            Overlay.rewardsDisplaying = true;
 
-                        if (_settings.Clipboard && !string.IsNullOrEmpty(clipboard))
-                            Clipboard.SetText(clipboard);
+                            if (_settings.IsOverlaySelected)
+                            {
+                                Main.overlays[partNumber].LoadTextData(correctName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo, false);
+                                Main.overlays[partNumber].Resize(overWid);
+                                Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / _window.DpiScaling), startY + (int)(_settings.OverlayYOffsetValue / _window.DpiScaling), _settings.Delay);
+                            }
+                            else if (!_settings.IsLightSelected)
+                            {
+                                Main.window.loadTextData(correctName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", partNumber, true, hideRewardInfo);
+                            }
+                            //else
+                            //Main.window.loadTextData(correctName, plat, ducats, volume, vaulted, $"{partsOwned} / {partsCount}", partNumber, false, hideRewardInfo);
 
-                    });
+                            if (_settings.Clipboard && !string.IsNullOrEmpty(clipboard))
+                                Clipboard.SetText(clipboard);
+
+                        });
+                    }
                     partNumber++;
                     hideRewardInfo = false;
                     #endregion
