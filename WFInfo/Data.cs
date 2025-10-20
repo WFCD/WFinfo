@@ -1116,9 +1116,17 @@ namespace WFInfo
             multipleLowest = false;
             foreach (KeyValuePair<string, JToken> prop in nameData)
             {
-                // Potent. Fix? Dont wanna break compatibility.
-                int val = LevenshteinDistance(prop.Value.ToObject<string>(), name);
-                //int val = LevenshteinDistance(prop.Key, name);
+                int val;
+
+                if (_settings.Locale != "en")
+                {
+                    val = LevenshteinDistance(prop.Value.ToObject<string>(), name);
+                }
+                else
+                {
+                    val = LevenshteinDistance(prop.Key, name);
+                }
+
                 if (val < low)
                 {
                     low = val;
