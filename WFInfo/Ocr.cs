@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Tesseract;
 using WFInfo.Services.HDRDetection;
 using WFInfo.Services.Screenshot;
@@ -335,7 +336,11 @@ namespace WFInfo
 
                     if (_settings.Locale != "en")
                     {
-                        translatedTempName = Main.dataBase.GetLocaleNameData(correctName);
+                        string localized = Main.dataBase.GetLocaleNameData(correctName);
+                        if (!string.IsNullOrWhiteSpace(localized))
+                        {
+                            translatedTempName = localized;
+                        }
                     }
 
                     Main.RunOnUIThread(() =>
@@ -716,7 +721,11 @@ namespace WFInfo
 
                 if (_settings.Locale != "en")
                 {
-                    translatedTempName = Main.dataBase.GetLocaleNameData(name);
+                    string localized = Main.dataBase.GetLocaleNameData(name);
+                    if (!string.IsNullOrWhiteSpace(localized))
+                    {
+                        translatedTempName = localized;
+                    }
                 }
                 
                 if (levenDist > Math.Min(part.Name.Length, translatedTempName.Length) / 3 || multipleLowest)
@@ -769,7 +778,11 @@ namespace WFInfo
 
                 if (_settings.Locale != "en")
                 {
-                    translatedTempName = Main.dataBase.GetLocaleNameData(name);
+                    string localized = Main.dataBase.GetLocaleNameData(name);
+                    if (!string.IsNullOrWhiteSpace(localized))
+                    {
+                        translatedTempName = localized;
+                    }
                 }
 
                 Main.RunOnUIThread(() =>
