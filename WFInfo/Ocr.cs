@@ -330,7 +330,7 @@ namespace WFInfo
 
                     #region display part
 
-                    // Display the translated item name when the user's selected locale is not English
+                    // If the locale setting is not English, the name is translated to the appropriate language.
                     translatedTempName = correctName;
 
                     if (_settings.Locale != "en")
@@ -711,7 +711,7 @@ namespace WFInfo
                 string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool multipleLowest);
                 string primeSetName = Data.GetSetName(name);
 
-                // Get the translated item name when the user's selected locale is not English
+                // If the locale setting is not "en" (English), the name is translated to the appropriate language.
                 translatedTempName = name;
 
                 if (_settings.Locale != "en")
@@ -764,8 +764,9 @@ namespace WFInfo
                     width = _settings.MaxOverlayWidth;
                 }
 
-                // Display the translated item name when the user's selected locale is not English
+                // If the locale setting is not "en" (English), the name is translated to the appropriate language.
                 translatedTempName = name;
+
                 if (_settings.Locale != "en")
                 {
                     translatedTempName = Main.dataBase.GetLocaleNameData(name);
