@@ -900,7 +900,8 @@ namespace WFInfo
             }
             else
             {
-                s = GetLocaleNameData(s);
+                var localized = GetLocaleNameData(s);
+                s = string.IsNullOrWhiteSpace(localized) ? s : localized;
             }
 
             return LevenshteinDistanceDefault(s, t);
