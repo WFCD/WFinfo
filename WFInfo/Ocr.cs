@@ -120,12 +120,6 @@ namespace WFInfo
         private static string timestamp;
 
         private static string clipboard;
-
-        /// <summary>
-        /// Stores temp. the translated name of an item based on the current locale.
-        /// </summary>
-        private static string translatedTempName;
-
         #endregion
 
         private static readonly System.Threading.SemaphoreSlim ReloadSemaphore = new System.Threading.SemaphoreSlim(1, 1);
@@ -332,7 +326,7 @@ namespace WFInfo
                     #region display part
 
                     // If the locale setting is not English, the name is translated to the appropriate language.
-                    translatedTempName = correctName;
+                    string translatedTempName = correctName;
 
                     if (_settings.Locale != "en")
                     {
@@ -364,9 +358,6 @@ namespace WFInfo
                             Clipboard.SetText(clipboard);
 
                     });
-
-                    // Clear translated name
-                    translatedTempName = null;
 
                     partNumber++;
                     hideRewardInfo = false;
@@ -717,7 +708,7 @@ namespace WFInfo
                 string primeSetName = Data.GetSetName(name);
 
                 // If the locale setting is not "en" (English), the name is translated to the appropriate language.
-                translatedTempName = name;
+                string translatedTempName = name;
 
                 if (_settings.Locale != "en")
                 {
@@ -733,9 +724,6 @@ namespace WFInfo
                     // show warning triangle if the result is of questionable accuracy. The limit is basically arbitrary
                     part.Warning = true;
                 }
-
-                // Clear translated name
-                translatedTempName = null;
 
                 bool doWarn = part.Warning;
                 part.Name = name;
@@ -793,9 +781,6 @@ namespace WFInfo
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(_window.Window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / _window.DpiScaling), (int)((_window.Window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / _window.DpiScaling), _settings.SnapItDelay);
                 });
-
-                // Clear translated name
-                translatedTempName = null;
             }
 
             if (_settings.DoSnapItCount && resultCount > 0)
