@@ -118,7 +118,7 @@ namespace WFInfo
             filterAllJsonFallbackPath = applicationDirectory + @"\fallback_equipment_list.json";
             sheetJsonFallbackPath = applicationDirectory + @"\fallback_price_sheet.json";
             wfmItemsFallbackPaths = new Dictionary<string, string>();
-            string[] locales = new string[] { "en", "ko" };
+            string[] locales = new string[] { "en", "de", "ko" };
             foreach (string locale in locales)
             {
                 wfmItemsFallbackPaths[locale] = applicationDirectory + @"\fallback_names_" + locale + ".json";
@@ -832,8 +832,11 @@ namespace WFInfo
             switch (_settings.Locale)
             {
                 case "ko":
-                    // for korean
+                    // Korean
                     return LevenshteinDistanceKorean(s, t);
+                case "de":
+                    // German
+                    return LevenshteinDistanceGerman(s, t);
                 default:
                     return LevenshteinDistanceDefault(s, t);
             }
@@ -888,6 +891,22 @@ namespace WFInfo
             return d[n, m];
         }
 
+        public int LevenshteinDistanceGerman(string s, string t)
+        {
+            // Edge Case: there is no translation for "Forma Blueprint"
+            if (s == "Forma Blueprint")
+            {
+                s = "Forma Blaupause";
+            }
+            else
+            {
+                var localized = GetLocaleNameData(s);
+                s = string.IsNullOrWhiteSpace(localized) ? s : localized;
+            }
+
+            return LevenshteinDistanceDefault(s, t);
+        }
+
         // This isn't used anymore?!
         public static bool IsKorean(String str)
         {
@@ -924,6 +943,7 @@ namespace WFInfo
 
             return localeName;
         }
+
         private protected static string e = "A?s/,;j_<Z3Q4z&)";
 
         public int LevenshteinDistanceKorean(string s, string t)
@@ -1097,7 +1117,17 @@ namespace WFInfo
             multipleLowest = false;
             foreach (KeyValuePair<string, JToken> prop in nameData)
             {
-                int val = LevenshteinDistance(prop.Key, name);
+                int val;
+
+                if (_settings.Locale != "en")
+                {
+                    val = LevenshteinDistance(prop.Value.ToObject<string>(), name);
+                }
+                else
+                {
+                    val = LevenshteinDistance(prop.Key, name);
+                }
+
                 if (val < low)
                 {
                     low = val;

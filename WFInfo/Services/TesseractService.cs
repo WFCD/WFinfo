@@ -133,6 +133,7 @@ namespace WFInfo
             JObject traineddata_checksums = new JObject
             {
                 {"en", "7af2ad02d11702c7092a5f8dd044d52f"},
+                {"de", "f5488b7c3186e822e0e6c5c05c1aaf1f"},
                 {"ko", "c776744205668b7e76b190cc648765da"}
             };
 

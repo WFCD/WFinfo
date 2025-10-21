@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Tesseract;
 using WFInfo.Services.HDRDetection;
 using WFInfo.Services.Screenshot;
@@ -97,7 +98,7 @@ namespace WFInfo
         // UI - Scaling used in Warframe
         public static double uiScaling;
 
-        public static Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static Regex RE = new Regex("[^a-zäöüß:가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
         public const int pixleRewardWidth = 968;
@@ -323,13 +324,26 @@ namespace WFInfo
                     #endregion
 
                     #region display part
+
+                    // If the locale setting is not English, the name is translated to the appropriate language.
+                    string translatedTempName = correctName;
+
+                    if (_settings.Locale != "en")
+                    {
+                        string localized = Main.dataBase.GetLocaleNameData(correctName);
+                        if (!string.IsNullOrWhiteSpace(localized))
+                        {
+                            translatedTempName = localized;
+                        }
+                    }
+
                     Main.RunOnUIThread(() =>
                     {
                         Overlay.rewardsDisplaying = true;
 
                         if (_settings.IsOverlaySelected)
                         {
-                            Main.overlays[partNumber].LoadTextData(correctName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo, false);
+                            Main.overlays[partNumber].LoadTextData(translatedTempName, plat, primeSetPlat, ducats, volume, vaulted, mastered, $"{partsOwned} / {partsCount}", "", hideRewardInfo, false);
                             Main.overlays[partNumber].Resize(overWid);
                             Main.overlays[partNumber].Display((int)((startX + width / 4 * partNumber + _settings.OverlayXOffsetValue) / _window.DpiScaling), startY + (int)(_settings.OverlayYOffsetValue / _window.DpiScaling), _settings.Delay);
                         }
@@ -344,6 +358,7 @@ namespace WFInfo
                             Clipboard.SetText(clipboard);
 
                     });
+
                     partNumber++;
                     hideRewardInfo = false;
                     #endregion
@@ -639,7 +654,10 @@ namespace WFInfo
         /// <returns>If part name is close enough to valid to actually process</returns>
         internal static bool PartNameValid (string partName)
         {
-            if ((partName.Length < 13 && _settings.Locale == "en") || (partName.Replace(" ", "").Length < 6 && _settings.Locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
+            // if part name is smaller than "Bo prime handle" skip current part
+            if ((partName.Length < 13 && _settings.Locale == "en") ||
+                (partName.Length < 13 && _settings.Locale == "de") ||
+                (partName.Replace(" ", "").Length < 6 && _settings.Locale == "ko")) 
                 //TODO: Add a min character for other locale here.
                 return false;
             return true;
@@ -688,11 +706,25 @@ namespace WFInfo
                 Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool multipleLowest);
                 string primeSetName = Data.GetSetName(name);
-                if (levenDist > Math.Min(part.Name.Length, name.Length) / 3 || multipleLowest)
+
+                // If the locale setting is not "en" (English), the name is translated to the appropriate language.
+                string translatedTempName = name;
+
+                if (_settings.Locale != "en")
                 {
-                    //show warning triangle if the result is of questionable accuracy. The limit is basically arbitrary
+                    string localized = Main.dataBase.GetLocaleNameData(name);
+                    if (!string.IsNullOrWhiteSpace(localized))
+                    {
+                        translatedTempName = localized;
+                    }
+                }
+                
+                if (levenDist > Math.Min(part.Name.Length, translatedTempName.Length) / 3 || multipleLowest)
+                {
+                    // show warning triangle if the result is of questionable accuracy. The limit is basically arbitrary
                     part.Warning = true;
                 }
+
                 bool doWarn = part.Warning;
                 part.Name = name;
                 foundParts[i] = part;
@@ -729,11 +761,22 @@ namespace WFInfo
                     width = _settings.MaxOverlayWidth;
                 }
 
+                // If the locale setting is not "en" (English), the name is translated to the appropriate language.
+                translatedTempName = name;
+
+                if (_settings.Locale != "en")
+                {
+                    string localized = Main.dataBase.GetLocaleNameData(name);
+                    if (!string.IsNullOrWhiteSpace(localized))
+                    {
+                        translatedTempName = localized;
+                    }
+                }
 
                 Main.RunOnUIThread(() =>
                 {
                     Overlay itemOverlay = new Overlay();
-                    itemOverlay.LoadTextData(name, plat, primeSetPlat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false, doWarn);
+                    itemOverlay.LoadTextData(translatedTempName, plat, primeSetPlat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false, doWarn);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
                     itemOverlay.Display((int)(_window.Window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / _window.DpiScaling), (int)((_window.Window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / _window.DpiScaling), _settings.SnapItDelay);
@@ -1545,19 +1588,47 @@ namespace WFInfo
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
             fullShot.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
             List<InventoryItem> foundParts = FindOwnedItems(fullShot, timestamp, start, watch);
+
             for (int i = 0; i < foundParts.Count; i++)
             {
                 InventoryItem part = foundParts[i];
-                if (!PartNameValid(part.Name + " Blueprint"))
-                    continue;
-                string name = Main.dataBase.GetPartName(part.Name+" Blueprint", out int proximity, true, out _); //add blueprint to name to check against prime drop table
-                string checkName = Main.dataBase.GetPartName(part.Name + " prime Blueprint", out int primeProximity, true, out _); //also add prime to check if that gives better match. If so, this is a non-prime
-                Main.AddLog("Checking \"" + part.Name.Trim() +"\", (" + proximity +")\"" + name + "\", +prime (" + primeProximity + ")\"" + checkName + "\"");
 
-                //Decide if item is an actual prime, if so mark as mastered
-                if (proximity < 3 && proximity < primeProximity && part.Name.Length > 6 && name.Contains("Prime"))
+                // The word "Blueprint" translated
+                string blueprintTranslated;
+
+                // The word "Prime" translated
+                string primeTranslated;
+
+                switch (_settings.Locale)
                 {
-                    //mark as mastered
+                    case "de":
+                        blueprintTranslated = "Blaupause";
+                        primeTranslated = "Prime";
+                        break;
+                    default:
+                        blueprintTranslated = "Blueprint";
+                        primeTranslated = "Prime";
+                        break;
+                }
+
+                if (!PartNameValid(part.Name + $" {blueprintTranslated}"))
+                    continue;
+
+                // Add blueprint to name to check against prime drop table
+                string name = Main.dataBase.GetPartName(part.Name + $" {blueprintTranslated}", out int proximity, true, out _);
+
+                // Also add prime to check if that gives better match. If so, this is a non-prime
+                string checkName = Main.dataBase.GetPartName(part.Name + $" {primeTranslated} {blueprintTranslated}", out int primeProximity, true, out _);
+                
+                Main.AddLog("Checking \"" + part.Name.Trim() + "\", (" + proximity + ")\"" + name + "\", +prime (" + primeProximity + ")\"" + checkName + "\"");
+
+                // Decide if item is an actual prime, if so mark as mastered
+                if (proximity < 3 && proximity < primeProximity && part.Name.Length > 6 && name.Contains(primeTranslated))
+                {
+                    // This logic should be revisited when adding support for additional languages.
+                    // Currently, it works because in German, "Prime" is also "Prime", but this might change with other languages.
+
+                    // Mark as mastered
                     string[] nameParts = name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
                     string primeName = nameParts[0] + "Prime";
 
@@ -1566,12 +1637,14 @@ namespace WFInfo
                         Main.dataBase.equipmentData[primeName]["mastered"] = true;
 
                         Main.AddLog("Marked \"" + primeName + "\" as mastered");
-                    } else
+                    }
+                    else
                     {
                         Main.AddLog("Failed to mark \"" + primeName + "\" as mastered");
                     }
                 }
             }
+
             Main.dataBase.SaveAllJSONs();
             Main.RunOnUIThread(() =>
             {
@@ -1587,7 +1660,6 @@ namespace WFInfo
                 Main.StatusUpdate("Lower brightness may increase speed(" + (end - start) + "ms)", 1);
             }
             watch.Stop();
-
         }
 
         /// <summary>
@@ -1813,7 +1885,7 @@ namespace WFInfo
 
 
                             //do OCR
-                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&");
+                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&ÄÖÜ:");
                             using (var page = _tesseractService.FirstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                             {
                                 using (var iterator = page.GetIterator())
