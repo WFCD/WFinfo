@@ -103,7 +103,7 @@
     <PackageReference Include="Tesseract" Version="5.2.0">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.0" /> 
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.1" /> 
   </ItemGroup>
   <ItemGroup>
     <None Update="$(HOME)\.nuget\packages\tesseract\5.2.0\build\\..\x64\leptonica-1.82.0.dll">
