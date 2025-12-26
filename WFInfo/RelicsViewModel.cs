@@ -228,7 +228,8 @@ namespace WFInfo
             TreeNode meso = new TreeNode("Meso", "", false, 0);
             TreeNode neo = new TreeNode("Neo", "", false, 0);
             TreeNode axi = new TreeNode("Axi", "", false, 0);
-            _rawRelicNodes.AddRange(new[] { lith, meso, neo, axi });
+            TreeNode vanguard = new TreeNode("Vanguard", "", false, 0);
+            _rawRelicNodes.AddRange(new[] { lith, meso, neo, axi, vanguard });
             int eraNum = 0;
             foreach (TreeNode head in _rawRelicNodes)
             {
