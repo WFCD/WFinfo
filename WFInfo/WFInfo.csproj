@@ -92,7 +92,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.26100.7175" />
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.26100.7463" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="ProDotNetZip" Version="1.20.0" />
