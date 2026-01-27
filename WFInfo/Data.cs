@@ -1867,7 +1867,8 @@ namespace WFInfo
                         type = "sell",
                         itemId,
                         platinum,
-                        quantity
+                        quantity,
+                        visible = true
                     });
                     request.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
                     request.Headers.Add("Authorization", "Bearer " + JWT);
