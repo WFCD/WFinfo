@@ -195,16 +195,26 @@
         </ScrollViewer>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" MinWidth="100" />
+                <ColumnDefinition Width="Auto" MinWidth="100" />
             </Grid.ColumnDefinitions>
-            <Label Grid.Column="0" Content="Save all" Foreground="#506464" FontSize="14" Style="{StaticResource Label_Button}">
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Label Content="Total:" Foreground="#506464" FontSize="14" />
+                <Image x:Name="platImage1" Width="20" Source="Resources/plat.gif" Height="20" />
+                <Label Content="{Binding viewModel.TotalPlatinum, StringFormat='{}{0:0.##}'}" Foreground="#506464" FontSize="14" />
+                <Image x:Name="firstDucatImage1" Width="20" Source="Resources/ducat_w.gif" Height="20" />
+                <Label Content="{Binding viewModel.TotalDucats}" Foreground="#506464" FontSize="14" />
+            </StackPanel>
+            
+            <Label Grid.Column="1" Content="Save all" Foreground="#506464" FontSize="14" Style="{StaticResource Label_Button}">
                 <Label.InputBindings>
                     <MouseBinding MouseAction="LeftClick" Command="{Binding IncrementAll}" />
                 </Label.InputBindings>
             </Label>
 
-            <Label Grid.Column="1" Content="Dismiss all" Foreground="#506464" FontSize="14" Style="{StaticResource Label_Button}">
+            <Label Grid.Column="2" Content="Dismiss all" Foreground="#506464" FontSize="14" Style="{StaticResource Label_Button}">
                 <Label.InputBindings>
                     <MouseBinding MouseAction="LeftClick" Command="{Binding RemoveAll}" />
                 </Label.InputBindings>

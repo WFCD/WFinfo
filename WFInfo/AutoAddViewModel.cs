@@ -2,14 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace WFInfo
 {
     public class AutoAddViewModel : INPC
     {
         private ObservableCollection<AutoAddSingleItem> _itemList;
+        private double _totalPlatinum;
+        private int _totalDucats;
+        private const NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
 
-        public  ObservableCollection<AutoAddSingleItem> ItemList
+        public ObservableCollection<AutoAddSingleItem> ItemList
         {
             get => _itemList;
             private set
@@ -18,6 +22,26 @@ namespace WFInfo
                 RaisePropertyChanged();
             }
         }
+
+        public double TotalPlatinum
+        {
+            get => _totalPlatinum;
+            private set
+            {
+                _totalPlatinum = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int TotalDucats
+        {
+            get => _totalDucats;
+            private set
+            {
+                _totalDucats = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public AutoAddViewModel()
         {
             _itemList = new ObservableCollection<AutoAddSingleItem>();
@@ -26,13 +50,46 @@ namespace WFInfo
         public void addItem(AutoAddSingleItem item)
         {
             _itemList.Add(item);
-            RaisePropertyChanged();
+            UpdateTotalsForOptionChange(null, item.ActiveOption);
         }
 
         public void removeItem(AutoAddSingleItem item)
         {
+            UpdateTotalsForOptionChange(item.ActiveOption, null);
             _itemList.Remove(item);
-            RaisePropertyChanged();
+        }
+
+        public void UpdateTotalsForOptionChange(string previousOption, string newOption)
+        {
+            if (!string.IsNullOrEmpty(previousOption))
+            {
+                JObject previousJob = (JObject)Main.dataBase.marketData.GetValue(previousOption);
+                string previousPlat = previousJob["plat"].ToObject<string>();
+                string previousDucats = previousJob["ducats"].ToObject<string>();
+                if (double.TryParse(previousPlat, styles, CultureInfo.InvariantCulture, out double previousPlatValue))
+                {
+                    TotalPlatinum -= previousPlatValue;
+                }
+                if (int.TryParse(previousDucats, styles, CultureInfo.InvariantCulture, out int previousDucatValue))
+                {
+                    TotalDucats -= previousDucatValue;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(newOption))
+            {
+                JObject newJob = (JObject)Main.dataBase.marketData.GetValue(newOption);
+                string newPlat = newJob["plat"].ToObject<string>();
+                string newDucats = newJob["ducats"].ToObject<string>();
+                if (double.TryParse(newPlat, styles, CultureInfo.InvariantCulture, out double newPlatValue))
+                {
+                    TotalPlatinum += newPlatValue;
+                }
+                if (int.TryParse(newDucats, styles, CultureInfo.InvariantCulture, out int newDucatValue))
+                {
+                    TotalDucats += newDucatValue;
+                }
+            }
         }
     }
 
@@ -58,8 +115,14 @@ namespace WFInfo
             get => _activeOption;
             set
             {
-                _activeOption = value;
-                RaisePropertyChanged();
+                // FIXME: breakpoint here doesn't always get hit (active option doesn't get changed). why?
+                if (_activeOption != value)
+                {
+                    string previousOption = _activeOption;
+                    _activeOption = value;
+                    RaisePropertyChanged();
+                    _parent?.UpdateTotalsForOptionChange(previousOption, _activeOption);
+                }
             }
         }
 
@@ -75,7 +138,8 @@ namespace WFInfo
             if (activeIndex >= 0 && options != null)
             {
                 ActiveOption = options[activeIndex];
-            } else
+            }
+            else
             {
                 ActiveOption = "";
             }
