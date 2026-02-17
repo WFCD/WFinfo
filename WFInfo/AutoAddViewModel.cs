@@ -51,12 +51,14 @@ namespace WFInfo
         {
             _itemList.Add(item);
             UpdateTotalsForOptionChange(null, item.ActiveOption);
+            RaisePropertyChanged();
         }
 
         public void removeItem(AutoAddSingleItem item)
         {
             UpdateTotalsForOptionChange(item.ActiveOption, null);
             _itemList.Remove(item);
+            RaisePropertyChanged();
         }
 
         public void UpdateTotalsForOptionChange(string previousOption, string newOption)
