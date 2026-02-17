@@ -117,7 +117,6 @@ namespace WFInfo
             get => _activeOption;
             set
             {
-                // FIXME: breakpoint here doesn't always get hit (active option doesn't get changed). why?
                 if (_activeOption != value)
                 {
                     string previousOption = _activeOption;
