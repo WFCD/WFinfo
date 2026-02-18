@@ -80,11 +80,6 @@ namespace WFInfo
             TotalPlatinum = _itemList.Sum(item => item.PlatinumValue);
             TotalDucats = _itemList.Sum(item => item.DucatValue);
         }
-
-        ~AutoAddViewModel()
-        {
-            _itemList.CollectionChanged -= CollectionChanged;
-        }
     }
 
     public class AutoAddSingleItem : INPC
@@ -147,7 +142,7 @@ namespace WFInfo
         {
             RewardOptions = new ObservableCollection<string>(options);
             activeIndex = Math.Min(RewardOptions.Count - 1, activeIndex);
-            ActiveOption = activeIndex >= 0 && options != null ? options[activeIndex] : "";
+            ActiveOption = activeIndex >= 0 ? options[activeIndex] : "";
             _parent = parent;
             Remove = new SimpleCommand(() => RemoveFromParent());
             Increment = new SimpleCommand(() => AddCount(true));
