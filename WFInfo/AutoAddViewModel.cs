@@ -59,7 +59,6 @@ namespace WFInfo
         {
             item.PropertyChanged -= ItemChanged;
             _itemList.Remove(item);
-            RecalculateTotals();
         }
 
         private void ItemChanged(object sender, PropertyChangedEventArgs e)
@@ -120,8 +119,11 @@ namespace WFInfo
             get => _platinumValue;
             private set
             {
-                _platinumValue = value;
-                RaisePropertyChanged();
+                if (_platinumValue != value)
+                {
+                    _platinumValue = value;
+                    RaisePropertyChanged();
+                }
             }
         }
         public int DucatValue
@@ -129,8 +131,11 @@ namespace WFInfo
             get => _ducatValue;
             private set
             {
-                _ducatValue = value;
-                RaisePropertyChanged();
+                if (_ducatValue != value)
+                {
+                    _ducatValue = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
