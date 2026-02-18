@@ -2,14 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Globalization;
+using System.Linq;
 
 namespace WFInfo
 {
     public class AutoAddViewModel : INPC
     {
         private ObservableCollection<AutoAddSingleItem> _itemList;
+        private double _totalPlatinum;
+        private int _totalDucats;
 
-        public  ObservableCollection<AutoAddSingleItem> ItemList
+        public ObservableCollection<AutoAddSingleItem> ItemList
         {
             get => _itemList;
             private set
@@ -18,21 +23,61 @@ namespace WFInfo
                 RaisePropertyChanged();
             }
         }
+
+        public double TotalPlatinum
+        {
+            get => _totalPlatinum;
+            private set
+            {
+                _totalPlatinum = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int TotalDucats
+        {
+            get => _totalDucats;
+            private set
+            {
+                _totalDucats = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public AutoAddViewModel()
         {
             _itemList = new ObservableCollection<AutoAddSingleItem>();
+            _itemList.CollectionChanged += CollectionChanged;
         }
 
         public void addItem(AutoAddSingleItem item)
         {
+            item.PropertyChanged += ItemChanged;
             _itemList.Add(item);
-            RaisePropertyChanged();
         }
 
         public void removeItem(AutoAddSingleItem item)
         {
+            item.PropertyChanged -= ItemChanged;
             _itemList.Remove(item);
-            RaisePropertyChanged();
+        }
+
+        private void ItemChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(AutoAddSingleItem.PlatinumValue) || e.PropertyName == nameof(AutoAddSingleItem.DucatValue))
+            {
+                RecalculateTotals();
+            }
+        }
+
+        private void CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            RecalculateTotals();
+        }
+
+        private void RecalculateTotals()
+        {
+            TotalPlatinum = _itemList.Sum(item => item.PlatinumValue);
+            TotalDucats = _itemList.Sum(item => item.DucatValue);
         }
     }
 
@@ -40,7 +85,11 @@ namespace WFInfo
     {
         public AutoAddViewModel _parent;
 
+        private const NumberStyles style = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
         private ObservableCollection<string> _rewardOptions;
+        private string _activeOption;
+        private double _platinumValue;
+        private int _ducatValue;
 
         public ObservableCollection<string> RewardOptions
         {
@@ -52,14 +101,41 @@ namespace WFInfo
             }
         }
 
-        private string _activeOption;
         public string ActiveOption
         {
             get => _activeOption;
             set
             {
-                _activeOption = value;
-                RaisePropertyChanged();
+                if (_activeOption != value)
+                {
+                    _activeOption = value;
+                    UpdateValues();
+                    RaisePropertyChanged();
+                }
+            }
+        }
+        public double PlatinumValue
+        {
+            get => _platinumValue;
+            private set
+            {
+                if (_platinumValue != value)
+                {
+                    _platinumValue = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+        public int DucatValue
+        {
+            get => _ducatValue;
+            private set
+            {
+                if (_ducatValue != value)
+                {
+                    _ducatValue = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -69,19 +145,29 @@ namespace WFInfo
 
         public AutoAddSingleItem(List<string> options, int activeIndex, AutoAddViewModel parent)
         {
-
             RewardOptions = new ObservableCollection<string>(options);
             activeIndex = Math.Min(RewardOptions.Count - 1, activeIndex);
-            if (activeIndex >= 0 && options != null)
-            {
-                ActiveOption = options[activeIndex];
-            } else
-            {
-                ActiveOption = "";
-            }
+            ActiveOption = activeIndex >= 0 ? options[activeIndex] : "";
             _parent = parent;
             Remove = new SimpleCommand(() => RemoveFromParent());
             Increment = new SimpleCommand(() => AddCount(true));
+        }
+
+        private void UpdateValues()
+        {
+            if (!string.IsNullOrEmpty(ActiveOption))
+            {
+                JObject job = (JObject)Main.dataBase.marketData.GetValue(ActiveOption);
+                string plat = job["plat"].ToObject<string>();
+                string ducats = job["ducats"].ToObject<string>();
+                PlatinumValue = double.TryParse(plat, style, CultureInfo.InvariantCulture, out double platValue) ? platValue : 0;
+                DucatValue = int.TryParse(ducats, style, CultureInfo.InvariantCulture, out int ducatValue) ? ducatValue : 0;
+            }
+            else
+            {
+                PlatinumValue = 0;
+                DucatValue = 0;
+            }
         }
 
         public void AddCount(bool save)
