@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 
 namespace WFInfo
 {
@@ -11,7 +13,6 @@ namespace WFInfo
         private ObservableCollection<AutoAddSingleItem> _itemList;
         private double _totalPlatinum;
         private int _totalDucats;
-        private const NumberStyles styles = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
 
         public ObservableCollection<AutoAddSingleItem> ItemList
         {
@@ -45,53 +46,44 @@ namespace WFInfo
         public AutoAddViewModel()
         {
             _itemList = new ObservableCollection<AutoAddSingleItem>();
+            _itemList.CollectionChanged += CollectionChanged;
         }
 
         public void addItem(AutoAddSingleItem item)
         {
+            item.PropertyChanged += ItemChanged;
             _itemList.Add(item);
-            UpdateTotalsForOptionChange(null, item.ActiveOption);
-            RaisePropertyChanged();
         }
 
         public void removeItem(AutoAddSingleItem item)
         {
-            UpdateTotalsForOptionChange(item.ActiveOption, null);
+            item.PropertyChanged -= ItemChanged;
             _itemList.Remove(item);
-            RaisePropertyChanged();
+            RecalculateTotals();
         }
 
-        public void UpdateTotalsForOptionChange(string previousOption, string newOption)
+        private void ItemChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(previousOption))
+            if (e.PropertyName == nameof(AutoAddSingleItem.PlatinumValue) || e.PropertyName == nameof(AutoAddSingleItem.DucatValue))
             {
-                JObject previousJob = (JObject)Main.dataBase.marketData.GetValue(previousOption);
-                string previousPlat = previousJob["plat"].ToObject<string>();
-                string previousDucats = previousJob["ducats"].ToObject<string>();
-                if (double.TryParse(previousPlat, styles, CultureInfo.InvariantCulture, out double previousPlatValue))
-                {
-                    TotalPlatinum -= previousPlatValue;
-                }
-                if (int.TryParse(previousDucats, styles, CultureInfo.InvariantCulture, out int previousDucatValue))
-                {
-                    TotalDucats -= previousDucatValue;
-                }
+                RecalculateTotals();
             }
+        }
 
-            if (!string.IsNullOrEmpty(newOption))
-            {
-                JObject newJob = (JObject)Main.dataBase.marketData.GetValue(newOption);
-                string newPlat = newJob["plat"].ToObject<string>();
-                string newDucats = newJob["ducats"].ToObject<string>();
-                if (double.TryParse(newPlat, styles, CultureInfo.InvariantCulture, out double newPlatValue))
-                {
-                    TotalPlatinum += newPlatValue;
-                }
-                if (int.TryParse(newDucats, styles, CultureInfo.InvariantCulture, out int newDucatValue))
-                {
-                    TotalDucats += newDucatValue;
-                }
-            }
+        private void CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            RecalculateTotals();
+        }
+
+        private void RecalculateTotals()
+        {
+            TotalPlatinum = _itemList.Sum(item => item.PlatinumValue);
+            TotalDucats = _itemList.Sum(item => item.DucatValue);
+        }
+
+        ~AutoAddViewModel()
+        {
+            _itemList.CollectionChanged -= CollectionChanged;
         }
     }
 
@@ -99,7 +91,11 @@ namespace WFInfo
     {
         public AutoAddViewModel _parent;
 
+        private const NumberStyles style = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent;
         private ObservableCollection<string> _rewardOptions;
+        private string _activeOption;
+        private double _platinumValue;
+        private int _ducatValue;
 
         public ObservableCollection<string> RewardOptions
         {
@@ -111,7 +107,6 @@ namespace WFInfo
             }
         }
 
-        private string _activeOption;
         public string ActiveOption
         {
             get => _activeOption;
@@ -119,11 +114,28 @@ namespace WFInfo
             {
                 if (_activeOption != value)
                 {
-                    string previousOption = _activeOption;
                     _activeOption = value;
+                    UpdateValues();
                     RaisePropertyChanged();
-                    _parent?.UpdateTotalsForOptionChange(previousOption, _activeOption);
                 }
+            }
+        }
+        public double PlatinumValue
+        {
+            get => _platinumValue;
+            private set
+            {
+                _platinumValue = value;
+                RaisePropertyChanged();
+            }
+        }
+        public int DucatValue
+        {
+            get => _ducatValue;
+            private set
+            {
+                _ducatValue = value;
+                RaisePropertyChanged();
             }
         }
 
@@ -133,20 +145,29 @@ namespace WFInfo
 
         public AutoAddSingleItem(List<string> options, int activeIndex, AutoAddViewModel parent)
         {
-
             RewardOptions = new ObservableCollection<string>(options);
             activeIndex = Math.Min(RewardOptions.Count - 1, activeIndex);
-            if (activeIndex >= 0 && options != null)
-            {
-                ActiveOption = options[activeIndex];
-            }
-            else
-            {
-                ActiveOption = "";
-            }
+            ActiveOption = activeIndex >= 0 && options != null ? options[activeIndex] : "";
             _parent = parent;
             Remove = new SimpleCommand(() => RemoveFromParent());
             Increment = new SimpleCommand(() => AddCount(true));
+        }
+
+        private void UpdateValues()
+        {
+            if (!string.IsNullOrEmpty(ActiveOption))
+            {
+                JObject job = (JObject)Main.dataBase.marketData.GetValue(ActiveOption);
+                string plat = job["plat"].ToObject<string>();
+                string ducats = job["ducats"].ToObject<string>();
+                PlatinumValue = double.TryParse(plat, style, CultureInfo.InvariantCulture, out double platValue) ? platValue : 0;
+                DucatValue = int.TryParse(ducats, style, CultureInfo.InvariantCulture, out int ducatValue) ? ducatValue : 0;
+            }
+            else
+            {
+                PlatinumValue = 0;
+                DucatValue = 0;
+            }
         }
 
         public void AddCount(bool save)
