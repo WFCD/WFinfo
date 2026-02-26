@@ -85,8 +85,10 @@ namespace WFInfo
             Directory.CreateDirectory(appPath);
 
             // Check for test execution arguments
-            string[] args = Environment.GetCommandLineArgs();
-            if (args.Length >= 4 && (args[1].EndsWith(".json") || args[1].Contains("map")))
+            string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
+            if (args.Length >= 2 &&
+                (args[0].EndsWith(".json", StringComparison.OrdinalIgnoreCase) ||
+                args[0].IndexOf("map", StringComparison.OrdinalIgnoreCase) >= 0))
             {
                 // Test execution mode: WFInfo.exe map.json data/ results.json
                 try
@@ -95,7 +97,7 @@ namespace WFInfo
                     Console.WriteLine("=======================");
                     
                     // Initialize test services and run tests
-                    TestProgram.RunTests(args).Wait();
+                    TestProgram.RunTests(args).GetAwaiter().GetResult();
                     return;
                 }
                 catch (Exception ex)

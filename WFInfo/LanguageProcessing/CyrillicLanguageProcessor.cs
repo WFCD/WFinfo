@@ -36,8 +36,8 @@ namespace WFInfo.LanguageProcessing
             // Handle Russian blueprint format: "Чертёж: <item_name>" -> "<item_name> (чертеж)"
             if (normalized.StartsWith("чертёж:") || normalized.StartsWith("чертеж:"))
             {
-                // Extract the item name after "Чертёж:"
-                string itemName = normalized.Substring(8).Trim();
+                // Extract item name after "чертёж:" / "чертеж:" with optional whitespace
+                string itemName = Regex.Replace(normalized, @"^черт[её]ж:\s*", "");
                 normalized = itemName + " (чертеж)";
             }
 

@@ -18,7 +18,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Plan", "Şema" };
 
-        public override string CharacterWhitelist => "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" + GenerateCharacterRange(0x00C7, 0x00C7) + GenerateCharacterRange(0x011F, 0x011F) + GenerateCharacterRange(0x0130, 0x0130) + GenerateCharacterRange(0x0150, 0x0150) + GenerateCharacterRange(0x0170, 0x0170) + GenerateCharacterRange(0x0131, 0x0131); // Turkish with ranges
+        public override string CharacterWhitelist => "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" + "ÇçĞğİıÖöŞşÜü"; // Turkish-specific characters
 
         /// <summary>
         /// Generates a string containing all characters in the specified Unicode range
