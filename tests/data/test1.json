@@ -1,0 +1,16 @@
+{
+  "description": "Basic English reward screen with 4 items",
+  "resolution": "1920x1080",
+  "scaling": 100,
+  "theme": "orokin",
+  "language": "english",
+  "parts": {
+    "0": "Volt Prime Blueprint",
+    "1": "Mag Prime Blueprint", 
+    "2": "Ash Prime Blueprint",
+    "3": "Trinity Prime Blueprint"
+  },
+  "category": "reward",
+  "hdr": false,
+  "filters": []
+}

@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
 using WFInfo.Settings;
+using WFInfo.LanguageProcessing;
 
 namespace WFInfo
 {
@@ -30,28 +31,6 @@ namespace WFInfo
         public JObject equipmentData; // Contains equipmentData from Warframe PC Drops          {<EQMT>: {"vaulted": true, "PARTS": {<NAME>:{"relic_name":<name>|"","count":<num>}, ...}},  ...}
         public JObject nameData; // Contains relic to market name translation          {<relic_name>: <market_name>}
 
-        private static readonly List<Dictionary<int, List<int>>> korean = new List<Dictionary<int, List<int>>>() {
-            new Dictionary<int, List<int>>() {
-                { 0, new List<int>{ 6, 7, 8, 16 } }, // ㅁ, ㅂ, ㅃ, ㅍ
-                { 1, new List<int>{ 2, 3, 4, 16, 5, 9, 10 } }, // ㄴ, ㄷ, ㄸ, ㅌ, ㄹ, ㅅ, ㅆ
-                { 2, new List<int>{ 12, 13, 14 } }, // ㅈ, ㅉ, ㅊ
-                { 3, new List<int>{ 0, 1, 15, 11, 18 } } // ㄱ, ㄲ, ㅋ, ㅇ, ㅎ
-            },
-            new Dictionary<int, List<int>>() {
-                { 0, new List<int>{ 20, 5, 1, 7, 3, 19 } }, // ㅣ, ㅔ, ㅐ, ㅖ, ㅒ, ㅢ
-                { 1, new List<int>{ 16, 11, 15, 10 } }, // ㅟ, ㅚ, ㅞ, ㅙ
-                { 2, new List<int>{ 4, 0, 6, 2, 14, 9 } }, // ㅓ, ㅏ, ㅕ, ㅑ, ㅝ, ㅘ
-                { 3, new List<int>{ 18, 13, 8, 17, 12 } } // ㅡ, ㅜ, ㅗ, ㅠ, ㅛ
-            },
-            new Dictionary<int, List<int>>() {
-                { 0, new List<int>{ 16, 17, 18, 26 } }, // ㅁ, ㅂ, ㅄ, ㅍ
-                { 1, new List<int>{ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 19, 20, 25 } }, // ㄴ, ㄵ, ㄶ, ㄷ, ㄹ, ㄺ, ㄻ, ㄼ, ㄽ, ㄾ, ㄿ, ㅀ, ㅅ, ㅆ, ㅌ
-                { 2, new List<int>{ 22, 23 } }, // ㅈ, ㅊ
-                { 3, new List<int>{ 1, 2, 3, 24, 21, 27 } }, // ㄱ, ㄲ, ㄳ, ㅋ, ㅑ, ㅎ
-                { 4, new List<int>{ 0 } }, // 
-            }
-        };
-
         private readonly string applicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         private readonly string marketItemsPath;
         private readonly string marketDataPath;
@@ -60,7 +39,7 @@ namespace WFInfo
         private readonly string nameDataPath;
         private readonly string filterAllJsonFallbackPath;
         private readonly string sheetJsonFallbackPath;
-        private readonly Dictionary<string, string> wfmItemsFallbackPaths;
+        private readonly string wfmItemsFallbackPath;
         public string JWT; // JWT is the security key, store this as email+pw combo'
         private ClientWebSocket marketSocket = new ClientWebSocket();
         private CancellationTokenSource marketSocketCancellation = new CancellationTokenSource();
@@ -109,6 +88,9 @@ namespace WFInfo
             _process = process;
             _window = window;
 
+            // Initialize the language processor factory
+            LanguageProcessorFactory.Initialize(settings);
+
             Main.AddLog("Initializing Databases");
             marketItemsPath = applicationDirectory + @"\market_items.json";
             marketDataPath = applicationDirectory + @"\market_data.json";
@@ -117,12 +99,7 @@ namespace WFInfo
             nameDataPath = applicationDirectory + @"\name_data.json";
             filterAllJsonFallbackPath = applicationDirectory + @"\fallback_equipment_list.json";
             sheetJsonFallbackPath = applicationDirectory + @"\fallback_price_sheet.json";
-            wfmItemsFallbackPaths = new Dictionary<string, string>();
-            string[] locales = new string[] { "en", "ko" };
-            foreach (string locale in locales)
-            {
-                wfmItemsFallbackPaths[locale] = applicationDirectory + @"\fallback_names_" + locale + ".json";
-            }
+            wfmItemsFallbackPath = applicationDirectory + @"\fallback_names.json";
 
             Directory.CreateDirectory(applicationDirectory);
 
@@ -229,9 +206,23 @@ namespace WFInfo
             items = JArray.FromObject(localizedItems.Data["data"]);
             foreach (var item in items)
             {
-                string name = item["slug"].ToString();
-                if (name.Contains("prime") && tempMarketItems.ContainsKey(item["id"].ToString()))
-                    tempMarketItems[item["id"].ToString()] = tempMarketItems[item["id"].ToString()] + "|" + item["i18n"][_settings.Locale]["name"];
+                string itemId = item["id"].ToString();
+                if (tempMarketItems.ContainsKey(itemId))
+                {
+                    // Check if the locale data exists before accessing it
+                    if (item["i18n"][_settings.Locale] != null && item["i18n"][_settings.Locale]["name"] != null)
+                    {
+                        string localizedName = item["i18n"][_settings.Locale]["name"].ToString();
+                        tempMarketItems[itemId] = tempMarketItems[itemId] + "|" + localizedName;
+                    }
+                    else
+                    {
+                        // Fallback to English name if locale data is missing
+                        Main.AddLog($"Warning: Missing {_settings.Locale} translation for item {itemId}, using English name");
+                        string englishName = item["i18n"]["en"]["name"].ToString();
+                        tempMarketItems[itemId] = tempMarketItems[itemId] + "|" + englishName;
+                    }
+                }
             }
 
             // Atomically replace marketItems under lock
@@ -239,6 +230,9 @@ namespace WFInfo
             {
                 marketItems = tempMarketItems;
             }
+
+            // Save the updated database to file
+            SaveAllJSONs();
 
             Main.AddLog("Item database has been downloaded");
             return enItems.IsFallback || localizedItems.IsFallback;
@@ -440,30 +434,23 @@ namespace WFInfo
                     var response = await client.SendAsync(request).ConfigureAwait(false);
                     var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var data = JsonConvert.DeserializeObject<JObject>(body);
-                    if (wfmItemsFallbackPaths.TryGetValue(locale, out var fallbackPath)) 
-                    {
-                        File.WriteAllText(fallbackPath, body);
-                    }
+                    File.WriteAllText(wfmItemsFallbackPath, body);
                     return (data, false);
                 }
             }
             catch (Exception ex)
             {
-                if (wfmItemsFallbackPaths.TryGetValue(locale, out var fallbackPath))
+                Main.AddLog("Failed to fetch/parse " + wfmItemsUrl + ", using file " + wfmItemsFallbackPath + Environment.NewLine + ex.ToString());
+                if (File.Exists(wfmItemsFallbackPath))
                 {
-                    Main.AddLog("Failed to fetch/parse " + wfmItemsUrl + ", using file " + fallbackPath + Environment.NewLine + ex.ToString());
-                    if (File.Exists(fallbackPath))
-                    {
-                        string response = File.ReadAllText(fallbackPath);
-                        JObject data = JsonConvert.DeserializeObject<JObject>(response);
-                        return (data, true);
-                    }
+                    string response = File.ReadAllText(wfmItemsFallbackPath);
+                    JObject data = JsonConvert.DeserializeObject<JObject>(response);
+                    return (data, true);
                 }
                 else
                 {
-                    Main.AddLog("Failed to fetch/parse " + wfmItemsUrl + ", and no fallback path found for locale: " + locale + Environment.NewLine + ex.ToString());
+                    throw new AggregateException("No local fallback found", ex);
                 }
-                throw new AggregateException("No local fallback found", ex);
             }
         }
 
@@ -595,25 +582,50 @@ namespace WFInfo
             if (marketData == null)
             {
                 marketData = ParseFileOrMakeNew(marketDataPath, ref parseHasFailed);
+                if (marketData == null)
+                {
+                    Main.AddLog("Failed to parse marketData, creating empty object");
+                    marketData = new JObject();
+                }
             }
             lock (marketItemsLock)
             {
                 if (marketItems == null)
                 {
                     marketItems = ParseFileOrMakeNew(marketItemsPath, ref parseHasFailed);
+                    if (marketItems == null)
+                    {
+                        Main.AddLog("Failed to parse marketItems, creating empty object");
+                        marketItems = new JObject();
+                    }
                 }
             }
             if (equipmentData == null)
             {
                 equipmentData = ParseFileOrMakeNew(equipmentDataPath, ref parseHasFailed);
+                if (equipmentData == null)
+                {
+                    Main.AddLog("Failed to parse equipmentData, creating empty object");
+                    equipmentData = new JObject();
+                }
             }
             if (relicData == null)
             {
                 relicData = ParseFileOrMakeNew(relicDataPath, ref parseHasFailed);
+                if (relicData == null)
+                {
+                    Main.AddLog("Failed to parse relicData, creating empty object");
+                    relicData = new JObject();
+                }
             }
             if (nameData == null)
             {
                 nameData = ParseFileOrMakeNew(nameDataPath, ref parseHasFailed);
+                if (nameData == null)
+                {
+                    Main.AddLog("Failed to parse nameData, creating empty object");
+                    nameData = new JObject();
+                }
             }
 
             string oldMarketTimeText;
@@ -829,186 +841,22 @@ namespace WFInfo
 
         public int LevenshteinDistance(string s, string t)
         {
-            switch (_settings.Locale)
-            {
-                case "ko":
-                    // for korean
-                    return LevenshteinDistanceKorean(s, t);
-                default:
-                    return LevenshteinDistanceDefault(s, t);
-            }
-        }
-
-        public static int LevenshteinDistanceDefault(string s, string t)
-        {
-            // Levenshtein Distance determines how many character changes it takes to form a known result
-            // For example: Nuvo Prime is closer to Nova Prime (2) then Ash Prime (4)
-            // For more info see: https://en.wikipedia.org/wiki/Levenshtein_distance
-            s = s.ToLower(Main.culture);
-            t = t.ToLower(Main.culture);
-            int n = s.Length;
-            int m = t.Length;
-            int[,] d = new int[n + 1, m + 1];
-
-            if (n == 0 || m == 0)
-                return n + m;
-
-            d[0, 0] = 0;
-
-            int count = 0;
-            for (int i = 1; i <= n; i++)
-                d[i, 0] = (s[i - 1] == ' ' ? count : ++count);
-
-            count = 0;
-            for (int j = 1; j <= m; j++)
-                d[0, j] = (t[j - 1] == ' ' ? count : ++count);
-
-            for (int i = 1; i <= n; i++)
-                for (int j = 1; j <= m; j++)
-                {
-                    // deletion of s
-                    int opt1 = d[i - 1, j];
-                    if (s[i - 1] != ' ')
-                        opt1++;
-
-                    // deletion of t
-                    int opt2 = d[i, j - 1];
-                    if (t[j - 1] != ' ')
-                        opt2++;
-
-                    // swapping s to t
-                    int opt3 = d[i - 1, j - 1];
-                    if (t[j - 1] != s[i - 1])
-                        opt3++;
-                    d[i, j] = Math.Min(Math.Min(opt1, opt2), opt3);
-                }
-
-
-
-            return d[n, m];
-        }
-
-        // This isn't used anymore?!
-        public static bool IsKorean(String str)
-        {
-            // Safeguard for empty strings that will give false positives and/or crashes
-            if (string.IsNullOrEmpty(str)) return false;
-            char c = str[0];
-            if (0x1100 <= c && c <= 0x11FF) return true;
-            if (0x3130 <= c && c <= 0x318F) return true;
-            if (0xAC00 <= c && c <= 0xD7A3) return true;
-            return false;
+            var processor = LanguageProcessorFactory.GetCurrentProcessor();
+            return processor.CalculateLevenshteinDistance(s, t);
         }
 
         public string GetLocaleNameData(string s)
         {
-            string localeName = "";
+            return GetLocaleNameData(s, true);
+        }
 
+        public string GetLocaleNameData(string s, bool useLevenshtein)
+        {
+            var processor = LanguageProcessorFactory.GetCurrentProcessor();
             lock (marketItemsLock)
             {
-                if (marketItems != null) // Add null check
-                {
-                    foreach (var marketItem in marketItems)
-                    {
-                        if (marketItem.Key == "version")
-                            continue;
-                        string[] split = marketItem.Value.ToString().Split('|');
-                        if (split[0] == s)
-                        {
-                            localeName = split.Length > 2 ? split[2] : "";
-                            break;
-                        }
-                    }
-                }
+                return processor.GetLocalizedNameData(s, marketItems, useLevenshtein);
             }
-
-            return localeName;
-        }
-        private protected static string e = "A?s/,;j_<Z3Q4z&)";
-
-        public int LevenshteinDistanceKorean(string s, string t)
-        {
-            // NameData s 를 한글명으로 가져옴
-            s = GetLocaleNameData(s);
-
-            // i18n korean edit distance algorithm
-            s = " " + s.Replace("설계도", "").Replace(" ", "");
-            t = " " + t.Replace("설계도", "").Replace(" ", "");
-
-            int n = s.Length;
-            int m = t.Length;
-            int[,] d = new int[n + 1, m + 1];
-
-            if (n == 0 || m == 0)
-                return n + m;
-            int i, j;
-
-            for (i = 1; i < s.Length; i++) d[i, 0] = i * 9;
-            for (j = 1; j < t.Length; j++) d[0, j] = j * 9;
-
-            int s1, s2;
-
-            for (i = 1; i < s.Length; i++)
-            {
-                for (j = 1; j < t.Length; j++)
-                {
-                    s1 = 0;
-                    s2 = 0;
-
-                    char cha = s[i];
-                    char chb = t[j];
-                    int[] a = new int[3];
-                    int[] b = new int[3];
-                    a[0] = (((cha - 0xAC00) - (cha - 0xAC00) % 28) / 28) / 21;
-                    a[1] = (((cha - 0xAC00) - (cha - 0xAC00) % 28) / 28) % 21;
-                    a[2] = (cha - 0xAC00) % 28;
-
-                    b[0] = (((chb - 0xAC00) - (chb - 0xAC00) % 28) / 28) / 21;
-                    b[1] = (((chb - 0xAC00) - (chb - 0xAC00) % 28) / 28) % 21;
-                    b[2] = (chb - 0xAC00) % 28;
-
-                    if (a[0] != b[0] && a[1] != b[1] && a[2] != b[2])
-                    {
-                        s1 = 9;
-                    }
-                    else
-                    {
-                        for (int k = 0; k < 3; k++)
-                        {
-                            if (a[k] != b[k])
-                            {
-                                if (GroupEquals(korean[k], a[k], b[k]))
-                                {
-                                    s2 += 1;
-                                }
-                                else
-                                {
-                                    s1 += 1;
-                                }
-                            }
-
-                        }
-                        s1 *= 3;
-                        s2 *= 2;
-                    }
-
-                    d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 9, d[i, j - 1] + 9), d[i - 1, j - 1] + s1 + s2);
-                }
-            }
-
-            return d[s.Length - 1, t.Length - 1];
-        }
-
-        private static bool GroupEquals(Dictionary<int, List<int>> group, int ak, int bk)
-        {
-            foreach (var entry in group)
-            {
-                if (entry.Value.Contains(ak) && entry.Value.Contains(bk))
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         public int LevenshteinDistanceSecond(string str1, string str2, int limit = -1)
@@ -1095,30 +943,86 @@ namespace WFInfo
             string lowest_unfiltered = null;
             low = 9999;
             multipleLowest = false;
-            foreach (KeyValuePair<string, JToken> prop in nameData)
+            
+            // Resolve OCR text to English once before loops to avoid repeated expensive database searches
+            // Only resolve for non-English locales to avoid regression in English
+            string resolvedName = _settings.Locale == "en" ? name : GetLocaleNameData(name, false);
+            
+            // For all non-English supported languages - check against localized names directly to avoid expensive conversion
+            if (_settings.Locale != "en")
             {
-                int val = LevenshteinDistance(prop.Key, name);
-                if (val < low)
+                // Check against localized names in marketItems
+                lock (marketItemsLock)
                 {
-                    low = val;
-                    lowest = prop.Value.ToObject<string>();
-                    lowest_unfiltered = prop.Key;
-                    multipleLowest = false;
+                    if (marketItems != null)
+                    {
+                        var processor = LanguageProcessorFactory.GetCurrentProcessor();
+                        foreach (var marketItem in marketItems)
+                        {
+                            if (marketItem.Key == "version") continue;
+                            string[] split = marketItem.Value.ToString().Split('|');
+                            if (split.Length < 3) continue;
+                            
+                            // Pre-filter: only check items with reasonable length difference (matching GetLocalizedNameData logic)
+                            int lengthDiff = Math.Abs(split[2].Length - name.Length);
+                            if (lengthDiff > split[2].Length / 2) continue;
+                            
+                            // Use normalized strings for comparison (like GetLocalizedNameData does)
+                            string normalizedName = processor.NormalizeForPatternMatching(name);
+                            string normalizedStored = processor.NormalizeForPatternMatching(split[2]);
+                            int val = processor.SimpleLevenshteinDistance(normalizedName, normalizedStored);
+                            
+                            // Distance filter: Only accept matches with distance < 50% of string length (like GetLocalizedNameData)
+                            if (val >= split[2].Length * 0.5) continue;
+                            
+                            if (val < low)
+                            {
+                                low = val;
+                                lowest = split[0]; // Return English name
+                                lowest_unfiltered = split[2]; // Show localized name in log
+                                multipleLowest = false;
+                            }
+                            else if (val == low)
+                            {
+                                multipleLowest = true;
+                            }
+                        }
+                    }
                 }
-                else if (val == low)
+            }
+            else
+            {
+                // Original logic for English
+                foreach (KeyValuePair<string, JToken> prop in nameData)
                 {
-                    multipleLowest = true;
-                }
+                    int lengthDiff = Math.Abs(prop.Key.Length - name.Length);
+                    if (lengthDiff > Math.Max(prop.Key.Length, name.Length) / 2) continue; // Skip if too different in length
+                    
+                    // Resolve OCR text to English for proper comparison (without recursive Levenshtein calls)
+                    int val = LevenshteinDistance(prop.Key, resolvedName);
+                    if (val < low)
+                    {
+                        low = val;
+                        lowest = prop.Value.ToObject<string>();
+                        lowest_unfiltered = prop.Key;
+                        multipleLowest = false;
+                    }
+                    else if (val == low)
+                    {
+                        multipleLowest = true;
+                    }
 
-                if (val == low && lowest.StartsWith("Gara") && prop.Key.StartsWith("Ivara")) //If both
-                {
-                    lowest = prop.Value.ToObject<string>();
-                    lowest_unfiltered = prop.Key;
+                    if (val == low && lowest.StartsWith("Gara") && prop.Key.StartsWith("Ivara")) //If both
+                    {
+                        lowest = prop.Value.ToObject<string>();
+                        lowest_unfiltered = prop.Key;
+                    }
                 }
             }
 
             if (!suppressLogging)
                 Main.AddLog("Found part(" + low + "): \"" + lowest_unfiltered + "\" from \"" + name + "\"");
+                
             return lowest;
         }
 
@@ -1127,11 +1031,15 @@ namespace WFInfo
             string lowest = null;
             string lowest_unfiltered = null;
             low = 9999;
+            
+            // Resolve OCR text to English once before loops to avoid repeated expensive database searches
+            // Only resolve for non-English locales to avoid regression in English
+            string resolvedName = _settings.Locale == "en" ? name : GetLocaleNameData(name, false);
             foreach (KeyValuePair<string, JToken> prop in nameData)
             {
                 if (prop.Value.ToString().ToLower(Main.culture).Contains(name.ToLower(Main.culture)))
                 {
-                    int val = LevenshteinDistance(prop.Value.ToString(), name);
+                    int val = LevenshteinDistance(prop.Value.ToString(), resolvedName);
                     if (val < low)
                     {
                         low = val;
@@ -1144,7 +1052,7 @@ namespace WFInfo
             {
                 foreach (KeyValuePair<string, JToken> prop in nameData)
                 {
-                    int val = LevenshteinDistance(prop.Value.ToString(), name);
+                    int val = LevenshteinDistance(prop.Value.ToString(), resolvedName);
                     if (val < low)
                     {
                         low = val;
@@ -1192,7 +1100,7 @@ namespace WFInfo
             result = result.Replace("hilt", "");
             result = result.Replace("link", "");
             result = result.TrimEnd();
-            result = Main.culture.TextInfo.ToTitleCase(result);
+            result = LanguageProcessorFactory.GetCurrentProcessor().Culture.TextInfo.ToTitleCase(result);
             result += " Set";
             return result;
         }
@@ -1460,7 +1368,7 @@ namespace WFInfo
                 options.SetRequestHeader("User-Agent", userAgent);
                 return;
             }
-            catch (System.ArgumentException ex)
+            catch (System.ArgumentException)
             {
                 //Debug.WriteLine(ex.ToString());
                 // Fallback to reflection if User-Agent is not settable

@@ -1,0 +1,13 @@
+{
+  "description": "Korean fissure reward screen",
+  "resolution": "1920x1080",
+  "scaling": 125,
+  "theme": "lotus",
+  "language": "korean",
+  "parts": {
+    "0": "보 프라임 설계도"
+  },
+  "category": "reward",
+  "hdr": false,
+  "filters": []
+}

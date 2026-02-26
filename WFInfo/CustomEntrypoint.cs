@@ -14,6 +14,7 @@ using System.Windows;
 using System.Linq;
 using System.CodeDom;
 using Tesseract;
+using WFInfo.Tests;
 
 namespace WFInfo
 {
@@ -82,6 +83,28 @@ namespace WFInfo
             currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
 
             Directory.CreateDirectory(appPath);
+
+            // Check for test execution arguments
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length >= 4 && (args[1].EndsWith(".json") || args[1].Contains("map")))
+            {
+                // Test execution mode: WFInfo.exe map.json data/ results.json
+                try
+                {
+                    Console.WriteLine("WFInfo OCR Test Runner");
+                    Console.WriteLine("=======================");
+                    
+                    // Initialize test services and run tests
+                    TestProgram.RunTests(args).Wait();
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Test execution failed: {ex.Message}");
+                    Environment.Exit(1);
+                    return;
+                }
+            }
 
             string thisprocessname = Process.GetCurrentProcess().ProcessName;
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();

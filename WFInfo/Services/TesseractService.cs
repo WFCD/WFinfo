@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using Tesseract;
 using WFInfo.Settings;
+using WFInfo.LanguageProcessing;
 
 namespace WFInfo
 {
@@ -30,8 +32,8 @@ namespace WFInfo
     }
 
     /// <summary>
-    /// Holds all the TesseractEngine instances and is responsible for loadind/reloading them
-    /// They are all configured in the same way
+    /// Holds all TesseractEngine instances and is responsible for loadind/reloading them
+    /// They are all configured with language-specific character whitelists to reduce noise
     /// </summary>
     public class TesseractService : ITesseractService
     {
@@ -44,7 +46,7 @@ namespace WFInfo
         /// </summary>
         public TesseractEngine SecondEngine { get; private set; }
         /// <summary>
-        /// Engines for parallel processing the reward screen and snapit
+        /// Engines for parallel processing of reward screen and snapit
         /// </summary>
         public TesseractEngine[] Engines { get; } = new TesseractEngine[4];
 
@@ -53,6 +55,9 @@ namespace WFInfo
         private static readonly string NormalDataPath = ApplicationDirectory + @"\tessdata";
         private static readonly string FallbackDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\WFInfo" + @"\tessdata";
         private string DataPath;
+
+        // Fallback whitelist for unknown locales
+        private const string DefaultWhitelist = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
         public TesseractService()
         {
@@ -99,10 +104,30 @@ namespace WFInfo
             SecondEngine = CreateEngine();
         }
 
-        private TesseractEngine CreateEngine() => new TesseractEngine(DataPath, Locale)
+        private TesseractEngine CreateEngine()
         {
-            DefaultPageSegMode = PageSegMode.SingleBlock
-        };
+            //Main.AddLog($"Creating Tesseract engine for locale: '{Locale}'");
+            var engine = new TesseractEngine(DataPath, Locale);
+            
+            // Apply Korean-specific optimizations only for Korean locale
+            if (Locale == "ko")
+            {
+                engine.SetVariable("engine_mode", "1"); // Use LSTM neural network engine
+                engine.SetVariable("oem_engine", "1"); // Use LSTM OEM engine
+                
+                // Improve text segmentation for Korean
+                engine.SetVariable("enable_smoothing", "1"); // Helps with Korean character recognition
+                engine.SetVariable("smooth_scaling_factor", "1.5"); // Slight smoothing for better accuracy
+            }
+            
+            // Apply language-specific character whitelist from language processor
+            var processor = LanguageProcessorFactory.GetProcessor(Locale);
+            var whitelist = processor?.CharacterWhitelist ?? DefaultWhitelist;
+            engine.SetVariable("tessedit_char_whitelist", whitelist);
+            //Main.AddLog($"Tesseract whitelist for '{Locale}': '{whitelist}'");
+            
+            return engine;
+        }
         
         public void Init()
         {
@@ -133,7 +158,20 @@ namespace WFInfo
             JObject traineddata_checksums = new JObject
             {
                 {"en", "7af2ad02d11702c7092a5f8dd044d52f"},
-                {"ko", "c776744205668b7e76b190cc648765da"}
+                {"ko", "c776744205668b7e76b190cc648765da"},
+                {"fr", "ac0a3da6bf50ed0dab61b46415e82c17"},
+                {"uk", "fe1312cbfb602fc179796dbf54ee65fe"},
+                {"it", "401cd425084217b224f99c3f55c78518"},
+                {"de", "d37aac5fce1c7d8f279a42f076c935d8"},
+                {"es", "130215a6355e9ea651f483279271d354"},
+                {"pt", "9627fa0ccecdc9dfdb9ac232bbbd744f"},
+                {"pl", "33bb3c504011b839cf6e2b689ea68578"},
+                //{"tr", "df810a344d6725b2ee3e76682de5a86b"}, - cannot be supported until WFM supports it
+                {"ru", "2e2022eddce032b754300a8188b41419"},
+                //{"ja", "synthetic_md5_japanese"}, - cannot be supported until WFM supports it
+                {"zh-hans", "921bdf9c27a17ce5c7c77c10345ad8fb"},
+                {"zh-hant", "5865dded9ef6d035c165fb14317f1402"},
+                //{"th", "synthetic_md5_thai"} - cannot be supported until WFM supports it
             };
 
             // get trainned data
