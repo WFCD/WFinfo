@@ -12,28 +12,31 @@ if not exist "map.json" (
     echo Usage: run_tests.bat [test_data_directory]
     echo.
     echo Example: run_tests.bat data\
-    goto :eof
+    exit /b 2
 )
 
 REM Set test images directory
-set TEST_IMAGES_DIR=%~1
-if "%TEST_IMAGES_DIR%"=="" set TEST_IMAGES_DIR=data
+set "TEST_IMAGES_DIR=%~1"
+if "%TEST_IMAGES_DIR%"=="" set "TEST_IMAGES_DIR=data"
 
 REM Check if test images directory exists
 if not exist "%TEST_IMAGES_DIR%" (
     echo ERROR: Test images directory not found: "%TEST_IMAGES_DIR%"
-    goto :eof
+    exit /b 3
 )
 
 REM Run the test
 echo Running OCR tests...
 echo Map: map.json
 echo Images: %TEST_IMAGES_DIR%
-echo Output: test_results_%date:~-4,4%%date:~-10,2%%date:~-7,2%_%time:~0,2%%time:~3,2%%time:~6,2%.json
+
+REM Generate locale-safe timestamp
+for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "Get-Date -Format 'yyyyMMdd_HHmmss'"`) do set TIMESTAMP=%%T
+echo Output: test_results_%TIMESTAMP%.json
 echo.
 
 REM Run test executable (using main WFInfo executable)
-..\bin\Release\net48\WFInfo.exe map.json "%TEST_IMAGES_DIR%" test_results_%date:~-4,4%%date:~-10,2%%date:~-7,2%_%time:~0,2%%time:~3,2%%time:~6,2%.json
+..\bin\Release\net48\WFInfo.exe map.json "%TEST_IMAGES_DIR%" "test_results_%TIMESTAMP%.json"
 
 REM Check results
 if %errorlevel% equ 0 (

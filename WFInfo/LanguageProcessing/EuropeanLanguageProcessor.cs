@@ -48,7 +48,7 @@ namespace WFInfo.LanguageProcessing
         
         protected override int DefaultLevenshteinDistance(string s, string t)
         {
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, input => NormalizeEuropeanCharacters(input));
+            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, input => NormalizeEuropeanCharacters(input), callBaseDefault: true);
         }
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Plan", "Schemat" };
 
-        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x0104, 0x0107) + GenerateCharacterRange(0x0118, 0x0119) + GenerateCharacterRange(0x0141, 0x0144) + GenerateCharacterRange(0x015A, 0x015A); // Polish with ranges
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x0104, 0x0107) + GenerateCharacterRange(0x0118, 0x0119) + GenerateCharacterRange(0x0141, 0x0144) + GenerateCharacterRange(0x015A, 0x015A) + "\u00d3\u00f3\u015a\u015b\u0179\u017a\u017b\u017c"; // Polish with ranges + missing letters
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {

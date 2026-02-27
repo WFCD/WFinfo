@@ -126,10 +126,42 @@ namespace WFInfo.LanguageProcessing
             s = " " + s.Replace("설계도", "").Replace(" ", "");
             t = " " + t.Replace("설계도", "").Replace(" ", "");
 
-            // Normalize Korean characters to Latin equivalents for proper comparison
-            s = NormalizeKoreanCharacters(s);
-            t = NormalizeKoreanCharacters(t);
-
+            // Check if both inputs contain Hangul characters for Korean-aware comparison
+            bool sHasHangul = ContainsHangul(s);
+            bool tHasHangul = ContainsHangul(t);
+            
+            if (sHasHangul && tHasHangul)
+            {
+                // Korean-aware path: use original Hangul characters with Korean similarity logic
+                return CalculateKoreanAwareDistance(s, t);
+            }
+            else
+            {
+                // Fallback/transliterated path: normalize to Latin equivalents
+                s = NormalizeKoreanCharacters(s);
+                t = NormalizeKoreanCharacters(t);
+                return CalculateStandardDistance(s, t);
+            }
+        }
+        
+        /// <summary>
+        /// Checks if a string contains any Hangul characters
+        /// </summary>
+        private static bool ContainsHangul(string input)
+        {
+            foreach (char c in input)
+            {
+                if (c >= 0xAC00 && c <= 0xD7AF) // Hangul syllables range
+                    return true;
+            }
+            return false;
+        }
+        
+        /// <summary>
+        /// Calculates distance using Korean-aware similarity logic
+        /// </summary>
+        private int CalculateKoreanAwareDistance(string s, string t)
+        {
             int n = s.Length;
             int m = t.Length;
 
@@ -149,6 +181,39 @@ namespace WFInfo.LanguageProcessing
                 for (int j = 1; j <= m; j++)
                 {
                     int cost = GetKoreanCharacterDifference(s[i - 1], t[j - 1]);
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+                }
+            }
+
+            return d[n, m];
+        }
+        
+        /// <summary>
+        /// Calculates standard distance without Korean-specific logic
+        /// </summary>
+        private int CalculateStandardDistance(string s, string t)
+        {
+            int n = s.Length;
+            int m = t.Length;
+
+            if (n == 0) return m;
+            if (m == 0) return n;
+
+            int[,] d = new int[n + 1, m + 1];
+
+            for (int i = 0; i <= n; i++)
+                d[i, 0] = i;
+
+            for (int j = 0; j <= m; j++)
+                d[0, j] = j;
+
+            for (int i = 1; i <= n; i++)
+            {
+                for (int j = 1; j <= m; j++)
+                {
+                    int cost = (s[i - 1] == t[j - 1]) ? 0 : 1;
                     d[i, j] = Math.Min(
                         Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
                         d[i - 1, j - 1] + cost);
@@ -305,6 +370,29 @@ namespace WFInfo.LanguageProcessing
         {
             if (a == b) return 0;
 
+            // Handle Hangul decomposition for Korean-aware comparison
+            if (IsHangulSyllable(a) && IsHangulSyllable(b))
+            {
+                // Decompose both characters into Jamo indices and compare
+                var jamoA = DecomposeHangul(a);
+                var jamoB = DecomposeHangul(b);
+                
+                // Compare each component (initial, medial, final) using similarity groups
+                int totalCost = 0;
+                
+                // Compare initial consonants (초성)
+                totalCost += CompareJamoSimilarity(jamoA.initialIndex, jamoB.initialIndex, 0);
+                
+                // Compare medial vowels (중성)  
+                totalCost += CompareJamoSimilarity(jamoA.medialIndex, jamoB.medialIndex, 1);
+                
+                // Compare final consonants (종성)
+                totalCost += CompareJamoSimilarity(jamoA.finalIndex, jamoB.finalIndex, 2);
+                
+                return totalCost > 0 ? Math.Min(totalCost, 2) : 0;
+            }
+            
+            // Fallback to original logic for non-Hangul or mixed cases
             // Check if characters are in the same similarity group
             for (int group = 0; group < Korean.Count; group++)
             {
@@ -319,6 +407,54 @@ namespace WFInfo.LanguageProcessing
 
             return 2; // Different characters have higher cost
         }
+        
+        /// <summary>
+        /// Checks if a character is a Hangul syllable
+        /// </summary>
+        private static bool IsHangulSyllable(char c)
+        {
+            return c >= 0xAC00 && c <= 0xD7AF;
+        }
+        
+        /// <summary>
+        /// Decomposes a Hangul syllable into Jamo component indices
+        /// </summary>
+        private static (int initialIndex, int medialIndex, int finalIndex) DecomposeHangul(char syllable)
+        {
+            if (!IsHangulSyllable(syllable))
+                return (-1, -1, -1);
+                
+            int syllableIndex = syllable - 0xAC00;
+            
+            int finalIndex = syllableIndex % 28; // 0-27 (including no final consonant)
+            int medialIndex = (syllableIndex / 28) % 21; // 0-20
+            int initialIndex = syllableIndex / (28 * 21); // 0-18
+            
+            return (initialIndex, medialIndex, finalIndex);
+        }
+        
+        /// <summary>
+        /// Compares two Jamo indices using Korean similarity groups
+        /// </summary>
+        private int CompareJamoSimilarity(int indexA, int indexB, int groupType)
+        {
+            if (indexA == indexB) return 0;
+            if (indexA < 0 || indexB < 0) return 2; // Invalid indices
+            
+            // Use the Korean similarity groups for the specified type
+            if (groupType < Korean.Count)
+            {
+                foreach (var similarityGroup in Korean[groupType])
+                {
+                    if (similarityGroup.Value.Contains(indexA) && similarityGroup.Value.Contains(indexB))
+                    {
+                        return 1; // Similar Jamo have lower cost
+                    }
+                }
+            }
+            
+            return 2; // Different Jamo have higher cost
+        }
 
         /// <summary>
         /// Normalizes Korean Hangul characters to Latin equivalents for comparison
@@ -329,80 +465,81 @@ namespace WFInfo.LanguageProcessing
             if (string.IsNullOrEmpty(input)) return input;
             
             // Common OCR character substitutions and confusions
-            var replacements = new Dictionary<string, string>
+            // Using List<KeyValuePair<string,string>> to allow duplicate keys and preserve order
+            var replacements = new List<KeyValuePair<string, string>>
             {
                 // Basic consonants and vowels
-                {"가", "ga"}, {"개", "gae"}, {"갸", "gya"}, {"걔", "gyae"}, {"거", "geo"}, {"게", "ge"}, {"겨", "gyeo"}, {"계", "gye"},
-                {"고", "go"}, {"과", "gwa"}, {"궈", "gwo"}, {"괘", "gwae"}, {"괴", "goe"}, {"교", "gyo"}, {"구", "gu"}, {"궈", "gwo"},
-                {"궤", "gwe"}, {"귀", "gwi"}, {"규", "gyu"}, {"그", "geu"}, {"긔", "gui"}, {"기", "gi"},
+                new KeyValuePair<string, string>("가", "ga"), new KeyValuePair<string, string>("개", "gae"), new KeyValuePair<string, string>("갸", "gya"), new KeyValuePair<string, string>("걔", "gyae"), new KeyValuePair<string, string>("거", "geo"), new KeyValuePair<string, string>("게", "ge"), new KeyValuePair<string, string>("겨", "gyeo"), new KeyValuePair<string, string>("계", "gye"),
+                new KeyValuePair<string, string>("고", "go"), new KeyValuePair<string, string>("과", "gwa"), new KeyValuePair<string, string>("궈", "gwo"), new KeyValuePair<string, string>("괘", "gwae"), new KeyValuePair<string, string>("괴", "goe"), new KeyValuePair<string, string>("교", "gyo"), new KeyValuePair<string, string>("구", "gu"), new KeyValuePair<string, string>("궈", "gwo"),
+                new KeyValuePair<string, string>("궤", "gwe"), new KeyValuePair<string, string>("귀", "gwi"), new KeyValuePair<string, string>("규", "gyu"), new KeyValuePair<string, string>("그", "geu"), new KeyValuePair<string, string>("긔", "gui"), new KeyValuePair<string, string>("기", "gi"),
                 
-                {"나", "na"}, {"내", "nae"}, {"냐", "nya"}, {"냬", "nyae"}, {"너", "neo"}, {"네", "ne"}, {"녀", "nyeo"}, {"녜", "nye"},
-                {"노", "no"}, {"놔", "nwa"}, {"놰", "nwo"}, {"놰", "nwae"}, {"뇌", "noe"}, {"뇨", "nyo"}, {"누", "nu"}, {"뉘", "nwi"},
-                {"뉴", "nyu"}, {"느", "neu"}, {"늬", "nui"}, {"니", "ni"},
+                new KeyValuePair<string, string>("나", "na"), new KeyValuePair<string, string>("내", "nae"), new KeyValuePair<string, string>("냐", "nya"), new KeyValuePair<string, string>("냬", "nyae"), new KeyValuePair<string, string>("너", "neo"), new KeyValuePair<string, string>("네", "ne"), new KeyValuePair<string, string>("녀", "nyeo"), new KeyValuePair<string, string>("녜", "nye"),
+                new KeyValuePair<string, string>("노", "no"), new KeyValuePair<string, string>("놔", "nwa"), new KeyValuePair<string, string>("놰", "nwo"), new KeyValuePair<string, string>("놰", "nwae"), new KeyValuePair<string, string>("뇌", "noe"), new KeyValuePair<string, string>("뇨", "nyo"), new KeyValuePair<string, string>("누", "nu"), new KeyValuePair<string, string>("뉘", "nwi"),
+                new KeyValuePair<string, string>("뉴", "nyu"), new KeyValuePair<string, string>("느", "neu"), new KeyValuePair<string, string>("늬", "nui"), new KeyValuePair<string, string>("니", "ni"),
                 
-                {"다", "da"}, {"대", "dae"}, {"댜", "dya"}, {"댸", "dyae"}, {"더", "deo"}, {"데", "de"}, {"뎌", "dyeo"}, {"뎨", "dye"},
-                {"도", "do"}, {"돠", "dwa"}, {"돼", "dwae"}, {"돼", "doe"}, {"됴", "dyo"}, {"두", "du"}, {"둬", "dwo"}, {"뒈", "dwae"},
-                {"뒤", "dwi"}, {"듀", "dyu"}, {"드", "deu"}, {"듸", "dui"}, {"디", "di"},
+                new KeyValuePair<string, string>("다", "da"), new KeyValuePair<string, string>("대", "dae"), new KeyValuePair<string, string>("댜", "dya"), new KeyValuePair<string, string>("댸", "dyae"), new KeyValuePair<string, string>("더", "deo"), new KeyValuePair<string, string>("데", "de"), new KeyValuePair<string, string>("뎌", "dyeo"), new KeyValuePair<string, string>("뎨", "dye"),
+                new KeyValuePair<string, string>("도", "do"), new KeyValuePair<string, string>("돠", "dwa"), new KeyValuePair<string, string>("돼", "dwae"), new KeyValuePair<string, string>("돼", "doe"), new KeyValuePair<string, string>("됴", "dyo"), new KeyValuePair<string, string>("두", "du"), new KeyValuePair<string, string>("둬", "dwo"), new KeyValuePair<string, string>("뒈", "dwae"),
+                new KeyValuePair<string, string>("뒤", "dwi"), new KeyValuePair<string, string>("듀", "dyu"), new KeyValuePair<string, string>("드", "deu"), new KeyValuePair<string, string>("듸", "dui"), new KeyValuePair<string, string>("디", "di"),
                 
-                {"라", "ra"}, {"래", "rae"}, {"랴", "rya"}, {"럐", "ryae"}, {"러", "reo"}, {"레", "re"}, {"려", "ryeo"}, {"례", "rye"},
-                {"로", "ro"}, {"롸", "rwa"}, {"뢔", "roe"}, {"료", "ryo"}, {"루", "ru"}, {"뤄", "rwo"}, {"뤠", "rwae"}, {"뤼", "rwi"},
-                {"류", "ryu"}, {"르", "reu"}, {"릐", "rui"}, {"리", "ri"},
+                new KeyValuePair<string, string>("라", "ra"), new KeyValuePair<string, string>("래", "rae"), new KeyValuePair<string, string>("랴", "rya"), new KeyValuePair<string, string>("럐", "ryae"), new KeyValuePair<string, string>("러", "reo"), new KeyValuePair<string, string>("레", "re"), new KeyValuePair<string, string>("려", "ryeo"), new KeyValuePair<string, string>("례", "rye"),
+                new KeyValuePair<string, string>("로", "ro"), new KeyValuePair<string, string>("롸", "rwa"), new KeyValuePair<string, string>("뢔", "roe"), new KeyValuePair<string, string>("료", "ryo"), new KeyValuePair<string, string>("루", "ru"), new KeyValuePair<string, string>("뤄", "rwo"), new KeyValuePair<string, string>("뤠", "rwae"), new KeyValuePair<string, string>("뤼", "rwi"),
+                new KeyValuePair<string, string>("류", "ryu"), new KeyValuePair<string, string>("르", "reu"), new KeyValuePair<string, string>("릐", "rui"), new KeyValuePair<string, string>("리", "ri"),
                 
-                {"마", "ma"}, {"매", "mae"}, {"먀", "mya"}, {"먜", "myae"}, {"머", "meo"}, {"메", "me"}, {"며", "myeo"}, {"몌", "mye"},
-                {"모", "mo"}, {"뫄", "mwa"}, {"뫠", "mwae"}, {"뫼", "moe"}, {"묘", "myo"}, {"무", "mu"}, {"뭐", "mwo"}, {"뭬", "mwae"},
-                {"뮈", "mwi"}, {"뮤", "myu"}, {"므", "meu"}, {"믜", "mui"}, {"미", "mi"},
+                new KeyValuePair<string, string>("마", "ma"), new KeyValuePair<string, string>("매", "mae"), new KeyValuePair<string, string>("먀", "mya"), new KeyValuePair<string, string>("먜", "myae"), new KeyValuePair<string, string>("머", "meo"), new KeyValuePair<string, string>("메", "me"), new KeyValuePair<string, string>("며", "myeo"), new KeyValuePair<string, string>("몌", "mye"),
+                new KeyValuePair<string, string>("모", "mo"), new KeyValuePair<string, string>("뫄", "mwa"), new KeyValuePair<string, string>("뫠", "mwae"), new KeyValuePair<string, string>("뫼", "moe"), new KeyValuePair<string, string>("묘", "myo"), new KeyValuePair<string, string>("무", "mu"), new KeyValuePair<string, string>("뭐", "mwo"), new KeyValuePair<string, string>("뭬", "mwae"),
+                new KeyValuePair<string, string>("뮈", "mwi"), new KeyValuePair<string, string>("뮤", "myu"), new KeyValuePair<string, string>("므", "meu"), new KeyValuePair<string, string>("믜", "mui"), new KeyValuePair<string, string>("미", "mi"),
                 
-                {"바", "ba"}, {"배", "bae"}, {"뱌", "bya"}, {"뱨", "byae"}, {"버", "beo"}, {"베", "be"}, {"벼", "byeo"}, {"볘", "bye"},
-                {"보", "bo"}, {"봐", "bwa"}, {"봬", "bwae"}, {"뵈", "boe"}, {"뵤", "byo"}, {"부", "bu"}, {"붜", "bwo"}, {"붸", "bwae"},
-                {"뷔", "bwi"}, {"뷰", "byu"}, {"브", "beu"}, {"븨", "bui"}, {"비", "bi"},
+                new KeyValuePair<string, string>("바", "ba"), new KeyValuePair<string, string>("배", "bae"), new KeyValuePair<string, string>("뱌", "bya"), new KeyValuePair<string, string>("뱨", "byae"), new KeyValuePair<string, string>("버", "beo"), new KeyValuePair<string, string>("베", "be"), new KeyValuePair<string, string>("벼", "byeo"), new KeyValuePair<string, string>("볘", "bye"),
+                new KeyValuePair<string, string>("보", "bo"), new KeyValuePair<string, string>("봐", "bwa"), new KeyValuePair<string, string>("봬", "bwae"), new KeyValuePair<string, string>("뵈", "boe"), new KeyValuePair<string, string>("뵤", "byo"), new KeyValuePair<string, string>("부", "bu"), new KeyValuePair<string, string>("붜", "bwo"), new KeyValuePair<string, string>("붸", "bwae"),
+                new KeyValuePair<string, string>("뷔", "bwi"), new KeyValuePair<string, string>("뷰", "byu"), new KeyValuePair<string, string>("브", "beu"), new KeyValuePair<string, string>("븨", "bui"), new KeyValuePair<string, string>("비", "bi"),
                 
-                {"사", "sa"}, {"새", "sae"}, {"샤", "sya"}, {"섀", "syae"}, {"서", "seo"}, {"세", "se"}, {"셔", "syeo"}, {"셰", "sye"},
-                {"소", "so"}, {"솨", "swa"}, {"쇄", "swae"}, {"쇠", "soe"}, {"쇼", "syo"}, {"수", "su"}, {"숴", "swo"}, {"쉐", "swae"},
-                {"쉬", "swi"}, {"슈", "syu"}, {"스", "seu"}, {"싀", "sui"}, {"시", "si"},
+                new KeyValuePair<string, string>("사", "sa"), new KeyValuePair<string, string>("새", "sae"), new KeyValuePair<string, string>("샤", "sya"), new KeyValuePair<string, string>("섀", "syae"), new KeyValuePair<string, string>("서", "seo"), new KeyValuePair<string, string>("세", "se"), new KeyValuePair<string, string>("셔", "syeo"), new KeyValuePair<string, string>("셰", "sye"),
+                new KeyValuePair<string, string>("소", "so"), new KeyValuePair<string, string>("솨", "swa"), new KeyValuePair<string, string>("쇄", "swae"), new KeyValuePair<string, string>("쇠", "soe"), new KeyValuePair<string, string>("쇼", "syo"), new KeyValuePair<string, string>("수", "su"), new KeyValuePair<string, string>("숴", "swo"), new KeyValuePair<string, string>("쉐", "swae"),
+                new KeyValuePair<string, string>("쉬", "swi"), new KeyValuePair<string, string>("슈", "syu"), new KeyValuePair<string, string>("스", "seu"), new KeyValuePair<string, string>("싀", "sui"), new KeyValuePair<string, string>("시", "si"),
                 
-                {"아", "a"}, {"애", "ae"}, {"야", "ya"}, {"얘", "yae"}, {"어", "eo"}, {"에", "e"}, {"여", "yeo"}, {"예", "ye"},
-                {"오", "o"}, {"와", "wa"}, {"왜", "wae"}, {"외", "oe"}, {"요", "yo"}, {"우", "u"}, {"워", "wo"}, {"웨", "we"},
-                {"위", "wi"}, {"유", "yu"}, {"으", "eu"}, {"의", "ui"}, {"이", "i"},
+                new KeyValuePair<string, string>("아", "a"), new KeyValuePair<string, string>("애", "ae"), new KeyValuePair<string, string>("야", "ya"), new KeyValuePair<string, string>("얘", "yae"), new KeyValuePair<string, string>("어", "eo"), new KeyValuePair<string, string>("에", "e"), new KeyValuePair<string, string>("여", "yeo"), new KeyValuePair<string, string>("예", "ye"),
+                new KeyValuePair<string, string>("오", "o"), new KeyValuePair<string, string>("와", "wa"), new KeyValuePair<string, string>("왜", "wae"), new KeyValuePair<string, string>("외", "oe"), new KeyValuePair<string, string>("요", "yo"), new KeyValuePair<string, string>("우", "u"), new KeyValuePair<string, string>("워", "wo"), new KeyValuePair<string, string>("웨", "we"),
+                new KeyValuePair<string, string>("위", "wi"), new KeyValuePair<string, string>("유", "yu"), new KeyValuePair<string, string>("으", "eu"), new KeyValuePair<string, string>("의", "ui"), new KeyValuePair<string, string>("이", "i"),
                 
-                {"자", "ja"}, {"재", "jae"}, {"쟈", "jya"}, {"쟤", "jyae"}, {"저", "jeo"}, {"제", "je"}, {"져", "jyeo"}, {"졔", "jye"},
-                {"조", "jo"}, {"좌", "jwa"}, {"좨", "jwae"}, {"죄", "joe"}, {"죠", "jyo"}, {"주", "ju"}, {"줘", "jwo"}, {"줴", "jwae"},
-                {"쥐", "jwi"}, {"쥬", "jyu"}, {"즈", "jeu"}, {"즤", "jui"}, {"지", "ji"},
+                new KeyValuePair<string, string>("자", "ja"), new KeyValuePair<string, string>("재", "jae"), new KeyValuePair<string, string>("쟈", "jya"), new KeyValuePair<string, string>("쟤", "jyae"), new KeyValuePair<string, string>("저", "jeo"), new KeyValuePair<string, string>("제", "je"), new KeyValuePair<string, string>("져", "jyeo"), new KeyValuePair<string, string>("졔", "jye"),
+                new KeyValuePair<string, string>("조", "jo"), new KeyValuePair<string, string>("좌", "jwa"), new KeyValuePair<string, string>("좨", "jwae"), new KeyValuePair<string, string>("죄", "joe"), new KeyValuePair<string, string>("죠", "jyo"), new KeyValuePair<string, string>("주", "ju"), new KeyValuePair<string, string>("줘", "jwo"), new KeyValuePair<string, string>("줴", "jwae"),
+                new KeyValuePair<string, string>("쥐", "jwi"), new KeyValuePair<string, string>("쥬", "jyu"), new KeyValuePair<string, string>("즈", "jeu"), new KeyValuePair<string, string>("즤", "jui"), new KeyValuePair<string, string>("지", "ji"),
                 
-                {"차", "cha"}, {"채", "chae"}, {"챠", "chya"}, {"챼", "chyae"}, {"처", "cheo"}, {"체", "che"}, {"쳐", "chyeo"}, {"쳬", "chye"},
-                {"초", "cho"}, {"촤", "chwa"}, {"쵀", "chwae"}, {"최", "choe"}, {"쵸", "chyo"}, {"추", "chu"}, {"춰", "chwo"}, {"췌", "chwae"},
-                {"취", "chwi"}, {"츄", "chyu"}, {"츠", "cheu"}, {"츼", "chui"}, {"치", "chi"},
+                new KeyValuePair<string, string>("차", "cha"), new KeyValuePair<string, string>("채", "chae"), new KeyValuePair<string, string>("챠", "chya"), new KeyValuePair<string, string>("챼", "chyae"), new KeyValuePair<string, string>("처", "cheo"), new KeyValuePair<string, string>("체", "che"), new KeyValuePair<string, string>("쳐", "chyeo"), new KeyValuePair<string, string>("쳬", "chye"),
+                new KeyValuePair<string, string>("초", "cho"), new KeyValuePair<string, string>("촤", "chwa"), new KeyValuePair<string, string>("쵀", "chwae"), new KeyValuePair<string, string>("최", "choe"), new KeyValuePair<string, string>("쵸", "chyo"), new KeyValuePair<string, string>("추", "chu"), new KeyValuePair<string, string>("춰", "chwo"), new KeyValuePair<string, string>("췌", "chwae"),
+                new KeyValuePair<string, string>("취", "chwi"), new KeyValuePair<string, string>("츄", "chyu"), new KeyValuePair<string, string>("츠", "cheu"), new KeyValuePair<string, string>("츼", "chui"), new KeyValuePair<string, string>("치", "chi"),
                 
-                {"카", "ka"}, {"캐", "kae"}, {"캬", "kya"}, {"컈", "kyae"}, {"커", "keo"}, {"케", "ke"}, {"켜", "kyeo"}, {"켸", "kye"},
-                {"코", "ko"}, {"콰", "kwa"}, {"쾌", "kwae"}, {"쾨", "koe"}, {"쿄", "kyo"}, {"쿠", "ku"}, {"퀘", "kwo"}, {"퀘", "kwae"},
-                {"퀴", "kwi"}, {"큐", "kyu"}, {"크", "keu"}, {"킈", "kui"}, {"키", "ki"},
+                new KeyValuePair<string, string>("카", "ka"), new KeyValuePair<string, string>("캐", "kae"), new KeyValuePair<string, string>("캬", "kya"), new KeyValuePair<string, string>("컈", "kyae"), new KeyValuePair<string, string>("커", "keo"), new KeyValuePair<string, string>("케", "ke"), new KeyValuePair<string, string>("켜", "kyeo"), new KeyValuePair<string, string>("켸", "kye"),
+                new KeyValuePair<string, string>("코", "ko"), new KeyValuePair<string, string>("콰", "kwa"), new KeyValuePair<string, string>("쾌", "kwae"), new KeyValuePair<string, string>("쾨", "koe"), new KeyValuePair<string, string>("쿄", "kyo"), new KeyValuePair<string, string>("쿠", "ku"), new KeyValuePair<string, string>("퀘", "kwo"), new KeyValuePair<string, string>("퀘", "kwae"),
+                new KeyValuePair<string, string>("퀴", "kwi"), new KeyValuePair<string, string>("큐", "kyu"), new KeyValuePair<string, string>("크", "keu"), new KeyValuePair<string, string>("킈", "kui"), new KeyValuePair<string, string>("키", "ki"),
                 
-                {"타", "ta"}, {"태", "tae"}, {"탸", "tya"}, {"턔", "tyae"}, {"터", "teo"}, {"테", "te"}, {"텨", "tyeo"}, {"톄", "tye"},
-                {"토", "to"}, {"톼", "twa"}, {"퇘", "twae"}, {"퇴", "toe"}, {"툐", "tyo"}, {"투", "tu"}, {"퉈", "two"}, {"퉤", "twae"},
-                {"튀", "twi"}, {"튜", "tyu"}, {"트", "teu"}, {"틔", "tui"}, {"티", "ti"},
+                new KeyValuePair<string, string>("타", "ta"), new KeyValuePair<string, string>("태", "tae"), new KeyValuePair<string, string>("탸", "tya"), new KeyValuePair<string, string>("턔", "tyae"), new KeyValuePair<string, string>("터", "teo"), new KeyValuePair<string, string>("테", "te"), new KeyValuePair<string, string>("텨", "tyeo"), new KeyValuePair<string, string>("톄", "tye"),
+                new KeyValuePair<string, string>("토", "to"), new KeyValuePair<string, string>("톼", "twa"), new KeyValuePair<string, string>("퇘", "twae"), new KeyValuePair<string, string>("퇴", "toe"), new KeyValuePair<string, string>("툐", "tyo"), new KeyValuePair<string, string>("투", "tu"), new KeyValuePair<string, string>("퉈", "two"), new KeyValuePair<string, string>("퉤", "twae"),
+                new KeyValuePair<string, string>("튀", "twi"), new KeyValuePair<string, string>("튜", "tyu"), new KeyValuePair<string, string>("트", "teu"), new KeyValuePair<string, string>("틔", "tui"), new KeyValuePair<string, string>("티", "ti"),
                 
-                {"파", "pa"}, {"패", "pae"}, {"퍄", "pya"}, {"퍠", "pyae"}, {"퍼", "peo"}, {"페", "pe"}, {"펴", "pyeo"}, {"폐", "pye"},
-                {"포", "po"}, {"퐈", "pwa"}, {"퐤", "pwae"}, {"푀", "poe"}, {"표", "pyo"}, {"푸", "pu"}, {"풔", "pwo"}, {"풰", "pwae"},
-                {"퓌", "pwi"}, {"퓨", "pyu"}, {"프", "peu"}, {"픠", "pui"}, {"피", "pi"},
+                new KeyValuePair<string, string>("파", "pa"), new KeyValuePair<string, string>("패", "pae"), new KeyValuePair<string, string>("퍄", "pya"), new KeyValuePair<string, string>("퍠", "pyae"), new KeyValuePair<string, string>("퍼", "peo"), new KeyValuePair<string, string>("페", "pe"), new KeyValuePair<string, string>("펴", "pyeo"), new KeyValuePair<string, string>("폐", "pye"),
+                new KeyValuePair<string, string>("포", "po"), new KeyValuePair<string, string>("퐈", "pwa"), new KeyValuePair<string, string>("퐤", "pwae"), new KeyValuePair<string, string>("푀", "poe"), new KeyValuePair<string, string>("표", "pyo"), new KeyValuePair<string, string>("푸", "pu"), new KeyValuePair<string, string>("풔", "pwo"), new KeyValuePair<string, string>("풰", "pwae"),
+                new KeyValuePair<string, string>("퓌", "pwi"), new KeyValuePair<string, string>("퓨", "pyu"), new KeyValuePair<string, string>("프", "peu"), new KeyValuePair<string, string>("픠", "pui"), new KeyValuePair<string, string>("피", "pi"),
                 
-                {"하", "ha"}, {"해", "hae"}, {"햐", "hya"}, {"햬", "hyae"}, {"허", "heo"}, {"헤", "he"}, {"혀", "hyeo"}, {"혜", "hye"},
-                {"호", "ho"}, {"화", "hwa"}, {"홰", "hwae"}, {"회", "hoe"}, {"효", "hyo"}, {"후", "hu"}, {"훠", "hwo"}, {"훼", "hwe"},
-                {"휘", "hwi"}, {"류", "hyu"}, {"흐", "heu"}, {"희", "hui"}, {"히", "hi"},
+                new KeyValuePair<string, string>("하", "ha"), new KeyValuePair<string, string>("해", "hae"), new KeyValuePair<string, string>("햐", "hya"), new KeyValuePair<string, string>("햬", "hyae"), new KeyValuePair<string, string>("허", "heo"), new KeyValuePair<string, string>("헤", "he"), new KeyValuePair<string, string>("혀", "hyeo"), new KeyValuePair<string, string>("혜", "hye"),
+                new KeyValuePair<string, string>("호", "ho"), new KeyValuePair<string, string>("화", "hwa"), new KeyValuePair<string, string>("홰", "hwae"), new KeyValuePair<string, string>("회", "hoe"), new KeyValuePair<string, string>("효", "hyo"), new KeyValuePair<string, string>("후", "hu"), new KeyValuePair<string, string>("훠", "hwo"), new KeyValuePair<string, string>("훼", "hwe"),
+                new KeyValuePair<string, string>("휘", "hwi"), new KeyValuePair<string, string>("류", "hyu"), new KeyValuePair<string, string>("흐", "heu"), new KeyValuePair<string, string>("희", "hui"), new KeyValuePair<string, string>("히", "hi"),
                 
-                {"속스프", ""}, // Common OCR garbage text
-                {"스프", ""}, // Common OCR garbage suffix
-                {"속스", ""}, // Common OCR garbage prefix
-                {"노스프킨", "뉴로옵틱스"}, // Scrambled neuroptics pattern
-                {"오티스석", "옵틱스 설계도"}, // Scrambled optics blueprint pattern
-                {"온티스석", "옵틱스 설계도"}, // Alternative scrambled optics blueprint pattern
-                {"버1", ""}, // Common OCR garbage suffix
-                {"버", ""}, // Common OCR garbage character
+                new KeyValuePair<string, string>("속스프", ""), // Common OCR garbage text
+                new KeyValuePair<string, string>("스프", ""), // Common OCR garbage suffix
+                new KeyValuePair<string, string>("속스", ""), // Common OCR garbage prefix
+                new KeyValuePair<string, string>("노스프킨", "뉴로옵틱스"), // Scrambled neuroptics pattern
+                new KeyValuePair<string, string>("오티스석", "옵틱스 설계도"), // Scrambled optics blueprint pattern
+                new KeyValuePair<string, string>("온티스석", "옵틱스 설계도"), // Alternative scrambled optics blueprint pattern
+                new KeyValuePair<string, string>("버1", ""), // Common OCR garbage suffix
+                new KeyValuePair<string, string>("버", ""), // Common OCR garbage character
                 
                 // Common OCR corrections for Prime parts
-                {"프라임", "prime"}, {"프리임", "prime"}, {"프라읍", "prime"},
-                {"설계도", "blueprint"},
+                new KeyValuePair<string, string>("프라임", "prime"), new KeyValuePair<string, string>("프리임", "prime"), new KeyValuePair<string, string>("프라읍", "prime"),
+                new KeyValuePair<string, string>("설계도", "blueprint"),
                 
                 // Common character confusions in OCR
-                {"리", "ri"}, {"이", "i"}, {"ㄱ", "k"}, {"ㄴ", "n"}, {"ㄷ", "t"}, {"ㄹ", "r"}, {"ㅁ", "m"}, {"ㅂ", "p"}, {"ㅅ", "s"}, {"ㅇ", "ng"}, {"ㅈ", "j"}, {"ㅊ", "ch"}, {"ㅋ", "k"}, {"ㅌ", "t"}, {"ㅍ", "p"}, {"ㅎ", "h"}
+                new KeyValuePair<string, string>("리", "ri"), new KeyValuePair<string, string>("이", "i"), new KeyValuePair<string, string>("ㄱ", "k"), new KeyValuePair<string, string>("ㄴ", "n"), new KeyValuePair<string, string>("ㄷ", "t"), new KeyValuePair<string, string>("ㄹ", "r"), new KeyValuePair<string, string>("ㅁ", "m"), new KeyValuePair<string, string>("ㅂ", "p"), new KeyValuePair<string, string>("ㅅ", "s"), new KeyValuePair<string, string>("ㅇ", "ng"), new KeyValuePair<string, string>("ㅈ", "j"), new KeyValuePair<string, string>("ㅊ", "ch"), new KeyValuePair<string, string>("ㅋ", "k"), new KeyValuePair<string, string>("ㅌ", "t"), new KeyValuePair<string, string>("ㅍ", "p"), new KeyValuePair<string, string>("ㅎ", "h")
             };
             
             string result = input;

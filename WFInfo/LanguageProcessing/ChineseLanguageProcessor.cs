@@ -49,6 +49,13 @@ namespace WFInfo.LanguageProcessing
             return !string.IsNullOrEmpty(partName) && partName.Replace(" ", "").Length >= 4;
         }
 
+        public override bool ShouldFilterWord(string word)
+        {
+            // Chinese filtering: don't filter short Chinese words as single characters can be meaningful
+            // Only filter out actual garbage (null/empty)
+            return string.IsNullOrEmpty(word);
+        }
+
         
         /// <summary>
         /// Normalizes Chinese characters for comparison
@@ -102,6 +109,13 @@ namespace WFInfo.LanguageProcessing
         {
             // Chinese requires minimum of 4 characters after removing spaces
             return !string.IsNullOrEmpty(partName) && partName.Replace(" ", "").Length >= 4;
+        }
+
+        public override bool ShouldFilterWord(string word)
+        {
+            // Chinese filtering: don't filter short Chinese words as single characters can be meaningful
+            // Only filter out actual garbage (null/empty)
+            return string.IsNullOrEmpty(word);
         }
 
         

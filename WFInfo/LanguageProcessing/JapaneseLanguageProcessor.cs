@@ -38,8 +38,8 @@ namespace WFInfo.LanguageProcessing
             // Add spaces around "Prime" to match database format better
             normalized = normalized.Replace("prime", " prime ");
 
-            // Remove accents (not typically needed for Japanese)
-            normalized = RemoveAccents(normalized);
+            // Remove accents (not typically needed for Japanese - preserve combining marks)
+            // normalized = RemoveAccents(normalized);
 
             // Remove extra spaces
             var parts = normalized.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -61,7 +61,7 @@ namespace WFInfo.LanguageProcessing
             string result = NormalizeFullWidthCharacters(input);
             
             // Normalize katakana/hiragana variations (basic approach)
-            result = result.Replace('ヶ', 'ケ').Replace('ヵ', 'カ').Replace('ヶ', 'ケ');
+            result = result.Replace('ヶ', 'ケ').Replace('ヵ', 'カ');
             
             return result.ToLowerInvariant();
         }

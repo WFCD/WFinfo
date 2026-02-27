@@ -75,7 +75,7 @@ WFInfo.Tests.exe map.json test_images/ results.json
 ### Languages
 - **English** (`english`)
 - **Korean** (`korean`) - 한국어
-- **Japanese** (`japanese`) - 日本语
+- **Japanese** (`japanese`) - 日本語
 - **Simplified Chinese** (`simplified chinese`) - 简体中文
 - **Traditional Chinese** (`traditional chinese`) - 繁體中文
 - **French** (`french`) - Français

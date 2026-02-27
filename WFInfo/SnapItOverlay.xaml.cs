@@ -80,17 +80,7 @@ namespace WFInfo
 
         public void closeOverlay()
         {
-            rectangle.Width = 0;
-            rectangle.Height = 0;
-            rectangle.RenderTransform = new TranslateTransform(0, 0);
-            rectangle.Visibility = Visibility.Hidden;
-            
-            // Properly clean up canvas by removing the rectangle
-            if (canvas.Children.Contains(rectangle))
-            {
-                canvas.Children.Remove(rectangle);
-            }
-            
+            ResetRectangle();
             Topmost = false;
             isEnabled = false;
 

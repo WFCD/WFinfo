@@ -93,6 +93,15 @@ namespace WFInfo
                 args[0].Equals("--map", StringComparison.OrdinalIgnoreCase) ||
                 args[0].StartsWith("map:", StringComparison.OrdinalIgnoreCase)))
             {
+                // Normalize map flag arguments - remove flag and pass actual JSON path
+                if (args[0].Equals("map", StringComparison.OrdinalIgnoreCase) ||
+                    args[0].Equals("-map", StringComparison.OrdinalIgnoreCase) ||
+                    args[0].Equals("--map", StringComparison.OrdinalIgnoreCase) ||
+                    args[0].StartsWith("map:", StringComparison.OrdinalIgnoreCase))
+                {
+                    args = args.Skip(1).ToArray();
+                }
+
                 // Test execution mode: WFInfo.exe map.json data/ results.json
                 try
                 {

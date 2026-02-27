@@ -257,7 +257,7 @@ namespace WFInfo
                     
                     // Filter out results with excessively high Levenshtein distances (indicating no valid match)
                     // 9999 is the default value when no match was found, and anything above 50% of string length is likely invalid
-                    if (firstProximity[i] == 9999 || firstProximity[i] > Math.Max(part.Length, 6) || string.IsNullOrEmpty(correctName))
+                    if (firstProximity[i] == 9999 || firstProximity[i] > Math.Max((int)Math.Ceiling(part.Length * 0.5), 3) || string.IsNullOrEmpty(correctName))
                     {
                         Main.AddLog($"Rejected junk match: '{part}' with distance {firstProximity[i]}");
                         continue; // Skip this part entirely
@@ -1289,10 +1289,11 @@ namespace WFInfo
 
 
                 //set OCR to numbers only
-                _tesseractService.SetNumbersOnlyMode();
+                try
+                {
+                    _tesseractService.SetNumbersOnlyMode();
 
-
-                double widthMultiplier = (_settings.DoCustomNumberBoxWidth ? _settings.SnapItNumberBoxWidth : 0.4);
+                    double widthMultiplier = (_settings.DoCustomNumberBoxWidth ? _settings.SnapItNumberBoxWidth : 0.4);
                 //Process grid system
                 for (int i = 0; i < Rows.Count; i++)
                 {
@@ -1640,7 +1641,11 @@ namespace WFInfo
                 }
                 
                 //return OCR to any symbols
-                _tesseractService.ResetToDefaultMode();
+                }
+                finally
+                {
+                    _tesseractService.ResetToDefaultMode();
+                }
             }
             darkCyan.Dispose();
             red.Dispose();

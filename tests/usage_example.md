@@ -47,4 +47,4 @@ The test framework uses:
 - **Theme detection** and scaling simulation
 - **Comprehensive validation** and error reporting
 
-This provides automated regression testing for all supported languages (English, Korean, Japanese, Chinese Simplified/Traditional, French, Ukrainian, Italian, German, Spanish, Portuguese, Polish, Russian) across different UI themes, resolutions, and game scenarios. Note: Thai and Turkish are supported in the main application but excluded from automated testing.
+This provides automated regression testing for all supported languages (English, Korean, Chinese Simplified/Traditional, French, Ukrainian, Italian, German, Spanish, Portuguese, Polish, Russian) across different UI themes, resolutions, and game scenarios. Note: Thai, Japanese, and Turkish are supported in the main application but excluded from automated testing.

@@ -99,7 +99,7 @@ namespace WFInfo
             nameDataPath = applicationDirectory + @"\name_data.json";
             filterAllJsonFallbackPath = applicationDirectory + @"\fallback_equipment_list.json";
             sheetJsonFallbackPath = applicationDirectory + @"\fallback_price_sheet.json";
-            wfmItemsFallbackPath = applicationDirectory + @"\fallback_names.json";
+            wfmItemsFallbackPath = applicationDirectory + $@"\fallback_names.{_settings.Locale}.json";
 
             Directory.CreateDirectory(applicationDirectory);
 
@@ -209,19 +209,24 @@ namespace WFInfo
                 string itemId = item["id"].ToString();
                 if (tempMarketItems.ContainsKey(itemId))
                 {
-                    // Check if the locale data exists before accessing it
-                    if (item["i18n"][_settings.Locale] != null && item["i18n"][_settings.Locale]["name"] != null)
+                    // Validate presence of locale data and throw exception if missing
+                    if (item["i18n"] == null)
                     {
-                        string localizedName = item["i18n"][_settings.Locale]["name"].ToString();
-                        tempMarketItems[itemId] = tempMarketItems[itemId] + "|" + localizedName;
+                        throw new KeyNotFoundException($"Item {itemId} missing i18n data entirely");
                     }
-                    else
+                    
+                    if (item["i18n"][_settings.Locale] == null)
                     {
-                        // Fallback to English name if locale data is missing
-                        Main.AddLog($"Warning: Missing {_settings.Locale} translation for item {itemId}, using English name");
-                        string englishName = item["i18n"]["en"]["name"].ToString();
-                        tempMarketItems[itemId] = tempMarketItems[itemId] + "|" + englishName;
+                        throw new KeyNotFoundException($"Item {itemId} missing locale data for {_settings.Locale}");
                     }
+                    
+                    if (item["i18n"][_settings.Locale]["name"] == null)
+                    {
+                        throw new KeyNotFoundException($"Item {itemId} missing name field for locale {_settings.Locale}");
+                    }
+                    
+                    string localizedName = item["i18n"][_settings.Locale]["name"].ToString();
+                    tempMarketItems[itemId] = tempMarketItems[itemId] + "|" + localizedName;
                 }
             }
 

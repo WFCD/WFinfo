@@ -36,8 +36,8 @@ namespace WFInfo.LanguageProcessing
             // Add spaces around "Prime" to match database format better
             normalized = normalized.Replace("prime", " prime ");
 
-            // Remove accents (not typically needed for Thai)
-            normalized = RemoveAccents(normalized);
+            // Remove accents (not typically needed for Thai - preserve tone/vowel marks)
+            // normalized = RemoveAccents(normalized);
 
             // Remove extra spaces
             var parts = normalized.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
