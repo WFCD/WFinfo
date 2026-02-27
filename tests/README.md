@@ -4,8 +4,8 @@ This test framework allows you to run comprehensive OCR tests programmatically w
 
 ## Features
 
-- **Multi-language Support**: Tests all 15 supported languages (English, Korean, Japanese, Chinese Simplified/Traditional, Thai, French, Ukrainian, Italian, German, Spanish, Portuguese, Polish, Turkish, Russian)
-- **Category Testing**: Reward screens, Fissure rewards, SnapIt inventory, Profile screens
+- **Multi-language Support**: Tests all supported languages (English, Korean, Japanese, Chinese Simplified/Traditional, French, Ukrainian, Italian, German, Spanish, Portuguese, Polish, Russian) - excludes Thai, Japanese, and Turkish from automated testing
+- **Category Testing**: Reward screens (including fissure rewards), SnapIt inventory, Profile screens
 - **Theme Testing**: All Warframe UI themes (Orokin, Tenno, Grineer, Corpus, etc.)
 - **HDR Support**: Test both HDR and non-HDR scenarios
 - **Custom Filters**: Support for colorblind filters and other visual modifications
@@ -14,7 +14,7 @@ This test framework allows you to run comprehensive OCR tests programmatically w
 ## Quick Start
 
 ### 1. Prepare Test Files
-```
+```text
 tests/
 ├── map.json              # Test scenarios configuration
 ├── run_tests.bat          # Windows batch runner
@@ -70,13 +70,14 @@ WFInfo.Tests.exe map.json test_images/ results.json
 - **`inventory`**: Profile/inventory screen scanning
 - **`snapit`**: Inventory screen scanning
 
+**Note**: Fissure rewards are treated as a subtype of the `reward` category and should use `"category": "reward"` in map.json files.
+
 ### Languages
 - **English** (`english`)
 - **Korean** (`korean`) - 한국어
-- **Japanese** (`japanese`) - 日本語
+- **Japanese** (`japanese`) - 日本语
 - **Simplified Chinese** (`simplified chinese`) - 简体中文
 - **Traditional Chinese** (`traditional chinese`) - 繁體中文
-- **Thai** (`thai`) - ไทย
 - **French** (`french`) - Français
 - **Ukrainian** (`ukrainian`) - Українська
 - **Italian** (`italian`) - Italiano
@@ -84,8 +85,9 @@ WFInfo.Tests.exe map.json test_images/ results.json
 - **Spanish** (`spanish`) - Español
 - **Portuguese** (`portuguese`) - Português
 - **Polish** (`polish`) - Polski
-- **Turkish** (`turkish`) - Türkçe
 - **Russian** (`russian`) - Русский
+
+**Note**: Thai and Turkish are supported in the main application but excluded from automated testing.
 
 ### Themes
 - **Orokin** (`orokin`)
@@ -200,9 +202,9 @@ Create comprehensive test suites for regression testing:
 ```json
 {
   "categories": {
-    "reward": ["test1", "test2", "test3"],
-    "fissure": ["fissure_test1", "fissure_test2"],
-    "all": ["test1", "test2", "fissure_test1", "test3"]
+    "reward": ["test1", "test2", "test3", "fissure_test1", "fissure_test2"],
+    "inventory": ["inventory_test1", "inventory_test2"],
+    "snapit": ["snapit_test1", "snapit_test2"]
   }
 }
 ```

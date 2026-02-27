@@ -16,12 +16,12 @@ if not exist "map.json" (
 )
 
 REM Set test images directory
-set TEST_IMAGES_DIR=%1
+set TEST_IMAGES_DIR=%~1
 if "%TEST_IMAGES_DIR%"=="" set TEST_IMAGES_DIR=data
 
 REM Check if test images directory exists
 if not exist "%TEST_IMAGES_DIR%" (
-    echo ERROR: Test images directory not found: %TEST_IMAGES_DIR%
+    echo ERROR: Test images directory not found: "%TEST_IMAGES_DIR%"
     goto :eof
 )
 
@@ -33,7 +33,7 @@ echo Output: test_results_%date:~-4,4%%date:~-10,2%%date:~-7,2%_%time:~0,2%%time
 echo.
 
 REM Run test executable (using main WFInfo executable)
-..\bin\Release\net48\WFInfo.exe map.json %TEST_IMAGES_DIR% test_results_%date:~-4,4%%date:~-10,2%%date:~-7,2%_%time:~0,2%%time:~3,2%%time:~6,2%.json
+..\bin\Release\net48\WFInfo.exe map.json "%TEST_IMAGES_DIR%" test_results_%date:~-4,4%%date:~-10,2%%date:~-7,2%_%time:~0,2%%time:~3,2%%time:~6,2%.json
 
 REM Check results
 if %errorlevel% equ 0 (

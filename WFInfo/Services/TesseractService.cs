@@ -29,6 +29,16 @@ namespace WFInfo
 
         void Init();
         void ReloadEngines();
+        
+        /// <summary>
+        /// Sets the FirstEngine to numbers-only mode for item counting
+        /// </summary>
+        void SetNumbersOnlyMode();
+        
+        /// <summary>
+        /// Resets the FirstEngine to its default language-specific whitelist
+        /// </summary>
+        void ResetToDefaultMode();
     }
 
     /// <summary>
@@ -58,6 +68,9 @@ namespace WFInfo
 
         // Fallback whitelist for unknown locales
         private const string DefaultWhitelist = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        
+        // Numbers-only whitelist for item counting
+        private const string NumbersOnlyWhitelist = "0123456789";
 
         public TesseractService()
         {
@@ -108,16 +121,46 @@ namespace WFInfo
         {
             //Main.AddLog($"Creating Tesseract engine for locale: '{Locale}'");
             var engine = new TesseractEngine(DataPath, Locale);
+
+            engine.SetVariable("engine_mode", "1"); // Use LSTM neural network engine
+            engine.SetVariable("oem_engine", "1"); // Use LSTM OEM engine
+            engine.SetVariable("enable_smoothing", "1"); // Helps with Korean character recognition
+
+            // Apply universal OCR improvements for all languages
             
-            // Apply Korean-specific optimizations only for Korean locale
+            // This causes crash
+            //engine.SetVariable("tessedit_reject_mode", "1"); // Reject questionable characters
+            
+            engine.SetVariable("tessedit_zero_rejection", "false"); // Don't force recognition of uncertain characters
+            engine.SetVariable("tessedit_write_rep_codes", "false"); // Don't write rejection codes
+            engine.SetVariable("tessedit_write_unlv", "false"); // Don't write UNLV format
+            engine.SetVariable("tessedit_fix_fuzzy_spaces", "true"); // Fix spacing issues
+            engine.SetVariable("tessedit_prefer_joined_broken", "false"); // Don't join broken characters
+            engine.SetVariable("tessedit_font_id", "0"); // Use default font (Tesseract 5+)
+                     
+            // Language model penalties that work across all languages
+            engine.SetVariable("language_model_penalty_non_dict_word", "0.3"); // Penalize non-dictionary words heavily
+            engine.SetVariable("language_model_penalty_case_ok", "0.1"); // Small penalty for case mismatches
+            engine.SetVariable("language_model_penalty_case_bad", "0.4"); // Higher penalty for bad case
+            
+            // Thresholding parameters for better binarization (Tesseract 5+)
+            engine.SetVariable("thresholding_method", "0"); // Use default thresholding
+            engine.SetVariable("thresholding_window_size", "5"); // Smaller window for better noise reduction
+            
+            // Apply language-specific optimizations
             if (Locale == "ko")
             {
-                engine.SetVariable("engine_mode", "1"); // Use LSTM neural network engine
-                engine.SetVariable("oem_engine", "1"); // Use LSTM OEM engine
-                
                 // Improve text segmentation for Korean
-                engine.SetVariable("enable_smoothing", "1"); // Helps with Korean character recognition
                 engine.SetVariable("smooth_scaling_factor", "1.5"); // Slight smoothing for better accuracy
+            }
+            else if (Locale == "en")
+            {
+                // Aggressive settings for English to reduce noise
+                
+                engine.SetVariable("smooth_scaling_factor", "1.0"); // Minimal smoothing to preserve clarity
+                engine.SetVariable("tessedit_pageseg_mode", "7"); // Treat the image as a single text line (most aggressive)
+                engine.SetVariable("textord_force_make_prop_words", "true"); // Help with compound words
+                
             }
             
             // Apply language-specific character whitelist from language processor
@@ -151,6 +194,21 @@ namespace WFInfo
             FirstEngine = CreateEngine();
             SecondEngine?.Dispose();
             SecondEngine = CreateEngine();
+        }
+        
+        public void SetNumbersOnlyMode()
+        {
+            FirstEngine?.SetVariable("tessedit_char_whitelist", NumbersOnlyWhitelist);
+        }
+        
+        public void ResetToDefaultMode()
+        {
+            if (FirstEngine != null)
+            {
+                var processor = LanguageProcessorFactory.GetProcessor(Locale);
+                var whitelist = processor?.CharacterWhitelist ?? DefaultWhitelist;
+                FirstEngine.SetVariable("tessedit_char_whitelist", whitelist);
+            }
         }
         private void getLocaleTessdata()
         {

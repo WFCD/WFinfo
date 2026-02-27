@@ -88,7 +88,10 @@ namespace WFInfo
             string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
             if (args.Length >= 2 &&
                 (args[0].EndsWith(".json", StringComparison.OrdinalIgnoreCase) ||
-                args[0].IndexOf("map", StringComparison.OrdinalIgnoreCase) >= 0))
+                args[0].Equals("map", StringComparison.OrdinalIgnoreCase) ||
+                args[0].Equals("-map", StringComparison.OrdinalIgnoreCase) ||
+                args[0].Equals("--map", StringComparison.OrdinalIgnoreCase) ||
+                args[0].StartsWith("map:", StringComparison.OrdinalIgnoreCase)))
             {
                 // Test execution mode: WFInfo.exe map.json data/ results.json
                 try

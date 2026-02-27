@@ -1000,6 +1000,10 @@ namespace WFInfo
                     
                     // Resolve OCR text to English for proper comparison (without recursive Levenshtein calls)
                     int val = LevenshteinDistance(prop.Key, resolvedName);
+                    
+                    // Distance filter: Only accept matches with distance < 50% of string length
+                    if (val >= prop.Key.Length * 0.5) continue;
+                    
                     if (val < low)
                     {
                         low = val;

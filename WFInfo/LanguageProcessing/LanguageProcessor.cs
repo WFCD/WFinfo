@@ -253,8 +253,8 @@ namespace WFInfo.LanguageProcessing
 
             foreach (string removal in blueprintRemovals)
             {
-                s = s.Replace(removal, "");
-                t = t.Replace(removal, "");
+                s = System.Text.RegularExpressions.Regex.Replace(s, System.Text.RegularExpressions.Regex.Escape(removal), "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                t = System.Text.RegularExpressions.Regex.Replace(t, System.Text.RegularExpressions.Regex.Escape(removal), "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
             }
 
             s = s.Replace(" ", "");
@@ -294,14 +294,41 @@ namespace WFInfo.LanguageProcessing
         /// </summary>
         protected static string NormalizeFullWidthCharacters(string input)
         {
-            string result = input;
-            for (int i = 0xFF00; i <= 0xFFEF; i++)
+            var result = new System.Text.StringBuilder(input.Length);
+            
+            foreach (char c in input)
             {
-                char fullWidth = (char)i;
-                char halfWidth = (char)(i - 0xFF00 + 0x20);
-                result = result.Replace(fullWidth, halfWidth);
+                if (c == '\u3000') // Fullwidth space
+                {
+                    result.Append(' ');
+                }
+                else if (c >= '\uFF01' && c <= '\uFF5E') // Fullwidth ASCII range
+                {
+                    result.Append((char)(c - 0xFEE0));
+                }
+                else
+                {
+                    result.Append(c); // Leave other characters unchanged
+                }
             }
-            return result;
+            
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Generates a string containing all characters in the specified Unicode range
+        /// </summary>
+        /// <param name="start">Starting Unicode code point</param>
+        /// <param name="end">Ending Unicode code point</param>
+        /// <returns>String containing all characters in the range</returns>
+        protected static string GenerateCharacterRange(int start, int end)
+        {
+            var chars = new char[end - start + 1];
+            for (int i = 0; i <= end - start; i++)
+            {
+                chars[i] = (char)(start + i);
+            }
+            return new string(chars);
         }
     }
 }

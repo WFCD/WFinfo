@@ -75,22 +75,6 @@ namespace WFInfo.LanguageProcessing
                 .Replace('Ç', 'C')
                 .Replace('Ÿ', 'Y');
         }
-
-        /// <summary>
-        /// Generates a string containing all characters in the specified Unicode range
-        /// </summary>
-        /// <param name="start">Starting Unicode code point</param>
-        /// <param name="end">Ending Unicode code point</param>
-        /// <returns>String containing all characters in the range</returns>
-        protected static string GenerateCharacterRange(int start, int end)
-        {
-            var chars = new char[end - start + 1];
-            for (int i = 0; i <= end - start; i++)
-            {
-                chars[i] = (char)(start + i);
-            }
-            return new string(chars);
-        }
     }
 
     /// <summary>
@@ -107,7 +91,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Blaupause", "Plan" };
 
-        public override string CharacterWhitelist => "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" + GenerateCharacterRange(0x00C4, 0x00C4) + GenerateCharacterRange(0x00D6, 0x00D6) + GenerateCharacterRange(0x00DC, 0x00DC) + GenerateCharacterRange(0x00DF, 0x00DF); // German with umlauts
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C4, 0x00C4) + GenerateCharacterRange(0x00D6, 0x00D6) + GenerateCharacterRange(0x00DC, 0x00DC) + GenerateCharacterRange(0x00DF, 0x00DF); // German with umlauts
     }
 
     /// <summary>
@@ -124,7 +108,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Plano", "Diseño" };
 
-        public override string CharacterWhitelist => "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" + GenerateCharacterRange(0x00C0, 0x00FF); // Spanish with accents
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C0, 0x00FF); // Spanish with accents
     }
 
     /// <summary>
@@ -141,7 +125,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Planta", "Projeto" };
 
-        public override string CharacterWhitelist => "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" + GenerateCharacterRange(0x00C0, 0x00FF); // Portuguese with accents
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C0, 0x00FF); // Portuguese with accents
     }
 
     /// <summary>
@@ -158,7 +142,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Schéma", "Plan" };
 
-        public override string CharacterWhitelist => "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" + GenerateCharacterRange(0x00C0, 0x00FF); // French with Latin-1 supplement
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C0, 0x00FF); // French with Latin-1 supplement
     }
 
     /// <summary>
@@ -175,6 +159,6 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Progetto", "Piano" };
 
-        public override string CharacterWhitelist => "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-()" + GenerateCharacterRange(0x00C0, 0x00FF); // Italian with accents
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-()" + GenerateCharacterRange(0x00C0, 0x00FF); // Italian with accents
     }
 }

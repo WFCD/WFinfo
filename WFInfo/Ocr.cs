@@ -142,17 +142,17 @@ namespace WFInfo
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
             _tesseractService = tesseractService;
-            _tesseractService.Init();
             _soundPlayer = soundPlayer;
             _settings = settings;
             _window = window;
-            _hdrDetector = hdrDetector;
-
-            // Initialize the language processor factory
-            LanguageProcessorFactory.Initialize(settings);
-
             _gdiScreenshot = gdiScreenshot;
             _windowsScreenshot = windowsScreenshot;
+            _hdrDetector = hdrDetector;
+
+            // Initialize the language processor factory before tesseract service
+            LanguageProcessorFactory.Initialize(settings);
+
+            _tesseractService.Init();
         }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
@@ -254,6 +254,15 @@ namespace WFInfo
                     string part = firstChecks[i];
                     #region found a part
                     string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false, out _);
+                    
+                    // Filter out results with excessively high Levenshtein distances (indicating no valid match)
+                    // 9999 is the default value when no match was found, and anything above 50% of string length is likely invalid
+                    if (firstProximity[i] == 9999 || firstProximity[i] > Math.Max(part.Length, 6) || string.IsNullOrEmpty(correctName))
+                    {
+                        Main.AddLog($"Rejected junk match: '{part}' with distance {firstProximity[i]}");
+                        continue; // Skip this part entirely
+                    }
+                    
                     string primeSetName = Data.GetSetName(correctName);
                     JObject job = (JObject)Main.dataBase.marketData.GetValue(correctName);
                     JObject primeSet = (JObject)Main.dataBase.marketData.GetValue(primeSetName);
@@ -1055,8 +1064,31 @@ namespace WFInfo
             {
                 foreach (Tuple<String,Rectangle> wordResult in snapTasks[threadNum].Result)
                 {
-                    string currentWord = wordResult.Item1;
+                    string currentLine = wordResult.Item1;
                     Rectangle bounds = wordResult.Item2;
+                    
+                    // Split line into individual words for proper filtering
+                    var words = currentLine.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    var filteredWords = new List<string>();
+                    
+                    // Filter individual words as intended
+                    var processor = LanguageProcessorFactory.GetCurrentProcessor();
+                    foreach (var word in words)
+                    {
+                        if (!processor.ShouldFilterWord(word))
+                        {
+                            filteredWords.Add(word);
+                        }
+                    }
+                    
+                    // If all words were filtered, skip this line
+                    if (filteredWords.Count == 0)
+                    {
+                        continue;
+                    }
+                    
+                    // Reconstruct the filtered line
+                    string currentWord = string.Join(" ", filteredWords);
                     //word is valid start comparing to others
                     int VerticalPad = bounds.Height/2;
                     int HorizontalPad = (int)(bounds.Height * _settings.SnapItHorizontalNameMargin);
@@ -1083,18 +1115,8 @@ namespace WFInfo
                         }
                         else
                         {
-                            // Use language processor to determine if word should be filtered
-                            var processor = LanguageProcessorFactory.GetCurrentProcessor();
-                            if (processor.ShouldFilterWord(currentWord))
-                            {
-                                g.FillRectangle(green, paddedBounds);
-                                numberTooFewCharacters++;
-                                continue;
-                            }
-                            else
-                            {
-                                g.DrawRectangle(pinkP, paddedBounds);
-                            }
+                            // Words already filtered at individual level above
+                            g.DrawRectangle(pinkP, paddedBounds);
                         }
                         g.DrawRectangle(greenp, bounds);
                         g.DrawString(currentWord, font, Brushes.Pink, new Point(paddedBounds.X, paddedBounds.Y));
@@ -1267,7 +1289,7 @@ namespace WFInfo
 
 
                 //set OCR to numbers only
-                _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "0123456789âàéèêëïîôùûçÀÉÈÊËÏÎÔÙÛÇäöüßÄÖÜßñáéíóúüÁÉÍÓÚÜçãõẽẽÇÃÕĘĘ");
+                _tesseractService.SetNumbersOnlyMode();
 
 
                 double widthMultiplier = (_settings.DoCustomNumberBoxWidth ? _settings.SnapItNumberBoxWidth : 0.4);
@@ -1618,7 +1640,7 @@ namespace WFInfo
                 }
                 
                 //return OCR to any symbols
-                _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "");
+                _tesseractService.ResetToDefaultMode();
             }
             darkCyan.Dispose();
             red.Dispose();
@@ -1906,7 +1928,7 @@ namespace WFInfo
 
 
                             //do OCR
-                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&-:()");
+                            // Using default language-specific whitelist
                             using (var page = _tesseractService.FirstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                             {
                                 using (var iterator = page.GetIterator())
@@ -1921,7 +1943,6 @@ namespace WFInfo
 
                                 }
                             }
-                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "");
                         }
                     }
                     if (nextYCounter >= 0)

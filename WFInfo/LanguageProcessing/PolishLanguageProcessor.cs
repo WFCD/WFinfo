@@ -18,23 +18,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Plan", "Schemat" };
 
-        public override string CharacterWhitelist => "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" + GenerateCharacterRange(0x0104, 0x0107) + GenerateCharacterRange(0x0118, 0x0119) + GenerateCharacterRange(0x0141, 0x0144) + GenerateCharacterRange(0x015A, 0x015A); // Polish with ranges
-
-        /// <summary>
-        /// Generates a string containing all characters in the specified Unicode range
-        /// </summary>
-        /// <param name="start">Starting Unicode code point</param>
-        /// <param name="end">Ending Unicode code point</param>
-        /// <returns>String containing all characters in the range</returns>
-        private static string GenerateCharacterRange(int start, int end)
-        {
-            var chars = new char[end - start + 1];
-            for (int i = 0; i <= end - start; i++)
-            {
-                chars[i] = (char)(start + i);
-            }
-            return new string(chars);
-        }
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x0104, 0x0107) + GenerateCharacterRange(0x0118, 0x0119) + GenerateCharacterRange(0x0141, 0x0144) + GenerateCharacterRange(0x015A, 0x015A); // Polish with ranges
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {

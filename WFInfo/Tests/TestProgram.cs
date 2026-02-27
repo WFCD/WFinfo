@@ -173,6 +173,9 @@ namespace WFInfo.Tests
 
         public void Init() { }
         public void ReloadEngines() { }
+        
+        public void SetNumbersOnlyMode() { }
+        public void ResetToDefaultMode() { }
     }
 
     public class TestWindowInfoService : IWindowInfoService

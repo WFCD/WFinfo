@@ -118,23 +118,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "설계도" };
 
-        public override string CharacterWhitelist => GenerateCharacterRange(0xAC00, 0xD7AF) + "0123456789"; // Korean Hangul
-
-        /// <summary>
-        /// Generates a string containing all characters in the specified Unicode range
-        /// </summary>
-        /// <param name="start">Starting Unicode code point</param>
-        /// <param name="end">Ending Unicode code point</param>
-        /// <returns>String containing all characters in the range</returns>
-        private static string GenerateCharacterRange(int start, int end)
-        {
-            var chars = new char[end - start + 1];
-            for (int i = 0; i <= end - start; i++)
-            {
-                chars[i] = (char)(start + i);
-            }
-            return new string(chars);
-        }
+        public override string CharacterWhitelist => GenerateCharacterRange(0xAC00, 0xD7AF) + " "; // Korean Hangul
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {

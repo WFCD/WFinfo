@@ -18,23 +18,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "設計図", "青図" };
 
-        public override string CharacterWhitelist => GenerateCharacterRange(0x3040, 0x309F) + GenerateCharacterRange(0x30A0, 0x30FF) + GenerateCharacterRange(0x4E00, 0x9FAF) + "0123456789"; // Japanese Hiragana, Katakana, Kanji
-
-        /// <summary>
-        /// Generates a string containing all characters in the specified Unicode range
-        /// </summary>
-        /// <param name="start">Starting Unicode code point</param>
-        /// <param name="end">Ending Unicode code point</param>
-        /// <returns>String containing all characters in the range</returns>
-        private static string GenerateCharacterRange(int start, int end)
-        {
-            var chars = new char[end - start + 1];
-            for (int i = 0; i <= end - start; i++)
-            {
-                chars[i] = (char)(start + i);
-            }
-            return new string(chars);
-        }
+        public override string CharacterWhitelist => GenerateCharacterRange(0x3040, 0x309F) + GenerateCharacterRange(0x30A0, 0x30FF) + GenerateCharacterRange(0x4E00, 0x9FAF) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Japanese Hiragana, Katakana, Kanji
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
@@ -45,8 +29,11 @@ namespace WFInfo.LanguageProcessing
         {
             if (string.IsNullOrEmpty(input)) return input;
 
+            // Apply Japanese-specific normalization first
+            string normalized = NormalizeJapaneseCharacters(input);
+
             // Basic cleanup for Japanese
-            string normalized = input.ToLower(_culture).Trim();
+            normalized = normalized.ToLower(_culture).Trim();
 
             // Add spaces around "Prime" to match database format better
             normalized = normalized.Replace("prime", " prime ");
