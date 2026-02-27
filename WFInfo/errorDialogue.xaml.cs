@@ -48,30 +48,46 @@ namespace WFInfo
                 using (ZipFile zip = new ZipFile())
                 {
                     // Priority files: debug.log and settings JSON files
-                    var priorityFiles = new List<string>
+                    string parentDir = Path.GetDirectoryName(startPath);
+                    var priorityFiles = new[]
                     {
-                        startPath + @"\..\debug.log",
-                        startPath + @"\..\settings.json"
+                        Path.Combine(parentDir, "debug.log"),
+                        Path.Combine(parentDir, "settings.json")
                     };
 
                     // Other data files
-                    var otherDataFiles = new List<string>
+                    var otherDataFiles = new[]
                     {
-                        startPath + @"\..\eqmt_data.json",
-                        startPath + @"\..\market_data.json",
-                        startPath + @"\..\market_items.json",
-                        startPath + @"\..\name_data.json",
-                        startPath + @"\..\relic_data.json"
+                        Path.Combine(parentDir, "eqmt_data.json"),
+                        Path.Combine(parentDir, "market_data.json"),
+                        Path.Combine(parentDir, "market_items.json"),
+                        Path.Combine(parentDir, "name_data.json"),
+                        Path.Combine(parentDir, "relic_data.json")
                     };
 
-                    // Add priority files first
-                    priorityFiles.Where(path => File.Exists(path)).ToList().ForEach(filename => zip.AddFile(filename, ""));
+                    // Add debug folder files first (will end up in later segments)
+                    foreach (FileInfo file in files)
+                    {
+                        zip.AddFile(file.FullName, "");
+                    }
 
-                    // Add other data files
-                    otherDataFiles.Where(path => File.Exists(path)).ToList().ForEach(filename => zip.AddFile(filename, ""));
+                    // Add other data files next
+                    foreach (string path in otherDataFiles)
+                    {
+                        if (File.Exists(path))
+                        {
+                            zip.AddFile(path, "");
+                        }
+                    }
 
-                    // Add debug folder files last
-                    files.Select(file => file.FullName).ToList().ForEach(filename => zip.AddFile(filename, ""));
+                    // Add priority files last (will end up in first segment .z01)
+                    foreach (string path in priorityFiles)
+                    {
+                        if (File.Exists(path))
+                        {
+                            zip.AddFile(path, "");
+                        }
+                    }
 
                     zip.MaxOutputSegmentSize64 = segmentSize; // 8m segments
                     zip.Save(fullZipPath);
