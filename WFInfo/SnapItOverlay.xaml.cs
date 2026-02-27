@@ -51,11 +51,7 @@ namespace WFInfo
             rectangle.RenderTransform = new TranslateTransform(0, 0);
             rectangle.Visibility = Visibility.Hidden;
             
-            // Remove rectangle from canvas to ensure clean state
-            if (canvas.Children.Contains(rectangle))
-            {
-                canvas.Children.Remove(rectangle);
-            }
+            // Keep rectangle as persistent child - don't remove from canvas
         }
 
         private void canvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -63,11 +59,8 @@ namespace WFInfo
             //Set the start point
             startDrag = e.GetPosition(canvas);
             
-            // Re-add rectangle to canvas if it was removed
-            if (!canvas.Children.Contains(rectangle))
-            {
-                canvas.Children.Add(rectangle);
-            }
+            // Rectangle is always persistent, just ensure it's visible and on top
+            rectangle.Visibility = Visibility.Visible;
             
             //Move the selection marquee on top of all other objects in canvas
             Canvas.SetZIndex(rectangle, canvas.Children.Count);

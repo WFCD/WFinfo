@@ -91,7 +91,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Blaupause", "Plan" };
 
-        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C4, 0x00C4) + GenerateCharacterRange(0x00D6, 0x00D6) + GenerateCharacterRange(0x00DC, 0x00DC) + GenerateCharacterRange(0x00DF, 0x00DF); // German with umlauts
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C4, 0x00C4) + GenerateCharacterRange(0x00D6, 0x00D6) + GenerateCharacterRange(0x00DC, 0x00DC) + GenerateCharacterRange(0x00DF, 0x00DF) + GenerateCharacterRange(0x00E4, 0x00E4) + GenerateCharacterRange(0x00F6, 0x00F6) + GenerateCharacterRange(0x00FC, 0x00FC); // German with umlauts
     }
 
     /// <summary>

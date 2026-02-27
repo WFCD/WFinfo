@@ -446,7 +446,10 @@ namespace WFInfo.LanguageProcessing
             {
                 foreach (var similarityGroup in Korean[groupType])
                 {
-                    if (similarityGroup.Value.Contains(indexA) && similarityGroup.Value.Contains(indexB))
+                    // Check both the value list and the key for declared pairs
+                    if ((similarityGroup.Value.Contains(indexA) && similarityGroup.Value.Contains(indexB)) ||
+                        (similarityGroup.Key == indexA && similarityGroup.Value.Contains(indexB)) ||
+                        (similarityGroup.Key == indexB && similarityGroup.Value.Contains(indexA)))
                     {
                         return 1; // Similar Jamo have lower cost
                     }

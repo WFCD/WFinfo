@@ -266,8 +266,16 @@ namespace WFInfo
                     string primeSetName = Data.GetSetName(correctName);
                     JObject job = (JObject)Main.dataBase.marketData.GetValue(correctName);
                     JObject primeSet = (JObject)Main.dataBase.marketData.GetValue(primeSetName);
+                    
+                    // Guard against null market data
+                    if (job == null || job["ducats"] == null)
+                    {
+                        Main.AddLog($"MARKET DATA: No market data or ducats found for '{correctName}', skipping");
+                        continue;
+                    }
+                    
                     string ducats = job["ducats"].ToObject<string>();
-                    if (int.Parse(ducats, Main.culture) == 0)
+                    if (!int.TryParse(ducats, System.Globalization.NumberStyles.Integer, Main.culture, out int ducatValue) || ducatValue == 0)
                     {
                         hideRewardInfo = true;
                     }
@@ -285,7 +293,7 @@ namespace WFInfo
                     bool mastered = Main.dataBase.IsPartMastered(correctName);
                     string partsOwned = Main.dataBase.PartsOwned(correctName);
                     string partsCount = Main.dataBase.PartsCount(correctName);
-                    int duc = int.Parse(ducats, Main.culture);
+                    int duc = ducatValue;
                     #endregion
 
                     #region highlighting
@@ -704,7 +712,7 @@ namespace WFInfo
                 // Filter out results with excessively high Levenshtein distances (indicating no valid match)
                 // 9999 is the default value when no match was found, and anything above 50% of string length is likely invalid
                 // Also check for null names (can happen with non-English languages when no match was found)
-                if (levenDist == 9999 || levenDist > Math.Max(part.Name.Length, 6) || string.IsNullOrEmpty(name))
+                if (levenDist == 9999 || levenDist > Math.Max(part.Name.Length / 2, 6) || string.IsNullOrEmpty(name))
                 {
                     foundParts.RemoveAt(i); // remove invalid part from list
                     i--; // Adjust index since we removed an item
@@ -1015,6 +1023,19 @@ namespace WFInfo
                 // Fallback to single-threaded for large layouts to avoid threading issues
                 if (zones.Count > 12) // Too many zones means fragmentation is occurring
                 {
+                    // Dispose existing Bitmaps before replacing zones
+                    foreach (var zone in zones)
+                    {
+                        try
+                        {
+                            zone.Item1?.Dispose();
+                        }
+                        catch
+                        {
+                            // Ignore disposal errors
+                        }
+                    }
+                    
                     // Fallback to single-threaded for large layouts to avoid threading issues
                     zones = new List<Tuple<Bitmap, Rectangle>>();
                     zones.Add( Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height) ) );

@@ -18,7 +18,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "蓝图", "设计图" };
 
-        public override string CharacterWhitelist => GenerateCharacterRange(0x4E00, 0x9FAF) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Chinese characters
+        public override string CharacterWhitelist => GenerateCharacterRange(0x4E00, 0x9FFF) + GenerateCharacterRange(0x3400, 0x4DBF) + GenerateCharacterRange(0xF900, 0xFAFF) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Full CJK ideographs
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
@@ -80,7 +80,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "藍圖", "設計圖" };
 
-        public override string CharacterWhitelist => GenerateCharacterRange(0x4E00, 0x9FAF) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Traditional Chinese characters
+        public override string CharacterWhitelist => GenerateCharacterRange(0x4E00, 0x9FFF) + GenerateCharacterRange(0x3400, 0x4DBF) + GenerateCharacterRange(0xF900, 0xFAFF) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Full CJK ideographs
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {

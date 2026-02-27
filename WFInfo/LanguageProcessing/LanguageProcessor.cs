@@ -251,10 +251,16 @@ namespace WFInfo.LanguageProcessing
             s = " " + s;
             t = " " + t;
 
-            foreach (string removal in blueprintRemovals)
+            if (blueprintRemovals != null)
             {
-                s = System.Text.RegularExpressions.Regex.Replace(s, System.Text.RegularExpressions.Regex.Escape(removal), "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
-                t = System.Text.RegularExpressions.Regex.Replace(t, System.Text.RegularExpressions.Regex.Escape(removal), "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                foreach (string removal in blueprintRemovals)
+                {
+                    if (!string.IsNullOrEmpty(removal))
+                    {
+                        s = System.Text.RegularExpressions.Regex.Replace(s, System.Text.RegularExpressions.Regex.Escape(removal), "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                        t = System.Text.RegularExpressions.Regex.Replace(t, System.Text.RegularExpressions.Regex.Escape(removal), "", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    }
+                }
             }
 
             s = s.Replace(" ", "");

@@ -66,9 +66,17 @@ namespace WFInfo
                     };
 
                     // Add debug folder files first (will end up in later segments)
+                    // Filter out files that would collide with priorityFiles and otherDataFiles
+                    var priorityFileNames = priorityFiles.Select(Path.GetFileName).ToHashSet();
+                    var otherDataFileNames = otherDataFiles.Select(Path.GetFileName).ToHashSet();
+                    
                     foreach (FileInfo file in files)
                     {
-                        zip.AddFile(file.FullName, "");
+                        string fileName = Path.GetFileName(file.FullName);
+                        if (!priorityFileNames.Contains(fileName) && !otherDataFileNames.Contains(fileName))
+                        {
+                            zip.AddFile(file.FullName, "");
+                        }
                     }
 
                     // Add other data files next

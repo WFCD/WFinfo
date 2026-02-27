@@ -39,7 +39,6 @@ namespace WFInfo
         private readonly string nameDataPath;
         private readonly string filterAllJsonFallbackPath;
         private readonly string sheetJsonFallbackPath;
-        private readonly string wfmItemsFallbackPath;
         public string JWT; // JWT is the security key, store this as email+pw combo'
         private ClientWebSocket marketSocket = new ClientWebSocket();
         private CancellationTokenSource marketSocketCancellation = new CancellationTokenSource();
@@ -99,7 +98,7 @@ namespace WFInfo
             nameDataPath = applicationDirectory + @"\name_data.json";
             filterAllJsonFallbackPath = applicationDirectory + @"\fallback_equipment_list.json";
             sheetJsonFallbackPath = applicationDirectory + @"\fallback_price_sheet.json";
-            wfmItemsFallbackPath = applicationDirectory + $@"\fallback_names.{_settings.Locale}.json";
+            // wfmItemsFallbackPath will be computed per-request in GetWfmItemList
 
             Directory.CreateDirectory(applicationDirectory);
 
@@ -424,6 +423,9 @@ namespace WFInfo
 
         private async Task<(JObject Data, bool IsFallback)> GetWfmItemList(string locale)
         {
+            // Compute locale-specific fallback path per-request
+            string localeSpecificFallbackPath = Path.Combine(applicationDirectory, $"fallback_names.{locale}.json");
+            
             try
             {
                 using (var request = new HttpRequestMessage()
@@ -439,16 +441,16 @@ namespace WFInfo
                     var response = await client.SendAsync(request).ConfigureAwait(false);
                     var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var data = JsonConvert.DeserializeObject<JObject>(body);
-                    File.WriteAllText(wfmItemsFallbackPath, body);
+                    File.WriteAllText(localeSpecificFallbackPath, body);
                     return (data, false);
                 }
             }
             catch (Exception ex)
             {
-                Main.AddLog("Failed to fetch/parse " + wfmItemsUrl + ", using file " + wfmItemsFallbackPath + Environment.NewLine + ex.ToString());
-                if (File.Exists(wfmItemsFallbackPath))
+                Main.AddLog("Failed to fetch/parse " + wfmItemsUrl + ", using file " + localeSpecificFallbackPath + Environment.NewLine + ex.ToString());
+                if (File.Exists(localeSpecificFallbackPath))
                 {
-                    string response = File.ReadAllText(wfmItemsFallbackPath);
+                    string response = File.ReadAllText(localeSpecificFallbackPath);
                     JObject data = JsonConvert.DeserializeObject<JObject>(response);
                     return (data, true);
                 }
@@ -962,6 +964,9 @@ namespace WFInfo
                     if (marketItems != null)
                     {
                         var processor = LanguageProcessorFactory.GetCurrentProcessor();
+                        // Precompute normalized OCR input once before iterating
+                        string normalizedName = processor.NormalizeForPatternMatching(name);
+                        
                         foreach (var marketItem in marketItems)
                         {
                             if (marketItem.Key == "version") continue;
@@ -973,7 +978,6 @@ namespace WFInfo
                             if (lengthDiff > split[2].Length / 2) continue;
                             
                             // Use normalized strings for comparison (like GetLocalizedNameData does)
-                            string normalizedName = processor.NormalizeForPatternMatching(name);
                             string normalizedStored = processor.NormalizeForPatternMatching(split[2]);
                             int val = processor.SimpleLevenshteinDistance(normalizedName, normalizedStored);
                             
