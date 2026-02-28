@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -15,8 +16,8 @@ namespace WFInfo.LanguageProcessing
     /// </summary>
     public abstract class LanguageProcessor
     {
-        // Static normalized blueprint removals to avoid recomputing on every call
-        private static string[] normalizedBlueprintRemovals;
+        // Per-type normalized blueprint removals to avoid recomputing on every call
+        private static readonly ConcurrentDictionary<Type, string[]> _normalizedBlueprintRemovalsCache = new ConcurrentDictionary<Type, string[]>();
         
         protected readonly IReadOnlyApplicationSettings _settings;
         protected readonly CultureInfo _culture;
@@ -32,14 +33,17 @@ namespace WFInfo.LanguageProcessing
             _culture = GetCultureInfo(settings.Locale);
             
             // Initialize normalized blueprint removals once per concrete type
-            if (normalizedBlueprintRemovals == null)
+            Type concreteType = GetType();
+            _normalizedBlueprintRemovalsCache.GetOrAdd(concreteType, type => 
             {
-                normalizedBlueprintRemovals = new string[BlueprintRemovals.Length];
-                for (int i = 0; i < BlueprintRemovals.Length; i++)
+                var blueprintRemovals = BlueprintRemovals;
+                var normalized = new string[blueprintRemovals.Length];
+                for (int i = 0; i < blueprintRemovals.Length; i++)
                 {
-                    normalizedBlueprintRemovals[i] = BlueprintRemovals[i].ToLowerInvariant();
+                    normalized[i] = blueprintRemovals[i].ToLowerInvariant();
                 }
-            }
+                return normalized;
+            });
         }
 
         /// <summary>
@@ -127,6 +131,7 @@ namespace WFInfo.LanguageProcessing
             
             // Check against pre-normalized blueprint removal terms
             // Handle common formats: standalone terms, in parentheses, etc.
+            var normalizedBlueprintRemovals = _normalizedBlueprintRemovalsCache[GetType()];
             for (int i = 0; i < normalizedBlueprintRemovals.Length; i++)
             {
                 string normalizedRemoval = normalizedBlueprintRemovals[i];
@@ -200,32 +205,7 @@ namespace WFInfo.LanguageProcessing
         {
             s = s.ToLower(_culture);
             t = t.ToLower(_culture);
-            int n = s.Length;
-            int m = t.Length;
-
-            if (n == 0) return m;
-            if (m == 0) return n;
-
-            int[,] d = new int[n + 1, m + 1];
-
-            for (int i = 0; i <= n; i++)
-                d[i, 0] = i;
-
-            for (int j = 0; j <= m; j++)
-                d[0, j] = j;
-
-            for (int i = 1; i <= n; i++)
-            {
-                for (int j = 1; j <= m; j++)
-                {
-                    int cost = (s[i - 1] == t[j - 1]) ? 0 : 1;
-                    d[i, j] = Math.Min(
-                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
-                        d[i - 1, j - 1] + cost);
-                }
-            }
-
-            return d[n, m];
+            return ComputeLevenshteinCore(s, t);
         }
 
         /// <summary>
@@ -233,34 +213,7 @@ namespace WFInfo.LanguageProcessing
         /// </summary>
         public int SimpleLevenshteinDistance(string s, string t)
         {
-            s = s.ToLower(_culture);
-            t = t.ToLower(_culture);
-            int n = s.Length;
-            int m = t.Length;
-
-            if (n == 0) return m;
-            if (m == 0) return n;
-
-            int[,] d = new int[n + 1, m + 1];
-
-            for (int i = 0; i <= n; i++)
-                d[i, 0] = i;
-
-            for (int j = 0; j <= m; j++)
-                d[0, j] = j;
-
-            for (int i = 1; i <= n; i++)
-            {
-                for (int j = 1; j <= m; j++)
-                {
-                    int cost = (s[i - 1] == t[j - 1]) ? 0 : 1;
-                    d[i, j] = Math.Min(
-                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
-                        d[i - 1, j - 1] + cost);
-                }
-            }
-
-            return d[n, m];
+            return ComputeLevenshteinCore(s, t);
         }
 
         /// <summary>

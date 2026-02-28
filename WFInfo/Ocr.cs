@@ -257,7 +257,7 @@ namespace WFInfo
                     
                     // Filter out results with excessively high Levenshtein distances (indicating no valid match)
                     // 9999 is the default value when no match was found, and anything above 50% of string length is likely invalid
-                    if (firstProximity[i] == 9999 || firstProximity[i] > Math.Max((int)Math.Ceiling(part.Length * 0.5), 3) || string.IsNullOrEmpty(correctName))
+                    if (firstProximity[i] == 9999 || firstProximity[i] > GetMaxAllowedLevenshteinDistance(part.Length) || string.IsNullOrEmpty(correctName))
                     {
                         Main.AddLog($"Rejected junk match: '{part}' with distance {firstProximity[i]}");
                         continue; // Skip this part entirely
@@ -666,6 +666,17 @@ namespace WFInfo
         }
 
         /// <summary>
+        /// Gets the maximum allowed Levenshtein distance threshold for part name matching
+        /// </summary>
+        /// <param name="partNameLength">Length of the part name</param>
+        /// <returns>Maximum allowed Levenshtein distance</returns>
+        private static int GetMaxAllowedLevenshteinDistance(int partNameLength)
+        {
+            // Use 50% of string length with a minimum floor of 3 for consistency
+            return Math.Max((int)Math.Ceiling(partNameLength * 0.5), 3);
+        }
+
+        /// <summary>
         /// Processes the image the user cropped in the selection
         /// </summary>
         /// <param name="snapItImage"></param>
@@ -712,7 +723,7 @@ namespace WFInfo
                 // Filter out results with excessively high Levenshtein distances (indicating no valid match)
                 // 9999 is the default value when no match was found, and anything above 50% of string length is likely invalid
                 // Also check for null names (can happen with non-English languages when no match was found)
-                if (levenDist == 9999 || levenDist > Math.Max(part.Name.Length / 2, 6) || string.IsNullOrEmpty(name))
+                if (levenDist == 9999 || levenDist > GetMaxAllowedLevenshteinDistance(part.Name.Length) || string.IsNullOrEmpty(name))
                 {
                     foundParts.RemoveAt(i); // remove invalid part from list
                     i--; // Adjust index since we removed an item
@@ -1081,12 +1092,16 @@ namespace WFInfo
             }
             Task.WaitAll(snapTasks);
 
-            // Dispose all zone bitmaps after processing is complete
+            // Dispose all zone bitmaps after processing is complete (except filteredImageClean which is disposed later)
             foreach (var zone in zones)
             {
                 try
                 {
-                    zone.Item1?.Dispose();
+                    // Skip disposing filteredImageClean as it's needed by GetItemCounts() and disposed later
+                    if (!ReferenceEquals(zone.Item1, filteredImageClean))
+                    {
+                        zone.Item1?.Dispose();
+                    }
                 }
                 catch
                 {
@@ -1111,7 +1126,7 @@ namespace WFInfo
                     // Filter individual words as intended
                     foreach (var word in words)
                     {
-                        if (processor != null && !processor.ShouldFilterWord(word))
+                        if (processor == null || !processor.ShouldFilterWord(word))
                         {
                             filteredWords.Add(word);
                         }
