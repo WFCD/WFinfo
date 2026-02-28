@@ -866,6 +866,22 @@ namespace WFInfo
             }
         }
 
+        /// <summary>
+        /// Resolves OCR-specific ambiguities between similar-looking operator names
+        /// </summary>
+        /// <param name="currentBest">Current best match</param>
+        /// <param name="candidate">Candidate alternative</param>
+        /// <returns>True if the candidate should be preferred over current</returns>
+        private bool ResolveOcrAmbiguity(string currentBest, string candidate)
+        {
+            // Handle Gara/Ivara OCR confusion - these operators have similar visual patterns
+            if (currentBest.StartsWith("Gara") && candidate.StartsWith("Ivara"))
+                return true;
+            
+            // Future OCR ambiguities can be added here
+            return false;
+        }
+
         public int LevenshteinDistanceSecond(string str1, string str2, int limit = -1)
         {
             int num;
@@ -954,6 +970,7 @@ namespace WFInfo
             // Resolve OCR text to English once before loops to avoid repeated expensive database searches
             // Only resolve for non-English locales to avoid regression in English
             string resolvedName = _settings.Locale == "en" ? name : GetLocaleNameData(name, false);
+            resolvedName = resolvedName ?? name; // Fallback to original OCR string if resolution fails
             
             // For all non-English supported languages - check against localized names directly to avoid expensive conversion
             if (_settings.Locale != "en")
@@ -1041,7 +1058,9 @@ namespace WFInfo
                         multipleLowest = true;
                     }
 
-                    if (val == low && lowest.StartsWith("Gara") && prop.Key.StartsWith("Ivara")) //If both
+                    // Handle OCR ambiguity between Gara and Ivara operators
+                    // These operators have similar visual patterns that can confuse OCR
+                    if (val == low && ResolveOcrAmbiguity(lowest, prop.Key))
                     {
                         lowest = prop.Value.ToObject<string>();
                         lowest_unfiltered = prop.Key;
@@ -1064,6 +1083,8 @@ namespace WFInfo
             // Resolve OCR text to English once before loops to avoid repeated expensive database searches
             // Only resolve for non-English locales to avoid regression in English
             string resolvedName = _settings.Locale == "en" ? name : GetLocaleNameData(name, false);
+            resolvedName = resolvedName ?? name; // Fallback to original OCR string if resolution fails
+            
             foreach (KeyValuePair<string, JToken> prop in nameData)
             {
                 if (prop.Value.ToString().ToLower(Main.culture).Contains(name.ToLower(Main.culture)))

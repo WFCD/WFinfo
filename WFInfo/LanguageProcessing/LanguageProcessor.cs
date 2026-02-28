@@ -22,11 +22,6 @@ namespace WFInfo.LanguageProcessing
         protected readonly IReadOnlyApplicationSettings _settings;
         protected readonly CultureInfo _culture;
 
-        static LanguageProcessor()
-        {
-            // Will be initialized when first concrete instance is created
-        }
-
         protected LanguageProcessor(IReadOnlyApplicationSettings settings)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -136,7 +131,6 @@ namespace WFInfo.LanguageProcessing
             {
                 string normalizedRemoval = normalizedBlueprintRemovals[i];
                 if (normalizedText.Contains(normalizedRemoval) ||
-                    normalizedText.Contains($"({normalizedRemoval})") ||
                     normalizedText.StartsWith($"({normalizedRemoval}") ||
                     normalizedText.EndsWith($"{normalizedRemoval})"))
                 {

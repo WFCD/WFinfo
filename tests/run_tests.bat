@@ -23,7 +23,7 @@ set "TEST_IMAGES_DIR=%~1"
 if "%TEST_IMAGES_DIR%"=="" set "TEST_IMAGES_DIR=%SCRIPT_DIR%data"
 
 REM Check if TEST_IMAGES_DIR is relative and prefix with script directory
-echo "%TEST_IMAGES_DIR%" | findstr /r "^.\:\\.*" >nul
+echo "%TEST_IMAGES_DIR%" | findstr /r "^\".:\\.*" >nul
 if %errorlevel% neq 0 (
     REM Relative path detected, prefix with script directory
     set "TEST_IMAGES_DIR=%SCRIPT_DIR%%TEST_IMAGES_DIR%"
