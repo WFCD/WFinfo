@@ -15,13 +15,31 @@ namespace WFInfo.LanguageProcessing
     /// </summary>
     public abstract class LanguageProcessor
     {
+        // Static normalized blueprint removals to avoid recomputing on every call
+        private static string[] normalizedBlueprintRemovals;
+        
         protected readonly IReadOnlyApplicationSettings _settings;
         protected readonly CultureInfo _culture;
+
+        static LanguageProcessor()
+        {
+            // Will be initialized when first concrete instance is created
+        }
 
         protected LanguageProcessor(IReadOnlyApplicationSettings settings)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _culture = GetCultureInfo(settings.Locale);
+            
+            // Initialize normalized blueprint removals once per concrete type
+            if (normalizedBlueprintRemovals == null)
+            {
+                normalizedBlueprintRemovals = new string[BlueprintRemovals.Length];
+                for (int i = 0; i < BlueprintRemovals.Length; i++)
+                {
+                    normalizedBlueprintRemovals[i] = BlueprintRemovals[i].ToLowerInvariant();
+                }
+            }
         }
 
         /// <summary>
@@ -104,15 +122,18 @@ namespace WFInfo.LanguageProcessing
         {
             if (string.IsNullOrEmpty(text)) return false;
             
-            // Check against blueprint removal terms for this language
+            // Normalize text for case-insensitive comparison
+            string normalizedText = text.ToLowerInvariant();
+            
+            // Check against pre-normalized blueprint removal terms
             // Handle common formats: standalone terms, in parentheses, etc.
-            foreach (string removal in BlueprintRemovals)
+            for (int i = 0; i < normalizedBlueprintRemovals.Length; i++)
             {
-                if (text.Contains(removal) ||
-                    text.Contains($"({removal})") ||
-                    text.Contains($"({removal.ToLower()})") ||
-                    text.StartsWith($"({removal}") ||
-                    text.EndsWith($"{removal})"))
+                string normalizedRemoval = normalizedBlueprintRemovals[i];
+                if (normalizedText.Contains(normalizedRemoval) ||
+                    normalizedText.Contains($"({normalizedRemoval})") ||
+                    normalizedText.StartsWith($"({normalizedRemoval}") ||
+                    normalizedText.EndsWith($"{normalizedRemoval})"))
                 {
                     return true;
                 }

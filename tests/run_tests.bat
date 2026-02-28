@@ -20,7 +20,14 @@ if not exist "%SCRIPT_DIR%map.json" (
 
 REM Set test images directory
 set "TEST_IMAGES_DIR=%~1"
-if "%TEST_IMAGES_DIR%"=="" set "TEST_IMAGES_DIR=data"
+if "%TEST_IMAGES_DIR%"=="" set "TEST_IMAGES_DIR=%SCRIPT_DIR%data"
+
+REM Check if TEST_IMAGES_DIR is relative and prefix with script directory
+echo "%TEST_IMAGES_DIR%" | findstr /r "^.\:\\.*" >nul
+if %errorlevel% neq 0 (
+    REM Relative path detected, prefix with script directory
+    set "TEST_IMAGES_DIR=%SCRIPT_DIR%%TEST_IMAGES_DIR%"
+)
 
 REM Check if test images directory exists
 if not exist "%TEST_IMAGES_DIR%" (
@@ -34,6 +41,7 @@ echo Map: map.json
 echo Images: %TEST_IMAGES_DIR%
 
 REM Generate locale-safe timestamp with fallback
+set "TIMESTAMP="
 for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "Get-Date -Format 'yyyyMMdd_HHmmss'" 2^>nul`) do set TIMESTAMP=%%T
 
 REM Check if PowerShell command failed and provide fallback

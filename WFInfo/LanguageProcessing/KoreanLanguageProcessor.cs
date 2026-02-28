@@ -12,6 +12,13 @@ namespace WFInfo.LanguageProcessing
     /// </summary>
     public class KoreanLanguageProcessor : LanguageProcessor
     {
+                
+        // Static spacing corrections to avoid recreating dictionary on every call
+        private static readonly Dictionary<string, string> spacingCorrections = new Dictionary<string, string>
+        {
+            {"  ", " "}, {"   ", " "}, {"    ", " "}
+        };
+        
         // Korean character similarity groups for enhanced matching
         // Expanded to cover more OCR confusions and visual similarities
         private static readonly List<Dictionary<int, List<int>>> Korean = new List<Dictionary<int, List<int>>>() {
@@ -123,8 +130,9 @@ namespace WFInfo.LanguageProcessing
         public override int CalculateLevenshteinDistance(string s, string t)
         {
             // i18n korean edit distance algorithm
-            s = " " + s.Replace("설계도", "").Replace(" ", "");
-            t = " " + t.Replace("설계도", "").Replace(" ", "");
+            // Normalize spacing but preserve word boundaries for better OCR fragment matching
+            s = NormalizeKoreanTextForComparison(s ?? "");
+            t = NormalizeKoreanTextForComparison(t ?? "");
 
             // Check if both inputs contain Hangul characters for Korean-aware comparison
             bool sHasHangul = ContainsHangul(s);
@@ -142,6 +150,21 @@ namespace WFInfo.LanguageProcessing
                 t = NormalizeKoreanCharacters(t);
                 return CalculateStandardDistance(s, t);
             }
+        }
+        
+        /// <summary>
+        /// Normalizes Korean text for comparison by only removing spaces
+        /// Direct OCR to database matching with minimal tampering
+        /// </summary>
+        private static string NormalizeKoreanTextForComparison(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return " ";
+            
+            // Only remove spaces - direct OCR to database matching
+            string result = input.Replace(" ", "");
+            
+            // Add leading space to match original algorithm structure
+            return " " + result;
         }
         
         /// <summary>
@@ -227,139 +250,33 @@ namespace WFInfo.LanguageProcessing
         {
             if (string.IsNullOrEmpty(input)) return input;
 
-            // Basic cleanup for Korean
-            string normalized = input.ToLower(_culture).Trim();
-
-            // Fix common OCR character substitutions and garbage text FIRST
-            normalized = FixCommonOCRErrors(normalized);
-            
-            // Preprocess common Korean OCR spacing issues
-            normalized = FixKoreanSpacing(normalized);
-
-            // Add spaces around "Prime" to match database format better
-            normalized = normalized.Replace("prime", " prime ");
-
-            // Remove accents (not typically needed for Korean)
-            normalized = RemoveAccents(normalized);
-
-            // Remove extra spaces and normalize spacing
-            var parts = normalized.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            string result = string.Join(" ", parts);
-            
-            return result;
-        }
-        
-        /// <summary>
-        /// Fixes common spacing issues in Korean OCR text
-        /// Korean OCR often misses spaces between words or adds incorrect spaces
-        /// </summary>
-        /// <param name="input">Input string with spacing issues</param>
-        /// <returns>String with corrected spacing</returns>
-        private static string FixKoreanSpacing(string input)
-        {
-            if (string.IsNullOrEmpty(input)) return input;
-            
-            string result = input;
-            
-            // Add spaces before common Korean suffixes and particles that are often concatenated
-            result = Regex.Replace(result, "(프라임)(?=[가-힣])", "$1 "); // Prime + Korean
-            result = Regex.Replace(result, "(설계도)(?=[가-힣])", "$1 "); // Blueprint + Korean
-            result = Regex.Replace(result, "([가-힣])(?=프라임)", "$1 "); // Korean + Prime
-            result = Regex.Replace(result, "([가-힣])(?=설계도)", "$1 "); // Korean + Blueprint
-            
-            // Fix common concatenated part names using patterns only
-            result = Regex.Replace(result, "([가-힣]{2,4})(프라임)", "$1 $2");
-            result = Regex.Replace(result, "(프라임)(뉴로옵틱스|섀시|리시버|건틀렛|핸들|블레이드|시스템|스트링)", "$1 $2");
-            result = Regex.Replace(result, "(뉴로옵틱스|섀시|리시버|건틀렛|핸들|블레이드|시스템|스트링)(설계도)", "$1 $2");
-            
-            // Specific fix for neuroptics blueprint concatenation
-            result = Regex.Replace(result, "뉴로옵틱스설계도", "뉴로옵틱스 설계도");
-            result = Regex.Replace(result, "뉴로옵틱스 설계도", "뉴로옵틱스 설계도");
-            
-            // Add spaces between Korean words when they're concatenated (heuristic approach)
-            result = Regex.Replace(result, "([가-힣]{2,4})([가-힣]{2,4})(?=[가-힣]|$)", m => {
-                string word1 = m.Groups[1].Value;
-                string word2 = m.Groups[2].Value;
-                
-                // Common part type patterns that should have spaces
-                var partTypes = new[] { "프라임", "뉴로옵틱스", "섀시", "리시버", "건틀렛", "핸들", "블레이드", "시스템", "스트링", "설계도" };
-                
-                if (partTypes.Contains(word1, StringComparer.Ordinal) || partTypes.Contains(word2, StringComparer.Ordinal))
-                {
-                    return word1 + " " + word2;
-                }
-                
-                return m.Value;
-            });
-            
-            return result;
-        }
-        
-        /// <summary>
-        /// Fixes common OCR character substitutions and confusions in Korean text
-        /// </summary>
-        /// <param name="input">Input string with OCR errors</param>
-        /// <returns>String with corrected characters</returns>
-        private static string FixCommonOCRErrors(string input)
-        {
-            if (string.IsNullOrEmpty(input)) return input;
-            
-            // Apply pattern-based fixes FIRST before character-level replacements
-            var patternCorrections = new Dictionary<string, string>
-            {
-                {"속스프", ""}, // Common OCR garbage text
-                {"스프", ""}, // Common OCR garbage suffix
-                {"속스", ""}, // Common OCR garbage prefix
-                {"노스프킨", "뉴로옵틱스"}, // Scrambled neuroptics pattern
-                {"온티스석", "옵틱스"}, // Scrambled optics pattern
-                {"오티스석", "옵틱스"}, // Alternative scrambled optics pattern
-                {"버1", ""}, // Common OCR garbage suffix
-                {"버", ""}, // Common OCR garbage character
-                
-                // Common OCR corrections for Prime parts
-                {"프라임", "prime"}, {"프리임", "prime"}, {"프라읍", "prime"},
-                // Removed "설계도" → "blueprint" to keep Korean text intact
-            };
-            
-            string result = input;
-            foreach (var correction in patternCorrections.OrderByDescending(c => c.Key.Length))
-            {
-                result = result.Replace(correction.Key, correction.Value);
-            }
-            
-            // Apply spacing corrections
-            var spacingCorrections = new Dictionary<string, string>
-            {
-                {"  ", " "}, {"   ", " "}, {"    ", " "}
-            };
-            
-            foreach (var correction in spacingCorrections.OrderByDescending(c => c.Key.Length))
-            {
-                result = result.Replace(correction.Key, correction.Value);
-            }
-            
-            return result;
+            // Direct OCR to database matching - only remove spaces
+            return input.Replace(" ", "");
         }
 
         public override bool IsPartNameValid(string partName)
         {
             if (string.IsNullOrEmpty(partName)) return false;
             
-            // Apply basic OCR fixes before validation
-            string cleaned = FixCommonOCRErrors(partName);
-            
             // Korean requires minimum of 6 characters after removing spaces
-            return cleaned.Replace(" ", "").Length >= 6;
+            return partName.Replace(" ", "").Length >= 6;
         }
 
         public override bool ShouldFilterWord(string word)
         {
-            // Korean filtering: don't filter short Korean words as they may be valid parts of compound words
-            // Only filter out actual garbage (null/empty) and very short single characters
-            // Also preserve common Korean OCR fragments that might be parts of words
-            var validKoreanFragments = new[] { "노", "스", "프", "킨", "옵", "틱", "석", "계", "도", "이쿼", "녹스" };
+            // Korean filtering: use intelligent analysis instead of hardcoded fragments
             
-            return string.IsNullOrEmpty(word) || (word.Length == 1 && !validKoreanFragments.Contains(word));
+            if (string.IsNullOrEmpty(word)) return true;
+            
+            // Filter out very short non-Korean garbage (single characters that aren't Hangul)
+            if (word.Length == 1 && !IsHangulSyllable(word[0])) return true;
+            
+            // Keep all Korean text (Hangul characters) since Korean words are meaningful
+            // even when split by OCR
+            if (ContainsHangul(word)) return false;
+            
+            // For non-Korean text, use standard filtering (filter very short words)
+            return word.Length < 2;
         }
 
         
@@ -528,21 +445,6 @@ namespace WFInfo.LanguageProcessing
                 new KeyValuePair<string, string>("호", "ho"), new KeyValuePair<string, string>("화", "hwa"), new KeyValuePair<string, string>("홰", "hwae"), new KeyValuePair<string, string>("회", "hoe"), new KeyValuePair<string, string>("효", "hyo"), new KeyValuePair<string, string>("후", "hu"), new KeyValuePair<string, string>("훠", "hwo"), new KeyValuePair<string, string>("훼", "hwe"),
                 new KeyValuePair<string, string>("휘", "hwi"), new KeyValuePair<string, string>("류", "hyu"), new KeyValuePair<string, string>("흐", "heu"), new KeyValuePair<string, string>("희", "hui"), new KeyValuePair<string, string>("히", "hi"),
                 
-                new KeyValuePair<string, string>("속스프", ""), // Common OCR garbage text
-                new KeyValuePair<string, string>("스프", ""), // Common OCR garbage suffix
-                new KeyValuePair<string, string>("속스", ""), // Common OCR garbage prefix
-                new KeyValuePair<string, string>("노스프킨", "뉴로옵틱스"), // Scrambled neuroptics pattern
-                new KeyValuePair<string, string>("오티스석", "옵틱스 설계도"), // Scrambled optics blueprint pattern
-                new KeyValuePair<string, string>("온티스석", "옵틱스 설계도"), // Alternative scrambled optics blueprint pattern
-                new KeyValuePair<string, string>("버1", ""), // Common OCR garbage suffix
-                new KeyValuePair<string, string>("버", ""), // Common OCR garbage character
-                
-                // Common OCR corrections for Prime parts
-                new KeyValuePair<string, string>("프라임", "prime"), new KeyValuePair<string, string>("프리임", "prime"), new KeyValuePair<string, string>("프라읍", "prime"),
-                new KeyValuePair<string, string>("설계도", "blueprint"),
-                
-                // Common character confusions in OCR
-                new KeyValuePair<string, string>("리", "ri"), new KeyValuePair<string, string>("이", "i"), new KeyValuePair<string, string>("ㄱ", "k"), new KeyValuePair<string, string>("ㄴ", "n"), new KeyValuePair<string, string>("ㄷ", "t"), new KeyValuePair<string, string>("ㄹ", "r"), new KeyValuePair<string, string>("ㅁ", "m"), new KeyValuePair<string, string>("ㅂ", "p"), new KeyValuePair<string, string>("ㅅ", "s"), new KeyValuePair<string, string>("ㅇ", "ng"), new KeyValuePair<string, string>("ㅈ", "j"), new KeyValuePair<string, string>("ㅊ", "ch"), new KeyValuePair<string, string>("ㅋ", "k"), new KeyValuePair<string, string>("ㅌ", "t"), new KeyValuePair<string, string>("ㅍ", "p"), new KeyValuePair<string, string>("ㅎ", "h")
             };
             
             string result = input;

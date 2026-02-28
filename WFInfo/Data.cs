@@ -235,8 +235,8 @@ namespace WFInfo
                 marketItems = tempMarketItems;
             }
 
-            // Save the updated database to file
-            SaveAllJSONs();
+            // Save only the updated marketItems to file
+            SaveDatabase(marketItemsPath, marketItems);
 
             Main.AddLog("Item database has been downloaded");
             return enItems.IsFallback || localizedItems.IsFallback;
@@ -959,13 +959,16 @@ namespace WFInfo
             if (_settings.Locale != "en")
             {
                 // Check against localized names in marketItems
+                List<Tuple<string, string, string>> marketItemsSnapshot;
+                var processor = LanguageProcessorFactory.GetCurrentProcessor();
+                string normalizedName = processor.NormalizeForPatternMatching(name);
+                
+                // Snapshot minimal data needed under lock
                 lock (marketItemsLock)
                 {
                     if (marketItems != null)
                     {
-                        var processor = LanguageProcessorFactory.GetCurrentProcessor();
-                        // Precompute normalized OCR input once before iterating
-                        string normalizedName = processor.NormalizeForPatternMatching(name);
+                        marketItemsSnapshot = new List<Tuple<string, string, string>>();
                         
                         foreach (var marketItem in marketItems)
                         {
@@ -973,29 +976,42 @@ namespace WFInfo
                             string[] split = marketItem.Value.ToString().Split('|');
                             if (split.Length < 3) continue;
                             
-                            // Pre-filter: only check items with reasonable length difference (matching GetLocalizedNameData logic)
+                            // Pre-filter: only check items with reasonable length difference (matching English logic)
+                            int englishNameLength = split[0].Length;
                             int lengthDiff = Math.Abs(split[2].Length - name.Length);
-                            if (lengthDiff > split[2].Length / 2) continue;
+                            if (lengthDiff > Math.Max(englishNameLength, name.Length) / 2) continue;
                             
-                            // Use normalized strings for comparison (like GetLocalizedNameData does)
-                            string normalizedStored = processor.NormalizeForPatternMatching(split[2]);
-                            int val = processor.SimpleLevenshteinDistance(normalizedName, normalizedStored);
-                            
-                            // Distance filter: Only accept matches with distance < 50% of string length (like GetLocalizedNameData)
-                            if (val >= split[2].Length * 0.5) continue;
-                            
-                            if (val < low)
-                            {
-                                low = val;
-                                lowest = split[0]; // Return English name
-                                lowest_unfiltered = split[2]; // Show localized name in log
-                                multipleLowest = false;
-                            }
-                            else if (val == low)
-                            {
-                                multipleLowest = true;
-                            }
+                            marketItemsSnapshot.Add(Tuple.Create(split[0], split[2], processor.NormalizeForPatternMatching(split[2])));
                         }
+                    }
+                    else
+                    {
+                        marketItemsSnapshot = new List<Tuple<string, string, string>>();
+                    }
+                }
+                
+                // Do heavy Levenshtein work outside lock
+                foreach (var item in marketItemsSnapshot)
+                {
+                    string englishName = item.Item1;
+                    string storedName = item.Item2;
+                    string normalizedStored = item.Item3;
+                    
+                    int val = processor.CalculateLevenshteinDistance(normalizedName, normalizedStored);
+                    
+                    // Distance filter: Only accept matches with distance < 50% of string length (like GetLocalizedNameData)
+                    if (val >= storedName.Length * 0.5) continue;
+                    
+                    if (val < low)
+                    {
+                        low = val;
+                        lowest = englishName; // Return English name
+                        lowest_unfiltered = storedName; // Show localized name in log
+                        multipleLowest = false;
+                    }
+                    else if (val == low)
+                    {
+                        multipleLowest = true;
                     }
                 }
             }

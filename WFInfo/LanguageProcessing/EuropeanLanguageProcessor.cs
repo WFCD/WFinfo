@@ -66,12 +66,6 @@ namespace WFInfo.LanguageProcessing
                 .Replace('ñ', 'n')
                 .Replace('ç', 'c')
                 .Replace('ÿ', 'y')
-                .Replace('À', 'A').Replace('Á', 'A').Replace('Â', 'A').Replace('Ã', 'A').Replace('Ä', 'A').Replace('Å', 'A')
-                .Replace('È', 'E').Replace('É', 'E').Replace('Ê', 'E').Replace('Ë', 'E')
-                .Replace('Ì', 'I').Replace('Í', 'I').Replace('Î', 'I').Replace('Ï', 'I')
-                .Replace('Ò', 'O').Replace('Ó', 'O').Replace('Ô', 'O').Replace('Õ', 'O').Replace('Ö', 'O')
-                .Replace('Ù', 'U').Replace('Ú', 'U').Replace('Û', 'U').Replace('Ü', 'U')
-                .Replace('Ñ', 'N')
                 .Replace('Ç', 'C')
                 .Replace('Ÿ', 'Y');
         }

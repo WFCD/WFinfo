@@ -1081,6 +1081,22 @@ namespace WFInfo
             }
             Task.WaitAll(snapTasks);
 
+            // Dispose all zone bitmaps after processing is complete
+            foreach (var zone in zones)
+            {
+                try
+                {
+                    zone.Item1?.Dispose();
+                }
+                catch
+                {
+                    // Ignore disposal errors
+                }
+            }
+
+            // Get processor once outside loops for performance
+            var processor = LanguageProcessorFactory.GetCurrentProcessor();
+
             for (int threadNum = 0; threadNum < snapThreads; threadNum++)
             {
                 foreach (Tuple<String,Rectangle> wordResult in snapTasks[threadNum].Result)
@@ -1093,12 +1109,15 @@ namespace WFInfo
                     var filteredWords = new List<string>();
                     
                     // Filter individual words as intended
-                    var processor = LanguageProcessorFactory.GetCurrentProcessor();
                     foreach (var word in words)
                     {
-                        if (!processor.ShouldFilterWord(word))
+                        if (processor != null && !processor.ShouldFilterWord(word))
                         {
                             filteredWords.Add(word);
+                        }
+                        else if (word.Length <= 3)
+                        {
+                            numberTooFewCharacters++;
                         }
                     }
                     
