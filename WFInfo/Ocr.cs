@@ -106,6 +106,20 @@ namespace WFInfo
         public const int pixleRewardHeight = 235;
         public const int pixleRewardYDisplay = 316;
         public const int pixelRewardLineHeight = 48;
+        
+        // CJK language detection helper - Korean, Simplified Chinese, Traditional Chinese share similar OCR needs
+        private static bool IsCJKLocale()
+        {
+            var locale = ApplicationSettings.GlobalReadonlySettings.Locale;
+            return locale == "ko" || locale == "zh-hans" || locale == "zh-hant";
+        }
+        
+        // CJK-specific adjustments for multi-line text
+        private static int GetAdjustedLineHeight()
+        {
+            // CJK text needs slightly more vertical space for multi-line wrapping
+            return IsCJKLocale() ? 58 : pixelRewardLineHeight;
+        }
 
         public const int SCALING_LIMIT = 100;
         public static bool processingActive = false;
@@ -557,7 +571,7 @@ namespace WFInfo
         /// <returns></returns>
         public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * _window.ScreenScaling);
+            int lineHeight = (int)(GetAdjustedLineHeight() / 2 * _window.ScreenScaling);
             // int width = image == null ? window.Width * (int)_window.DpiScaling : image.Width;
             // int height = image == null ? window.Height * (int)_window.DpiScaling : image.Height;
             int mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling);
@@ -712,6 +726,7 @@ namespace WFInfo
                 var part = foundParts[i];
                 if (!PartNameValid(part.Name))
                 {
+                    Main.AddLog($"SnapIt: Rejected invalid part name: \"{part.Name}\" (length after trim: {part.Name?.Replace(" ", "").Length ?? 0})");
                     foundParts.RemoveAt(i); //remove invalid part from list to not clog VerifyCount
                     i--; // Adjust index since we removed an item
                     resultCount--;
@@ -975,35 +990,178 @@ namespace WFInfo
 
         private static List<Tuple<String, Rectangle>> GetTextWithBoundsFromImage(TesseractEngine engine, Bitmap image, int rectXOffset, int rectYOffset)
         {
-            List<Tuple<String, Rectangle>> data = new List<Tuple<String, Rectangle>>();
-
-
-            using (var page = engine.Process(image, PageSegMode.SparseText))
+            // Use single PSM mode for deterministic results
+            // SparseText is best for SnapIt: finds text anywhere in the image regardless of layout
+            var results = new List<Tuple<String, Rectangle>>();
+            
+            try
             {
-                using (var iterator = page.GetIterator())
+                using (var page = engine.Process(image, PageSegMode.SparseText))
                 {
-
-                    iterator.Begin();
-                    do
+                    using (var iterator = page.GetIterator())
                     {
-                        string currentWord = iterator.GetText(PageIteratorLevel.TextLine);
-                        iterator.TryGetBoundingBox(PageIteratorLevel.TextLine, out Rect tempbounds);
-                        Rectangle bounds = new Rectangle(tempbounds.X1 + rectXOffset, tempbounds.Y1 + rectYOffset, tempbounds.Width, tempbounds.Height);
-                        if (currentWord != null)
+                        iterator.Begin();
+                        do
                         {
-                            // Tesseract now handles character filtering via CharacterWhitelist
-                            // Just trim whitespace, no regex filtering needed
-                            currentWord = currentWord.Trim();
-                            if (currentWord.Length > 0)
-                            { //word is valid start comparing to others
-                                data.Add(Tuple.Create(currentWord, bounds));
+                            string currentWord = iterator.GetText(PageIteratorLevel.TextLine);
+                            iterator.TryGetBoundingBox(PageIteratorLevel.TextLine, out Rect tempbounds);
+                            Rectangle bounds = new Rectangle(tempbounds.X1 + rectXOffset, tempbounds.Y1 + rectYOffset, tempbounds.Width, tempbounds.Height);
+                            if (currentWord != null)
+                            {
+                                currentWord = currentWord.Trim();
+                                if (currentWord.Length > 0)
+                                {
+                                    results.Add(Tuple.Create(currentWord, bounds));
+                                }
                             }
                         }
+                        while (iterator.Next(PageIteratorLevel.TextLine));
                     }
-                    while (iterator.Next(PageIteratorLevel.TextLine));
                 }
             }
-            return data;
+            catch
+            {
+                // Return empty results on failure
+            }
+            return results;
+        }
+
+        /// <summary>
+        /// Analyzes OCR quality based on content characteristics and layout
+        /// </summary>
+        private static double AnalyzeOCRQuality(List<Tuple<String, Rectangle>> textLines, PageSegMode mode, int imageWidth, int imageHeight)
+        {
+            if (textLines == null || textLines.Count == 0)
+                return 0;
+
+            double score = 0;
+            
+            // Base score for number of text lines detected
+            score += Math.Min(textLines.Count * 10, 50); // Cap at 50 points for quantity
+            
+            // Korean text quality assessment
+            int koreanLines = 0;
+            int totalKoreanChars = 0;
+            double avgLineHeight = 0;
+            double totalYCoverage = 0;
+            
+            foreach (var line in textLines)
+            {
+                // Check for Korean Hangul characters
+                if (line.Item1.Any(c => c >= 0xAC00 && c <= 0xD7AF))
+                {
+                    koreanLines++;
+                    totalKoreanChars += line.Item1.Count(c => c >= 0xAC00 && c <= 0xD7AF);
+                }
+                
+                avgLineHeight += line.Item2.Height;
+                totalYCoverage += line.Item2.Height;
+            }
+            
+            avgLineHeight /= textLines.Count;
+            
+            // Bonus for Korean text detection (important for Korean locale)
+            if (koreanLines > 0)
+            {
+                score += 20; // Bonus for detecting Korean text
+                
+                // Additional bonus for good Korean character coverage
+                double koreanRatio = (double)totalKoreanChars / textLines.Sum(l => l.Item1.Length);
+                score += koreanRatio * 15;
+            }
+            
+            // Layout analysis bonuses/penalties based on PSM mode
+            if (mode == PageSegMode.SparseText)
+            {
+                // SparseText should find many distinct regions for multi-item scenarios
+                if (textLines.Count >= 2)
+                    score += 15;
+                
+                // Penalize if it creates too many tiny fragments (indicates over-segmentation)
+                int tinyLines = textLines.Count(l => l.Item2.Height < avgLineHeight * 0.3);
+                if (tinyLines > textLines.Count * 0.5)
+                    score -= 10;
+            }
+            else if (mode == PageSegMode.SingleBlock)
+            {
+                // SingleBlock should work well for single items (up to 3 lines with word wrapping)
+                if (textLines.Count >= 1 && textLines.Count <= 3)
+                    score += 20; // Higher bonus for optimal 1-3 line range
+                
+                // Bonus for consistent line heights (indicates proper block detection)
+                double heightVariance = CalculateVariance(textLines.Select(l => (double)l.Item2.Height));
+                if (heightVariance < avgLineHeight * 0.3)
+                    score += 10;
+                
+                // Penalty for too many lines (indicates merging multiple items)
+                if (textLines.Count > 3)
+                    score -= 15; // Reduced penalty since 3+ lines might still be valid
+            }
+            else if (mode == PageSegMode.Auto)
+            {
+                // Auto mode gets neutral bonuses
+                score += 5;
+            }
+            
+            // Text coverage analysis - good OCR should cover reasonable image area
+            double yCoverage = totalYCoverage / imageHeight;
+            if (yCoverage > 0.1 && yCoverage < 0.9) // Reasonable coverage
+                score += 10;
+            
+            return Math.Max(score, 0);
+        }
+
+        /// <summary>
+        /// Selects the best PSM mode based on analysis results
+        /// </summary>
+        private static PageSegMode SelectBestPSM(Dictionary<PageSegMode, List<Tuple<String, Rectangle>>> modeResults, 
+                                            Dictionary<PageSegMode, double> modeScores)
+        {
+            // Find the mode with highest score
+            var bestMode = modeScores.OrderByDescending(kvp => kvp.Value).First().Key;
+            
+            // Special handling for edge cases
+            var bestResult = modeResults[bestMode];
+            
+            // If best mode has no results, try the next best
+            if (bestResult.Count == 0)
+            {
+                foreach (var kvp in modeScores.OrderByDescending(kvp => kvp.Value))
+                {
+                    if (modeResults[kvp.Key].Count > 0)
+                        return kvp.Key;
+                }
+            }
+            
+            // Special case: if SparseText found significantly more Korean text lines, prefer it
+            if (modeResults.ContainsKey(PageSegMode.SparseText) && modeResults.ContainsKey(PageSegMode.SingleBlock))
+            {
+                int sparseKoreanLines = modeResults[PageSegMode.SparseText].Count(l => 
+                    l.Item1.Any(c => c >= 0xAC00 && c <= 0xD7AF));
+                int singleKoreanLines = modeResults[PageSegMode.SingleBlock].Count(l => 
+                    l.Item1.Any(c => c >= 0xAC00 && c <= 0xD7AF));
+                
+                // If SparseText found 2x more Korean lines and has reasonable score, prefer it
+                if (sparseKoreanLines >= singleKoreanLines * 2 && sparseKoreanLines >= 3 && 
+                    modeScores[PageSegMode.SparseText] > modeScores[PageSegMode.SingleBlock] * 0.8)
+                {
+                    return PageSegMode.SparseText;
+                }
+            }
+            
+            return bestMode;
+        }
+
+        /// <summary>
+        /// Calculates variance in a sequence of values
+        /// </summary>
+        private static double CalculateVariance(IEnumerable<double> values)
+        {
+            if (!values.Any()) return 0;
+            
+            double mean = values.Average();
+            double sumOfSquares = values.Sum(v => Math.Pow(v - mean, 2));
+            return sumOfSquares / values.Count();
         }
 
         
@@ -1139,14 +1297,25 @@ namespace WFInfo
                     // If all words were filtered, skip this line
                     if (filteredWords.Count == 0)
                     {
+                        Main.AddLog($"SnapIt: All words filtered from line: \"{currentLine}\"");
                         continue;
                     }
                     
                     // Reconstruct the filtered line
                     string currentWord = string.Join(" ", filteredWords);
                     //word is valid start comparing to others
-                    int VerticalPad = bounds.Height/2;
-                    int HorizontalPad = (int)(bounds.Height * _settings.SnapItHorizontalNameMargin);
+                    // CJK text wraps across multiple lines more often, so increase vertical padding
+                    // to ensure multi-line item names get grouped into a single item
+                    int VerticalPad = IsCJKLocale() 
+                        ? bounds.Height * 3 / 4  // Moderate padding for CJK multi-line grouping (not full height to avoid cross-item merging)
+                        : bounds.Height / 2;
+                    // Reduce horizontal padding for CJK to prevent cross-item horizontal merging
+                    // CJK item tiles in the SnapIt grid are close together, so large horizontal padding
+                    // causes padded bounds to overlap with adjacent items
+                    double hMargin = IsCJKLocale() 
+                        ? Math.Min(_settings.SnapItHorizontalNameMargin, 0.3)  // Cap at 0.3 for CJK
+                        : _settings.SnapItHorizontalNameMargin;
+                    int HorizontalPad = (int)(bounds.Height * hMargin);
                     
                                         
                     var paddedBounds = new Rectangle(bounds.X - HorizontalPad, bounds.Y - VerticalPad, bounds.Width + HorizontalPad * 2, bounds.Height + VerticalPad * 2);
@@ -1154,15 +1323,23 @@ namespace WFInfo
 
                     using (Graphics g = Graphics.FromImage(filteredImage))
                     {
-                        if (paddedBounds.Height > 50 * _window.ScreenScaling || paddedBounds.Width > 84 * _window.ScreenScaling)
+                        // CJK characters are inherently larger than Latin, so use higher thresholds
+                        // Also CJK 3-char words like 리시버/설계도/槍機/藍圖 are valid item name fragments
+                        bool isCJK = IsCJKLocale();
+                        int sizeThresholdH = isCJK ? (int)(80 * _window.ScreenScaling) : (int)(50 * _window.ScreenScaling);
+                        int sizeThresholdW = isCJK ? (int)(120 * _window.ScreenScaling) : (int)(84 * _window.ScreenScaling);
+                        int minCharLength = isCJK ? 2 : 3; // CJK packs more info per character
+                        
+                        if (paddedBounds.Height > sizeThresholdH || paddedBounds.Width > sizeThresholdW)
                         { //Determine whether or not the box is too large, false positives in OCR can scan items (such as neuroptics, chassis or systems) as a character(s).
-                            if (currentWord.Length > 3)
-                            { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
+                            if (currentWord.Length > minCharLength)
+                            { // enough characters in a box too large is likely going to be good, pass it but mark as potentially bad
                                 g.DrawRectangle(orange, paddedBounds);
                                 numberTooLargeButEnoughCharacters++;
                             }
                             else
                             {
+                                Main.AddLog($"SnapIt: Rejected oversized box with short text: \"{currentWord}\" (bounds: {paddedBounds.Width}x{paddedBounds.Height})");
                                 g.FillRectangle(red, paddedBounds);
                                 numberTooLarge++;
                                 continue;
@@ -1178,10 +1355,25 @@ namespace WFInfo
 
                     }
                     int i = foundItems.Count - 1;
+                    
+                    // Max combined width to prevent merging text from different items in the grid
+                    // Each item tile is roughly 130-140px wide at 1080p; cap at 160px to allow
+                    // multi-line wrapping within one item but prevent cross-item cascading merges
+                    int maxGroupWidth = (int)(160 * _window.ScreenScaling);
 
                     for (; i >= 0; i--)
+                    {
                         if (foundItems[i].Item2.IntersectsWith(paddedBounds))
-                            break;
+                        {
+                            // Check if merging would create an unreasonably wide group
+                            int combinedLeft = Math.Min(foundItems[i].Item2.Left, paddedBounds.Left);
+                            int combinedRight = Math.Max(foundItems[i].Item2.Right, paddedBounds.Right);
+                            int combinedWidth = combinedRight - combinedLeft;
+                            if (combinedWidth <= maxGroupWidth)
+                                break; // OK to merge
+                            // else: skip this group, too wide — would merge across items
+                        }
+                    }
 
                     if (i == -1)
                     {
@@ -2187,16 +2379,16 @@ namespace WFInfo
             long start = watch.ElapsedMilliseconds;
             long beginning = start;
 
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * _window.ScreenScaling);
+            int lineHeight = (int)(GetAdjustedLineHeight() * _window.ScreenScaling);
 
             Color clr;
             int width = _window.Window.Width;
             int height = _window.Window.Height;
             int mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling);
             int mostLeft = (width / 2) - (mostWidth / 2 );
-            // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
+            // Most Top = pixleRewardYDisplay - pixleRewardHeight + GetAdjustedLineHeight()
             //                   (316          -        235        +       44)    *    1.1    =    137
-            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * _window.ScreenScaling);
+            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + GetAdjustedLineHeight()) * _window.ScreenScaling);
             int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * 0.5);
             //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
             var rectangle = new Rectangle((int)(mostLeft), (int)(mostTop), mostWidth, mostBot - mostTop);
@@ -2347,7 +2539,7 @@ namespace WFInfo
 
             int cropWidth = (int)(pixleRewardWidth * _window.ScreenScaling * highScaling);
             int cropLeft = (preFilter.Width / 2) - (cropWidth / 2);
-            int cropTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * _window.ScreenScaling * highScaling);
+            int cropTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + GetAdjustedLineHeight()) * _window.ScreenScaling * highScaling);
             int cropBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * lowScaling);
             int cropHei = cropBot - cropTop;
             cropTop -= mostTop;
@@ -2470,7 +2662,7 @@ namespace WFInfo
         //private static List<Bitmap> FilterAndSeparateParts(Bitmap image, WFtheme active)
         //{
         //    int width = (int)(pixleRewardWidth * _window.ScreenScaling * uiScaling);
-        //    int lineHeight = (int)(pixelRewardLineHeight * _window.ScreenScaling * uiScaling);
+        //    int lineHeight = (int)(GetAdjustedLineHeight() * _window.ScreenScaling * uiScaling);
         //    int left = (image.Width / 2) - (width / 2);
         //    int top = (image.Height / 2) - (int)(pixleRewardYDisplay * _window.ScreenScaling * uiScaling) + (int)(pixleRewardHeight * _window.ScreenScaling * uiScaling) - lineHeight;
 
@@ -2491,10 +2683,118 @@ namespace WFInfo
         public static string GetTextFromImage(Bitmap image, TesseractEngine engine)
         {
             string ret = "";
-            using (Page page = engine.Process(image))
-                ret = page.GetText().Trim();
+            
+            // Use intelligent PSM selection for better Korean text recognition
+            // Try modes in order of likelihood, exit early if we get a good result
+            // For Korean: prioritize single block modes for wrapped multi-line item names
+            PageSegMode[] preferredModes = { 
+                PageSegMode.SingleBlock,     // Best for single items with multi-line wrapping
+                PageSegMode.SingleColumn     // Good for stacked lines in reward slots
+                // Removed SparseText and Auto to improve performance
+            };
+
+            Dictionary<PageSegMode, string> modeResults = new Dictionary<PageSegMode, string>();
+            Dictionary<PageSegMode, double> modeScores = new Dictionary<PageSegMode, double>();
+
+            foreach (var mode in preferredModes)
+            {
+                try
+                {
+                    using (Page page = engine.Process(image, mode))
+                    {
+                        string text = page.GetText().Trim();
+                        modeResults[mode] = text;
+                        
+                        // Score the result
+                        double score = ScoreTextResult(text, mode);
+                        modeScores[mode] = score;
+                        
+                        // Early exit if we got a very good result (has CJK chars and reasonable length)
+                        if (score > 50 && text.Length > 6 && text.Any(c => 
+                            (c >= 0xAC00 && c <= 0xD7AF) ||  // Korean Hangul
+                            (c >= 0x4E00 && c <= 0x9FFF) ||  // CJK Unified Ideographs
+                            (c >= 0x3400 && c <= 0x4DBF)))   // CJK Extension A
+                        {
+                            ret = text;
+                            break; // Exit early for performance
+                        }
+                    }
+                }
+                catch
+                {
+                    modeResults[mode] = "";
+                    modeScores[mode] = 0;
+                }
+            }
+
+            // If we didn't exit early, select the best result
+            if (string.IsNullOrEmpty(ret))
+            {
+                var bestMode = modeScores.OrderByDescending(kvp => kvp.Value).First().Key;
+                ret = modeResults[bestMode] ?? "";
+            }
+            
             // Tesseract now handles character filtering via CharacterWhitelist
             return ret.Trim();
+        }
+        /// <summary>
+        /// Scores OCR text results for quality assessment
+        /// </summary>
+        private static double ScoreTextResult(string text, PageSegMode mode)
+        {
+            if (string.IsNullOrEmpty(text))
+                return 0;
+
+            double score = 0;
+            
+            // Base score for text length
+            score += Math.Min(text.Length, 100);
+            
+            // Korean character detection bonus
+            int koreanChars = text.Count(c => c >= 0xAC00 && c <= 0xD7AF);
+            // CJK character detection bonus (Chinese Simplified/Traditional)
+            int cjkChars = text.Count(c => (c >= 0x4E00 && c <= 0x9FFF) || (c >= 0x3400 && c <= 0x4DBF));
+            int nonLatinChars = koreanChars + cjkChars;
+            if (nonLatinChars > 0)
+            {
+                score += 20; // Bonus for CJK text
+                score += Math.Min(nonLatinChars * 2, 30); // Additional bonus per CJK character
+            }
+            
+            // Line count analysis
+            string[] lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            score += Math.Min(lines.Length * 5, 25);
+            
+            // Mode-specific scoring
+            if (mode == PageSegMode.SingleBlock)
+            {
+                // SingleBlock should work well for single items (up to 3 lines with word wrapping)
+                if (lines.Length >= 1 && lines.Length <= 3)
+                    score += 20; // Higher bonus for optimal single item blocks
+                if (nonLatinChars > 0 && lines.Length >= 2)
+                    score += 15; // Extra bonus for multi-line CJK text (wrapped item names)
+            }
+            else if (mode == PageSegMode.SingleColumn)
+            {
+                // SingleColumn should handle stacked lines well in reward slots
+                if (lines.Length >= 1 && lines.Length <= 4)
+                    score += 15; // Good for vertically stacked reward text
+                if (nonLatinChars > 0)
+                    score += 10; // Bonus for CJK text in column layout
+            }
+            else if (mode == PageSegMode.SparseText)
+            {
+                // SparseText should find multiple distinct text regions
+                if (lines.Length >= 2)
+                    score += 10;
+            }
+            
+            // Penalty for too much whitespace (indicates poor segmentation)
+            double whitespaceRatio = (double)text.Count(char.IsWhiteSpace) / text.Length;
+            if (whitespaceRatio > 0.3)
+                score -= 10;
+            
+            return Math.Max(score, 0);
         }
 
         internal static List<string> SeparatePlayers(Bitmap image, TesseractEngine engine)
@@ -2716,6 +3016,118 @@ namespace WFInfo
                 ReloadSemaphore.Release();
             }
         }
+
+        #region Test Support Methods
+
+        /// <summary>
+        /// Test-only entry point: runs the reward screen OCR pipeline on a screenshot
+        /// and returns the list of matched part names (English) without any UI side-effects.
+        /// Requires OCR.Init and Main.dataBase to be initialized.
+        /// </summary>
+        internal static List<string> ProcessRewardScreenForTest(Bitmap screenshot, IWindowInfoService windowService)
+        {
+            var results = new List<string>();
+            windowService.UseImage(screenshot);
+
+            List<Bitmap> parts;
+            try
+            {
+                parts = ExtractPartBoxAutomatically(out uiScaling, out _, screenshot);
+            }
+            catch (Exception e)
+            {
+                Main.AddLog("Test ProcessReward: ExtractPartBoxAutomatically failed: " + e.Message);
+                return results;
+            }
+
+            int engineCount = Math.Min(parts.Count, _tesseractService.Engines.Length);
+            string[] checks = new string[parts.Count];
+            Task[] tasks = new Task[engineCount];
+            for (int i = 0; i < engineCount; i++)
+            {
+                int tempI = i;
+                tasks[i] = Task.Factory.StartNew(() => { checks[tempI] = GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]); });
+            }
+            Task.WaitAll(tasks);
+
+            // Process remaining parts sequentially if more parts than engines
+            for (int i = engineCount; i < parts.Count; i++)
+            {
+                checks[i] = GetTextFromImage(parts[i], _tesseractService.FirstEngine);
+            }
+
+            foreach (var p in parts) p.Dispose();
+
+            var validChecks = checks.Where(s => !string.IsNullOrEmpty(s) && s.Replace(" ", "").Length > 6).ToArray();
+
+            foreach (var part in validChecks)
+            {
+                string correctName = Main.dataBase.GetPartName(part, out int dist, false, out _);
+                if (dist != 9999 && dist <= GetMaxAllowedLevenshteinDistance(part.Length) && !string.IsNullOrEmpty(correctName))
+                {
+                    results.Add(correctName);
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Test-only entry point: runs the SnapIt OCR pipeline on a screenshot
+        /// and returns the list of matched part names (English) without any UI side-effects.
+        /// Requires OCR.Init and Main.dataBase to be initialized.
+        /// </summary>
+        internal static List<string> ProcessSnapItForTest(Bitmap screenshot, IWindowInfoService windowService)
+        {
+            var results = new List<string>();
+            windowService.UseImage(screenshot);
+
+            WFtheme theme = GetThemeWeighted(out _, screenshot);
+            if (theme == WFtheme.UNKNOWN)
+            {
+                Main.AddLog("Test SnapIt: Theme detection failed");
+                return results;
+            }
+
+            Bitmap filtered = ScaleUpAndFilter(screenshot, theme, out int[] rowHits, out int[] colHits);
+            List<InventoryItem> foundParts = FindAllParts(filtered, screenshot, rowHits, colHits);
+            filtered.Dispose();
+
+            foreach (var part in foundParts)
+            {
+                if (!PartNameValid(part.Name))
+                    continue;
+
+                string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool multipleLowest);
+                if (levenDist == 9999 || levenDist > GetMaxAllowedLevenshteinDistance(part.Name.Length) || string.IsNullOrEmpty(name))
+                    continue;
+
+                results.Add(name);
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Test-only: initializes OCR for headless test mode with only the required services.
+        /// </summary>
+        internal static void InitForTest(ITesseractService tesseractService, IReadOnlyApplicationSettings settings,
+            IWindowInfoService window, IHDRDetectorService hdrDetector)
+        {
+            Directory.CreateDirectory(Main.AppPath + @"\Debug");
+            _tesseractService = tesseractService;
+            _soundPlayer = null;
+            _settings = settings;
+            _window = window;
+            _gdiScreenshot = null;
+            _windowsScreenshot = null;
+            _hdrDetector = hdrDetector;
+
+            LanguageProcessorFactory.Initialize(settings);
+            _tesseractService.Init();
+        }
+
+        #endregion
     }
 
     public struct InventoryItem

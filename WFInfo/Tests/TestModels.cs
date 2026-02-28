@@ -38,32 +38,23 @@ namespace WFInfo.Tests
     {
         [JsonProperty("scenarios")]
         public List<string> Scenarios { get; set; }
-
-        [JsonProperty("categories")]
-        public Dictionary<string, List<string>> Categories { get; set; }
     }
 
     public class TestResult
     {
         public string TestCaseName { get; set; }
         public string ImagePath { get; set; }
+        public string Language { get; set; }
+        public string Theme { get; set; }
+        public string Category { get; set; }
         public bool Success { get; set; }
-        public List<PartMatchResult> ExpectedParts { get; set; }
-        public List<PartMatchResult> ActualParts { get; set; }
-        public List<string> MissingParts { get; set; }
-        public List<string> ExtraParts { get; set; }
+        public List<string> ExpectedParts { get; set; } = new List<string>();
+        public List<string> ActualParts { get; set; } = new List<string>();
+        public List<string> MissingParts { get; set; } = new List<string>();
+        public List<string> ExtraParts { get; set; } = new List<string>();
         public double AccuracyScore { get; set; }
         public long ProcessingTimeMs { get; set; }
         public string ErrorMessage { get; set; }
-    }
-
-    public class PartMatchResult
-    {
-        public string OriginalText { get; set; }
-        public string MatchedName { get; set; }
-        public int LevenshteinDistance { get; set; }
-        public bool IsExactMatch { get; set; }
-        public double Confidence { get; set; }
     }
 
     public class TestSuiteResult
@@ -71,17 +62,15 @@ namespace WFInfo.Tests
         public string TestSuiteName { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public List<TestResult> TestResults { get; set; }
+        public List<TestResult> TestResults { get; set; } = new List<TestResult>();
         public int TotalTests { get; set; }
         public int PassedTests { get; set; }
         public int FailedTests { get; set; }
+        public int ErrorTests { get; set; }
         public double OverallAccuracy { get; set; }
         public double PassRate { get; set; }
-        public Dictionary<string, double> LanguageAccuracy { get; set; }
-        public Dictionary<string, double> ThemeAccuracy { get; set; }
-        public Dictionary<string, double> CategoryAccuracy { get; set; }
-        public Dictionary<string, TestCoverage> CategoryCoverage { get; set; }
-        public Dictionary<string, TestCoverage> LanguageCoverage { get; set; }
+        public Dictionary<string, TestCoverage> CategoryCoverage { get; set; } = new Dictionary<string, TestCoverage>();
+        public Dictionary<string, TestCoverage> LanguageCoverage { get; set; } = new Dictionary<string, TestCoverage>();
         public TestCoverage OverallCoverage { get; set; }
         public string ErrorMessage { get; set; }
     }
@@ -94,15 +83,5 @@ namespace WFInfo.Tests
         public double PassRate { get; set; }
         public double AverageAccuracy { get; set; }
         public double AverageProcessingTime { get; set; }
-    }
-
-    public enum TestCategory
-    {
-        RewardScreen,
-        SnapIt,
-        Inventory,
-        Profile,
-        Fissure,
-        All
     }
 }

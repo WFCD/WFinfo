@@ -130,6 +130,7 @@ namespace WFInfo
             
             // This causes crash
             //engine.SetVariable("tessedit_reject_mode", "1"); // Reject questionable characters
+            //engine.SetVariable("textord_heavy_nr", "1");  // Enable heavy noise reduction
             
             engine.SetVariable("tessedit_zero_rejection", "false"); // Don't force recognition of uncertain characters
             engine.SetVariable("tessedit_write_rep_codes", "false"); // Don't write rejection codes
@@ -137,9 +138,11 @@ namespace WFInfo
             engine.SetVariable("tessedit_fix_fuzzy_spaces", "true"); // Fix spacing issues
             engine.SetVariable("tessedit_prefer_joined_broken", "false"); // Don't join broken characters
             engine.SetVariable("tessedit_font_id", "0"); // Use default font (Tesseract 5+)
+            
+            // Dictionary and spacing improvements for UI text
+            engine.SetVariable("preserve_interword_spaces", "1"); // Preserve spacing for stable output
                      
             // Language model penalties that work across all languages
-            engine.SetVariable("language_model_penalty_non_dict_word", "0.3"); // Penalize non-dictionary words heavily
             engine.SetVariable("language_model_penalty_case_ok", "0.1"); // Small penalty for case mismatches
             engine.SetVariable("language_model_penalty_case_bad", "0.4"); // Higher penalty for bad case
             
@@ -148,17 +151,27 @@ namespace WFInfo
             engine.SetVariable("thresholding_window_size", "5"); // Smaller window for better noise reduction
             
             // Apply language-specific optimizations
-            if (Locale == "ko")
+            // CJK languages (Korean, Simplified Chinese, Traditional Chinese) share similar OCR challenges
+            if (Locale == "ko" || Locale == "zh-hans" || Locale == "zh-hant")
             {
-                // Improve text segmentation for Korean
+                // CJK-specific OCR improvements for better character recognition
                 engine.SetVariable("smooth_scaling_factor", "1.5"); // Slight smoothing for better accuracy
+                engine.SetVariable("textord_noise_normratio", "2.0"); // More aggressive noise reduction for CJK
+                engine.SetVariable("chop_enable", "0"); // Disable character chopping for CJK characters
+                engine.SetVariable("use_new_state_cost", "1"); // Use new state cost for better CJK recognition
+                engine.SetVariable("load_system_dawg", "true"); // Enable system dictionary for better text segmentation
+                engine.SetVariable("load_freq_dawg", "true"); // Enable frequency dictionary for better text segmentation
+                engine.SetVariable("language_model_penalty_non_dict_word", "0"); // Don't penalize non-dictionary words (item names aren't dictionary words)
+                engine.SetVariable("user_defined_dpi", "300"); // Improve recognition for scaled/filtered UI text
+                engine.SetVariable("segment_nonalphabetic_script", "1"); // Better segmentation for non-alphabetic scripts
             }
             else if (Locale == "en")
             {
                 // Aggressive settings for English to reduce noise
-                
+                engine.SetVariable("language_model_penalty_non_dict_word", "0.3"); // Penalize non-dictionary words heavily
+                engine.SetVariable("load_system_dawg", "false"); // Disable system dictionary for better UI text recognition
+                engine.SetVariable("load_freq_dawg", "false"); // Disable frequency dictionary for better UI text recognition
                 engine.SetVariable("smooth_scaling_factor", "1.0"); // Minimal smoothing to preserve clarity
-                engine.SetVariable("tessedit_pageseg_mode", "7"); // Treat the image as a single text line (most aggressive)
                 engine.SetVariable("textord_force_make_prop_words", "true"); // Help with compound words
                 
             }

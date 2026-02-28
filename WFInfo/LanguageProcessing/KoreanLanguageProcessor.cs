@@ -156,13 +156,28 @@ namespace WFInfo.LanguageProcessing
         /// Normalizes Korean text for comparison by only removing spaces
         /// Direct OCR to database matching with minimal tampering
         /// </summary>
-        private static string NormalizeKoreanTextForComparison(string input)
+        private string NormalizeKoreanTextForComparison(string input)
         {
             if (string.IsNullOrEmpty(input)) return " ";
-            
-            // Only remove spaces - direct OCR to database matching
-            string result = input.Replace(" ", "");
-            
+
+            string result = NormalizeFullWidthCharacters(input);
+
+            // Remove blueprint equivalents (e.g., "설계도")
+            foreach (string removal in BlueprintRemovals)
+            {
+                if (!string.IsNullOrEmpty(removal))
+                {
+                    result = Regex.Replace(
+                        result,
+                        Regex.Escape(removal),
+                        "",
+                        RegexOptions.CultureInvariant);
+                }
+            }
+
+            // Remove whitespace (spaces, newlines, tabs) for OCR matching
+            result = Regex.Replace(result, @"\s+", "", RegexOptions.CultureInvariant);
+
             // Add leading space to match original algorithm structure
             return " " + result;
         }
@@ -250,16 +265,31 @@ namespace WFInfo.LanguageProcessing
         {
             if (string.IsNullOrEmpty(input)) return input;
 
-            // Direct OCR to database matching - only remove spaces
-            return input.Replace(" ", "");
+            string result = NormalizeFullWidthCharacters(input);
+
+            foreach (string removal in BlueprintRemovals)
+            {
+                if (!string.IsNullOrEmpty(removal))
+                {
+                    result = Regex.Replace(
+                        result,
+                        Regex.Escape(removal),
+                        "",
+                        RegexOptions.CultureInvariant);
+                }
+            }
+
+            // Direct OCR to database matching - remove all whitespace
+            return Regex.Replace(result, @"\s+", "", RegexOptions.CultureInvariant);
         }
 
         public override bool IsPartNameValid(string partName)
         {
             if (string.IsNullOrEmpty(partName)) return false;
             
-            // Korean requires minimum of 6 characters after removing spaces
-            return partName.Replace(" ", "").Length >= 6;
+            // Korean item names can be short (e.g. "렉스 프라임" = 5 chars without spaces)
+            // Use lower threshold than other languages to avoid dropping valid fragments
+            return Regex.Replace(partName, @"\s+", "", RegexOptions.CultureInvariant).Length >= 4;
         }
 
         public override bool ShouldFilterWord(string word)

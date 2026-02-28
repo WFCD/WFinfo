@@ -51,9 +51,45 @@ namespace WFInfo.LanguageProcessing
 
         public override bool ShouldFilterWord(string word)
         {
-            // Chinese filtering: don't filter short Chinese words as single characters can be meaningful
-            // Only filter out actual garbage (null/empty)
-            return string.IsNullOrEmpty(word);
+            if (string.IsNullOrEmpty(word)) return true;
+            
+            bool hasCJK = ContainsCJK(word);
+            bool hasLatin = false;
+            foreach (char c in word)
+            {
+                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+                {
+                    hasLatin = true;
+                    break;
+                }
+            }
+            
+            // Pure CJK words: keep (even single chars are meaningful in Chinese)
+            if (hasCJK && !hasLatin) return false;
+            
+            // Pure Latin words: shortest valid item name component is 3 chars (Ash, Nyx, Mag)
+            // Filter Latin-only words with <= 2 chars ("ll", "ee", "on", "me" = OCR noise from UI)
+            if (hasLatin && !hasCJK) return word.Length <= 2;
+            
+            // Mixed Latin+CJK: filter short mixed words (like "G壬") which are OCR garbage
+            // Valid mixed text is always longer (e.g. "Prime" next to CJK is separate words)
+            if (hasCJK && hasLatin && word.Length <= 2) return true;
+            
+            // Keep everything else
+            return false;
+        }
+        
+        /// <summary>
+        /// Checks if a string contains CJK characters
+        /// </summary>
+        public static bool ContainsCJK(string text)
+        {
+            foreach (char c in text)
+            {
+                if ((c >= 0x4E00 && c <= 0x9FFF) || (c >= 0x3400 && c <= 0x4DBF) || (c >= 0xF900 && c <= 0xFAFF))
+                    return true;
+            }
+            return false;
         }
 
         
@@ -113,9 +149,32 @@ namespace WFInfo.LanguageProcessing
 
         public override bool ShouldFilterWord(string word)
         {
-            // Chinese filtering: don't filter short Chinese words as single characters can be meaningful
-            // Only filter out actual garbage (null/empty)
-            return string.IsNullOrEmpty(word);
+            if (string.IsNullOrEmpty(word)) return true;
+            
+            bool hasCJK = SimplifiedChineseLanguageProcessor.ContainsCJK(word);
+            bool hasLatin = false;
+            foreach (char c in word)
+            {
+                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+                {
+                    hasLatin = true;
+                    break;
+                }
+            }
+            
+            // Pure CJK words: keep (even single chars are meaningful in Chinese)
+            if (hasCJK && !hasLatin) return false;
+            
+            // Pure Latin words: shortest valid item name component is 3 chars (Ash, Nyx, Mag)
+            // Filter Latin-only words with <= 2 chars ("ll", "ee", "on", "me" = OCR noise from UI)
+            if (hasLatin && !hasCJK) return word.Length <= 2;
+            
+            // Mixed Latin+CJK: filter short mixed words (like "G壬") which are OCR garbage
+            // Valid mixed text is always longer (e.g. "Prime" next to CJK is separate words)
+            if (hasCJK && hasLatin && word.Length <= 2) return true;
+            
+            // Keep everything else
+            return false;
         }
 
         

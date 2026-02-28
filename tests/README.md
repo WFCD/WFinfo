@@ -1,177 +1,143 @@
 # WFInfo OCR Test Framework
 
-This test framework allows you to run comprehensive OCR tests programmatically without the UI, supporting all 15 languages with various themes, resolutions, and categories.
+Regression and accuracy testing for WFInfo's OCR pipeline. Runs **headlessly** from the command line using the **real** WFInfo OCR methods (no mocks or copied code).
 
-## Features
+## How It Works
 
-- **Multi-language Support**: Tests all supported languages (English, Korean, Japanese, Chinese Simplified/Traditional, French, Ukrainian, Italian, German, Spanish, Portuguese, Polish, Russian) - excludes Thai, Japanese, and Turkish from automated testing
-- **Category Testing**: Reward screens (including fissure rewards), SnapIt inventory, Profile screens
-- **Theme Testing**: All Warframe UI themes (Orokin, Tenno, Grineer, Corpus, etc.)
-- **HDR Support**: Test both HDR and non-HDR scenarios
-- **Custom Filters**: Support for colorblind filters and other visual modifications
-- **Detailed Reporting**: Accuracy metrics, processing times, missing/extra parts detection
+1. The runner reads `map.json` which lists scenario paths.
+2. Each scenario is a **PNG + JSON pair** (e.g. `data/test1.png` + `data/test1.json`).
+3. The JSON spec defines language, theme, HDR, scaling, category, and expected part names.
+4. WFInfo's real OCR pipeline processes the screenshot:
+   - **Reward screens**: `ExtractPartBoxAutomatically` → `GetTextFromImage` → `GetPartName`
+   - **SnapIt**: `ScaleUpAndFilter` → `FindAllParts` → `GetPartName`
+5. Actual results are compared against expected parts; accuracy and pass/fail are reported.
+
+## Directory Structure
+
+```
+tests/
+├── map.json           # Lists scenarios to run
+├── run_tests.bat      # One-click Windows runner
+├── data/
+│   ├── test1.json     # Test spec
+│   ├── test1.png      # Corresponding screenshot
+│   ├── test2.json
+│   ├── test2.png
+│   └── ...
+```
 
 ## Quick Start
 
-### 1. Prepare Test Files
-```text
-tests/
-├── map.json              # Test scenarios configuration
-├── run_tests.bat          # Windows batch runner
-├── test_images/           # Directory containing test images
-│   ├── english_reward_basic.png
-│   ├── korean_fissure.png
-│   ├── japanese_snapit.png
-│   └── ...
-└── results/               # Generated test results
+### 1. Build the project
+```batch
+dotnet build WFInfo.sln -c Release
 ```
 
-### 2. Create Test Scenarios
+### 2. Run tests
+```batch
+cd tests
+run_tests.bat
+```
 
-Edit `map.json` to define your test cases:
+Or manually:
+```batch
+WFInfo.exe --test map.json results.json
+WFInfo.exe map.json results.json
+```
+
+If no output file is specified, results go to `test_results_<timestamp>.json`.
+
+### 3. Check results
+The runner prints a summary to stdout and writes detailed JSON to the output file.
+
+## Test Spec Format (JSON)
+
+Each test scenario JSON file:
 
 ```json
 {
-  "scenarios": {
-    "test_name": {
-      "description": "Test description",
-      "resolution": "1920x1080",
-      "scaling": 100,
-      "theme": "orokin",
-      "language": "english",
-      "parts": {
-        "0": "Expected Part Name"
-      },
-      "category": "reward",
-      "hdr": false,
-      "filters": []
-    }
-  }
+  "description": "Basic English reward screen with 4 items",
+  "resolution": "1920x1080",
+  "scaling": 100,
+  "theme": "orokin",
+  "language": "english",
+  "parts": {
+    "0": "Volt Prime Blueprint",
+    "1": "Mag Prime Blueprint",
+    "2": "Ash Prime Blueprint",
+    "3": "Trinity Prime Blueprint"
+  },
+  "category": "reward",
+  "hdr": false,
+  "filters": []
 }
 ```
 
-### 3. Run Tests
+### Fields
 
-**Windows:**
-```batch
-cd tests
-run_tests.bat test_images\
+| Field | Required | Description |
+|-------|----------|-------------|
+| `description` | No | Human-readable description |
+| `resolution` | No | Source resolution (informational) |
+| `scaling` | Yes | UI scaling percentage (100 = 100%) |
+| `theme` | Yes | UI theme name (see below) |
+| `language` | Yes | Language name (see below) |
+| `parts` | Yes | Map of index → expected part name (English) |
+| `category` | Yes | `reward` or `snapit` |
+| `hdr` | Yes | Whether the screenshot is HDR |
+| `filters` | No | Optional filter tags (e.g. `colorblind`) |
+
+## map.json Format
+
+```json
+{
+  "scenarios": [
+    "data/test1",
+    "data/test2",
+    "data/test3"
+  ]
+}
 ```
 
-**Manual:**
-```bash
-WFInfo.Tests.exe map.json test_images/ results.json
-```
+Each entry is a path (relative to `map.json`) without extension. The runner appends `.json` and `.png`.
 
-## Test Categories
+## Supported Values
 
 ### Categories
-- **`reward`**: Standard reward screen with 4 items (includes fissure rewards)
-- **`inventory`**: Profile/inventory screen scanning
-- **`snapit`**: Inventory screen scanning
-
-**Note**: Fissure rewards are treated as a subtype of the `reward` category and should use `"category": "reward"` in map.json files.
+- **`reward`** — Fissure reward screen (1-4 items)
+- **`snapit`** — SnapIt inventory scanning
 
 ### Languages
-- **English** (`english`)
-- **Korean** (`korean`) - 한국어
-- **Japanese** (`japanese`) - 日本語
-- **Simplified Chinese** (`simplified chinese`) - 简体中文
-- **Traditional Chinese** (`traditional chinese`) - 繁體中文
-- **French** (`french`) - Français
-- **Ukrainian** (`ukrainian`) - Українська
-- **Italian** (`italian`) - Italiano
-- **German** (`german`) - Deutsch
-- **Spanish** (`spanish`) - Español
-- **Portuguese** (`portuguese`) - Português
-- **Polish** (`polish`) - Polski
-- **Russian** (`russian`) - Русский
-
-**Note**: Thai and Turkish are supported in the main application but excluded from automated testing.
+`english`, `korean`, `japanese`, `simplified chinese`, `traditional chinese`, `thai`, `french`, `ukrainian`, `italian`, `german`, `spanish`, `portuguese`, `polish`, `turkish`, `russian`
 
 ### Themes
-- **Orokin** (`orokin`)
-- **Tenno** (`tenno`)
-- **Grineer** (`grineer`)
-- **Corpus** (`corpus`)
-- **Infested** (`infested`) - Maps to NIDUS
-- **Lotus** (`lotus`)
-- **Fortuna** (`fortuna`)
-- **Baruuk** (`baruuk`)
-- **Equinox** (`equinox`)
-- **Dark Lotus** (`dark_lotus`)
-- **Zephyr** (`zephyr`)
-- **High Contrast** (`high_contrast`)
-- **Legacy** (`legacy`)
+`orokin`, `tenno`, `grineer`, `corpus`, `infested`, `lotus`, `fortuna`, `baruuk`, `equinox`, `dark lotus` / `dark_lotus`, `zephyr`, `high contrast` / `high_contrast`, `legacy`, `auto`
 
-## Results
-
-The test framework generates comprehensive JSON reports with:
+## Output Format
 
 ```json
 {
   "TestSuiteName": "map",
-  "TotalTests": 5,
-  "PassedTests": 4,
+  "TotalTests": 3,
+  "PassedTests": 2,
   "FailedTests": 1,
-  "PassRate": 80.0,
-  "OverallAccuracy": 85.5,
-  "LanguageAccuracy": {
-    "english": 90.0,
-    "korean": 80.0
-  },
-  "CategoryCoverage": {
-    "reward": {
-      "TotalTests": 3,
-      "PassedTests": 2,
-      "FailedTests": 1,
-      "PassRate": 66.7,
-      "AverageAccuracy": 88.3,
-      "AverageProcessingTime": 1250.0
-    },
-    "inventory": {
-      "TotalTests": 2,
-      "PassedTests": 2,
-      "FailedTests": 0,
-      "PassRate": 100.0,
-      "AverageAccuracy": 82.5,
-      "AverageProcessingTime": 980.0
-    }
-  },
-  "LanguageCoverage": {
-    "english": {
-      "TotalTests": 3,
-      "PassedTests": 3,
-      "FailedTests": 0,
-      "PassRate": 100.0,
-      "AverageAccuracy": 91.7,
-      "AverageProcessingTime": 1100.0
-    },
-    "korean": {
-      "TotalTests": 2,
-      "PassedTests": 1,
-      "FailedTests": 1,
-      "PassRate": 50.0,
-      "AverageAccuracy": 79.0,
-      "AverageProcessingTime": 1400.0
-    }
-  },
-  "OverallCoverage": {
-    "TotalTests": 5,
-    "PassedTests": 4,
-    "FailedTests": 1,
-    "PassRate": 80.0,
-    "AverageAccuracy": 85.5,
-    "AverageProcessingTime": 1220.0
-  },
+  "ErrorTests": 0,
+  "PassRate": 66.7,
+  "OverallAccuracy": 83.3,
+  "CategoryCoverage": { ... },
+  "LanguageCoverage": { ... },
+  "OverallCoverage": { ... },
   "TestResults": [
     {
-      "TestCaseName": "english_reward_basic",
+      "TestCaseName": "test1",
+      "Language": "english",
+      "Theme": "orokin",
+      "Category": "reward",
       "Success": true,
       "AccuracyScore": 100.0,
       "ProcessingTimeMs": 1250,
-      "ExpectedParts": [...],
-      "ActualParts": [...],
+      "ExpectedParts": ["Volt Prime Blueprint", ...],
+      "ActualParts": ["Volt Prime Blueprint", ...],
       "MissingParts": [],
       "ExtraParts": []
     }
@@ -179,59 +145,38 @@ The test framework generates comprehensive JSON reports with:
 }
 ```
 
-## Integration with WFInfo
-
-The test framework uses the actual OCR engine and language-specific algorithms:
-
-- **Levenshtein Distance**: Language-specific implementations for optimal matching
-- **Character Normalization**: Diacritic handling for European languages, full-width conversion for Asian languages
-- **Blueprint Removal**: Language-specific term removal (설계도, 設計図, 蓝图, Schéma, Bauplan, etc.)
-- **Validation Logic**: Minimum character length validation per language
-
 ## Exit Codes
 
-- **0**: Success - All tests passed
-- **1**: Warning - Some tests failed
-- **2**: Error - Test execution failed
+| Code | Meaning |
+|------|---------|
+| 0 | All tests passed |
+| 1 | Some tests failed |
+| 2 | Fatal error (missing files, init failure, etc.) |
 
-## Advanced Usage
+## Architecture
 
-### Regression Testing
-Create comprehensive test suites for regression testing:
+The test runner calls WFInfo's internal methods directly:
 
-```json
-{
-  "categories": {
-    "reward": ["test1", "test2", "test3", "fissure_test1", "fissure_test2"],
-    "inventory": ["inventory_test1", "inventory_test2"],
-    "snapit": ["snapit_test1", "snapit_test2"]
-  }
-}
-```
+- `OCR.InitForTest()` — headless OCR initialization (real TesseractService, no sound/screenshot services)
+- `OCR.ProcessRewardScreenForTest()` — full reward pipeline: extract part boxes → Tesseract OCR → Levenshtein matching
+- `OCR.ProcessSnapItForTest()` — full SnapIt pipeline: theme detection → filter → find parts → matching
+- `Data.GetPartName()` — real Levenshtein-based name matching against the market database
+- `LanguageProcessorFactory` — real language-specific processing (CJK, Cyrillic, Latin, etc.)
 
-### Performance Testing
-Monitor processing times and accuracy across different:
-- Resolutions (1920x1080, 2560x1440, 3840x2160)
-- Scaling factors (100%, 125%, 150%)
-- HDR vs non-HDR
-- Language complexity (Latin vs Cyrillic vs Asian scripts)
+Settings (locale, theme, scaling) are applied via `ApplicationSettings.GlobalSettings` before each test, and Tesseract engines are reloaded when the language changes.
 
-### CI/CD Integration
-Perfect for automated testing pipelines:
-- JSON output for easy parsing
-- Exit codes for build status
-- Detailed logging for debugging
-- Batch scripts for Windows environments
+## Adding New Tests
+
+1. Take a screenshot in Warframe
+2. Save as `tests/data/<name>.png`
+3. Create `tests/data/<name>.json` with the spec (see format above)
+4. Add `"data/<name>"` to `map.json` scenarios list
+5. Run `run_tests.bat`
 
 ## Troubleshooting
 
-### Common Issues
-1. **Missing Images**: Ensure all PNG files exist in test_images directory
-2. **Language Not Supported**: Check language spelling in JSON matches supported locales
-3. **Theme Detection Failures**: Verify theme names are valid WFtheme enum values
-4. **OCR Engine Issues**: Ensure traineddata files are downloaded for test languages
-
-### Debug Mode
-Add `"debug": true` to test scenarios for verbose logging and intermediate image saving.
-
-This framework provides comprehensive, automated testing of WFInfo's OCR capabilities across all supported languages and scenarios.
+- **"Databases not ready"** — First run downloads market data from the internet. Ensure connectivity.
+- **"PNG not found"** — The `.png` must be next to the `.json` with the same base name.
+- **Low accuracy** — Check that expected part names match WFInfo's English database names exactly.
+- **Tesseract errors** — Ensure tessdata files are available in `%APPDATA%\WFInfo\tessdata\`.
+- **Debug logs** — Check `%APPDATA%\WFInfo\debug.log` for detailed OCR pipeline logs.

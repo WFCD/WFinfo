@@ -871,11 +871,18 @@ namespace WFInfo
         /// </summary>
         /// <param name="currentBest">Current best match</param>
         /// <param name="candidate">Candidate alternative</param>
+        /// <param name="ocrText">Original OCR text for disambiguation</param>
         /// <returns>True if the candidate should be preferred over current</returns>
-        private bool ResolveOcrAmbiguity(string currentBest, string candidate)
+        private bool ResolveOcrAmbiguity(string currentBest, string candidate, string ocrText)
         {
             // Handle Gara/Ivara OCR confusion - these operators have similar visual patterns
             if (currentBest.StartsWith("Gara") && candidate.StartsWith("Ivara"))
+                return true;
+            
+            // Handle Gara/Mesa OCR confusion - garbled "Mesa" (e.g. "Mggga") can tie with "Gara" at same Levenshtein distance
+            // Use first character of OCR text to disambiguate since M and G are visually distinct
+            if (currentBest.StartsWith("Gara") && candidate.StartsWith("Mesa") &&
+                !string.IsNullOrEmpty(ocrText) && ocrText.StartsWith("M", StringComparison.OrdinalIgnoreCase))
                 return true;
             
             // Future OCR ambiguities can be added here
@@ -1060,7 +1067,7 @@ namespace WFInfo
 
                     // Handle OCR ambiguity between Gara and Ivara operators
                     // These operators have similar visual patterns that can confuse OCR
-                    if (val == low && ResolveOcrAmbiguity(lowest, prop.Key))
+                    if (val == low && ResolveOcrAmbiguity(lowest, prop.Key, resolvedName))
                     {
                         lowest = prop.Value.ToObject<string>();
                         lowest_unfiltered = prop.Key;

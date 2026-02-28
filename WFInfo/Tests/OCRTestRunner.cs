@@ -6,156 +6,136 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using WFInfo.Settings;
-using WFInfo.Services.WindowInfo;
-using WFInfo.Services.Screenshot;
 using WFInfo.Services.HDRDetection;
+using WFInfo.Services.WindowInfo;
 
 namespace WFInfo.Tests
 {
+    /// <summary>
+    /// OCR regression test runner that calls real WFInfo OCR methods directly.
+    /// Requires OCR.InitForTest and Main.dataBase to be initialized before use.
+    /// </summary>
     public class OCRTestRunner
     {
-        private readonly IDataService _dataService;
-        private readonly ITesseractService _tesseractService;
         private readonly IWindowInfoService _windowService;
-        private readonly IScreenshotService _screenshotService;
-        private readonly IHDRDetectorService _hdrDetector;
+        private string _currentLocale;
 
-        public OCRTestRunner(IDataService dataService, ITesseractService tesseractService, 
-            IWindowInfoService windowService, IScreenshotService screenshotService, 
-            IHDRDetectorService hdrDetector)
+        public OCRTestRunner(IWindowInfoService windowService)
         {
-            _dataService = dataService;
-            _tesseractService = tesseractService;
             _windowService = windowService;
-            _screenshotService = screenshotService;
-            _hdrDetector = hdrDetector;
         }
 
-        public TestSuiteResult RunTestSuite(string testMapPath, string testImagesDirectory)
+        public TestSuiteResult RunTestSuite(string testMapPath)
         {
             var result = new TestSuiteResult
             {
                 TestSuiteName = Path.GetFileNameWithoutExtension(testMapPath),
-                StartTime = DateTime.UtcNow,
-                TestResults = new List<TestResult>(),
-                LanguageAccuracy = new Dictionary<string, double>(),
-                ThemeAccuracy = new Dictionary<string, double>(),
-                CategoryAccuracy = new Dictionary<string, double>(),
-                CategoryCoverage = new Dictionary<string, TestCoverage>(),
-                LanguageCoverage = new Dictionary<string, TestCoverage>(),
-                OverallCoverage = new TestCoverage()
+                StartTime = DateTime.UtcNow
             };
 
             try
             {
-                // Load test map
                 var testMapJson = File.ReadAllText(testMapPath);
                 var testMap = JsonConvert.DeserializeObject<TestMap>(testMapJson);
+                string testMapDir = Path.GetDirectoryName(Path.GetFullPath(testMapPath));
 
-                Main.AddLog($"Starting test suite: {result.TestSuiteName} with {testMap.Scenarios.Count} test cases");
+                Main.AddLog($"Starting test suite: {result.TestSuiteName} with {testMap.Scenarios.Count} scenario(s)");
 
-                // Run each test scenario
                 foreach (var scenario in testMap.Scenarios)
                 {
-                    var testResult = RunSingleTest(scenario, testImagesDirectory, Path.GetDirectoryName(testMapPath));
+                    var testResult = RunSingleTest(scenario, testMapDir);
                     result.TestResults.Add(testResult);
                 }
 
-                // Calculate final statistics
-                result.TotalTests = result.TestResults.Count;
-                result.PassedTests = result.TestResults.Count(t => t.Success);
-                result.FailedTests = result.TotalTests - result.PassedTests;
-                result.OverallAccuracy = result.TestResults.Average(t => t.AccuracyScore);
-                result.PassRate = result.TotalTests > 0 ? (double)result.PassedTests / result.TotalTests * 100 : 0;
-                
-                // Calculate coverage metrics
-                CalculateCoverageMetrics(result);
-                
+                CalculateStatistics(result);
                 result.EndTime = DateTime.UtcNow;
 
-                Main.AddLog($"Test suite completed: {result.PassedTests}/{result.TotalTests} passed, {result.PassRate:F1}% pass rate, {result.OverallAccuracy:F2}% overall accuracy");
-
-                return result;
+                Main.AddLog($"Test suite completed: {result.PassedTests}/{result.TotalTests} passed ({result.PassRate:F1}%), accuracy {result.OverallAccuracy:F1}%");
             }
             catch (Exception ex)
             {
-                Main.AddLog($"Test suite failed: {ex.Message}");
+                Main.AddLog($"Test suite failed: {ex.Message}\n{ex.StackTrace}");
                 result.EndTime = DateTime.UtcNow;
                 result.ErrorMessage = ex.Message;
-                return result;
             }
+
+            return result;
         }
 
-        private TestResult RunSingleTest(string scenarioPath, string testImagesDirectory, string testMapDirectory)
+        private TestResult RunSingleTest(string scenarioPath, string testMapDir)
         {
             var stopwatch = Stopwatch.StartNew();
+
+            // Resolve paths relative to the map.json directory
+            string jsonPath = Path.GetFullPath(Path.Combine(testMapDir, scenarioPath + ".json"));
+            string imagePath = Path.GetFullPath(Path.Combine(testMapDir, scenarioPath + ".png"));
+            string testName = Path.GetFileName(scenarioPath);
+
             var result = new TestResult
             {
-                TestCaseName = Path.GetFileNameWithoutExtension(scenarioPath),
-                ImagePath = Path.Combine(testImagesDirectory, Path.GetFileNameWithoutExtension(scenarioPath) + ".png"),
-                ExpectedParts = new List<PartMatchResult>(),
-                ActualParts = new List<PartMatchResult>(),
-                MissingParts = new List<string>(),
-                ExtraParts = new List<string>(),
-                AccuracyScore = 0,
-                ProcessingTimeMs = 0
+                TestCaseName = testName,
+                ImagePath = imagePath
             };
 
             try
             {
-                Main.AddLog($"Running test: {result.TestCaseName}");
-
-                // Load test data from external file
-                var testDataPath = Path.Combine(testMapDirectory, scenarioPath + ".json");
-                if (!File.Exists(testDataPath))
+                // Validate files exist
+                if (!File.Exists(jsonPath))
                 {
-                    result.ErrorMessage = $"Test data file not found: {testDataPath}";
+                    result.ErrorMessage = $"JSON not found: {jsonPath}";
                     result.Success = false;
+                    stopwatch.Stop();
+                    result.ProcessingTimeMs = stopwatch.ElapsedMilliseconds;
                     return result;
                 }
 
-                var testDataJson = File.ReadAllText(testDataPath);
-                var testCase = JsonConvert.DeserializeObject<TestCase>(testDataJson);
-
-                // Load test image
-                if (!File.Exists(result.ImagePath))
+                if (!File.Exists(imagePath))
                 {
-                    result.ErrorMessage = $"Test image not found: {result.ImagePath}";
+                    result.ErrorMessage = $"PNG not found: {imagePath}";
                     result.Success = false;
+                    stopwatch.Stop();
+                    result.ProcessingTimeMs = stopwatch.ElapsedMilliseconds;
                     return result;
                 }
 
-                // Setup test environment
-                SetupTestEnvironment(testCase);
+                // Load spec
+                var testCase = JsonConvert.DeserializeObject<TestCase>(File.ReadAllText(jsonPath));
+                result.Language = testCase.Language ?? "unknown";
+                result.Theme = testCase.Theme ?? "auto";
+                result.Category = testCase.Category ?? "reward";
+                result.ExpectedParts = testCase.Parts?.Values.ToList() ?? new List<string>();
 
-                // Load test image
-                using (var bitmap = new Bitmap(result.ImagePath))
+                Main.AddLog($"Running: {testName} [{result.Language}/{result.Category}/{result.Theme}] expecting {result.ExpectedParts.Count} part(s)");
+
+                // Configure settings for this test
+                ApplyTestSettings(testCase);
+
+                // Run real OCR pipeline
+                using (var bitmap = new Bitmap(imagePath))
                 {
-                    // Process image based on category
-                    var ocrResults = ProcessImageByCategory(bitmap, testCase.Category);
-
-                    // Build expected parts from test data
-                    foreach (var expectedPart in testCase.Parts)
+                    List<string> ocrResults;
+                    switch (result.Category.ToLower())
                     {
-                        result.ExpectedParts.Add(new PartMatchResult
-                        {
-                            OriginalText = expectedPart.Value,
-                            MatchedName = expectedPart.Value,
-                            IsExactMatch = true,
-                            Confidence = 1.0
-                        });
+                        case "snapit":
+                            ocrResults = OCR.ProcessSnapItForTest(bitmap, _windowService);
+                            break;
+                        case "reward":
+                        default:
+                            ocrResults = OCR.ProcessRewardScreenForTest(bitmap, _windowService);
+                            break;
                     }
 
-                    // Compare results
-                    CompareResults(result, ocrResults);
+                    result.ActualParts = ocrResults;
                 }
+
+                // Compare expected vs actual
+                CompareResults(result);
 
                 stopwatch.Stop();
                 result.ProcessingTimeMs = stopwatch.ElapsedMilliseconds;
 
-                Main.AddLog($"Test {result.TestCaseName} completed in {result.ProcessingTimeMs}ms - Success: {result.Success}, Accuracy: {result.AccuracyScore:F2}%");
-
-                return result;
+                string status = result.Success ? "PASS" : "FAIL";
+                Main.AddLog($"  {status}: {testName} ({result.AccuracyScore:F0}% accuracy, {result.ProcessingTimeMs}ms) actual=[{string.Join(", ", result.ActualParts)}]");
             }
             catch (Exception ex)
             {
@@ -163,371 +143,162 @@ namespace WFInfo.Tests
                 result.ProcessingTimeMs = stopwatch.ElapsedMilliseconds;
                 result.ErrorMessage = ex.Message;
                 result.Success = false;
-                Main.AddLog($"Test {result.TestCaseName} failed: {ex.Message}");
-                return result;
+                Main.AddLog($"  ERROR: {testName}: {ex.Message}");
             }
+
+            return result;
         }
 
-        private void SetupTestEnvironment(TestCase testCase)
+        private void ApplyTestSettings(TestCase testCase)
         {
-            // Apply test settings
             var settings = ApplicationSettings.GlobalSettings;
-            
-            // Set language
-            var langLower = testCase.Language.ToLower();
-            switch (langLower)
+
+            // Map language name to locale code
+            string newLocale = MapLanguageToLocale(testCase.Language);
+            bool localeChanged = newLocale != _currentLocale;
+            settings.Locale = newLocale;
+            _currentLocale = newLocale;
+
+            // Map theme name to enum
+            settings.ThemeSelection = MapThemeToEnum(testCase.Theme);
+
+            // Apply scaling
+            if (testCase.Scaling > 0)
+                OCR.uiScaling = testCase.Scaling / 100.0;
+
+            // Reload engines if language changed (different tessdata)
+            if (localeChanged)
             {
-                case "english":
-                    settings.Locale = "en";
-                    break;
-                case "korean":
-                    settings.Locale = "ko";
-                    break;
-                case "japanese":
-                    settings.Locale = "ja";
-                    break;
-                case "simplified chinese":
-                    settings.Locale = "zh-hans";
-                    break;
-                case "traditional chinese":
-                    settings.Locale = "zh-hant";
-                    break;
-                case "thai":
-                    settings.Locale = "th";
-                    break;
-                case "french":
-                    settings.Locale = "fr";
-                    break;
-                case "ukrainian":
-                    settings.Locale = "uk";
-                    break;
-                case "italian":
-                    settings.Locale = "it";
-                    break;
-                case "german":
-                    settings.Locale = "de";
-                    break;
-                case "spanish":
-                    settings.Locale = "es";
-                    break;
-                case "portuguese":
-                    settings.Locale = "pt";
-                    break;
-                case "polish":
-                    settings.Locale = "pl";
-                    break;
-                case "turkish":
-                    settings.Locale = "tr";
-                    break;
-                case "russian":
-                    settings.Locale = "ru";
-                    break;
-                default:
-                    settings.Locale = "en";
-                    break;
-            }
+                Main.AddLog($"  Locale changed to '{newLocale}', reinitializing OCR engines...");
+                OCR.InitForTest(
+                    new TesseractService(),
+                    ApplicationSettings.GlobalReadonlySettings,
+                    _windowService,
+                    new HeadlessHDRDetector(testCase.HDR));
 
-            // Set theme
-            var themeLower = testCase.Theme.ToLower();
-            switch (themeLower)
-            {
-                case "orokin":
-                    settings.ThemeSelection = WFtheme.OROKIN;
-                    break;
-                case "tenno":
-                    settings.ThemeSelection = WFtheme.TENNO;
-                    break;
-                case "grineer":
-                    settings.ThemeSelection = WFtheme.GRINEER;
-                    break;
-                case "corpus":
-                    settings.ThemeSelection = WFtheme.CORPUS;
-                    break;
-                case "infested":
-                    settings.ThemeSelection = WFtheme.NIDUS;
-                    break;
-                case "lotus":
-                    settings.ThemeSelection = WFtheme.LOTUS;
-                    break;
-                case "fortuna":
-                    settings.ThemeSelection = WFtheme.FORTUNA;
-                    break;
-                case "baruuk":
-                    settings.ThemeSelection = WFtheme.BARUUK;
-                    break;
-                case "equinox":
-                    settings.ThemeSelection = WFtheme.EQUINOX;
-                    break;
-                case "dark lotus":
-                    settings.ThemeSelection = WFtheme.DARK_LOTUS;
-                    break;
-                case "zephyr":
-                    settings.ThemeSelection = WFtheme.ZEPHYR;
-                    break;
-                case "high contrast":
-                    settings.ThemeSelection = WFtheme.HIGH_CONTRAST;
-                    break;
-                case "legacy":
-                    settings.ThemeSelection = WFtheme.LEGACY;
-                    break;
-                default:
-                    settings.ThemeSelection = WFtheme.AUTO;
-                    break;
-            }
-
-            // Set scaling
-            OCR.uiScaling = testCase.Scaling / 100.0;
-
-            // Reload OCR engines with new settings
-            _tesseractService.ReloadEngines();
-        }
-
-        private List<PartMatchResult> ProcessImageByCategory(Bitmap image, string category)
-        {
-            var results = new List<PartMatchResult>();
-
-            switch (category.ToLower())
-            {
-                case "reward":
-                    return ProcessRewardScreen(image);
-                
-                case "inventory":
-                    return ProcessInventoryScreen(image);
-                
-                case "snapit":
-                    return ProcessSnapIt(image);
-                
-                default:
-                    return ProcessRewardScreen(image); // Default to reward screen processing
+                // Also re-update Data so Levenshtein uses the right locale for matching
+                Main.dataBase.ReloadItems().GetAwaiter().GetResult();
             }
         }
 
-        private List<PartMatchResult> ProcessRewardScreen(Bitmap image)
+        private static string MapLanguageToLocale(string language)
         {
-            var results = new List<PartMatchResult>();
-            
-            try
+            if (string.IsNullOrEmpty(language)) return "en";
+            switch (language.ToLower())
             {
-                // Simulate reward screen processing - basic OCR on the whole image
-                // This is a simplified approach since we can't access the private ExtractPartBoxAutomatically method
-                var ocrText = OCR.GetTextFromImage(image, _tesseractService.FirstEngine);
-                
-                if (!string.IsNullOrEmpty(ocrText) && ocrText.Replace(" ", "").Length > 6)
-                {
-                    var matchedName = _dataService.GetPartName(ocrText, out int distance, false, out bool multipleLowest);
-                        
-                    results.Add(new PartMatchResult
-                    {
-                        OriginalText = ocrText,
-                        MatchedName = matchedName,
-                        LevenshteinDistance = distance,
-                        IsExactMatch = ocrText.Equals(matchedName, StringComparison.OrdinalIgnoreCase),
-                        Confidence = CalculateConfidence(distance, ocrText.Length, matchedName.Length)
-                    });
-                }
+                case "english": return "en";
+                case "korean": return "ko";
+                case "japanese": return "ja";
+                case "simplified chinese": return "zh-hans";
+                case "traditional chinese": return "zh-hant";
+                case "thai": return "th";
+                case "french": return "fr";
+                case "ukrainian": return "uk";
+                case "italian": return "it";
+                case "german": return "de";
+                case "spanish": return "es";
+                case "portuguese": return "pt";
+                case "polish": return "pl";
+                case "turkish": return "tr";
+                case "russian": return "ru";
+                default: return "en";
             }
-            catch (Exception ex)
-            {
-                Main.AddLog($"Reward screen processing failed: {ex.Message}");
-            }
-
-            return results;
         }
 
-        private List<PartMatchResult> ProcessSnapIt(Bitmap image)
+        private static WFtheme MapThemeToEnum(string theme)
         {
-            var results = new List<PartMatchResult>();
-            
-            try
+            if (string.IsNullOrEmpty(theme)) return WFtheme.AUTO;
+            switch (theme.ToLower())
             {
-                // Use existing SnapIt logic - simulate process
-                var filteredImage = OCR.ScaleUpAndFilter(image, WFtheme.AUTO, out _, out _);
-                
-                // Since FindAllParts is private, we'll simulate basic OCR on whole image
-                var ocrText = OCR.GetTextFromImage(image, _tesseractService.FirstEngine);
-                
-                if (!string.IsNullOrEmpty(ocrText) && OCR.PartNameValid(ocrText))
-                {
-                    var matchedName = _dataService.GetPartName(ocrText, out int distance, false, out bool multipleLowest);
-                    
-                    results.Add(new PartMatchResult
-                    {
-                        OriginalText = ocrText,
-                        MatchedName = matchedName,
-                        LevenshteinDistance = distance,
-                        IsExactMatch = ocrText.Equals(matchedName, StringComparison.OrdinalIgnoreCase),
-                        Confidence = CalculateConfidence(distance, ocrText.Length, matchedName.Length)
-                    });
-                }
+                case "orokin": return WFtheme.OROKIN;
+                case "tenno": return WFtheme.TENNO;
+                case "grineer": return WFtheme.GRINEER;
+                case "corpus": return WFtheme.CORPUS;
+                case "infested": return WFtheme.NIDUS;
+                case "lotus": return WFtheme.LOTUS;
+                case "fortuna": return WFtheme.FORTUNA;
+                case "baruuk": return WFtheme.BARUUK;
+                case "equinox": return WFtheme.EQUINOX;
+                case "dark lotus": case "dark_lotus": return WFtheme.DARK_LOTUS;
+                case "zephyr": return WFtheme.ZEPHYR;
+                case "high contrast": case "high_contrast": return WFtheme.HIGH_CONTRAST;
+                case "legacy": return WFtheme.LEGACY;
+                default: return WFtheme.AUTO;
             }
-            catch (Exception ex)
-            {
-                Main.AddLog($"SnapIt processing failed: {ex.Message}");
-            }
-
-            return results;
         }
 
-        private List<PartMatchResult> ProcessInventoryScreen(Bitmap image)
+        private static void CompareResults(TestResult result)
         {
-            var results = new List<PartMatchResult>();
-            
-            try
+            var expectedSet = new HashSet<string>(result.ExpectedParts, StringComparer.OrdinalIgnoreCase);
+            var actualSet = new HashSet<string>(result.ActualParts, StringComparer.OrdinalIgnoreCase);
+
+            // Missing: expected but not found
+            foreach (var exp in result.ExpectedParts)
             {
-                // Use inventory OCR logic
-                var ocrText = OCR.GetTextFromImage(image, _tesseractService.FirstEngine);
-                
-                if (!string.IsNullOrEmpty(ocrText))
-                {
-                    var matchedName = _dataService.GetPartName(ocrText, out int distance, false, out bool multipleLowest);
-                    
-                    results.Add(new PartMatchResult
-                    {
-                        OriginalText = ocrText,
-                        MatchedName = matchedName,
-                        LevenshteinDistance = distance,
-                        IsExactMatch = ocrText.Equals(matchedName, StringComparison.OrdinalIgnoreCase),
-                        Confidence = CalculateConfidence(distance, ocrText.Length, matchedName.Length)
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog($"Inventory processing failed: {ex.Message}");
+                if (!actualSet.Contains(exp))
+                    result.MissingParts.Add(exp);
             }
 
-            return results;
+            // Extra: found but not expected
+            foreach (var act in result.ActualParts)
+            {
+                if (!expectedSet.Contains(act))
+                    result.ExtraParts.Add(act);
+            }
+
+            int totalExpected = result.ExpectedParts.Count;
+            int matched = totalExpected - result.MissingParts.Count;
+            result.AccuracyScore = totalExpected > 0 ? (double)matched / totalExpected * 100.0 : 0;
+            result.Success = result.MissingParts.Count == 0 && string.IsNullOrEmpty(result.ErrorMessage);
         }
 
-        private void CompareResults(TestResult result, List<PartMatchResult> ocrResults)
+        private static void CalculateStatistics(TestSuiteResult suite)
         {
-            result.ActualParts = ocrResults;
+            suite.TotalTests = suite.TestResults.Count;
+            suite.PassedTests = suite.TestResults.Count(t => t.Success);
+            suite.FailedTests = suite.TestResults.Count(t => !t.Success && t.ErrorMessage == null);
+            suite.ErrorTests = suite.TestResults.Count(t => t.ErrorMessage != null && !t.Success);
+            suite.OverallAccuracy = suite.TestResults.Count > 0 ? suite.TestResults.Average(t => t.AccuracyScore) : 0;
+            suite.PassRate = suite.TotalTests > 0 ? (double)suite.PassedTests / suite.TotalTests * 100 : 0;
 
-            // Find missing parts (expected but not found)
-            foreach (var expected in result.ExpectedParts)
+            // Category coverage
+            foreach (var group in suite.TestResults.GroupBy(t => t.Category ?? "unknown"))
             {
-                var found = result.ActualParts.FirstOrDefault(p => 
-                    p.MatchedName.Equals(expected.MatchedName, StringComparison.OrdinalIgnoreCase));
-                
-                if (found == null)
-                {
-                    result.MissingParts.Add(expected.MatchedName);
-                }
+                suite.CategoryCoverage[group.Key] = BuildCoverage(group);
             }
 
-            // Find extra parts (found but not expected)
-            foreach (var actual in result.ActualParts)
+            // Language coverage
+            foreach (var group in suite.TestResults.GroupBy(t => t.Language ?? "unknown"))
             {
-                var expected = result.ExpectedParts.FirstOrDefault(p => 
-                    p.MatchedName.Equals(actual.MatchedName, StringComparison.OrdinalIgnoreCase));
-                
-                if (expected == null)
-                {
-                    result.ExtraParts.Add(actual.MatchedName);
-                }
+                suite.LanguageCoverage[group.Key] = BuildCoverage(group);
             }
 
-            // Calculate accuracy
-            var totalExpected = result.ExpectedParts.Count;
-            var correctlyIdentified = totalExpected - result.MissingParts.Count;
-            result.AccuracyScore = totalExpected > 0 ? (double)correctlyIdentified / totalExpected * 100 : 0;
-            result.Success = result.AccuracyScore >= 50.0; // Consider 50%+ as passing
-        }
-
-        private double CalculateConfidence(int levenshteinDistance, int originalLength, int matchedLength)
-        {
-            if (originalLength == 0 || matchedLength == 0) return 0;
-            
-            var maxLength = Math.Max(originalLength, matchedLength);
-            var similarity = (double)(maxLength - levenshteinDistance) / maxLength;
-            return Math.Max(0, similarity);
-        }
-
-        private void CalculateCoverageMetrics(TestSuiteResult suiteResult)
-        {
-            suiteResult.CategoryCoverage = new Dictionary<string, TestCoverage>();
-            suiteResult.LanguageCoverage = new Dictionary<string, TestCoverage>();
-
-            // Calculate category coverage
-            var categoryGroups = suiteResult.TestResults.GroupBy(t => GetTestCategory(t.TestCaseName));
-            foreach (var group in categoryGroups)
+            // Overall coverage
+            suite.OverallCoverage = new TestCoverage
             {
-                var coverage = new TestCoverage
-                {
-                    TotalTests = group.Count(),
-                    PassedTests = group.Count(t => t.Success),
-                    FailedTests = group.Count(t => !t.Success),
-                    PassRate = group.Count() > 0 ? (double)group.Count(t => t.Success) / group.Count() * 100 : 0,
-                    AverageAccuracy = group.Average(t => t.AccuracyScore),
-                    AverageProcessingTime = group.Average(t => t.ProcessingTimeMs)
-                };
-                suiteResult.CategoryCoverage[group.Key] = coverage;
-            }
-
-            // Calculate language coverage
-            var languageGroups = suiteResult.TestResults.GroupBy(t => GetTestLanguage(t.TestCaseName));
-            foreach (var group in languageGroups)
-            {
-                var coverage = new TestCoverage
-                {
-                    TotalTests = group.Count(),
-                    PassedTests = group.Count(t => t.Success),
-                    FailedTests = group.Count(t => !t.Success),
-                    PassRate = group.Count() > 0 ? (double)group.Count(t => t.Success) / group.Count() * 100 : 0,
-                    AverageAccuracy = group.Average(t => t.AccuracyScore),
-                    AverageProcessingTime = group.Average(t => t.ProcessingTimeMs)
-                };
-                suiteResult.LanguageCoverage[group.Key] = coverage;
-            }
-
-            // Calculate overall coverage
-            suiteResult.OverallCoverage = new TestCoverage
-            {
-                TotalTests = suiteResult.TotalTests,
-                PassedTests = suiteResult.PassedTests,
-                FailedTests = suiteResult.FailedTests,
-                PassRate = suiteResult.PassRate,
-                AverageAccuracy = suiteResult.OverallAccuracy,
-                AverageProcessingTime = suiteResult.TestResults.Average(t => t.ProcessingTimeMs)
+                TotalTests = suite.TotalTests,
+                PassedTests = suite.PassedTests,
+                FailedTests = suite.FailedTests,
+                PassRate = suite.PassRate,
+                AverageAccuracy = suite.OverallAccuracy,
+                AverageProcessingTime = suite.TestResults.Count > 0 ? suite.TestResults.Average(t => t.ProcessingTimeMs) : 0
             };
         }
 
-        private string GetTestCategory(string scenarioPath)
+        private static TestCoverage BuildCoverage(IGrouping<string, TestResult> group)
         {
-            // Extract category from scenario path or use default
-            var fileName = Path.GetFileNameWithoutExtension(scenarioPath).ToLower();
-            if (fileName.Contains("reward") || fileName.Contains("fissure"))
-                return "reward";
-            else if (fileName.Contains("inventory") || fileName.Contains("profile"))
-                return "inventory";
-            else if (fileName.Contains("snapit"))
-                return "snapit";
-            else
-                return "unknown";
+            return new TestCoverage
+            {
+                TotalTests = group.Count(),
+                PassedTests = group.Count(t => t.Success),
+                FailedTests = group.Count(t => !t.Success),
+                PassRate = group.Count() > 0 ? (double)group.Count(t => t.Success) / group.Count() * 100 : 0,
+                AverageAccuracy = group.Average(t => t.AccuracyScore),
+                AverageProcessingTime = group.Average(t => t.ProcessingTimeMs)
+            };
         }
 
-        private string GetTestLanguage(string scenarioPath)
-        {
-            // Extract language from scenario path
-            var fileName = Path.GetFileNameWithoutExtension(scenarioPath).ToLower();
-            if (fileName.Contains("english")) return "english";
-            if (fileName.Contains("korean")) return "korean";
-            if (fileName.Contains("japanese")) return "japanese";
-            if (fileName.Contains("chinese")) return "chinese";
-            if (fileName.Contains("thai")) return "thai";
-            if (fileName.Contains("french")) return "french";
-            if (fileName.Contains("ukrainian")) return "ukrainian";
-            if (fileName.Contains("italian")) return "italian";
-            if (fileName.Contains("german")) return "german";
-            if (fileName.Contains("spanish")) return "spanish";
-            if (fileName.Contains("portuguese")) return "portuguese";
-            if (fileName.Contains("polish")) return "polish";
-            if (fileName.Contains("turkish")) return "turkish";
-            if (fileName.Contains("russian")) return "russian";
-            return "unknown";
-        }
-
-        public void SaveResults(TestSuiteResult results, string outputPath)
+        public static void SaveResults(TestSuiteResult results, string outputPath)
         {
             try
             {
@@ -542,8 +313,12 @@ namespace WFInfo.Tests
         }
     }
 
-    public interface IDataService
+    /// <summary>
+    /// Headless HDR detector that returns a fixed value for testing.
+    /// </summary>
+    internal class HeadlessHDRDetector : IHDRDetectorService
     {
-        string GetPartName(string name, out int low, bool suppressLogging, out bool multipleLowest);
+        public bool IsHDR { get; }
+        public HeadlessHDRDetector(bool isHdr) { IsHDR = isHdr; }
     }
 }

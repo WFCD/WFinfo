@@ -262,7 +262,8 @@ namespace WFInfo
 
         public static void RunOnUIThread(Action act)
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(act);
+            if (MainWindow.INSTANCE?.Dispatcher != null)
+                MainWindow.INSTANCE.Dispatcher.Invoke(act);
         }
 
         public static void StartMessage()
@@ -298,7 +299,8 @@ namespace WFInfo
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
         public static void StatusUpdate(string message, int severity)
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
+            if (MainWindow.INSTANCE?.Dispatcher != null)
+                MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
         }
 
         public void ActivationKeyPressed(Object key)

@@ -1,204 +1,186 @@
-using Newtonsoft.Json;
 using System;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using WFInfo.Tests;
 using WFInfo.Settings;
+using WFInfo.Services.WarframeProcess;
 using WFInfo.Services.WindowInfo;
-using WFInfo.Services.Screenshot;
-using WFInfo.Services.HDRDetection;
 
 namespace WFInfo.Tests
 {
-    public class TestProgram
+    /// <summary>
+    /// Headless entry point for OCR regression tests.
+    /// Initializes real WFInfo services (Tesseract, Data, WindowInfo) without WPF UI.
+    /// </summary>
+    public static class TestProgram
     {
-        public static void Main(string[] args)
-        {
-            RunTests(args).Wait();
-        }
-
         public static async Task RunTests(string[] args)
         {
+            if (args.Length < 1)
+            {
+                PrintUsage();
+                return;
+            }
+
+            string testMapPath = args[0];
+            string outputPath = args.Length > 1 ? args[1] : $"test_results_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+
+            Console.WriteLine($"Map:    {Path.GetFullPath(testMapPath)}");
+            Console.WriteLine($"Output: {Path.GetFullPath(outputPath)}");
+            Console.WriteLine();
+
+            if (!File.Exists(testMapPath))
+            {
+                Console.Error.WriteLine($"ERROR: map file not found: {testMapPath}");
+                Environment.ExitCode = 2;
+                return;
+            }
+
             try
             {
-                Console.WriteLine("WFInfo OCR Test Runner");
-                Console.WriteLine("=======================");
+                // --- Initialize real services headlessly ---
+                Console.WriteLine("Initializing services...");
 
-                if (args.Length < 2)
-                {
-                    Console.WriteLine("Usage: WFInfo.exe <testMap.json> <testImagesDirectory> [outputFile.json]");
-                    Console.WriteLine("");
-                    Console.WriteLine("Example:");
-                    Console.WriteLine("  WFInfo.exe map.json tests/ results.json");
-                    Console.WriteLine("");
-                    Console.WriteLine("Test map format:");
-                    Console.WriteLine("{");
-                    Console.WriteLine("  \"scenarios\": [");
-                    Console.WriteLine("    \"data/test1\",");
-                    Console.WriteLine("    \"data/test2\"");
-                    Console.WriteLine("  ]");
-                    Console.WriteLine("}");
-                    return;
-                }
+                var settings = ApplicationSettings.GlobalSettings;
+                settings.Debug = true; // Enable debug mode so window info works without a game process
 
-                string testMapPath = args[0];
-                string testImagesDir = args[1];
-                string outputPath = args.Length > 2 ? args[2] : $"test_results_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+                var processFinder = new HeadlessProcessFinder();
+                var windowService = new Win32WindowInfoService(processFinder, ApplicationSettings.GlobalReadonlySettings);
 
-                Console.WriteLine($"Loading test map: {testMapPath}");
-                Console.WriteLine($"Test images directory: {testImagesDir}");
-                Console.WriteLine($"Output file: {outputPath}");
-                Console.WriteLine("");
+                // Initialize Data (downloads/loads market data, name data, etc.)
+                Main.dataBase = new Data(ApplicationSettings.GlobalReadonlySettings, processFinder, windowService);
+                Console.WriteLine("Updating databases (this may take a moment on first run)...");
+                await Main.dataBase.Update();
+                Console.WriteLine("Databases ready.");
 
-                // Validate inputs
-                if (!File.Exists(testMapPath))
-                {
-                    Console.WriteLine($"ERROR: Test map file not found: {testMapPath}");
-                    return;
-                }
+                // Initialize OCR with real TesseractService
+                OCR.InitForTest(
+                    new TesseractService(),
+                    ApplicationSettings.GlobalReadonlySettings,
+                    windowService,
+                    new HeadlessHDRDetector(false));
+                Console.WriteLine("OCR engine ready.");
+                Console.WriteLine();
 
-                if (!Directory.Exists(testImagesDir))
-                {
-                    Console.WriteLine($"ERROR: Test images directory not found: {testImagesDir}");
-                    return;
-                }
+                // --- Run tests ---
+                var runner = new OCRTestRunner(windowService);
+                var results = runner.RunTestSuite(testMapPath);
 
-                // Initialize services (simplified for testing)
-                var dataService = new TestDataService();
-                var tesseractService = new TestTesseractService();
-                var windowService = new TestWindowInfoService();
-                var screenshotService = new TestScreenshotService();
-                var hdrDetector = new TestHDRDetectorService();
-
-                // Create test runner
-                var testRunner = new OCRTestRunner(dataService, tesseractService, 
-                    windowService, screenshotService, hdrDetector);
-
-                // Run test suite
-                var results = testRunner.RunTestSuite(testMapPath, testImagesDir);
-
-                // Save results
-                testRunner.SaveResults(results, outputPath);
-
-                // Print summary
+                // --- Save & report ---
+                OCRTestRunner.SaveResults(results, outputPath);
                 PrintSummary(results);
 
-                Console.WriteLine("");
-                Console.WriteLine("Test completed successfully!");
-                Console.WriteLine($"Results saved to: {outputPath}");
+                Console.WriteLine();
+                Console.WriteLine($"Results saved to: {Path.GetFullPath(outputPath)}");
 
-                // Set exit code based on results
-                Environment.ExitCode = results.FailedTests > 0 ? 1 : 0;
+                // Exit code: 0 = all pass, 1 = some fail, 2 = error
+                if (!string.IsNullOrEmpty(results.ErrorMessage))
+                    Environment.ExitCode = 2;
+                else if (results.FailedTests > 0 || results.ErrorTests > 0)
+                    Environment.ExitCode = 1;
+                else
+                    Environment.ExitCode = 0;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"FATAL ERROR: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                Console.Error.WriteLine($"FATAL: {ex.Message}");
+                Console.Error.WriteLine(ex.StackTrace);
                 Environment.ExitCode = 2;
             }
         }
 
+        private static void PrintUsage()
+        {
+            Console.WriteLine("Usage: WFInfo.exe <map.json> [output.json]");
+            Console.WriteLine();
+            Console.WriteLine("  map.json    - Test map file listing scenario paths");
+            Console.WriteLine("  output.json - (optional) Output results file");
+            Console.WriteLine();
+            Console.WriteLine("Each scenario is a pair of files relative to map.json:");
+            Console.WriteLine("  data/test1.json  - Test spec (language, theme, expected parts, ...)");
+            Console.WriteLine("  data/test1.png   - Screenshot to OCR");
+            Console.WriteLine();
+            Console.WriteLine("Example map.json:");
+            Console.WriteLine("  { \"scenarios\": [\"data/test1\", \"data/test2\"] }");
+        }
+
         private static void PrintSummary(TestSuiteResult results)
         {
-            Console.WriteLine("");
-            Console.WriteLine("TEST RESULTS SUMMARY");
-            Console.WriteLine("==================");
-            Console.WriteLine($"Test Suite: {results.TestSuiteName}");
-            Console.WriteLine($"Total Tests: {results.TotalTests}");
-            Console.WriteLine($"Passed: {results.PassedTests}");
-            Console.WriteLine($"Failed: {results.FailedTests}");
-            Console.WriteLine($"Pass Rate: {results.PassRate:F1}%");
-            Console.WriteLine($"Overall Accuracy: {results.OverallAccuracy:F2}%");
-            Console.WriteLine($"Duration: {(results.EndTime - results.StartTime).TotalMinutes:F1} minutes");
+            Console.WriteLine();
+            Console.WriteLine("========================================");
+            Console.WriteLine("  TEST RESULTS SUMMARY");
+            Console.WriteLine("========================================");
+            Console.WriteLine($"  Suite:    {results.TestSuiteName}");
+            Console.WriteLine($"  Total:    {results.TotalTests}");
+            Console.WriteLine($"  Passed:   {results.PassedTests}");
+            Console.WriteLine($"  Failed:   {results.FailedTests}");
+            if (results.ErrorTests > 0)
+                Console.WriteLine($"  Errors:   {results.ErrorTests}");
+            Console.WriteLine($"  Pass Rate: {results.PassRate:F1}%");
+            Console.WriteLine($"  Accuracy:  {results.OverallAccuracy:F1}%");
+            Console.WriteLine($"  Duration:  {(results.EndTime - results.StartTime).TotalSeconds:F1}s");
 
-            Console.WriteLine("");
-            Console.WriteLine("Category Coverage:");
-            foreach (var category in results.CategoryCoverage)
+            if (results.LanguageCoverage.Count > 0)
             {
-                Console.WriteLine($"  {category.Key}: {category.Value.PassedTests}/{category.Value.TotalTests} ({category.Value.PassRate:F1}% pass rate, {category.Value.AverageAccuracy:F2}% avg accuracy)");
-            }
-
-            Console.WriteLine("");
-            Console.WriteLine("Language Coverage:");
-            foreach (var lang in results.LanguageCoverage)
-            {
-                Console.WriteLine($"  {lang.Key}: {lang.Value.PassedTests}/{lang.Value.TotalTests} ({lang.Value.PassRate:F1}% pass rate, {lang.Value.AverageAccuracy:F2}% avg accuracy, {lang.Value.AverageProcessingTime:F0}ms avg time)");
-            }
-
-            Console.WriteLine("");
-            Console.WriteLine("Language Accuracy:");
-            foreach (var lang in results.LanguageAccuracy)
-            {
-                Console.WriteLine($"  {lang.Key}: {lang.Value:F2}%");
+                Console.WriteLine();
+                Console.WriteLine("  By Language:");
+                foreach (var kv in results.LanguageCoverage)
+                {
+                    var c = kv.Value;
+                    Console.WriteLine($"    {kv.Key,-20} {c.PassedTests}/{c.TotalTests} pass  {c.AverageAccuracy:F0}% acc  {c.AverageProcessingTime:F0}ms avg");
+                }
             }
 
-            Console.WriteLine("");
-            Console.WriteLine("Failed Tests:");
-            var failedTests = new System.Collections.Generic.List<TestResult>();
-            foreach (var test in results.TestResults)
+            if (results.CategoryCoverage.Count > 0)
             {
-                if (!test.Success)
-                    failedTests.Add(test);
+                Console.WriteLine();
+                Console.WriteLine("  By Category:");
+                foreach (var kv in results.CategoryCoverage)
+                {
+                    var c = kv.Value;
+                    Console.WriteLine($"    {kv.Key,-20} {c.PassedTests}/{c.TotalTests} pass  {c.AverageAccuracy:F0}% acc  {c.AverageProcessingTime:F0}ms avg");
+                }
             }
-            
-            foreach (var failed in failedTests)
+
+            // Print failed/error test details
+            var problems = results.TestResults.FindAll(t => !t.Success);
+            if (problems.Count > 0)
             {
-                Console.WriteLine($"  {failed.TestCaseName}: {failed.ErrorMessage}");
-                if (failed.MissingParts.Count > 0)
-                    Console.WriteLine($"    Missing: {string.Join(", ", failed.MissingParts)}");
-                if (failed.ExtraParts.Count > 0)
-                    Console.WriteLine($"    Extra: {string.Join(", ", failed.ExtraParts)}");
+                Console.WriteLine();
+                Console.WriteLine("  Failed/Error Details:");
+                foreach (var t in problems)
+                {
+                    if (!string.IsNullOrEmpty(t.ErrorMessage))
+                    {
+                        Console.WriteLine($"    ERROR {t.TestCaseName}: {t.ErrorMessage}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"    FAIL  {t.TestCaseName} ({t.AccuracyScore:F0}% accuracy)");
+                        if (t.MissingParts.Count > 0)
+                            Console.WriteLine($"          Missing: {string.Join(", ", t.MissingParts)}");
+                        if (t.ExtraParts.Count > 0)
+                            Console.WriteLine($"          Extra:   {string.Join(", ", t.ExtraParts)}");
+                        if (t.ActualParts.Count > 0)
+                            Console.WriteLine($"          Got:     {string.Join(", ", t.ActualParts)}");
+                    }
+                }
             }
+
+            Console.WriteLine("========================================");
         }
     }
 
-    // Mock services for testing (these would be replaced with real implementations)
-    public class TestDataService : IDataService
+    /// <summary>
+    /// Headless process finder that reports no running game process.
+    /// </summary>
+    internal class HeadlessProcessFinder : IProcessFinder
     {
-        public string GetPartName(string name, out int low, bool suppressLogging, out bool multipleLowest)
-        {
-            // Mock implementation - in real usage this would use the actual Data class
-            low = name == "Volt Prime Blueprint" ? 0 : 5;
-            multipleLowest = false;
-            return name == "Volt Prime Blueprint" ? "Volt Prime Blueprint" : "Unknown Part";
-        }
-    }
-
-    public class TestTesseractService : ITesseractService
-    {
-        public Tesseract.TesseractEngine FirstEngine => throw new NotImplementedException("Mock service");
-        public Tesseract.TesseractEngine SecondEngine => throw new NotImplementedException("Mock service");
-        public Tesseract.TesseractEngine[] Engines => throw new NotImplementedException("Mock service");
-
-        public void Init() { }
-        public void ReloadEngines() { }
-        
-        public void SetNumbersOnlyMode() { }
-        public void ResetToDefaultMode() { }
-    }
-
-    public class TestWindowInfoService : IWindowInfoService
-    {
-        public System.Drawing.Rectangle Window => new System.Drawing.Rectangle(0, 0, 1920, 1080);
-        public System.Drawing.Point Center => new System.Drawing.Point(960, 540);
-        public double ScreenScaling => 1.0;
-        public double DpiScaling => 1.0;
-        public System.Windows.Forms.Screen Screen => throw new NotImplementedException("Mock service");
-        public void UpdateWindow() { }
-        public void UseImage(System.Drawing.Bitmap image) { }
-    }
-
-    public class TestScreenshotService : IScreenshotService
-    {
-        public System.Threading.Tasks.Task<System.Collections.Generic.List<System.Drawing.Bitmap>> CaptureScreenshot() => 
-            System.Threading.Tasks.Task.FromResult(new System.Collections.Generic.List<System.Drawing.Bitmap>());
-        
-        public bool IsAvailable => true;
-    }
-
-    public class TestHDRDetectorService : IHDRDetectorService
-    {
-        public bool IsHDR => false;
+        public Process Warframe => null;
+        public HandleRef HandleRef => default;
+        public bool IsRunning => false;
+        public bool GameIsStreamed => false;
+        public event ProcessChangedArgs OnProcessChanged { add { } remove { } }
     }
 }

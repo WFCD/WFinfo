@@ -5,71 +5,64 @@ echo WFInfo OCR Test Runner
 echo ========================
 echo.
 
-REM Get script directory for absolute path resolution
+REM Get script directory (always ends with \)
 set "SCRIPT_DIR=%~dp0"
 
-REM Check if map.json exists in script directory
-if not exist "%SCRIPT_DIR%map.json" (
-    echo ERROR: map.json not found in script directory: %SCRIPT_DIR%
-    echo.
-    echo Usage: run_tests.bat [test_data_directory]
-    echo.
-    echo Example: run_tests.bat data\
+REM Locate WFInfo.exe - try Release first, then Debug
+set "EXE="
+if exist "%SCRIPT_DIR%..\bin\Release\net48\WFInfo.exe" (
+    set "EXE=%SCRIPT_DIR%..\bin\Release\net48\WFInfo.exe"
+) else if exist "%SCRIPT_DIR%..\bin\Debug\net48\WFInfo.exe" (
+    set "EXE=%SCRIPT_DIR%..\bin\Debug\net48\WFInfo.exe"
+) else if exist "%SCRIPT_DIR%..\WFInfo\bin\Release\net48\WFInfo.exe" (
+    set "EXE=%SCRIPT_DIR%..\WFInfo\bin\Release\net48\WFInfo.exe"
+) else if exist "%SCRIPT_DIR%..\WFInfo\bin\Debug\net48\WFInfo.exe" (
+    set "EXE=%SCRIPT_DIR%..\WFInfo\bin\Debug\net48\WFInfo.exe"
+)
+
+if "%EXE%"=="" (
+    echo ERROR: WFInfo.exe not found. Build the project first.
+    echo Looked in:
+    echo   %SCRIPT_DIR%..\bin\Release\net48\WFInfo.exe
+    echo   %SCRIPT_DIR%..\bin\Debug\net48\WFInfo.exe
+    echo   %SCRIPT_DIR%..\WFInfo\bin\Release\net48\WFInfo.exe
+    echo   %SCRIPT_DIR%..\WFInfo\bin\Debug\net48\WFInfo.exe
     exit /b 2
 )
 
-REM Set test images directory
-set "TEST_IMAGES_DIR=%~1"
-if "%TEST_IMAGES_DIR%"=="" set "TEST_IMAGES_DIR=%SCRIPT_DIR%data"
-
-REM Check if TEST_IMAGES_DIR is relative and prefix with script directory
-echo "%TEST_IMAGES_DIR%" | findstr /r "^\".:\\.*" >nul
-if %errorlevel% neq 0 (
-    REM Relative path detected, prefix with script directory
-    set "TEST_IMAGES_DIR=%SCRIPT_DIR%%TEST_IMAGES_DIR%"
+REM Verify map.json exists
+if not exist "%SCRIPT_DIR%map.json" (
+    echo ERROR: map.json not found in %SCRIPT_DIR%
+    exit /b 2
 )
 
-REM Check if test images directory exists
-if not exist "%TEST_IMAGES_DIR%" (
-    echo ERROR: Test images directory not found: "%TEST_IMAGES_DIR%"
-    exit /b 3
+REM Generate timestamp for output file
+for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set "TIMESTAMP=%%I"
+set "TIMESTAMP=%TIMESTAMP:~0,8%_%TIMESTAMP:~8,6%"
+
+REM Parse arguments
+set "OUTPUT_FILE=%~1"
+if "%OUTPUT_FILE%"=="" (
+    set "OUTPUT_FILE=%SCRIPT_DIR%test_results_%TIMESTAMP%.json"
 )
 
-REM Run the test
-echo Running OCR tests...
-echo Map: map.json
-echo Images: %TEST_IMAGES_DIR%
-
-REM Generate locale-safe timestamp with fallback
-set "TIMESTAMP="
-for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "Get-Date -Format 'yyyyMMdd_HHmmss'" 2^>nul`) do set TIMESTAMP=%%T
-
-REM Check if PowerShell command failed and provide fallback
-if "%TIMESTAMP%"=="" (
-    REM Fallback using DATE and TIME environment variables
-    set "TIMESTAMP=%DATE:~-4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%"
-    REM Remove spaces that might be in TIME
-    set "TIMESTAMP=%TIMESTAMP: =0%"
-)
-echo Output: test_results_%TIMESTAMP%.json
+echo Executable: %EXE%
+echo Test Map:   %SCRIPT_DIR%map.json
+echo Output:     %OUTPUT_FILE%
 echo.
 
-REM Run test executable (using main WFInfo executable)
-"%SCRIPT_DIR%..\bin\Release\net48\WFInfo.exe" "%SCRIPT_DIR%map.json" "%TEST_IMAGES_DIR%" "test_results_%TIMESTAMP%.json"
+REM Run tests via WFInfo.exe --test map.json output.json
+"%EXE%" --test "%SCRIPT_DIR%map.json" "%OUTPUT_FILE%"
+set "EXIT_CODE=%ERRORLEVEL%"
 
-REM Check results
-if %errorlevel% equ 0 (
-    echo.
-    echo SUCCESS: All tests passed!
-) else if %errorlevel% equ 1 (
-    echo.
-    echo WARNING: Some tests failed (exit code 1)
+echo.
+if %EXIT_CODE% EQU 0 (
+    echo All tests passed!
+) else if %EXIT_CODE% EQU 1 (
+    echo Some tests failed. Check results for details.
 ) else (
-    echo.
-    echo ERROR: Test execution failed (exit code %errorlevel%)
+    echo Test execution encountered an error.
 )
 
-echo.
-echo Test completed. Check the JSON results file for detailed information.
-REM Only pause in interactive environments (not CI)
-if "%CI%"=="" if "%GITHUB_ACTIONS%"=="" pause
+echo Results saved to: %OUTPUT_FILE%
+exit /b %EXIT_CODE%

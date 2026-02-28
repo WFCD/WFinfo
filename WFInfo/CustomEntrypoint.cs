@@ -85,36 +85,35 @@ namespace WFInfo
             Directory.CreateDirectory(appPath);
 
             // Check for test execution arguments
+            // Usage: WFInfo.exe [--test] map.json [output.json]
             string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
-            if (args.Length >= 2 &&
-                (args[0].EndsWith(".json", StringComparison.OrdinalIgnoreCase) ||
-                args[0].Equals("map", StringComparison.OrdinalIgnoreCase) ||
-                args[0].Equals("-map", StringComparison.OrdinalIgnoreCase) ||
-                args[0].Equals("--map", StringComparison.OrdinalIgnoreCase) ||
-                args[0].StartsWith("map:", StringComparison.OrdinalIgnoreCase)))
-            {
-                // Normalize map flag arguments - remove flag and pass actual JSON path
-                if (args[0].Equals("map", StringComparison.OrdinalIgnoreCase) ||
-                    args[0].Equals("-map", StringComparison.OrdinalIgnoreCase) ||
-                    args[0].Equals("--map", StringComparison.OrdinalIgnoreCase) ||
-                    args[0].StartsWith("map:", StringComparison.OrdinalIgnoreCase))
-                {
-                    args = args.Skip(1).ToArray();
-                }
+            bool isTestMode = false;
 
-                // Test execution mode: WFInfo.exe map.json data/ results.json
+            if (args.Length >= 1 && (args[0].Equals("--test", StringComparison.OrdinalIgnoreCase) ||
+                                     args[0].Equals("-test", StringComparison.OrdinalIgnoreCase) ||
+                                     args[0].Equals("--map", StringComparison.OrdinalIgnoreCase)))
+            {
+                isTestMode = true;
+                args = args.Skip(1).ToArray(); // strip flag
+            }
+            else if (args.Length >= 1 && args[0].EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                isTestMode = true;
+            }
+
+            if (isTestMode)
+            {
                 try
                 {
                     Console.WriteLine("WFInfo OCR Test Runner");
                     Console.WriteLine("=======================");
-                    
-                    // Initialize test services and run tests
                     TestProgram.RunTests(args).GetAwaiter().GetResult();
                     return;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Test execution failed: {ex.Message}");
+                    Console.WriteLine(ex.StackTrace);
                     Environment.Exit(1);
                     return;
                 }
