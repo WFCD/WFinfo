@@ -190,7 +190,10 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "설계도" };
 
-        public override string CharacterWhitelist => GenerateCharacterRange(0xAC00, 0xC6FF) + GenerateCharacterRange(0xC700, 0xD5FF) + GenerateCharacterRange(0xD600, 0xD7AF) + " "; // Korean Hangul
+        public override string CharacterWhitelist => 
+            string.Concat(GenerateCharacterRangeIterator(0xAC00, 0xC6FF)) + 
+            GenerateCharacterRange(0xC700, 0xD5FF) + 
+            GenerateCharacterRange(0xD600, 0xD7AF) + " "; // Korean Hangul
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {

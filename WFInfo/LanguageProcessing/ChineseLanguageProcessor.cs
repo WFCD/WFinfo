@@ -14,8 +14,8 @@ namespace WFInfo.LanguageProcessing
         }
 
         public override string CharacterWhitelist => 
-            GenerateCharacterRange(0x4E00, 0x7FFF) + 
-            GenerateCharacterRange(0x8000, 0x9FFF) + 
+            string.Concat(GenerateCharacterRangeIterator(0x4E00, 0x7FFF)) + 
+            string.Concat(GenerateCharacterRangeIterator(0x8000, 0x9FFF)) + 
             GenerateCharacterRange(0x3400, 0x4DBF) + 
             GenerateCharacterRange(0xF900, 0xFAFF) + 
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Full CJK ideographs

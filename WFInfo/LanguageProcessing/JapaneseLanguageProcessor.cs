@@ -19,7 +19,13 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "設計図", "青図" };
 
-        public override string CharacterWhitelist => GenerateCharacterRange(0x3040, 0x309F) + GenerateCharacterRange(0x30A0, 0x30FF) + GenerateCharacterRange(0x4E00, 0x6FFF) + GenerateCharacterRange(0x7000, 0x7FFF) + GenerateCharacterRange(0x8000, 0x9FAF) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Japanese Hiragana, Katakana, Kanji
+        public override string CharacterWhitelist => 
+            GenerateCharacterRange(0x3040, 0x309F) + 
+            GenerateCharacterRange(0x30A0, 0x30FF) + 
+            string.Concat(GenerateCharacterRangeIterator(0x4E00, 0x6FFF)) + 
+            GenerateCharacterRange(0x7000, 0x7FFF) + 
+            GenerateCharacterRange(0x8000, 0x9FAF) + 
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Japanese Hiragana, Katakana, Kanji
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
