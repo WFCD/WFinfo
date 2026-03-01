@@ -153,12 +153,23 @@
     <PropertyGroup>
       <ExePath>$(OutputPath)WFInfo.exe</ExePath>
       <ZipPath>$(OutputPath)WFInfo.zip</ZipPath>
+      <TempDir>$(OutputPath)temp\</TempDir>
+      <TempExePath>$(TempDir)WFInfo.exe</TempExePath>
     </PropertyGroup>
     
-    <!-- Create zip file using PowerShell with only the executable -->
-    <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(ExePath)' -DestinationPath '$(ZipPath)' -Force&quot;" 
+    <!-- Create temporary directory -->
+    <MakeDir Directories="$(TempDir)" />
+    
+    <!-- Copy the exe to temporary directory with correct name -->
+    <Copy SourceFiles="$(ExePath)" DestinationFiles="$(TempExePath)" />
+    
+    <!-- Create zip from the temporary directory -->
+    <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(TempExePath)' -DestinationPath '$(ZipPath)' -Force&quot;" 
           ContinueOnError="false" 
           IgnoreExitCode="false" />
+    
+    <!-- Clean up temporary directory -->
+    <RemoveDir Directories="$(TempDir)" />
     
     <Message Text="Created WFInfo.zip at $(ZipPath) for publishing" Importance="high" />
   </Target>
