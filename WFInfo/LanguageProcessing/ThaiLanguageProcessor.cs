@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using WFInfo.Settings;
@@ -23,7 +24,137 @@ namespace WFInfo.LanguageProcessing
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeThaiCharacters);
+            // Check if both inputs contain Thai characters for Thai-aware comparison
+            bool sHasThai = ContainsThai(s);
+            bool tHasThai = ContainsThai(t);
+            
+            if (sHasThai && tHasThai)
+            {
+                // Thai-aware path: use original Thai characters with Thai similarity logic
+                return CalculateThaiAwareDistance(s, t);
+            }
+            else
+            {
+                // Fallback/transliterated path: normalize to Latin equivalents
+                return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeThaiCharacters, callBaseDefault: true);
+            }
+        }
+
+        /// <summary>
+        /// Calculates Thai-aware Levenshtein distance with character similarity groups
+        /// </summary>
+        private int CalculateThaiAwareDistance(string s, string t)
+        {
+            if (string.IsNullOrEmpty(s)) return string.IsNullOrEmpty(t) ? 0 : t.Length;
+            if (string.IsNullOrEmpty(t)) return s.Length;
+
+            int n = s.Length;
+            int m = t.Length;
+
+            if (n == 0) return m;
+            if (m == 0) return n;
+
+            int[,] d = new int[n + 1, m + 1];
+
+            for (int i = 0; i <= n; i++)
+                d[i, 0] = i;
+
+            for (int j = 0; j <= m; j++)
+                d[0, j] = j;
+
+            for (int i = 1; i <= n; i++)
+            {
+                for (int j = 1; j <= m; j++)
+                {
+                    int cost = GetThaiCharacterDifference(s[i - 1], t[j - 1]);
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+                }
+            }
+
+            return d[n, m];
+        }
+
+        /// <summary>
+        /// Gets the character difference cost for Thai characters based on similarity groups
+        /// </summary>
+        private int GetThaiCharacterDifference(char a, char b)
+        {
+            if (a == b) return 0;
+
+            // Similar looking Thai characters (common OCR confusions)
+            var similarChars = new[]
+            {
+                new[] {'ก', 'ฮ'}, // ko/ho - similar round shapes
+                new[] {'ด', 'ป'}, // do/po - similar loops
+                new[] {'ต', 'ถ'}, // to/tho - similar shapes
+                new[] {'บ', 'ป'}, // bo/po - similar loops
+                new[] {'อ', 'โ'}, // o/o - different forms
+                new[] {'ผ', 'ฝ'}, // pho/fo - similar shapes
+                new[] {'ซ', 'ศ', 'ษ'}, // so variations
+                new[] {'ง', 'ย'}, // ngo/yo - similar tails
+                new[] {'ม', 'น'}, // mo/no - similar curves
+                new[] {'ว', 'ใ'}, // wo/ai - similar shapes
+            };
+
+            foreach (var pair in similarChars)
+            {
+                if ((a == pair[0] && b == pair[1]) || (a == pair[1] && b == pair[0]))
+                    return 1; // Low cost for similar looking characters
+                if (pair.Length == 3 && 
+                    ((a == pair[0] && b == pair[1]) || (a == pair[1] && b == pair[0]) ||
+                     (a == pair[0] && b == pair[2]) || (a == pair[2] && b == pair[0]) ||
+                     (a == pair[1] && b == pair[2]) || (a == pair[2] && b == pair[1])))
+                    return 1;
+            }
+
+            // Tone mark confusions (lower cost for tone differences)
+            var toneMarks = new[] {'่', '้', '๊', '๋', '่', '้', '๊', '๋'}; // Different tone marks
+            bool aIsTone = toneMarks.Contains(a);
+            bool bIsTone = toneMarks.Contains(b);
+            if (aIsTone && bIsTone) return 1; // Low cost for tone mark differences
+
+            // Default cost for different characters
+            return 2;
+        }
+
+        public override bool ShouldFilterWord(string word)
+        {
+            if (string.IsNullOrEmpty(word)) return true;
+            
+            bool hasThai = ContainsThai(word);
+            bool hasLatin = false;
+            foreach (char c in word)
+            {
+                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+                {
+                    hasLatin = true;
+                    break;
+                }
+            }
+            
+            // Keep all Thai text since Thai words are meaningful even when split by OCR
+            if (hasThai) return false;
+            
+            // For mixed Thai-Latin words, be more lenient
+            if (hasThai && hasLatin) return false;
+            
+            // For non-Thai text, use standard filtering (filter very short words)
+            return word.Length < 2;
+        }
+
+        /// <summary>
+        /// Checks if a string contains Thai characters
+        /// </summary>
+        private static bool ContainsThai(string input)
+        {
+            foreach (char c in input)
+            {
+                // Thai Unicode range (0x0E00-0x0E7F)
+                if (c >= 0x0E00 && c <= 0x0E7F) return true;
+            }
+            return false;
         }
 
         public override string NormalizeForPatternMatching(string input)
@@ -58,8 +189,22 @@ namespace WFInfo.LanguageProcessing
         {
             string result = NormalizeFullWidthCharacters(input);
             
-            // Basic Thai tone mark normalization (simplified approach)
+            // Basic Thai tone mark normalization
             result = result.Normalize(System.Text.NormalizationForm.FormC);
+            
+            // Common Thai OCR confusions and character variations
+            result = result.Replace('ซ', 'ศ').Replace('ศ', 'ษ'); // so variations normalization
+            result = result.Replace('ผ', 'ฝ'); // pho/fo confusion
+            result = result.Replace('บ', 'ป'); // bo/po confusion  
+            result = result.Replace('ด', 'ต'); // do/to confusion
+            result = result.Replace('อ', 'โ'); // o/o form variations
+            
+            // Remove or normalize common diacritic issues
+            result = result.Replace("์", ""); // Remove karan (silent marker) for comparison
+            
+            // Normalize similar vowel forms
+            result = result.Replace('ใ', 'ไ'); // ai vowel variations
+            result = result.Replace('ำ', 'ํ'); // am vowel variations
             
             return result.ToLowerInvariant();
         }

@@ -95,10 +95,12 @@ namespace WFInfo
             }
 
             // Use async UI dispatcher call
-            if (MainWindow.INSTANCE?.Dispatcher != null)
-                await MainWindow.INSTANCE.Dispatcher.InvokeAsync(() =>
+            var wnd = MainWindow.INSTANCE;
+            var disp = wnd?.Dispatcher;
+            if (disp != null)
+                await disp.InvokeAsync(() =>
                 {
-                    MainWindow.INSTANCE.UpdateMarketStatus(msg);
+                    wnd.UpdateMarketStatus(msg);
                 });
         }
 
@@ -263,8 +265,14 @@ namespace WFInfo
 
         public static void RunOnUIThread(Action act)
         {
-            if (MainWindow.INSTANCE?.Dispatcher != null)
-                MainWindow.INSTANCE.Dispatcher.Invoke(act);
+            var mw = MainWindow.INSTANCE;
+            if (mw?.Dispatcher != null && !mw.Dispatcher.HasShutdownStarted && !mw.Dispatcher.HasShutdownFinished)
+            {
+                if (mw.Dispatcher.CheckAccess())
+                    act();
+                else
+                    mw.Dispatcher.Invoke(act);
+            }
         }
 
         public static void StartMessage()

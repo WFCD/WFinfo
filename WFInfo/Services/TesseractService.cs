@@ -262,7 +262,11 @@ namespace WFInfo
                             File.Copy(app_data_traineddata_path, curr_data_traineddata_path, true);
                         }
                     }
-                    catch (Exception) { }
+                    catch (Exception ex)
+                    {
+                        Main.AddLog($"Failed to download traineddata for locale '{Locale}': {ex.Message}. Source: {traineddata_hotlink}, Target: {app_data_traineddata_path}");
+                        // Don't throw during initialization to allow service to continue with existing data
+                    }
                 }
             }
             else

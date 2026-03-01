@@ -22,7 +22,7 @@ namespace WFInfo.LanguageProcessing
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeTurkishCharacters);
+            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeTurkishCharacters, callBaseDefault: true);
         }
 
         public override string NormalizeForPatternMatching(string input)

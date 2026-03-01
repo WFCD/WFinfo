@@ -38,6 +38,19 @@ namespace WFInfo.Tests
             {
                 var testMapJson = File.ReadAllText(testMapPath);
                 var testMap = JsonConvert.DeserializeObject<TestMap>(testMapJson);
+                
+                if (testMap == null)
+                {
+                    Main.AddLog($"Failed to deserialize TestMap from '{testMapPath}' - deserialization returned null");
+                    throw new InvalidDataException($"TestMap deserialization failed for file: {testMapPath}");
+                }
+                
+                if (testMap.Scenarios == null || testMap.Scenarios.Count == 0)
+                {
+                    Main.AddLog($"TestMap from '{testMapPath}' contains no scenarios");
+                    throw new InvalidDataException($"TestMap contains no scenarios: {testMapPath}");
+                }
+                
                 string testMapDir = Path.GetDirectoryName(Path.GetFullPath(testMapPath));
 
                 Main.AddLog($"Starting test suite: {result.TestSuiteName} with {testMap.Scenarios.Count} scenario(s)");

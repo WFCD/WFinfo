@@ -37,7 +37,7 @@ namespace WFInfo.Tests
     public class TestMap
     {
         [JsonProperty("scenarios")]
-        public List<string> Scenarios { get; set; }
+        public List<string> Scenarios { get; set; } = new List<string>();
     }
 
     public class TestResult

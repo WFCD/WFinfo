@@ -40,6 +40,12 @@ REM Generate timestamp for output file
 for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set "TIMESTAMP=%%I"
 set "TIMESTAMP=%TIMESTAMP:~0,8%_%TIMESTAMP:~8,6%"
 
+REM Fallback timestamp if wmic failed
+if "%TIMESTAMP%"=="" (
+    set "TIMESTAMP=%DATE:~-4%_%DATE:~-10,2%_%DATE:~-7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%"
+    set "TIMESTAMP=%TIMESTAMP: =0%"
+)
+
 REM Parse arguments
 set "OUTPUT_FILE=%~1"
 if "%OUTPUT_FILE%"=="" (

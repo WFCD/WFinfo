@@ -80,6 +80,10 @@ namespace WFInfo.LanguageProcessing
             new KeyValuePair<string, string>("휘", "hwi"), new KeyValuePair<string, string>("류", "ryu"), new KeyValuePair<string, string>("휴", "hyu"), new KeyValuePair<string, string>("흐", "heu"), new KeyValuePair<string, string>("희", "hui"), new KeyValuePair<string, string>("히", "hi"),
         };
         
+        // Precomputed ordered Korean replacements to avoid repeated sorting
+        private static readonly List<KeyValuePair<string, string>> koreanReplacementsOrdered = 
+            koreanReplacements.OrderByDescending(r => r.Key.Length).ToList();
+        
         // Korean character similarity groups for enhanced matching
         // Expanded to cover more OCR confusions and visual similarities
         private static readonly List<Dictionary<int, List<int>>> Korean = new List<Dictionary<int, List<int>>>() {
@@ -186,7 +190,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "설계도" };
 
-        public override string CharacterWhitelist => GenerateCharacterRange(0xAC00, 0xD7AF) + " "; // Korean Hangul
+        public override string CharacterWhitelist => GenerateCharacterRange(0xAC00, 0xC6FF) + GenerateCharacterRange(0xC700, 0xD5FF) + GenerateCharacterRange(0xD600, 0xD7AF) + " "; // Korean Hangul
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
@@ -476,7 +480,7 @@ namespace WFInfo.LanguageProcessing
             if (string.IsNullOrEmpty(input)) return input;
             
             string result = input;
-            foreach (var replacement in koreanReplacements.OrderByDescending(r => r.Key.Length))
+            foreach (var replacement in koreanReplacementsOrdered)
             {
                 result = result.Replace(replacement.Key, replacement.Value);
             }

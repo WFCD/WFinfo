@@ -613,9 +613,7 @@ namespace WFInfo
                 marketData = ParseFileOrMakeNew(marketDataPath, ref parseHasFailed);
                 if (marketData == null)
                 {
-                    Main.AddLog("Failed to parse marketData, aborting initialization");
-                    parseHasFailed = true;
-                    return;
+                    throw new InvalidDataException($"Failed to parse marketData from '{marketDataPath}'. JSON deserialization returned null.");
                 }
             }
             lock (marketItemsLock)
@@ -625,9 +623,7 @@ namespace WFInfo
                     marketItems = ParseFileOrMakeNew(marketItemsPath, ref parseHasFailed);
                     if (marketItems == null)
                     {
-                        Main.AddLog("Failed to parse marketItems, aborting initialization");
-                        parseHasFailed = true;
-                        return;
+                        throw new InvalidDataException($"Failed to parse marketItems from '{marketItemsPath}'. JSON deserialization returned null.");
                     }
                 }
             }
@@ -636,9 +632,7 @@ namespace WFInfo
                 equipmentData = ParseFileOrMakeNew(equipmentDataPath, ref parseHasFailed);
                 if (equipmentData == null)
                 {
-                    Main.AddLog("Failed to parse equipmentData, aborting initialization");
-                    parseHasFailed = true;
-                    return;
+                    throw new InvalidDataException($"Failed to parse equipmentData from '{equipmentDataPath}'. JSON deserialization returned null.");
                 }
             }
             if (relicData == null)
@@ -646,9 +640,7 @@ namespace WFInfo
                 relicData = ParseFileOrMakeNew(relicDataPath, ref parseHasFailed);
                 if (relicData == null)
                 {
-                    Main.AddLog("Failed to parse relicData, aborting initialization");
-                    parseHasFailed = true;
-                    return;
+                    throw new InvalidDataException($"Failed to parse relicData from '{relicDataPath}'. JSON deserialization returned null.");
                 }
             }
             if (nameData == null)
@@ -656,9 +648,7 @@ namespace WFInfo
                 nameData = ParseFileOrMakeNew(nameDataPath, ref parseHasFailed);
                 if (nameData == null)
                 {
-                    Main.AddLog("Failed to parse nameData, aborting initialization");
-                    parseHasFailed = true;
-                    return;
+                    throw new InvalidDataException($"Failed to parse nameData from '{nameDataPath}'. JSON deserialization returned null.");
                 }
             }
 

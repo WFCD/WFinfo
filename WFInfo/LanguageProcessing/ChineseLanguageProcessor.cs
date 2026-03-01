@@ -13,7 +13,12 @@ namespace WFInfo.LanguageProcessing
         {
         }
 
-        public override string CharacterWhitelist => GenerateCharacterRange(0x4E00, 0x9FFF) + GenerateCharacterRange(0x3400, 0x4DBF) + GenerateCharacterRange(0xF900, 0xFAFF) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Full CJK ideographs
+        public override string CharacterWhitelist => 
+            GenerateCharacterRange(0x4E00, 0x7FFF) + 
+            GenerateCharacterRange(0x8000, 0x9FFF) + 
+            GenerateCharacterRange(0x3400, 0x4DBF) + 
+            GenerateCharacterRange(0xF900, 0xFAFF) + 
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Full CJK ideographs
 
         public override string NormalizeForPatternMatching(string input)
         {
@@ -115,7 +120,7 @@ namespace WFInfo.LanguageProcessing
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeChineseCharacters);
+            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeChineseCharacters, callBaseDefault: true);
         }
     }
 
@@ -135,7 +140,7 @@ namespace WFInfo.LanguageProcessing
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeChineseCharacters);
+            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeChineseCharacters, callBaseDefault: true);
         }
     }
 }

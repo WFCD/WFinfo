@@ -111,7 +111,7 @@ namespace WFInfo
         private static bool IsCJKLocale()
         {
             var locale = ApplicationSettings.GlobalReadonlySettings.Locale;
-            return locale == "ko" || locale == "zh-hans" || locale == "zh-hant";
+            return locale == "ko" || locale == "zh-hans" || locale == "zh-hant" || locale == "ja";
         }
         
         // CJK-specific adjustments for multi-line text
@@ -188,12 +188,26 @@ namespace WFInfo
             // Initialize the language processor factory before tesseract service
             LanguageProcessorFactory.Initialize(settings);
 
-            _tesseractService.Init();
+            try
+            {
+                _tesseractService.Init();
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"ERROR: Failed to initialize TesseractService: {ex.Message}");
+                _tesseractService = null;
+            }
         }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
             #region initializers
+            if (_tesseractService == null)
+            {
+                Main.AddLog("ERROR: Cannot process reward screen - TesseractService is null");
+                return;
+            }
+            
             if (processingActive)
             {
                 Main.StatusUpdate("Still Processing Reward Screen", 2);
@@ -2867,7 +2881,10 @@ namespace WFInfo
         {
             await ReloadSemaphore.WaitAsync().ConfigureAwait(false);
             try {
-                 await Task.Run(() => _tesseractService.ReloadEngines()).ConfigureAwait(false);
+                if (_tesseractService != null)
+                    await Task.Run(() => _tesseractService.ReloadEngines()).ConfigureAwait(false);
+                else
+                    Main.AddLog("ERROR: Cannot reload engines - TesseractService is null");
             }
             finally {
                 ReloadSemaphore.Release();
@@ -2981,7 +2998,15 @@ namespace WFInfo
             _hdrDetector = hdrDetector;
 
             LanguageProcessorFactory.Initialize(settings);
-            _tesseractService.Init();
+            try
+            {
+                _tesseractService.Init();
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"ERROR: Failed to initialize TesseractService in test mode: {ex.Message}");
+                _tesseractService = null;
+            }
         }
 
         #endregion
