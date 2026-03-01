@@ -449,12 +449,13 @@ namespace WFInfo
                     if (data != null && data["data"] != null && data["data"] is JArray)
                     {
                         File.WriteAllText(localeSpecificFallbackPath, body);
+                        return (data, false);
                     }
                     else
                     {
-                        Main.AddLog($"Invalid payload structure received from {wfmItemsUrl}, skipping cache write");
+                        Main.AddLog($"Invalid payload structure received from {wfmItemsUrl}, using fallback file {localeSpecificFallbackPath}");
+                        throw new InvalidDataException($"Invalid JSON payload structure from {wfmItemsUrl}");
                     }
-                    return (data, false);
                 }
             }
             catch (Exception ex)
@@ -988,8 +989,15 @@ namespace WFInfo
             
             // Resolve OCR text to English once before loops to avoid repeated expensive database searches
             // Only resolve for non-English locales to avoid regression in English
-            string resolvedName = _settings.Locale == "en" ? name : GetLocaleNameData(name, false);
-            resolvedName = resolvedName ?? name; // Fallback to original OCR string if resolution fails
+            string resolvedName;
+            if (_settings.Locale == "en")
+            {
+                resolvedName = name; // Use original OCR text for English
+            }
+            else
+            {
+                resolvedName = GetLocaleNameData(name, false) ?? name; // Fallback to original OCR string if resolution fails
+            }
             
             // For all non-English supported languages - check against localized names directly to avoid expensive conversion
             if (_settings.Locale != "en")
@@ -1107,8 +1115,15 @@ namespace WFInfo
             
             // Resolve OCR text to English once before loops to avoid repeated expensive database searches
             // Only resolve for non-English locales to avoid regression in English
-            string resolvedName = _settings.Locale == "en" ? name : GetLocaleNameData(name, false);
-            resolvedName = resolvedName ?? name; // Fallback to original OCR string if resolution fails
+            string resolvedName;
+            if (_settings.Locale == "en")
+            {
+                resolvedName = name; // Use original OCR text for English
+            }
+            else
+            {
+                resolvedName = GetLocaleNameData(name, false) ?? name; // Fallback to original OCR string if resolution fails
+            }
             
             foreach (KeyValuePair<string, JToken> prop in nameData)
             {

@@ -20,6 +20,7 @@ namespace WFInfo.Tests
             if (args.Length < 1)
             {
                 PrintUsage();
+                Environment.ExitCode = 1;
                 return;
             }
 

@@ -300,8 +300,7 @@ namespace WFInfo
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
         public static void StatusUpdate(string message, int severity)
         {
-            if (MainWindow.INSTANCE?.Dispatcher != null)
-                MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
+            RunOnUIThread(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
         }
 
         public void ActivationKeyPressed(Object key)
@@ -543,8 +542,7 @@ namespace WFInfo
         // Switch to logged in mode for warfrane.market systems
         public void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
-            if (MainWindow.INSTANCE?.Dispatcher != null)
-                MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
+            RunOnUIThread(() => { MainWindow.INSTANCE.LoggedIn(); });
 
             // start the AFK timer
             latestActive = DateTime.UtcNow.AddMinutes(1);
@@ -614,8 +612,7 @@ namespace WFInfo
 
         public static void SignOut()
         {
-            if (MainWindow.INSTANCE?.Dispatcher != null)
-                MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
+            RunOnUIThread(() => { MainWindow.INSTANCE.SignOut(); });
         }
     }
 

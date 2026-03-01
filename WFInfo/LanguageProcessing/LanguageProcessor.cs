@@ -328,19 +328,47 @@ namespace WFInfo.LanguageProcessing
         }
 
         /// <summary>
+        /// Maximum safe size for character range generation to prevent memory issues
+        /// </summary>
+        private const int MaxGeneratedRangeSize = 10000;
+
+        /// <summary>
         /// Generates a string containing all characters in the specified Unicode range
         /// </summary>
         /// <param name="start">Starting Unicode code point</param>
         /// <param name="end">Ending Unicode code point</param>
         /// <returns>String containing all characters in the range</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when range size exceeds safe limit</exception>
         protected static string GenerateCharacterRange(int start, int end)
         {
-            var chars = new char[end - start + 1];
-            for (int i = 0; i <= end - start; i++)
+            int rangeSize = end - start + 1;
+            if (rangeSize > MaxGeneratedRangeSize)
+            {
+                throw new ArgumentOutOfRangeException(nameof(end), 
+                    $"Character range size ({rangeSize}) exceeds maximum safe limit ({MaxGeneratedRangeSize}). " +
+                    $"Use GenerateCharacterRangeIterator for large ranges.");
+            }
+
+            var chars = new char[rangeSize];
+            for (int i = 0; i < rangeSize; i++)
             {
                 chars[i] = (char)(start + i);
             }
             return new string(chars);
+        }
+
+        /// <summary>
+        /// Generates characters in the specified Unicode range using streaming (no large array allocation)
+        /// </summary>
+        /// <param name="start">Starting Unicode code point</param>
+        /// <param name="end">Ending Unicode code point</param>
+        /// <returns>Enumerable that yields characters in the range</returns>
+        protected static IEnumerable<char> GenerateCharacterRangeIterator(int start, int end)
+        {
+            for (int i = start; i <= end; i++)
+            {
+                yield return (char)i;
+            }
         }
     }
 }

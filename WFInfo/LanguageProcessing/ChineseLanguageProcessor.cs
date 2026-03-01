@@ -5,31 +5,21 @@ using WFInfo.Settings;
 namespace WFInfo.LanguageProcessing
 {
     /// <summary>
-    /// Simplified Chinese language processor for OCR text processing
-    /// Handles Simplified Chinese characters
+    /// Base class for Chinese language processors containing shared behaviors
     /// </summary>
-    public class SimplifiedChineseLanguageProcessor : LanguageProcessor
+    public abstract class ChineseLanguageProcessorBase : LanguageProcessor
     {
-        public SimplifiedChineseLanguageProcessor(IReadOnlyApplicationSettings settings) : base(settings)
+        protected ChineseLanguageProcessorBase(IReadOnlyApplicationSettings settings) : base(settings)
         {
         }
-
-        public override string Locale => "zh-hans";
-
-        public override string[] BlueprintRemovals => new[] { "蓝图", "设计图" };
 
         public override string CharacterWhitelist => GenerateCharacterRange(0x4E00, 0x9FFF) + GenerateCharacterRange(0x3400, 0x4DBF) + GenerateCharacterRange(0xF900, 0xFAFF) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Full CJK ideographs
-
-        public override int CalculateLevenshteinDistance(string s, string t)
-        {
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeChineseCharacters);
-        }
 
         public override string NormalizeForPatternMatching(string input)
         {
             if (string.IsNullOrEmpty(input)) return input;
 
-            // Basic cleanup for Simplified Chinese
+            // Basic cleanup for Chinese
             string normalized = input.ToLower(_culture).Trim();
 
             // Add spaces around "Prime" to match database format better
@@ -48,7 +38,12 @@ namespace WFInfo.LanguageProcessing
             // Chinese requires minimum of 4 characters after removing spaces
             return !string.IsNullOrEmpty(partName) && partName.Replace(" ", "").Length >= 4;
         }
-        
+
+        public override bool ShouldFilterWord(string word)
+        {
+            return FilterWordCore(word);
+        }
+
         /// <summary>
         /// Shared filtering logic for Chinese word processing
         /// </summary>
@@ -82,11 +77,6 @@ namespace WFInfo.LanguageProcessing
             return false;
         }
 
-        public override bool ShouldFilterWord(string word)
-        {
-            return FilterWordCore(word);
-        }
-        
         /// <summary>
         /// Checks if a string contains CJK characters
         /// </summary>
@@ -100,13 +90,32 @@ namespace WFInfo.LanguageProcessing
             return false;
         }
 
-        
         /// <summary>
         /// Normalizes Chinese characters for comparison
         /// </summary>
-        private static string NormalizeChineseCharacters(string input)
+        protected static string NormalizeChineseCharacters(string input)
         {
             return NormalizeFullWidthCharacters(input).ToLowerInvariant();
+        }
+    }
+
+    /// <summary>
+    /// Simplified Chinese language processor for OCR text processing
+    /// Handles Simplified Chinese characters
+    /// </summary>
+    public class SimplifiedChineseLanguageProcessor : ChineseLanguageProcessorBase
+    {
+        public SimplifiedChineseLanguageProcessor(IReadOnlyApplicationSettings settings) : base(settings)
+        {
+        }
+
+        public override string Locale => "zh-hans";
+
+        public override string[] BlueprintRemovals => new[] { "蓝图", "设计图" };
+
+        public override int CalculateLevenshteinDistance(string s, string t)
+        {
+            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeChineseCharacters);
         }
     }
 
@@ -114,7 +123,7 @@ namespace WFInfo.LanguageProcessing
     /// Traditional Chinese language processor for OCR text processing
     /// Handles Traditional Chinese characters
     /// </summary>
-    public class TraditionalChineseLanguageProcessor : LanguageProcessor
+    public class TraditionalChineseLanguageProcessor : ChineseLanguageProcessorBase
     {
         public TraditionalChineseLanguageProcessor(IReadOnlyApplicationSettings settings) : base(settings)
         {
@@ -124,49 +133,9 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "藍圖", "設計圖" };
 
-        public override string CharacterWhitelist => GenerateCharacterRange(0x4E00, 0x9FFF) + GenerateCharacterRange(0x3400, 0x4DBF) + GenerateCharacterRange(0xF900, 0xFAFF) + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "; // Full CJK ideographs
-
         public override int CalculateLevenshteinDistance(string s, string t)
         {
             return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeChineseCharacters);
-        }
-
-        public override string NormalizeForPatternMatching(string input)
-        {
-            if (string.IsNullOrEmpty(input)) return input;
-
-            // Basic cleanup for Traditional Chinese
-            string normalized = input.ToLower(_culture).Trim();
-
-            // Add spaces around "Prime" to match database format better
-            normalized = normalized.Replace("prime", " prime ");
-
-            // Remove accents (not typically needed for Chinese)
-            normalized = RemoveAccents(normalized);
-
-            // Remove extra spaces
-            var parts = normalized.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            return string.Join(" ", parts);
-        }
-
-        public override bool IsPartNameValid(string partName)
-        {
-            // Chinese requires minimum of 4 characters after removing spaces
-            return !string.IsNullOrEmpty(partName) && partName.Replace(" ", "").Length >= 4;
-        }
-
-        public override bool ShouldFilterWord(string word)
-        {
-            return SimplifiedChineseLanguageProcessor.FilterWordCore(word);
-        }
-
-        
-        /// <summary>
-        /// Normalizes Chinese characters for comparison
-        /// </summary>
-        private static string NormalizeChineseCharacters(string input)
-        {
-            return NormalizeFullWidthCharacters(input).ToLowerInvariant();
         }
     }
 }

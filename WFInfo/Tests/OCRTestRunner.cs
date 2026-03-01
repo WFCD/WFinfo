@@ -19,6 +19,7 @@ namespace WFInfo.Tests
     {
         private readonly IWindowInfoService _windowService;
         private string _currentLocale;
+        private bool _currentHDR;
 
         public OCRTestRunner(IWindowInfoService windowService)
         {
@@ -173,8 +174,10 @@ namespace WFInfo.Tests
             // Map language name to locale code
             string newLocale = MapLanguageToLocale(testCase.Language);
             bool localeChanged = newLocale != _currentLocale;
+            bool hdrChanged = testCase.HDR != _currentHDR;
             settings.Locale = newLocale;
             _currentLocale = newLocale;
+            _currentHDR = testCase.HDR;
 
             // Map theme name to enum
             settings.ThemeSelection = MapThemeToEnum(testCase.Theme);
@@ -183,10 +186,11 @@ namespace WFInfo.Tests
             if (testCase.Scaling > 0)
                 OCR.uiScaling = testCase.Scaling / 100.0;
 
-            // Reload engines if language changed (different tessdata)
-            if (localeChanged)
+            // Reload engines if language changed (different tessdata) or HDR setting changed
+            if (localeChanged || hdrChanged)
             {
-                Main.AddLog($"  Locale changed to '{newLocale}', reinitializing OCR engines...");
+                string reason = localeChanged ? $"Locale changed to '{newLocale}'" : $"HDR changed to '{testCase.HDR}'";
+                Main.AddLog($"  {reason}, reinitializing OCR engines...");
                 OCR.InitForTest(
                     new TesseractService(),
                     ApplicationSettings.GlobalReadonlySettings,

@@ -121,6 +121,28 @@ namespace WFInfo
             return IsCJKLocale() ? 58 : pixelRewardLineHeight;
         }
 
+        /// <summary>
+        /// Safe call helper to execute functions with consistent error handling and logging
+        /// </summary>
+        /// <typeparam name="T">Return type of the function</typeparam>
+        /// <param name="func">Function to execute</param>
+        /// <param name="defaultValue">Default value to return on error</param>
+        /// <param name="operationName">Name of the operation for logging</param>
+        /// <param name="itemName">Name of the item being processed</param>
+        /// <returns>Result of the function or default value on error</returns>
+        private static T SafeCall<T>(Func<T> func, T defaultValue, string operationName, string itemName)
+        {
+            try
+            {
+                return func();
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"ERROR: {operationName} failed for '{itemName}': {ex.Message}");
+                return defaultValue;
+            }
+        }
+
         public const int SCALING_LIMIT = 100;
         public static bool processingActive = false;
 
@@ -777,38 +799,9 @@ namespace WFInfo
                 string ducats = job["ducats"].ToObject<string>();
                 string volume = job["volume"].ToObject<string>();
                 
-                bool vaulted;
-                try
-                {
-                    vaulted = Main.dataBase.IsPartVaulted(name);
-                }
-                catch (Exception ex)
-                {
-                    Main.AddLog($"ERROR: IsPartVaulted failed for '{name}': {ex.Message}");
-                    vaulted = false;
-                }
-                
-                bool mastered;
-                try
-                {
-                    mastered = Main.dataBase.IsPartMastered(name);
-                }
-                catch (Exception ex)
-                {
-                    Main.AddLog($"ERROR: IsPartMastered failed for '{name}': {ex.Message}");
-                    mastered = false;
-                }
-                
-                string partsOwned;
-                try
-                {
-                    partsOwned = Main.dataBase.PartsOwned(name);
-                }
-                catch (Exception ex)
-                {
-                    Main.AddLog($"ERROR: PartsOwned failed for '{name}': {ex.Message}");
-                    partsOwned = "0";
-                }
+                bool vaulted = SafeCall(() => Main.dataBase.IsPartVaulted(name), false, "IsPartVaulted", name);
+                bool mastered = SafeCall(() => Main.dataBase.IsPartMastered(name), false, "IsPartMastered", name);
+                string partsOwned = SafeCall(() => Main.dataBase.PartsOwned(name), "0", "PartsOwned", name);
                 
                 string partsDetected = ""+part.Count;
 
