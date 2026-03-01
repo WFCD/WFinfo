@@ -45,6 +45,11 @@
     <DebugType>embedded</DebugType>
 	<DeterministicSourcePaths>True</DeterministicSourcePaths>
   </PropertyGroup>
+  
+  <!-- Define assembly version property for use in update.xml generation -->
+  <PropertyGroup>
+    <UpdateAssemblyVersion>9.8.0.0</UpdateAssemblyVersion>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Net.Http" />
     <Reference Include="Tesseract">
@@ -125,4 +130,36 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  
+  <!-- Target to generate update.xml file after build -->
+  <Target Name="GenerateUpdateXml" AfterTargets="Build">
+    <PropertyGroup>
+      <UpdateXmlPath>$(OutputPath)update.xml</UpdateXmlPath>
+    </PropertyGroup>
+    
+    <WriteLinesToFile File="$(UpdateXmlPath)" Lines="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;" Overwrite="true" />
+    <WriteLinesToFile File="$(UpdateXmlPath)" Lines="&lt;item&gt;" Overwrite="false" />
+    <WriteLinesToFile File="$(UpdateXmlPath)" Lines="    &lt;version&gt;$(UpdateAssemblyVersion)&lt;/version&gt;" Overwrite="false" />
+    <WriteLinesToFile File="$(UpdateXmlPath)" Lines="    &lt;url&gt;https://github.com/WFCD/WFinfo/releases/latest/download/WFInfo.zip&lt;/url&gt;" Overwrite="false" />
+    <WriteLinesToFile File="$(UpdateXmlPath)" Lines="    &lt;changelog&gt;https://github.com/WFCD/WFinfo/releases/latest&lt;/changelog&gt;" Overwrite="false" />
+    <WriteLinesToFile File="$(UpdateXmlPath)" Lines="    &lt;mandatory&gt;false&lt;/mandatory&gt;" Overwrite="false" />
+    <WriteLinesToFile File="$(UpdateXmlPath)" Lines="&lt;/item&gt;" Overwrite="false" />
+    
+    <Message Text="Generated update.xml at $(UpdateXmlPath) with version $(UpdateAssemblyVersion)" Importance="high" />
+  </Target>
+  
+  <!-- Target to create WFInfo.zip for publishing (Release builds only) -->
+  <Target Name="CreatePublishZip" AfterTargets="GenerateUpdateXml" Condition="'$(Configuration)'=='Release'">
+    <PropertyGroup>
+      <ExePath>$(OutputPath)WFInfo.exe</ExePath>
+      <ZipPath>$(OutputPath)WFInfo.zip</ZipPath>
+    </PropertyGroup>
+    
+    <!-- Create zip file using PowerShell with only the executable -->
+    <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(ExePath)' -DestinationPath '$(ZipPath)' -Force&quot;" 
+          ContinueOnError="false" 
+          IgnoreExitCode="false" />
+    
+    <Message Text="Created WFInfo.zip at $(ZipPath) for publishing" Importance="high" />
+  </Target>
 </Project>
