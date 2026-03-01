@@ -102,7 +102,21 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Plano", "Diseño" };
 
-        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C0, 0x00FF); // Spanish with accents
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + 
+            GenerateCharacterRange(0x00C1, 0x00C1) + // Á
+            GenerateCharacterRange(0x00C9, 0x00C9) + // É
+            GenerateCharacterRange(0x00CD, 0x00CD) + // Í
+            GenerateCharacterRange(0x00D1, 0x00D1) + // Ñ
+            GenerateCharacterRange(0x00D3, 0x00D3) + // Ó
+            GenerateCharacterRange(0x00DA, 0x00DA) + // Ú
+            GenerateCharacterRange(0x00DC, 0x00DC) + // Ü
+            GenerateCharacterRange(0x00E1, 0x00E1) + // á
+            GenerateCharacterRange(0x00E9, 0x00E9) + // é
+            GenerateCharacterRange(0x00ED, 0x00ED) + // í
+            GenerateCharacterRange(0x00F1, 0x00F1) + // ñ
+            GenerateCharacterRange(0x00F3, 0x00F3) + // ó
+            GenerateCharacterRange(0x00FA, 0x00FA) + // ú
+            GenerateCharacterRange(0x00FC, 0x00FC);   // ü
     }
 
     /// <summary>
@@ -119,7 +133,33 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Planta", "Projeto" };
 
-        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C0, 0x00FF); // Portuguese with accents
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + 
+            GenerateCharacterRange(0x00C0, 0x00C0) + // À
+            GenerateCharacterRange(0x00C1, 0x00C1) + // Á
+            GenerateCharacterRange(0x00C2, 0x00C2) + // Â
+            GenerateCharacterRange(0x00C3, 0x00C3) + // Ã
+            GenerateCharacterRange(0x00C7, 0x00C7) + // Ç
+            GenerateCharacterRange(0x00C9, 0x00C9) + // É
+            GenerateCharacterRange(0x00CA, 0x00CA) + // Ê
+            GenerateCharacterRange(0x00CD, 0x00CD) + // Í
+            GenerateCharacterRange(0x00D3, 0x00D3) + // Ó
+            GenerateCharacterRange(0x00D4, 0x00D4) + // Ô
+            GenerateCharacterRange(0x00D5, 0x00D5) + // Õ
+            GenerateCharacterRange(0x00DA, 0x00DA) + // Ú
+            GenerateCharacterRange(0x00DC, 0x00DC) + // Ü
+            GenerateCharacterRange(0x00E0, 0x00E0) + // à
+            GenerateCharacterRange(0x00E1, 0x00E1) + // á
+            GenerateCharacterRange(0x00E2, 0x00E2) + // â
+            GenerateCharacterRange(0x00E3, 0x00E3) + // ã
+            GenerateCharacterRange(0x00E7, 0x00E7) + // ç
+            GenerateCharacterRange(0x00E9, 0x00E9) + // é
+            GenerateCharacterRange(0x00EA, 0x00EA) + // ê
+            GenerateCharacterRange(0x00ED, 0x00ED) + // í
+            GenerateCharacterRange(0x00F3, 0x00F3) + // ó
+            GenerateCharacterRange(0x00F4, 0x00F4) + // ô
+            GenerateCharacterRange(0x00F5, 0x00F5) + // õ
+            GenerateCharacterRange(0x00FA, 0x00FA) + // ú
+            GenerateCharacterRange(0x00FC, 0x00FC);   // ü
     }
 
     /// <summary>
@@ -136,7 +176,37 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Schéma", "Plan" };
 
-        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C0, 0x00FF); // French with Latin-1 supplement
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + 
+            GenerateCharacterRange(0x00C0, 0x00C0) + // À
+            GenerateCharacterRange(0x00C2, 0x00C2) + // Â
+            GenerateCharacterRange(0x00C6, 0x00C6) + // Æ
+            GenerateCharacterRange(0x00C7, 0x00C7) + // Ç
+            GenerateCharacterRange(0x00C8, 0x00C8) + // È
+            GenerateCharacterRange(0x00C9, 0x00C9) + // É
+            GenerateCharacterRange(0x00CA, 0x00CA) + // Ê
+            GenerateCharacterRange(0x00CB, 0x00CB) + // Ë
+            GenerateCharacterRange(0x00CE, 0x00CE) + // Î
+            GenerateCharacterRange(0x00CF, 0x00CF) + // Ï
+            GenerateCharacterRange(0x00D4, 0x00D4) + // Ô
+            GenerateCharacterRange(0x00D6, 0x00D6) + // Ö
+            GenerateCharacterRange(0x00D9, 0x00D9) + // Ù
+            GenerateCharacterRange(0x00DB, 0x00DB) + // Û
+            GenerateCharacterRange(0x00DC, 0x00DC) + // Ü
+            GenerateCharacterRange(0x00E0, 0x00E0) + // à
+            GenerateCharacterRange(0x00E2, 0x00E2) + // â
+            GenerateCharacterRange(0x00E6, 0x00E6) + // æ
+            GenerateCharacterRange(0x00E7, 0x00E7) + // ç
+            GenerateCharacterRange(0x00E8, 0x00E8) + // è
+            GenerateCharacterRange(0x00E9, 0x00E9) + // é
+            GenerateCharacterRange(0x00EA, 0x00EA) + // ê
+            GenerateCharacterRange(0x00EB, 0x00EB) + // ë
+            GenerateCharacterRange(0x00EE, 0x00EE) + // î
+            GenerateCharacterRange(0x00EF, 0x00EF) + // ï
+            GenerateCharacterRange(0x00F4, 0x00F4) + // ô
+            GenerateCharacterRange(0x00F6, 0x00F6) + // ö
+            GenerateCharacterRange(0x00F9, 0x00F9) + // ù
+            GenerateCharacterRange(0x00FB, 0x00FB) + // û
+            GenerateCharacterRange(0x00FC, 0x00FC);   // ü
     }
 
     /// <summary>
@@ -153,6 +223,22 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Progetto", "Piano" };
 
-        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-()" + GenerateCharacterRange(0x00C0, 0x00FF); // Italian with accents
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-()" + 
+            GenerateCharacterRange(0x00C0, 0x00C0) + // À
+            GenerateCharacterRange(0x00C8, 0x00C8) + // È
+            GenerateCharacterRange(0x00C9, 0x00C9) + // É
+            GenerateCharacterRange(0x00CC, 0x00CC) + // Ì
+            GenerateCharacterRange(0x00CD, 0x00CD) + // Í
+            GenerateCharacterRange(0x00D2, 0x00D2) + // Ò
+            GenerateCharacterRange(0x00D3, 0x00D3) + // Ó
+            GenerateCharacterRange(0x00D9, 0x00D9) + // Ù
+            GenerateCharacterRange(0x00E0, 0x00E0) + // à
+            GenerateCharacterRange(0x00E8, 0x00E8) + // è
+            GenerateCharacterRange(0x00E9, 0x00E9) + // é
+            GenerateCharacterRange(0x00EC, 0x00EC) + // ì
+            GenerateCharacterRange(0x00ED, 0x00ED) + // í
+            GenerateCharacterRange(0x00F2, 0x00F2) + // ò
+            GenerateCharacterRange(0x00F3, 0x00F3) + // ó
+            GenerateCharacterRange(0x00F9, 0x00F9);   // ù
     }
 }

@@ -583,7 +583,16 @@ namespace WFInfo
         {
             if (File.Exists(path))
             {
-                return JsonConvert.DeserializeObject<JObject>(File.ReadAllText(path));
+                try
+                {
+                    return JsonConvert.DeserializeObject<JObject>(File.ReadAllText(path));
+                }
+                catch (Exception ex)
+                {
+                    Main.AddLog($"Failed to parse {path}: {ex.Message}");
+                    parseHasFailed = true;
+                    return null;
+                }
             }
             Main.AddLog(path + " missing, loading blank");
             parseHasFailed = true;
@@ -604,8 +613,9 @@ namespace WFInfo
                 marketData = ParseFileOrMakeNew(marketDataPath, ref parseHasFailed);
                 if (marketData == null)
                 {
-                    Main.AddLog("Failed to parse marketData, creating empty object");
-                    marketData = new JObject();
+                    Main.AddLog("Failed to parse marketData, aborting initialization");
+                    parseHasFailed = true;
+                    return;
                 }
             }
             lock (marketItemsLock)
@@ -615,8 +625,9 @@ namespace WFInfo
                     marketItems = ParseFileOrMakeNew(marketItemsPath, ref parseHasFailed);
                     if (marketItems == null)
                     {
-                        Main.AddLog("Failed to parse marketItems, creating empty object");
-                        marketItems = new JObject();
+                        Main.AddLog("Failed to parse marketItems, aborting initialization");
+                        parseHasFailed = true;
+                        return;
                     }
                 }
             }
@@ -625,8 +636,9 @@ namespace WFInfo
                 equipmentData = ParseFileOrMakeNew(equipmentDataPath, ref parseHasFailed);
                 if (equipmentData == null)
                 {
-                    Main.AddLog("Failed to parse equipmentData, creating empty object");
-                    equipmentData = new JObject();
+                    Main.AddLog("Failed to parse equipmentData, aborting initialization");
+                    parseHasFailed = true;
+                    return;
                 }
             }
             if (relicData == null)
@@ -634,8 +646,9 @@ namespace WFInfo
                 relicData = ParseFileOrMakeNew(relicDataPath, ref parseHasFailed);
                 if (relicData == null)
                 {
-                    Main.AddLog("Failed to parse relicData, creating empty object");
-                    relicData = new JObject();
+                    Main.AddLog("Failed to parse relicData, aborting initialization");
+                    parseHasFailed = true;
+                    return;
                 }
             }
             if (nameData == null)
@@ -643,8 +656,9 @@ namespace WFInfo
                 nameData = ParseFileOrMakeNew(nameDataPath, ref parseHasFailed);
                 if (nameData == null)
                 {
-                    Main.AddLog("Failed to parse nameData, creating empty object");
-                    nameData = new JObject();
+                    Main.AddLog("Failed to parse nameData, aborting initialization");
+                    parseHasFailed = true;
+                    return;
                 }
             }
 
@@ -987,18 +1001,6 @@ namespace WFInfo
             low = 9999;
             multipleLowest = false;
             
-            // Resolve OCR text to English once before loops to avoid repeated expensive database searches
-            // Only resolve for non-English locales to avoid regression in English
-            string resolvedName;
-            if (_settings.Locale == "en")
-            {
-                resolvedName = name; // Use original OCR text for English
-            }
-            else
-            {
-                resolvedName = GetLocaleNameData(name, false) ?? name; // Fallback to original OCR string if resolution fails
-            }
-            
             // For all non-English supported languages - check against localized names directly to avoid expensive conversion
             if (_settings.Locale != "en")
             {
@@ -1022,15 +1024,15 @@ namespace WFInfo
                         {
                             if (marketItem.Key == "version") continue;
                             string[] split = marketItem.Value.ToString().Split('|');
-                            if (split.Length < 3) continue;
+                            if (split.Length < 2) continue;
                             
                             // Use English name (split[0]) for length comparison regardless of locale cache
                             int englishNameLength = split[0].Length;
-                            int lengthDiff = Math.Abs((useLocalizedNames ? split[2].Length : split[0].Length) - name.Length);
+                            int lengthDiff = Math.Abs((useLocalizedNames && split.Length >= 3 ? split[2].Length : split[0].Length) - name.Length);
                             if (lengthDiff > Math.Max(englishNameLength, name.Length) / 2) continue;
                             
-                            // Use localized name only if cache locale matches, otherwise fall back to English
-                            string comparisonName = useLocalizedNames ? split[2] : split[0];
+                            // Use localized name only if cache locale matches and available, otherwise fall back to English
+                            string comparisonName = useLocalizedNames && split.Length >= 3 ? split[2] : split[0];
                             marketItemsSnapshot.Add(Tuple.Create(split[0], comparisonName, processor.NormalizeForPatternMatching(comparisonName)));
                         }
                     }
@@ -1068,6 +1070,9 @@ namespace WFInfo
             else
             {
                 // Original logic for English
+                // For English, resolvedName is just the original OCR text
+                string resolvedName = name;
+                
                 foreach (KeyValuePair<string, JToken> prop in nameData)
                 {
                     int lengthDiff = Math.Abs(prop.Key.Length - name.Length);

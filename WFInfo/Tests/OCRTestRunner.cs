@@ -197,8 +197,11 @@ namespace WFInfo.Tests
                     _windowService,
                     new HeadlessHDRDetector(testCase.HDR));
 
-                // Also re-update Data so Levenshtein uses the right locale for matching
-                Main.dataBase.ReloadItems().GetAwaiter().GetResult();
+                // Also re-update Data so Levenshtein uses the right locale for matching (only when locale changes)
+                if (localeChanged)
+                {
+                    Main.dataBase.ReloadItems().GetAwaiter().GetResult();
+                }
             }
         }
 

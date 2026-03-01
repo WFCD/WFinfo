@@ -2576,8 +2576,9 @@ namespace WFInfo
                         }
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    Main.AddLog($"OCR extraction failed in GetTextFromImage: {e.Message}\n{e.ToString()}");
                     modeResults[mode] = "";
                     modeScores[mode] = 0;
                 }

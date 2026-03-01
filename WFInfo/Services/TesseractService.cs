@@ -122,10 +122,6 @@ namespace WFInfo
             //Main.AddLog($"Creating Tesseract engine for locale: '{Locale}'");
             var engine = new TesseractEngine(DataPath, Locale);
 
-            engine.SetVariable("engine_mode", "1"); // Use LSTM neural network engine
-            engine.SetVariable("oem_engine", "1"); // Use LSTM OEM engine
-            engine.SetVariable("enable_smoothing", "1"); // Helps with Korean character recognition
-
             // Apply universal OCR improvements for all languages
             
             // This causes crash

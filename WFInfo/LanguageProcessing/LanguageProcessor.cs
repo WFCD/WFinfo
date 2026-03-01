@@ -52,8 +52,10 @@ namespace WFInfo.LanguageProcessing
             {
                 return new CultureInfo(locale, false);
             }
-            catch
+            catch (Exception e)
             {
+                // Log the failure and offending locale before falling back
+                System.Diagnostics.Debug.WriteLine($"Failed to create CultureInfo for locale '{locale}': {e.Message}");
                 // Fallback to invariant culture for unsupported locales
                 return CultureInfo.InvariantCulture;
             }
