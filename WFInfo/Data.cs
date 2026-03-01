@@ -229,6 +229,9 @@ namespace WFInfo
                 }
             }
 
+            // Add locale metadata for cache validation
+            tempMarketItems["locale"] = _settings.Locale;
+
             // Atomically replace marketItems under lock
             lock (marketItemsLock)
             {
@@ -441,7 +444,16 @@ namespace WFInfo
                     var response = await client.SendAsync(request).ConfigureAwait(false);
                     var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var data = JsonConvert.DeserializeObject<JObject>(body);
-                    File.WriteAllText(localeSpecificFallbackPath, body);
+                    
+                    // Validate payload structure before caching
+                    if (data != null && data["data"] != null && data["data"] is JArray)
+                    {
+                        File.WriteAllText(localeSpecificFallbackPath, body);
+                    }
+                    else
+                    {
+                        Main.AddLog($"Invalid payload structure received from {wfmItemsUrl}, skipping cache write");
+                    }
                     return (data, false);
                 }
             }
@@ -992,6 +1004,10 @@ namespace WFInfo
                 {
                     if (marketItems != null)
                     {
+                        // Check if cached locale matches current locale
+                        string cachedLocale = marketItems.TryGetValue("locale", out var localeToken) ? localeToken?.ToString() : null;
+                        bool useLocalizedNames = cachedLocale == _settings.Locale;
+                        
                         marketItemsSnapshot = new List<Tuple<string, string, string>>();
                         
                         foreach (var marketItem in marketItems)
@@ -1000,12 +1016,14 @@ namespace WFInfo
                             string[] split = marketItem.Value.ToString().Split('|');
                             if (split.Length < 3) continue;
                             
-                            // Pre-filter: only check items with reasonable length difference (matching English logic)
+                            // Use English name (split[0]) for length comparison regardless of locale cache
                             int englishNameLength = split[0].Length;
-                            int lengthDiff = Math.Abs(split[2].Length - name.Length);
+                            int lengthDiff = Math.Abs((useLocalizedNames ? split[2].Length : split[0].Length) - name.Length);
                             if (lengthDiff > Math.Max(englishNameLength, name.Length) / 2) continue;
                             
-                            marketItemsSnapshot.Add(Tuple.Create(split[0], split[2], processor.NormalizeForPatternMatching(split[2])));
+                            // Use localized name only if cache locale matches, otherwise fall back to English
+                            string comparisonName = useLocalizedNames ? split[2] : split[0];
+                            marketItemsSnapshot.Add(Tuple.Create(split[0], comparisonName, processor.NormalizeForPatternMatching(comparisonName)));
                         }
                     }
                     else

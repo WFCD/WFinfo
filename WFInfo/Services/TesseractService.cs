@@ -155,7 +155,6 @@ namespace WFInfo
             if (Locale == "ko" || Locale == "zh-hans" || Locale == "zh-hant")
             {
                 // CJK-specific OCR improvements for better character recognition
-                engine.SetVariable("smooth_scaling_factor", "1.5"); // Slight smoothing for better accuracy
                 engine.SetVariable("textord_noise_normratio", "2.0"); // More aggressive noise reduction for CJK
                 engine.SetVariable("chop_enable", "0"); // Disable character chopping for CJK characters
                 engine.SetVariable("use_new_state_cost", "1"); // Use new state cost for better CJK recognition
@@ -171,7 +170,6 @@ namespace WFInfo
                 engine.SetVariable("language_model_penalty_non_dict_word", "0.3"); // Penalize non-dictionary words heavily
                 engine.SetVariable("load_system_dawg", "false"); // Disable system dictionary for better UI text recognition
                 engine.SetVariable("load_freq_dawg", "false"); // Disable frequency dictionary for better UI text recognition
-                engine.SetVariable("smooth_scaling_factor", "1.0"); // Minimal smoothing to preserve clarity
                 engine.SetVariable("textord_force_make_prop_words", "true"); // Help with compound words
                 
             }
@@ -252,18 +250,29 @@ namespace WFInfo
 
             WebClient webClient = CustomEntrypoint.CreateNewWebClient();
 
-            if (!File.Exists(app_data_traineddata_path) || CustomEntrypoint.GetMD5hash(app_data_traineddata_path) != traineddata_checksums.GetValue(Locale).ToObject<string>())
+            // Check if locale is supported before accessing checksums
+            if (traineddata_checksums.TryGetValue(Locale, out JToken checksumToken))
             {
-                try
+                string expectedChecksum = checksumToken.ToObject<string>();
+                
+                if (!File.Exists(app_data_traineddata_path) || CustomEntrypoint.GetMD5hash(app_data_traineddata_path) != expectedChecksum)
                 {
-                    webClient.DownloadFile(traineddata_hotlink, app_data_traineddata_path);
-                    // We download to normal data path. If current data path differs, copy it to there too
-                    if (curr_data_traineddata_path != app_data_traineddata_path)
+                    try
                     {
-                        File.Copy(app_data_traineddata_path, curr_data_traineddata_path, true);
+                        webClient.DownloadFile(traineddata_hotlink, app_data_traineddata_path);
+                        // We download to normal data path. If current data path differs, copy it to there too
+                        if (curr_data_traineddata_path != app_data_traineddata_path)
+                        {
+                            File.Copy(app_data_traineddata_path, curr_data_traineddata_path, true);
+                        }
                     }
+                    catch (Exception) { }
                 }
-                catch (Exception) { }
+            }
+            else
+            {
+                // Unsupported locale - skip download and log warning
+                Main.AddLog($"Unsupported locale '{Locale}' - no traineddata checksum available, skipping download");
             }
         }
     }

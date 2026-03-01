@@ -48,8 +48,11 @@ namespace WFInfo.LanguageProcessing
             // Chinese requires minimum of 4 characters after removing spaces
             return !string.IsNullOrEmpty(partName) && partName.Replace(" ", "").Length >= 4;
         }
-
-        public override bool ShouldFilterWord(string word)
+        
+        /// <summary>
+        /// Shared filtering logic for Chinese word processing
+        /// </summary>
+        public static bool FilterWordCore(string word)
         {
             if (string.IsNullOrEmpty(word)) return true;
             
@@ -77,6 +80,11 @@ namespace WFInfo.LanguageProcessing
             
             // Keep everything else
             return false;
+        }
+
+        public override bool ShouldFilterWord(string word)
+        {
+            return FilterWordCore(word);
         }
         
         /// <summary>
@@ -149,32 +157,7 @@ namespace WFInfo.LanguageProcessing
 
         public override bool ShouldFilterWord(string word)
         {
-            if (string.IsNullOrEmpty(word)) return true;
-            
-            bool hasCJK = SimplifiedChineseLanguageProcessor.ContainsCJK(word);
-            bool hasLatin = false;
-            foreach (char c in word)
-            {
-                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-                {
-                    hasLatin = true;
-                    break;
-                }
-            }
-            
-            // Pure CJK words: keep (even single chars are meaningful in Chinese)
-            if (hasCJK && !hasLatin) return false;
-            
-            // Pure Latin words: shortest valid item name component is 3 chars (Ash, Nyx, Mag)
-            // Filter Latin-only words with <= 2 chars ("ll", "ee", "on", "me" = OCR noise from UI)
-            if (hasLatin && !hasCJK) return word.Length <= 2;
-            
-            // Mixed Latin+CJK: filter short mixed words (like "G壬") which are OCR garbage
-            // Valid mixed text is always longer (e.g. "Prime" next to CJK is separate words)
-            if (hasCJK && hasLatin && word.Length <= 2) return true;
-            
-            // Keep everything else
-            return false;
+            return SimplifiedChineseLanguageProcessor.FilterWordCore(word);
         }
 
         

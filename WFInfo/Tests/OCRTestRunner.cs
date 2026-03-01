@@ -66,9 +66,26 @@ namespace WFInfo.Tests
         {
             var stopwatch = Stopwatch.StartNew();
 
-            // Resolve paths relative to the map.json directory
-            string jsonPath = Path.GetFullPath(Path.Combine(testMapDir, scenarioPath + ".json"));
-            string imagePath = Path.GetFullPath(Path.Combine(testMapDir, scenarioPath + ".png"));
+            // Resolve paths relative to the map.json directory with traversal protection
+            string baseDir = Path.GetFullPath(testMapDir);
+            string jsonFull = Path.GetFullPath(Path.Combine(baseDir, scenarioPath + ".json"));
+            string imageFull = Path.GetFullPath(Path.Combine(baseDir, scenarioPath + ".png"));
+            
+            // Verify paths don't escape the base directory (case-insensitive on Windows)
+            if (!jsonFull.Equals(baseDir, StringComparison.OrdinalIgnoreCase) && 
+                !jsonFull.StartsWith(baseDir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new Exception($"Path traversal detected for JSON file: {scenarioPath}");
+            }
+            
+            if (!imageFull.Equals(baseDir, StringComparison.OrdinalIgnoreCase) && 
+                !imageFull.StartsWith(baseDir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new Exception($"Path traversal detected for image file: {scenarioPath}");
+            }
+            
+            string jsonPath = jsonFull;
+            string imagePath = imageFull;
             string testName = Path.GetFileName(scenarioPath);
 
             var result = new TestResult
@@ -229,27 +246,62 @@ namespace WFInfo.Tests
 
         private static void CompareResults(TestResult result)
         {
-            var expectedSet = new HashSet<string>(result.ExpectedParts, StringComparer.OrdinalIgnoreCase);
-            var actualSet = new HashSet<string>(result.ActualParts, StringComparer.OrdinalIgnoreCase);
-
-            // Missing: expected but not found
+            // Count occurrences for multiset comparison
+            var expectedCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var actualCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            
             foreach (var exp in result.ExpectedParts)
             {
-                if (!actualSet.Contains(exp))
-                    result.MissingParts.Add(exp);
+                expectedCounts[exp] = expectedCounts.TryGetValue(exp, out int count) ? count + 1 : 1;
             }
-
-            // Extra: found but not expected
+            
             foreach (var act in result.ActualParts)
             {
-                if (!expectedSet.Contains(act))
-                    result.ExtraParts.Add(act);
+                actualCounts[act] = actualCounts.TryGetValue(act, out int count) ? count + 1 : 1;
             }
 
+            // Find missing parts (expected count > actual count)
+            foreach (var kvp in expectedCounts)
+            {
+                int expectedCount = kvp.Value;
+                int actualCount = actualCounts.TryGetValue(kvp.Key, out int count) ? count : 0;
+                
+                if (actualCount < expectedCount)
+                {
+                    for (int i = 0; i < expectedCount - actualCount; i++)
+                    {
+                        result.MissingParts.Add(kvp.Key);
+                    }
+                }
+            }
+
+            // Find extra parts (actual count > expected count)
+            foreach (var kvp in actualCounts)
+            {
+                int actualCount = kvp.Value;
+                int expectedCount = expectedCounts.TryGetValue(kvp.Key, out int count) ? count : 0;
+                
+                if (actualCount > expectedCount)
+                {
+                    for (int i = 0; i < actualCount - expectedCount; i++)
+                    {
+                        result.ExtraParts.Add(kvp.Key);
+                    }
+                }
+            }
+
+            // Calculate accuracy based on matched items
             int totalExpected = result.ExpectedParts.Count;
-            int matched = totalExpected - result.MissingParts.Count;
+            int matched = 0;
+            foreach (var kvp in expectedCounts)
+            {
+                int expectedCount = kvp.Value;
+                int actualCount = actualCounts.TryGetValue(kvp.Key, out int count) ? count : 0;
+                matched += Math.Min(expectedCount, actualCount);
+            }
+            
             result.AccuracyScore = totalExpected > 0 ? (double)matched / totalExpected * 100.0 : 0;
-            result.Success = result.MissingParts.Count == 0 && string.IsNullOrEmpty(result.ErrorMessage);
+            result.Success = result.MissingParts.Count == 0 && result.ExtraParts.Count == 0 && string.IsNullOrEmpty(result.ErrorMessage);
         }
 
         private static void CalculateStatistics(TestSuiteResult suite)

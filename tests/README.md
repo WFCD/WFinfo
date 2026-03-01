@@ -14,7 +14,7 @@ Regression and accuracy testing for WFInfo's OCR pipeline. Runs **headlessly** f
 
 ## Directory Structure
 
-```
+```text
 tests/
 ├── map.json           # Lists scenarios to run
 ├── run_tests.bat      # One-click Windows runner

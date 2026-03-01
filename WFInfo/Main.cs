@@ -95,10 +95,11 @@ namespace WFInfo
             }
 
             // Use async UI dispatcher call
-            await MainWindow.INSTANCE.Dispatcher.InvokeAsync(() =>
-            {
-                MainWindow.INSTANCE.UpdateMarketStatus(msg);
-            });
+            if (MainWindow.INSTANCE?.Dispatcher != null)
+                await MainWindow.INSTANCE.Dispatcher.InvokeAsync(() =>
+                {
+                    MainWindow.INSTANCE.UpdateMarketStatus(msg);
+                });
         }
 
         private static IServiceCollection ConfigureServices(IServiceCollection services)
@@ -542,7 +543,8 @@ namespace WFInfo
         // Switch to logged in mode for warfrane.market systems
         public void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
+            if (MainWindow.INSTANCE?.Dispatcher != null)
+                MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
 
             // start the AFK timer
             latestActive = DateTime.UtcNow.AddMinutes(1);
@@ -612,7 +614,8 @@ namespace WFInfo
 
         public static void SignOut()
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
+            if (MainWindow.INSTANCE?.Dispatcher != null)
+                MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
         }
     }
 
