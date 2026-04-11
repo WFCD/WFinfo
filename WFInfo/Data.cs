@@ -465,6 +465,8 @@ namespace WFInfo
                 {
                     string response = File.ReadAllText(localeSpecificFallbackPath);
                     JObject data = JsonConvert.DeserializeObject<JObject>(response);
+                    if (data == null || data["data"] == null || !(data["data"] is JArray))
+                        throw new InvalidDataException($"Invalid JSON payload structure in fallback file {localeSpecificFallbackPath}");
                     return (data, true);
                 }
                 else
@@ -877,10 +879,12 @@ namespace WFInfo
         public string GetLocaleNameData(string s, bool useLevenshtein)
         {
             var processor = LanguageProcessorFactory.GetCurrentProcessor();
+            JObject snapshot;
             lock (marketItemsLock)
             {
-                return processor.GetLocalizedNameData(s, marketItems, useLevenshtein);
+                snapshot = (JObject)marketItems?.DeepClone() ?? new JObject();
             }
+            return processor.GetLocalizedNameData(s, snapshot, useLevenshtein);
         }
 
         /// <summary>

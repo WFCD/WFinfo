@@ -110,7 +110,7 @@ namespace WFInfo
         // CJK language detection helper - Korean, Simplified Chinese, Traditional Chinese share similar OCR needs
         private static bool IsCJKLocale()
         {
-            var locale = ApplicationSettings.GlobalReadonlySettings.Locale;
+            var locale = _settings?.Locale ?? ApplicationSettings.GlobalReadonlySettings.Locale;
             return locale == "ko" || locale == "zh-hans" || locale == "zh-hant" || locale == "ja";
         }
         
@@ -161,6 +161,7 @@ namespace WFInfo
 
         private static readonly System.Threading.SemaphoreSlim ReloadSemaphore = new System.Threading.SemaphoreSlim(1, 1);
         private static ITesseractService _tesseractService;
+        private static bool _tesseractInitFailed;
         private static ISoundPlayer _soundPlayer;
         private static IReadOnlyApplicationSettings _settings;
         private static IWindowInfoService _window;
@@ -195,6 +196,7 @@ namespace WFInfo
             catch (Exception ex)
             {
                 Main.AddLog($"ERROR: Failed to initialize TesseractService: {ex.Message}");
+                _tesseractInitFailed = true;
                 _tesseractService = null;
             }
         }
@@ -202,9 +204,9 @@ namespace WFInfo
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
             #region initializers
-            if (_tesseractService == null)
+            if (_tesseractInitFailed || _tesseractService == null)
             {
-                Main.AddLog("ERROR: Cannot process reward screen - TesseractService is null");
+                Main.AddLog("ERROR: Cannot process reward screen - TesseractService is null or failed to initialize");
                 return;
             }
             
@@ -3005,6 +3007,7 @@ namespace WFInfo
             catch (Exception ex)
             {
                 Main.AddLog($"ERROR: Failed to initialize TesseractService in test mode: {ex.Message}");
+                _tesseractInitFailed = true;
                 _tesseractService = null;
             }
         }

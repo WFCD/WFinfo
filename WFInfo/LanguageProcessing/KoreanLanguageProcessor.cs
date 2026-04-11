@@ -77,7 +77,7 @@ namespace WFInfo.LanguageProcessing
             
             new KeyValuePair<string, string>("하", "ha"), new KeyValuePair<string, string>("해", "hae"), new KeyValuePair<string, string>("햐", "hya"), new KeyValuePair<string, string>("햬", "hyae"), new KeyValuePair<string, string>("허", "heo"), new KeyValuePair<string, string>("헤", "he"), new KeyValuePair<string, string>("혀", "hyeo"), new KeyValuePair<string, string>("혜", "hye"),
             new KeyValuePair<string, string>("호", "ho"), new KeyValuePair<string, string>("화", "hwa"), new KeyValuePair<string, string>("홰", "hwae"), new KeyValuePair<string, string>("회", "hoe"), new KeyValuePair<string, string>("효", "hyo"), new KeyValuePair<string, string>("후", "hu"), new KeyValuePair<string, string>("훠", "hwo"), new KeyValuePair<string, string>("훼", "hwe"),
-            new KeyValuePair<string, string>("휘", "hwi"), new KeyValuePair<string, string>("류", "ryu"), new KeyValuePair<string, string>("휴", "hyu"), new KeyValuePair<string, string>("흐", "heu"), new KeyValuePair<string, string>("희", "hui"), new KeyValuePair<string, string>("히", "hi"),
+            new KeyValuePair<string, string>("휘", "hwi"), new KeyValuePair<string, string>("휴", "hyu"), new KeyValuePair<string, string>("흐", "heu"), new KeyValuePair<string, string>("희", "hui"), new KeyValuePair<string, string>("히", "hi"),
         };
         
         // Precomputed ordered Korean replacements to avoid repeated sorting

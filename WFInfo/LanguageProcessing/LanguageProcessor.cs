@@ -31,11 +31,11 @@ namespace WFInfo.LanguageProcessing
             Type concreteType = GetType();
             _normalizedBlueprintRemovalsCache.GetOrAdd(concreteType, type => 
             {
-                var blueprintRemovals = BlueprintRemovals;
+                var blueprintRemovals = BlueprintRemovals ?? Array.Empty<string>();
                 var normalized = new string[blueprintRemovals.Length];
                 for (int i = 0; i < blueprintRemovals.Length; i++)
                 {
-                    normalized[i] = blueprintRemovals[i].ToLowerInvariant();
+                    normalized[i] = (blueprintRemovals[i] ?? string.Empty).ToLowerInvariant();
                 }
                 return normalized;
             });

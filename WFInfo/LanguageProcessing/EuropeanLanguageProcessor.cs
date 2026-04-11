@@ -223,7 +223,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Progetto", "Piano" };
 
-        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-()" + 
+        public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-() " + 
             GenerateCharacterRange(0x00C0, 0x00C0) + // À
             GenerateCharacterRange(0x00C8, 0x00C8) + // È
             GenerateCharacterRange(0x00C9, 0x00C9) + // É

@@ -131,6 +131,14 @@ namespace WFInfo.Tests
 
                 // Load spec
                 var testCase = JsonConvert.DeserializeObject<TestCase>(File.ReadAllText(jsonPath));
+                if (testCase == null)
+                {
+                    result.ErrorMessage = $"Failed to deserialize test case from {jsonPath}: JSON was null or malformed";
+                    result.Success = false;
+                    stopwatch.Stop();
+                    result.ProcessingTimeMs = stopwatch.ElapsedMilliseconds;
+                    return result;
+                }
                 result.Language = testCase.Language ?? "unknown";
                 result.Theme = testCase.Theme ?? "auto";
                 result.Category = testCase.Category ?? "reward";

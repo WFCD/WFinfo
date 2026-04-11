@@ -97,11 +97,16 @@ namespace WFInfo
             // Use async UI dispatcher call
             var wnd = MainWindow.INSTANCE;
             var disp = wnd?.Dispatcher;
-            if (disp != null)
-                await disp.InvokeAsync(() =>
+            if (wnd != null && disp != null && !disp.HasShutdownStarted && !disp.HasShutdownFinished)
+            {
+                try
                 {
-                    wnd.UpdateMarketStatus(msg);
-                });
+                    await disp.InvokeAsync(() => wnd.UpdateMarketStatus(msg)).Task;
+                }
+                catch (TaskCanceledException) { }
+                catch (OperationCanceledException) { }
+                catch (InvalidOperationException) { }
+            }
         }
 
         private static IServiceCollection ConfigureServices(IServiceCollection services)

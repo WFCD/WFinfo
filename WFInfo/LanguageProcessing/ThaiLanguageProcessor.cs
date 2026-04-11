@@ -24,6 +24,8 @@ namespace WFInfo.LanguageProcessing
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
+            s = s ?? string.Empty;
+            t = t ?? string.Empty;
             // Check if both inputs contain Thai characters for Thai-aware comparison
             bool sHasThai = ContainsThai(s);
             bool tHasThai = ContainsThai(t);
@@ -135,7 +137,7 @@ namespace WFInfo.LanguageProcessing
             }
             
             // Keep all Thai text since Thai words are meaningful even when split by OCR
-            if (hasThai) return false;
+            if (hasThai && !hasLatin) return false;
             
             // For mixed Thai-Latin words, be more lenient
             if (hasThai && hasLatin) return false;
@@ -192,12 +194,22 @@ namespace WFInfo.LanguageProcessing
             // Basic Thai tone mark normalization
             result = result.Normalize(System.Text.NormalizationForm.FormC);
             
-            // Common Thai OCR confusions and character variations
-            result = result.Replace('ซ', 'ศ').Replace('ศ', 'ษ'); // so variations normalization
-            result = result.Replace('ผ', 'ฝ'); // pho/fo confusion
-            result = result.Replace('บ', 'ป'); // bo/po confusion  
-            result = result.Replace('ด', 'ต'); // do/to confusion
-            result = result.Replace('อ', 'โ'); // o/o form variations
+            // Common Thai OCR confusions and character variations — single-pass to avoid transitive remaps
+            var sb = new System.Text.StringBuilder(result.Length);
+            foreach (char c in result)
+            {
+                switch (c)
+                {
+                    case 'ซ': sb.Append('ศ'); break; // ซ → ศ
+                    case 'ศ': sb.Append('ษ'); break; // ศ → ษ
+                    case 'ผ': sb.Append('ฝ'); break; // ผ → ฝ
+                    case 'บ': sb.Append('ป'); break; // บ → ป
+                    case 'ด': sb.Append('ต'); break; // ด → ต
+                    case 'อ': sb.Append('โ'); break; // อ → โ
+                    default: sb.Append(c); break;
+                }
+            }
+            result = sb.ToString();
             
             // Remove or normalize common diacritic issues
             result = result.Replace("์", ""); // Remove karan (silent marker) for comparison

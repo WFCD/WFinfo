@@ -46,10 +46,6 @@
 	<DeterministicSourcePaths>True</DeterministicSourcePaths>
   </PropertyGroup>
   
-  <!-- Define assembly version property for use in update.xml generation -->
-  <PropertyGroup>
-    <UpdateAssemblyVersion>9.8.0.0</UpdateAssemblyVersion>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Net.Http" />
     <Reference Include="Tesseract">
@@ -131,8 +127,14 @@
     </None>
   </ItemGroup>
   
-  <!-- Target to generate update.xml file after build -->
-  <Target Name="GenerateUpdateXml" AfterTargets="Build">
+  <!-- Target to generate update.xml file after build (Release only) -->
+  <Target Name="GenerateUpdateXml" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <GetAssemblyIdentity AssemblyFiles="$(OutputPath)$(AssemblyName).exe">
+      <Output TaskParameter="Assemblies" ItemName="_AssemblyIdentity" />
+    </GetAssemblyIdentity>
+    <PropertyGroup>
+      <UpdateAssemblyVersion>%(_AssemblyIdentity.Version)</UpdateAssemblyVersion>
+    </PropertyGroup>
     <PropertyGroup>
       <UpdateXmlPath>$(OutputPath)update.xml</UpdateXmlPath>
     </PropertyGroup>

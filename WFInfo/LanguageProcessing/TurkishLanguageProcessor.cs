@@ -53,22 +53,25 @@ namespace WFInfo.LanguageProcessing
         /// <summary>
         /// Normalizes Turkish characters to standard equivalents for comparison
         /// </summary>
+        private static readonly System.Globalization.CultureInfo _turkishCulture = new System.Globalization.CultureInfo("tr-TR");
+
         private static string NormalizeTurkishCharacters(string input)
         {
-            // Convert Turkish characters to standard equivalents for comparison
-            return input.ToLowerInvariant()
+            // Handle Turkish dotted/dotless I explicitly before any casing to avoid Unicode edge cases
+            string result = input
+                .Replace('İ', 'i') // U+0130 LATIN CAPITAL LETTER I WITH DOT ABOVE → i
+                .Replace('I', 'ı'); // U+0049 LATIN CAPITAL LETTER I → ı (Turkish dotless)
+            // Lowercase with Turkish culture so ş/ğ/ç/ö/ü fold correctly
+            result = result.ToLower(_turkishCulture);
+            // ASCII-fold Turkish diacritics
+            result = result
                 .Replace('ğ', 'g')
-                .Replace('Ğ', 'G')
                 .Replace('ş', 's')
-                .Replace('Ş', 'S')
                 .Replace('ç', 'c')
-                .Replace('Ç', 'C')
                 .Replace('ö', 'o')
-                .Replace('Ö', 'O')
                 .Replace('ü', 'u')
-                .Replace('Ü', 'U')
-                .Replace('ı', 'i')
-                .Replace('İ', 'I');
+                .Replace('ı', 'i'); // dotless i → i
+            return result;
         }
     }
 }

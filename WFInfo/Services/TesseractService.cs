@@ -171,8 +171,16 @@ namespace WFInfo
             }
             
             // Apply language-specific character whitelist from language processor
-            var processor = LanguageProcessorFactory.GetProcessor(Locale);
-            var whitelist = processor?.CharacterWhitelist ?? DefaultWhitelist;
+            string whitelist;
+            try
+            {
+                var processor = LanguageProcessorFactory.GetProcessor(Locale);
+                whitelist = processor?.CharacterWhitelist ?? DefaultWhitelist;
+            }
+            catch (InvalidOperationException)
+            {
+                whitelist = DefaultWhitelist;
+            }
             engine.SetVariable("tessedit_char_whitelist", whitelist);
             //Main.AddLog($"Tesseract whitelist for '{Locale}': '{whitelist}'");
             
@@ -244,8 +252,8 @@ namespace WFInfo
             string app_data_traineddata_path = NormalDataPath + @"\" + Locale + ".traineddata";
             string curr_data_traineddata_path = DataPath + @"\" + Locale + ".traineddata";
 
-            WebClient webClient = CustomEntrypoint.CreateNewWebClient();
-
+            using (var webClient = CustomEntrypoint.CreateNewWebClient())
+            {
             // Check if locale is supported before accessing checksums
             if (traineddata_checksums.TryGetValue(Locale, out JToken checksumToken))
             {
@@ -274,6 +282,7 @@ namespace WFInfo
                 // Unsupported locale - skip download and log warning
                 Main.AddLog($"Unsupported locale '{Locale}' - no traineddata checksum available, skipping download");
             }
+            } // end using webClient
         }
     }
 }

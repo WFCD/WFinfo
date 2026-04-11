@@ -11,6 +11,37 @@ namespace WFInfo.LanguageProcessing
     /// </summary>
     public class JapaneseLanguageProcessor : LanguageProcessor
     {
+        private static readonly Dictionary<char, char> HiraganaKatakanaPairs = new Dictionary<char, char>
+        {
+            {'あ', 'ア'}, {'い', 'イ'}, {'う', 'ウ'}, {'え', 'エ'}, {'お', 'オ'},
+            {'か', 'カ'}, {'き', 'キ'}, {'く', 'ク'}, {'け', 'ケ'}, {'こ', 'コ'},
+            {'が', 'ガ'}, {'ぎ', 'ギ'}, {'ぐ', 'グ'}, {'げ', 'ゲ'}, {'ご', 'ゴ'},
+            {'さ', 'サ'}, {'し', 'シ'}, {'す', 'ス'}, {'せ', 'セ'}, {'そ', 'ソ'},
+            {'ざ', 'ザ'}, {'じ', 'ジ'}, {'ず', 'ズ'}, {'ぜ', 'ゼ'}, {'ぞ', 'ゾ'},
+            {'た', 'タ'}, {'ち', 'チ'}, {'つ', 'ツ'}, {'て', 'テ'}, {'と', 'ト'},
+            {'だ', 'ダ'}, {'ぢ', 'ヂ'}, {'づ', 'ヅ'}, {'で', 'デ'}, {'ど', 'ド'},
+            {'な', 'ナ'}, {'に', 'ニ'}, {'ぬ', 'ヌ'}, {'ね', 'ネ'}, {'の', 'ノ'},
+            {'は', 'ハ'}, {'ひ', 'ヒ'}, {'ふ', 'フ'}, {'へ', 'ヘ'}, {'ほ', 'ホ'},
+            {'ば', 'バ'}, {'び', 'ビ'}, {'ぶ', 'ブ'}, {'べ', 'ベ'}, {'ぼ', 'ボ'},
+            {'ぱ', 'パ'}, {'ぴ', 'ピ'}, {'ぷ', 'プ'}, {'ぺ', 'ペ'}, {'ぽ', 'ポ'},
+            {'ま', 'マ'}, {'み', 'ミ'}, {'む', 'ム'}, {'め', 'メ'}, {'も', 'モ'},
+            {'や', 'ヤ'}, {'ゆ', 'ユ'}, {'よ', 'ヨ'},
+            {'ら', 'ラ'}, {'り', 'リ'}, {'る', 'ル'}, {'れ', 'レ'}, {'ろ', 'ロ'},
+            {'わ', 'ワ'}, {'ゐ', 'ヰ'}, {'ゑ', 'ヱ'}, {'を', 'ヲ'}, {'ん', 'ン'},
+            {'っ', 'ッ'}, {'ゃ', 'ャ'}, {'ゅ', 'ュ'}, {'ょ', 'ョ'}
+        };
+
+        private static readonly (char, char)[] SimilarCharPairs = new[]
+        {
+            ('シ', 'ツ'), // shi/tsu confusion
+            ('ソ', 'ン'), // so/n confusion
+            ('ク', 'ワ'), // ku/wa confusion
+            ('ヘ', 'へ'), // he/he (different forms)
+            ('ベ', 'べ'), // be/be (different forms)
+            ('ヶ', 'ケ'), // ke/ke variation
+            ('ヵ', 'カ'), // ka/ka variation
+        };
+
         public JapaneseLanguageProcessor(IReadOnlyApplicationSettings settings) : base(settings)
         {
         }
@@ -88,49 +119,16 @@ namespace WFInfo.LanguageProcessing
         {
             if (a == b) return 0;
 
-            // Hiragana-Katakana equivalents (lower cost for similar characters)
-            var hiraganaKatakanaPairs = new Dictionary<char, char>
-            {
-                {'あ', 'ア'}, {'い', 'イ'}, {'う', 'ウ'}, {'え', 'エ'}, {'お', 'オ'},
-                {'か', 'カ'}, {'き', 'キ'}, {'く', 'ク'}, {'け', 'ケ'}, {'こ', 'コ'},
-                {'が', 'ガ'}, {'ぎ', 'ギ'}, {'ぐ', 'グ'}, {'げ', 'ゲ'}, {'ご', 'ゴ'},
-                {'さ', 'サ'}, {'し', 'シ'}, {'す', 'ス'}, {'せ', 'セ'}, {'そ', 'ソ'},
-                {'ざ', 'ザ'}, {'じ', 'ジ'}, {'ず', 'ズ'}, {'ぜ', 'ゼ'}, {'ぞ', 'ゾ'},
-                {'た', 'タ'}, {'ち', 'チ'}, {'つ', 'ツ'}, {'て', 'テ'}, {'と', 'ト'},
-                {'だ', 'ダ'}, {'ぢ', 'ヂ'}, {'づ', 'ヅ'}, {'で', 'デ'}, {'ど', 'ド'},
-                {'な', 'ナ'}, {'に', 'ニ'}, {'ぬ', 'ヌ'}, {'ね', 'ネ'}, {'の', 'ノ'},
-                {'は', 'ハ'}, {'ひ', 'ヒ'}, {'ふ', 'フ'}, {'へ', 'ヘ'}, {'ほ', 'ホ'},
-                {'ば', 'バ'}, {'び', 'ビ'}, {'ぶ', 'ブ'}, {'べ', 'ベ'}, {'ぼ', 'ボ'},
-                {'ぱ', 'パ'}, {'ぴ', 'ピ'}, {'ぷ', 'プ'}, {'ぺ', 'ペ'}, {'ぽ', 'ポ'},
-                {'ま', 'マ'}, {'み', 'ミ'}, {'む', 'ム'}, {'め', 'メ'}, {'も', 'モ'},
-                {'や', 'ヤ'}, {'ゆ', 'ユ'}, {'よ', 'ヨ'},
-                {'ら', 'ラ'}, {'り', 'リ'}, {'る', 'ル'}, {'れ', 'レ'}, {'ろ', 'ロ'},
-                {'わ', 'ワ'}, {'ゐ', 'ヰ'}, {'ゑ', 'ヱ'}, {'を', 'ヲ'}, {'ん', 'ン'},
-                {'っ', 'ッ'}, {'ゃ', 'ャ'}, {'ゅ', 'ュ'}, {'ょ', 'ョ'}
-            };
-
             // Check if characters are hiragana-katakana equivalents
-            if (hiraganaKatakanaPairs.TryGetValue(a, out var katakanaEquiv) && katakanaEquiv == b)
+            if (HiraganaKatakanaPairs.TryGetValue(a, out var katakanaEquiv) && katakanaEquiv == b)
                 return 1; // Low cost for hiragana-katakana equivalents
-            if (hiraganaKatakanaPairs.TryGetValue(b, out var hiraganaEquiv) && hiraganaEquiv == a)
+            if (HiraganaKatakanaPairs.TryGetValue(b, out var hiraganaEquiv) && hiraganaEquiv == a)
                 return 1;
 
             // Similar looking characters (common OCR confusions)
-            var similarChars = new[]
+            foreach (var (first, second) in SimilarCharPairs)
             {
-                new[] {'シ', 'ツ'}, // shi/tsu confusion
-                new[] {'ソ', 'ン'}, // so/n confusion  
-                new[] {'ク', 'ワ'}, // ku/wa confusion
-                new[] {'ヘ', 'へ'}, // he/he (different forms)
-                new[] {'ベ', 'べ'}, // be/be (different forms)
-                new[] {'ヲ', 'ヲ'}, // wo/wo (different forms)
-                new[] {'ヶ', 'ケ'}, // ke/ke variation
-                new[] {'ヵ', 'カ'}, // ka/ka variation
-            };
-
-            foreach (var pair in similarChars)
-            {
-                if ((a == pair[0] && b == pair[1]) || (a == pair[1] && b == pair[0]))
+                if ((a == first && b == second) || (a == second && b == first))
                     return 1; // Low cost for similar looking characters
             }
 
@@ -183,7 +181,7 @@ namespace WFInfo.LanguageProcessing
             
             // Keep all Japanese text (Hiragana/Katakana/Kanji characters) since Japanese words are meaningful
             // even when split by OCR
-            if (hasJapanese) return false;
+            if (hasJapanese && !hasLatin) return false;
             
             // For mixed Japanese-Latin words, be more lenient
             if (hasJapanese && hasLatin) return false;
@@ -221,7 +219,7 @@ namespace WFInfo.LanguageProcessing
             result = result.Replace('ﾞ', '゛').Replace('ﾟ', '゜'); // Handakuten and Dakuten normalization
             
             // Common katakana OCR confusions
-            result = result.Replace('ヲ', 'ヲ').Replace('ヮ', 'ワ').Replace('ヰ', 'イ').Replace('ヱ', 'エ').Replace('ヲ', 'オ');
+            result = result.Replace('ヮ', 'ワ').Replace('ヰ', 'イ').Replace('ヱ', 'エ').Replace('ヲ', 'オ');
             
             return result.ToLowerInvariant();
         }
