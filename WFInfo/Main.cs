@@ -329,8 +329,9 @@ namespace WFInfo
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"AddLog disk I/O error: {ex}");
             }
         }
 

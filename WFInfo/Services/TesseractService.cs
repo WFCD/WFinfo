@@ -27,16 +27,21 @@ namespace WFInfo
         /// </summary>
         TesseractEngine[] Engines { get; }
 
+        /// <summary>
+        /// Dedicated numbers-only engine for item counting (avoids race conditions)
+        /// </summary>
+        TesseractEngine NumbersOnlyEngine { get; }
+
         void Init();
         void ReloadEngines();
         
         /// <summary>
-        /// Sets the FirstEngine to numbers-only mode for item counting
+        /// Sets the mode to numbers-only for item counting. Use NumbersOnlyEngine after calling this.
         /// </summary>
         void SetNumbersOnlyMode();
         
         /// <summary>
-        /// Resets the FirstEngine to its default language-specific whitelist
+        /// Resets to default mode. Use FirstEngine after calling this.
         /// </summary>
         void ResetToDefaultMode();
     }
@@ -59,6 +64,10 @@ namespace WFInfo
         /// Engines for parallel processing of reward screen and snapit
         /// </summary>
         public TesseractEngine[] Engines { get; } = new TesseractEngine[4];
+        /// <summary>
+        /// Dedicated numbers-only engine for item counting (avoids race conditions with FirstEngine)
+        /// </summary>
+        public TesseractEngine NumbersOnlyEngine { get; private set; }
 
         private static string Locale => ApplicationSettings.GlobalReadonlySettings.Locale;
         private static readonly string ApplicationDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
@@ -115,6 +124,7 @@ namespace WFInfo
                 FirstEngine = CreateEngine();
             }
             SecondEngine = CreateEngine();
+            NumbersOnlyEngine = CreateNumbersOnlyEngine();
         }
 
         private TesseractEngine CreateEngine()
@@ -186,6 +196,18 @@ namespace WFInfo
             
             return engine;
         }
+
+        private TesseractEngine CreateNumbersOnlyEngine()
+        {
+            var engine = new TesseractEngine(DataPath, Locale);
+            
+            // Minimal settings for numbers-only recognition
+            engine.SetVariable("tessedit_char_whitelist", NumbersOnlyWhitelist);
+            engine.SetVariable("tessedit_zero_rejection", "false");
+            engine.SetVariable("preserve_interword_spaces", "0");
+            
+            return engine;
+        }
         
         public void Init()
         {
@@ -194,6 +216,8 @@ namespace WFInfo
             FirstEngine = CreateEngine();
             SecondEngine?.Dispose();
             SecondEngine = CreateEngine();
+            NumbersOnlyEngine?.Dispose();
+            NumbersOnlyEngine = CreateNumbersOnlyEngine();
         }
 
         private void LoadEngines()
@@ -213,21 +237,20 @@ namespace WFInfo
             FirstEngine = CreateEngine();
             SecondEngine?.Dispose();
             SecondEngine = CreateEngine();
+            NumbersOnlyEngine?.Dispose();
+            NumbersOnlyEngine = CreateNumbersOnlyEngine();
         }
         
         public void SetNumbersOnlyMode()
         {
-            FirstEngine?.SetVariable("tessedit_char_whitelist", NumbersOnlyWhitelist);
+            // Numbers-only mode now uses the dedicated NumbersOnlyEngine
+            // This avoids race conditions from mutating the shared FirstEngine
         }
         
         public void ResetToDefaultMode()
         {
-            if (FirstEngine != null)
-            {
-                var processor = LanguageProcessorFactory.GetProcessor(Locale);
-                var whitelist = processor?.CharacterWhitelist ?? DefaultWhitelist;
-                FirstEngine.SetVariable("tessedit_char_whitelist", whitelist);
-            }
+            // Default mode uses FirstEngine - no state change needed
+            // This avoids race conditions from mutating the shared FirstEngine
         }
         private void getLocaleTessdata()
         {

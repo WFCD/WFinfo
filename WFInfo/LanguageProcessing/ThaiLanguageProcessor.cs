@@ -26,20 +26,54 @@ namespace WFInfo.LanguageProcessing
         {
             s = s ?? string.Empty;
             t = t ?? string.Empty;
+            
+            // Apply the same preprocessing used by the fallback path
+            s = ApplyBlueprintRemovals(s, BlueprintRemovals);
+            t = ApplyBlueprintRemovals(t, BlueprintRemovals);
+            s = NormalizeThaiCharacters(s);
+            t = NormalizeThaiCharacters(t);
+            s = s.Trim();
+            t = t.Trim();
+            
             // Check if both inputs contain Thai characters for Thai-aware comparison
             bool sHasThai = ContainsThai(s);
             bool tHasThai = ContainsThai(t);
             
             if (sHasThai && tHasThai)
             {
-                // Thai-aware path: use original Thai characters with Thai similarity logic
+                // Thai-aware path: use normalized Thai characters with Thai similarity logic
                 return CalculateThaiAwareDistance(s, t);
             }
             else
             {
-                // Fallback/transliterated path: normalize to Latin equivalents
-                return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeThaiCharacters, callBaseDefault: true);
+                // Fallback/transliterated path: use simple Levenshtein with already-normalized strings
+                return SimpleLevenshteinDistance(s, t);
             }
+        }
+
+        /// <summary>
+        /// Applies blueprint removal patterns to a string
+        /// </summary>
+        private static string ApplyBlueprintRemovals(string input, string[] removals)
+        {
+            if (string.IsNullOrEmpty(input) || removals == null)
+                return input;
+            
+            string result = input;
+            foreach (var removal in removals)
+            {
+                if (!string.IsNullOrEmpty(removal))
+                {
+                    // Case-insensitive replacement using IndexOf
+                    int index = result.IndexOf(removal, StringComparison.OrdinalIgnoreCase);
+                    while (index >= 0)
+                    {
+                        result = result.Substring(0, index) + result.Substring(index + removal.Length);
+                        index = result.IndexOf(removal, StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+            }
+            return result;
         }
 
         /// <summary>

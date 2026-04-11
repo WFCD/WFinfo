@@ -3016,6 +3016,7 @@ namespace WFInfo
         internal static void InitForTest(ITesseractService tesseractService, IReadOnlyApplicationSettings settings,
             IWindowInfoService window, IHDRDetectorService hdrDetector)
         {
+            _tesseractInitFailed = false;
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
             _tesseractService = tesseractService;
             _soundPlayer = null;
