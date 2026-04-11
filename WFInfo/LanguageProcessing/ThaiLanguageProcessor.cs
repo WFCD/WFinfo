@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -12,6 +13,24 @@ namespace WFInfo.LanguageProcessing
     /// </summary>
     public class ThaiLanguageProcessor : LanguageProcessor
     {
+        // Static readonly fields to avoid per-call allocations in GetThaiCharacterDifference
+        private static readonly char[][] SimilarChars = new[]
+        {
+            new[] {'ก', 'ฮ'}, // ko/ho - similar round shapes
+            new[] {'ด', 'ป'}, // do/po - similar loops
+            new[] {'ต', 'ถ'}, // to/tho - similar shapes
+            new[] {'บ', 'ป'}, // bo/po - similar loops
+            new[] {'อ', 'โ'}, // o/o - different forms
+            new[] {'ผ', 'ฝ'}, // pho/fo - similar shapes
+            new[] {'ซ', 'ศ', 'ษ'}, // so variations
+            new[] {'ง', 'ย'}, // ngo/yo - similar tails
+            new[] {'ม', 'น'}, // mo/no - similar curves
+            new[] {'ว', 'ใ'}, // wo/ai - similar shapes
+        };
+
+        // Unique Thai tone marks for OCR confusion detection
+        private static readonly HashSet<char> ToneMarks = new HashSet<char> { '่', '้', '๊', '๋' };
+
         public ThaiLanguageProcessor(IReadOnlyApplicationSettings settings) : base(settings)
         {
         }
@@ -119,22 +138,8 @@ namespace WFInfo.LanguageProcessing
         {
             if (a == b) return 0;
 
-            // Similar looking Thai characters (common OCR confusions)
-            var similarChars = new[]
-            {
-                new[] {'ก', 'ฮ'}, // ko/ho - similar round shapes
-                new[] {'ด', 'ป'}, // do/po - similar loops
-                new[] {'ต', 'ถ'}, // to/tho - similar shapes
-                new[] {'บ', 'ป'}, // bo/po - similar loops
-                new[] {'อ', 'โ'}, // o/o - different forms
-                new[] {'ผ', 'ฝ'}, // pho/fo - similar shapes
-                new[] {'ซ', 'ศ', 'ษ'}, // so variations
-                new[] {'ง', 'ย'}, // ngo/yo - similar tails
-                new[] {'ม', 'น'}, // mo/no - similar curves
-                new[] {'ว', 'ใ'}, // wo/ai - similar shapes
-            };
-
-            foreach (var pair in similarChars)
+            // Check against static similar character groups (no allocation)
+            foreach (var pair in SimilarChars)
             {
                 if ((a == pair[0] && b == pair[1]) || (a == pair[1] && b == pair[0]))
                     return 1; // Low cost for similar looking characters
@@ -145,10 +150,9 @@ namespace WFInfo.LanguageProcessing
                     return 1;
             }
 
-            // Tone mark confusions (lower cost for tone differences)
-            var toneMarks = new[] {'่', '้', '๊', '๋', '่', '้', '๊', '๋'}; // Different tone marks
-            bool aIsTone = toneMarks.Contains(a);
-            bool bIsTone = toneMarks.Contains(b);
+            // Tone mark confusions (lower cost for tone differences) - uses static HashSet
+            bool aIsTone = ToneMarks.Contains(a);
+            bool bIsTone = ToneMarks.Contains(b);
             if (aIsTone && bIsTone) return 1; // Low cost for tone mark differences
 
             // Default cost for different characters

@@ -51,6 +51,7 @@ namespace WFInfo
         // Non-blocking log queue: AddLog enqueues, background timer flushes to disk
         private static readonly ConcurrentQueue<string> _logQueue = new ConcurrentQueue<string>();
         private static readonly System.Threading.Timer _logFlushTimer = new System.Threading.Timer(FlushLogQueue, null, 250, 250);
+        private static int _isFlushing = 0; // 0 = not flushing, 1 = flushing (Interlocked)
 
         public static bool Initialized;
         private static event EventHandler OnInitialized;
@@ -186,8 +187,8 @@ namespace WFInfo
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
-                    // Marshal UI call to UI thread
-                    RunOnUIThread(() => MainWindow.INSTANCE.LoggedIn());
+                    // Marshal UI call to UI thread using safe overload
+                    RunOnUIThread(mw => mw.LoggedIn());
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
@@ -318,6 +319,11 @@ namespace WFInfo
         private static void FlushLogQueue(object state)
         {
             if (_logQueue.IsEmpty) return;
+            
+            // Serialize flushes: return immediately if another flush is in progress
+            if (System.Threading.Interlocked.Exchange(ref _isFlushing, 1) != 0)
+                return;
+            
             try
             {
                 Directory.CreateDirectory(AppPath);
@@ -333,6 +339,10 @@ namespace WFInfo
             {
                 System.Diagnostics.Debug.WriteLine($"AddLog disk I/O error: {ex}");
             }
+            finally
+            {
+                System.Threading.Interlocked.Exchange(ref _isFlushing, 0);
+            }
         }
 
         /// <summary>
@@ -341,7 +351,15 @@ namespace WFInfo
         public static void FlushLog()
         {
             _logFlushTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+            
+            // Wait for any in-flight flush to complete
+            System.Threading.SpinWait.SpinUntil(() => _isFlushing == 0);
+            
+            // Now perform final flush
             FlushLogQueue(null);
+            
+            // Wait for final flush to complete
+            System.Threading.SpinWait.SpinUntil(() => _isFlushing == 0);
         }
 
         /// <summary>
