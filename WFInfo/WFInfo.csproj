@@ -153,10 +153,10 @@
   <!-- Target to create WFInfo.zip for publishing (Release builds only) -->
   <Target Name="CreatePublishZip" AfterTargets="GenerateUpdateXml" Condition="'$(Configuration)'=='Release'">
     <PropertyGroup>
-      <ExePath>$(OutputPath)WFInfo.exe</ExePath>
-      <ZipPath>$(OutputPath)WFInfo.zip</ZipPath>
+      <ExePath>$(TargetPath)</ExePath>
+      <ZipPath>$(OutputPath)$(AssemblyName).zip</ZipPath>
       <TempDir>$(OutputPath)temp\</TempDir>
-      <TempExePath>$(TempDir)WFInfo.exe</TempExePath>
+      <TempExePath>$(TempDir)$(AssemblyName)$(TargetExt)</TempExePath>
     </PropertyGroup>
     
     <!-- Create temporary directory -->

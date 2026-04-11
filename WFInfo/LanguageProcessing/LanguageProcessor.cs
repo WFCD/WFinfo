@@ -26,10 +26,11 @@ namespace WFInfo.LanguageProcessing
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _culture = GetCultureInfo(settings.Locale);
-            
-            // Initialize normalized blueprint removals once per concrete type
-            Type concreteType = GetType();
-            _normalizedBlueprintRemovalsCache.GetOrAdd(concreteType, type => 
+        }
+
+        private string[] GetNormalizedBlueprintRemovals()
+        {
+            return _normalizedBlueprintRemovalsCache.GetOrAdd(GetType(), type =>
             {
                 var blueprintRemovals = BlueprintRemovals ?? Array.Empty<string>();
                 var normalized = new string[blueprintRemovals.Length];
@@ -128,7 +129,7 @@ namespace WFInfo.LanguageProcessing
             
             // Check against pre-normalized blueprint removal terms
             // Handle common formats: standalone terms, in parentheses, etc.
-            var normalizedBlueprintRemovals = _normalizedBlueprintRemovalsCache[GetType()];
+            var normalizedBlueprintRemovals = GetNormalizedBlueprintRemovals();
             for (int i = 0; i < normalizedBlueprintRemovals.Length; i++)
             {
                 string normalizedRemoval = normalizedBlueprintRemovals[i];

@@ -12,13 +12,6 @@ namespace WFInfo.LanguageProcessing
     /// </summary>
     public class KoreanLanguageProcessor : LanguageProcessor
     {
-                
-        // Static spacing corrections to avoid recreating dictionary on every call
-        private static readonly Dictionary<string, string> spacingCorrections = new Dictionary<string, string>
-        {
-            {"  ", " "}, {"   ", " "}, {"    ", " "}
-        };
-
         // Static Korean character replacements to avoid recreating list on every call
         private static readonly List<KeyValuePair<string, string>> koreanReplacements = new List<KeyValuePair<string, string>>
         {

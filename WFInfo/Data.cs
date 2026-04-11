@@ -157,7 +157,8 @@ namespace WFInfo
 
         public int GetGithubVersion()
         {
-            WebClient githubWebClient = CustomEntrypoint.CreateNewWebClient();
+            using (WebClient githubWebClient = CustomEntrypoint.CreateNewWebClient())
+            {
             JObject github =
                 JsonConvert.DeserializeObject<JObject>(
                     githubWebClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases/latest"));
@@ -167,6 +168,7 @@ namespace WFInfo
                 return Main.VersionToInteger(githubVersion);
             }
             return Main.VersionToInteger(Main.BuildVersion);
+            } // end using githubWebClient
         }
 
         // Load item list from Sheets

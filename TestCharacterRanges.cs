@@ -1,4 +1,7 @@
 using System;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Input;
 using WFInfo.LanguageProcessing;
 using WFInfo.Settings;
 
@@ -9,41 +12,34 @@ namespace WFInfo.Test
     /// </summary>
     public class TestCharacterRanges
     {
+        // Known minimum whitelist lengths — any shorter indicates a regression
+        private const int MinJapaneseWhitelistLength = 10000;
+        private const int MinKoreanWhitelistLength = 5000;
+        private const int MinSimplifiedChineseWhitelistLength = 10000;
+        private const int MinTraditionalChineseWhitelistLength = 10000;
+
         public static void RunTestCharacterRanges()
         {
-            Console.WriteLine("Testing character range generation...");
-            
-            // Create a mock settings object
             var settings = new TestApplicationSettings();
-            
-            try
-            {
-                // Test Japanese processor
-                var japaneseProcessor = new JapaneseLanguageProcessor(settings);
-                var japaneseWhitelist = japaneseProcessor.CharacterWhitelist;
-                Console.WriteLine($"Japanese whitelist length: {japaneseWhitelist.Length}");
-                
-                // Test Korean processor  
-                var koreanProcessor = new KoreanLanguageProcessor(settings);
-                var koreanWhitelist = koreanProcessor.CharacterWhitelist;
-                Console.WriteLine($"Korean whitelist length: {koreanWhitelist.Length}");
-                
-                // Test Chinese processors
-                var simplifiedProcessor = new SimplifiedChineseLanguageProcessor(settings);
-                var simplifiedWhitelist = simplifiedProcessor.CharacterWhitelist;
-                Console.WriteLine($"Simplified Chinese whitelist length: {simplifiedWhitelist.Length}");
-                
-                var traditionalProcessor = new TraditionalChineseLanguageProcessor(settings);
-                var traditionalWhitelist = traditionalProcessor.CharacterWhitelist;
-                Console.WriteLine($"Traditional Chinese whitelist length: {traditionalWhitelist.Length}");
-                
-                Console.WriteLine("All character range tests passed!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error testing character ranges: {ex.Message}");
-                throw;
-            }
+            LanguageProcessorFactory.Initialize(settings);
+            LanguageProcessorFactory.ClearCache();
+
+            AssertWhitelistLength("ja", MinJapaneseWhitelistLength);
+            AssertWhitelistLength("ko", MinKoreanWhitelistLength);
+            AssertWhitelistLength("zh-Hans", MinSimplifiedChineseWhitelistLength);
+            AssertWhitelistLength("zh-Hant", MinTraditionalChineseWhitelistLength);
+        }
+
+        private static void AssertWhitelistLength(string locale, int minExpected)
+        {
+            var processor = LanguageProcessorFactory.GetProcessor(locale);
+            string whitelist = processor.CharacterWhitelist;
+            Debug.Assert(
+                whitelist != null && whitelist.Length >= minExpected,
+                $"CharacterWhitelist for '{locale}' has length {whitelist?.Length ?? 0}, expected >= {minExpected}");
+            if (whitelist == null || whitelist.Length < minExpected)
+                throw new InvalidOperationException(
+                    $"CharacterWhitelist regression: '{locale}' length={whitelist?.Length ?? 0}, expected >= {minExpected}");
         }
     }
     
@@ -55,16 +51,16 @@ namespace WFInfo.Test
         public Display Display => Display.Window;
         public double MainWindowLocation_X => 0;
         public double MainWindowLocation_Y => 0;
-        public System.Windows.Point MainWindowLocation => new System.Windows.Point(0, 0);
+        public Point MainWindowLocation => new Point(0, 0);
         public bool IsOverlaySelected => false;
         public bool IsLightSelected => false;
         public string ActivationKey => "";
-        public System.Windows.Input.Key? ActivationKeyKey => null;
-        public System.Windows.Input.MouseButton? ActivationMouseButton => null;
-        public System.Windows.Input.Key DebugModifierKey => System.Windows.Input.Key.None;
-        public System.Windows.Input.Key SearchItModifierKey => System.Windows.Input.Key.None;
-        public System.Windows.Input.Key SnapitModifierKey => System.Windows.Input.Key.None;
-        public System.Windows.Input.Key MasterItModifierKey => System.Windows.Input.Key.None;
+        public Key? ActivationKeyKey => null;
+        public MouseButton? ActivationMouseButton => null;
+        public Key DebugModifierKey => Key.None;
+        public Key SearchItModifierKey => Key.None;
+        public Key SnapitModifierKey => Key.None;
+        public Key MasterItModifierKey => Key.None;
         public bool Debug => false;
         public string Locale => "en";
         public bool Clipboard => false;

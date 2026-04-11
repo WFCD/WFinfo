@@ -17,6 +17,7 @@ using WFInfo.Services.WindowInfo;
 using Microsoft.Extensions.DependencyInjection;
 using WFInfo.Services;
 using WFInfo.Services.HDRDetection;
+using System.Collections.Concurrent;
 using System.Linq;
 using Windows.Foundation.Metadata;
 
@@ -46,6 +47,10 @@ namespace WFInfo
         public static PlusOne plusOne = new PlusOne();
         public static System.Threading.Timer timer;
         public static System.Drawing.Point lastClick;
+
+        // Non-blocking log queue: AddLog enqueues, background timer flushes to disk
+        private static readonly ConcurrentQueue<string> _logQueue = new ConcurrentQueue<string>();
+        private static readonly System.Threading.Timer _logFlushTimer = new System.Threading.Timer(FlushLogQueue, null, 250, 250);
 
         public static bool Initialized;
         private static event EventHandler OnInitialized;
@@ -280,30 +285,62 @@ namespace WFInfo
             }
         }
 
+        public static void RunOnUIThread(Action<MainWindow> act)
+        {
+            var mw = MainWindow.INSTANCE;
+            if (mw?.Dispatcher != null && !mw.Dispatcher.HasShutdownStarted && !mw.Dispatcher.HasShutdownFinished)
+            {
+                if (mw.Dispatcher.CheckAccess())
+                    act(mw);
+                else
+                    mw.Dispatcher.Invoke(() => act(mw));
+            }
+        }
+
         public static void StartMessage()
         {
             Directory.CreateDirectory(AppPath);
             Directory.CreateDirectory(AppPath + @"\debug");
             using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
             {
-                sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
-                sw.WriteLineAsync("   STARTING WFINFO " + buildVersion + " at " + DateTime.UtcNow);
-                sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
+                sw.WriteLine("--------------------------------------------------------------------------------------------------------------------------------------------");
+                sw.WriteLine("   STARTING WFINFO " + buildVersion + " at " + DateTime.UtcNow);
+                sw.WriteLine("--------------------------------------------------------------------------------------------------------------------------------------------");
             }
         }
 
         public static void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
             Debug.WriteLine(argm);
-            Directory.CreateDirectory(AppPath);
+            _logQueue.Enqueue("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
+        }
+
+        private static void FlushLogQueue(object state)
+        {
+            if (_logQueue.IsEmpty) return;
             try
             {
+                Directory.CreateDirectory(AppPath);
                 using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
+                {
+                    while (_logQueue.TryDequeue(out string line))
+                    {
+                        sw.WriteLine(line);
+                    }
+                }
             }
             catch (Exception)
             {
             }
+        }
+
+        /// <summary>
+        /// Flushes any remaining log entries to disk. Call on shutdown.
+        /// </summary>
+        public static void FlushLog()
+        {
+            _logFlushTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+            FlushLogQueue(null);
         }
 
         /// <summary>
@@ -313,7 +350,7 @@ namespace WFInfo
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
         public static void StatusUpdate(string message, int severity)
         {
-            RunOnUIThread(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
+            RunOnUIThread(mw => mw.ChangeStatus(message, severity));
         }
 
         public void ActivationKeyPressed(Object key)
@@ -555,7 +592,7 @@ namespace WFInfo
         // Switch to logged in mode for warfrane.market systems
         public void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
-            RunOnUIThread(() => { MainWindow.INSTANCE.LoggedIn(); });
+            RunOnUIThread(mw => mw.LoggedIn());
 
             // start the AFK timer
             latestActive = DateTime.UtcNow.AddMinutes(1);
@@ -625,7 +662,7 @@ namespace WFInfo
 
         public static void SignOut()
         {
-            RunOnUIThread(() => { MainWindow.INSTANCE.SignOut(); });
+            RunOnUIThread(mw => mw.SignOut());
         }
     }
 

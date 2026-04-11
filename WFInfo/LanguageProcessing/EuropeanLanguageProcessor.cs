@@ -65,9 +65,7 @@ namespace WFInfo.LanguageProcessing
                 .Replace('ù', 'u').Replace('ú', 'u').Replace('û', 'u').Replace('ü', 'u')
                 .Replace('ñ', 'n')
                 .Replace('ç', 'c')
-                .Replace('ÿ', 'y')
-                .Replace('Ç', 'C')
-                .Replace('Ÿ', 'Y');
+                .Replace('ÿ', 'y');
         }
     }
 

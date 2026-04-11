@@ -190,6 +190,10 @@ namespace WFInfo
         public void Init()
         {
             LoadEngines();
+            FirstEngine?.Dispose();
+            FirstEngine = CreateEngine();
+            SecondEngine?.Dispose();
+            SecondEngine = CreateEngine();
         }
 
         private void LoadEngines()
@@ -264,17 +268,20 @@ namespace WFInfo
                     try
                     {
                         webClient.DownloadFile(traineddata_hotlink, app_data_traineddata_path);
-                        // We download to normal data path. If current data path differs, copy it to there too
-                        if (curr_data_traineddata_path != app_data_traineddata_path)
-                        {
-                            File.Copy(app_data_traineddata_path, curr_data_traineddata_path, true);
-                        }
                     }
                     catch (Exception ex)
                     {
                         Main.AddLog($"Failed to download traineddata for locale '{Locale}': {ex.Message}. Source: {traineddata_hotlink}, Target: {app_data_traineddata_path}");
                         // Don't throw during initialization to allow service to continue with existing data
                     }
+                }
+                // Always ensure the active tessdata is in sync when paths differ
+                if (curr_data_traineddata_path != app_data_traineddata_path
+                    && File.Exists(app_data_traineddata_path)
+                    && (!File.Exists(curr_data_traineddata_path)
+                        || CustomEntrypoint.GetMD5hash(curr_data_traineddata_path) != CustomEntrypoint.GetMD5hash(app_data_traineddata_path)))
+                {
+                    File.Copy(app_data_traineddata_path, curr_data_traineddata_path, true);
                 }
             }
             else

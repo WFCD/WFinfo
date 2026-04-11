@@ -216,7 +216,7 @@ namespace WFInfo.LanguageProcessing
             
             // Normalize similar vowel forms
             result = result.Replace('ใ', 'ไ'); // ai vowel variations
-            result = result.Replace('ำ', 'ํ'); // am vowel variations
+            result = result.Replace("ำ", "ํา"); // am vowel variations
             
             return result.ToLowerInvariant();
         }

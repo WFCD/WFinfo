@@ -18,6 +18,7 @@ namespace WFInfo
                 WFInfo.MainWindow.listener.Dispose();
                 WFInfo.MainWindow.INSTANCE.Exit(null, null);
             }
+            WFInfo.Main.FlushLog();
         }
     }
 }

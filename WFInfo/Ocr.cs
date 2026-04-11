@@ -110,7 +110,8 @@ namespace WFInfo
         // CJK language detection helper - Korean, Simplified Chinese, Traditional Chinese share similar OCR needs
         private static bool IsCJKLocale()
         {
-            var locale = _settings?.Locale ?? ApplicationSettings.GlobalReadonlySettings.Locale;
+            var locale = _settings?.Locale;
+            if (string.IsNullOrEmpty(locale)) return false;
             return locale == "ko" || locale == "zh-hans" || locale == "zh-hant" || locale == "ja";
         }
         
@@ -189,6 +190,7 @@ namespace WFInfo
             // Initialize the language processor factory before tesseract service
             LanguageProcessorFactory.Initialize(settings);
 
+            _tesseractInitFailed = false;
             try
             {
                 _tesseractService.Init();
@@ -197,7 +199,6 @@ namespace WFInfo
             {
                 Main.AddLog($"ERROR: Failed to initialize TesseractService: {ex.Message}");
                 _tesseractInitFailed = true;
-                _tesseractService = null;
             }
         }
 
@@ -267,7 +268,7 @@ namespace WFInfo
 
             // Remove any empty (or suspiciously short) items from the array
             firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s) && s.Replace(" ", "").Length > 6).ToArray();
-            if (firstChecks == null || firstChecks.Length == 0 || CheckIfError())
+            if (firstChecks == null || firstChecks.Length == 0)
             {
                 processingActive = false;
                 Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
@@ -279,6 +280,7 @@ namespace WFInfo
                         Main.SpawnErrorPopup(time);
                     });
                 }
+                return;
             }
             double bestPlat = 0;
             int bestDucat = 0;
@@ -288,6 +290,8 @@ namespace WFInfo
 
             #endregion
 
+            try
+            {
             #region processing data
             if (firstChecks.Length > 0)
             {
@@ -341,10 +345,10 @@ namespace WFInfo
                     }
                     double platinum = double.Parse(plat, styles, Main.culture);
                     string volume = job["volume"].ToObject<string>();
-                    bool vaulted = Main.dataBase.IsPartVaulted(correctName);
-                    bool mastered = Main.dataBase.IsPartMastered(correctName);
-                    string partsOwned = Main.dataBase.PartsOwned(correctName);
-                    string partsCount = Main.dataBase.PartsCount(correctName);
+                    bool vaulted = SafeCall(() => Main.dataBase.IsPartVaulted(correctName), false, "IsPartVaulted", correctName);
+                    bool mastered = SafeCall(() => Main.dataBase.IsPartMastered(correctName), false, "IsPartMastered", correctName);
+                    string partsOwned = SafeCall(() => Main.dataBase.PartsOwned(correctName), "0", "PartsOwned", correctName);
+                    string partsCount = SafeCall(() => Main.dataBase.PartsCount(correctName), "0", "PartsCount", correctName);
                     int duc = ducatValue;
                     #endregion
 
@@ -463,8 +467,11 @@ namespace WFInfo
                 partialScreenshot.Dispose();
                 partialScreenshot = null;
             }
-
-            processingActive = false;
+            } // end try
+            finally
+            {
+                processingActive = false;
+            }
 
         }
 
@@ -674,20 +681,24 @@ namespace WFInfo
             return active;
         }
 #pragma warning disable IDE0044 // Add readonly modifier
-        private static short[,,] GetThemeCache = new short[256, 256, 256];
-        private static short[,,] GetThresholdCache = new short[256, 256, 256];
-#pragma warning disable IDE0044 // Add readonly modifier
+        private static int[,,] GetThemeCache = new int[256, 256, 256];
+        private static int[,,] GetThresholdCache = new int[256, 256, 256];
+        private static readonly object GetThemeCacheLock = new object();
+#pragma warning restore IDE0044 // Add readonly modifier
 
         private static WFtheme GetClosestTheme(Color clr, out int threshold)
         {
-            threshold = 999;
-            WFtheme minTheme = WFtheme.CORPUS;
-            if (GetThemeCache[clr.R, clr.G, clr.B] > 0)
+            lock (GetThemeCacheLock)
             {
-                threshold = GetThresholdCache[clr.R, clr.G, clr.B];
-                return (WFtheme)(GetThemeCache[clr.R, clr.G, clr.B] - 1);
+                if (GetThemeCache[clr.R, clr.G, clr.B] > 0)
+                {
+                    threshold = GetThresholdCache[clr.R, clr.G, clr.B];
+                    return (WFtheme)(GetThemeCache[clr.R, clr.G, clr.B] - 1);
+                }
             }
 
+            threshold = 999;
+            WFtheme minTheme = WFtheme.CORPUS;
             foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
             {
                 if ((int)theme >= 0) //ignore special theme values
@@ -701,8 +712,11 @@ namespace WFInfo
                     }
                 }
             }
-            GetThemeCache[clr.R, clr.G, clr.B] = (byte)(minTheme + 1);
-            GetThresholdCache[clr.R, clr.G, clr.B] = (byte)threshold;
+            lock (GetThemeCacheLock)
+            {
+                GetThemeCache[clr.R, clr.G, clr.B] = (int)minTheme + 1;
+                GetThresholdCache[clr.R, clr.G, clr.B] = threshold;
+            }
             return minTheme;
         }
 
@@ -764,7 +778,8 @@ namespace WFInfo
                 var part = foundParts[i];
                 if (!PartNameValid(part.Name))
                 {
-                    Main.AddLog($"SnapIt: Rejected invalid part name: \"{part.Name}\" (length after trim: {part.Name?.Replace(" ", "").Length ?? 0})");
+                    if (_settings.Debug)
+                        Main.AddLog($"SnapIt: Rejected invalid part name: \"{part.Name}\" (length after trim: {part.Name?.Replace(" ", "").Length ?? 0})");
                     foundParts.RemoveAt(i); //remove invalid part from list to not clog VerifyCount
                     i--; // Adjust index since we removed an item
                     resultCount--;
@@ -1169,7 +1184,8 @@ namespace WFInfo
                     // If all words were filtered, skip this line
                     if (filteredWords.Count == 0)
                     {
-                        Main.AddLog($"SnapIt: All words filtered from line: \"{currentLine}\"");
+                        if (_settings.Debug)
+                            Main.AddLog($"SnapIt: All words filtered from line: \"{currentLine}\"");
                         continue;
                     }
                     
@@ -2903,6 +2919,11 @@ namespace WFInfo
         internal static List<string> ProcessRewardScreenForTest(Bitmap screenshot, IWindowInfoService windowService)
         {
             var results = new List<string>();
+            if (_tesseractInitFailed || _tesseractService == null)
+            {
+                Main.AddLog("Test ProcessReward: TesseractService is null or failed to initialize");
+                return results;
+            }
             windowService.UseImage(screenshot);
 
             List<Bitmap> parts;
@@ -2956,6 +2977,11 @@ namespace WFInfo
         internal static List<string> ProcessSnapItForTest(Bitmap screenshot, IWindowInfoService windowService)
         {
             var results = new List<string>();
+            if (_tesseractInitFailed || _tesseractService == null)
+            {
+                Main.AddLog("Test ProcessSnapIt: TesseractService is null or failed to initialize");
+                return results;
+            }
             windowService.UseImage(screenshot);
 
             WFtheme theme = GetThemeWeighted(out _, screenshot);
