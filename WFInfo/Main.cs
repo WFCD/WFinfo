@@ -53,6 +53,7 @@ namespace WFInfo
         private static readonly ConcurrentQueue<string> _logQueue = new ConcurrentQueue<string>();
         private static readonly System.Threading.Timer _logFlushTimer = new System.Threading.Timer(FlushLogQueue, null, 250, 250);
         private static int _isFlushing = 0; // 0 = not flushing, 1 = flushing (Interlocked)
+        private static int _shutdownInProgress = 0; // 0 = normal, 1 = shutting down (Interlocked)
 
         public static bool Initialized;
         private static event EventHandler OnInitialized;
@@ -314,7 +315,28 @@ namespace WFInfo
         public static void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
             Debug.WriteLine(argm);
-            _logQueue.Enqueue("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
+            string logEntry = "[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm;
+            
+            // During shutdown, write synchronously to avoid losing logs
+            if (System.Threading.Interlocked.CompareExchange(ref _shutdownInProgress, 0, 0) == 1)
+            {
+                try
+                {
+                    Directory.CreateDirectory(AppPath);
+                    using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+                    {
+                        sw.WriteLine(logEntry);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"AddLog synchronous write error during shutdown: {ex}");
+                }
+            }
+            else
+            {
+                _logQueue.Enqueue(logEntry);
+            }
         }
 
         private static void FlushLogQueue(object state)
@@ -369,16 +391,41 @@ namespace WFInfo
         /// </summary>
         public static void FlushLog()
         {
+            // Signal shutdown mode first so new AddLog calls write synchronously
+            System.Threading.Interlocked.Exchange(ref _shutdownInProgress, 1);
+            
+            // Stop the background timer
             _logFlushTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
             
-            // Wait for any in-flight flush to complete
-            System.Threading.SpinWait.SpinUntil(() => _isFlushing == 0);
-            
-            // Now perform final flush
-            FlushLogQueue(null);
-            
-            // Wait for final flush to complete
-            System.Threading.SpinWait.SpinUntil(() => _isFlushing == 0);
+            // Keep flushing until queue is empty and no flush in progress
+            int emptyCount = 0;
+            while (emptyCount < 3) // Ensure queue stays empty for 3 consecutive checks
+            {
+                // Wait for any in-flight flush to complete
+                System.Threading.SpinWait.SpinUntil(() => _isFlushing == 0);
+                
+                // Try to flush
+                FlushLogQueue(null);
+                
+                // Wait for flush to complete
+                System.Threading.SpinWait.SpinUntil(() => _isFlushing == 0);
+                
+                // Check if queue is empty
+                if (_logQueue.IsEmpty)
+                {
+                    emptyCount++;
+                }
+                else
+                {
+                    emptyCount = 0;
+                }
+                
+                // Small delay to let any concurrent producers finish
+                if (emptyCount < 3)
+                {
+                    System.Threading.Thread.Sleep(50);
+                }
+            }
         }
 
         /// <summary>

@@ -200,24 +200,31 @@ namespace WFInfo
                 string itemId = item["id"].ToString();
                 if (tempMarketItems.ContainsKey(itemId))
                 {
-                    // Validate presence of locale data and throw exception if missing
+                    string localizedName = null;
+                    
+                    // Degrade gracefully when i18n data is missing - log warning and use fallback
                     if (item["i18n"] == null)
                     {
-                        throw new KeyNotFoundException($"Item {itemId} missing i18n data entirely");
+                        Main.AddLog($"Warning: Item {itemId} missing i18n data entirely, using default name");
                     }
-                    
-                    if (item["i18n"][_settings.Locale] == null)
+                    else if (item["i18n"][_settings.Locale] == null)
                     {
-                        throw new KeyNotFoundException($"Item {itemId} missing locale data for {_settings.Locale}");
+                        Main.AddLog($"Warning: Item {itemId} missing locale data for {_settings.Locale}, using default name");
                     }
-                    
-                    if (item["i18n"][_settings.Locale]["name"] == null)
+                    else if (item["i18n"][_settings.Locale]["name"] == null)
                     {
-                        throw new KeyNotFoundException($"Item {itemId} missing name field for locale {_settings.Locale}");
+                        Main.AddLog($"Warning: Item {itemId} missing name field for locale {_settings.Locale}, using default name");
+                    }
+                    else
+                    {
+                        localizedName = item["i18n"][_settings.Locale]["name"].ToString();
                     }
                     
-                    string localizedName = item["i18n"][_settings.Locale]["name"].ToString();
-                    tempMarketItems[itemId] = tempMarketItems[itemId] + "|" + localizedName;
+                    // Append localized name if available, otherwise leave as-is (English only)
+                    if (!string.IsNullOrEmpty(localizedName))
+                    {
+                        tempMarketItems[itemId] = tempMarketItems[itemId] + "|" + localizedName;
+                    }
                 }
             }
 
@@ -918,6 +925,16 @@ namespace WFInfo
             {
                 if (marketItems == null)
                     return s;
+                
+                // Validate that cached marketItems locale matches current processor locale
+                // If stale (after locale switch), skip lookup to avoid using wrong localized names
+                string cachedLocale = marketItems.TryGetValue("locale", out var localeToken) ? localeToken?.ToString() : null;
+                if (cachedLocale != processor.Culture.Name)
+                {
+                    Main.AddLog($"Warning: marketItems locale ({cachedLocale ?? "null"}) doesn't match processor locale ({processor.Culture.Name}), skipping localized lookup");
+                    return s;
+                }
+                
                 snapshot = new List<KeyValuePair<string, string>>(marketItems.Count);
                 foreach (var kvp in marketItems)
                 {
@@ -1176,7 +1193,8 @@ namespace WFInfo
 
         private static string ComputeSetName(string name)
         {
-            string result = name.ToLower(Main.culture);
+            var processor = LanguageProcessorFactory.GetCurrentProcessor();
+            string result = name.ToLower(processor.Culture);
 
             if (result.Contains("kavasa"))
             {
