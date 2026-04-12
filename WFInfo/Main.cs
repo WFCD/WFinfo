@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -187,8 +188,8 @@ namespace WFInfo
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
-                    // Marshal UI call to UI thread using safe overload
-                    RunOnUIThread(mw => mw.LoggedIn());
+                    // Call Main.LoggedIn() to ensure AFK timer and startup status logic runs
+                    INSTANCE.LoggedIn();
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
@@ -324,12 +325,25 @@ namespace WFInfo
             if (System.Threading.Interlocked.Exchange(ref _isFlushing, 1) != 0)
                 return;
             
+            // Drain queue to temporary list before attempting file write
+            var tempList = new List<string>();
+            while (_logQueue.TryDequeue(out string line))
+            {
+                tempList.Add(line);
+            }
+            
+            if (tempList.Count == 0)
+            {
+                System.Threading.Interlocked.Exchange(ref _isFlushing, 0);
+                return;
+            }
+            
             try
             {
                 Directory.CreateDirectory(AppPath);
                 using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
                 {
-                    while (_logQueue.TryDequeue(out string line))
+                    foreach (string line in tempList)
                     {
                         sw.WriteLine(line);
                     }
@@ -338,6 +352,11 @@ namespace WFInfo
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"AddLog disk I/O error: {ex}");
+                // Re-enqueue the items back to preserve diagnostic logs
+                foreach (string line in tempList)
+                {
+                    _logQueue.Enqueue(line);
+                }
             }
             finally
             {

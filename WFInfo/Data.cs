@@ -619,7 +619,7 @@ namespace WFInfo
                 {
                     Main.AddLog($"Failed to parse {path}: {ex.Message}");
                     parseHasFailed = true;
-                    return null;
+                    throw new InvalidDataException($"Failed to parse JSON from '{path}'", ex);
                 }
             }
             Main.AddLog(path + " missing, loading blank");
@@ -1010,7 +1010,7 @@ namespace WFInfo
             if (_settings.Locale != "en")
             {
                 // Check against localized names in marketItems
-                List<Tuple<string, string, string>> marketItemsSnapshot;
+                List<Tuple<string, string>> marketItemsSnapshot;
                 var processor = LanguageProcessorFactory.GetCurrentProcessor();
                 string normalizedName = processor.NormalizeForPatternMatching(name);
                 
@@ -1023,7 +1023,7 @@ namespace WFInfo
                         string cachedLocale = marketItems.TryGetValue("locale", out var localeToken) ? localeToken?.ToString() : null;
                         bool useLocalizedNames = cachedLocale == _settings.Locale;
                         
-                        marketItemsSnapshot = new List<Tuple<string, string, string>>();
+                        marketItemsSnapshot = new List<Tuple<string, string>>();
                         
                         foreach (var marketItem in marketItems)
                         {
@@ -1038,12 +1038,12 @@ namespace WFInfo
                             
                             // Use localized name only if cache locale matches and available, otherwise fall back to English
                             string comparisonName = useLocalizedNames && split.Length >= 3 ? split[2] : split[0];
-                            marketItemsSnapshot.Add(Tuple.Create(split[0], comparisonName, processor.NormalizeForPatternMatching(comparisonName)));
+                            marketItemsSnapshot.Add(Tuple.Create(split[0], comparisonName));
                         }
                     }
                     else
                     {
-                        marketItemsSnapshot = new List<Tuple<string, string, string>>();
+                        marketItemsSnapshot = new List<Tuple<string, string>>();
                     }
                 }
                 
@@ -1052,9 +1052,8 @@ namespace WFInfo
                 {
                     string englishName = item.Item1;
                     string storedName = item.Item2;
-                    string normalizedStored = item.Item3;
                     
-                    int val = processor.CalculateLevenshteinDistance(normalizedName, normalizedStored);
+                    int val = processor.CalculateLevenshteinDistance(name, storedName);
                     
                     // Distance filter: Only accept matches with distance < 50% of string length (like GetLocalizedNameData)
                     if (val >= storedName.Length * 0.5) continue;
@@ -1137,7 +1136,7 @@ namespace WFInfo
             
             foreach (KeyValuePair<string, JToken> prop in nameData)
             {
-                if (prop.Value.ToString().ToLower(Main.culture).Contains(name.ToLower(Main.culture)))
+                if (prop.Value.ToString().ToLower(Main.culture).Contains(resolvedName.ToLower(Main.culture)))
                 {
                     int val = LevenshteinDistance(prop.Value.ToString(), resolvedName);
                     if (val < low)
@@ -1166,12 +1165,13 @@ namespace WFInfo
             return lowest;
         }
 
-        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _setNameCache =
-            new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string Culture, string Name), string> _setNameCache =
+            new System.Collections.Concurrent.ConcurrentDictionary<(string, string), string>();
 
         public static string GetSetName(string name)
         {
-            return _setNameCache.GetOrAdd(name, ComputeSetName);
+            var culture = LanguageProcessorFactory.GetCurrentProcessor().Culture;
+            return _setNameCache.GetOrAdd((culture.Name, name), key => ComputeSetName(key.Name));
         }
 
         private static string ComputeSetName(string name)

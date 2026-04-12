@@ -3055,7 +3055,6 @@ namespace WFInfo
             {
                 Main.AddLog($"ERROR: Failed to initialize TesseractService in test mode: {ex.Message}");
                 _tesseractInitFailed = true;
-                _tesseractService = null;
             }
         }
 

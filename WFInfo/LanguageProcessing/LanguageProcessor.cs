@@ -144,69 +144,14 @@ namespace WFInfo.LanguageProcessing
         }
 
         /// <summary>
-        /// Gets localized name data from market items using language-specific matching
+        /// Finds the best matching localized name from market items
         /// </summary>
-        /// <param name="input">Input string to match</param>
-        /// <param name="marketItems">Market items dictionary</param>
-        /// <param name="useLevenshtein">Whether to use full Levenshtein distance</param>
-        /// <returns>Best matching localized name</returns>
-        public virtual string GetLocalizedNameData(string input, JObject marketItems, bool useLevenshtein)
+        private string FindBestLocalizedMatch(string input, IEnumerable<KeyValuePair<string, string>> marketItems, bool useLevenshtein)
         {
-            if (string.IsNullOrEmpty(input) || marketItems == null)
-                return input;
-
             string bestMatch = input;
             int bestDistance = int.MaxValue;
 
-            foreach (KeyValuePair<string, JToken> item in marketItems)
-            {
-                if (item.Key == "version") continue;
-
-                string[] split = item.Value.ToString().Split('|');
-                if (split.Length < 3) continue;
-
-                string localizedName = split[2];
-                if (string.IsNullOrEmpty(localizedName)) continue;
-
-                // Skip if length difference is too large
-                int lengthDiff = Math.Abs(input.Length - localizedName.Length);
-                if (lengthDiff > localizedName.Length / 2) continue;
-
-                int distance;
-                if (useLevenshtein)
-                {
-                    distance = CalculateLevenshteinDistance(input, localizedName);
-                }
-                else
-                {
-                    string normalizedInput = NormalizeForPatternMatching(input);
-                    string normalizedStored = NormalizeForPatternMatching(localizedName);
-                    distance = SimpleLevenshteinDistance(normalizedInput, normalizedStored);
-                }
-
-                // Only accept matches that are reasonably close (less than 50% difference)
-                if (distance < bestDistance && distance < localizedName.Length * 0.5)
-                {
-                    bestDistance = distance;
-                    bestMatch = split[0]; // Return the English name
-                }
-            }
-
-            return bestMatch;
-        }
-
-        /// <summary>
-        /// Gets localized name data from a lightweight snapshot of market items (avoids JObject DeepClone)
-        /// </summary>
-        public virtual string GetLocalizedNameData(string input, List<KeyValuePair<string, string>> marketItemsSnapshot, bool useLevenshtein)
-        {
-            if (string.IsNullOrEmpty(input) || marketItemsSnapshot == null)
-                return input;
-
-            string bestMatch = input;
-            int bestDistance = int.MaxValue;
-
-            foreach (var item in marketItemsSnapshot)
+            foreach (var item in marketItems)
             {
                 if (item.Key == "version") continue;
 
@@ -234,11 +179,39 @@ namespace WFInfo.LanguageProcessing
                 if (distance < bestDistance && distance < localizedName.Length * 0.5)
                 {
                     bestDistance = distance;
-                    bestMatch = split[0];
+                    bestMatch = split[0]; // Return the English name
                 }
             }
 
             return bestMatch;
+        }
+
+        /// <summary>
+        /// Gets localized name data from market items using language-specific matching
+        /// </summary>
+        /// <param name="input">Input string to match</param>
+        /// <param name="marketItems">Market items dictionary</param>
+        /// <param name="useLevenshtein">Whether to use full Levenshtein distance</param>
+        /// <returns>Best matching localized name</returns>
+        public virtual string GetLocalizedNameData(string input, JObject marketItems, bool useLevenshtein)
+        {
+            if (string.IsNullOrEmpty(input) || marketItems == null)
+                return input;
+
+            // Build IEnumerable<KeyValuePair<string,string>> from JObject properties
+            var items = marketItems.Properties().Select(p => new KeyValuePair<string, string>(p.Name, p.Value.ToString()));
+            return FindBestLocalizedMatch(input, items, useLevenshtein);
+        }
+
+        /// <summary>
+        /// Gets localized name data from a lightweight snapshot of market items (avoids JObject DeepClone)
+        /// </summary>
+        public virtual string GetLocalizedNameData(string input, List<KeyValuePair<string, string>> marketItemsSnapshot, bool useLevenshtein)
+        {
+            if (string.IsNullOrEmpty(input) || marketItemsSnapshot == null)
+                return input;
+
+            return FindBestLocalizedMatch(input, marketItemsSnapshot, useLevenshtein);
         }
 
         /// <summary>

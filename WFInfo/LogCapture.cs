@@ -117,7 +117,7 @@ namespace WFInfo
                 return;
             }
 
-            Task.Run(Run);
+            Task.Factory.StartNew(Run, TaskCreationOptions.LongRunning);
             timer.Dispose();
         }
 
