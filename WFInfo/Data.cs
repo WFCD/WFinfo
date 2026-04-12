@@ -220,11 +220,20 @@ namespace WFInfo
                         localizedName = item["i18n"][_settings.Locale]["name"].ToString();
                     }
                     
-                    // Append localized name if available, otherwise leave as-is (English only)
-                    if (!string.IsNullOrEmpty(localizedName))
-                    {
-                        tempMarketItems[itemId] = tempMarketItems[itemId] + "|" + localizedName;
-                    }
+                    // Always append third segment for consistent three-segment shape (name|slug|localizedName)
+                    // Use empty string when localized name is missing so GetUrlName() and
+                    // FindBestLocalizedMatch() don't skip these entries due to segment count checks
+                    tempMarketItems[itemId] = tempMarketItems[itemId] + "|" + (localizedName ?? string.Empty);
+                }
+            }
+
+            // Ensure all entries have three segments even if the localized API didn't include them
+            foreach (var key in tempMarketItems.Properties().Select(p => p.Name).ToList())
+            {
+                string val = tempMarketItems[key].ToString();
+                if (val.Split('|').Length < 3)
+                {
+                    tempMarketItems[key] = val + "|";
                 }
             }
 
@@ -927,12 +936,26 @@ namespace WFInfo
                     return s;
                 
                 // Validate that cached marketItems locale matches current processor locale
-                // If stale (after locale switch), skip lookup to avoid using wrong localized names
+                // If stale (after locale switch), trigger background refresh and fall through to English-based lookup
                 string cachedLocale = marketItems.TryGetValue("locale", out var localeToken) ? localeToken?.ToString() : null;
                 if (cachedLocale != processor.Culture.Name)
                 {
-                    Main.AddLog($"Warning: marketItems locale ({cachedLocale ?? "null"}) doesn't match processor locale ({processor.Culture.Name}), skipping localized lookup");
-                    return s;
+                    Main.AddLog($"Warning: marketItems locale ({cachedLocale ?? "null"}) doesn't match processor locale ({processor.Culture.Name}), triggering background refresh");
+                    // Schedule a background refresh to repopulate marketItems for the new locale
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await ReloadItems();
+                            Main.AddLog($"Background ReloadItems completed for locale {processor.Culture.Name}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Main.AddLog($"Background ReloadItems failed: {ex.Message}");
+                        }
+                    });
+                    // Fall through: the lookup will attempt to match against English names (split[0])
+                    // since the localized names (split[2]) won't match the new locale's OCR text well
                 }
                 
                 snapshot = new List<KeyValuePair<string, string>>(marketItems.Count);

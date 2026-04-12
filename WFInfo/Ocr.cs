@@ -2263,7 +2263,7 @@ namespace WFInfo
             long start = watch.ElapsedMilliseconds;
             long beginning = start;
 
-            int lineHeight = (int)(GetAdjustedLineHeight() * _window.ScreenScaling);
+            int lineHeight = (int)(GetAdjustedLineHeight() / 2 * _window.ScreenScaling);
 
             Color clr;
             int width = _window.Window.Width;

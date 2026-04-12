@@ -54,6 +54,7 @@ namespace WFInfo
         private static readonly System.Threading.Timer _logFlushTimer = new System.Threading.Timer(FlushLogQueue, null, 250, 250);
         private static int _isFlushing = 0; // 0 = not flushing, 1 = flushing (Interlocked)
         private static int _shutdownInProgress = 0; // 0 = normal, 1 = shutting down (Interlocked)
+        private static readonly object _logFileWriteLock = new object();
 
         public static bool Initialized;
         private static event EventHandler OnInitialized;
@@ -304,11 +305,14 @@ namespace WFInfo
         {
             Directory.CreateDirectory(AppPath);
             Directory.CreateDirectory(AppPath + @"\debug");
-            using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+            lock (_logFileWriteLock)
             {
-                sw.WriteLine("--------------------------------------------------------------------------------------------------------------------------------------------");
-                sw.WriteLine("   STARTING WFINFO " + buildVersion + " at " + DateTime.UtcNow);
-                sw.WriteLine("--------------------------------------------------------------------------------------------------------------------------------------------");
+                using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+                {
+                    sw.WriteLine("--------------------------------------------------------------------------------------------------------------------------------------------");
+                    sw.WriteLine("   STARTING WFINFO " + buildVersion + " at " + DateTime.UtcNow);
+                    sw.WriteLine("--------------------------------------------------------------------------------------------------------------------------------------------");
+                }
             }
         }
 
@@ -320,17 +324,20 @@ namespace WFInfo
             // During shutdown, write synchronously to avoid losing logs
             if (System.Threading.Interlocked.CompareExchange(ref _shutdownInProgress, 0, 0) == 1)
             {
-                try
+                lock (_logFileWriteLock)
                 {
-                    Directory.CreateDirectory(AppPath);
-                    using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+                    try
                     {
-                        sw.WriteLine(logEntry);
+                        Directory.CreateDirectory(AppPath);
+                        using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+                        {
+                            sw.WriteLine(logEntry);
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"AddLog synchronous write error during shutdown: {ex}");
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"AddLog synchronous write error during shutdown: {ex}");
+                    }
                 }
             }
             else
@@ -360,30 +367,30 @@ namespace WFInfo
                 return;
             }
             
-            try
+            lock (_logFileWriteLock)
             {
-                Directory.CreateDirectory(AppPath);
-                using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+                try
                 {
+                    Directory.CreateDirectory(AppPath);
+                    using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+                    {
+                        foreach (string line in tempList)
+                        {
+                            sw.WriteLine(line);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"AddLog disk I/O error: {ex}");
+                    // Re-enqueue the items back to preserve diagnostic logs
                     foreach (string line in tempList)
                     {
-                        sw.WriteLine(line);
+                        _logQueue.Enqueue(line);
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"AddLog disk I/O error: {ex}");
-                // Re-enqueue the items back to preserve diagnostic logs
-                foreach (string line in tempList)
-                {
-                    _logQueue.Enqueue(line);
-                }
-            }
-            finally
-            {
-                System.Threading.Interlocked.Exchange(ref _isFlushing, 0);
-            }
+            System.Threading.Interlocked.Exchange(ref _isFlushing, 0);
         }
 
         /// <summary>

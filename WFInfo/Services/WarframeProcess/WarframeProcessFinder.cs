@@ -69,6 +69,7 @@ namespace WFInfo.Services.WarframeProcess
         private readonly IReadOnlyApplicationSettings _settings;
         private Timer find_process_timer;
         private const int FindProcessTimerDuration = 40000; // ms
+        private bool _wasRunningPreviously = false;
 
         public WarframeProcessFinder(IReadOnlyApplicationSettings settings)
         {
@@ -95,7 +96,8 @@ namespace WFInfo.Services.WarframeProcess
                 }
             }
 
-            //Main.AddLog("FindProcess have been triggered");
+            // Track state change for logging
+            bool wasRunning = _wasRunningPreviously;
 
             Process identified_process = null;
             // Search for Warframe related process
@@ -104,7 +106,10 @@ namespace WFInfo.Services.WarframeProcess
                 if (process.ProcessName == "Warframe.x64" && process.MainWindowTitle == "Warframe")
                 {
                     identified_process = process;
-                    Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
+                    if (!wasRunning)
+                    {
+                        Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
+                    }
                     break;
                 }
                 else if (process.MainWindowTitle.Contains("Warframe") && process.MainWindowTitle.Contains("GeForce NOW"))
@@ -113,7 +118,10 @@ namespace WFInfo.Services.WarframeProcess
                     {
                         Main.SpawnGFNWarning();
                     });
-                    Main.AddLog("GFN -- Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
+                    if (!wasRunning)
+                    {
+                        Main.AddLog("GFN -- Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
+                    }
                     identified_process = process;
                     break;
                 }
@@ -136,7 +144,7 @@ namespace WFInfo.Services.WarframeProcess
             }
             else
             {
-                if (!_settings.Debug)
+                if (wasRunning)
                 {
                     Main.AddLog("Did Not Detect Warframe Process");
                     Main.StatusUpdate("Unable to Detect Warframe Process", 1);
@@ -145,6 +153,9 @@ namespace WFInfo.Services.WarframeProcess
             
             // set new process, or null if none found
             Warframe = identified_process;
+
+            // Update state tracking for next iteration
+            _wasRunningPreviously = Warframe != null;
         }
     }
 }
