@@ -73,13 +73,7 @@ namespace WFInfo
         private readonly IProcessFinder _process;
         private readonly IWindowInfoService _window;
 
-        public static WebClient CreateWfmClient()
-        {
-            WebClient webClient = CustomEntrypoint.CreateNewWebClient();
-            webClient.Headers.Add("platform", "pc");
-            webClient.Headers.Add("language", "en");
-            return webClient;
-        }
+        // CreateWfmClient removed — use shared HttpClient instead
 
         public Data(IReadOnlyApplicationSettings settings, IProcessFinder process, IWindowInfoService window)
         {
@@ -155,20 +149,16 @@ namespace WFInfo
             return JWT != null && JWT.Length > 300; //check if the token is of the right length
         }
 
-        public int GetGithubVersion()
+        public async Task<int> GetGithubVersion()
         {
-            using (WebClient githubWebClient = CustomEntrypoint.CreateNewWebClient())
-            {
-            JObject github =
-                JsonConvert.DeserializeObject<JObject>(
-                    githubWebClient.DownloadString("https://api.github.com/repos/WFCD/WFInfo/releases/latest"));
+            string json = await client.GetStringAsync("https://api.github.com/repos/WFCD/WFInfo/releases/latest").ConfigureAwait(false);
+            JObject github = JsonConvert.DeserializeObject<JObject>(json);
             if (github.ContainsKey("tag_name"))
             {
                 githubVersion = github["tag_name"]?.ToObject<string>();
                 return Main.VersionToInteger(githubVersion);
             }
             return Main.VersionToInteger(Main.BuildVersion);
-            } // end using githubWebClient
         }
 
         // Load item list from Sheets
@@ -276,7 +266,7 @@ namespace WFInfo
             }
 
             // Load ignored items
-            foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
+            foreach (KeyValuePair<string, JToken> ignored in (JObject)allFiltered["ignored_items"])
             {
                 newMarketData[ignored.Key] = ignored.Value;
             }
@@ -286,9 +276,41 @@ namespace WFInfo
             return newMarketData;
         }
 
+        private bool IsItemUntradeable(JObject allFiltered, string itemName)
+        {
+            // Check if the item is marked as untradeable in the filtered_data
+            // The filtered_data structure has eqmt -> equipment -> parts
+            if (allFiltered == null || !allFiltered.ContainsKey("eqmt"))
+                return false;
+
+            foreach (KeyValuePair<string, JToken> prime in (JObject)allFiltered["eqmt"])
+            {
+                JObject primeObj = prime.Value as JObject;
+                if (primeObj != null && primeObj.ContainsKey("parts"))
+                {
+                    foreach (KeyValuePair<string, JToken> part in (JObject)primeObj["parts"])
+                    {
+                        // Check if the part name matches (with or without " Blueprint" suffix)
+                        if (string.Equals(part.Key, itemName, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(part.Key, itemName + " Blueprint", StringComparison.OrdinalIgnoreCase))
+                        {
+                            JObject partObj = part.Value as JObject;
+                            // Check if the part has untradeable = true
+                            if (partObj != null && partObj.ContainsKey("untradeable") && partObj["untradeable"].ToObject<bool>() == true)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private async Task<JObject> LoadMarketItem(string url)
         {
-            
+
 
             JObject stats = new JObject
                 {
@@ -305,7 +327,7 @@ namespace WFInfo
                 if (latestStats != null)
                 {
                     stats = latestStats.ToObject<JObject>();
-                } 
+                }
                 else
                 {
                     Main.AddLog("Using placeholder stats");
@@ -354,37 +376,39 @@ namespace WFInfo
             var newRelicData = new JObject();
             var newNameData = new JObject();
 
-            foreach (KeyValuePair<string, JToken> era in allFiltered["relics"].ToObject<JObject>())
+            foreach (KeyValuePair<string, JToken> era in (JObject)allFiltered["relics"])
             {
                 newRelicData[era.Key] = new JObject();
-                foreach (KeyValuePair<string, JToken> relic in era.Value.ToObject<JObject>())
+                foreach (KeyValuePair<string, JToken> relic in (JObject)era.Value)
                     newRelicData[era.Key][relic.Key] = relic.Value;
             }
 
-            foreach (KeyValuePair<string, JToken> prime in allFiltered["eqmt"].ToObject<JObject>())
+            foreach (KeyValuePair<string, JToken> prime in (JObject)allFiltered["eqmt"])
             {
                 string primeName = prime.Key.Substring(0, prime.Key.IndexOf("Prime") + 5);
                 if (!eqmtData.TryGetValue(primeName, out _))
                     eqmtData[primeName] = new JObject();
-                eqmtData[primeName]["vaulted"] = prime.Value["vaulted"];
-                eqmtData[primeName]["type"] = prime.Value["type"];
-                if (!eqmtData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
-                    eqmtData[primeName]["mastered"] = false;
+                JObject primeEqmt = (JObject)eqmtData[primeName];
+                primeEqmt["vaulted"] = prime.Value["vaulted"];
+                primeEqmt["type"] = prime.Value["type"];
+                if (primeEqmt["mastered"] == null)
+                    primeEqmt["mastered"] = false;
 
-                if (!eqmtData[primeName].ToObject<JObject>().TryGetValue("parts", out _))
-                    eqmtData[primeName]["parts"] = new JObject();
+                if (primeEqmt["parts"] == null)
+                    primeEqmt["parts"] = new JObject();
+                JObject primeParts = (JObject)primeEqmt["parts"];
 
-
-                foreach (KeyValuePair<string, JToken> part in prime.Value["parts"].ToObject<JObject>())
+                foreach (KeyValuePair<string, JToken> part in (JObject)prime.Value["parts"])
                 {
                     string partName = part.Key;
-                    if (!eqmtData[primeName]["parts"].ToObject<JObject>().TryGetValue(partName, out _))
-                        eqmtData[primeName]["parts"][partName] = new JObject();
-                    if (!eqmtData[primeName]["parts"][partName].ToObject<JObject>().TryGetValue("owned", out _))
-                        eqmtData[primeName]["parts"][partName]["owned"] = 0;
-                    eqmtData[primeName]["parts"][partName]["vaulted"] = part.Value["vaulted"];
-                    eqmtData[primeName]["parts"][partName]["count"] = part.Value["count"];
-                    eqmtData[primeName]["parts"][partName]["ducats"] = part.Value["ducats"];
+                    if (primeParts[partName] == null)
+                        primeParts[partName] = new JObject();
+                    JObject partObj = (JObject)primeParts[partName];
+                    if (partObj["owned"] == null)
+                        partObj["owned"] = 0;
+                    partObj["vaulted"] = part.Value["vaulted"];
+                    partObj["count"] = part.Value["count"];
+                    partObj["ducats"] = part.Value["ducats"];
 
 
                     if (part.Key != null && prime.Value?["type"] != null && part.Value?["ducats"] != null)
@@ -417,7 +441,7 @@ namespace WFInfo
             }
 
             // Add default values for ignored items
-            foreach (KeyValuePair<string, JToken> ignored in allFiltered["ignored_items"].ToObject<JObject>())
+            foreach (KeyValuePair<string, JToken> ignored in (JObject)allFiltered["ignored_items"])
             {
                 newNameData[ignored.Key] = ignored.Key;
             }
@@ -725,6 +749,13 @@ namespace WFInfo
             // retrieve missing item data directly from WFM
             foreach (var m in missing)
             {
+                // Skip items marked as untradeable in filtered_data
+                if (IsItemUntradeable(allFiltered.Data, m.Name))
+                {
+                    Main.AddLog("Skipping untradeable item: " + m.Name);
+                    continue;
+                }
+
                 Main.AddLog("Load missing market item: " + m.Name);
                 newMarketData[m.Name] = await LoadMarketItem(m.Url);
             }
@@ -881,10 +912,17 @@ namespace WFInfo
         public string GetLocaleNameData(string s, bool useLevenshtein)
         {
             var processor = LanguageProcessorFactory.GetCurrentProcessor();
-            JObject snapshot;
+            // Build a lightweight snapshot of just the string values instead of an expensive DeepClone()
+            List<KeyValuePair<string, string>> snapshot;
             lock (marketItemsLock)
             {
-                snapshot = (JObject)marketItems?.DeepClone() ?? new JObject();
+                if (marketItems == null)
+                    return s;
+                snapshot = new List<KeyValuePair<string, string>>(marketItems.Count);
+                foreach (var kvp in marketItems)
+                {
+                    snapshot.Add(new KeyValuePair<string, string>(kvp.Key, kvp.Value.ToString()));
+                }
             }
             return processor.GetLocalizedNameData(s, snapshot, useLevenshtein);
         }
@@ -914,76 +952,47 @@ namespace WFInfo
 
         public int LevenshteinDistanceSecond(string str1, string str2, int limit = -1)
         {
-            int num;
-            Boolean maxY;
-            int temp;
-            Boolean maxX;
             string s = str1.ToLower(Main.culture);
             string t = str2.ToLower(Main.culture);
             int n = s.Length;
             int m = t.Length;
-            if (!(n == 0 || m == 0))
+
+            if (n == 0) return m;
+            if (m == 0) return n;
+
+            // Ensure s is the shorter string to minimize memory (O(min(n,m)) space)
+            if (n > m)
             {
-                int[,] d = new int[n + 1 + 1 - 1, m + 1 + 1 - 1];
-                List<int> activeX = new List<int>();
-                List<int> activeY = new List<int>();
-                d[0, 0] = 1;
-                activeX.Add(0);
-                activeY.Add(0);
-                do
+                var tmp = s; s = t; t = tmp;
+                var tmpLen = n; n = m; m = tmpLen;
+            }
+
+            // Two-row DP: prev = row i-1, curr = row i
+            int[] prev = new int[n + 1];
+            int[] curr = new int[n + 1];
+            for (int j = 0; j <= n; j++)
+                prev[j] = j;
+
+            for (int i = 1; i <= m; i++)
+            {
+                curr[0] = i;
+                int rowMin = curr[0];
+                for (int j = 1; j <= n; j++)
                 {
-                    int currX = activeX[0];
-                    activeX.RemoveAt(0);
-                    int currY = activeY[0];
-                    activeY.RemoveAt(0);
+                    int cost = GetDifference(s[j - 1], t[i - 1]);
+                    curr[j] = Math.Min(Math.Min(prev[j] + 1, curr[j - 1] + 1), prev[j - 1] + cost);
+                    if (curr[j] < rowMin) rowMin = curr[j];
+                }
 
-                    temp = d[currX, currY];
-                    if (limit != -1 && temp > limit)
-                    {
-                        return temp;
-                    }
+                // Early termination: if the minimum value in this row already exceeds the limit,
+                // the final distance can only grow larger
+                if (limit != -1 && rowMin > limit)
+                    return rowMin;
 
-                    maxX = currX == n;
-                    maxY = currY == m;
-                    if (!maxX)
-                    {
-                        temp = d[currX, currY] + 1;
-                        if (temp < d[currX + 1, currY] || d[currX + 1, currY] == 0)
-                        {
-                            d[currX + 1, currY] = temp;
-                            AddElement(d, activeX, activeY, currX + 1, currY);
-                        }
-                    }
-
-                    if (!maxY)
-                    {
-                        temp = d[currX, currY] + 1;
-                        if (temp < d[currX, currY + 1] || d[currX, currY + 1] == 0)
-                        {
-                            d[currX, currY + 1] = temp;
-                            AddElement(d, activeX, activeY, currX, currY + 1);
-                        }
-                    }
-
-                    if (!maxX && !maxY)
-                    {
-                        temp = d[currX, currY] + GetDifference(s[currX], t[currY]);
-                        if (temp < d[currX + 1, currY + 1] || d[currX + 1, currY + 1] == 0)
-                        {
-                            d[currX + 1, currY + 1] = temp;
-                            AddElement(d, activeX, activeY, currX + 1, currY + 1);
-                        }
-                    }
-                } while (!(maxX && maxY));
-
-                num = d[n, m] - 1;
-            }
-            else
-            {
-                num = n + m;
+                var swap = prev; prev = curr; curr = swap;
             }
 
-            return num;
+            return prev[n];
         }
 
         //public string ClosestAutoComplete(string searchQuery) {
@@ -1157,7 +1166,15 @@ namespace WFInfo
             return lowest;
         }
 
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _setNameCache =
+            new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
+
         public static string GetSetName(string name)
+        {
+            return _setNameCache.GetOrAdd(name, ComputeSetName);
+        }
+
+        private static string ComputeSetName(string name)
         {
             string result = name.ToLower(Main.culture);
 
@@ -1243,7 +1260,7 @@ namespace WFInfo
 
             if (line.Contains("Pause countdown done") || line.Contains("Got rewards"))
             {
-                autoThread = Task.Factory.StartNew(AutoTriggered);
+                autoThread = Task.Run(() => AutoTriggered());
                 Overlay.rewardsDisplaying = true;
             }
 
@@ -1361,7 +1378,7 @@ namespace WFInfo
             });
         }
 
-        public void AutoTriggered()
+        public async Task AutoTriggered()
         {
             try
             {
@@ -1376,18 +1393,26 @@ namespace WFInfo
                 {
                     while (watch.ElapsedMilliseconds < stop)
                     {
-                        if (watch.ElapsedMilliseconds <= wait) continue;
+                        if (watch.ElapsedMilliseconds <= wait)
+                        {
+                            await Task.Delay(10).ConfigureAwait(false);
+                            continue;
+                        }
                         wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
                         OCR.GetThemeWeighted(out double diff);
                         if (!(diff > 40)) continue;
-                        while (watch.ElapsedMilliseconds < wait) ;
+                        long remaining = wait - watch.ElapsedMilliseconds;
+                        if (remaining > 0)
+                            await Task.Delay((int)remaining).ConfigureAwait(false);
                         Main.AddLog("started auto processing");
                         OCR.ProcessRewardScreen();
                         break;
                     }
                 } else
                 {
-                    while (watch.ElapsedMilliseconds < fixedStop) ;
+                    long remaining = fixedStop - watch.ElapsedMilliseconds;
+                    if (remaining > 0)
+                        await Task.Delay((int)remaining).ConfigureAwait(false);
                     Main.AddLog("started auto processing (fixed delay)");
                     OCR.ProcessRewardScreen();
                 }
@@ -1477,7 +1502,7 @@ namespace WFInfo
         // Listener to track messages coming back
         private async Task StartWebSocketListener()
         {
-            var buffer = new byte[1024 * 4];
+            var buffer = new byte[1024 * 8];
 
             try
             {
@@ -1487,7 +1512,25 @@ namespace WFInfo
 
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
-                        var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        string message;
+                        if (result.EndOfMessage)
+                        {
+                            message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        }
+                        else
+                        {
+                            // Accumulate fragmented message
+                            using (var ms = new System.IO.MemoryStream())
+                            {
+                                ms.Write(buffer, 0, result.Count);
+                                while (!result.EndOfMessage)
+                                {
+                                    result = await marketSocket.ReceiveAsync(new ArraySegment<byte>(buffer), marketSocketCancellation.Token).ConfigureAwait(false);
+                                    ms.Write(buffer, 0, result.Count);
+                                }
+                                message = Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length);
+                            }
+                        }
                         Debug.WriteLine($"Received: {message}");
                         await HandleWebSocketMessage(message).ConfigureAwait(false);
 

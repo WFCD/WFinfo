@@ -430,7 +430,7 @@ namespace WFInfo
             {//masterit
                 AddLog("Starting master it");
                 StatusUpdate("Starting master it", 0);
-                Task.Factory.StartNew(() => {
+                Task.Run(() => {
                     Bitmap bigScreenshot = OCR.CaptureScreenshot();
                     if (bigScreenshot == null)
                     {
@@ -443,7 +443,7 @@ namespace WFInfo
             }
             else if (_settings.Debug || _process.IsRunning)
             {
-                Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
+                Task.Run(() => OCR.ProcessRewardScreen());
             }
         }
 
@@ -556,7 +556,7 @@ namespace WFInfo
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    Task.Factory.StartNew(
+                    Task.Run(
                         () =>
                     {
                         try

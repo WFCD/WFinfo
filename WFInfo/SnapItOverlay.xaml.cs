@@ -95,7 +95,7 @@ namespace WFInfo
                 return;
             }
             Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * _window.DpiScaling), (int)(topLeft.Y * _window.DpiScaling), (int)(rectangle.Width * _window.DpiScaling), (int)(rectangle.Height * _window.DpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
-            Task.Factory.StartNew(() => OCR.ProcessSnapIt(cutout, tempImage, topLeft));
+            Task.Run(() => OCR.ProcessSnapIt(cutout, tempImage, topLeft));
 
             closeOverlay();
         }

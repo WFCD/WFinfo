@@ -262,7 +262,7 @@ namespace WFInfo
             for (int i = 0; i < parts.Count; i++)
             {
                 int tempI = i;
-                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]);});
+                tasks[i] = Task.Run(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]);});
             }
             Task.WaitAll(tasks);
 
@@ -463,7 +463,8 @@ namespace WFInfo
 
             if (partialScreenshot != null)
             {
-                partialScreenshot.Save(Main.AppPath + @"\Debug\PartBox " + timestamp + ".png");
+                if (_settings.Debug)
+                    partialScreenshot.Save(Main.AppPath + @"\Debug\PartBox " + timestamp + ".png");
                 partialScreenshot.Dispose();
                 partialScreenshot = null;
             }
@@ -680,21 +681,16 @@ namespace WFInfo
             }
             return active;
         }
-#pragma warning disable IDE0044 // Add readonly modifier
-        private static int[,,] GetThemeCache = new int[256, 256, 256];
-        private static int[,,] GetThresholdCache = new int[256, 256, 256];
-        private static readonly object GetThemeCacheLock = new object();
-#pragma warning restore IDE0044 // Add readonly modifier
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, (int theme, int threshold)> _themeCache =
+            new System.Collections.Concurrent.ConcurrentDictionary<int, (int theme, int threshold)>();
 
         private static WFtheme GetClosestTheme(Color clr, out int threshold)
         {
-            lock (GetThemeCacheLock)
+            int key = (clr.R << 16) | (clr.G << 8) | clr.B;
+            if (_themeCache.TryGetValue(key, out var cached))
             {
-                if (GetThemeCache[clr.R, clr.G, clr.B] > 0)
-                {
-                    threshold = GetThresholdCache[clr.R, clr.G, clr.B];
-                    return (WFtheme)(GetThemeCache[clr.R, clr.G, clr.B] - 1);
-                }
+                threshold = cached.threshold;
+                return (WFtheme)cached.theme;
             }
 
             threshold = 999;
@@ -712,11 +708,7 @@ namespace WFInfo
                     }
                 }
             }
-            lock (GetThemeCacheLock)
-            {
-                GetThemeCache[clr.R, clr.G, clr.B] = (int)minTheme + 1;
-                GetThresholdCache[clr.R, clr.G, clr.B] = threshold;
-            }
+            _themeCache[key] = ((int)minTheme, threshold);
             return minTheme;
         }
 
@@ -761,9 +753,11 @@ namespace WFInfo
                 return;
             }
 
-            snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
+            if (_settings.Debug)
+                snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
-            snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+            if (_settings.Debug)
+                snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, snapItImage, rowHits, colHits); 
             long end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
@@ -1120,7 +1114,7 @@ namespace WFInfo
             for (int i = 0; i < snapThreads; i++)
             {
                 int tempI = i;
-                snapTasks[i] = Task.Factory.StartNew(() =>
+                snapTasks[i] = Task.Run(() =>
                 {
                     List<Tuple<String, Rectangle>> taskResults = new List<Tuple<String, Rectangle>>();
                     int zonesProcessed = 0;
@@ -1327,7 +1321,8 @@ namespace WFInfo
                 Main.AddLog("numberTooLarge: " + numberTooLarge + ", numberTooFewCharacters: " + numberTooFewCharacters + ", numberTooLargeButEnoughCharacters: " + numberTooLargeButEnoughCharacters + ", foundItems.Count: " + foundItems.Count);
             }
 
-            filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
+            if (_settings.Debug)
+                filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
             return results;
         }
 
@@ -1528,14 +1523,13 @@ namespace WFInfo
                         sumBlack = 1;
                         //use "flood search" approach from the pixel found above to find the whole checkmark+circle icon
                         Stack<Point> searchSpace = new Stack<Point>();
-                        Dictionary<Point, bool> pixelChecked = new Dictionary<Point, bool>();
+                        HashSet<Point> pixelChecked = new HashSet<Point>();
                         searchSpace.Push(new Point(x, y));
                         while(searchSpace.Count > 0)
                         {
                             Point p = searchSpace.Pop();
-                            if (!pixelChecked.TryGetValue(p, out bool val) || !val)
+                            if (pixelChecked.Add(p))
                             {
-                                pixelChecked[p] = true;
                                 for (int xOff = -2; xOff <= 2; xOff++)
                                 {
                                     for (int yOff = -2; yOff <= 2; yOff++)
@@ -1798,7 +1792,8 @@ namespace WFInfo
             long start = watch.ElapsedMilliseconds;
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-            fullShot.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
+            if (_settings.Debug)
+                fullShot.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
             List<InventoryItem> foundParts = FindOwnedItems(fullShot, timestamp, start, watch);
             for (int i = 0; i < foundParts.Count; i++)
             {
@@ -2093,7 +2088,8 @@ namespace WFInfo
             }
 
             ProfileImageClean.Dispose();
-            ProfileImage.Save(Main.AppPath + @"\Debug\ProfileImageBounds " + timestamp + ".png");
+            if (_settings.Debug)
+                ProfileImage.Save(Main.AppPath + @"\Debug\ProfileImageBounds " + timestamp + ".png");
             darkCyan.Dispose();
             pink.Dispose();
             cyan.Dispose();
@@ -2307,23 +2303,24 @@ namespace WFInfo
             int[] rows = new int[preFilter.Height];
             // 0 => 50   27 => 77   50 => 100
 
+            // Use LockBits for fast pixel access instead of GetPixel
+            BitmapData preFilterData = preFilter.LockBits(new Rectangle(0, 0, preFilter.Width, preFilter.Height), ImageLockMode.ReadOnly, preFilter.PixelFormat);
+            int pfStride = Math.Abs(preFilterData.Stride);
+            byte[] pfBytes = new byte[pfStride * preFilter.Height];
+            Marshal.Copy(preFilterData.Scan0, pfBytes, 0, pfBytes.Length);
+            preFilter.UnlockBits(preFilterData);
 
-            //Main.AddLog("ROWS: 0 to " + preFilter.Height);
-            //var postFilter = preFilter;
+            int pfPixelSize = 4; // BGRA
             for (int y = 0; y < preFilter.Height; y++)
             {
                 rows[y] = 0;
                 for (int x = 0; x < preFilter.Width; x++)
                 {
-                    clr = preFilter.GetPixel(x, y);
+                    int idx = y * pfStride + x * pfPixelSize;
+                    clr = Color.FromArgb(pfBytes[idx + 3], pfBytes[idx + 2], pfBytes[idx + 1], pfBytes[idx]);
                     if (ThemeThresholdFilter(clr, active))
-                    //{
                         rows[y]++;
-                        //postFilter.SetPixel(x, y, Color.Black);
-                    //} else
-                        //postFilter.SetPixel(x, y, Color.White);
                 }
-                //Debug.Write(rows[y] + " ");
             }
 
             //postFilter.Save(Main.AppPath + @"\Debug\PostFilter" + timestamp + ".png");
@@ -2414,11 +2411,13 @@ namespace WFInfo
                 g.DrawRectangle(Pens.Red, rectangle);
                 g.DrawRectangle(Pens.Chartreuse, uidebug);
             }
-            fullScreen.Save(Main.AppPath + @"\Debug\BorderScreenshot " + timestamp + ".png");
+            if (_settings.Debug)
+                fullScreen.Save(Main.AppPath + @"\Debug\BorderScreenshot " + timestamp + ".png");
 
 
             //postFilter.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
-            preFilter.Save(Main.AppPath + @"\Debug\FullPartArea " + timestamp + ".png");
+            if (_settings.Debug)
+                preFilter.Save(Main.AppPath + @"\Debug\FullPartArea " + timestamp + ".png");
             scaling = topFive[4] + 50; //scaling was sometimes going to 50 despite being set to 100, so taking the value from above that seems to be accurate.
 
             scaling /= 100;
@@ -2448,7 +2447,8 @@ namespace WFInfo
 
             end = watch.ElapsedMilliseconds;
             Main.AddLog("Finished function " + (end - beginning) + "ms");
-            partialScreenshot.Save(Main.AppPath + @"\Debug\PartialScreenshot" + timestamp + ".png");
+            if (_settings.Debug)
+                partialScreenshot.Save(Main.AppPath + @"\Debug\PartialScreenshot" + timestamp + ".png");
             return FilterAndSeparatePartsFromPartBox(partialScreenshot, active);
         }
 
@@ -2463,20 +2463,38 @@ namespace WFInfo
             int height = partBox.Height;
             int[] counts = new int[height];
             Bitmap filtered = new Bitmap(width, height);
+
+            // Read source pixels via LockBits for fast access
+            BitmapData srcData = partBox.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, partBox.PixelFormat);
+            int srcStride = Math.Abs(srcData.Stride);
+            byte[] srcBytes = new byte[srcStride * height];
+            Marshal.Copy(srcData.Scan0, srcBytes, 0, srcBytes.Length);
+            partBox.UnlockBits(srcData);
+
+            // Prepare destination pixel buffer
+            BitmapData dstData = filtered.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, filtered.PixelFormat);
+            int dstStride = Math.Abs(dstData.Stride);
+            byte[] dstBytes = new byte[dstStride * height];
+
+            int pixelSize = 4; // ARGB, stored as BGRA
             for (int x = 0; x < width; x++)
             {
                 int count = 0;
                 for (int y = 0; y < height; y++)
                 {
-                    clr = partBox.GetPixel(x, y);
+                    int srcIdx = y * srcStride + x * pixelSize;
+                    clr = Color.FromArgb(srcBytes[srcIdx + 3], srcBytes[srcIdx + 2], srcBytes[srcIdx + 1], srcBytes[srcIdx]);
+                    int dstIdx = y * dstStride + x * pixelSize;
                     if (ThemeThresholdFilter(clr, active))
                     {
-                        filtered.SetPixel(x, y, Color.Black);
+                        dstBytes[dstIdx] = 0; dstBytes[dstIdx + 1] = 0; dstBytes[dstIdx + 2] = 0; dstBytes[dstIdx + 3] = 255; // Black
                         counts[y]++;
                         count++;
                     }
                     else
-                        filtered.SetPixel(x, y, Color.White);
+                    {
+                        dstBytes[dstIdx] = 255; dstBytes[dstIdx + 1] = 255; dstBytes[dstIdx + 2] = 255; dstBytes[dstIdx + 3] = 255; // White
+                    }
                 }
 
                 count = Math.Min(count, partBox.Height / 3);
@@ -2489,6 +2507,9 @@ namespace WFInfo
                 else if (sinVal > 0)
                     totalOdd += sinVal * count;
             }
+
+            Marshal.Copy(dstBytes, 0, dstData.Scan0, dstBytes.Length);
+            filtered.UnlockBits(dstData);
 
             // Rarely, the selection box on certain themes can get included in the detected reward area.
             // Therefore, we check the bottom 10% of the image for this potential issue
@@ -2541,7 +2562,8 @@ namespace WFInfo
                 using (Graphics grD = Graphics.FromImage(newBox))
                     grD.DrawImage(filtered, destRegion, srcRegion, GraphicsUnit.Pixel);
                 ret.Add(newBox);
-                newBox.Save(Main.AppPath + @"\Debug\PartBox(" + i + ") " + timestamp + ".png");
+                if (_settings.Debug)
+                    newBox.Save(Main.AppPath + @"\Debug\PartBox(" + i + ") " + timestamp + ".png");
             }
             filtered.Dispose();
             return ret;
@@ -2572,14 +2594,11 @@ namespace WFInfo
         {
             string ret = "";
             
-            // Use intelligent PSM selection for better Korean text recognition
-            // Try modes in order of likelihood, exit early if we get a good result
-            // For Korean: prioritize single block modes for wrapped multi-line item names
-            PageSegMode[] preferredModes = { 
-                PageSegMode.SingleBlock,     // Best for single items with multi-line wrapping
-                PageSegMode.SingleColumn     // Good for stacked lines in reward slots
-                // Removed SparseText and Auto to improve performance
-            };
+            // For CJK locales, try multiple PSM modes and pick the best result.
+            // For Latin-based locales, SingleBlock is sufficient — skip the second pass for performance.
+            PageSegMode[] preferredModes = IsCJKLocale()
+                ? new[] { PageSegMode.SingleBlock, PageSegMode.SingleColumn }
+                : new[] { PageSegMode.SingleBlock };
 
             Dictionary<PageSegMode, string> modeResults = new Dictionary<PageSegMode, string>();
             Dictionary<PageSegMode, double> modeScores = new Dictionary<PageSegMode, double>();
@@ -2872,7 +2891,8 @@ namespace WFInfo
                 return null;
             }
             var image = images.First();
-            image.Save(Main.AppPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + ".png");
+            if (_settings.Debug)
+                image.Save(Main.AppPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + ".png");
             return image;
         }
 
@@ -2943,7 +2963,7 @@ namespace WFInfo
             for (int i = 0; i < engineCount; i++)
             {
                 int tempI = i;
-                tasks[i] = Task.Factory.StartNew(() => { checks[tempI] = GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]); });
+                tasks[i] = Task.Run(() => { checks[tempI] = GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]); });
             }
             Task.WaitAll(tasks);
 

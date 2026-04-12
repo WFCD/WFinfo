@@ -196,6 +196,52 @@ namespace WFInfo.LanguageProcessing
         }
 
         /// <summary>
+        /// Gets localized name data from a lightweight snapshot of market items (avoids JObject DeepClone)
+        /// </summary>
+        public virtual string GetLocalizedNameData(string input, List<KeyValuePair<string, string>> marketItemsSnapshot, bool useLevenshtein)
+        {
+            if (string.IsNullOrEmpty(input) || marketItemsSnapshot == null)
+                return input;
+
+            string bestMatch = input;
+            int bestDistance = int.MaxValue;
+
+            foreach (var item in marketItemsSnapshot)
+            {
+                if (item.Key == "version") continue;
+
+                string[] split = item.Value.Split('|');
+                if (split.Length < 3) continue;
+
+                string localizedName = split[2];
+                if (string.IsNullOrEmpty(localizedName)) continue;
+
+                int lengthDiff = Math.Abs(input.Length - localizedName.Length);
+                if (lengthDiff > localizedName.Length / 2) continue;
+
+                int distance;
+                if (useLevenshtein)
+                {
+                    distance = CalculateLevenshteinDistance(input, localizedName);
+                }
+                else
+                {
+                    string normalizedInput = NormalizeForPatternMatching(input);
+                    string normalizedStored = NormalizeForPatternMatching(localizedName);
+                    distance = SimpleLevenshteinDistance(normalizedInput, normalizedStored);
+                }
+
+                if (distance < bestDistance && distance < localizedName.Length * 0.5)
+                {
+                    bestDistance = distance;
+                    bestMatch = split[0];
+                }
+            }
+
+            return bestMatch;
+        }
+
+        /// <summary>
         /// Default Levenshtein distance implementation for languages that don't need special handling
         /// </summary>
         protected virtual int DefaultLevenshteinDistance(string s, string t)
