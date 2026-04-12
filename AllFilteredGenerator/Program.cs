@@ -31,7 +31,7 @@ namespace AllFilteredGenerator
 
             if (!File.Exists(allJsonPath))
             {
-                Console.WriteLine("All.json file not found at path:" + savePath);
+                Console.WriteLine("All.json file not found at path:" + allJsonPath);
                 Environment.Exit(1);
             }
 

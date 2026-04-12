@@ -1,4 +1,5 @@
 ﻿
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -43,7 +44,7 @@ namespace AllFilteredGenerator
                 return null;
             }
 
-            if (!int.TryParse(propNode.ToString(), out var value))
+            if (!int.TryParse(propNode.ToString(), CultureInfo.InvariantCulture, out var value))
             {
                 return null;
             }
@@ -58,7 +59,7 @@ namespace AllFilteredGenerator
                 return null;
             }
 
-            if (!double.TryParse(propNode.ToString(), out var value))
+            if (!double.TryParse(propNode.ToString(), CultureInfo.InvariantCulture, out var value))
             {
                 return null;
             }
