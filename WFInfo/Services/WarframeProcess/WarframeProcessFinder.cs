@@ -70,6 +70,7 @@ namespace WFInfo.Services.WarframeProcess
         private Timer find_process_timer;
         private const int FindProcessTimerDuration = 40000; // ms
         private bool _wasRunningPreviously = false;
+        private int _isFinding = 0; // 0 = idle, 1 = running (Interlocked)
 
         public WarframeProcessFinder(IReadOnlyApplicationSettings settings)
         {
@@ -87,75 +88,86 @@ namespace WFInfo.Services.WarframeProcess
 
         private void FindProcess(Object stateInfo)
         {
-            // Process was already found previously
-            if (_warframe != null)
-            {
-                if (!_warframe.HasExited)
-                {
-                    return; // Current process is still good
-                }
-            }
-
-            // Track state change for logging
-            bool wasRunning = _wasRunningPreviously;
-
-            Process identified_process = null;
-            // Search for Warframe related process
-            foreach (Process process in Process.GetProcesses())
-            {
-                if (process.ProcessName == "Warframe.x64" && process.MainWindowTitle == "Warframe")
-                {
-                    identified_process = process;
-                    if (!wasRunning)
-                    {
-                        Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
-                    }
-                    break;
-                }
-                else if (process.MainWindowTitle.Contains("Warframe") && process.MainWindowTitle.Contains("GeForce NOW"))
-                {
-                    Main.RunOnUIThread(() =>
-                    {
-                        Main.SpawnGFNWarning();
-                    });
-                    if (!wasRunning)
-                    {
-                        Main.AddLog("GFN -- Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
-                    }
-                    identified_process = process;
-                    break;
-                }
-            }
-
-            // Try and catch any UAC related issues
-            if (identified_process != null)
-            {
-                try
-                {
-                    bool _ = identified_process.HasExited;
-                }
-                catch (System.ComponentModel.Win32Exception e)
-                {
-                    identified_process = null;
-
-                    Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
-                    Main.StatusUpdate("Restart Warframe without admin privileges, or WFInfo with admin privileges", 1);
-                }
-            }
-            else
-            {
-                if (wasRunning)
-                {
-                    Main.AddLog("Did Not Detect Warframe Process");
-                    Main.StatusUpdate("Unable to Detect Warframe Process", 1);
-                }
-            }
+            // Non-reentrant gate: skip if a previous invocation is still running
+            if (Interlocked.CompareExchange(ref _isFinding, 1, 0) != 0)
+                return;
             
-            // set new process, or null if none found
-            Warframe = identified_process;
+            try
+            {
+                // Process was already found previously
+                if (_warframe != null)
+                {
+                    if (!_warframe.HasExited)
+                    {
+                        return; // Current process is still good
+                    }
+                }
 
-            // Update state tracking for next iteration
-            _wasRunningPreviously = Warframe != null;
+                // Track state change for logging
+                bool wasRunning = _wasRunningPreviously;
+
+                Process identified_process = null;
+                // Search for Warframe related process
+                foreach (Process process in Process.GetProcesses())
+                {
+                    if (process.ProcessName == "Warframe.x64" && process.MainWindowTitle == "Warframe")
+                    {
+                        identified_process = process;
+                        if (!wasRunning)
+                        {
+                            Main.AddLog("Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
+                        }
+                        break;
+                    }
+                    else if (process.MainWindowTitle.Contains("Warframe") && process.MainWindowTitle.Contains("GeForce NOW"))
+                    {
+                        Main.RunOnUIThread(() =>
+                        {
+                            Main.SpawnGFNWarning();
+                        });
+                        if (!wasRunning)
+                        {
+                            Main.AddLog("GFN -- Found Warframe Process: ID - " + process.Id + ", MainTitle - " + process.MainWindowTitle + ", Process Name - " + process.ProcessName);
+                        }
+                        identified_process = process;
+                        break;
+                    }
+                }
+
+                // Try and catch any UAC related issues
+                if (identified_process != null)
+                {
+                    try
+                    {
+                        bool _ = identified_process.HasExited;
+                    }
+                    catch (System.ComponentModel.Win32Exception e)
+                    {
+                        identified_process = null;
+
+                        Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
+                        Main.StatusUpdate("Restart Warframe without admin privileges, or WFInfo with admin privileges", 1);
+                    }
+                }
+                else
+                {
+                    if (wasRunning)
+                    {
+                        Main.AddLog("Did Not Detect Warframe Process");
+                        Main.StatusUpdate("Unable to Detect Warframe Process", 1);
+                    }
+                }
+                
+                // set new process, or null if none found
+                Warframe = identified_process;
+
+                // Update state tracking for next iteration
+                _wasRunningPreviously = Warframe != null;
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _isFinding, 0);
+            }
         }
     }
 }

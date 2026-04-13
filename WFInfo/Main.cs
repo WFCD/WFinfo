@@ -55,6 +55,8 @@ namespace WFInfo
         private static int _isFlushing = 0; // 0 = not flushing, 1 = flushing (Interlocked)
         private static int _shutdownInProgress = 0; // 0 = normal, 1 = shutting down (Interlocked)
         private static readonly object _logFileWriteLock = new object();
+        private static int _consecutiveFlushFailures = 0;
+        private const int _flushRetryLimit = 5;
 
         public static bool Initialized;
         private static event EventHandler OnInitialized;
@@ -379,14 +381,24 @@ namespace WFInfo
                             sw.WriteLine(line);
                         }
                     }
+                    System.Threading.Interlocked.Exchange(ref _consecutiveFlushFailures, 0);
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"AddLog disk I/O error: {ex}");
-                    // Re-enqueue the items back to preserve diagnostic logs
-                    foreach (string line in tempList)
+                    int failures = System.Threading.Interlocked.Increment(ref _consecutiveFlushFailures);
+                    System.Diagnostics.Debug.WriteLine($"AddLog disk I/O error (attempt {failures}/{_flushRetryLimit}): {ex}");
+                    bool isShuttingDown = System.Threading.Interlocked.CompareExchange(ref _shutdownInProgress, 0, 0) == 1;
+                    if (failures < _flushRetryLimit && !isShuttingDown)
                     {
-                        _logQueue.Enqueue(line);
+                        // Re-enqueue the items back to preserve diagnostic logs
+                        foreach (string line in tempList)
+                        {
+                            _logQueue.Enqueue(line);
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Dropping {tempList.Count} log entries after {failures} consecutive failures (shutdown={isShuttingDown})");
                     }
                 }
             }
@@ -406,10 +418,21 @@ namespace WFInfo
             
             // Keep flushing until queue is empty and no flush in progress
             int emptyCount = 0;
-            while (emptyCount < 3) // Ensure queue stays empty for 3 consecutive checks
+            int maxAttempts = _flushRetryLimit * 3; // Total loop iterations before giving up
+            int attempts = 0;
+            while (emptyCount < 3 && attempts < maxAttempts)
             {
+                attempts++;
+                
                 // Wait for any in-flight flush to complete
                 System.Threading.SpinWait.SpinUntil(() => _isFlushing == 0);
+                
+                // Bail if we've exceeded consecutive failure limit
+                if (_consecutiveFlushFailures >= _flushRetryLimit)
+                {
+                    System.Diagnostics.Debug.WriteLine($"FlushLog: aborting after {_consecutiveFlushFailures} consecutive flush failures");
+                    break;
+                }
                 
                 // Try to flush
                 FlushLogQueue(null);
@@ -432,6 +455,11 @@ namespace WFInfo
                 {
                     System.Threading.Thread.Sleep(50);
                 }
+            }
+            
+            if (attempts >= maxAttempts)
+            {
+                System.Diagnostics.Debug.WriteLine($"FlushLog: gave up after {maxAttempts} attempts, {_logQueue.Count} entries remaining");
             }
         }
 
@@ -510,8 +538,10 @@ namespace WFInfo
                         AddLog("MasterIt activation failed: Screenshot failed");
                         return;
                     }
-                    OCR.ProcessProfileScreen(bigScreenshot);
-                    bigScreenshot.Dispose();
+                    using (bigScreenshot)
+                    {
+                        OCR.ProcessProfileScreen(bigScreenshot);
+                    }
                 });
             }
             else if (_settings.Debug || _process.IsRunning)
@@ -629,36 +659,43 @@ namespace WFInfo
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
+                    string[] fileNames = openFileDialog.FileNames;
                     Task.Run(
                         () =>
                     {
                         try
                         {
                             // TODO: This
-                            foreach (string file in openFileDialog.FileNames)
+                            foreach (string file in fileNames)
                             {
                                 if (type == ScreenshotType.NORMAL)
                                 {
                                     AddLog("Testing file: " + file);
 
                                     //Get the path of specified file
-                                    Bitmap image = new Bitmap(file);
-                                    _windowInfo.UseImage(image);
-                                    OCR.ProcessRewardScreen(image);
+                                    using (Bitmap image = new Bitmap(file))
+                                    {
+                                        _windowInfo.UseImage(image);
+                                        OCR.ProcessRewardScreen(image);
+                                    }
                                 } else if (type == ScreenshotType.SNAPIT)
                                 {
                                     AddLog("Testing snapit on file: " + file);
 
-                                    Bitmap image = new Bitmap(file);
-                                    _windowInfo.UseImage(image);
-                                    OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
+                                    using (Bitmap image = new Bitmap(file))
+                                    {
+                                        _windowInfo.UseImage(image);
+                                        OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
+                                    }
                                 } else if (type == ScreenshotType.MASTERIT)
                                 {
                                     AddLog("Testing masterit on file: " + file);
 
-                                    Bitmap image = new Bitmap(file);
-                                    _windowInfo.UseImage(image);
-                                    OCR.ProcessProfileScreen(image);
+                                    using (Bitmap image = new Bitmap(file))
+                                    {
+                                        _windowInfo.UseImage(image);
+                                        OCR.ProcessProfileScreen(image);
+                                    }
                                 }
                             }
                         }
@@ -691,6 +728,8 @@ namespace WFInfo
             TimeSpan startTimeSpan = TimeSpan.Zero;
             TimeSpan periodTimeSpan = TimeSpan.FromMinutes(1);
             
+            // Dispose previous timer to prevent accumulating orphaned timers
+            timer?.Dispose();
             timer = new System.Threading.Timer((e) =>
             {
                 TimeoutCheck();
@@ -754,6 +793,8 @@ namespace WFInfo
 
         public static void SignOut()
         {
+            timer?.Dispose();
+            timer = null;
             RunOnUIThread(mw => mw.SignOut());
         }
     }
