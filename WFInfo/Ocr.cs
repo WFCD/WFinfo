@@ -463,8 +463,7 @@ namespace WFInfo
 
             if (partialScreenshot != null)
             {
-                if (_settings.Debug)
-                    partialScreenshot.Save(Main.AppPath + @"\Debug\PartBox " + timestamp + ".png");
+                partialScreenshot.Save(Main.AppPath + @"\Debug\PartBox " + timestamp + ".png");
                 partialScreenshot.Dispose();
                 partialScreenshot = null;
             }
@@ -756,8 +755,7 @@ namespace WFInfo
             if (_settings.Debug)
                 snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
-            if (_settings.Debug)
-                snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+            snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, snapItImage, rowHits, colHits); 
             long end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
@@ -2447,8 +2445,7 @@ namespace WFInfo
 
             end = watch.ElapsedMilliseconds;
             Main.AddLog("Finished function " + (end - beginning) + "ms");
-            if (_settings.Debug)
-                partialScreenshot.Save(Main.AppPath + @"\Debug\PartialScreenshot" + timestamp + ".png");
+            partialScreenshot.Save(Main.AppPath + @"\Debug\PartialScreenshot" + timestamp + ".png");
             return FilterAndSeparatePartsFromPartBox(partialScreenshot, active);
         }
 
@@ -2891,8 +2888,7 @@ namespace WFInfo
                 return null;
             }
             var image = images.First();
-            if (_settings.Debug)
-                image.Save(Main.AppPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + ".png");
+            image.Save(Main.AppPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + ".png");
             return image;
         }
 
