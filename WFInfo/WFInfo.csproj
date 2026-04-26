@@ -88,23 +88,23 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.103">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.203">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
-    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.26100.7705" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.28000.1721" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="ProDotNetZip" Version="1.20.0" />
     <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
     <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
-    <PackageReference Include="System.Management" Version="10.0.3" />
-    <PackageReference Include="System.Resources.Extensions" Version="10.0.3" />
+    <PackageReference Include="System.Management" Version="10.0.7" />
+    <PackageReference Include="System.Resources.Extensions" Version="10.0.7" />
     <PackageReference Include="Tesseract" Version="5.2.0">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.3" /> 
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.7" />
   </ItemGroup>
   <ItemGroup>
     <None Update="$(HOME)\.nuget\packages\tesseract\5.2.0\build\\..\x64\leptonica-1.82.0.dll">
@@ -166,9 +166,7 @@
     <Copy SourceFiles="$(ExePath)" DestinationFiles="$(TempExePath)" />
     
     <!-- Create zip from the temporary directory -->
-    <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(TempExePath)' -DestinationPath '$(ZipPath)' -Force&quot;" 
-          ContinueOnError="false" 
-          IgnoreExitCode="false" />
+    <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(TempExePath)' -DestinationPath '$(ZipPath)' -Force&quot;" ContinueOnError="false" IgnoreExitCode="false" />
     
     <!-- Clean up temporary directory -->
     <RemoveDir Directories="$(TempDir)" />
