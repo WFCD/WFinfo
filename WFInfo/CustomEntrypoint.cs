@@ -14,6 +14,7 @@ using System.Windows;
 using System.Linq;
 using System.CodeDom;
 using Tesseract;
+using WFInfo.Tests;
 
 namespace WFInfo
 {
@@ -82,6 +83,41 @@ namespace WFInfo
             currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
 
             Directory.CreateDirectory(appPath);
+
+            // Check for test execution arguments
+            // Usage: WFInfo.exe [--test] map.json [output.json]
+            string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
+            bool isTestMode = false;
+
+            if (args.Length >= 1 && (args[0].Equals("--test", StringComparison.OrdinalIgnoreCase) ||
+                                     args[0].Equals("-test", StringComparison.OrdinalIgnoreCase) ||
+                                     args[0].Equals("--map", StringComparison.OrdinalIgnoreCase)))
+            {
+                isTestMode = true;
+                args = args.Skip(1).ToArray(); // strip flag
+            }
+            else if (args.Length >= 1 && args[0].EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                isTestMode = true;
+            }
+
+            if (isTestMode)
+            {
+                try
+                {
+                    Console.WriteLine("WFInfo OCR Test Runner");
+                    Console.WriteLine("=======================");
+                    TestProgram.RunTests(args).GetAwaiter().GetResult();
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Test execution failed: {ex.Message}");
+                    Console.WriteLine(ex.StackTrace);
+                    Environment.Exit(1);
+                    return;
+                }
+            }
 
             string thisprocessname = Process.GetCurrentProcess().ProcessName;
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();

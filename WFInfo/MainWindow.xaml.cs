@@ -343,7 +343,7 @@ namespace WFInfo
             ComboBox.Visibility = Visibility.Hidden;
             PlusOneButton.Visibility = Visibility.Hidden;
             CreateListing.Visibility = Visibility.Hidden;
-            Task.Factory.StartNew(() => { Main.dataBase.Disconnect(); });
+            Task.Run(() => { Main.dataBase.Disconnect(); });
         }
 
         internal void FinishedLoading(object sender, EventArgs e)

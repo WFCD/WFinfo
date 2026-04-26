@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -17,6 +18,7 @@ using WFInfo.Services.WindowInfo;
 using Microsoft.Extensions.DependencyInjection;
 using WFInfo.Services;
 using WFInfo.Services.HDRDetection;
+using System.Collections.Concurrent;
 using System.Linq;
 using Windows.Foundation.Metadata;
 
@@ -46,6 +48,15 @@ namespace WFInfo
         public static PlusOne plusOne = new PlusOne();
         public static System.Threading.Timer timer;
         public static System.Drawing.Point lastClick;
+
+        // Non-blocking log queue: AddLog enqueues, background timer flushes to disk
+        private static readonly ConcurrentQueue<string> _logQueue = new ConcurrentQueue<string>();
+        private static readonly System.Threading.Timer _logFlushTimer = new System.Threading.Timer(FlushLogQueue, null, 250, 250);
+        private static int _isFlushing = 0; // 0 = not flushing, 1 = flushing (Interlocked)
+        private static int _shutdownInProgress = 0; // 0 = normal, 1 = shutting down (Interlocked)
+        private static readonly object _logFileWriteLock = new object();
+        private static int _consecutiveFlushFailures = 0;
+        private const int _flushRetryLimit = 5;
 
         public static bool Initialized;
         private static event EventHandler OnInitialized;
@@ -95,10 +106,18 @@ namespace WFInfo
             }
 
             // Use async UI dispatcher call
-            await MainWindow.INSTANCE.Dispatcher.InvokeAsync(() =>
+            var wnd = MainWindow.INSTANCE;
+            var disp = wnd?.Dispatcher;
+            if (wnd != null && disp != null && !disp.HasShutdownStarted && !disp.HasShutdownFinished)
             {
-                MainWindow.INSTANCE.UpdateMarketStatus(msg);
-            });
+                try
+                {
+                    await disp.InvokeAsync(() => wnd.UpdateMarketStatus(msg)).Task;
+                }
+                catch (TaskCanceledException) { }
+                catch (OperationCanceledException) { }
+                catch (InvalidOperationException) { }
+            }
         }
 
         private static IServiceCollection ConfigureServices(IServiceCollection services)
@@ -173,8 +192,8 @@ namespace WFInfo
                     dataBase.EnableLogCapture();
                 if (dataBase.IsJWTvalid().Result)
                 {
-                    // Marshal UI call to UI thread
-                    RunOnUIThread(() => MainWindow.INSTANCE.LoggedIn());
+                    // Call Main.LoggedIn() to ensure AFK timer and startup status logic runs
+                    INSTANCE.LoggedIn();
                 }
                 StatusUpdate("WFInfo Initialization Complete", 0);
                 AddLog("WFInfo has launched successfully");
@@ -262,32 +281,185 @@ namespace WFInfo
 
         public static void RunOnUIThread(Action act)
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(act);
+            var mw = MainWindow.INSTANCE;
+            if (mw?.Dispatcher != null && !mw.Dispatcher.HasShutdownStarted && !mw.Dispatcher.HasShutdownFinished)
+            {
+                if (mw.Dispatcher.CheckAccess())
+                    act();
+                else
+                    mw.Dispatcher.Invoke(act);
+            }
+        }
+
+        public static void RunOnUIThread(Action<MainWindow> act)
+        {
+            var mw = MainWindow.INSTANCE;
+            if (mw?.Dispatcher != null && !mw.Dispatcher.HasShutdownStarted && !mw.Dispatcher.HasShutdownFinished)
+            {
+                if (mw.Dispatcher.CheckAccess())
+                    act(mw);
+                else
+                    mw.Dispatcher.Invoke(() => act(mw));
+            }
         }
 
         public static void StartMessage()
         {
             Directory.CreateDirectory(AppPath);
             Directory.CreateDirectory(AppPath + @"\debug");
-            using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+            lock (_logFileWriteLock)
             {
-                sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
-                sw.WriteLineAsync("   STARTING WFINFO " + buildVersion + " at " + DateTime.UtcNow);
-                sw.WriteLineAsync("--------------------------------------------------------------------------------------------------------------------------------------------");
+                using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+                {
+                    sw.WriteLine("--------------------------------------------------------------------------------------------------------------------------------------------");
+                    sw.WriteLine("   STARTING WFINFO " + buildVersion + " at " + DateTime.UtcNow);
+                    sw.WriteLine("--------------------------------------------------------------------------------------------------------------------------------------------");
+                }
             }
         }
 
         public static void AddLog(string argm)
         { //write to the debug file, includes version and UTCtime
             Debug.WriteLine(argm);
-            Directory.CreateDirectory(AppPath);
-            try
+            string logEntry = "[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm;
+            
+            // During shutdown, write synchronously to avoid losing logs
+            if (System.Threading.Interlocked.CompareExchange(ref _shutdownInProgress, 0, 0) == 1)
             {
-                using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
-                    sw.WriteLineAsync("[" + DateTime.UtcNow + " " + buildVersion + "]   " + argm);
+                lock (_logFileWriteLock)
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(AppPath);
+                        using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+                        {
+                            sw.WriteLine(logEntry);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"AddLog synchronous write error during shutdown: {ex}");
+                    }
+                }
             }
-            catch (Exception)
+            else
             {
+                _logQueue.Enqueue(logEntry);
+            }
+        }
+
+        private static void FlushLogQueue(object state)
+        {
+            if (_logQueue.IsEmpty) return;
+            
+            // Serialize flushes: return immediately if another flush is in progress
+            if (System.Threading.Interlocked.Exchange(ref _isFlushing, 1) != 0)
+                return;
+            
+            // Drain queue to temporary list before attempting file write
+            var tempList = new List<string>();
+            while (_logQueue.TryDequeue(out string line))
+            {
+                tempList.Add(line);
+            }
+            
+            if (tempList.Count == 0)
+            {
+                System.Threading.Interlocked.Exchange(ref _isFlushing, 0);
+                return;
+            }
+            
+            lock (_logFileWriteLock)
+            {
+                try
+                {
+                    Directory.CreateDirectory(AppPath);
+                    using (StreamWriter sw = File.AppendText(AppPath + @"\debug.log"))
+                    {
+                        foreach (string line in tempList)
+                        {
+                            sw.WriteLine(line);
+                        }
+                    }
+                    System.Threading.Interlocked.Exchange(ref _consecutiveFlushFailures, 0);
+                }
+                catch (Exception ex)
+                {
+                    int failures = System.Threading.Interlocked.Increment(ref _consecutiveFlushFailures);
+                    System.Diagnostics.Debug.WriteLine($"AddLog disk I/O error (attempt {failures}/{_flushRetryLimit}): {ex}");
+                    bool isShuttingDown = System.Threading.Interlocked.CompareExchange(ref _shutdownInProgress, 0, 0) == 1;
+                    if (failures < _flushRetryLimit && !isShuttingDown)
+                    {
+                        // Re-enqueue the items back to preserve diagnostic logs
+                        foreach (string line in tempList)
+                        {
+                            _logQueue.Enqueue(line);
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Dropping {tempList.Count} log entries after {failures} consecutive failures (shutdown={isShuttingDown})");
+                    }
+                }
+            }
+            System.Threading.Interlocked.Exchange(ref _isFlushing, 0);
+        }
+
+        /// <summary>
+        /// Flushes any remaining log entries to disk. Call on shutdown.
+        /// </summary>
+        public static void FlushLog()
+        {
+            // Signal shutdown mode first so new AddLog calls write synchronously
+            System.Threading.Interlocked.Exchange(ref _shutdownInProgress, 1);
+            
+            // Stop the background timer
+            _logFlushTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+            
+            // Keep flushing until queue is empty and no flush in progress
+            int emptyCount = 0;
+            int maxAttempts = _flushRetryLimit * 3; // Total loop iterations before giving up
+            int attempts = 0;
+            while (emptyCount < 3 && attempts < maxAttempts)
+            {
+                attempts++;
+                
+                // Wait for any in-flight flush to complete
+                System.Threading.SpinWait.SpinUntil(() => _isFlushing == 0);
+                
+                // Bail if we've exceeded consecutive failure limit
+                if (_consecutiveFlushFailures >= _flushRetryLimit)
+                {
+                    System.Diagnostics.Debug.WriteLine($"FlushLog: aborting after {_consecutiveFlushFailures} consecutive flush failures");
+                    break;
+                }
+                
+                // Try to flush
+                FlushLogQueue(null);
+                
+                // Wait for flush to complete
+                System.Threading.SpinWait.SpinUntil(() => _isFlushing == 0);
+                
+                // Check if queue is empty
+                if (_logQueue.IsEmpty)
+                {
+                    emptyCount++;
+                }
+                else
+                {
+                    emptyCount = 0;
+                }
+                
+                // Small delay to let any concurrent producers finish
+                if (emptyCount < 3)
+                {
+                    System.Threading.Thread.Sleep(50);
+                }
+            }
+            
+            if (attempts >= maxAttempts)
+            {
+                System.Diagnostics.Debug.WriteLine($"FlushLog: gave up after {maxAttempts} attempts, {_logQueue.Count} entries remaining");
             }
         }
 
@@ -298,7 +470,7 @@ namespace WFInfo
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
         public static void StatusUpdate(string message, int severity)
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.ChangeStatus(message, severity); });
+            RunOnUIThread(mw => mw.ChangeStatus(message, severity));
         }
 
         public void ActivationKeyPressed(Object key)
@@ -359,20 +531,22 @@ namespace WFInfo
             {//masterit
                 AddLog("Starting master it");
                 StatusUpdate("Starting master it", 0);
-                Task.Factory.StartNew(() => {
+                Task.Run(() => {
                     Bitmap bigScreenshot = OCR.CaptureScreenshot();
                     if (bigScreenshot == null)
                     {
                         AddLog("MasterIt activation failed: Screenshot failed");
                         return;
                     }
-                    OCR.ProcessProfileScreen(bigScreenshot);
-                    bigScreenshot.Dispose();
+                    using (bigScreenshot)
+                    {
+                        OCR.ProcessProfileScreen(bigScreenshot);
+                    }
                 });
             }
             else if (_settings.Debug || _process.IsRunning)
             {
-                Task.Factory.StartNew(() => OCR.ProcessRewardScreen());
+                Task.Run(() => OCR.ProcessRewardScreen());
             }
         }
 
@@ -485,36 +659,43 @@ namespace WFInfo
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    Task.Factory.StartNew(
+                    string[] fileNames = openFileDialog.FileNames;
+                    Task.Run(
                         () =>
                     {
                         try
                         {
                             // TODO: This
-                            foreach (string file in openFileDialog.FileNames)
+                            foreach (string file in fileNames)
                             {
                                 if (type == ScreenshotType.NORMAL)
                                 {
                                     AddLog("Testing file: " + file);
 
                                     //Get the path of specified file
-                                    Bitmap image = new Bitmap(file);
-                                    _windowInfo.UseImage(image);
-                                    OCR.ProcessRewardScreen(image);
+                                    using (Bitmap image = new Bitmap(file))
+                                    {
+                                        _windowInfo.UseImage(image);
+                                        OCR.ProcessRewardScreen(image);
+                                    }
                                 } else if (type == ScreenshotType.SNAPIT)
                                 {
                                     AddLog("Testing snapit on file: " + file);
 
-                                    Bitmap image = new Bitmap(file);
-                                    _windowInfo.UseImage(image);
-                                    OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
+                                    using (Bitmap image = new Bitmap(file))
+                                    {
+                                        _windowInfo.UseImage(image);
+                                        OCR.ProcessSnapIt(image, image, new System.Drawing.Point(0, 0));
+                                    }
                                 } else if (type == ScreenshotType.MASTERIT)
                                 {
                                     AddLog("Testing masterit on file: " + file);
 
-                                    Bitmap image = new Bitmap(file);
-                                    _windowInfo.UseImage(image);
-                                    OCR.ProcessProfileScreen(image);
+                                    using (Bitmap image = new Bitmap(file))
+                                    {
+                                        _windowInfo.UseImage(image);
+                                        OCR.ProcessProfileScreen(image);
+                                    }
                                 }
                             }
                         }
@@ -540,13 +721,15 @@ namespace WFInfo
         // Switch to logged in mode for warfrane.market systems
         public void LoggedIn()
         { //this is bullshit, but I couldn't call it in login.xaml.cs because it doesn't properly get to the main window
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.LoggedIn(); });
+            RunOnUIThread(mw => mw.LoggedIn());
 
             // start the AFK timer
             latestActive = DateTime.UtcNow.AddMinutes(1);
             TimeSpan startTimeSpan = TimeSpan.Zero;
             TimeSpan periodTimeSpan = TimeSpan.FromMinutes(1);
             
+            // Dispose previous timer to prevent accumulating orphaned timers
+            timer?.Dispose();
             timer = new System.Threading.Timer((e) =>
             {
                 TimeoutCheck();
@@ -610,7 +793,9 @@ namespace WFInfo
 
         public static void SignOut()
         {
-            MainWindow.INSTANCE.Dispatcher.Invoke(() => { MainWindow.INSTANCE.SignOut(); });
+            timer?.Dispose();
+            timer = null;
+            RunOnUIThread(mw => mw.SignOut());
         }
     }
 

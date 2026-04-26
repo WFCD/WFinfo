@@ -119,11 +119,20 @@ namespace WFInfo
                         primeNode.GetSetInfo();
                         type.AddChild(primeNode);
                     }
+                    else
+                    {
+                        Main.AddLog("EQUIPMENT: Skipping " + primeName + " - no children added (all parts missing from marketData)");
+                    }
                 }
             }
 
             foreach (string typeName in types)
             {
+                if (!primeTypes.ContainsKey(typeName))
+                {
+                    Main.AddLog("EQUIPMENT: No items found for type: " + typeName + ", skipping");
+                    continue;
+                }
                 TreeNode primeType = primeTypes[typeName];
                 primeType.ResetFilter();
                 primeType.FilterOutVaulted();
@@ -300,6 +309,7 @@ namespace WFInfo
                 List<TreeNode> activeNodes = new List<TreeNode>();
                 foreach (string typeName in types)
                 {
+                    if (!primeTypes.ContainsKey(typeName)) continue;
                     TreeNode primeType = primeTypes[typeName];
                     foreach (TreeNode eqmt in primeType.ChildrenFiltered)
                         activeNodes.Add(eqmt);
@@ -327,6 +337,7 @@ namespace WFInfo
             {
                 foreach (string typeName in types)
                 {
+                    if (!primeTypes.ContainsKey(typeName)) continue;
                     TreeNode primeType = primeTypes[typeName];
                     int curr = EqmtTree.Items.IndexOf(primeType);
                     if (primeType.ChildrenFiltered.Count == 0)

@@ -124,7 +124,7 @@ namespace WFInfo
 
                 if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    Task.Factory.StartNew(
+                    Task.Run(
                         () =>
                         {
 
