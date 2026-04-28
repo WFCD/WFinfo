@@ -16,6 +16,7 @@ using WFInfo.Services.HDRDetection;
 using WFInfo.Services.Screenshot;
 using WFInfo.Services.WindowInfo;
 using WFInfo.Settings;
+using WFInfo.LanguageProcessing;
 using Brushes = System.Drawing.Brushes;
 using Clipboard = System.Windows.Forms.Clipboard;
 using Color = System.Drawing.Color;
@@ -97,13 +98,51 @@ namespace WFInfo
         // UI - Scaling used in Warframe
         public static double uiScaling;
 
-        public static Regex RE = new Regex("[^a-z가-힣]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        // Language-specific regex patterns are now handled by CharacterWhitelist in Tesseract
+        // No post-processing filtering needed since Tesseract handles character filtering at source
 
         // Pixel measurements for reward screen @ 1920 x 1080 with 100% scale https://docs.google.com/drawings/d/1Qgs7FU2w1qzezMK-G1u9gMTsQZnDKYTEU36UPakNRJQ/edit
         public const int pixleRewardWidth = 968;
         public const int pixleRewardHeight = 235;
         public const int pixleRewardYDisplay = 316;
         public const int pixelRewardLineHeight = 48;
+        
+        // CJK language detection helper - Korean, Simplified Chinese, Traditional Chinese share similar OCR needs
+        private static bool IsCJKLocale()
+        {
+            var locale = _settings?.Locale;
+            if (string.IsNullOrEmpty(locale)) return false;
+            return locale == "ko" || locale == "zh-hans" || locale == "zh-hant" || locale == "ja";
+        }
+        
+        // CJK-specific adjustments for multi-line text
+        private static int GetAdjustedLineHeight()
+        {
+            // CJK text needs slightly more vertical space for multi-line wrapping
+            return IsCJKLocale() ? 58 : pixelRewardLineHeight;
+        }
+
+        /// <summary>
+        /// Safe call helper to execute functions with consistent error handling and logging
+        /// </summary>
+        /// <typeparam name="T">Return type of the function</typeparam>
+        /// <param name="func">Function to execute</param>
+        /// <param name="defaultValue">Default value to return on error</param>
+        /// <param name="operationName">Name of the operation for logging</param>
+        /// <param name="itemName">Name of the item being processed</param>
+        /// <returns>Result of the function or default value on error</returns>
+        private static T SafeCall<T>(Func<T> func, T defaultValue, string operationName, string itemName)
+        {
+            try
+            {
+                return func();
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"ERROR: {operationName} failed for '{itemName}': {ex.Message}");
+                return defaultValue;
+            }
+        }
 
         public const int SCALING_LIMIT = 100;
         public static bool processingActive = false;
@@ -123,6 +162,7 @@ namespace WFInfo
 
         private static readonly System.Threading.SemaphoreSlim ReloadSemaphore = new System.Threading.SemaphoreSlim(1, 1);
         private static ITesseractService _tesseractService;
+        private static bool _tesseractInitFailed;
         private static ISoundPlayer _soundPlayer;
         private static IReadOnlyApplicationSettings _settings;
         private static IWindowInfoService _window;
@@ -140,19 +180,37 @@ namespace WFInfo
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
             _tesseractService = tesseractService;
-            _tesseractService.Init();
             _soundPlayer = soundPlayer;
             _settings = settings;
             _window = window;
-            _hdrDetector = hdrDetector;
-
             _gdiScreenshot = gdiScreenshot;
             _windowsScreenshot = windowsScreenshot;
+            _hdrDetector = hdrDetector;
+
+            // Initialize the language processor factory before tesseract service
+            LanguageProcessorFactory.Initialize(settings);
+
+            _tesseractInitFailed = false;
+            try
+            {
+                _tesseractService.Init();
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"ERROR: Failed to initialize TesseractService: {ex.Message}");
+                _tesseractInitFailed = true;
+            }
         }
 
         internal static void ProcessRewardScreen(Bitmap file = null)
         {
             #region initializers
+            if (_tesseractInitFailed || _tesseractService == null)
+            {
+                Main.AddLog("ERROR: Cannot process reward screen - TesseractService is null or failed to initialize");
+                return;
+            }
+            
             if (processingActive)
             {
                 Main.StatusUpdate("Still Processing Reward Screen", 2);
@@ -204,13 +262,13 @@ namespace WFInfo
             for (int i = 0; i < parts.Count; i++)
             {
                 int tempI = i;
-                tasks[i] = Task.Factory.StartNew(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]);});
+                tasks[i] = Task.Run(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]);});
             }
             Task.WaitAll(tasks);
 
             // Remove any empty (or suspiciously short) items from the array
             firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s) && s.Replace(" ", "").Length > 6).ToArray();
-            if (firstChecks == null || firstChecks.Length == 0 || CheckIfError())
+            if (firstChecks == null || firstChecks.Length == 0)
             {
                 processingActive = false;
                 Main.AddLog(("----  Partial Processing Time, couldn't find rewards " + (watch.ElapsedMilliseconds - start) + " ms  ------------------------------------------------------------------------------------------").Substring(0, 108));
@@ -222,6 +280,7 @@ namespace WFInfo
                         Main.SpawnErrorPopup(time);
                     });
                 }
+                return;
             }
             double bestPlat = 0;
             int bestDucat = 0;
@@ -231,6 +290,8 @@ namespace WFInfo
 
             #endregion
 
+            try
+            {
             #region processing data
             if (firstChecks.Length > 0)
             {
@@ -249,11 +310,28 @@ namespace WFInfo
                     string part = firstChecks[i];
                     #region found a part
                     string correctName = Main.dataBase.GetPartName(part, out firstProximity[i], false, out _);
+                    
+                    // Filter out results with excessively high Levenshtein distances (indicating no valid match)
+                    // 9999 is the default value when no match was found, and anything above 50% of string length is likely invalid
+                    if (firstProximity[i] == 9999 || firstProximity[i] > GetMaxAllowedLevenshteinDistance(part.Length) || string.IsNullOrEmpty(correctName))
+                    {
+                        Main.AddLog($"Rejected junk match: '{part}' with distance {firstProximity[i]}");
+                        continue; // Skip this part entirely
+                    }
+                    
                     string primeSetName = Data.GetSetName(correctName);
                     JObject job = (JObject)Main.dataBase.marketData.GetValue(correctName);
                     JObject primeSet = (JObject)Main.dataBase.marketData.GetValue(primeSetName);
+                    
+                    // Guard against null market data
+                    if (job == null || job["ducats"] == null)
+                    {
+                        Main.AddLog($"MARKET DATA: No market data or ducats found for '{correctName}', skipping");
+                        continue;
+                    }
+                    
                     string ducats = job["ducats"].ToObject<string>();
-                    if (int.Parse(ducats, Main.culture) == 0)
+                    if (!int.TryParse(ducats, System.Globalization.NumberStyles.Integer, Main.culture, out int ducatValue) || ducatValue == 0)
                     {
                         hideRewardInfo = true;
                     }
@@ -267,11 +345,11 @@ namespace WFInfo
                     }
                     double platinum = double.Parse(plat, styles, Main.culture);
                     string volume = job["volume"].ToObject<string>();
-                    bool vaulted = Main.dataBase.IsPartVaulted(correctName);
-                    bool mastered = Main.dataBase.IsPartMastered(correctName);
-                    string partsOwned = Main.dataBase.PartsOwned(correctName);
-                    string partsCount = Main.dataBase.PartsCount(correctName);
-                    int duc = int.Parse(ducats, Main.culture);
+                    bool vaulted = SafeCall(() => Main.dataBase.IsPartVaulted(correctName), false, "IsPartVaulted", correctName);
+                    bool mastered = SafeCall(() => Main.dataBase.IsPartMastered(correctName), false, "IsPartMastered", correctName);
+                    string partsOwned = SafeCall(() => Main.dataBase.PartsOwned(correctName), "0", "PartsOwned", correctName);
+                    string partsCount = SafeCall(() => Main.dataBase.PartsCount(correctName), "0", "PartsCount", correctName);
+                    int duc = ducatValue;
                     #endregion
 
                     #region highlighting
@@ -389,8 +467,11 @@ namespace WFInfo
                 partialScreenshot.Dispose();
                 partialScreenshot = null;
             }
-
-            processingActive = false;
+            } // end try
+            finally
+            {
+                processingActive = false;
+            }
 
         }
 
@@ -535,7 +616,7 @@ namespace WFInfo
         /// <returns></returns>
         public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * _window.ScreenScaling);
+            int lineHeight = (int)(GetAdjustedLineHeight() / 2 * _window.ScreenScaling);
             // int width = image == null ? window.Width * (int)_window.DpiScaling : image.Width;
             // int height = image == null ? window.Height * (int)_window.DpiScaling : image.Height;
             int mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling);
@@ -599,21 +680,20 @@ namespace WFInfo
             }
             return active;
         }
-#pragma warning disable IDE0044 // Add readonly modifier
-        private static short[,,] GetThemeCache = new short[256, 256, 256];
-        private static short[,,] GetThresholdCache = new short[256, 256, 256];
-#pragma warning disable IDE0044 // Add readonly modifier
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, (int theme, int threshold)> _themeCache =
+            new System.Collections.Concurrent.ConcurrentDictionary<int, (int theme, int threshold)>();
 
         private static WFtheme GetClosestTheme(Color clr, out int threshold)
         {
-            threshold = 999;
-            WFtheme minTheme = WFtheme.CORPUS;
-            if (GetThemeCache[clr.R, clr.G, clr.B] > 0)
+            int key = (clr.R << 16) | (clr.G << 8) | clr.B;
+            if (_themeCache.TryGetValue(key, out var cached))
             {
-                threshold = GetThresholdCache[clr.R, clr.G, clr.B];
-                return (WFtheme)(GetThemeCache[clr.R, clr.G, clr.B] - 1);
+                threshold = cached.threshold;
+                return (WFtheme)cached.theme;
             }
 
+            threshold = 999;
+            WFtheme minTheme = WFtheme.CORPUS;
             foreach (WFtheme theme in (WFtheme[])Enum.GetValues(typeof(WFtheme)))
             {
                 if ((int)theme >= 0) //ignore special theme values
@@ -627,8 +707,7 @@ namespace WFInfo
                     }
                 }
             }
-            GetThemeCache[clr.R, clr.G, clr.B] = (byte)(minTheme + 1);
-            GetThresholdCache[clr.R, clr.G, clr.B] = (byte)threshold;
+            _themeCache[key] = ((int)minTheme, threshold);
             return minTheme;
         }
 
@@ -637,12 +716,21 @@ namespace WFInfo
         /// </summary>
         /// <param name="partName">Scanned part name</param>
         /// <returns>If part name is close enough to valid to actually process</returns>
-        internal static bool PartNameValid (string partName)
+        internal static bool PartNameValid(string partName)
         {
-            if ((partName.Length < 13 && _settings.Locale == "en") || (partName.Replace(" ", "").Length < 6 && _settings.Locale == "ko")) // if part name is smaller than "Bo prime handle" skip current part 
-                //TODO: Add a min character for other locale here.
-                return false;
-            return true;
+            var processor = LanguageProcessorFactory.GetCurrentProcessor();
+            return processor?.IsPartNameValid(partName) ?? false;
+        }
+
+        /// <summary>
+        /// Gets the maximum allowed Levenshtein distance threshold for part name matching
+        /// </summary>
+        /// <param name="partNameLength">Length of the part name</param>
+        /// <returns>Maximum allowed Levenshtein distance</returns>
+        private static int GetMaxAllowedLevenshteinDistance(int partNameLength)
+        {
+            // Use 50% of string length with a minimum floor of 3 for consistency
+            return Math.Max((int)Math.Ceiling(partNameLength * 0.5), 3);
         }
 
         /// <summary>
@@ -664,7 +752,8 @@ namespace WFInfo
                 return;
             }
 
-            snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
+            if (_settings.Debug)
+                snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, snapItImage, rowHits, colHits); 
@@ -681,12 +770,27 @@ namespace WFInfo
                 var part = foundParts[i];
                 if (!PartNameValid(part.Name))
                 {
-                    foundParts.RemoveAt(i--); //remove invalid part from list to not clog VerifyCount. Decrement to not skip any entries
+                    if (_settings.Debug)
+                        Main.AddLog($"SnapIt: Rejected invalid part name: \"{part.Name}\" (length after trim: {part.Name?.Replace(" ", "").Length ?? 0})");
+                    foundParts.RemoveAt(i); //remove invalid part from list to not clog VerifyCount
+                    i--; // Adjust index since we removed an item
                     resultCount--;
                     continue;
                 }
-                Debug.WriteLine($"Part  {foundParts.IndexOf(part)} out of {foundParts.Count}");
+                Debug.WriteLine($"Part  {i} out of {foundParts.Count}");
                 string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool multipleLowest);
+                
+                // Filter out results with excessively high Levenshtein distances (indicating no valid match)
+                // 9999 is the default value when no match was found, and anything above 50% of string length is likely invalid
+                // Also check for null names (can happen with non-English languages when no match was found)
+                if (levenDist == 9999 || levenDist > GetMaxAllowedLevenshteinDistance(part.Name.Length) || string.IsNullOrEmpty(name))
+                {
+                    foundParts.RemoveAt(i); // remove invalid part from list
+                    i--; // Adjust index since we removed an item
+                    resultCount--;
+                    continue;
+                }
+                
                 string primeSetName = Data.GetSetName(name);
                 if (levenDist > Math.Min(part.Name.Length, name.Length) / 3 || multipleLowest)
                 {
@@ -696,8 +800,19 @@ namespace WFInfo
                 bool doWarn = part.Warning;
                 part.Name = name;
                 foundParts[i] = part;
-                JObject job = Main.dataBase.marketData.GetValue(name).ToObject<JObject>();
-                JObject primeSet = (JObject)Main.dataBase.marketData.GetValue(primeSetName);
+                
+                // Safely get market data with null checking
+                JObject job = Main.dataBase.marketData.GetValue(name) as JObject;
+                if (job == null)
+                {
+                    Main.AddLog($"MARKET DATA: No market data found for '{name}', skipping item");
+                    foundParts.RemoveAt(i); // remove item with no market data
+                    i--; // Adjust index since we removed an item
+                    resultCount--;
+                    continue;
+                }
+                
+                JObject primeSet = Main.dataBase.marketData.GetValue(primeSetName) as JObject;
                 string plat = job["plat"].ToObject<string>();
                 string primeSetPlat = null;
                 if (primeSet != null)
@@ -706,9 +821,11 @@ namespace WFInfo
                 }
                 string ducats = job["ducats"].ToObject<string>();
                 string volume = job["volume"].ToObject<string>();
-                bool vaulted = Main.dataBase.IsPartVaulted(name);
-                bool mastered = Main.dataBase.IsPartMastered(name);
-                string partsOwned = Main.dataBase.PartsOwned(name);
+                
+                bool vaulted = SafeCall(() => Main.dataBase.IsPartVaulted(name), false, "IsPartVaulted", name);
+                bool mastered = SafeCall(() => Main.dataBase.IsPartMastered(name), false, "IsPartMastered", name);
+                string partsOwned = SafeCall(() => Main.dataBase.PartsOwned(name), "0", "PartsOwned", name);
+                
                 string partsDetected = ""+part.Count;
 
                 if (_settings.SnapitExport)
@@ -889,35 +1006,44 @@ namespace WFInfo
 
         private static List<Tuple<String, Rectangle>> GetTextWithBoundsFromImage(TesseractEngine engine, Bitmap image, int rectXOffset, int rectYOffset)
         {
-            List<Tuple<String, Rectangle>> data = new List<Tuple<String, Rectangle>>();
-
-
-            using (var page = engine.Process(image, PageSegMode.SparseText))
+            // Use single PSM mode for deterministic results
+            // SparseText is best for SnapIt: finds text anywhere in the image regardless of layout
+            var results = new List<Tuple<String, Rectangle>>();
+            
+            try
             {
-                using (var iterator = page.GetIterator())
+                using (var page = engine.Process(image, PageSegMode.SparseText))
                 {
-
-                    iterator.Begin();
-                    do
+                    using (var iterator = page.GetIterator())
                     {
-                        string currentWord = iterator.GetText(PageIteratorLevel.TextLine);
-                        iterator.TryGetBoundingBox(PageIteratorLevel.TextLine, out Rect tempbounds);
-                        Rectangle bounds = new Rectangle(tempbounds.X1 + rectXOffset, tempbounds.Y1 + rectYOffset, tempbounds.Width, tempbounds.Height);
-                        if (currentWord != null)
+                        iterator.Begin();
+                        do
                         {
-                            currentWord = RE.Replace(currentWord, "").Trim();
-                            if (currentWord.Length > 0)
-                            { //word is valid start comparing to others
-                                data.Add(Tuple.Create(currentWord, bounds));
+                            string currentWord = iterator.GetText(PageIteratorLevel.TextLine);
+                            iterator.TryGetBoundingBox(PageIteratorLevel.TextLine, out Rect tempbounds);
+                            Rectangle bounds = new Rectangle(tempbounds.X1 + rectXOffset, tempbounds.Y1 + rectYOffset, tempbounds.Width, tempbounds.Height);
+                            if (currentWord != null)
+                            {
+                                currentWord = currentWord.Trim();
+                                if (currentWord.Length > 0)
+                                {
+                                    results.Add(Tuple.Create(currentWord, bounds));
+                                }
                             }
                         }
+                        while (iterator.Next(PageIteratorLevel.TextLine));
                     }
-                    while (iterator.Next(PageIteratorLevel.TextLine));
                 }
             }
-            return data;
+            catch (Exception ex)
+            {
+                // Log OCR extraction failure for debugging
+                Main.AddLog($"OCR extraction failed in GetTextWithBoundsFromImage: {ex.Message}\n{ex.ToString()}");
+            }
+            return results;
         }
 
+        
         /// <summary>
         /// Filters out any group of words and addes them all into a single InventoryItem, containing the found words as well as the bounds within they reside.
         /// </summary>
@@ -942,67 +1068,166 @@ namespace WFInfo
             if ( _settings.SnapMultiThreaded)
             {
                 zones = DivideSnapZones(filteredImage, filteredImageClean, rowHits, colHits);
-                snapThreads = 4;
+                // Fallback to single-threaded for large layouts to avoid threading issues
+                if (zones.Count > 12) // Too many zones means fragmentation is occurring
+                {
+                    // Dispose existing Bitmaps before replacing zones
+                    foreach (var zone in zones)
+                    {
+                        try
+                        {
+                            zone.Item1?.Dispose();
+                        }
+                        catch
+                        {
+                            // Ignore disposal errors
+                        }
+                    }
+                    
+                    // Fallback to single-threaded for large layouts to avoid threading issues
+                    zones = new List<Tuple<Bitmap, Rectangle>>();
+                    zones.Add( Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height) ) );
+                    snapThreads = 1;
+                    // Keep the zones but process them single-threaded
+                }
+                else if (zones.Count > 8) // Large but reasonable number of zones
+                {
+                    // Large but reasonable number of zones
+                    snapThreads = 1;
+                }
+                else
+                {
+                    snapThreads = 4;
+                }
             } else
             {
                 zones = new List<Tuple<Bitmap, Rectangle>>();
                 zones.Add( Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height) ) );
                 snapThreads = 1;
             }
+
+            // Initialize results list early for single zone mode
+            List<InventoryItem> results = new List<InventoryItem>();
             Task < List<Tuple<String, Rectangle>>>[] snapTasks = new Task<List<Tuple<String, Rectangle>>>[snapThreads];
             for (int i = 0; i < snapThreads; i++)
             {
                 int tempI = i;
-                snapTasks[i] = Task.Factory.StartNew(() =>
+                snapTasks[i] = Task.Run(() =>
                 {
                     List<Tuple<String, Rectangle>> taskResults = new List<Tuple<String, Rectangle>>();
+                    int zonesProcessed = 0;
                     for (int j = tempI; j < zones.Count; j += snapThreads)
                     {
                         //process images
                         List<Tuple<String, Rectangle>> currentResult = GetTextWithBoundsFromImage(_tesseractService.Engines[tempI], zones[j].Item1, zones[j].Item2.X, zones[j].Item2.Y);
                         taskResults.AddRange(currentResult);
+                        zonesProcessed++;
                     }
+                    // Thread processing complete
                     return taskResults;
                 });
             }
             Task.WaitAll(snapTasks);
 
+            // Dispose all zone bitmaps after processing is complete (except filteredImageClean which is disposed later)
+            foreach (var zone in zones)
+            {
+                try
+                {
+                    // Skip disposing filteredImageClean as it's needed by GetItemCounts() and disposed later
+                    if (!ReferenceEquals(zone.Item1, filteredImageClean))
+                    {
+                        zone.Item1?.Dispose();
+                    }
+                }
+                catch
+                {
+                    // Ignore disposal errors
+                }
+            }
+
+            // Get processor once outside loops for performance
+            var processor = LanguageProcessorFactory.GetCurrentProcessor();
+
             for (int threadNum = 0; threadNum < snapThreads; threadNum++)
             {
                 foreach (Tuple<String,Rectangle> wordResult in snapTasks[threadNum].Result)
                 {
-                    string currentWord = wordResult.Item1;
+                    string currentLine = wordResult.Item1;
                     Rectangle bounds = wordResult.Item2;
+                    
+                    // Split line into individual words for proper filtering
+                    var words = currentLine.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    var filteredWords = new List<string>();
+                    
+                    // Filter individual words as intended
+                    foreach (var word in words)
+                    {
+                        if (processor == null || !processor.ShouldFilterWord(word))
+                        {
+                            filteredWords.Add(word);
+                        }
+                        else if (word.Length <= 3)
+                        {
+                            numberTooFewCharacters++;
+                        }
+                    }
+                    
+                    // If all words were filtered, skip this line
+                    if (filteredWords.Count == 0)
+                    {
+                        if (_settings.Debug)
+                            Main.AddLog($"SnapIt: All words filtered from line: \"{currentLine}\"");
+                        continue;
+                    }
+                    
+                    // Reconstruct the filtered line
+                    string currentWord = string.Join(" ", filteredWords);
                     //word is valid start comparing to others
-                    int VerticalPad = bounds.Height/2;
-                    int HorizontalPad = (int)(bounds.Height * _settings.SnapItHorizontalNameMargin);
+                    // CJK text wraps across multiple lines more often, so increase vertical padding
+                    // to ensure multi-line item names get grouped into a single item
+                    int VerticalPad = IsCJKLocale() 
+                        ? bounds.Height * 3 / 4  // Moderate padding for CJK multi-line grouping (not full height to avoid cross-item merging)
+                        : bounds.Height / 2;
+                    // Reduce horizontal padding for CJK to prevent cross-item horizontal merging
+                    // CJK item tiles in the SnapIt grid are close together, so large horizontal padding
+                    // causes padded bounds to overlap with adjacent items
+                    double hMargin = IsCJKLocale() 
+                        ? Math.Min(_settings.SnapItHorizontalNameMargin, 0.3)  // Cap at 0.3 for CJK
+                        : _settings.SnapItHorizontalNameMargin;
+                    int HorizontalPad = (int)(bounds.Height * hMargin);
+                    
+                                        
                     var paddedBounds = new Rectangle(bounds.X - HorizontalPad, bounds.Y - VerticalPad, bounds.Width + HorizontalPad * 2, bounds.Height + VerticalPad * 2);
                     //var paddedBounds = new Rectangle(bounds.X - bounds.Height / 3, bounds.Y - bounds.Height / 3, bounds.Width + bounds.Height, bounds.Height + bounds.Height / 2);
 
                     using (Graphics g = Graphics.FromImage(filteredImage))
                     {
-                        if (paddedBounds.Height > 50 * _window.ScreenScaling || paddedBounds.Width > 84 * _window.ScreenScaling)
+                        // CJK characters are inherently larger than Latin, so use higher thresholds
+                        // Also CJK 3-char words like 리시버/설계도/槍機/藍圖 are valid item name fragments
+                        bool isCJK = IsCJKLocale();
+                        int sizeThresholdH = isCJK ? (int)(80 * _window.ScreenScaling) : (int)(50 * _window.ScreenScaling);
+                        int sizeThresholdW = isCJK ? (int)(120 * _window.ScreenScaling) : (int)(84 * _window.ScreenScaling);
+                        int minCharLength = isCJK ? 2 : 3; // CJK packs more info per character
+                        
+                        if (paddedBounds.Height > sizeThresholdH || paddedBounds.Width > sizeThresholdW)
                         { //Determine whether or not the box is too large, false positives in OCR can scan items (such as neuroptics, chassis or systems) as a character(s).
-                            if (currentWord.Length > 3)
-                            { // more than 3 characters in a box too large is likely going to be good, pass it but mark as potentially bad
+                            if (currentWord.Length > minCharLength)
+                            { // enough characters in a box too large is likely going to be good, pass it but mark as potentially bad
                                 g.DrawRectangle(orange, paddedBounds);
                                 numberTooLargeButEnoughCharacters++;
                             }
                             else
                             {
+                                Main.AddLog($"SnapIt: Rejected oversized box with short text: \"{currentWord}\" (bounds: {paddedBounds.Width}x{paddedBounds.Height})");
                                 g.FillRectangle(red, paddedBounds);
                                 numberTooLarge++;
                                 continue;
                             }
                         }
-                        else if (currentWord.Length < 2 && _settings.Locale == "en")
-                        {
-                            g.FillRectangle(green, paddedBounds);
-                            numberTooFewCharacters++;
-                            continue;
-                        }
                         else
                         {
+                            // Words already filtered at individual level above
                             g.DrawRectangle(pinkP, paddedBounds);
                         }
                         g.DrawRectangle(greenp, bounds);
@@ -1010,10 +1235,25 @@ namespace WFInfo
 
                     }
                     int i = foundItems.Count - 1;
+                    
+                    // Max combined width to prevent merging text from different items in the grid
+                    // Each item tile is roughly 130-140px wide at 1080p; cap at 160px to allow
+                    // multi-line wrapping within one item but prevent cross-item cascading merges
+                    int maxGroupWidth = (int)(160 * _window.ScreenScaling);
 
                     for (; i >= 0; i--)
+                    {
                         if (foundItems[i].Item2.IntersectsWith(paddedBounds))
-                            break;
+                        {
+                            // Check if merging would create an unreasonably wide group
+                            int combinedLeft = Math.Min(foundItems[i].Item2.Left, paddedBounds.Left);
+                            int combinedRight = Math.Max(foundItems[i].Item2.Right, paddedBounds.Right);
+                            int combinedWidth = combinedRight - combinedLeft;
+                            if (combinedWidth <= maxGroupWidth)
+                                break; // OK to merge
+                            // else: skip this group, too wide — would merge across items
+                        }
+                    }
 
                     if (i == -1)
                     {
@@ -1037,8 +1277,8 @@ namespace WFInfo
                 }
             }
 
-            List<InventoryItem> results = new List<InventoryItem>();
-
+            
+            // Process item groups
             foreach( Tuple<List<InventoryItem>, Rectangle> itemGroup in foundItems)
             {
                 //Sort order for component words to appear in. If large height difference, sort vertically. If small height difference, sort horizontally
@@ -1059,6 +1299,8 @@ namespace WFInfo
                 results.Add(new InventoryItem(name, itemGroup.Item2));
             }
 
+            // Final results processed
+
             if ( _settings.DoSnapItCount)
             {
                 GetItemCounts(filteredImage, filteredImageClean, unfilteredImage, results, font);
@@ -1077,7 +1319,8 @@ namespace WFInfo
                 Main.AddLog("numberTooLarge: " + numberTooLarge + ", numberTooFewCharacters: " + numberTooFewCharacters + ", numberTooLargeButEnoughCharacters: " + numberTooLargeButEnoughCharacters + ", foundItems.Count: " + foundItems.Count);
             }
 
-            filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
+            if (_settings.Debug)
+                filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
             return results;
         }
 
@@ -1174,10 +1417,11 @@ namespace WFInfo
 
 
                 //set OCR to numbers only
-                _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "0123456789");
+                try
+                {
+                    _tesseractService.SetNumbersOnlyMode();
 
-
-                double widthMultiplier = (_settings.DoCustomNumberBoxWidth ? _settings.SnapItNumberBoxWidth : 0.4);
+                    double widthMultiplier = (_settings.DoCustomNumberBoxWidth ? _settings.SnapItNumberBoxWidth : 0.4);
                 //Process grid system
                 for (int i = 0; i < Rows.Count; i++)
                 {
@@ -1277,14 +1521,13 @@ namespace WFInfo
                         sumBlack = 1;
                         //use "flood search" approach from the pixel found above to find the whole checkmark+circle icon
                         Stack<Point> searchSpace = new Stack<Point>();
-                        Dictionary<Point, bool> pixelChecked = new Dictionary<Point, bool>();
+                        HashSet<Point> pixelChecked = new HashSet<Point>();
                         searchSpace.Push(new Point(x, y));
                         while(searchSpace.Count > 0)
                         {
                             Point p = searchSpace.Pop();
-                            if (!pixelChecked.TryGetValue(p, out bool val) || !val)
+                            if (pixelChecked.Add(p))
                             {
-                                pixelChecked[p] = true;
                                 for (int xOff = -2; xOff <= 2; xOff++)
                                 {
                                     for (int yOff = -2; yOff <= 2; yOff++)
@@ -1525,7 +1768,11 @@ namespace WFInfo
                 }
                 
                 //return OCR to any symbols
-                _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "");
+                }
+                finally
+                {
+                    _tesseractService.ResetToDefaultMode();
+                }
             }
             darkCyan.Dispose();
             red.Dispose();
@@ -1543,7 +1790,8 @@ namespace WFInfo
             long start = watch.ElapsedMilliseconds;
 
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-            fullShot.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
+            if (_settings.Debug)
+                fullShot.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
             List<InventoryItem> foundParts = FindOwnedItems(fullShot, timestamp, start, watch);
             for (int i = 0; i < foundParts.Count; i++)
             {
@@ -1813,7 +2061,7 @@ namespace WFInfo
 
 
                             //do OCR
-                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", " ABCDEFGHIJKLMNOPQRSTUVWXYZ&");
+                            // Using default language-specific whitelist
                             using (var page = _tesseractService.FirstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                             {
                                 using (var iterator = page.GetIterator())
@@ -1828,7 +2076,6 @@ namespace WFInfo
 
                                 }
                             }
-                            _tesseractService.FirstEngine.SetVariable("tessedit_char_whitelist", "");
                         }
                     }
                     if (nextYCounter >= 0)
@@ -1839,7 +2086,8 @@ namespace WFInfo
             }
 
             ProfileImageClean.Dispose();
-            ProfileImage.Save(Main.AppPath + @"\Debug\ProfileImageBounds " + timestamp + ".png");
+            if (_settings.Debug)
+                ProfileImage.Save(Main.AppPath + @"\Debug\ProfileImageBounds " + timestamp + ".png");
             darkCyan.Dispose();
             pink.Dispose();
             cyan.Dispose();
@@ -2013,16 +2261,16 @@ namespace WFInfo
             long start = watch.ElapsedMilliseconds;
             long beginning = start;
 
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * _window.ScreenScaling);
+            int lineHeight = (int)(GetAdjustedLineHeight() / 2 * _window.ScreenScaling);
 
             Color clr;
             int width = _window.Window.Width;
             int height = _window.Window.Height;
             int mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling);
             int mostLeft = (width / 2) - (mostWidth / 2 );
-            // Most Top = pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight
+            // Most Top = pixleRewardYDisplay - pixleRewardHeight + GetAdjustedLineHeight()
             //                   (316          -        235        +       44)    *    1.1    =    137
-            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * _window.ScreenScaling);
+            int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + GetAdjustedLineHeight()) * _window.ScreenScaling);
             int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * 0.5);
             //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
             var rectangle = new Rectangle((int)(mostLeft), (int)(mostTop), mostWidth, mostBot - mostTop);
@@ -2053,23 +2301,24 @@ namespace WFInfo
             int[] rows = new int[preFilter.Height];
             // 0 => 50   27 => 77   50 => 100
 
+            // Use LockBits for fast pixel access instead of GetPixel
+            BitmapData preFilterData = preFilter.LockBits(new Rectangle(0, 0, preFilter.Width, preFilter.Height), ImageLockMode.ReadOnly, preFilter.PixelFormat);
+            int pfStride = Math.Abs(preFilterData.Stride);
+            byte[] pfBytes = new byte[pfStride * preFilter.Height];
+            Marshal.Copy(preFilterData.Scan0, pfBytes, 0, pfBytes.Length);
+            preFilter.UnlockBits(preFilterData);
 
-            //Main.AddLog("ROWS: 0 to " + preFilter.Height);
-            //var postFilter = preFilter;
+            int pfPixelSize = 4; // BGRA
             for (int y = 0; y < preFilter.Height; y++)
             {
                 rows[y] = 0;
                 for (int x = 0; x < preFilter.Width; x++)
                 {
-                    clr = preFilter.GetPixel(x, y);
+                    int idx = y * pfStride + x * pfPixelSize;
+                    clr = Color.FromArgb(pfBytes[idx + 3], pfBytes[idx + 2], pfBytes[idx + 1], pfBytes[idx]);
                     if (ThemeThresholdFilter(clr, active))
-                    //{
                         rows[y]++;
-                        //postFilter.SetPixel(x, y, Color.Black);
-                    //} else
-                        //postFilter.SetPixel(x, y, Color.White);
                 }
-                //Debug.Write(rows[y] + " ");
             }
 
             //postFilter.Save(Main.AppPath + @"\Debug\PostFilter" + timestamp + ".png");
@@ -2160,11 +2409,13 @@ namespace WFInfo
                 g.DrawRectangle(Pens.Red, rectangle);
                 g.DrawRectangle(Pens.Chartreuse, uidebug);
             }
-            fullScreen.Save(Main.AppPath + @"\Debug\BorderScreenshot " + timestamp + ".png");
+            if (_settings.Debug)
+                fullScreen.Save(Main.AppPath + @"\Debug\BorderScreenshot " + timestamp + ".png");
 
 
             //postFilter.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
-            preFilter.Save(Main.AppPath + @"\Debug\FullPartArea " + timestamp + ".png");
+            if (_settings.Debug)
+                preFilter.Save(Main.AppPath + @"\Debug\FullPartArea " + timestamp + ".png");
             scaling = topFive[4] + 50; //scaling was sometimes going to 50 despite being set to 100, so taking the value from above that seems to be accurate.
 
             scaling /= 100;
@@ -2173,7 +2424,7 @@ namespace WFInfo
 
             int cropWidth = (int)(pixleRewardWidth * _window.ScreenScaling * highScaling);
             int cropLeft = (preFilter.Width / 2) - (cropWidth / 2);
-            int cropTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * _window.ScreenScaling * highScaling);
+            int cropTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + GetAdjustedLineHeight()) * _window.ScreenScaling * highScaling);
             int cropBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * lowScaling);
             int cropHei = cropBot - cropTop;
             cropTop -= mostTop;
@@ -2209,20 +2460,38 @@ namespace WFInfo
             int height = partBox.Height;
             int[] counts = new int[height];
             Bitmap filtered = new Bitmap(width, height);
+
+            // Read source pixels via LockBits for fast access
+            BitmapData srcData = partBox.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, partBox.PixelFormat);
+            int srcStride = Math.Abs(srcData.Stride);
+            byte[] srcBytes = new byte[srcStride * height];
+            Marshal.Copy(srcData.Scan0, srcBytes, 0, srcBytes.Length);
+            partBox.UnlockBits(srcData);
+
+            // Prepare destination pixel buffer
+            BitmapData dstData = filtered.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, filtered.PixelFormat);
+            int dstStride = Math.Abs(dstData.Stride);
+            byte[] dstBytes = new byte[dstStride * height];
+
+            int pixelSize = 4; // ARGB, stored as BGRA
             for (int x = 0; x < width; x++)
             {
                 int count = 0;
                 for (int y = 0; y < height; y++)
                 {
-                    clr = partBox.GetPixel(x, y);
+                    int srcIdx = y * srcStride + x * pixelSize;
+                    clr = Color.FromArgb(srcBytes[srcIdx + 3], srcBytes[srcIdx + 2], srcBytes[srcIdx + 1], srcBytes[srcIdx]);
+                    int dstIdx = y * dstStride + x * pixelSize;
                     if (ThemeThresholdFilter(clr, active))
                     {
-                        filtered.SetPixel(x, y, Color.Black);
+                        dstBytes[dstIdx] = 0; dstBytes[dstIdx + 1] = 0; dstBytes[dstIdx + 2] = 0; dstBytes[dstIdx + 3] = 255; // Black
                         counts[y]++;
                         count++;
                     }
                     else
-                        filtered.SetPixel(x, y, Color.White);
+                    {
+                        dstBytes[dstIdx] = 255; dstBytes[dstIdx + 1] = 255; dstBytes[dstIdx + 2] = 255; dstBytes[dstIdx + 3] = 255; // White
+                    }
                 }
 
                 count = Math.Min(count, partBox.Height / 3);
@@ -2235,6 +2504,9 @@ namespace WFInfo
                 else if (sinVal > 0)
                     totalOdd += sinVal * count;
             }
+
+            Marshal.Copy(dstBytes, 0, dstData.Scan0, dstBytes.Length);
+            filtered.UnlockBits(dstData);
 
             // Rarely, the selection box on certain themes can get included in the detected reward area.
             // Therefore, we check the bottom 10% of the image for this potential issue
@@ -2287,7 +2559,8 @@ namespace WFInfo
                 using (Graphics grD = Graphics.FromImage(newBox))
                     grD.DrawImage(filtered, destRegion, srcRegion, GraphicsUnit.Pixel);
                 ret.Add(newBox);
-                newBox.Save(Main.AppPath + @"\Debug\PartBox(" + i + ") " + timestamp + ".png");
+                if (_settings.Debug)
+                    newBox.Save(Main.AppPath + @"\Debug\PartBox(" + i + ") " + timestamp + ".png");
             }
             filtered.Dispose();
             return ret;
@@ -2296,7 +2569,7 @@ namespace WFInfo
         //private static List<Bitmap> FilterAndSeparateParts(Bitmap image, WFtheme active)
         //{
         //    int width = (int)(pixleRewardWidth * _window.ScreenScaling * uiScaling);
-        //    int lineHeight = (int)(pixelRewardLineHeight * _window.ScreenScaling * uiScaling);
+        //    int lineHeight = (int)(GetAdjustedLineHeight() * _window.ScreenScaling * uiScaling);
         //    int left = (image.Width / 2) - (width / 2);
         //    int top = (image.Height / 2) - (int)(pixleRewardYDisplay * _window.ScreenScaling * uiScaling) + (int)(pixleRewardHeight * _window.ScreenScaling * uiScaling) - lineHeight;
 
@@ -2317,9 +2590,116 @@ namespace WFInfo
         public static string GetTextFromImage(Bitmap image, TesseractEngine engine)
         {
             string ret = "";
-            using (Page page = engine.Process(image))
-                ret = page.GetText().Trim();
-            return RE.Replace(ret, "").Trim();
+            
+            // For CJK locales, try multiple PSM modes and pick the best result.
+            // For Latin-based locales, SingleBlock is sufficient — skip the second pass for performance.
+            PageSegMode[] preferredModes = IsCJKLocale()
+                ? new[] { PageSegMode.SingleBlock, PageSegMode.SingleColumn }
+                : new[] { PageSegMode.SingleBlock };
+
+            Dictionary<PageSegMode, string> modeResults = new Dictionary<PageSegMode, string>();
+            Dictionary<PageSegMode, double> modeScores = new Dictionary<PageSegMode, double>();
+
+            foreach (var mode in preferredModes)
+            {
+                try
+                {
+                    using (Page page = engine.Process(image, mode))
+                    {
+                        string text = page.GetText().Trim();
+                        modeResults[mode] = text;
+                        
+                        // Score the result
+                        double score = ScoreTextResult(text, mode);
+                        modeScores[mode] = score;
+                        
+                        // Early exit if we got a very good result (has CJK chars and reasonable length)
+                        if (score > 50 && text.Length > 6 && text.Any(c => 
+                            (c >= 0xAC00 && c <= 0xD7AF) ||  // Korean Hangul
+                            (c >= 0x4E00 && c <= 0x9FFF) ||  // CJK Unified Ideographs
+                            (c >= 0x3400 && c <= 0x4DBF)))   // CJK Extension A
+                        {
+                            ret = text;
+                            break; // Exit early for performance
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Main.AddLog($"OCR extraction failed in GetTextFromImage: {e.Message}\n{e.ToString()}");
+                    modeResults[mode] = "";
+                    modeScores[mode] = 0;
+                }
+            }
+
+            // If we didn't exit early, select the best result
+            if (string.IsNullOrEmpty(ret))
+            {
+                var bestMode = modeScores.OrderByDescending(kvp => kvp.Value).First().Key;
+                ret = modeResults[bestMode] ?? "";
+            }
+            
+            // Tesseract now handles character filtering via CharacterWhitelist
+            return ret.Trim();
+        }
+        /// <summary>
+        /// Scores OCR text results for quality assessment
+        /// </summary>
+        private static double ScoreTextResult(string text, PageSegMode mode)
+        {
+            if (string.IsNullOrEmpty(text))
+                return 0;
+
+            double score = 0;
+            
+            // Base score for text length
+            score += Math.Min(text.Length, 100);
+            
+            // Korean character detection bonus
+            int koreanChars = text.Count(c => c >= 0xAC00 && c <= 0xD7AF);
+            // CJK character detection bonus (Chinese Simplified/Traditional)
+            int cjkChars = text.Count(c => (c >= 0x4E00 && c <= 0x9FFF) || (c >= 0x3400 && c <= 0x4DBF));
+            int nonLatinChars = koreanChars + cjkChars;
+            if (nonLatinChars > 0)
+            {
+                score += 20; // Bonus for CJK text
+                score += Math.Min(nonLatinChars * 2, 30); // Additional bonus per CJK character
+            }
+            
+            // Line count analysis
+            string[] lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            score += Math.Min(lines.Length * 5, 25);
+            
+            // Mode-specific scoring
+            if (mode == PageSegMode.SingleBlock)
+            {
+                // SingleBlock should work well for single items (up to 3 lines with word wrapping)
+                if (lines.Length >= 1 && lines.Length <= 3)
+                    score += 20; // Higher bonus for optimal single item blocks
+                if (nonLatinChars > 0 && lines.Length >= 2)
+                    score += 15; // Extra bonus for multi-line CJK text (wrapped item names)
+            }
+            else if (mode == PageSegMode.SingleColumn)
+            {
+                // SingleColumn should handle stacked lines well in reward slots
+                if (lines.Length >= 1 && lines.Length <= 4)
+                    score += 15; // Good for vertically stacked reward text
+                if (nonLatinChars > 0)
+                    score += 10; // Bonus for CJK text in column layout
+            }
+            else if (mode == PageSegMode.SparseText)
+            {
+                // SparseText should find multiple distinct text regions
+                if (lines.Length >= 2)
+                    score += 10;
+            }
+            
+            // Penalty for too much whitespace (indicates poor segmentation)
+            double whitespaceRatio = (double)text.Count(char.IsWhiteSpace) / text.Length;
+            if (whitespaceRatio > 0.3)
+                score -= 10;
+            
+            return Math.Max(score, 0);
         }
 
         internal static List<string> SeparatePlayers(Bitmap image, TesseractEngine engine)
@@ -2364,7 +2744,8 @@ namespace WFInfo
                         string word = iter.GetText(PageIteratorLevel.Word);
                         if (word != null)
                         {
-                            word = RE.Replace(word, "").Trim();
+                            // Tesseract now handles character filtering via CharacterWhitelist
+                            word = word.Trim();
                             if (word.Length > 0)
                             {
                                 int topOrBot = outRect.Y1 > (outRect.Height * 3 / 4) ? 0 : 1;
@@ -2534,12 +2915,146 @@ namespace WFInfo
         {
             await ReloadSemaphore.WaitAsync().ConfigureAwait(false);
             try {
-                 await Task.Run(() => _tesseractService.ReloadEngines()).ConfigureAwait(false);
+                if (_tesseractService != null)
+                    await Task.Run(() => _tesseractService.ReloadEngines()).ConfigureAwait(false);
+                else
+                    Main.AddLog("ERROR: Cannot reload engines - TesseractService is null");
             }
             finally {
                 ReloadSemaphore.Release();
             }
         }
+
+        #region Test Support Methods
+
+        /// <summary>
+        /// Test-only entry point: runs the reward screen OCR pipeline on a screenshot
+        /// and returns the list of matched part names (English) without any UI side-effects.
+        /// Requires OCR.Init and Main.dataBase to be initialized.
+        /// </summary>
+        internal static List<string> ProcessRewardScreenForTest(Bitmap screenshot, IWindowInfoService windowService)
+        {
+            var results = new List<string>();
+            if (_tesseractInitFailed || _tesseractService == null)
+            {
+                Main.AddLog("Test ProcessReward: TesseractService is null or failed to initialize");
+                return results;
+            }
+            windowService.UseImage(screenshot);
+
+            List<Bitmap> parts;
+            try
+            {
+                parts = ExtractPartBoxAutomatically(out uiScaling, out _, screenshot);
+            }
+            catch (Exception e)
+            {
+                Main.AddLog("Test ProcessReward: ExtractPartBoxAutomatically failed: " + e.Message);
+                return results;
+            }
+
+            int engineCount = Math.Min(parts.Count, _tesseractService.Engines.Length);
+            string[] checks = new string[parts.Count];
+            Task[] tasks = new Task[engineCount];
+            for (int i = 0; i < engineCount; i++)
+            {
+                int tempI = i;
+                tasks[i] = Task.Run(() => { checks[tempI] = GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]); });
+            }
+            Task.WaitAll(tasks);
+
+            // Process remaining parts sequentially if more parts than engines
+            for (int i = engineCount; i < parts.Count; i++)
+            {
+                checks[i] = GetTextFromImage(parts[i], _tesseractService.FirstEngine);
+            }
+
+            foreach (var p in parts) p.Dispose();
+
+            var validChecks = checks.Where(s => !string.IsNullOrEmpty(s) && s.Replace(" ", "").Length > 6).ToArray();
+
+            foreach (var part in validChecks)
+            {
+                string correctName = Main.dataBase.GetPartName(part, out int dist, false, out _);
+                if (dist != 9999 && dist <= GetMaxAllowedLevenshteinDistance(part.Length) && !string.IsNullOrEmpty(correctName))
+                {
+                    results.Add(correctName);
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Test-only entry point: runs the SnapIt OCR pipeline on a screenshot
+        /// and returns the list of matched part names (English) without any UI side-effects.
+        /// Requires OCR.Init and Main.dataBase to be initialized.
+        /// </summary>
+        internal static List<string> ProcessSnapItForTest(Bitmap screenshot, IWindowInfoService windowService)
+        {
+            var results = new List<string>();
+            if (_tesseractInitFailed || _tesseractService == null)
+            {
+                Main.AddLog("Test ProcessSnapIt: TesseractService is null or failed to initialize");
+                return results;
+            }
+            windowService.UseImage(screenshot);
+
+            WFtheme theme = GetThemeWeighted(out _, screenshot);
+            if (theme == WFtheme.UNKNOWN)
+            {
+                Main.AddLog("Test SnapIt: Theme detection failed");
+                return results;
+            }
+
+            Bitmap filtered = ScaleUpAndFilter(screenshot, theme, out int[] rowHits, out int[] colHits);
+            List<InventoryItem> foundParts = FindAllParts(filtered, screenshot, rowHits, colHits);
+            filtered.Dispose();
+
+            foreach (var part in foundParts)
+            {
+                if (!PartNameValid(part.Name))
+                    continue;
+
+                string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool multipleLowest);
+                if (levenDist == 9999 || levenDist > GetMaxAllowedLevenshteinDistance(part.Name.Length) || string.IsNullOrEmpty(name))
+                    continue;
+
+                results.Add(name);
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Test-only: initializes OCR for headless test mode with only the required services.
+        /// </summary>
+        internal static void InitForTest(ITesseractService tesseractService, IReadOnlyApplicationSettings settings,
+            IWindowInfoService window, IHDRDetectorService hdrDetector)
+        {
+            _tesseractInitFailed = false;
+            Directory.CreateDirectory(Main.AppPath + @"\Debug");
+            _tesseractService = tesseractService;
+            _soundPlayer = null;
+            _settings = settings;
+            _window = window;
+            _gdiScreenshot = null;
+            _windowsScreenshot = null;
+            _hdrDetector = hdrDetector;
+
+            LanguageProcessorFactory.Initialize(settings);
+            try
+            {
+                _tesseractService.Init();
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"ERROR: Failed to initialize TesseractService in test mode: {ex.Message}");
+                _tesseractInitFailed = true;
+            }
+        }
+
+        #endregion
     }
 
     public struct InventoryItem

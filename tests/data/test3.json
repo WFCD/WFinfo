@@ -1,0 +1,14 @@
+{
+  "description": "Japanese inventory screen",
+  "resolution": "2560x1440",
+  "scaling": 150,
+  "theme": "tenno",
+  "language": "japanese",
+  "parts": {
+    "0": "Volt Prime 設計図",
+    "1": "Saryn Prime 設計図"
+  },
+  "category": "inventory",
+  "hdr": true,
+  "filters": ["colorblind"]
+}

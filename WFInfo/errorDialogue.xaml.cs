@@ -43,29 +43,59 @@ namespace WFInfo
 
             try
             {
-                var filePathsToCheck = new List<string>
-                {
-                    startPath + @"\..\eqmt_data.json",
-                    startPath + @"\..\market_data.json",
-                    startPath + @"\..\market_items.json",
-                    startPath + @"\..\name_data.json",
-                    startPath + @"\..\relic_data.json",
-                    startPath + @"\..\settings.json",
-                    startPath + @"\..\debug.log"
-                };
 
                 var fullZipPath = zipPath + @"\WFInfoError_" + closest.ToString("yyyy-MM-dd_HH-mm-ssff") + ".zip";
                 using (ZipFile zip = new ZipFile())
                 {
-                    filePathsToCheck.Where(
-                        path => File.Exists(path)
-                    ).ToList().Concat(
-                        files.Select(
-                            file => file.FullName
-                        )
-                    ).ToList().ForEach(
-                        filename => zip.AddFile(filename, "")
-                    );
+                    // Priority files: debug.log and settings JSON files
+                    string parentDir = Path.GetDirectoryName(startPath);
+                    var priorityFiles = new[]
+                    {
+                        Path.Combine(parentDir, "debug.log"),
+                        Path.Combine(parentDir, "settings.json")
+                    };
+
+                    // Other data files
+                    var otherDataFiles = new[]
+                    {
+                        Path.Combine(parentDir, "eqmt_data.json"),
+                        Path.Combine(parentDir, "market_data.json"),
+                        Path.Combine(parentDir, "market_items.json"),
+                        Path.Combine(parentDir, "name_data.json"),
+                        Path.Combine(parentDir, "relic_data.json")
+                    };
+
+                    // Add debug folder files first (will end up in later segments)
+                    // Filter out files that would collide with priorityFiles and otherDataFiles
+                    var priorityFileNames = priorityFiles.Select(Path.GetFileName).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                    var otherDataFileNames = otherDataFiles.Select(Path.GetFileName).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                    
+                    foreach (FileInfo file in files)
+                    {
+                        string fileName = Path.GetFileName(file.FullName);
+                        if (!priorityFileNames.Contains(fileName) && !otherDataFileNames.Contains(fileName))
+                        {
+                            zip.AddFile(file.FullName, "");
+                        }
+                    }
+
+                    // Add other data files next
+                    foreach (string path in otherDataFiles)
+                    {
+                        if (File.Exists(path))
+                        {
+                            zip.AddFile(path, "");
+                        }
+                    }
+
+                    // Add priority files last (will end up in first segment .z01)
+                    foreach (string path in priorityFiles)
+                    {
+                        if (File.Exists(path))
+                        {
+                            zip.AddFile(path, "");
+                        }
+                    }
 
                     zip.MaxOutputSegmentSize64 = segmentSize; // 8m segments
                     zip.Save(fullZipPath);

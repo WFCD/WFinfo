@@ -38,16 +38,33 @@ namespace WFInfo
 
         public void Populate(Bitmap screenshot)
         {
+            ResetRectangle();
             tempImage = screenshot;
             isEnabled = true;
+        }
+
+        private void ResetRectangle()
+        {
+            // Reset rectangle properties to ensure it doesn't persist from previous session
+            rectangle.Width = 0;
+            rectangle.Height = 0;
+            rectangle.RenderTransform = new TranslateTransform(0, 0);
+            rectangle.Visibility = Visibility.Hidden;
+            
+            // Keep rectangle as persistent child - don't remove from canvas
         }
 
         private void canvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             //Set the start point
             startDrag = e.GetPosition(canvas);
+            
+            // Rectangle is always persistent, just ensure it's visible and on top
+            rectangle.Visibility = Visibility.Visible;
+            
             //Move the selection marquee on top of all other objects in canvas
             Canvas.SetZIndex(rectangle, canvas.Children.Count);
+            
             //Capture the mouse
             if (!canvas.IsMouseCaptured)
                 canvas.CaptureMouse();
@@ -56,23 +73,12 @@ namespace WFInfo
 
         public void closeOverlay()
         {
-            rectangle.Width = 0;
-            rectangle.Height = 0;
-            rectangle.RenderTransform = new TranslateTransform(0, 0);
+            ResetRectangle();
             Topmost = false;
             isEnabled = false;
 
-            // THIS FUCKING RECTANGLE WOULDN'T GO AWAY 
-            //    AND IT WOULD STAY FOR 1 FRAME WHEN RE-OPENNING THIS WINDOW
-            //    SO I FORCED THAT FRAME TO HAPPEN BEFORE CLOSING
-            //       AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHH
-            //
-            //  fucking hate rectangles
-            Task.Factory.StartNew(async () =>
-            {
-                await Task.Delay(100);
-                Dispatcher.Invoke(Hide);
-            });
+            // Force immediate hide without delay to prevent rectangle persistence
+            Hide();
         }
 
         private void canvas_MouseUp(object sender, MouseButtonEventArgs e)
@@ -89,7 +95,7 @@ namespace WFInfo
                 return;
             }
             Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * _window.DpiScaling), (int)(topLeft.Y * _window.DpiScaling), (int)(rectangle.Width * _window.DpiScaling), (int)(rectangle.Height * _window.DpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
-            Task.Factory.StartNew(() => OCR.ProcessSnapIt(cutout, tempImage, topLeft));
+            Task.Run(() => OCR.ProcessSnapIt(cutout, tempImage, topLeft));
 
             closeOverlay();
         }
