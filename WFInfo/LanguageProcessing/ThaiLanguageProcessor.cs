@@ -39,6 +39,23 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "แบบแปลน", "ภาพวาด" };
 
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "ฟอร์มา แบบแปลน",
+            ["Exilus Weapon Adapter Blueprint"] = "เอกซิลัส อแดปเตอร์อาวุธ แบบแปลน",
+            ["Kuva"] = "คูวา",
+            ["Riven Sliver"] = "เศษริเวน",
+            ["Ayatan Amber Star"] = "ดาวอำพันอายาตัน",
+            ["Galariak Prime Blueprint"] = "กาลาริแอค ไพรม์ แบบแปลน",
+            ["Galariak Prime Blade"] = "กาลาริแอค ไพรม์ ใบมีด แบบแปลน",
+            ["Galariak Prime Handle"] = "กาลาริแอค ไพรม์ ด้ามจับ แบบแปลน",
+            ["Sagek Prime Blueprint"] = "ซาเจ็ค ไพรม์ แบบแปลน",
+            ["Sagek Prime Barrel"] = "ซาเจ็ค ไพรม์ ลำกล้อง แบบแปลน",
+            ["Sagek Prime Receiver"] = "ซาเจ็ค ไพรม์ ตัวรับ แบบแปลน"
+        };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
+
         public override string CharacterWhitelist => GenerateCharacterRange(0x0E00, 0x0E7F) + " "; // Thai characters
 
         public override int CalculateLevenshteinDistance(string s, string t)

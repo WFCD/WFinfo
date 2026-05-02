@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using WFInfo.Settings;
 
 namespace WFInfo.LanguageProcessing
@@ -82,6 +83,23 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Blaupause", "Plan" };
 
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Forma Blaupause",
+            ["Exilus Weapon Adapter Blueprint"] = "Exilus-Waffenadapter Blaupause",
+            ["Kuva"] = "Kuva",
+            ["Riven Sliver"] = "Riven-Splitter",
+            ["Ayatan Amber Star"] = "Ayatan Amber Stern",
+            ["Galariak Prime Blueprint"] = "Galariak Prime Blaupause",
+            ["Galariak Prime Blade"] = "Galariak Prime: Klinge Blaupause",
+            ["Galariak Prime Handle"] = "Galariak Prime: Griff Blaupause",
+            ["Sagek Prime Blueprint"] = "Sagek Prime Blaupause",
+            ["Sagek Prime Barrel"] = "Sagek Prime: Lauf Blaupause",
+            ["Sagek Prime Receiver"] = "Sagek Prime: Empfänger Blaupause"
+        };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
+
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C4, 0x00C4) + GenerateCharacterRange(0x00D6, 0x00D6) + GenerateCharacterRange(0x00DC, 0x00DC) + GenerateCharacterRange(0x00DF, 0x00DF) + GenerateCharacterRange(0x00E4, 0x00E4) + GenerateCharacterRange(0x00F6, 0x00F6) + GenerateCharacterRange(0x00FC, 0x00FC); // German with umlauts
     }
 
@@ -98,6 +116,23 @@ namespace WFInfo.LanguageProcessing
         public override string Locale => "es";
 
         public override string[] BlueprintRemovals => new[] { "Plano", "Diseño" };
+
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Plano Forma",
+            ["Exilus Weapon Adapter Blueprint"] = "Plano Adaptador Exilus de Arma",
+            ["Kuva"] = "Kuva",
+            ["Riven Sliver"] = "Fragmento Riven",
+            ["Ayatan Amber Star"] = "Estrella Ámbar Ayatan",
+            ["Galariak Prime Blueprint"] = "Plano Galariak Prime",
+            ["Galariak Prime Blade"] = "Plano Hoja Galariak Prime",
+            ["Galariak Prime Handle"] = "Plano Mango Galariak Prime",
+            ["Sagek Prime Blueprint"] = "Plano Sagek Prime",
+            ["Sagek Prime Barrel"] = "Plano Cañón Sagek Prime",
+            ["Sagek Prime Receiver"] = "Plano Receptor Sagek Prime"
+        };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + 
             GenerateCharacterRange(0x00C1, 0x00C1) + // Á
@@ -129,6 +164,23 @@ namespace WFInfo.LanguageProcessing
         public override string Locale => "pt";
 
         public override string[] BlueprintRemovals => new[] { "Planta", "Projeto" };
+
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Forma (Planta)",
+            ["Exilus Weapon Adapter Blueprint"] = "Adaptador Exilus de Arma (Planta)",
+            ["Kuva"] = "Kuva",
+            ["Riven Sliver"] = "Fragmento Riven",
+            ["Ayatan Amber Star"] = "Estrela Âmbar Ayatan",
+            ["Galariak Prime Blueprint"] = "Galariak Prime (Planta)",
+            ["Galariak Prime Blade"] = "Galariak Prime: Lâmina (Planta)",
+            ["Galariak Prime Handle"] = "Galariak Prime: Cabo (Planta)",
+            ["Sagek Prime Blueprint"] = "Sagek Prime (Planta)",
+            ["Sagek Prime Barrel"] = "Sagek Prime: Cano (Planta)",
+            ["Sagek Prime Receiver"] = "Sagek Prime: Receptor (Planta)"
+        };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + 
             GenerateCharacterRange(0x00C0, 0x00C0) + // À
@@ -172,6 +224,23 @@ namespace WFInfo.LanguageProcessing
         public override string Locale => "fr";
 
         public override string[] BlueprintRemovals => new[] { "Schéma", "Plan" };
+
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Forma (Schéma)",
+            ["Exilus Weapon Adapter Blueprint"] = "Adaptateur Exilus d'Arme (Schéma)",
+            ["Kuva"] = "Kuva",
+            ["Riven Sliver"] = "Éclat Riven",
+            ["Ayatan Amber Star"] = "Étoile Ambre Ayatan",
+            ["Galariak Prime Blueprint"] = "Galariak Prime (Schéma)",
+            ["Galariak Prime Blade"] = "Galariak Prime - Lame (Schéma)",
+            ["Galariak Prime Handle"] = "Galariak Prime - Manche (Schéma)",
+            ["Sagek Prime Blueprint"] = "Sagek Prime (Schéma)",
+            ["Sagek Prime Barrel"] = "Sagek Prime - Canon (Schéma)",
+            ["Sagek Prime Receiver"] = "Sagek Prime - Récepteur (Schéma)"
+        };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + 
             GenerateCharacterRange(0x00C0, 0x00C0) + // À
@@ -219,6 +288,23 @@ namespace WFInfo.LanguageProcessing
         public override string Locale => "it";
 
         public override string[] BlueprintRemovals => new[] { "Progetto", "Piano" };
+
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Forma (Progetto)",
+            ["Exilus Weapon Adapter Blueprint"] = "Adattatore Exilus per Arma (Progetto)",
+            ["Kuva"] = "Kuva",
+            ["Riven Sliver"] = "Scheggia Riven",
+            ["Ayatan Amber Star"] = "Stella Ambra Ayatan",
+            ["Galariak Prime Blueprint"] = "Galariak Prime (Progetto)",
+            ["Galariak Prime Blade"] = "Galariak Prime - Lama (Progetto)",
+            ["Galariak Prime Handle"] = "Galariak Prime - Impugnatura (Progetto)",
+            ["Sagek Prime Blueprint"] = "Sagek Prime (Progetto)",
+            ["Sagek Prime Barrel"] = "Sagek Prime - Canna (Progetto)",
+            ["Sagek Prime Receiver"] = "Sagek Prime - Ricevitore (Progetto)"
+        };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-() " + 
             GenerateCharacterRange(0x00C0, 0x00C0) + // À

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using WFInfo.Settings;
 
@@ -16,14 +17,33 @@ namespace WFInfo.LanguageProcessing
 
         public override string Locale => "ru";
 
-        public override string[] BlueprintRemovals => new string[0]; // No blueprint removals - handled in NormalizeForPatternMatching
+        public override string[] BlueprintRemovals => new[] { "чертёж", "чертеж", "(чертёж)", "(чертеж)" };
+
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Чертёж: Форма",
+            ["Exilus Weapon Adapter Blueprint"] = "Чертёж: Эксилус адаптер оружия",
+            ["Kuva"] = "Кува",
+            ["Riven Sliver"] = "Осколок Ривена",
+            ["Ayatan Amber Star"] = "Янтарная звезда Аятана",
+            ["Galariak Prime Blueprint"] = "Чертёж: Галариак Прайм",
+            ["Galariak Prime Blade"] = "Чертёж: Галариак Прайм клинок",
+            ["Galariak Prime Handle"] = "Чертёж: Галариак Прайм рукоять",
+            ["Sagek Prime Blueprint"] = "Чертёж: Сагек Прайм",
+            ["Sagek Prime Barrel"] = "Чертёж: Сагек Прайм ствол",
+            ["Sagek Prime Receiver"] = "Чертёж: Сагек Прайм приёмник"
+        };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => GenerateCharacterRange(0x0400, 0x04FF) + GenerateCharacterRange(0x0500, 0x052F) + ": "; // Cyrillic + Cyrillic Supplement
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
-            // For Russian, don't normalize Cyrillic to Latin - we want to match Russian to Russian
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, null);
+            // For Russian, normalize both strings before comparison to ensure consistent matching
+            string normalizedS = NormalizeForPatternMatching(s);
+            string normalizedT = NormalizeForPatternMatching(t);
+            return SimpleLevenshteinDistance(normalizedS, normalizedT);
         }
 
         public override string NormalizeForPatternMatching(string input)
@@ -73,12 +93,31 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Кресленник" };
 
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Кресленник: Форма",
+            ["Exilus Weapon Adapter Blueprint"] = "Кресленник: Екзилус адаптер зброї",
+            ["Kuva"] = "Кува",
+            ["Riven Sliver"] = "Уламок Рівена",
+            ["Ayatan Amber Star"] = "Янтарна зірка Аятана",
+            ["Galariak Prime Blueprint"] = "Кресленник: Ґаларіак-Прайм",
+            ["Galariak Prime Blade"] = "Кресленник: Ґаларіак-Прайм лезо",
+            ["Galariak Prime Handle"] = "Кресленник: Ґаларіак-Прайм рукоять",
+            ["Sagek Prime Blueprint"] = "Кресленник: Сагек Прайм",
+            ["Sagek Prime Barrel"] = "Кресленник: Сагек Прайм ствол",
+            ["Sagek Prime Receiver"] = "Кресленник: Сагек Прайм приймач"
+        };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
+
         public override string CharacterWhitelist => GenerateCharacterRange(0x0400, 0x04FF) + GenerateCharacterRange(0x0500, 0x052F) + ": -()"; // Cyrillic + Cyrillic Supplement
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
-            // For Ukrainian, don't normalize Cyrillic to Latin - we want to match Ukrainian to Ukrainian
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, null);
+            // For Ukrainian, normalize both strings before comparison to ensure consistent matching
+            string normalizedS = NormalizeForPatternMatching(s);
+            string normalizedT = NormalizeForPatternMatching(t);
+            return SimpleLevenshteinDistance(normalizedS, normalizedT);
         }
 
         public override string NormalizeForPatternMatching(string input)

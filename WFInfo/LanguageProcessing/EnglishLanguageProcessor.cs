@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using WFInfo.Settings;
 
@@ -17,6 +18,24 @@ namespace WFInfo.LanguageProcessing
         public override string Locale => "en";
 
         public override string[] BlueprintRemovals => new[] { "Blueprint" };
+
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Forma Blueprint",
+            ["Exilus Weapon Adapter Blueprint"] = "Exilus Weapon Adapter Blueprint",
+            ["Kuva"] = "Kuva",
+            ["Riven Sliver"] = "Riven Sliver",
+            ["Ayatan Amber Star"] = "Ayatan Amber Star",
+            ["Ayatan Cyan Star"] = "Ayatan Cyan Star",
+            ["Galariak Prime Blueprint"] = "Galariak Prime Blueprint",
+            ["Galariak Prime Blade"] = "Galariak Prime Blade",
+            ["Galariak Prime Handle"] = "Galariak Prime Handle",
+            ["Sagek Prime Blueprint"] = "Sagek Prime Blueprint",
+            ["Sagek Prime Barrel"] = "Sagek Prime Barrel",
+            ["Sagek Prime Receiver"] = "Sagek Prime Receiver"
+        };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 

@@ -181,7 +181,30 @@ namespace WFInfo.LanguageProcessing
 
         public override string Locale => "ko";
 
+        /// <summary>
+        /// Korean uses 75% threshold due to severe OCR garbling of complex Hangul characters
+        /// and trailing garbage from adjacent UI elements.
+        /// </summary>
+        public override double DistanceThresholdRatio => 0.75;
+
         public override string[] BlueprintRemovals => new[] { "설계도" };
+
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "포르마 설계도",
+            ["Exilus Weapon Adapter Blueprint"] = "엑실루스 무기 어댑터 설계도",
+            ["Kuva"] = "쿠바",
+            ["Riven Sliver"] = "리븐 파편",
+            ["Ayatan Amber Star"] = "아야탄 앰버 스타",
+            ["Galariak Prime Blueprint"] = "갈라리아크 프라임 설계도",
+            ["Galariak Prime Blade"] = "갈라리아크 프라임 블레이드 설계도",
+            ["Galariak Prime Handle"] = "갈라리아크 프라임 핸들 설계도",
+            ["Sagek Prime Blueprint"] = "사게크 프라임 설계도",
+            ["Sagek Prime Barrel"] = "사게크 프라임 배럴 설계도",
+            ["Sagek Prime Receiver"] = "사게크 프라임 리시버 설계도"
+        };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => 
             string.Concat(GenerateCharacterRangeIterator(0xAC00, 0xC6FF)) + 

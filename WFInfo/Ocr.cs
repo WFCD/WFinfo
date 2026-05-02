@@ -43,6 +43,10 @@ namespace WFInfo
         EQUINOX,
         DARK_LOTUS,
         ZEPHYR,
+        CONQUERA,
+        DEADLOCK,
+        LUNAR_RENEWAL,
+        POM_2,
         UNKNOWN = -1,
         AUTO = -2,
         CUSTOM = -3
@@ -71,7 +75,11 @@ namespace WFInfo
 															Color.FromArgb(255, 255, 255),  	//LEGACY		
 															Color.FromArgb(158, 159, 167),  	//EQUINOX		
 															Color.FromArgb(140, 119, 147),      //DARK_LOTUS
-                                                            Color.FromArgb(253, 132,   2), };   //ZEPHER
+                                                            Color.FromArgb(253, 132,   2),      //ZEPHER
+                                                            Color.FromArgb(200, 100, 200),      //CONQUERA - medium-light purple
+                                                            Color.FromArgb(25, 35, 60),      //DEADLOCK - dark navy
+                                                            Color.FromArgb(160, 40, 40),      //LUNAR_RENEWAL - deep red
+                                                            Color.FromArgb(12, 45, 25), };    //POM_2 - actual dark forest green
 
     //highlight colors from selected items
     public static Color[] ThemeSecondary = new Color[] {    Color.FromArgb(245, 227, 173),		//VITRUVIAN		
@@ -88,7 +96,11 @@ namespace WFInfo
 															Color.FromArgb(232, 213,  93),  	//LEGACY		
 															Color.FromArgb(232, 227, 227),  	//EQUINOX		
 															Color.FromArgb(200, 169, 237),      //DARK_LOTUS	
-                                                            Color.FromArgb(255,  53,   0) };    //ZEPHER	
+                                                            Color.FromArgb(255,  53,   0),      //ZEPHER
+                                                            	Color.FromArgb(255, 215,   0),      //CONQUERA
+                                                            Color.FromArgb(255, 255, 255),      //DEADLOCK
+                                                            Color.FromArgb(255, 200, 100),      //LUNAR_RENEWAL
+                                                            Color.FromArgb(100, 255, 100) };    //POM_2	
 
 
     private static int numberOfRewardsDisplayed;
@@ -335,7 +347,14 @@ namespace WFInfo
                     {
                         hideRewardInfo = true;
                     }
-                    //else if (correctName != "Kuva" || correctName != "Exilus Weapon Adapter Blueprint" || correctName != "Riven Sliver" || correctName != "Ayatan Amber Star")
+
+                    // Check if this is an ignored item using both English name AND raw OCR text (localized)
+                    // This catches items even if GetPartName() fails to convert properly
+                    if (Main.dataBase.IsIgnoredItem(correctName) || Main.dataBase.IsIgnoredItem(part))
+                    {
+                        hideRewardInfo = true;
+                    }
+
                     primeRewards.Add(correctName);
                     string plat = job["plat"].ToObject<string>();
                     string primeSetPlat = null;
@@ -379,7 +398,12 @@ namespace WFInfo
                     {
                         if (!string.IsNullOrEmpty(clipboard)) { clipboard += "-  "; }
 
-                        clipboard += "[" + correctName.Replace(" Blueprint", "") + "]: " + plat + ":platinum: ";
+                        // Get localized name for clipboard (uses current WFInfo locale)
+                        string localizedName = Main.dataBase.GetLocalizedNameForClipboard(correctName);
+                        // Remove blueprint terms for the current language
+                        localizedName = Main.dataBase.RemoveBlueprintTerms(localizedName);
+
+                        clipboard += "[" + localizedName + "]: " + plat + ":platinum: ";
 
                         if (primeSetPlat != null)
                         {
@@ -640,7 +664,7 @@ namespace WFInfo
 
 
 
-                    double[] weights = new double[15] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+                    double[] weights = new double[19] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
             int minWidth = mostWidth / 4;
 
             if (image == null || image.Height == 0)
@@ -2186,6 +2210,15 @@ namespace WFInfo
                 case WFtheme.ZEPHYR:
                 return ((Math.Abs(test.GetHue() - primary.GetHue()) < 4 && test.GetSaturation() >= 0.55)
                     || (Math.Abs(test.GetHue() - secondary.GetHue()) < 4 && test.GetSaturation() >= 0.66)) && test.GetBrightness() >= 0.25;
+                case WFtheme.CONQUERA:
+                return (Math.Abs(test.GetHue() - primary.GetHue()) < 25 && test.GetSaturation() >= 0.20 && test.GetBrightness() >= 0.15 && test.GetBrightness() <= 0.65)
+                    || (test.GetSaturation() <= 0.25 && test.GetBrightness() >= 0.55);
+                case WFtheme.DEADLOCK:
+                return test.GetSaturation() <= 0.08 && test.GetBrightness() >= 0.80;
+                case WFtheme.LUNAR_RENEWAL:
+                return test.GetSaturation() <= 0.15 && test.GetBrightness() >= 0.85;
+                case WFtheme.POM_2:
+                return Math.Abs(test.GetHue() - secondary.GetHue()) < 30 && test.GetSaturation() >= 0.25 && test.GetBrightness() >= 0.55;
                 default:
                     // This shouldn't be ran
                     //   Only for initial testing
