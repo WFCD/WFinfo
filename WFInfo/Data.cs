@@ -1073,8 +1073,8 @@ namespace WFInfo
                             
                             // Use English name (split[0]) for length comparison regardless of locale cache
                             int englishNameLength = split[0].Length;
-                            int lengthDiff = Math.Abs((useLocalizedNames && split.Length >= 3 ? split[2].Length : split[0].Length) - name.Length);
-                            if (lengthDiff > Math.Max(englishNameLength, name.Length) / 2) continue;
+                            int lengthDiff = Math.Abs((useLocalizedNames && split.Length >= 3 ? split[2].Length : split[0].Length) - normalizedName.Length);
+                            if (lengthDiff > Math.Max(englishNameLength, normalizedName.Length) / 2) continue;
                             
                             // Use localized name only if cache locale matches and available, otherwise fall back to English
                             string comparisonName = useLocalizedNames && split.Length >= 3 ? split[2] : split[0];
@@ -1093,7 +1093,7 @@ namespace WFInfo
                     string englishName = item.Item1;
                     string storedName = item.Item2;
                     
-                    int val = processor.CalculateLevenshteinDistance(name, storedName);
+                    int val = processor.CalculateLevenshteinDistance(normalizedName, storedName);
                     
                     // Distance filter: Only accept matches with distance < 50% of string length (like GetLocalizedNameData)
                     if (val >= storedName.Length * 0.5) continue;
@@ -1154,6 +1154,100 @@ namespace WFInfo
                 Main.AddLog("Found part(" + low + "): \"" + lowest_unfiltered + "\" from \"" + name + "\"");
                 
             return lowest;
+        }
+
+        /// <summary>
+        /// Gets the localized name for an English part name from market items.
+        /// Returns the English name if no localized version is available.
+        /// </summary>
+        public string GetLocalizedNameForClipboard(string englishName)
+        {
+            if (_settings.Locale == "en" || string.IsNullOrEmpty(englishName))
+                return englishName;
+
+            lock (marketItemsLock)
+            {
+                if (marketItems == null)
+                    return englishName;
+
+                // Check if cached locale matches current locale
+                string cachedLocale = marketItems.TryGetValue("locale", out var localeToken) ? localeToken?.ToString() : null;
+                if (cachedLocale != _settings.Locale)
+                    return englishName; // Fall back to English if locale doesn't match
+
+                foreach (var marketItem in marketItems)
+                {
+                    if (marketItem.Key == "locale" || marketItem.Key == "version")
+                        continue;
+
+                    string[] split = marketItem.Value.ToString().Split('|');
+                    if (split.Length < 3)
+                        continue;
+
+                    // Compare against English name (split[0])
+                    if (split[0].Equals(englishName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Return localized name (split[2]) if available and not empty
+                        string localizedName = split[2];
+                        if (!string.IsNullOrEmpty(localizedName))
+                            return localizedName;
+                        break;
+                    }
+                }
+            }
+
+            return englishName; // Fallback to English if not found
+        }
+
+        /// <summary>
+        /// Removes blueprint terms from a localized part name for clipboard display.
+        /// Uses the current language processor's BlueprintRemovals list.
+        /// </summary>
+        public string RemoveBlueprintTerms(string localizedName)
+        {
+            if (string.IsNullOrEmpty(localizedName))
+                return localizedName;
+
+            var processor = LanguageProcessorFactory.GetCurrentProcessor();
+            string result = localizedName;
+
+            // Get blueprint removal terms for current language
+            var blueprintTerms = processor.BlueprintRemovals;
+            if (blueprintTerms != null)
+            {
+                foreach (var term in blueprintTerms)
+                {
+                    if (string.IsNullOrEmpty(term))
+                        continue;
+
+                    // Remove " Term" or " Term " patterns (case insensitive)
+                    result = Regex.Replace(result, $"\\s+{Regex.Escape(term)}\\s*$", "", RegexOptions.IgnoreCase);
+                    result = Regex.Replace(result, $"\\s+{Regex.Escape(term)}\\s+", " ", RegexOptions.IgnoreCase);
+                }
+            }
+
+            // Special handling for Russian "Чертёж:" prefix format
+            if (_settings.Locale == "ru")
+            {
+                result = Regex.Replace(result, "^Черт[её]ж:\\s*", "", RegexOptions.IgnoreCase);
+                result = Regex.Replace(result, "^черт[её]ж:\\s*", "", RegexOptions.IgnoreCase);
+            }
+
+            return result.Trim();
+        }
+
+        /// <summary>
+        /// Checks if a part name is an ignored item (0 plat, 0 ducats).
+        /// Uses the current language processor's cached HashSet for O(1) lookup.
+        /// Works with both English and localized names.
+        /// </summary>
+        public bool IsIgnoredItem(string partName)
+        {
+            if (string.IsNullOrEmpty(partName))
+                return false;
+
+            var processor = LanguageProcessorFactory.GetCurrentProcessor();
+            return processor.IsIgnoredItem(partName);
         }
 
         public string GetPartNameHuman(string name, out int low)

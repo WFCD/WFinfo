@@ -50,6 +50,21 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "設計図", "青図" };
 
+        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "フォルマ 設計図",
+            ["Exilus Weapon Adapter Blueprint"] = "エクシラス ウェポン アダプター 設計図",
+            ["Kuva"] = "クバ",
+            ["Riven Sliver"] = "リヴン スリバー",
+            ["Ayatan Amber Star"] = "アヤタン アンバー スター",
+            ["Galariak Prime Blueprint"] = "ガラリアク プライム 設計図",
+            ["Galariak Prime Blade"] = "ガラリアク プライム ブレード 設計図",
+            ["Galariak Prime Handle"] = "ガラリアク プライム ハンドル 設計図",
+            ["Sagek Prime Blueprint"] = "サゲク プライム 設計図",
+            ["Sagek Prime Barrel"] = "サゲク プライム バレル 設計図",
+            ["Sagek Prime Receiver"] = "サゲク プライム レシーバー 設計図"
+        };
+
         public override string CharacterWhitelist => 
             GenerateCharacterRange(0x3040, 0x309F) + 
             GenerateCharacterRange(0x30A0, 0x30FF) + 

@@ -18,7 +18,9 @@ namespace WFInfo.LanguageProcessing
     {
         // Per-type normalized blueprint removals to avoid recomputing on every call
         private static readonly ConcurrentDictionary<Type, string[]> _normalizedBlueprintRemovalsCache = new ConcurrentDictionary<Type, string[]>();
-        
+        // Per-type ignored item names HashSet for O(1) lookup performance
+        private static readonly ConcurrentDictionary<Type, HashSet<string>> _ignoredItemNamesCache = new ConcurrentDictionary<Type, HashSet<string>>();
+
         protected readonly IReadOnlyApplicationSettings _settings;
         protected readonly CultureInfo _culture;
 
@@ -76,6 +78,53 @@ namespace WFInfo.LanguageProcessing
         /// Gets the blueprint removal terms for this language
         /// </summary>
         public abstract string[] BlueprintRemovals { get; }
+
+        /// <summary>
+        /// Gets the ignored item name translations for this language.
+        /// Maps English ignored item names to their localized equivalents.
+        /// </summary>
+        public abstract Dictionary<string, string> IgnoredItemNames { get; }
+
+        /// <summary>
+        /// Gets a HashSet of all ignored item names (both English and localized) for O(1) lookup.
+        /// This is cached per processor type to avoid rebuilding on every call.
+        /// </summary>
+        public HashSet<string> GetIgnoredItemNamesHashSet()
+        {
+            return _ignoredItemNamesCache.GetOrAdd(GetType(), type =>
+            {
+                var hashSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var ignoredItems = IgnoredItemNames;
+
+                if (ignoredItems != null)
+                {
+                    foreach (var kvp in ignoredItems)
+                    {
+                        // Add both English key and localized value
+                        if (!string.IsNullOrEmpty(kvp.Key))
+                            hashSet.Add(kvp.Key);
+                        if (!string.IsNullOrEmpty(kvp.Value))
+                            hashSet.Add(kvp.Value);
+                    }
+                }
+
+                return hashSet;
+            });
+        }
+
+        /// <summary>
+        /// Checks if a part name is an ignored item using efficient HashSet lookup.
+        /// </summary>
+        /// <param name="partName">Part name to check (can be English or localized)</param>
+        /// <returns>True if the item should be ignored (0 plat/ducats)</returns>
+        public bool IsIgnoredItem(string partName)
+        {
+            if (string.IsNullOrEmpty(partName))
+                return false;
+
+            var ignoredSet = GetIgnoredItemNamesHashSet();
+            return ignoredSet.Contains(partName);
+        }
 
         /// <summary>
         /// Gets the Tesseract character whitelist for this language

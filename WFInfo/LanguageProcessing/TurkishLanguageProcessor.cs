@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using WFInfo.Settings;
 
@@ -17,6 +18,21 @@ namespace WFInfo.LanguageProcessing
         public override string Locale => "tr";
 
         public override string[] BlueprintRemovals => new[] { "Plan", "Şema" };
+
+        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Forma Plan",
+            ["Exilus Weapon Adapter Blueprint"] = "Silah Exilus Adaptörü Plan",
+            ["Kuva"] = "Kuva",
+            ["Riven Sliver"] = "Riven Parçası",
+            ["Ayatan Amber Star"] = "Ayatan Amber Yıldızı",
+            ["Galariak Prime Blueprint"] = "Galariak Prime Plan",
+            ["Galariak Prime Blade"] = "Galariak Prime Bıçak",
+            ["Galariak Prime Handle"] = "Galariak Prime Kabza",
+            ["Sagek Prime Blueprint"] = "Sagek Prime Plan",
+            ["Sagek Prime Barrel"] = "Sagek Prime Namlu",
+            ["Sagek Prime Receiver"] = "Sagek Prime Alıcı"
+        };
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + "ÇçĞğİıÖöŞşÜü"; // Turkish-specific characters
 

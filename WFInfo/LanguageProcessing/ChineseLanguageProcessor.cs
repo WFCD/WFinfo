@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using WFInfo.Settings;
 
@@ -118,6 +119,21 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "蓝图", "设计图" };
 
+        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Forma 蓝图",
+            ["Exilus Weapon Adapter Blueprint"] = "Exilus 武器适配器 蓝图",
+            ["Kuva"] = "赤毒",
+            ["Riven Sliver"] = "裂罅碎块",
+            ["Ayatan Amber Star"] = "阿耶檀识 琥珀星",
+            ["Galariak Prime Blueprint"] = "加拉瑞克 Prime 蓝图",
+            ["Galariak Prime Blade"] = "加拉瑞克 Prime 刀刃 蓝图",
+            ["Galariak Prime Handle"] = "加拉瑞克 Prime 握柄 蓝图",
+            ["Sagek Prime Blueprint"] = "萨杰克 Prime 蓝图",
+            ["Sagek Prime Barrel"] = "萨杰克 Prime 枪管 蓝图",
+            ["Sagek Prime Receiver"] = "萨杰克 Prime 枪机 蓝图"
+        };
+
         public override int CalculateLevenshteinDistance(string s, string t)
         {
             return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, NormalizeChineseCharacters, callBaseDefault: true);
@@ -137,6 +153,21 @@ namespace WFInfo.LanguageProcessing
         public override string Locale => "zh-hant";
 
         public override string[] BlueprintRemovals => new[] { "藍圖", "設計圖" };
+
+        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        {
+            ["Forma Blueprint"] = "Forma 藍圖",
+            ["Exilus Weapon Adapter Blueprint"] = "Exilus 武器適配器 藍圖",
+            ["Kuva"] = "赤毒",
+            ["Riven Sliver"] = "裂罅碎塊",
+            ["Ayatan Amber Star"] = "阿耶檀識 琥珀星",
+            ["Galariak Prime Blueprint"] = "加拉瑞克 Prime 藍圖",
+            ["Galariak Prime Blade"] = "加拉瑞克 Prime 刀刃 藍圖",
+            ["Galariak Prime Handle"] = "加拉瑞克 Prime 握柄 藍圖",
+            ["Sagek Prime Blueprint"] = "薩傑克 Prime 藍圖",
+            ["Sagek Prime Barrel"] = "薩傑克 Prime 槍管 藍圖",
+            ["Sagek Prime Receiver"] = "薩傑克 Prime 槍機 藍圖"
+        };
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
