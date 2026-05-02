@@ -40,8 +40,10 @@ namespace WFInfo.LanguageProcessing
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
-            // For Russian, don't normalize Cyrillic to Latin - we want to match Russian to Russian
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, null);
+            // For Russian, normalize both strings before comparison to ensure consistent matching
+            string normalizedS = NormalizeForPatternMatching(s);
+            string normalizedT = NormalizeForPatternMatching(t);
+            return SimpleLevenshteinDistance(normalizedS, normalizedT);
         }
 
         public override string NormalizeForPatternMatching(string input)
@@ -98,9 +100,9 @@ namespace WFInfo.LanguageProcessing
             ["Kuva"] = "Кува",
             ["Riven Sliver"] = "Уламок Рівена",
             ["Ayatan Amber Star"] = "Янтарна зірка Аятана",
-            ["Galariak Prime Blueprint"] = "Кресленник: Галарак Прайм",
-            ["Galariak Prime Blade"] = "Кресленник: Галарак Прайм лезо",
-            ["Galariak Prime Handle"] = "Кресленник: Галарак Прайм рукоять",
+            ["Galariak Prime Blueprint"] = "Кресленник: Ґаларіак-Прайм",
+            ["Galariak Prime Blade"] = "Кресленник: Ґаларіак-Прайм лезо",
+            ["Galariak Prime Handle"] = "Кресленник: Ґаларіак-Прайм рукоять",
             ["Sagek Prime Blueprint"] = "Кресленник: Сагек Прайм",
             ["Sagek Prime Barrel"] = "Кресленник: Сагек Прайм ствол",
             ["Sagek Prime Receiver"] = "Кресленник: Сагек Прайм приймач"
@@ -112,8 +114,10 @@ namespace WFInfo.LanguageProcessing
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
-            // For Ukrainian, don't normalize Cyrillic to Latin - we want to match Ukrainian to Ukrainian
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, null);
+            // For Ukrainian, normalize both strings before comparison to ensure consistent matching
+            string normalizedS = NormalizeForPatternMatching(s);
+            string normalizedT = NormalizeForPatternMatching(t);
+            return SimpleLevenshteinDistance(normalizedS, normalizedT);
         }
 
         public override string NormalizeForPatternMatching(string input)

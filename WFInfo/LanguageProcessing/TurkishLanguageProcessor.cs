@@ -67,7 +67,33 @@ namespace WFInfo.LanguageProcessing
             return !string.IsNullOrEmpty(partName) && partName.Replace(" ", "").Length >= 6;
         }
 
-        
+        /// <summary>
+        /// Checks if a part name is an ignored item with Turkish diacritics normalization.
+        /// Normalizes input to handle OCR that loses Turkish diacritics.
+        /// </summary>
+        public override bool IsIgnoredItem(string partName)
+        {
+            if (string.IsNullOrEmpty(partName))
+                return false;
+
+            // Normalize input to handle OCR without diacritics
+            string normalizedInput = NormalizeTurkishCharacters(partName);
+            var ignoredSet = GetIgnoredItemNamesHashSet();
+
+            // Check raw input first
+            if (ignoredSet.Contains(partName))
+                return true;
+
+            // Check normalized input against normalized set values
+            foreach (var item in ignoredSet)
+            {
+                if (NormalizeTurkishCharacters(item).Equals(normalizedInput, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Normalizes Turkish characters to standard equivalents for comparison
         /// </summary>

@@ -26,6 +26,7 @@ namespace WFInfo.LanguageProcessing
             ["Kuva"] = "Kuva",
             ["Riven Sliver"] = "Riven Sliver",
             ["Ayatan Amber Star"] = "Ayatan Amber Star",
+            ["Ayatan Cyan Star"] = "Ayatan Cyan Star",
             ["Galariak Prime Blueprint"] = "Galariak Prime Blueprint",
             ["Galariak Prime Blade"] = "Galariak Prime Blade",
             ["Galariak Prime Handle"] = "Galariak Prime Handle",

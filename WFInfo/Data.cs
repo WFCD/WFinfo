@@ -1073,11 +1073,15 @@ namespace WFInfo
                             
                             // Use English name (split[0]) for length comparison regardless of locale cache
                             int englishNameLength = split[0].Length;
-                            int lengthDiff = Math.Abs((useLocalizedNames && split.Length >= 3 ? split[2].Length : split[0].Length) - normalizedName.Length);
-                            if (lengthDiff > Math.Max(englishNameLength, normalizedName.Length) / 2) continue;
                             
                             // Use localized name only if cache locale matches and available, otherwise fall back to English
                             string comparisonName = useLocalizedNames && split.Length >= 3 ? split[2] : split[0];
+                            
+                            // Normalize stored name for length comparison (Korean and others strip whitespace)
+                            string normalizedStoredName = processor.NormalizeForPatternMatching(comparisonName);
+                            int lengthDiff = Math.Abs(normalizedStoredName.Length - normalizedName.Length);
+                            if (lengthDiff > Math.Max(englishNameLength, normalizedName.Length) / 2) continue;
+                            
                             marketItemsSnapshot.Add(Tuple.Create(split[0], comparisonName));
                         }
                     }
@@ -1087,16 +1091,45 @@ namespace WFInfo
                     }
                 }
                 
+                // Add ignored items to the snapshot so they compete equally with market items
+                var ignoredItems = processor.IgnoredItemNames;
+                if (ignoredItems != null)
+                {
+                    foreach (var kvp in ignoredItems)
+                    {
+                        // Normalize ignored item names to match normalized OCR input format
+                        // e.g., "Чертёж: Форма" -> "форма (чертеж)" for proper matching
+                        string normalizedIgnoredName = processor.NormalizeForPatternMatching(kvp.Value);
+                        marketItemsSnapshot.Add(Tuple.Create(kvp.Key, normalizedIgnoredName));
+                    }
+                }
+
                 // Do heavy Levenshtein work outside lock
                 foreach (var item in marketItemsSnapshot)
                 {
                     string englishName = item.Item1;
                     string storedName = item.Item2;
                     
-                    int val = processor.CalculateLevenshteinDistance(normalizedName, storedName);
+                    // Normalize stored name to match OCR input format for fair comparison
+                    string normalizedStoredName = processor.NormalizeForPatternMatching(storedName);
                     
-                    // Distance filter: Only accept matches with distance < 50% of string length (like GetLocalizedNameData)
-                    if (val >= storedName.Length * 0.5) continue;
+                    // For Korean: use full CalculateLevenshteinDistance with Jamo-aware similarity
+                    // to handle severely mangled OCR (e.g., "뉴모 오티스 섬" vs "뉴로옵틱스")
+                    int val;
+                    if (processor.Locale == "ko")
+                    {
+                        // CalculateLevenshteinDistance normalizes internally, pass raw strings
+                        val = processor.CalculateLevenshteinDistance(name, storedName);
+                    }
+                    else
+                    {
+                        // Use SimpleLevenshteinDistance to avoid aggressive preprocessing
+                        // that removes blueprint terms (prevents "чертёж" removal causing false matches)
+                        val = processor.SimpleLevenshteinDistance(normalizedName, normalizedStoredName);
+                    }
+                    
+                    // Distance filter: Use language-specific threshold (default 50%, Korean 60% for garbled OCR)
+                    if (val >= normalizedStoredName.Length * processor.DistanceThresholdRatio) continue;
                     
                     if (val < low)
                     {
@@ -1108,37 +1141,6 @@ namespace WFInfo
                     else if (val == low)
                     {
                         multipleLowest = true;
-                    }
-                }
-
-                // Fallback: Check ignored item names from language processor (not in marketItems)
-                if (lowest == null)
-                {
-                    var ignoredItems = processor.IgnoredItemNames;
-                    if (ignoredItems != null)
-                    {
-                        foreach (var kvp in ignoredItems)
-                        {
-                            string englishName = kvp.Key;
-                            string localizedName = kvp.Value;
-                            
-                            int val = processor.CalculateLevenshteinDistance(normalizedName, localizedName);
-                            
-                            // Distance filter: Only accept matches with distance < 50% of string length
-                            if (val >= localizedName.Length * 0.5) continue;
-                            
-                            if (val < low)
-                            {
-                                low = val;
-                                lowest = englishName; // Return English name
-                                lowest_unfiltered = localizedName; // Show localized name in log
-                                multipleLowest = false;
-                            }
-                            else if (val == low)
-                            {
-                                multipleLowest = true;
-                            }
-                        }
                     }
                 }
             }

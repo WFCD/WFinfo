@@ -114,22 +114,44 @@ namespace WFInfo.LanguageProcessing
 
         /// <summary>
         /// Checks if a part name is an ignored item using efficient HashSet lookup.
+        /// Also performs substring matching to handle OCR with leading/trailing garbage.
         /// </summary>
         /// <param name="partName">Part name to check (can be English or localized)</param>
         /// <returns>True if the item should be ignored (0 plat/ducats)</returns>
-        public bool IsIgnoredItem(string partName)
+        public virtual bool IsIgnoredItem(string partName)
         {
             if (string.IsNullOrEmpty(partName))
                 return false;
 
             var ignoredSet = GetIgnoredItemNamesHashSet();
-            return ignoredSet.Contains(partName);
+            if (ignoredSet.Contains(partName))
+                return true;
+
+            // Substring matching: check if any ignored item name is contained within the OCR text
+            // This handles cases like "제 잃빼미 포르마 설계도" containing "포르마 설계도"
+            foreach (var ignoredName in ignoredSet)
+            {
+                if (!string.IsNullOrEmpty(ignoredName) && ignoredName.Length >= 4)
+                {
+                    if (partName.Contains(ignoredName))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
         /// Gets the Tesseract character whitelist for this language
         /// </summary>
         public abstract string CharacterWhitelist { get; }
+
+        /// <summary>
+        /// Gets the maximum Levenshtein distance ratio for matching (0.0-1.0).
+        /// Matches with distance >= threshold * stringLength are rejected.
+        /// Default is 0.5 (50%), languages with severe OCR issues may override to 0.6 (60%).
+        /// </summary>
+        public virtual double DistanceThresholdRatio => 0.5;
 
         /// <summary>
         /// Calculates Levenshtein distance between two strings using language-specific logic
