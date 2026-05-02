@@ -83,7 +83,7 @@ namespace WFInfo.LanguageProcessing
         /// Gets the ignored item name translations for this language.
         /// Maps English ignored item names to their localized equivalents.
         /// </summary>
-        public abstract Dictionary<string, string> IgnoredItemNames { get; }
+        public abstract IReadOnlyDictionary<string, string> IgnoredItemNames { get; }
 
         /// <summary>
         /// Gets a HashSet of all ignored item names (both English and localized) for O(1) lookup.

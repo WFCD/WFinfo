@@ -119,7 +119,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "蓝图", "设计图" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Forma 蓝图",
             ["Exilus Weapon Adapter Blueprint"] = "Exilus 武器适配器 蓝图",
@@ -133,6 +133,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "萨杰克 Prime 枪管 蓝图",
             ["Sagek Prime Receiver"] = "萨杰克 Prime 枪机 蓝图"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
@@ -154,7 +156,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "藍圖", "設計圖" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Forma 藍圖",
             ["Exilus Weapon Adapter Blueprint"] = "Exilus 武器適配器 藍圖",
@@ -168,6 +170,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "薩傑克 Prime 槍管 藍圖",
             ["Sagek Prime Receiver"] = "薩傑克 Prime 槍機 藍圖"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {

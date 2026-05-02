@@ -39,7 +39,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "แบบแปลน", "ภาพวาด" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "ฟอร์มา แบบแปลน",
             ["Exilus Weapon Adapter Blueprint"] = "เอกซิลัส อแดปเตอร์อาวุธ แบบแปลน",
@@ -53,6 +53,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "ซาเจ็ค ไพรม์ ลำกล้อง แบบแปลน",
             ["Sagek Prime Receiver"] = "ซาเจ็ค ไพรม์ ตัวรับ แบบแปลน"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => GenerateCharacterRange(0x0E00, 0x0E7F) + " "; // Thai characters
 

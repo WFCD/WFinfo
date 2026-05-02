@@ -19,7 +19,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "чертёж", "чертеж", "(чертёж)", "(чертеж)" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Чертёж: Форма",
             ["Exilus Weapon Adapter Blueprint"] = "Чертёж: Эксилус адаптер оружия",
@@ -33,6 +33,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "Чертёж: Сагек Прайм ствол",
             ["Sagek Prime Receiver"] = "Чертёж: Сагек Прайм приёмник"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => GenerateCharacterRange(0x0400, 0x04FF) + GenerateCharacterRange(0x0500, 0x052F) + ": "; // Cyrillic + Cyrillic Supplement
 
@@ -89,7 +91,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Кресленник" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Кресленник: Форма",
             ["Exilus Weapon Adapter Blueprint"] = "Кресленник: Екзилус адаптер зброї",
@@ -103,6 +105,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "Кресленник: Сагек Прайм ствол",
             ["Sagek Prime Receiver"] = "Кресленник: Сагек Прайм приймач"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => GenerateCharacterRange(0x0400, 0x04FF) + GenerateCharacterRange(0x0500, 0x052F) + ": -()"; // Cyrillic + Cyrillic Supplement
 

@@ -19,7 +19,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Plan", "Şema" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Forma Plan",
             ["Exilus Weapon Adapter Blueprint"] = "Silah Exilus Adaptörü Plan",
@@ -33,6 +33,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "Sagek Prime Namlu",
             ["Sagek Prime Receiver"] = "Sagek Prime Alıcı"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + "ÇçĞğİıÖöŞşÜü"; // Turkish-specific characters
 

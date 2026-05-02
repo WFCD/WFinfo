@@ -19,7 +19,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Plan", "Schemat" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Forma - Plan",
             ["Exilus Weapon Adapter Blueprint"] = "Adapter Exilus dla Broni - Plan",
@@ -33,6 +33,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "Sagek Prime: Lufa - Plan",
             ["Sagek Prime Receiver"] = "Sagek Prime: Korpus - Plan"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x0104, 0x0107) + GenerateCharacterRange(0x0118, 0x0119) + GenerateCharacterRange(0x0141, 0x0144) + GenerateCharacterRange(0x015A, 0x015A) + "\u00d3\u00f3\u015a\u015b\u0179\u017a\u017b\u017c"; // Polish with ranges + missing letters
 

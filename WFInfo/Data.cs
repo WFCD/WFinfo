@@ -1110,6 +1110,37 @@ namespace WFInfo
                         multipleLowest = true;
                     }
                 }
+
+                // Fallback: Check ignored item names from language processor (not in marketItems)
+                if (lowest == null)
+                {
+                    var ignoredItems = processor.IgnoredItemNames;
+                    if (ignoredItems != null)
+                    {
+                        foreach (var kvp in ignoredItems)
+                        {
+                            string englishName = kvp.Key;
+                            string localizedName = kvp.Value;
+                            
+                            int val = processor.CalculateLevenshteinDistance(normalizedName, localizedName);
+                            
+                            // Distance filter: Only accept matches with distance < 50% of string length
+                            if (val >= localizedName.Length * 0.5) continue;
+                            
+                            if (val < low)
+                            {
+                                low = val;
+                                lowest = englishName; // Return English name
+                                lowest_unfiltered = localizedName; // Show localized name in log
+                                multipleLowest = false;
+                            }
+                            else if (val == low)
+                            {
+                                multipleLowest = true;
+                            }
+                        }
+                    }
+                }
             }
             else
             {
@@ -1220,11 +1251,28 @@ namespace WFInfo
                     if (string.IsNullOrEmpty(term))
                         continue;
 
+                    string escapedTerm = Regex.Escape(term);
+
                     // Remove " Term" or " Term " patterns (case insensitive)
-                    result = Regex.Replace(result, $"\\s+{Regex.Escape(term)}\\s*$", "", RegexOptions.IgnoreCase);
-                    result = Regex.Replace(result, $"\\s+{Regex.Escape(term)}\\s+", " ", RegexOptions.IgnoreCase);
+                    result = Regex.Replace(result, $"\\s+{escapedTerm}\\s*$", "", RegexOptions.IgnoreCase);
+                    result = Regex.Replace(result, $"\\s+{escapedTerm}\\s+", " ", RegexOptions.IgnoreCase);
+
+                    // Remove term preceded by common punctuation: " - Term", " – Term", " — Term", ": Term"
+                    result = Regex.Replace(result, $"[:\\-–—]\\s*{escapedTerm}\\s*$", "", RegexOptions.IgnoreCase);
+                    result = Regex.Replace(result, $"[:\\-–—]\\s*{escapedTerm}\\s+", " ", RegexOptions.IgnoreCase);
+
+                    // Remove term followed by common punctuation: "Term - ", "Term:"
+                    result = Regex.Replace(result, $"\\s*{escapedTerm}\\s*[:\\-–—]", "", RegexOptions.IgnoreCase);
+
+                    // Remove term at boundaries (standalone)
+                    result = Regex.Replace(result, $"\\b{escapedTerm}\\b", "", RegexOptions.IgnoreCase);
                 }
             }
+
+            // Always strip English "Blueprint" regardless of locale
+            result = Regex.Replace(result, "\\s*Blueprint\\s*$", "", RegexOptions.IgnoreCase);
+            result = Regex.Replace(result, "\\s*Blueprint\\s+", " ", RegexOptions.IgnoreCase);
+            result = Regex.Replace(result, "^Blueprint\\s*[:\\-–—]?\\s*", "", RegexOptions.IgnoreCase);
 
             // Special handling for Russian "Чертёж:" prefix format
             if (_settings.Locale == "ru")

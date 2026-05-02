@@ -83,7 +83,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Blaupause", "Plan" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Forma Blaupause",
             ["Exilus Weapon Adapter Blueprint"] = "Exilus-Waffenadapter Blaupause",
@@ -97,6 +97,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "Sagek Prime: Lauf Blaupause",
             ["Sagek Prime Receiver"] = "Sagek Prime: Empfänger Blaupause"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + GenerateCharacterRange(0x00C4, 0x00C4) + GenerateCharacterRange(0x00D6, 0x00D6) + GenerateCharacterRange(0x00DC, 0x00DC) + GenerateCharacterRange(0x00DF, 0x00DF) + GenerateCharacterRange(0x00E4, 0x00E4) + GenerateCharacterRange(0x00F6, 0x00F6) + GenerateCharacterRange(0x00FC, 0x00FC); // German with umlauts
     }
@@ -115,7 +117,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Plano", "Diseño" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Plano Forma",
             ["Exilus Weapon Adapter Blueprint"] = "Plano Adaptador Exilus de Arma",
@@ -129,6 +131,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "Plano Cañón Sagek Prime",
             ["Sagek Prime Receiver"] = "Plano Receptor Sagek Prime"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + 
             GenerateCharacterRange(0x00C1, 0x00C1) + // Á
@@ -161,7 +165,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Planta", "Projeto" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Forma (Planta)",
             ["Exilus Weapon Adapter Blueprint"] = "Adaptador Exilus de Arma (Planta)",
@@ -175,6 +179,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "Sagek Prime: Cano (Planta)",
             ["Sagek Prime Receiver"] = "Sagek Prime: Receptor (Planta)"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + 
             GenerateCharacterRange(0x00C0, 0x00C0) + // À
@@ -219,7 +225,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Schéma", "Plan" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Forma (Schéma)",
             ["Exilus Weapon Adapter Blueprint"] = "Adaptateur Exilus d'Arme (Schéma)",
@@ -233,6 +239,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "Sagek Prime - Canon (Schéma)",
             ["Sagek Prime Receiver"] = "Sagek Prime - Récepteur (Schéma)"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz " + 
             GenerateCharacterRange(0x00C0, 0x00C0) + // À
@@ -281,7 +289,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "Progetto", "Piano" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "Forma (Progetto)",
             ["Exilus Weapon Adapter Blueprint"] = "Adattatore Exilus per Arma (Progetto)",
@@ -295,6 +303,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "Sagek Prime - Canna (Progetto)",
             ["Sagek Prime Receiver"] = "Sagek Prime - Ricevitore (Progetto)"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-() " + 
             GenerateCharacterRange(0x00C0, 0x00C0) + // À

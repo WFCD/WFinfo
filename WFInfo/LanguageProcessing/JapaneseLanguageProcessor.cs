@@ -50,7 +50,7 @@ namespace WFInfo.LanguageProcessing
 
         public override string[] BlueprintRemovals => new[] { "設計図", "青図" };
 
-        public override Dictionary<string, string> IgnoredItemNames => new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ignoredItemNames = new Dictionary<string, string>
         {
             ["Forma Blueprint"] = "フォルマ 設計図",
             ["Exilus Weapon Adapter Blueprint"] = "エクシラス ウェポン アダプター 設計図",
@@ -64,6 +64,8 @@ namespace WFInfo.LanguageProcessing
             ["Sagek Prime Barrel"] = "サゲク プライム バレル 設計図",
             ["Sagek Prime Receiver"] = "サゲク プライム レシーバー 設計図"
         };
+
+        public override IReadOnlyDictionary<string, string> IgnoredItemNames => _ignoredItemNames;
 
         public override string CharacterWhitelist => 
             GenerateCharacterRange(0x3040, 0x309F) + 
