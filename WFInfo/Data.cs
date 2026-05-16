@@ -985,7 +985,7 @@ namespace WFInfo
             if (currentBest.StartsWith("Gara") && candidate.StartsWith("Mesa") &&
                 !string.IsNullOrEmpty(ocrText) && ocrText.StartsWith("M", StringComparison.OrdinalIgnoreCase))
                 return true;
-            
+
             // Future OCR ambiguities can be added here
             return false;
         }

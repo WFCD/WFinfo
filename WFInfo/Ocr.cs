@@ -1033,10 +1033,31 @@ namespace WFInfo
             // Use single PSM mode for deterministic results
             // SparseText is best for SnapIt: finds text anywhere in the image regardless of layout
             var results = new List<Tuple<String, Rectangle>>();
-            
+
+            // Upscale small zones before OCR so Tesseract sees adequately-sized text.
+            // At 4K 100% menu scale, zone text can be ~12-14px — too small for reliable
+            // character segmentation (e.g. "Link" loses strokes → "in"). Target ≥80px height.
+            double scale = 1.0;
+            Bitmap scaledImage = null;
+            if (image.Height < 80)
+            {
+                scale = Math.Max(2.0, Math.Ceiling(80.0 / image.Height));
+                int sw = (int)(image.Width * scale);
+                int sh = (int)(image.Height * scale);
+                scaledImage = new Bitmap(sw, sh);
+                scaledImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+                using (var g = Graphics.FromImage(scaledImage))
+                {
+                    g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                    g.DrawImage(image, 0, 0, sw, sh);
+                }
+            }
+
             try
             {
-                using (var page = engine.Process(image, PageSegMode.SparseText))
+                using (var page = engine.Process(scaledImage ?? image, PageSegMode.SparseText))
                 {
                     using (var iterator = page.GetIterator())
                     {
@@ -1045,7 +1066,12 @@ namespace WFInfo
                         {
                             string currentWord = iterator.GetText(PageIteratorLevel.TextLine);
                             iterator.TryGetBoundingBox(PageIteratorLevel.TextLine, out Rect tempbounds);
-                            Rectangle bounds = new Rectangle(tempbounds.X1 + rectXOffset, tempbounds.Y1 + rectYOffset, tempbounds.Width, tempbounds.Height);
+                            // Scale bounds back to original coordinate space when upscaled
+                            Rectangle bounds = new Rectangle(
+                                (int)(tempbounds.X1 / scale) + rectXOffset,
+                                (int)(tempbounds.Y1 / scale) + rectYOffset,
+                                (int)(tempbounds.Width / scale),
+                                (int)(tempbounds.Height / scale));
                             if (currentWord != null)
                             {
                                 currentWord = currentWord.Trim();
@@ -1063,6 +1089,10 @@ namespace WFInfo
             {
                 // Log OCR extraction failure for debugging
                 Main.AddLog($"OCR extraction failed in GetTextWithBoundsFromImage: {ex.Message}\n{ex.ToString()}");
+            }
+            finally
+            {
+                scaledImage?.Dispose();
             }
             return results;
         }

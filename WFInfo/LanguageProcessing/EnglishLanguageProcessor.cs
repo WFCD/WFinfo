@@ -41,11 +41,16 @@ namespace WFInfo.LanguageProcessing
 
         public override int CalculateLevenshteinDistance(string s, string t)
         {
-            // Strip "Blueprint" terms and spaces before comparison, same as European processors.
-            // This prevents length mismatches when OCR misses "Blueprint" suffix or concatenates
-            // words (e.g. "HydroidPrime" → "HydroidPrime" matches "HydroidPrime" after normalization).
-            // callBaseDefault: false routes through DefaultLevenshteinDistance for lowercasing.
-            return LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, callBaseDefault: false);
+            // Compute both stripped and raw distances, take the minimum.
+            // Stripping (remove "Blueprint"+spaces) fixes cases where OCR misses "Blueprint"
+            // entirely (e.g. "HydroidPrime Neuroptics" → "HydroidPrimeNeuroptics" matches
+            // "HydroidPrimeNeuroptics" at distance 0 instead of tying with the wrong key).
+            // Raw (no stripping) fixes cases where OCR garbles "Blueprint" into something
+            // unrecognizable (e.g. "BIueorlnt") — stripping removes it from keys but NOT
+            // from OCR text, causing the garbled fragment to falsely match another key's suffix.
+            int stripped = LevenshteinDistanceWithPreprocessing(s, t, BlueprintRemovals, callBaseDefault: false);
+            int raw = DefaultLevenshteinDistance(s, t);
+            return Math.Min(stripped, raw);
         }
 
         public override string NormalizeForPatternMatching(string input)
