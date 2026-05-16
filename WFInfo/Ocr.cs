@@ -664,7 +664,7 @@ namespace WFInfo
 
 
 
-                    double[] weights = new double[19] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+                    double[] weights = new double[Enum.GetValues(typeof(WFtheme)).Cast<int>().Max() + 1];
             int minWidth = mostWidth / 4;
 
             if (image == null || image.Height == 0)
