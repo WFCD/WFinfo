@@ -85,8 +85,7 @@ namespace WFInfo.Tests
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"FATAL: {ex.Message}");
-                Console.Error.WriteLine(ex.StackTrace);
+                Console.Error.WriteLine($"FATAL: {ex}");
                 Environment.ExitCode = 2;
             }
         }

@@ -1,14 +1,14 @@
 {
-  "description": "Japanese inventory screen",
-  "resolution": "2560x1440",
-  "scaling": 150,
+  "description": "Japanese fissure reward screen",
+  "resolution": "1920x1080",
+  "scaling": 100,
   "theme": "tenno",
   "language": "japanese",
   "parts": {
-    "0": "Volt Prime 設計図",
-    "1": "Saryn Prime 設計図"
+    "0": "Volt Prime Blueprint",
+    "1": "Saryn Prime Blueprint"
   },
-  "category": "inventory",
-  "hdr": true,
+  "category": "reward",
+  "hdr": false,
   "filters": ["colorblind"]
 }

@@ -112,8 +112,7 @@ namespace WFInfo
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Test execution failed: {ex.Message}");
-                    Console.WriteLine(ex.StackTrace);
+                    Console.WriteLine($"Test execution failed: {ex}");
                     Environment.Exit(1);
                     return;
                 }

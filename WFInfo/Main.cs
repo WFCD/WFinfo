@@ -30,22 +30,24 @@ namespace WFInfo
         public static string AppPath { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo";
         public static string buildVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static Data dataBase;
-        public static RewardWindow window = new RewardWindow();
-        public static Overlay[] overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
-        public static EquipmentWindow equipmentWindow = new EquipmentWindow();
-        public static SettingsWindow settingsWindow = new SettingsWindow();
-        public static ThemeAdjuster themeAdjuster = new ThemeAdjuster();
-        public static VerifyCount verifyCount = new VerifyCount();
-        public static AutoCount autoCount = new AutoCount();
+        // WPF fields initialized lazily to avoid crashing in headless test mode.
+        // The static initializer does NOT create these — first access in GUI mode does.
+        public static RewardWindow window;
+        public static Overlay[] overlays;
+        public static EquipmentWindow equipmentWindow;
+        public static SettingsWindow settingsWindow;
+        public static ThemeAdjuster themeAdjuster;
+        public static VerifyCount verifyCount;
+        public static AutoCount autoCount;
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;
         public static GFNWarning gfnWarning;
         public static SnapItOverlay snapItOverlayWindow;
-        public static SearchIt searchBox = new SearchIt();
-        public static Login login = new Login();
-        public static ListingHelper listingHelper = new ListingHelper();
+        public static SearchIt searchBox;
+        public static Login login;
+        public static ListingHelper listingHelper;
         public static DateTime latestActive;
-        public static PlusOne plusOne = new PlusOne();
+        public static PlusOne plusOne;
         public static System.Threading.Timer timer;
         public static System.Drawing.Point lastClick;
 
@@ -80,8 +82,25 @@ namespace WFInfo
         private GdiScreenshotService _gdiScreenshot;
         private WindowsCaptureScreenshotService _windowsScreenshot;
 
+        public static void InitWpfFields()
+        {
+            if (window != null) return;
+            window = new RewardWindow();
+            overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
+            equipmentWindow = new EquipmentWindow();
+            settingsWindow = new SettingsWindow();
+            themeAdjuster = new ThemeAdjuster();
+            verifyCount = new VerifyCount();
+            autoCount = new AutoCount();
+            searchBox = new SearchIt();
+            login = new Login();
+            listingHelper = new ListingHelper();
+            plusOne = new PlusOne();
+        }
+
         public Main()
         {
+            InitWpfFields();
             INSTANCE = this;
             StartMessage();
             buildVersion = buildVersion.Substring(0, buildVersion.LastIndexOf("."));
