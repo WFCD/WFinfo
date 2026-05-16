@@ -162,7 +162,12 @@ namespace WFInfo
                 // Disable dictionaries so UI text isn't corrected to dictionary words
                 engine.SetVariable("load_system_dawg", "false");
                 engine.SetVariable("load_freq_dawg", "false");
-                
+                // Same as CJK: filtered B/W images lose accurate DPI, declare 300dpi
+                // so Tesseract correctly judges character size on scaled-down UI text
+                engine.SetVariable("user_defined_dpi", "300");
+                // Mild noise reduction for filtered UI text to reduce speckle that
+                // fragments thin character strokes (e.g. "Khora" → "klicgria")
+                engine.SetVariable("textord_noise_normratio", "1.0");
             }
             
             // Apply language-specific character whitelist from language processor
