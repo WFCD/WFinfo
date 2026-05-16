@@ -1808,7 +1808,7 @@ namespace WFInfo
                         g.DrawRectangle(cyan, cloneRect);
 
                         //do OCR
-                        using (var page = _tesseractService.FirstEngine.Process(cloneBitmap, PageSegMode.SingleLine))
+                        using (var page = _tesseractService.NumbersOnlyEngine.Process(cloneBitmap, PageSegMode.SingleLine))
                         {
                             using (var iterator = page.GetIterator())
                             {
