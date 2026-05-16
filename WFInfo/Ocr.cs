@@ -1279,6 +1279,45 @@ namespace WFInfo
                         }
                     }
 
+                    // Fallback: if no intersecting group found, try proximity-based merge
+                    // for Tesseract line-split fragments. Only merge with single-fragment
+                    // groups to prevent cascade, and skip very short text (OCR noise).
+                    if (i == -1 && foundItems.Count > 0)
+                    {
+                        int bestIdx = -1;
+                        int bestGap = int.MaxValue;
+                        for (int p = foundItems.Count - 1; p >= 0; p--)
+                        {
+                            if (foundItems[p].Item1.Count != 1) continue;
+                            if (foundItems[p].Item1[0].Name.Length < 5) continue;
+                            if (currentWord.Length < 5) continue;
+                            var groupBounds = foundItems[p].Item2;
+                            int vertGap = Math.Max(0, Math.Max(paddedBounds.Top - groupBounds.Bottom, groupBounds.Top - paddedBounds.Bottom));
+                            int avgHeight = (paddedBounds.Height + groupBounds.Height) / 2;
+                            if (vertGap <= avgHeight && vertGap < bestGap)
+                            {
+                                int overlapLeft = Math.Max(paddedBounds.Left, groupBounds.Left);
+                                int overlapRight = Math.Min(paddedBounds.Right, groupBounds.Right);
+                                if (overlapRight > overlapLeft)
+                                {
+                                    int combinedLeft = Math.Min(groupBounds.Left, paddedBounds.Left);
+                                    int combinedRight = Math.Max(groupBounds.Right, paddedBounds.Right);
+                                    if (combinedRight - combinedLeft <= maxGroupWidth)
+                                    {
+                                        bestIdx = p;
+                                        bestGap = vertGap;
+                                    }
+                                }
+                            }
+                        }
+                        if (bestIdx >= 0)
+                        {
+                            if (_settings.Debug)
+                                Main.AddLog($"SnapIt: Proximity merging \"{currentWord}\" with existing group (gap={bestGap}, avgH={((paddedBounds.Height + foundItems[bestIdx].Item2.Height) / 2)})");
+                            i = bestIdx;
+                        }
+                    }
+
                     if (i == -1)
                     {
                         //New entry added by creating a tuple. Item1 in tuple is list with just the newly found item, Item2 is its bounds
@@ -1297,64 +1336,6 @@ namespace WFInfo
                         tempList.Add(new InventoryItem(currentWord, paddedBounds));
                         foundItems.RemoveAt(i);
                         foundItems.Add(Tuple.Create(tempList, combinedBounds));
-                    }
-                }
-            }
-
-            // Post-pass: merge single-fragment groups that are vertically close
-            // and horizontally overlapping. Tesseract SparseText can split multi-word
-            // item names across separate lines; if fragments were returned out of order
-            // relative to other items, the inline loop can't pair them. This pass
-            // handles that by checking ALL single-fragment groups together.
-            {
-                int maxGroupWidth = (int)(180 * _window.ScreenScaling);
-                bool merged = true;
-                while (merged)
-                {
-                    merged = false;
-                    for (int a = 0; a < foundItems.Count; a++)
-                    {
-                        if (foundItems[a].Item1.Count > 2) continue;
-                        for (int b = a + 1; b < foundItems.Count; b++)
-                        {
-                            if (foundItems[b].Item1.Count > 2) continue;
-                            // Limit total fragments to 3 to prevent cascade merges
-                            if (foundItems[a].Item1.Count + foundItems[b].Item1.Count > 3) continue;
-                            // Skip merging with very short text (likely OCR noise like "QG", "GT", "CO")
-                            if (foundItems[a].Item1[0].Name.Length < 5 || foundItems[b].Item1[0].Name.Length < 5) continue;
-
-                            var boundsB = foundItems[b].Item2;
-                            int vertGap = Math.Max(0, Math.Max(foundItems[a].Item2.Top - boundsB.Bottom, boundsB.Top - foundItems[a].Item2.Bottom));
-                            int avgHeight = (foundItems[a].Item2.Height + boundsB.Height) / 2;
-                            if (vertGap <= avgHeight)
-                            {
-                                int overlapLeft = Math.Max(foundItems[a].Item2.Left, boundsB.Left);
-                                int overlapRight = Math.Min(foundItems[a].Item2.Right, boundsB.Right);
-                                if (overlapRight > overlapLeft)
-                                {
-                                    int combinedLeft = Math.Min(foundItems[a].Item2.Left, boundsB.Left);
-                                    int combinedRight = Math.Max(foundItems[a].Item2.Right, boundsB.Right);
-                                    if (combinedRight - combinedLeft <= maxGroupWidth)
-                                    {
-                                        int left = Math.Min(foundItems[a].Item2.Left, boundsB.Left);
-                                        int top = Math.Min(foundItems[a].Item2.Top, boundsB.Top);
-                                        int right = Math.Max(foundItems[a].Item2.Right, boundsB.Right);
-                                        int bot = Math.Max(foundItems[a].Item2.Bottom, boundsB.Bottom);
-                                        var combinedBounds = new Rectangle(left, top, right - left, bot - top);
-                                        var mergedList = new List<InventoryItem>(foundItems[a].Item1);
-                                        mergedList.AddRange(foundItems[b].Item1);
-                                        if (_settings.Debug)
-                                            Main.AddLog($"SnapIt: Post-pass merged \"{foundItems[a].Item1[0].Name}\" + \"{foundItems[b].Item1[0].Name}\" (gap={vertGap}, avgH={avgHeight})");
-                                        foundItems.RemoveAt(b);
-                                        foundItems.RemoveAt(a);
-                                        foundItems.Add(Tuple.Create(mergedList, combinedBounds));
-                                        merged = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        if (merged) break;
                     }
                 }
             }
