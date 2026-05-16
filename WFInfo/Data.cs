@@ -1170,7 +1170,15 @@ namespace WFInfo
                     }
                     else if (val == low)
                     {
-                        multipleLowest = true;
+                        // Break ties by preferring the longer key — more specific,
+                        // more likely correct (e.g. "Neuroptics Blueprint" over "Blueprint").
+                        // Update only if the new key is strictly longer.
+                        if (prop.Key.Length > lowest_unfiltered.Length)
+                        {
+                            lowest = prop.Value.ToObject<string>();
+                            lowest_unfiltered = prop.Key;
+                        }
+                        multipleLowest = true; // A tie occurred regardless of length preference
                     }
 
                     // Handle OCR ambiguity between Gara and Ivara operators
