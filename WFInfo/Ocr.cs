@@ -504,8 +504,8 @@ namespace WFInfo
             Debug.WriteLine(lastClick.ToString());
             var primeRewardIndex = 0;
             lastClick.Offset(-_window.Window.X, -_window.Window.Y);
-            var width = _window.Window.Width * (int)_window.DpiScaling;
-            var height = _window.Window.Height * (int)_window.DpiScaling;
+            var width = _window.Window.Width;
+            var height = _window.Window.Height;
             var mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling * uiScaling);
             var mostLeft = (width / 2) - (mostWidth / 2);
             var bottom = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * 0.5 * uiScaling);
@@ -1218,7 +1218,7 @@ namespace WFInfo
                     // causes padded bounds to overlap with adjacent items
                     double hMargin = IsCJKLocale() 
                         ? Math.Min(_settings.SnapItHorizontalNameMargin, 0.3)  // Cap at 0.3 for CJK
-                        : _settings.SnapItHorizontalNameMargin;
+                        : Math.Max(_settings.SnapItHorizontalNameMargin, 0.2);  // Min 0.2 for Latin to bridge horizontal text splits
                     int HorizontalPad = (int)(bounds.Height * hMargin);
                     
                                         
@@ -1263,7 +1263,7 @@ namespace WFInfo
                     // Max combined width to prevent merging text from different items in the grid
                     // Each item tile is roughly 130-140px wide at 1080p; cap at 160px to allow
                     // multi-line wrapping within one item but prevent cross-item cascading merges
-                    int maxGroupWidth = (int)(160 * _window.ScreenScaling);
+                    int maxGroupWidth = (int)(180 * _window.ScreenScaling);
 
                     for (; i >= 0; i--)
                     {
@@ -1301,7 +1301,64 @@ namespace WFInfo
                 }
             }
 
-            
+            // Post-pass: merge single-fragment groups that are vertically close
+            // and horizontally overlapping. Tesseract SparseText can split multi-word
+            // item names across separate lines; if fragments were returned out of order
+            // relative to other items, the inline loop can't pair them. This pass
+            // handles that by checking ALL single-fragment groups together.
+            {
+                int maxGroupWidth = (int)(180 * _window.ScreenScaling);
+                bool merged = true;
+                while (merged)
+                {
+                    merged = false;
+                    for (int a = 0; a < foundItems.Count; a++)
+                    {
+                        if (foundItems[a].Item1.Count > 2) continue;
+                        for (int b = a + 1; b < foundItems.Count; b++)
+                        {
+                            if (foundItems[b].Item1.Count > 2) continue;
+                            // Limit total fragments to 3 to prevent cascade merges
+                            if (foundItems[a].Item1.Count + foundItems[b].Item1.Count > 3) continue;
+                            // Skip merging with very short text (likely OCR noise like "QG", "GT", "CO")
+                            if (foundItems[a].Item1[0].Name.Length < 5 || foundItems[b].Item1[0].Name.Length < 5) continue;
+
+                            var boundsB = foundItems[b].Item2;
+                            int vertGap = Math.Max(0, Math.Max(foundItems[a].Item2.Top - boundsB.Bottom, boundsB.Top - foundItems[a].Item2.Bottom));
+                            int avgHeight = (foundItems[a].Item2.Height + boundsB.Height) / 2;
+                            if (vertGap <= avgHeight)
+                            {
+                                int overlapLeft = Math.Max(foundItems[a].Item2.Left, boundsB.Left);
+                                int overlapRight = Math.Min(foundItems[a].Item2.Right, boundsB.Right);
+                                if (overlapRight > overlapLeft)
+                                {
+                                    int combinedLeft = Math.Min(foundItems[a].Item2.Left, boundsB.Left);
+                                    int combinedRight = Math.Max(foundItems[a].Item2.Right, boundsB.Right);
+                                    if (combinedRight - combinedLeft <= maxGroupWidth)
+                                    {
+                                        int left = Math.Min(foundItems[a].Item2.Left, boundsB.Left);
+                                        int top = Math.Min(foundItems[a].Item2.Top, boundsB.Top);
+                                        int right = Math.Max(foundItems[a].Item2.Right, boundsB.Right);
+                                        int bot = Math.Max(foundItems[a].Item2.Bottom, boundsB.Bottom);
+                                        var combinedBounds = new Rectangle(left, top, right - left, bot - top);
+                                        var mergedList = new List<InventoryItem>(foundItems[a].Item1);
+                                        mergedList.AddRange(foundItems[b].Item1);
+                                        if (_settings.Debug)
+                                            Main.AddLog($"SnapIt: Post-pass merged \"{foundItems[a].Item1[0].Name}\" + \"{foundItems[b].Item1[0].Name}\" (gap={vertGap}, avgH={avgHeight})");
+                                        foundItems.RemoveAt(b);
+                                        foundItems.RemoveAt(a);
+                                        foundItems.Add(Tuple.Create(mergedList, combinedBounds));
+                                        merged = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (merged) break;
+                    }
+                }
+            }
+
             // Process item groups
             foreach( Tuple<List<InventoryItem>, Rectangle> itemGroup in foundItems)
             {

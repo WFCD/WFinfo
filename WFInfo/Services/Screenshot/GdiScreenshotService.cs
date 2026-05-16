@@ -41,8 +41,8 @@ namespace WFInfo.Services.Screenshot
                 height = window.Height;
                 center = new Point(window.X + window.Width / 2, window.Y + window.Height / 2);
 
-                width *= (int)_window.DpiScaling;
-                height *= (int)_window.DpiScaling;
+                // Screen.Bounds is already in physical pixels for DPI-aware apps
+                // No DpiScaling multiplication needed
             }
 
             Bitmap image = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);

@@ -14,10 +14,7 @@ namespace WFInfo.Services.WindowInfo
         { 
             get
             {
-                if (Window.Width * 9 > Window.Height * 16)  // image is less than 16:9 aspect
-                    return Window.Height / 1080.0;
-                else
-                    return Window.Width / 1920.0; //image is higher than 16:9 aspect
+                return Math.Max(Window.Width / 1920.0, Window.Height / 1080.0);
             }
         }
 
