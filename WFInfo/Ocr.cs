@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -1497,12 +1497,7 @@ namespace WFInfo
 
 
 
-                //set OCR to numbers only
-                try
-                {
-                    _tesseractService.SetNumbersOnlyMode();
-
-                    double widthMultiplier = (_settings.DoCustomNumberBoxWidth ? _settings.SnapItNumberBoxWidth : 0.4);
+                double widthMultiplier = (_settings.DoCustomNumberBoxWidth ? _settings.SnapItNumberBoxWidth : 0.4);
                 //Process grid system
                 for (int i = 0; i < Rows.Count; i++)
                 {
@@ -1846,13 +1841,6 @@ namespace WFInfo
                         cloneBitmapColoured.Dispose();
                         cloneBitmap.Dispose();
                     }
-                }
-                
-                //return OCR to any symbols
-                }
-                finally
-                {
-                    _tesseractService.ResetToDefaultMode();
                 }
             }
             darkCyan.Dispose();

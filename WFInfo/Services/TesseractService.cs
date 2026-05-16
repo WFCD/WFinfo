@@ -34,16 +34,6 @@ namespace WFInfo
 
         void Init();
         void ReloadEngines();
-        
-        /// <summary>
-        /// Sets the mode to numbers-only for item counting. Use NumbersOnlyEngine after calling this.
-        /// </summary>
-        void SetNumbersOnlyMode();
-        
-        /// <summary>
-        /// Resets to default mode. Use FirstEngine after calling this.
-        /// </summary>
-        void ResetToDefaultMode();
     }
 
     /// <summary>
@@ -143,8 +133,6 @@ namespace WFInfo
             engine.SetVariable("tessedit_write_unlv", "false"); // Don't write UNLV format
             engine.SetVariable("tessedit_fix_fuzzy_spaces", "true"); // Fix spacing issues
             engine.SetVariable("tessedit_prefer_joined_broken", "false"); // Don't join broken characters
-            engine.SetVariable("tessedit_font_id", "0"); // Use default font (Tesseract 5+)
-            
             // Dictionary and spacing improvements for UI text
             engine.SetVariable("preserve_interword_spaces", "1"); // Preserve spacing for stable output
                      
@@ -154,7 +142,6 @@ namespace WFInfo
             
             // Thresholding parameters for better binarization (Tesseract 5+)
             engine.SetVariable("thresholding_method", "0"); // Use default thresholding
-            engine.SetVariable("thresholding_window_size", "5"); // Smaller window for better noise reduction
             
             // Apply language-specific optimizations
             // CJK languages (Korean, Simplified Chinese, Traditional Chinese) share similar OCR challenges
@@ -172,11 +159,9 @@ namespace WFInfo
             }
             else if (Locale == "en")
             {
-                // Aggressive settings for English to reduce noise
-                engine.SetVariable("language_model_penalty_non_dict_word", "0.3"); // Penalize non-dictionary words heavily
-                engine.SetVariable("load_system_dawg", "false"); // Disable system dictionary for better UI text recognition
-                engine.SetVariable("load_freq_dawg", "false"); // Disable frequency dictionary for better UI text recognition
-                engine.SetVariable("textord_force_make_prop_words", "true"); // Help with compound words
+                // Disable dictionaries so UI text isn't corrected to dictionary words
+                engine.SetVariable("load_system_dawg", "false");
+                engine.SetVariable("load_freq_dawg", "false");
                 
             }
             
@@ -241,17 +226,6 @@ namespace WFInfo
             NumbersOnlyEngine = CreateNumbersOnlyEngine();
         }
         
-        public void SetNumbersOnlyMode()
-        {
-            // Numbers-only mode now uses the dedicated NumbersOnlyEngine
-            // This avoids race conditions from mutating the shared FirstEngine
-        }
-        
-        public void ResetToDefaultMode()
-        {
-            // Default mode uses FirstEngine - no state change needed
-            // This avoids race conditions from mutating the shared FirstEngine
-        }
         private void getLocaleTessdata()
         {
             string traineddata_hotlink_prefix = "https://raw.githubusercontent.com/WFCD/WFinfo/libs/tessdata/";
