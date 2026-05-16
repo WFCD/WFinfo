@@ -77,6 +77,18 @@ namespace WFInfo.LanguageProcessing
             // Russian filters very short words (less than 2 characters)
             return !string.IsNullOrEmpty(word) && word.Length < 2;
         }
+
+        public override string RemoveBlueprintTerms(string localizedName)
+        {
+            if (string.IsNullOrEmpty(localizedName))
+                return localizedName;
+
+            // Handle "Чертёж:" / "Чертеж:" prefix format before generic removal
+            string result = Regex.Replace(localizedName, "^Черт[её]ж:\\s*", "", RegexOptions.IgnoreCase);
+
+            // Apply generic BlueprintRemovals (handles "(чертеж)" suffix, etc.)
+            return base.RemoveBlueprintTerms(result);
+        }
     }
 
     /// <summary>
@@ -145,6 +157,18 @@ namespace WFInfo.LanguageProcessing
         {
             // Ukrainian filters very short words (less than 2 characters)
             return !string.IsNullOrEmpty(word) && word.Length < 2;
+        }
+
+        public override string RemoveBlueprintTerms(string localizedName)
+        {
+            if (string.IsNullOrEmpty(localizedName))
+                return localizedName;
+
+            // Handle "Кресленник:" prefix format before generic removal
+            string result = Regex.Replace(localizedName, "^Кресленник:\\s*", "", RegexOptions.IgnoreCase);
+
+            // Apply generic BlueprintRemovals (handles suffix patterns)
+            return base.RemoveBlueprintTerms(result);
         }
     }
 }

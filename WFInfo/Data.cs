@@ -1242,7 +1242,7 @@ namespace WFInfo
 
         /// <summary>
         /// Removes blueprint terms from a localized part name for clipboard display.
-        /// Uses the current language processor's BlueprintRemovals list.
+        /// Delegates to the current language processor for per-language implementation.
         /// </summary>
         public string RemoveBlueprintTerms(string localizedName)
         {
@@ -1250,48 +1250,7 @@ namespace WFInfo
                 return localizedName;
 
             var processor = LanguageProcessorFactory.GetCurrentProcessor();
-            string result = localizedName;
-
-            // Get blueprint removal terms for current language
-            var blueprintTerms = processor.BlueprintRemovals;
-            if (blueprintTerms != null)
-            {
-                foreach (var term in blueprintTerms)
-                {
-                    if (string.IsNullOrEmpty(term))
-                        continue;
-
-                    string escapedTerm = Regex.Escape(term);
-
-                    // Remove " Term" or " Term " patterns (case insensitive)
-                    result = Regex.Replace(result, $"\\s+{escapedTerm}\\s*$", "", RegexOptions.IgnoreCase);
-                    result = Regex.Replace(result, $"\\s+{escapedTerm}\\s+", " ", RegexOptions.IgnoreCase);
-
-                    // Remove term preceded by common punctuation: " - Term", " – Term", " — Term", ": Term"
-                    result = Regex.Replace(result, $"[:\\-–—]\\s*{escapedTerm}\\s*$", "", RegexOptions.IgnoreCase);
-                    result = Regex.Replace(result, $"[:\\-–—]\\s*{escapedTerm}\\s+", " ", RegexOptions.IgnoreCase);
-
-                    // Remove term followed by common punctuation: "Term - ", "Term:"
-                    result = Regex.Replace(result, $"\\s*{escapedTerm}\\s*[:\\-–—]", "", RegexOptions.IgnoreCase);
-
-                    // Remove term at boundaries (standalone)
-                    result = Regex.Replace(result, $"\\b{escapedTerm}\\b", "", RegexOptions.IgnoreCase);
-                }
-            }
-
-            // Always strip English "Blueprint" regardless of locale
-            result = Regex.Replace(result, "\\s*Blueprint\\s*$", "", RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, "\\s*Blueprint\\s+", " ", RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, "^Blueprint\\s*[:\\-–—]?\\s*", "", RegexOptions.IgnoreCase);
-
-            // Special handling for Russian "Чертёж:" prefix format
-            if (_settings.Locale == "ru")
-            {
-                result = Regex.Replace(result, "^Черт[её]ж:\\s*", "", RegexOptions.IgnoreCase);
-                result = Regex.Replace(result, "^черт[её]ж:\\s*", "", RegexOptions.IgnoreCase);
-            }
-
-            return result.Trim();
+            return processor.RemoveBlueprintTerms(localizedName);
         }
 
         /// <summary>

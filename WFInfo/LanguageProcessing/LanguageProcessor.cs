@@ -187,6 +187,48 @@ namespace WFInfo.LanguageProcessing
         }
 
         /// <summary>
+        /// Removes blueprint terms from a localized part name for clipboard display.
+        /// Override in language-specific processors for custom cleanup logic.
+        /// </summary>
+        /// <param name="localizedName">Localized part name to clean</param>
+        /// <returns>Cleaned part name with blueprint terms removed</returns>
+        public virtual string RemoveBlueprintTerms(string localizedName)
+        {
+            if (string.IsNullOrEmpty(localizedName))
+                return localizedName;
+
+            string result = localizedName;
+
+            var blueprintTerms = BlueprintRemovals;
+            if (blueprintTerms != null)
+            {
+                foreach (var term in blueprintTerms)
+                {
+                    if (string.IsNullOrEmpty(term))
+                        continue;
+
+                    string escapedTerm = Regex.Escape(term);
+
+                    // Remove " Term" or " Term " patterns (case insensitive)
+                    result = Regex.Replace(result, $"\\s+{escapedTerm}\\s*$", "", RegexOptions.IgnoreCase);
+                    result = Regex.Replace(result, $"\\s+{escapedTerm}\\s+", " ", RegexOptions.IgnoreCase);
+
+                    // Remove term preceded by common punctuation: " - Term", " – Term", " — Term", ": Term"
+                    result = Regex.Replace(result, $"[:\\-–—]\\s*{escapedTerm}\\s*$", "", RegexOptions.IgnoreCase);
+                    result = Regex.Replace(result, $"[:\\-–—]\\s*{escapedTerm}\\s+", " ", RegexOptions.IgnoreCase);
+
+                    // Remove term followed by common punctuation: "Term - ", "Term:"
+                    result = Regex.Replace(result, $"\\s*{escapedTerm}\\s*[:\\-–—]", "", RegexOptions.IgnoreCase);
+
+                    // Remove term at boundaries (standalone)
+                    result = Regex.Replace(result, $"\\b{escapedTerm}\\b", "", RegexOptions.IgnoreCase);
+                }
+            }
+
+            return result.Trim();
+        }
+
+        /// <summary>
         /// Checks if a text fragment is a blueprint term for this language
         /// </summary>
         /// <param name="text">Text fragment to check</param>

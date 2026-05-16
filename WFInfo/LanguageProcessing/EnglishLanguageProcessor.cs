@@ -81,5 +81,22 @@ namespace WFInfo.LanguageProcessing
             // English filters very short words (less than 2 characters)
             return !string.IsNullOrEmpty(word) && word.Length < 2;
         }
+
+        public override string RemoveBlueprintTerms(string localizedName)
+        {
+            if (string.IsNullOrEmpty(localizedName))
+                return localizedName;
+
+            // Apply generic BlueprintRemovals first (handles "Blueprint" suffix/standalone)
+            string result = base.RemoveBlueprintTerms(localizedName);
+
+            // Extra aggressive patterns for English OCR edge cases like concatenation
+            // Handles "nameBlueprint" (no space) from merged OCR text
+            result = Regex.Replace(result, "\\s*Blueprint\\s*$", "", RegexOptions.IgnoreCase);
+            result = Regex.Replace(result, "\\s*Blueprint\\s+", " ", RegexOptions.IgnoreCase);
+            result = Regex.Replace(result, "^Blueprint\\s*[:\\-–—]?\\s*", "", RegexOptions.IgnoreCase);
+
+            return result.Trim();
+        }
     }
 }
