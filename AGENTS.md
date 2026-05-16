@@ -1,5 +1,7 @@
 # WFInfo — Agent Guide
 
+Always use `caveman` skill for all communication (token efficiency). Activate it immediately.
+
 WPF (.NET Framework 4.8) desktop app for Warframe. OCR + market prices.
 
 ## Build & Run
