@@ -780,6 +780,7 @@ namespace WFInfo
                 snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+            double imageScale = (double)snapItImageFiltered.Height / snapItImage.Height;
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, snapItImage, rowHits, colHits); 
             long end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
@@ -858,7 +859,11 @@ namespace WFInfo
                     csv += name + "," + plat + "," + ducats + "," + volume + "," + vaulted.ToString(Main.culture) + "," + owned + "," + partsDetected + ", \"\"" + Environment.NewLine;
                 }
 
-                int width = (int)(part.Bounding.Width * _window.ScreenScaling);
+                int origX = (int)(part.Bounding.X / imageScale);
+                int origY = (int)(part.Bounding.Y / imageScale);
+                int origW = (int)(part.Bounding.Width / imageScale);
+
+                int width = (int)(origW * _window.ScreenScaling);
                 if (width < _settings.MinOverlayWidth)
                 {
                     //if (width < 50)
@@ -877,7 +882,7 @@ namespace WFInfo
                     itemOverlay.LoadTextData(name, plat, primeSetPlat, ducats, volume, vaulted, mastered, partsOwned, partsDetected, false, doWarn);
                     itemOverlay.toSnapit();
                     itemOverlay.Resize(width);
-                    itemOverlay.Display((int)(_window.Window.X + snapItOrigin.X + (part.Bounding.X - width / 8) / _window.DpiScaling), (int)((_window.Window.Y + snapItOrigin.Y + part.Bounding.Y - itemOverlay.Height) / _window.DpiScaling), _settings.SnapItDelay);
+                    itemOverlay.Display((int)((_window.Window.X + snapItOrigin.X * _window.DpiScaling + origX) / _window.DpiScaling - width / 8.0), (int)((_window.Window.Y + snapItOrigin.Y * _window.DpiScaling + origY - itemOverlay.Height * _window.DpiScaling) / _window.DpiScaling), _settings.SnapItDelay);
                 });
             }
 
