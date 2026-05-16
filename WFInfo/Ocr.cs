@@ -279,7 +279,7 @@ namespace WFInfo
             Task.WaitAll(tasks);
 
             // Remove any empty (or suspiciously short) items from the array
-            firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s) && s.Replace(" ", "").Length > 6).ToArray();
+            firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s) && PartNameValid(s)).ToArray();
             if (firstChecks == null || firstChecks.Length == 0)
             {
                 processingActive = false;

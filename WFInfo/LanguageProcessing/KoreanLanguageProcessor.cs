@@ -373,7 +373,7 @@ namespace WFInfo.LanguageProcessing
             
             // Korean item names can be short (e.g. "렉스 프라임" = 5 chars without spaces)
             // Use lower threshold than other languages to avoid dropping valid fragments
-            return Regex.Replace(partName, @"\s+", "", RegexOptions.CultureInvariant).Length >= 4;
+            return Regex.Replace(partName, @"\s+", "", RegexOptions.CultureInvariant).Length >= 3;
         }
 
         public override bool ShouldFilterWord(string word)
