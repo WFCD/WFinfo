@@ -747,14 +747,16 @@ namespace WFInfo
         }
 
         /// <summary>
-        /// Gets the maximum allowed Levenshtein distance threshold for part name matching
+        /// Gets the maximum allowed Levenshtein distance threshold for part name matching.
+        /// Uses the current language processor's DistanceThresholdRatio for locale-aware thresholds.
         /// </summary>
         /// <param name="partNameLength">Length of the part name</param>
         /// <returns>Maximum allowed Levenshtein distance</returns>
         private static int GetMaxAllowedLevenshteinDistance(int partNameLength)
         {
-            // Use 50% of string length with a minimum floor of 3 for consistency
-            return Math.Max((int)Math.Ceiling(partNameLength * 0.5), 3);
+            var processor = LanguageProcessorFactory.GetCurrentProcessor();
+            double ratio = processor?.DistanceThresholdRatio ?? 0.5;
+            return Math.Max((int)Math.Ceiling(partNameLength * ratio), 3);
         }
 
         /// <summary>
@@ -1317,15 +1319,18 @@ namespace WFInfo
                     // Fallback: if no intersecting group found, try proximity-based merge
                     // for Tesseract line-split fragments. Only merge with single-fragment
                     // groups to prevent cascade, and skip very short text (OCR noise).
+                    // CJK/Japanese/Korean tokens are meaningful at shorter lengths, so use
+                    // locale-aware threshold (3 for CJK, 5 for Latin).
                     if (i == -1 && foundItems.Count > 0)
                     {
                         int bestIdx = -1;
                         int bestGap = int.MaxValue;
+                        int minMergeLen = IsCJKLocale() ? 3 : 5;
                         for (int p = foundItems.Count - 1; p >= 0; p--)
                         {
                             if (foundItems[p].Item1.Count != 1) continue;
-                            if (foundItems[p].Item1[0].Name.Length < 5) continue;
-                            if (currentWord.Length < 5) continue;
+                            if (foundItems[p].Item1[0].Name.Length < minMergeLen) continue;
+                            if (currentWord.Length < minMergeLen) continue;
                             var groupBounds = foundItems[p].Item2;
                             int vertGap = Math.Max(0, Math.Max(paddedBounds.Top - groupBounds.Bottom, groupBounds.Top - paddedBounds.Bottom));
                             int avgHeight = (paddedBounds.Height + groupBounds.Height) / 2;
@@ -3065,7 +3070,7 @@ namespace WFInfo
 
             foreach (var p in parts) p.Dispose();
 
-            var validChecks = checks.Where(s => !string.IsNullOrEmpty(s) && s.Replace(" ", "").Length > 6).ToArray();
+            var validChecks = checks.Where(s => PartNameValid(s)).ToArray();
 
             foreach (var part in validChecks)
             {

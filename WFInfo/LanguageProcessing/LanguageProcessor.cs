@@ -289,7 +289,7 @@ namespace WFInfo.LanguageProcessing
                     distance = SimpleLevenshteinDistance(normalizedInput, normalizedStored);
                 }
 
-                if (distance < bestDistance && distance < localizedName.Length * 0.5)
+                if (distance < bestDistance && distance < localizedName.Length * this.DistanceThresholdRatio)
                 {
                     bestDistance = distance;
                     bestMatch = split[0]; // Return the English name

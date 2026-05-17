@@ -196,6 +196,7 @@ namespace WFInfo.LanguageProcessing
             ["Kuva"] = "쿠바",
             ["Riven Sliver"] = "리븐 파편",
             ["Ayatan Amber Star"] = "아야탄 앰버 스타",
+            ["Ayatan Cyan Star"] = "아야탄 시안 스타",
             ["Galariak Prime Blueprint"] = "갈라리아크 프라임 설계도",
             ["Galariak Prime Blade"] = "갈라리아크 프라임 블레이드 설계도",
             ["Galariak Prime Handle"] = "갈라리아크 프라임 핸들 설계도",

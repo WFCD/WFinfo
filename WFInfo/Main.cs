@@ -82,20 +82,37 @@ namespace WFInfo
         private GdiScreenshotService _gdiScreenshot;
         private WindowsCaptureScreenshotService _windowsScreenshot;
 
+        private static readonly object _initLock = new object();
+
         public static void InitWpfFields()
         {
             if (window != null) return;
-            window = new RewardWindow();
-            overlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
-            equipmentWindow = new EquipmentWindow();
-            settingsWindow = new SettingsWindow();
-            themeAdjuster = new ThemeAdjuster();
-            verifyCount = new VerifyCount();
-            autoCount = new AutoCount();
-            searchBox = new SearchIt();
-            login = new Login();
-            listingHelper = new ListingHelper();
-            plusOne = new PlusOne();
+            lock (_initLock)
+            {
+                if (window != null) return;
+                var tempWindow = new RewardWindow();
+                var tempOverlays = new Overlay[4] { new Overlay(), new Overlay(), new Overlay(), new Overlay() };
+                var tempEquipmentWindow = new EquipmentWindow();
+                var tempSettingsWindow = new SettingsWindow();
+                var tempThemeAdjuster = new ThemeAdjuster();
+                var tempVerifyCount = new VerifyCount();
+                var tempAutoCount = new AutoCount();
+                var tempSearchBox = new SearchIt();
+                var tempLogin = new Login();
+                var tempListingHelper = new ListingHelper();
+                var tempPlusOne = new PlusOne();
+                window = tempWindow;
+                overlays = tempOverlays;
+                equipmentWindow = tempEquipmentWindow;
+                settingsWindow = tempSettingsWindow;
+                themeAdjuster = tempThemeAdjuster;
+                verifyCount = tempVerifyCount;
+                autoCount = tempAutoCount;
+                searchBox = tempSearchBox;
+                login = tempLogin;
+                listingHelper = tempListingHelper;
+                plusOne = tempPlusOne;
+            }
         }
 
         public Main()
