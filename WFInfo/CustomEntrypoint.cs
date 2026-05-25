@@ -118,6 +118,23 @@ namespace WFInfo
                 }
             }
 
+            // Theme detection debug mode: WFInfo.exe --theme-debug <folder>
+            if (args.Length >= 1 && args[0].Equals("--theme-debug", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    string folder = args.Length > 1 ? args[1] : ".";
+                    int exitCode = ThemeTestRunner.Run(folder);
+                    Environment.ExitCode = exitCode;
+                }
+                catch (Exception ex)
+                {
+                    try { File.WriteAllText(appPath + @"\theme_crash.log", ex.ToString()); } catch { }
+                    Environment.ExitCode = 2;
+                }
+                return;
+            }
+
             string thisprocessname = Process.GetCurrentProcess().ProcessName;
             string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             if (Process.GetProcesses().Count(p => p.ProcessName == thisprocessname) > 1)

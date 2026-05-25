@@ -79,7 +79,7 @@ namespace WFInfo
                                                             Color.FromArgb(200, 100, 200),      //CONQUERA - medium-light purple
                                                             Color.FromArgb(25, 35, 60),      //DEADLOCK - dark navy
                                                             Color.FromArgb(160, 40, 40),      //LUNAR_RENEWAL - deep red
-                                                            Color.FromArgb(12, 45, 25), };    //POM_2 - actual dark forest green
+                                                            Color.FromArgb(105, 185, 140), };    //POM_2 - medium teal-green
 
     //highlight colors from selected items
     public static Color[] ThemeSecondary = new Color[] {    Color.FromArgb(245, 227, 173),		//VITRUVIAN		
@@ -640,19 +640,8 @@ namespace WFInfo
         /// <returns></returns>
         public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
-            int lineHeight = (int)(GetAdjustedLineHeight() / 2 * _window.ScreenScaling);
-            // int width = image == null ? window.Width * (int)_window.DpiScaling : image.Width;
-            // int height = image == null ? window.Height * (int)_window.DpiScaling : image.Height;
-            int mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling);
-            // int mostLeft = (width / 2) - (mostWidth / 2);
-            // int mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * _window.ScreenScaling);
-            // int mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * 0.5);
-
             if (image == null)
             {
-                // using (image = new Bitmap(mostWidth, mostBot - mostTop))
-                //     using (Graphics graphics = Graphics.FromImage(image))
-                //         graphics.CopyFromScreen(window.Left + mostLeft, window.Top + mostTop, 0, 0, new Size(image.Width, image.Height));
                 image = CaptureScreenshot();
 
                 if (image == null)
@@ -662,27 +651,12 @@ namespace WFInfo
                 }
             }
 
-
-
-                    double[] weights = new double[Enum.GetValues(typeof(WFtheme)).Cast<int>().Max() + 1];
-            int minWidth = mostWidth / 4;
-
             if (image == null || image.Height == 0)
             {
                 throw new Exception("Image height was 0");
             }
 
-            for (int y = lineHeight; y < image.Height; y++)
-            {
-                double perc = (y - lineHeight) / (image.Height - lineHeight);
-                int totWidth = (int)(minWidth * perc + minWidth);
-                for (int x = 0; x < totWidth; x++)
-                {
-                    int match = (int)GetClosestTheme(image.GetPixel(x + (mostWidth - totWidth) / 2, y), out int thresh);
-                
-                    weights[match] += 1 / Math.Pow(thresh + 1, 4);
-                }
-            }
+            double[] weights = ComputeThemeWeights(image);
 
             double max = 0;
             WFtheme active = WFtheme.UNKNOWN;
@@ -703,6 +677,92 @@ namespace WFInfo
                 return _settings.ThemeSelection;
             }
             return active;
+        }
+
+        private static readonly Color[] ThemePrimaryTop = new Color[]
+        {
+            Color.FromArgb( 35,  83, 124),  // VITRUVIAN
+            Color.FromArgb( 34,  82, 123),  // STALKER
+            Color.FromArgb( 37,  85, 125),  // BARUUK
+            Color.FromArgb( 34,  83, 125),  // CORPUS
+            Color.FromArgb( 34,  82, 124),  // FORTUNA
+            Color.FromArgb( 34,  83, 124),  // GRINEER
+            Color.FromArgb( 36,  85, 128),  // LOTUS
+            Color.FromArgb( 49,  97, 136),  // NIDUS
+            Color.FromArgb( 49,  97, 138),  // OROKIN
+            Color.FromArgb( 46,  96, 137),  // TENNO
+            Color.FromArgb( 35,  83, 126),  // HIGH_CONTRAST
+            Color.FromArgb( 36,  86, 128),  // LEGACY
+            Color.FromArgb( 34,  82, 123),  // EQUINOX
+            Color.FromArgb( 36,  82, 128),  // DARK_LOTUS
+            Color.FromArgb( 35,  83, 125),  // ZEPHYR
+            Color.FromArgb( 45,  85, 134),  // CONQUERA
+            Color.FromArgb( 35,  83, 126),  // DEADLOCK
+            Color.FromArgb( 39,  83, 124),  // LUNAR_RENEWAL
+            Color.FromArgb( 34,  84, 124),  // POM_2
+        };
+
+        private static readonly Color[] ThemePrimaryBot = new Color[]
+        {
+            Color.FromArgb(130, 136, 126),  // VITRUVIAN
+            Color.FromArgb(110,  64,  90),  // STALKER
+            Color.FromArgb(156, 151, 129),  // BARUUK
+            Color.FromArgb( 49, 153, 201),  // CORPUS
+            Color.FromArgb( 60, 102, 172),  // FORTUNA
+            Color.FromArgb(162, 147, 125),  // GRINEER
+            Color.FromArgb( 52, 146, 202),  // LOTUS
+            Color.FromArgb(119,  84, 134),  // NIDUS
+            Color.FromArgb( 56,  85, 103),  // OROKIN
+            Color.FromArgb( 49, 103, 142),  // TENNO
+            Color.FromArgb( 84, 140, 207),  // HIGH_CONTRAST
+            Color.FromArgb(165, 184, 208),  // LEGACY
+            Color.FromArgb(113, 130, 159),  // EQUINOX
+            Color.FromArgb(105, 110, 153),  // DARK_LOTUS
+            Color.FromArgb(162, 117,  75),  // ZEPHYR
+            Color.FromArgb(174, 183, 215),  // CONQUERA
+            Color.FromArgb(163, 181, 207),  // DEADLOCK
+            Color.FromArgb(168, 181, 205),  // LUNAR_RENEWAL
+            Color.FromArgb( 98, 166, 151),  // POM_2
+        };
+
+        private static double[] ComputeThemeWeights(Bitmap image)
+        {
+            double[] weights = new double[Enum.GetValues(typeof(WFtheme)).Cast<int>().Max() + 1];
+            double sc = _window.ScreenScaling;
+            int startX = (int)(90 * sc);
+            int endX = Math.Min((int)(110 * sc), image.Width);
+            int startY = (int)(65 * sc);
+            int endY = Math.Min((int)(80 * sc), image.Height);
+            int midY = (startY + endY) / 2;
+
+            int tR = 0, tG = 0, tB = 0, tCnt = 0, bR = 0, bG = 0, bB = 0, bCnt = 0;
+            for (int y = startY; y < endY; y++)
+            {
+                for (int x = startX; x < endX; x++)
+                {
+                    var c = image.GetPixel(x, y);
+                    if (y < midY) { tR += c.R; tG += c.G; tB += c.B; tCnt++; }
+                    else { bR += c.R; bG += c.G; bB += c.B; bCnt++; }
+                }
+            }
+
+            Color avgTop = Color.FromArgb(tR / tCnt, tG / tCnt, tB / tCnt);
+            Color avgBot = Color.FromArgb(bR / bCnt, bG / bCnt, bB / bCnt);
+
+            for (int i = 0; i < weights.Length; i++)
+            {
+                int dist = ColorDifference(avgTop, ThemePrimaryTop[i])
+                         + ColorDifference(avgBot, ThemePrimaryBot[i]);
+                weights[i] = 1.0 / (dist + 1);
+            }
+            return weights;
+        }
+
+        internal static double[] GetThemeWeightBreakdown(Bitmap image)
+        {
+            if (image == null || image.Height == 0)
+                return new double[0];
+            return ComputeThemeWeights(image);
         }
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, (int theme, int threshold)> _themeCache =
             new System.Collections.Concurrent.ConcurrentDictionary<int, (int theme, int threshold)>();
@@ -3151,6 +3211,22 @@ namespace WFInfo
                 Main.AddLog($"ERROR: Failed to initialize TesseractService in test mode: {ex.Message}");
                 _tesseractInitFailed = true;
             }
+            }
+
+        /// <summary>
+        /// Minimal init for theme detection testing only. Skips Tesseract/language engine.
+        /// </summary>
+        internal static void InitThemeTest(IReadOnlyApplicationSettings settings, IWindowInfoService window)
+        {
+            _tesseractInitFailed = false;
+            Directory.CreateDirectory(Main.AppPath + @"\Debug");
+            _settings = settings;
+            _window = window;
+            _gdiScreenshot = null;
+            _windowsScreenshot = null;
+            _soundPlayer = null;
+            _hdrDetector = null;
+            _tesseractService = null;
         }
 
         #endregion
