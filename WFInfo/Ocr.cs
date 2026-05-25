@@ -59,48 +59,39 @@ namespace WFInfo
 
         #region variabels and sizzle
 
+        private struct ThemeInfo
+        {
+            public Color Primary;
+            public Color Secondary;
+            public Color ProbeTop;
+            public Color ProbeBot;
+        }
 
-        // Colors for the top left "profile bar"
-        public static Color[] ThemePrimary = new Color[] {  Color.FromArgb(190, 169, 102),		//VITRUVIAN		
-															Color.FromArgb(153,  31,  35), 	    //STALKER		
-															Color.FromArgb(238, 193, 105),  	//BARUUK		
-															Color.FromArgb( 35, 201, 245),  	//CORPUS		
-															Color.FromArgb( 57, 105, 192),  	//FORTUNA		
-															Color.FromArgb(255, 189, 102),  	//GRINEER		
-															Color.FromArgb( 36, 184, 242),  	//LOTUS			
-															Color.FromArgb(140,  38,  92),  	//NIDUS			
-															Color.FromArgb( 20,  41,  29),  	//OROKIN		
-															Color.FromArgb(  9,  78, 106),  	//TENNO			
-															Color.FromArgb(102, 176, 255),  	//HIGH_CONTRAST	
-															Color.FromArgb(255, 255, 255),  	//LEGACY		
-															Color.FromArgb(158, 159, 167),  	//EQUINOX		
-															Color.FromArgb(140, 119, 147),      //DARK_LOTUS
-                                                            Color.FromArgb(253, 132,   2),      //ZEPHER
-                                                            Color.FromArgb(200, 100, 200),      //CONQUERA - medium-light purple
-                                                            Color.FromArgb(25, 35, 60),      //DEADLOCK - dark navy
-                                                            Color.FromArgb(160, 40, 40),      //LUNAR_RENEWAL - deep red
-                                                            Color.FromArgb(105, 185, 140), };    //POM_2 - medium teal-green
+        private static readonly ThemeInfo[] AllThemes = new ThemeInfo[]
+        {
+            new ThemeInfo { Primary = Color.FromArgb(190, 169, 102), Secondary = Color.FromArgb(245, 227, 173), ProbeTop = Color.FromArgb( 35,  83, 124), ProbeBot = Color.FromArgb(130, 136, 126) },
+            new ThemeInfo { Primary = Color.FromArgb(153,  31,  35), Secondary = Color.FromArgb(255,  61,  51), ProbeTop = Color.FromArgb( 34,  82, 123), ProbeBot = Color.FromArgb(110,  64,  90) },
+            new ThemeInfo { Primary = Color.FromArgb(238, 193, 105), Secondary = Color.FromArgb(236, 211, 162), ProbeTop = Color.FromArgb( 37,  85, 125), ProbeBot = Color.FromArgb(156, 151, 129) },
+            new ThemeInfo { Primary = Color.FromArgb( 35, 201, 245), Secondary = Color.FromArgb(111, 229, 253), ProbeTop = Color.FromArgb( 34,  83, 125), ProbeBot = Color.FromArgb( 49, 153, 201) },
+            new ThemeInfo { Primary = Color.FromArgb( 57, 105, 192), Secondary = Color.FromArgb(255, 115, 230), ProbeTop = Color.FromArgb( 34,  82, 124), ProbeBot = Color.FromArgb( 60, 102, 172) },
+            new ThemeInfo { Primary = Color.FromArgb(255, 189, 102), Secondary = Color.FromArgb(255, 224, 153), ProbeTop = Color.FromArgb( 34,  83, 124), ProbeBot = Color.FromArgb(162, 147, 125) },
+            new ThemeInfo { Primary = Color.FromArgb( 36, 184, 242), Secondary = Color.FromArgb(255, 241, 191), ProbeTop = Color.FromArgb( 36,  85, 128), ProbeBot = Color.FromArgb( 52, 146, 202) },
+            new ThemeInfo { Primary = Color.FromArgb(140,  38,  92), Secondary = Color.FromArgb(245,  73,  93), ProbeTop = Color.FromArgb( 49,  97, 136), ProbeBot = Color.FromArgb(119,  84, 134) },
+            new ThemeInfo { Primary = Color.FromArgb( 20,  41,  29), Secondary = Color.FromArgb(178, 125,   5), ProbeTop = Color.FromArgb( 49,  97, 138), ProbeBot = Color.FromArgb( 56,  85, 103) },
+            new ThemeInfo { Primary = Color.FromArgb(  9,  78, 106), Secondary = Color.FromArgb(  6, 106,  74), ProbeTop = Color.FromArgb( 46,  96, 137), ProbeBot = Color.FromArgb( 49, 103, 142) },
+            new ThemeInfo { Primary = Color.FromArgb(102, 176, 255), Secondary = Color.FromArgb(255, 255,   0), ProbeTop = Color.FromArgb( 35,  83, 126), ProbeBot = Color.FromArgb( 84, 140, 207) },
+            new ThemeInfo { Primary = Color.FromArgb(255, 255, 255), Secondary = Color.FromArgb(232, 213,  93), ProbeTop = Color.FromArgb( 36,  86, 128), ProbeBot = Color.FromArgb(165, 184, 208) },
+            new ThemeInfo { Primary = Color.FromArgb(158, 159, 167), Secondary = Color.FromArgb(232, 227, 227), ProbeTop = Color.FromArgb( 34,  82, 123), ProbeBot = Color.FromArgb(113, 130, 159) },
+            new ThemeInfo { Primary = Color.FromArgb(140, 119, 147), Secondary = Color.FromArgb(200, 169, 237), ProbeTop = Color.FromArgb( 36,  82, 128), ProbeBot = Color.FromArgb(105, 110, 153) },
+            new ThemeInfo { Primary = Color.FromArgb(253, 132,   2), Secondary = Color.FromArgb(255,  53,   0), ProbeTop = Color.FromArgb( 35,  83, 125), ProbeBot = Color.FromArgb(162, 117,  75) },
+            new ThemeInfo { Primary = Color.FromArgb(200, 100, 200), Secondary = Color.FromArgb(255, 215,   0), ProbeTop = Color.FromArgb( 45,  85, 134), ProbeBot = Color.FromArgb(174, 183, 215) },
+            new ThemeInfo { Primary = Color.FromArgb( 25,  35,  60), Secondary = Color.FromArgb(255, 255, 255), ProbeTop = Color.FromArgb( 35,  83, 126), ProbeBot = Color.FromArgb(163, 181, 207) },
+            new ThemeInfo { Primary = Color.FromArgb(160,  40,  40), Secondary = Color.FromArgb(255, 200, 100), ProbeTop = Color.FromArgb( 39,  83, 124), ProbeBot = Color.FromArgb(168, 181, 205) },
+            new ThemeInfo { Primary = Color.FromArgb(105, 185, 140), Secondary = Color.FromArgb(100, 255, 100), ProbeTop = Color.FromArgb( 34,  84, 124), ProbeBot = Color.FromArgb( 98, 166, 151) },
+        };
 
-    //highlight colors from selected items
-    public static Color[] ThemeSecondary = new Color[] {    Color.FromArgb(245, 227, 173),		//VITRUVIAN		
-															Color.FromArgb(255,  61,  51), 	//STALKER		
-															Color.FromArgb(236, 211, 162),  	//BARUUK		
-															Color.FromArgb(111, 229, 253),  	//CORPUS		
-															Color.FromArgb(255, 115, 230),  	//FORTUNA		
-															Color.FromArgb(255, 224, 153),  	//GRINEER		
-															Color.FromArgb(255, 241, 191),  	//LOTUS			
-															Color.FromArgb(245,  73,  93),  	//NIDUS			
-															Color.FromArgb(178, 125,   5),  	//OROKIN		
-															Color.FromArgb(  6, 106,  74),  	//TENNO			
-															Color.FromArgb(255, 255,   0),  	//HIGH_CONTRAST	
-															Color.FromArgb(232, 213,  93),  	//LEGACY		
-															Color.FromArgb(232, 227, 227),  	//EQUINOX		
-															Color.FromArgb(200, 169, 237),      //DARK_LOTUS	
-                                                            Color.FromArgb(255,  53,   0),      //ZEPHER
-                                                            	Color.FromArgb(255, 215,   0),      //CONQUERA
-                                                            Color.FromArgb(255, 255, 255),      //DEADLOCK
-                                                            Color.FromArgb(255, 200, 100),      //LUNAR_RENEWAL
-                                                            Color.FromArgb(100, 255, 100) };    //POM_2	
+        public static readonly Color[] ThemePrimary = AllThemes.Select(t => t.Primary).ToArray();
+        public static readonly Color[] ThemeSecondary = AllThemes.Select(t => t.Secondary).ToArray();
 
 
     private static int numberOfRewardsDisplayed;
@@ -679,52 +670,6 @@ namespace WFInfo
             return active;
         }
 
-        private static readonly Color[] ThemePrimaryTop = new Color[]
-        {
-            Color.FromArgb( 35,  83, 124),  // VITRUVIAN
-            Color.FromArgb( 34,  82, 123),  // STALKER
-            Color.FromArgb( 37,  85, 125),  // BARUUK
-            Color.FromArgb( 34,  83, 125),  // CORPUS
-            Color.FromArgb( 34,  82, 124),  // FORTUNA
-            Color.FromArgb( 34,  83, 124),  // GRINEER
-            Color.FromArgb( 36,  85, 128),  // LOTUS
-            Color.FromArgb( 49,  97, 136),  // NIDUS
-            Color.FromArgb( 49,  97, 138),  // OROKIN
-            Color.FromArgb( 46,  96, 137),  // TENNO
-            Color.FromArgb( 35,  83, 126),  // HIGH_CONTRAST
-            Color.FromArgb( 36,  86, 128),  // LEGACY
-            Color.FromArgb( 34,  82, 123),  // EQUINOX
-            Color.FromArgb( 36,  82, 128),  // DARK_LOTUS
-            Color.FromArgb( 35,  83, 125),  // ZEPHYR
-            Color.FromArgb( 45,  85, 134),  // CONQUERA
-            Color.FromArgb( 35,  83, 126),  // DEADLOCK
-            Color.FromArgb( 39,  83, 124),  // LUNAR_RENEWAL
-            Color.FromArgb( 34,  84, 124),  // POM_2
-        };
-
-        private static readonly Color[] ThemePrimaryBot = new Color[]
-        {
-            Color.FromArgb(130, 136, 126),  // VITRUVIAN
-            Color.FromArgb(110,  64,  90),  // STALKER
-            Color.FromArgb(156, 151, 129),  // BARUUK
-            Color.FromArgb( 49, 153, 201),  // CORPUS
-            Color.FromArgb( 60, 102, 172),  // FORTUNA
-            Color.FromArgb(162, 147, 125),  // GRINEER
-            Color.FromArgb( 52, 146, 202),  // LOTUS
-            Color.FromArgb(119,  84, 134),  // NIDUS
-            Color.FromArgb( 56,  85, 103),  // OROKIN
-            Color.FromArgb( 49, 103, 142),  // TENNO
-            Color.FromArgb( 84, 140, 207),  // HIGH_CONTRAST
-            Color.FromArgb(165, 184, 208),  // LEGACY
-            Color.FromArgb(113, 130, 159),  // EQUINOX
-            Color.FromArgb(105, 110, 153),  // DARK_LOTUS
-            Color.FromArgb(162, 117,  75),  // ZEPHYR
-            Color.FromArgb(174, 183, 215),  // CONQUERA
-            Color.FromArgb(163, 181, 207),  // DEADLOCK
-            Color.FromArgb(168, 181, 205),  // LUNAR_RENEWAL
-            Color.FromArgb( 98, 166, 151),  // POM_2
-        };
-
         private static double[] ComputeThemeWeights(Bitmap image)
         {
             double[] weights = new double[Enum.GetValues(typeof(WFtheme)).Cast<int>().Max() + 1];
@@ -751,8 +696,8 @@ namespace WFInfo
 
             for (int i = 0; i < weights.Length; i++)
             {
-                int dist = ColorDifference(avgTop, ThemePrimaryTop[i])
-                         + ColorDifference(avgBot, ThemePrimaryBot[i]);
+                int dist = ColorDifference(avgTop, AllThemes[i].ProbeTop)
+                         + ColorDifference(avgBot, AllThemes[i].ProbeBot);
                 weights[i] = 1.0 / (dist + 1);
             }
             return weights;
