@@ -5,16 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WFInfo"
         mc:Ignorable="d"
-        Title="SnapItOverlay" BorderThickness="0" AllowsTransparency="True" BorderBrush="Transparent" Background="#10FFFFFF" WindowStyle="None" Height="0" Width="0" WindowStartupLocation="Manual">
+        Title="SnapItOverlay" BorderThickness="0" AllowsTransparency="True" BorderBrush="Transparent" Background="#40FFFFFF" WindowStyle="None" Height="0" Width="0" WindowStartupLocation="Manual">
     <Window.Resources>
         <Storyboard x:Key="MarchingAnts">
-            <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" 
-                               Storyboard.TargetName="rectangle" 
-                               Storyboard.TargetProperty="(Shape.StrokeDashOffset)" 
+            <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                               Storyboard.TargetName="rectangleWhite"
+                               Storyboard.TargetProperty="(Shape.StrokeDashOffset)"
                                RepeatBehavior="Forever">
                 <SplineDoubleKeyFrame KeyTime="00:00:00" Value="0"/>
                 <SplineDoubleKeyFrame KeyTime="00:00:00.5000000"
                                Value="10"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                               Storyboard.TargetName="rectangleBlack"
+                               Storyboard.TargetProperty="(Shape.StrokeDashOffset)"
+                               RepeatBehavior="Forever">
+                <SplineDoubleKeyFrame KeyTime="00:00:00" Value="5"/>
+                <SplineDoubleKeyFrame KeyTime="00:00:00.5000000"
+                               Value="15"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
     </Window.Resources>
@@ -26,17 +34,20 @@
 
     <Grid Cursor="Cross" x:Name="LayoutRoot">
         <Canvas x:Name="canvas">
-            <TextBlock TextWrapping="Wrap" Text="Press any key to exit" FontSize="48" Width="{Binding Path=ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}" TextAlignment="Center" Canvas.Bottom="10"/>
-            <Rectangle Fill="#14FFFFFF" StrokeDashArray="5" 
-
-                Stroke="#FFFFFFFF" Visibility="Hidden" 
-
-                x:Name="rectangle" Width="50" Height="50" 
-
-                StrokeDashOffset="0" StrokeThickness="1" 
-
+            <Border Canvas.Bottom="10" HorizontalAlignment="Center" Background="#80000000" CornerRadius="8" Padding="20,8">
+                <TextBlock TextWrapping="Wrap" Text="Press any key to exit" FontSize="48" Foreground="White" TextAlignment="Center"/>
+            </Border>
+            <Rectangle Fill="#30FFFFFF" StrokeDashArray="5"
+                Stroke="#FF000000" Visibility="Hidden"
+                x:Name="rectangleBlack" Width="50" Height="50"
+                StrokeDashOffset="5" StrokeThickness="2"
                 RadiusX="0" RadiusY="0"
-
+                Canvas.Left="0" Canvas.Top="0"/>
+            <Rectangle Fill="Transparent" StrokeDashArray="5"
+                Stroke="#FFFFFFFF" Visibility="Hidden"
+                x:Name="rectangleWhite" Width="50" Height="50"
+                StrokeDashOffset="0" StrokeThickness="2"
+                RadiusX="0" RadiusY="0"
                 Canvas.Left="0" Canvas.Top="0"/>
         </Canvas>
     </Grid>

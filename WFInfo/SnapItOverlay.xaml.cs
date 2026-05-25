@@ -45,27 +45,23 @@ namespace WFInfo
 
         private void ResetRectangle()
         {
-            // Reset rectangle properties to ensure it doesn't persist from previous session
-            rectangle.Width = 0;
-            rectangle.Height = 0;
-            rectangle.RenderTransform = new TranslateTransform(0, 0);
-            rectangle.Visibility = Visibility.Hidden;
-            
-            // Keep rectangle as persistent child - don't remove from canvas
+            rectangleWhite.Width = 0;
+            rectangleWhite.Height = 0;
+            rectangleWhite.RenderTransform = new TranslateTransform(0, 0);
+            rectangleWhite.Visibility = Visibility.Hidden;
+            rectangleBlack.Width = 0;
+            rectangleBlack.Height = 0;
+            rectangleBlack.RenderTransform = new TranslateTransform(0, 0);
+            rectangleBlack.Visibility = Visibility.Hidden;
         }
 
         private void canvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            //Set the start point
             startDrag = e.GetPosition(canvas);
-            
-            // Rectangle is always persistent, just ensure it's visible and on top
-            rectangle.Visibility = Visibility.Visible;
-            
-            //Move the selection marquee on top of all other objects in canvas
-            Canvas.SetZIndex(rectangle, canvas.Children.Count);
-            
-            //Capture the mouse
+            rectangleWhite.Visibility = Visibility.Visible;
+            rectangleBlack.Visibility = Visibility.Visible;
+            Canvas.SetZIndex(rectangleWhite, canvas.Children.Count);
+            Canvas.SetZIndex(rectangleBlack, canvas.Children.Count - 1);
             if (!canvas.IsMouseCaptured)
                 canvas.CaptureMouse();
             canvas.Cursor = Cursors.Cross;
@@ -83,18 +79,17 @@ namespace WFInfo
 
         private void canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            //Release the mouse
             if (canvas.IsMouseCaptured)
                 canvas.ReleaseMouseCapture();
             canvas.Cursor = Cursors.Arrow;
-            Main.AddLog("User drew rectangle: Starting point: " + startDrag.ToString() + " Width: " + rectangle.Width + " Height:" + rectangle.Height);
-            if (rectangle.Width < 10 || rectangle.Height < 10)
-            { // box is smaller than 10x10 and thus will never be able to have any text. Also used as a failsave to prevent the program from crashing if the user makes a 0x0 sleection
+            Main.AddLog("User drew rectangle: Starting point: " + startDrag.ToString() + " Width: " + rectangleWhite.Width + " Height:" + rectangleWhite.Height);
+            if (rectangleWhite.Width < 10 || rectangleWhite.Height < 10)
+            {
                 Main.AddLog("User selected an area too small");
                 Main.StatusUpdate("Please slecet a larger area to scan", 2);
                 return;
             }
-            Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * _window.DpiScaling), (int)(topLeft.Y * _window.DpiScaling), (int)(rectangle.Width * _window.DpiScaling), (int)(rectangle.Height * _window.DpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
+            Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * _window.DpiScaling), (int)(topLeft.Y * _window.DpiScaling), (int)(rectangleWhite.Width * _window.DpiScaling), (int)(rectangleWhite.Height * _window.DpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
             Task.Run(() => OCR.ProcessSnapIt(cutout, tempImage, topLeft));
 
             closeOverlay();
@@ -106,20 +101,22 @@ namespace WFInfo
             {
                 System.Windows.Point currentPoint = e.GetPosition(canvas);
 
-                //Calculate the top left corner of the rectangle 
-                //regardless of drag direction
                 double x = startDrag.X < currentPoint.X ? startDrag.X : currentPoint.X;
                 double y = startDrag.Y < currentPoint.Y ? startDrag.Y : currentPoint.Y;
 
-                if (rectangle.Visibility == Visibility.Hidden)
-                    rectangle.Visibility = Visibility.Visible;
+                if (rectangleWhite.Visibility == Visibility.Hidden)
+                {
+                    rectangleWhite.Visibility = Visibility.Visible;
+                    rectangleBlack.Visibility = Visibility.Visible;
+                }
 
-                //Move the rectangle to proper place
                 topLeft = new System.Drawing.Point((int)x, (int)y);
-                rectangle.RenderTransform = new TranslateTransform(x, y);
-                //Set its size
-                rectangle.Width = Math.Abs(e.GetPosition(canvas).X - startDrag.X);
-                rectangle.Height = Math.Abs(e.GetPosition(canvas).Y - startDrag.Y);
+                rectangleWhite.RenderTransform = new TranslateTransform(x, y);
+                rectangleBlack.RenderTransform = new TranslateTransform(x, y);
+                rectangleWhite.Width = Math.Abs(e.GetPosition(canvas).X - startDrag.X);
+                rectangleWhite.Height = Math.Abs(e.GetPosition(canvas).Y - startDrag.Y);
+                rectangleBlack.Width = Math.Abs(e.GetPosition(canvas).X - startDrag.X);
+                rectangleBlack.Height = Math.Abs(e.GetPosition(canvas).Y - startDrag.Y);
             }
         }
     }
