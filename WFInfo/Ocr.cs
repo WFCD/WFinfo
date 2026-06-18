@@ -673,7 +673,7 @@ namespace WFInfo
         private static double[] ComputeThemeWeights(Bitmap image)
         {
             double[] weights = new double[Enum.GetValues(typeof(WFtheme)).Cast<int>().Max() + 1];
-            double sc = _window.ScreenScaling;
+            double sc = _window.ScreenScaling * Math.Max(uiScaling, 1.0);
             int startX = (int)(90 * sc);
             int endX = Math.Min((int)(110 * sc), image.Width);
             int startY = (int)(65 * sc);
@@ -776,6 +776,8 @@ namespace WFInfo
 
             //timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
+            try { ExtractPartBoxAutomatically(out uiScaling, out _, fullShot); }
+            catch { Main.AddLog("SnapIt: UI scaling detection failed, using previous value"); }
             WFtheme theme = GetThemeWeighted(out _, fullShot);
             if (theme == WFtheme.UNKNOWN)
             {
@@ -3172,6 +3174,7 @@ namespace WFInfo
             _soundPlayer = null;
             _hdrDetector = null;
             _tesseractService = null;
+            uiScaling = 1.0;
         }
 
         #endregion

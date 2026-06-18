@@ -100,7 +100,7 @@ namespace WFInfo.Tests
 
                             if (detected == expected)
                             {
-                                double sc = windowService.ScreenScaling;
+                                double sc = windowService.ScreenScaling * Math.Max(OCR.uiScaling, 1.0);
                                 int prbX = (int)(90 * sc);
                                 int prbEndX = Math.Min((int)(110 * sc), image.Width);
                                 int prbY = (int)(65 * sc);
@@ -115,14 +115,15 @@ namespace WFInfo.Tests
                                         else { bR += c.R; bG += c.G; bB += c.B; bCnt++; }
                                     }
                                 log.AppendLine($"PASS: {fileName}{Path.GetExtension(file)} -> {detected} [{image.Width}x{image.Height}]");
-                                log.AppendLine($"     Top RGB({tR / tCnt},{tG / tCnt},{tB / tCnt})  Bot RGB({bR / bCnt},{bG / bCnt},{bB / bCnt})");
+                                log.AppendLine($"     DPIxUI: {sc:F2} (dpi={windowService.ScreenScaling:F2} ui={OCR.uiScaling:F2})  Top RGB({tR / tCnt},{tG / tCnt},{tB / tCnt})  Bot RGB({bR / bCnt},{bG / bCnt},{bB / bCnt})");
                                 passed++;
                             }
                             else
                             {
                                 var breakdown = OCR.GetThemeWeightBreakdown(image);
                                 var topCands = GetTopCandidates(breakdown, 5);
-                                double sc = windowService.ScreenScaling;
+                                double sc = windowService.ScreenScaling * Math.Max(OCR.uiScaling, 1.0);
+                                double dpiSc = windowService.ScreenScaling;
                                 int prbX = (int)(90 * sc);
                                 int prbEndX = Math.Min((int)(110 * sc), image.Width);
                                 int prbY = (int)(65 * sc);
@@ -131,7 +132,7 @@ namespace WFInfo.Tests
                                 log.AppendLine($"FAIL: {fileName}{Path.GetExtension(file)}");
                                 log.AppendLine($"     Expected: {expected}");
                                 log.AppendLine($"     Detected: {detected} (weight={thresh:F2})");
-                                log.AppendLine($"     Size: {image.Width}x{image.Height}, Scale: {sc:F2}");
+                                log.AppendLine($"     Size: {image.Width}x{image.Height}, DPIxUI: {dpiSc:F2} (dpi={windowService.ScreenScaling:F2} ui={OCR.uiScaling:F2})");
                                 log.AppendLine($"     Probe: ({prbX},{prbY})-({prbEndX},{prbEndY}) = {(prbEndX - prbX) * (prbEndY - prbY)}px");
                                 int midY = (prbY + prbEndY) / 2;
                                 int tR = 0, tG = 0, tB = 0, tCnt = 0, bR = 0, bG = 0, bB = 0, bCnt = 0;
@@ -147,7 +148,7 @@ namespace WFInfo.Tests
                                 log.AppendLine("     Top-5 candidates:");
                                 for (int i = 0; i < topCands.Length; i++)
                                     log.AppendLine($"       {i + 1}. {(WFtheme)topCands[i].Index} weight={topCands[i].Weight:F2}");
-                                failures.Add($"{fileName}: expected={expected} detected={detected} weight={thresh:F2} scale={windowService.ScreenScaling:F2}");
+                                failures.Add($"{fileName}: expected={expected} detected={detected} weight={thresh:F2} dpi={windowService.ScreenScaling:F2} ui={OCR.uiScaling:F2}");
                                 failed++;
                             }
                         }
