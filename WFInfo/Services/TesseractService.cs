@@ -233,16 +233,25 @@ namespace WFInfo
             getLocaleTessdata();
             try
             {
-                FirstEngine = CreateEngine();
+                try
+                {
+                    FirstEngine = CreateEngine();
+                }
+                catch (TesseractException)
+                {
+                    DataPath = FallbackDataPath;
+                    FirstEngine = CreateEngine();
+                }
+                SecondEngine = CreateEngine();
+                NumbersOnlyEngine = CreateNumbersOnlyEngine();
+                LoadEngines();
             }
-            catch (TesseractException)
+            catch (Exception)
             {
-                DataPath = FallbackDataPath;
-                FirstEngine = CreateEngine();
+                // Dispose any engines created before failure to match Init() cleanup pattern
+                DisposeEngines();
+                throw;
             }
-            SecondEngine = CreateEngine();
-            NumbersOnlyEngine = CreateNumbersOnlyEngine();
-            LoadEngines();
         }
         
         private void getLocaleTessdata()

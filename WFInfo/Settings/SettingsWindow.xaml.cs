@@ -196,7 +196,7 @@ namespace WFInfo.Settings
             _viewModel.Locale = selectedLocale;
             Save();
 
-            _ = OCR.updateEngineAsync();
+            _ = OCR.UpdateEngineAsync();
 
             Task.Run(async() =>
             {

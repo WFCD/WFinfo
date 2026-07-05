@@ -687,6 +687,19 @@ namespace WFInfo
         {
             try
             {
+                // Avoid stacking duplicate windows
+                if (colorblindWarning != null)
+                {
+                    try
+                    {
+                        if (colorblindWarning.IsVisible) return;
+                    }
+                    catch
+                    {
+                        // Window was closed/disposed — fall through to create new one
+                    }
+                }
+
                 string cfgPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
                     + @"\Warframe\EE.cfg";
                 if (!File.Exists(cfgPath)) return;

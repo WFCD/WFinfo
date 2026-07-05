@@ -75,6 +75,7 @@ namespace WFInfo.Services.WarframeProcess
         private Timer find_process_timer;
         private const int FindProcessTimerDuration = 40000; // ms
         private bool _wasRunningPreviously = false;
+        private bool _lastDetectionFailed = false;
         private int _isFinding = 0; // 0 = idle, 1 = running (Interlocked)
 
         public WarframeProcessFinder(IReadOnlyApplicationSettings settings)
@@ -154,9 +155,10 @@ namespace WFInfo.Services.WarframeProcess
                         Main.StatusUpdate("Restart Warframe without admin privileges, or WFInfo with admin privileges", 1);
                     }
 
-                    if (identified_process != null && !wasRunning && Main.LastStatusMessage == "Unable to Detect Warframe Process")
+                    if (identified_process != null && !wasRunning && _lastDetectionFailed)
                     {
                         Main.StatusUpdate("Warframe Process Detected", 0);
+                        _lastDetectionFailed = false;
                     }
                 }
                 else
@@ -165,6 +167,7 @@ namespace WFInfo.Services.WarframeProcess
                     {
                         Main.AddLog("Did Not Detect Warframe Process");
                         Main.StatusUpdate("Unable to Detect Warframe Process", 1);
+                        _lastDetectionFailed = true;
                     }
                 }
                 

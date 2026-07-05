@@ -163,6 +163,9 @@ namespace WFInfo
         private static string clipboard;
         #endregion
 
+        private static readonly char[] WordSplitChars = { ' ' };
+        private static readonly string[] PrimeSplitChars = { "Prime" };
+        private static readonly char[] NewlineSplitChars = { '\r', '\n' };
         private static readonly System.Threading.SemaphoreSlim ReloadSemaphore = new System.Threading.SemaphoreSlim(1, 1);
         private static ITesseractService _tesseractService;
         private static bool _tesseractInitFailed;
@@ -536,7 +539,7 @@ namespace WFInfo
             new Point(mostLeft + 6 * length, middelHeight)};
 
             var lowestDistance = int.MaxValue;
-            var lowestDistancePoint = new Point();
+            Point lowestDistancePoint;
             if (numberOfRewardsDisplayed == 1) //rare, but can happen if others don't get enough traces
             {
                 primeRewardIndex = 0;
@@ -713,6 +716,9 @@ namespace WFInfo
                 else             { bR += r; bG += g; bB += b; bCnt++; }
             }
 
+            // Safeguard: if a bucket is empty (can happen when probeY2 clamps to probeY1), use fallback
+            if (tCnt == 0) { tR = 0; tG = 0; tB = 0; tCnt = 1; }
+            if (bCnt == 0) { bR = 0; bG = 0; bB = 0; bCnt = 1; }
             Color avgTop = Color.FromArgb((int)(tR / tCnt), (int)(tG / tCnt), (int)(tB / tCnt));
             Color avgBot = Color.FromArgb((int)(bR / bCnt), (int)(bG / bCnt), (int)(bB / bCnt));
 
@@ -771,7 +777,7 @@ namespace WFInfo
         internal static double[] GetThemeWeightBreakdown(Bitmap image)
         {
             if (image == null || image.Height == 0)
-                return new double[0];
+                return Array.Empty<double>();
             return ComputeThemeWeights(image);
         }
 
@@ -954,8 +960,7 @@ namespace WFInfo
                 foundParts[i] = part;
                 
                 // Safely get market data with null checking
-                JObject job = Main.dataBase.marketData.GetValue(name) as JObject;
-                if (job == null)
+                if (!(Main.dataBase.marketData.GetValue(name) is JObject job))
                 {
                     Main.AddLog($"MARKET DATA: No market data found for '{name}', skipping item");
                     foundParts.RemoveAt(i); // remove item with no market data
@@ -964,10 +969,9 @@ namespace WFInfo
                     continue;
                 }
                 
-                JObject primeSet = Main.dataBase.marketData.GetValue(primeSetName) as JObject;
                 string plat = job["plat"].ToObject<string>();
                 string primeSetPlat = null;
-                if (primeSet != null)
+                if (Main.dataBase.marketData.GetValue(primeSetName) is JObject primeSet)
                 {
                     primeSetPlat = (string)primeSet["plat"];
                 }
@@ -1019,7 +1023,7 @@ namespace WFInfo
                     VerifyCount.ShowVerifyCount(foundParts);
                  });
 
-            if (Main.snapItOverlayWindow.tempImage != null)
+            if (Main.snapItOverlayWindow.tempImage is object)
                 Main.snapItOverlayWindow.tempImage.Dispose();
             end = watch.ElapsedMilliseconds;
             if (resultCount == 0)
@@ -1073,7 +1077,7 @@ namespace WFInfo
                     i++;
                 }
             }
-            rowHeight = rowHeight / Math.Max(rows.Count, 1);
+            rowHeight /= Math.Max(rows.Count, 1);
 
             //combine adjacent rows into one block of text
             i = 0;
@@ -1220,7 +1224,7 @@ namespace WFInfo
             catch (Exception ex)
             {
                 // Log OCR extraction failure for debugging
-                Main.AddLog($"OCR extraction failed in GetTextWithBoundsFromImage: {ex.Message}\n{ex.ToString()}");
+                Main.AddLog($"OCR extraction failed in GetTextWithBoundsFromImage: {ex.Message}\n{ex}");
             }
             finally
             {
@@ -1271,8 +1275,7 @@ namespace WFInfo
                     }
                     
                     // Fallback to single-threaded for large layouts to avoid threading issues
-                    zones = new List<Tuple<Bitmap, Rectangle>>();
-                    zones.Add( Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height) ) );
+                    zones = new List<Tuple<Bitmap, Rectangle>> { Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height)) };
                     snapThreads = 1;
                     // Keep the zones but process them single-threaded
                 }
@@ -1287,8 +1290,7 @@ namespace WFInfo
                 }
             } else
             {
-                zones = new List<Tuple<Bitmap, Rectangle>>();
-                zones.Add( Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height) ) );
+                zones = new List<Tuple<Bitmap, Rectangle>> { Tuple.Create(filteredImageClean, new Rectangle(0, 0, filteredImageClean.Width, filteredImageClean.Height)) };
                 snapThreads = 1;
             }
 
@@ -1343,7 +1345,7 @@ namespace WFInfo
                     Rectangle bounds = wordResult.Item2;
                     
                     // Split line into individual words for proper filtering
-                    var words = currentLine.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    var words = currentLine.Split(WordSplitChars, StringSplitOptions.RemoveEmptyEntries);
                     var filteredWords = new List<string>();
                     
                     // Filter individual words as intended
@@ -1498,8 +1500,7 @@ namespace WFInfo
 
                         Rectangle combinedBounds = new Rectangle(left, top, right - left, bot - top);
                                     
-                        List<InventoryItem> tempList = new List<InventoryItem>(foundItems[i].Item1);
-                        tempList.Add(new InventoryItem(currentWord, paddedBounds));
+                        List<InventoryItem> tempList = new List<InventoryItem>(foundItems[i].Item1) { new InventoryItem(currentWord, paddedBounds) };
                         foundItems.RemoveAt(i);
                         foundItems.Add(Tuple.Create(tempList, combinedBounds));
                     }
@@ -1510,12 +1511,9 @@ namespace WFInfo
             foreach( Tuple<List<InventoryItem>, Rectangle> itemGroup in foundItems)
             {
                 //Sort order for component words to appear in. If large height difference, sort vertically. If small height difference, sort horizontally
-                itemGroup.Item1.Sort( (InventoryItem i1, InventoryItem i2) => 
-                {
-                    return Math.Abs(i1.Bounding.Top - i2.Bounding.Top) > i1.Bounding.Height/8
-                        ? i1.Bounding.Top - i2.Bounding.Top
-                        : i1.Bounding.Left - i2.Bounding.Left;
-                });
+                itemGroup.Item1.Sort( (i1, i2) => Math.Abs(i1.Bounding.Top - i2.Bounding.Top) > i1.Bounding.Height/8
+                    ? i1.Bounding.Top - i2.Bounding.Top
+                    : i1.Bounding.Left - i2.Bounding.Left);
 
                 //Combine into item name
                 String name = "";
@@ -1690,8 +1688,8 @@ namespace WFInfo
                                 sumBlack++;
                             }
                         }
-                        xCenter = xCenter / sumBlack;
-                        yCenter = yCenter / sumBlack;
+                        xCenter /= sumBlack;
+                        yCenter /= sumBlack;
 
 
                         if (sumBlack < Height ) continue; //not enough black = ignore and move on
@@ -1776,8 +1774,8 @@ namespace WFInfo
 
                         if (sumBlack < Height) continue; //not enough black = ignore and move on
 
-                        xCenterNew = xCenterNew / sumBlack;
-                        yCenterNew = yCenterNew / sumBlack;
+                        xCenterNew /= sumBlack;
+                        yCenterNew /= sumBlack;
 
                         //Search slight bit up and down to get well within the long line of the checkmark
                         int lowest = yCenterNew + 1000;
@@ -1844,9 +1842,9 @@ namespace WFInfo
                                 && LockedBitmapBytes[index + 3] == LockedBitmapBytes[index + 3 - 4] && LockedBitmapBytes[index + 3] == LockedBitmapBytes[index + 3 + 4]) 
                             {
                                 Color color = Color.FromArgb(LockedBitmapBytes[index + 3], LockedBitmapBytes[index + 2], LockedBitmapBytes[index + 1], LockedBitmapBytes[index]);
-                                if (colorHits.ContainsKey(color))
+                                if (colorHits.TryGetValue(color, out int count))
                                 {
-                                    colorHits[color]++;
+                                    colorHits[color] = count + 1;
                                 } else
                                 {
                                     colorHits[color] = 1;
@@ -1879,10 +1877,10 @@ namespace WFInfo
 
                         //recalculate centers to be relative to whole image
                         rightmost = rightmost + Left + 1;
-                        xCenter = xCenter + Left;
-                        yCenter = yCenter + Top;
-                        xCenterNew = xCenterNew + Left;
-                        yCenterNew = yCenterNew + Top;
+                        xCenter += Left;
+                        yCenter += Top;
+                        xCenterNew += Left;
+                        yCenterNew += Top;
                         Debug.WriteLine("Old Center" + xCenter + ", " + yCenter);
                         Debug.WriteLine("New Center" + xCenterNew + ", " + yCenterNew);
                         
@@ -2022,7 +2020,7 @@ namespace WFInfo
                 if (proximity < 3 && proximity < primeProximity && part.Name.Length > 6 && name.Contains("Prime"))
                 {
                     //mark as mastered
-                    string[] nameParts = name.Split(new string[] { "Prime" }, 2, StringSplitOptions.None);
+                    string[] nameParts = name.Split(PrimeSplitChars, 2, StringSplitOptions.None);
                     string primeName = nameParts[0] + "Prime";
 
                     if (Main.dataBase.equipmentData[primeName].ToObject<JObject>().TryGetValue("mastered", out _))
@@ -2063,7 +2061,7 @@ namespace WFInfo
         /// <param name="y">Pixel Y coordinate</param>
         /// <param name="lowSensitivity">Use lower threshold, mainly for finding black pixels instead</param>
         /// <returns>if pixel is above threshold for "white"</returns>
-        private static bool probeProfilePixel(byte[] byteArr, int width, int x, int y, bool lowSensitivity)
+        private static bool ProbeProfilePixel(byte[] byteArr, int width, int x, int y, bool lowSensitivity)
         {
             int A = byteArr[(x + y * width) * 4 + 3]; //4 bytes for ARGB, in order BGRA in the array
             int R = byteArr[(x + y * width) * 4 + 2];
@@ -2110,7 +2108,7 @@ namespace WFInfo
                 {
                     for (int x = 0; x < imgWidth; x+= probe_interval) //probe every few pixels for performance
                     {
-                        if (probeProfilePixel(LockedBitmapBytes, imgWidth, x, y, false) )
+                        if (ProbeProfilePixel(LockedBitmapBytes, imgWidth, x, y, false) )
                         {
                             //find left edge and check that the coloured area is at least as big as probe_interval
                             int leftEdge = -1;
@@ -2120,7 +2118,7 @@ namespace WFInfo
                             for (int tempX = Math.Max(x - probe_interval, 0); tempX < Math.Min(x + probe_interval, imgWidth) ; tempX++)
                             {
                                 areaWidth++;
-                                if ( probeProfilePixel(LockedBitmapBytes, imgWidth, tempX, y, false))
+                                if ( ProbeProfilePixel(LockedBitmapBytes, imgWidth, tempX, y, false))
                                 {
                                     hits++;
                                     leftEdge = (leftEdge == -1 ? tempX : leftEdge);
@@ -2136,8 +2134,8 @@ namespace WFInfo
                             //find where the line ends
                             int rightEdge = leftEdge;
                             while (rightEdge+2 < imgWidth && 
-                                ( probeProfilePixel(LockedBitmapBytes, imgWidth, rightEdge+1, y, false) 
-                                || probeProfilePixel(LockedBitmapBytes, imgWidth, rightEdge + 2, y, false)))
+                                ( ProbeProfilePixel(LockedBitmapBytes, imgWidth, rightEdge+1, y, false) 
+                                || ProbeProfilePixel(LockedBitmapBytes, imgWidth, rightEdge + 2, y, false)))
                             {
                                 rightEdge++;
                             }
@@ -2163,8 +2161,7 @@ namespace WFInfo
                             //find bottom edge and hit ratio of all rows
                             int topEdge = y;
                             int bottomEdge = y;
-                            List<double> hitRatios = new List<double>();
-                            hitRatios.Add(1);
+                            List<double> hitRatios = new List<double> { 1 };
                             do
                             {
                                 int rightMostHit = 0;
@@ -2173,7 +2170,7 @@ namespace WFInfo
                                 bottomEdge++;
                                 for (int i = leftEdge; i < rightEdge; i++)
                                 {
-                                    if (probeProfilePixel(LockedBitmapBytes, imgWidth, i, bottomEdge, false))
+                                    if (ProbeProfilePixel(LockedBitmapBytes, imgWidth, i, bottomEdge, false))
                                     {
                                         hits++;
                                         rightMostHit = i;
@@ -2257,7 +2254,7 @@ namespace WFInfo
                                 bool hitSomething = false;
                                 for (int j = 0; j < cloneRect.Height; j++)
                                 {
-                                    if (!probeProfilePixel(LockedBitmapBytes, imgWidth, cloneRect.X + i, cloneRect.Y + j, true))
+                                    if (!ProbeProfilePixel(LockedBitmapBytes, imgWidth, cloneRect.X + i, cloneRect.Y + j, true))
                                     {
                                         cloneBitmap.SetPixel(i + offset, j, Color.Black);
                                         ProfileImage.SetPixel(cloneRect.X + i, cloneRect.Y + j , Color.Red);
@@ -2517,7 +2514,7 @@ namespace WFInfo
             Main.AddLog("Grabbed images " + (end - start) + "ms");
             start = watch.ElapsedMilliseconds;
             
-            active = GetThemeWeighted(out var closest, fullScreen);
+            active = GetThemeWeighted(out var _, fullScreen);
 
             end = watch.ElapsedMilliseconds;
             Main.AddLog("Got theme " + (end - start) + "ms");
@@ -2852,7 +2849,7 @@ namespace WFInfo
                 }
                 catch (Exception e)
                 {
-                    Main.AddLog($"OCR extraction failed in GetTextFromImage: {e.Message}\n{e.ToString()}");
+                    Main.AddLog($"OCR extraction failed in GetTextFromImage: {e.Message}\n{e}");
                     modeResults[mode] = "";
                     modeScores[mode] = 0;
                 }
@@ -2893,7 +2890,7 @@ namespace WFInfo
             }
             
             // Line count analysis
-            string[] lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = text.Split(NewlineSplitChars, StringSplitOptions.RemoveEmptyEntries);
             score += Math.Min(lines.Length * 5, 25);
             
             // Mode-specific scoring
@@ -3217,7 +3214,7 @@ namespace WFInfo
             Main.snapItOverlayWindow.Focus();
         }
 
-        public static async Task updateEngineAsync()
+        public static async Task UpdateEngineAsync()
         {
             await ReloadSemaphore.WaitAsync().ConfigureAwait(false);
             try {
@@ -3322,7 +3319,7 @@ namespace WFInfo
                 if (!PartNameValid(part.Name))
                     continue;
 
-                string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool multipleLowest);
+                string name = Main.dataBase.GetPartName(part.Name, out int levenDist, false, out bool _);
                 if (levenDist == 9999 || levenDist > GetMaxAllowedLevenshteinDistance(part.Name.Length) || string.IsNullOrEmpty(name))
                     continue;
 

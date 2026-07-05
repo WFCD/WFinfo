@@ -34,9 +34,6 @@
 
     <Grid Cursor="Cross" x:Name="LayoutRoot">
         <Canvas x:Name="canvas">
-            <Border Canvas.Bottom="10" HorizontalAlignment="Center" Background="#80000000" CornerRadius="8" Padding="20,8">
-                <TextBlock TextWrapping="Wrap" Text="Press any key to exit" FontSize="48" Foreground="White" TextAlignment="Center"/>
-            </Border>
             <Rectangle Fill="#30FFFFFF" StrokeDashArray="5"
                 Stroke="#FF000000" Visibility="Hidden"
                 x:Name="rectangleBlack" Width="50" Height="50"
@@ -50,5 +47,9 @@
                 RadiusX="0" RadiusY="0"
                 Canvas.Left="0" Canvas.Top="0"/>
         </Canvas>
+        <!-- Centered exit prompt: placed in Grid so HorizontalAlignment works -->
+        <Border VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10" Background="#80000000" CornerRadius="8" Padding="20,8" IsHitTestVisible="False">
+            <TextBlock TextWrapping="Wrap" Text="Press any key to exit" FontSize="48" Foreground="White" TextAlignment="Center"/>
+        </Border>
     </Grid>
 </Window>

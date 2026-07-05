@@ -45,21 +45,25 @@ namespace WFInfo
 
         private void ResetRectangle()
         {
-            rectangleWhite.Width = 0;
-            rectangleWhite.Height = 0;
-            rectangleWhite.RenderTransform = new TranslateTransform(0, 0);
-            rectangleWhite.Visibility = Visibility.Hidden;
-            rectangleBlack.Width = 0;
-            rectangleBlack.Height = 0;
-            rectangleBlack.RenderTransform = new TranslateTransform(0, 0);
-            rectangleBlack.Visibility = Visibility.Hidden;
+            SetRectangles(0, 0, new TranslateTransform(0, 0), Visibility.Hidden);
+        }
+
+        private void SetRectangles(double width, double height, TranslateTransform transform, Visibility visibility)
+        {
+            rectangleWhite.Width = width;
+            rectangleWhite.Height = height;
+            rectangleWhite.RenderTransform = transform;
+            rectangleWhite.Visibility = visibility;
+            rectangleBlack.Width = width;
+            rectangleBlack.Height = height;
+            rectangleBlack.RenderTransform = transform;
+            rectangleBlack.Visibility = visibility;
         }
 
         private void canvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             startDrag = e.GetPosition(canvas);
-            rectangleWhite.Visibility = Visibility.Visible;
-            rectangleBlack.Visibility = Visibility.Visible;
+            SetRectangles(0, 0, new TranslateTransform(0, 0), Visibility.Visible);
             Canvas.SetZIndex(rectangleWhite, canvas.Children.Count);
             Canvas.SetZIndex(rectangleBlack, canvas.Children.Count - 1);
             if (!canvas.IsMouseCaptured)
@@ -86,7 +90,7 @@ namespace WFInfo
             if (rectangleWhite.Width < 10 || rectangleWhite.Height < 10)
             {
                 Main.AddLog("User selected an area too small");
-                Main.StatusUpdate("Please slecet a larger area to scan", 2);
+                Main.StatusUpdate("Please select a larger area to scan", 2);
                 return;
             }
             Bitmap cutout = tempImage.Clone(new Rectangle((int)(topLeft.X * _window.DpiScaling), (int)(topLeft.Y * _window.DpiScaling), (int)(rectangleWhite.Width * _window.DpiScaling), (int)(rectangleWhite.Height * _window.DpiScaling)), System.Drawing.Imaging.PixelFormat.DontCare);
@@ -104,19 +108,10 @@ namespace WFInfo
                 double x = startDrag.X < currentPoint.X ? startDrag.X : currentPoint.X;
                 double y = startDrag.Y < currentPoint.Y ? startDrag.Y : currentPoint.Y;
 
-                if (rectangleWhite.Visibility == Visibility.Hidden)
-                {
-                    rectangleWhite.Visibility = Visibility.Visible;
-                    rectangleBlack.Visibility = Visibility.Visible;
-                }
-
                 topLeft = new System.Drawing.Point((int)x, (int)y);
-                rectangleWhite.RenderTransform = new TranslateTransform(x, y);
-                rectangleBlack.RenderTransform = new TranslateTransform(x, y);
-                rectangleWhite.Width = Math.Abs(e.GetPosition(canvas).X - startDrag.X);
-                rectangleWhite.Height = Math.Abs(e.GetPosition(canvas).Y - startDrag.Y);
-                rectangleBlack.Width = Math.Abs(e.GetPosition(canvas).X - startDrag.X);
-                rectangleBlack.Height = Math.Abs(e.GetPosition(canvas).Y - startDrag.Y);
+                double w = Math.Abs(currentPoint.X - startDrag.X);
+                double h = Math.Abs(currentPoint.Y - startDrag.Y);
+                SetRectangles(w, h, new TranslateTransform(x, y), Visibility.Visible);
             }
         }
     }
