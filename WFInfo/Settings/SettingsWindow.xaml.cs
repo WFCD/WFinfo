@@ -196,13 +196,12 @@ namespace WFInfo.Settings
             _viewModel.Locale = selectedLocale;
             Save();
 
-            _ = OCR.UpdateEngineAsync();
-
-            Task.Run(async() =>
+            Task.Run(async () =>
             {
                 try
                 {
-                    await Main.dataBase.ReloadItems();
+                    await OCR.UpdateEngineAsync().ConfigureAwait(false);
+                    await Main.dataBase.ReloadItems().ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

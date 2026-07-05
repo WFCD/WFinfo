@@ -700,11 +700,6 @@ namespace WFInfo
                     }
                 }
 
-                string cfgPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
-                    + @"\Warframe\EE.cfg";
-                if (!File.Exists(cfgPath)) return;
-                if (!File.ReadAllText(cfgPath).Contains("Graphics.ColorBlindCompensation")) return;
-
                 colorblindWarning = new ColorblindWarning();
             }
             catch

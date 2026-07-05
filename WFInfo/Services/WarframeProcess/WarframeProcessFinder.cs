@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using WFInfo.Settings;
@@ -55,7 +56,14 @@ namespace WFInfo.Services.WarframeProcess
 
                     if (!GameIsStreamed)
                     {
-                        Main.RunOnUIThread(() => Main.SpawnColorblindWarning());
+                        Task.Run(() =>
+                        {
+                            string cfgPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+                                + @"\Warframe\EE.cfg";
+                            if (!File.Exists(cfgPath)) return;
+                            if (!File.ReadAllText(cfgPath).Contains("Graphics.ColorBlindCompensation")) return;
+                            Main.RunOnUIThread(() => Main.SpawnColorblindWarning());
+                        });
                     }
                 }
 
