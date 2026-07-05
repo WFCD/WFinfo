@@ -44,7 +44,7 @@ namespace WFInfo
             try
             {
 
-                var fullZipPath = zipPath + @"\WFInfoError_" + closest.ToString("yyyy-MM-dd_HH-mm-ssff") + ".zip";
+                var fullZipPath = zipPath + @"\WFInfoError_" + closest.ToString("yyyy-MM-dd_HH-mm-ssffffff") + ".zip";
                 using (ZipFile zip = new ZipFile())
                 {
                     // Priority files: debug.log and settings JSON files

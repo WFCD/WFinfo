@@ -114,6 +114,7 @@ namespace WFInfo
             if (!createdData)
             {
                 Main.AddLog("The DBWIN_DATA_READY event exists.");
+                timer.Dispose();
                 return;
             }
 

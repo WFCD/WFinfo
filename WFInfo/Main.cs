@@ -42,6 +42,7 @@ namespace WFInfo
         public static ErrorDialogue popup;
         public static FullscreenReminder fullscreenpopup;
         public static GFNWarning gfnWarning;
+        public static ColorblindWarning colorblindWarning;
         public static SnapItOverlay snapItOverlayWindow;
         public static SearchIt searchBox;
         public static Login login;
@@ -67,6 +68,7 @@ namespace WFInfo
         private static bool UserAway { get; set; }
         private static string LastMarketStatus { get; set; } = "invisible";
         private static string LastMarketStatusB4AFK { get; set; } = "invisible";
+        public static string LastStatusMessage { get; private set; }
 
         // Main service provider
         // TODO: Move to CustomEntryPoint
@@ -77,6 +79,9 @@ namespace WFInfo
         private IProcessFinder _process;
         private IWindowInfoService _windowInfo;
         private IHDRDetectorService _detector;
+
+        // Resolved via DI
+        private ITesseractService _tesseractService;
 
         // See comment on Ocr.Init for explanation
         private GdiScreenshotService _gdiScreenshot;
@@ -162,6 +167,7 @@ namespace WFInfo
             services.AddProcessFinder();
             services.AddWin32WindowInfo();
             services.AddHDRDetection();
+            services.AddSingleton<ITesseractService, TesseractService>();
 
             services.AddGDIScreenshots();
 
@@ -182,6 +188,7 @@ namespace WFInfo
             _windowInfo = services.GetRequiredService<IWindowInfoService>();
             _detector = services.GetRequiredService<IHDRDetectorService>();
 
+            _tesseractService = services.GetRequiredService<ITesseractService>();
             dataBase = new Data(ApplicationSettings.GlobalReadonlySettings, _process, _windowInfo);
             SettingsViewModel.Instance.InjectServices(_windowInfo, _process);
             snapItOverlayWindow = new SnapItOverlay(_windowInfo);
@@ -217,7 +224,7 @@ namespace WFInfo
 
                 // Too many dependencies?
                 StatusUpdate("Initializing OCR engine...", 0);
-                OCR.Init(new TesseractService(), new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings, _windowInfo, _detector, _gdiScreenshot, _windowsScreenshot);
+                OCR.Init(_tesseractService, new SoundPlayer(), ApplicationSettings.GlobalReadonlySettings, _windowInfo, _detector, _gdiScreenshot, _windowsScreenshot, _process);
 
                 StatusUpdate("Updating Databases...", 0);
 
@@ -506,6 +513,7 @@ namespace WFInfo
         /// <param name="severity">0 = normal, 1 = red, 2 = orange, 3 =yellow</param>
         public static void StatusUpdate(string message, int severity)
         {
+            LastStatusMessage = message;
             RunOnUIThread(mw => mw.ChangeStatus(message, severity));
         }
 
@@ -675,6 +683,22 @@ namespace WFInfo
             gfnWarning = new GFNWarning();
         }
 
+        public static void SpawnColorblindWarning()
+        {
+            try
+            {
+                string cfgPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+                    + @"\Warframe\EE.cfg";
+                if (!File.Exists(cfgPath)) return;
+                if (!File.ReadAllText(cfgPath).Contains("Graphics.ColorBlindCompensation")) return;
+
+                colorblindWarning = new ColorblindWarning();
+            }
+            catch
+            {
+                // swallow — best-effort check
+            }
+        }
 
         public enum ScreenshotType 
         {

@@ -1,0 +1,29 @@
+{
+  "skill_name": "tesseract-net",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I just cloned the tesseract.NET repo at /c/Users/DeathBox/Desktop/coding/tesseract and want to build the library targeting netstandard2.0 in Debug mode. What command do I run?",
+      "expected_output": "Provide the correct dotnet build command with all relevant flags",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I keep getting DllNotFoundException for tesseract50.dll when I run my app. How do I debug this? I need to know where the library loader looks for DLLs.",
+      "expected_output": "Explain the LibraryLoader search path order, check DLL bitness matches process, and verify DLLs exist in output with CopyToOutputDirectory=PreserveNewest",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I need to extract text and confidence scores word-by-word from an image using the Tesseract.NET wrapper. Write me a C# code snippet.",
+      "expected_output": "Provide correct code using TesseractEngine, Pix.LoadFromFile, page.GetIterator(), iterating with PageIteratorLevel.Word and using GetText/GetConfidence/TryGetBoundingBox",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "I just installed Tesseract.NET via NuGet but the engine throws an exception 'Failed to initialise tesseract engine'. I have the eng.traineddata in my project output. What else could be wrong?",
+      "expected_output": "Check datapath accuracy, engine mode vs traineddata compatibility, process bitness vs DLL bitness, and try EngineMode.TesseractOnly for legacy data",
+      "files": []
+    }
+  ]
+}

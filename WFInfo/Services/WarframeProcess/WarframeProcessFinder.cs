@@ -52,6 +52,11 @@ namespace WFInfo.Services.WarframeProcess
                     {
                         Main.dataBase.EnableLogCapture(); 
                     }
+
+                    if (!GameIsStreamed)
+                    {
+                        Main.RunOnUIThread(() => Main.SpawnColorblindWarning());
+                    }
                 }
 
                 // Invoking action
@@ -147,6 +152,11 @@ namespace WFInfo.Services.WarframeProcess
 
                         Main.AddLog($"Failed to get Warframe process due to: {e.Message}");
                         Main.StatusUpdate("Restart Warframe without admin privileges, or WFInfo with admin privileges", 1);
+                    }
+
+                    if (identified_process != null && !wasRunning && Main.LastStatusMessage == "Unable to Detect Warframe Process")
+                    {
+                        Main.StatusUpdate("Warframe Process Detected", 0);
                     }
                 }
                 else

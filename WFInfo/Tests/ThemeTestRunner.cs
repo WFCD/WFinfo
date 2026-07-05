@@ -41,7 +41,7 @@ namespace WFInfo.Tests
             ["pom_2"] = WFtheme.POM_2,
         };
 
-        public static int Run(string folderPath)
+        public static int Run(string folderPath, double overrideUiScale = -1)
         {
             var log = new StringBuilder();
 
@@ -65,6 +65,9 @@ namespace WFInfo.Tests
                 var windowService = new SettableWindowService();
                 OCR.InitThemeTest(ApplicationSettings.GlobalReadonlySettings, windowService);
 
+                if (overrideUiScale > 0)
+                    OCR.uiScaling = overrideUiScale;
+
                 var files = Directory.GetFiles(folderPath, "*.png").OrderBy(f => f).ToArray();
                 if (files.Length == 0)
                 {
@@ -83,8 +86,8 @@ namespace WFInfo.Tests
                 {
                     string fileName = Path.GetFileNameWithoutExtension(file);
 
-                    WFtheme expected = ParseThemeFromFilename(fileName);
-                    if (expected == WFtheme.UNKNOWN)
+                    WFtheme? expected = ParseThemeFromFilename(fileName);
+                    if (expected == null)
                     {
                         log.AppendLine($"SKIP: {fileName}{Path.GetExtension(file)} - no theme name found");
                         skipped++;
@@ -100,55 +103,25 @@ namespace WFInfo.Tests
 
                             if (detected == expected)
                             {
-                                double sc = windowService.ScreenScaling * Math.Max(OCR.uiScaling, 1.0);
-                                int prbX = (int)(90 * sc);
-                                int prbEndX = Math.Min((int)(110 * sc), image.Width);
-                                int prbY = (int)(65 * sc);
-                                int prbEndY = Math.Min((int)(80 * sc), image.Height);
-                                int midY = (prbY + prbEndY) / 2;
-                                int tR = 0, tG = 0, tB = 0, tCnt = 0, bR = 0, bG = 0, bB = 0, bCnt = 0;
-                                for (int py = prbY; py < prbEndY; py++)
-                                    for (int px = prbX; px < prbEndX; px++)
-                                    {
-                                        var c = image.GetPixel(px, py);
-                                        if (py < midY) { tR += c.R; tG += c.G; tB += c.B; tCnt++; }
-                                        else { bR += c.R; bG += c.G; bB += c.B; bCnt++; }
-                                    }
+                                var probe = OCR.GetProbeColors(image);
                                 log.AppendLine($"PASS: {fileName}{Path.GetExtension(file)} -> {detected} [{image.Width}x{image.Height}]");
-                                log.AppendLine($"     DPIxUI: {sc:F2} (dpi={windowService.ScreenScaling:F2} ui={OCR.uiScaling:F2})  Top RGB({tR / tCnt},{tG / tCnt},{tB / tCnt})  Bot RGB({bR / bCnt},{bG / bCnt},{bB / bCnt})");
+                                log.AppendLine($"     Probe: ({probe.x},{probe.y1}-{probe.y2})  Top RGB({probe.top.R},{probe.top.G},{probe.top.B})  Bot RGB({probe.bot.R},{probe.bot.G},{probe.bot.B})  scale={windowService.ScreenScaling:F2}");
                                 passed++;
                             }
                             else
                             {
                                 var breakdown = OCR.GetThemeWeightBreakdown(image);
                                 var topCands = GetTopCandidates(breakdown, 5);
-                                double sc = windowService.ScreenScaling * Math.Max(OCR.uiScaling, 1.0);
-                                double dpiSc = windowService.ScreenScaling;
-                                int prbX = (int)(90 * sc);
-                                int prbEndX = Math.Min((int)(110 * sc), image.Width);
-                                int prbY = (int)(65 * sc);
-                                int prbEndY = Math.Min((int)(80 * sc), image.Height);
-
+                                var probe = OCR.GetProbeColors(image);
                                 log.AppendLine($"FAIL: {fileName}{Path.GetExtension(file)}");
                                 log.AppendLine($"     Expected: {expected}");
                                 log.AppendLine($"     Detected: {detected} (weight={thresh:F2})");
-                                log.AppendLine($"     Size: {image.Width}x{image.Height}, DPIxUI: {dpiSc:F2} (dpi={windowService.ScreenScaling:F2} ui={OCR.uiScaling:F2})");
-                                log.AppendLine($"     Probe: ({prbX},{prbY})-({prbEndX},{prbEndY}) = {(prbEndX - prbX) * (prbEndY - prbY)}px");
-                                int midY = (prbY + prbEndY) / 2;
-                                int tR = 0, tG = 0, tB = 0, tCnt = 0, bR = 0, bG = 0, bB = 0, bCnt = 0;
-                                for (int py = prbY; py < prbEndY; py++)
-                                    for (int px = prbX; px < prbEndX; px++)
-                                    {
-                                        var c = image.GetPixel(px, py);
-                                        if (py < midY) { tR += c.R; tG += c.G; tB += c.B; tCnt++; }
-                                        else { bR += c.R; bG += c.G; bB += c.B; bCnt++; }
-                                    }
-                                log.AppendLine($"     Top-half avg: RGB({tR / tCnt},{tG / tCnt},{tB / tCnt})");
-                                log.AppendLine($"     Bot-half avg: RGB({bR / bCnt},{bG / bCnt},{bB / bCnt})");
+                                log.AppendLine($"     Probe: ({probe.x},{probe.y1}-{probe.y2})  Top RGB({probe.top.R},{probe.top.G},{probe.top.B})  Bot RGB({probe.bot.R},{probe.bot.G},{probe.bot.B})  scale={windowService.ScreenScaling:F2}");
+                                log.AppendLine($"     Size: {image.Width}x{image.Height}, dpi={windowService.ScreenScaling:F2}");
                                 log.AppendLine("     Top-5 candidates:");
                                 for (int i = 0; i < topCands.Length; i++)
                                     log.AppendLine($"       {i + 1}. {(WFtheme)topCands[i].Index} weight={topCands[i].Weight:F2}");
-                                failures.Add($"{fileName}: expected={expected} detected={detected} weight={thresh:F2} dpi={windowService.ScreenScaling:F2} ui={OCR.uiScaling:F2}");
+                                failures.Add($"{fileName}: expected={expected} detected={detected} weight={thresh:F2} probe=({probe.top.R},{probe.top.G},{probe.top.B})/({probe.bot.R},{probe.bot.G},{probe.bot.B})");
                                 failed++;
                             }
                         }
@@ -213,14 +186,14 @@ namespace WFInfo.Tests
             Console.SetError(new StreamWriter(Console.OpenStandardError()) { AutoFlush = true });
         }
 
-        private static WFtheme ParseThemeFromFilename(string name)
+        private static WFtheme? ParseThemeFromFilename(string name)
         {
             foreach (var kvp in ThemeNames.OrderByDescending(k => k.Key.Length))
             {
                 if (name.IndexOf(kvp.Key, StringComparison.OrdinalIgnoreCase) >= 0)
                     return kvp.Value;
             }
-            return WFtheme.UNKNOWN;
+            return null;
         }
 
         private static (int Index, double Weight)[] GetTopCandidates(double[] weights, int count)

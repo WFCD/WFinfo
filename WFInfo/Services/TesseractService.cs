@@ -75,12 +75,94 @@ namespace WFInfo
         {
             Directory.CreateDirectory(NormalDataPath);
             DataPath = NormalDataPath;
+        }
+
+        private TesseractEngine CreateEngine()
+        {
+            var engine = new TesseractEngine(DataPath, Locale, EngineMode.LstmOnly);
+            try
+            {
+                // Apply universal OCR improvements for all languages
+                engine.SetVariable("tessedit_zero_rejection", "false");
+                engine.SetVariable("tessedit_write_rep_codes", "false");
+                engine.SetVariable("tessedit_write_unlv", "false");
+                engine.SetVariable("tessedit_fix_fuzzy_spaces", "true");
+                engine.SetVariable("tessedit_prefer_joined_broken", "false");
+                engine.SetVariable("preserve_interword_spaces", "1");
+                engine.SetVariable("language_model_penalty_case_ok", "0.1");
+                engine.SetVariable("language_model_penalty_case_bad", "0.4");
+                engine.SetVariable("thresholding_method", "0");
+
+                // CJK-specific optimizations
+                if (Locale == "ko" || Locale == "zh-hans" || Locale == "zh-hant")
+                {
+                    engine.SetVariable("textord_noise_normratio", "2.0");
+                    engine.SetVariable("chop_enable", "0");
+                    engine.SetVariable("use_new_state_cost", "1");
+                    engine.SetVariable("load_system_dawg", "true");
+                    engine.SetVariable("load_freq_dawg", "true");
+                    engine.SetVariable("language_model_penalty_non_dict_word", "0");
+                    engine.SetVariable("user_defined_dpi", "300");
+                    engine.SetVariable("segment_nonalphabetic_script", "1");
+                }
+                else if (Locale == "en")
+                {
+                    engine.SetVariable("load_system_dawg", "false");
+                    engine.SetVariable("load_freq_dawg", "false");
+                    engine.SetVariable("user_defined_dpi", "300");
+                    engine.SetVariable("textord_noise_normratio", "1.0");
+                }
+
+                // Character whitelist from language processor
+                string whitelist;
+                try
+                {
+                    var processor = LanguageProcessorFactory.GetProcessor(Locale);
+                    whitelist = processor?.CharacterWhitelist ?? DefaultWhitelist;
+                }
+                catch (InvalidOperationException)
+                {
+                    whitelist = DefaultWhitelist;
+                }
+                engine.SetVariable("tessedit_char_whitelist", whitelist);
+
+                return engine;
+            }
+            catch (Exception)
+            {
+                engine.Dispose();
+                throw;
+            }
+        }
+
+        private TesseractEngine CreateNumbersOnlyEngine()
+        {
+            var engine = new TesseractEngine(DataPath, Locale, EngineMode.LstmOnly);
+            try
+            {
+                engine.SetVariable("tessedit_char_whitelist", NumbersOnlyWhitelist);
+                engine.SetVariable("tessedit_zero_rejection", "false");
+                engine.SetVariable("preserve_interword_spaces", "0");
+                return engine;
+            }
+            catch (Exception)
+            {
+                engine.Dispose();
+                throw;
+            }
+        }
+        
+        public void Init()
+        {
+            // Dispose existing engines before re-creating
+            DisposeEngines();
+
             getLocaleTessdata();
             try
             {
                 FirstEngine = CreateEngine();
             }
-            catch (TesseractException) 
+            catch (TesseractException)
             {
                 // Tesseract doesn't like characters from non-english languages in the file path to tessdata.
                 // Since we store those in %appdata% and that contains the username, we sometimes get issues with that.
@@ -92,143 +174,75 @@ namespace WFInfo
                 // Delete any files that exist within fallback location, but not in the normal location
                 FileInfo[] fallbackExtraFiles = fallbackDir.GetFiles().Where(fallbackFile => normalDirFiles.All(normalFile => normalFile.Name != fallbackFile.Name)).ToArray();
                 foreach (FileInfo extraFile in fallbackExtraFiles)
-                {
                     extraFile.Delete();
-                }
 
                 // Copy files from normal location to fallback location
                 foreach (FileInfo file in normalDirFiles)
                 {
                     string newFullName = Path.Combine(fallbackDir.FullName, file.Name);
-
-                    // if file is missing or is different, copy it over (with overwrite)
-                    if (!File.Exists(newFullName) 
-                        ||  CustomEntrypoint.GetMD5hash(newFullName) != CustomEntrypoint.GetMD5hash(file.FullName))
+                    if (!File.Exists(newFullName)
+                        || CustomEntrypoint.GetMD5hash(newFullName) != CustomEntrypoint.GetMD5hash(file.FullName))
                     {
                         file.CopyTo(newFullName, true);
                     }
                 }
 
                 DataPath = FallbackDataPath;
-
                 FirstEngine = CreateEngine();
             }
-            SecondEngine = CreateEngine();
-            NumbersOnlyEngine = CreateNumbersOnlyEngine();
-        }
-
-        private TesseractEngine CreateEngine()
-        {
-            //Main.AddLog($"Creating Tesseract engine for locale: '{Locale}'");
-            var engine = new TesseractEngine(DataPath, Locale);
-
-            // Apply universal OCR improvements for all languages
-            
-            // This causes crash
-            //engine.SetVariable("tessedit_reject_mode", "1"); // Reject questionable characters
-            //engine.SetVariable("textord_heavy_nr", "1");  // Enable heavy noise reduction
-            
-            engine.SetVariable("tessedit_zero_rejection", "false"); // Don't force recognition of uncertain characters
-            engine.SetVariable("tessedit_write_rep_codes", "false"); // Don't write rejection codes
-            engine.SetVariable("tessedit_write_unlv", "false"); // Don't write UNLV format
-            engine.SetVariable("tessedit_fix_fuzzy_spaces", "true"); // Fix spacing issues
-            engine.SetVariable("tessedit_prefer_joined_broken", "false"); // Don't join broken characters
-            // Dictionary and spacing improvements for UI text
-            engine.SetVariable("preserve_interword_spaces", "1"); // Preserve spacing for stable output
-                     
-            // Language model penalties that work across all languages
-            engine.SetVariable("language_model_penalty_case_ok", "0.1"); // Small penalty for case mismatches
-            engine.SetVariable("language_model_penalty_case_bad", "0.4"); // Higher penalty for bad case
-            
-            // Thresholding parameters for better binarization (Tesseract 5+)
-            engine.SetVariable("thresholding_method", "0"); // Use default thresholding
-            
-            // Apply language-specific optimizations
-            // CJK languages (Korean, Simplified Chinese, Traditional Chinese) share similar OCR challenges
-            if (Locale == "ko" || Locale == "zh-hans" || Locale == "zh-hant")
-            {
-                // CJK-specific OCR improvements for better character recognition
-                engine.SetVariable("textord_noise_normratio", "2.0"); // More aggressive noise reduction for CJK
-                engine.SetVariable("chop_enable", "0"); // Disable character chopping for CJK characters
-                engine.SetVariable("use_new_state_cost", "1"); // Use new state cost for better CJK recognition
-                engine.SetVariable("load_system_dawg", "true"); // Enable system dictionary for better text segmentation
-                engine.SetVariable("load_freq_dawg", "true"); // Enable frequency dictionary for better text segmentation
-                engine.SetVariable("language_model_penalty_non_dict_word", "0"); // Don't penalize non-dictionary words (item names aren't dictionary words)
-                engine.SetVariable("user_defined_dpi", "300"); // Improve recognition for scaled/filtered UI text
-                engine.SetVariable("segment_nonalphabetic_script", "1"); // Better segmentation for non-alphabetic scripts
-            }
-            else if (Locale == "en")
-            {
-                // Disable dictionaries so UI text isn't corrected to dictionary words
-                engine.SetVariable("load_system_dawg", "false");
-                engine.SetVariable("load_freq_dawg", "false");
-                // Same as CJK: filtered B/W images lose accurate DPI, declare 300dpi
-                // so Tesseract correctly judges character size on scaled-down UI text
-                engine.SetVariable("user_defined_dpi", "300");
-                // Mild noise reduction for filtered UI text to reduce speckle that
-                // fragments thin character strokes (e.g. "Khora" → "klicgria")
-                engine.SetVariable("textord_noise_normratio", "1.0");
-            }
-            
-            // Apply language-specific character whitelist from language processor
-            string whitelist;
             try
             {
-                var processor = LanguageProcessorFactory.GetProcessor(Locale);
-                whitelist = processor?.CharacterWhitelist ?? DefaultWhitelist;
+                SecondEngine = CreateEngine();
+                NumbersOnlyEngine = CreateNumbersOnlyEngine();
             }
-            catch (InvalidOperationException)
+            catch (Exception ex)
             {
-                whitelist = DefaultWhitelist;
+                Main.AddLog($"Failed to create secondary engines: {ex.Message}");
+                FirstEngine?.Dispose();
+                FirstEngine = null;
+                throw;
             }
-            engine.SetVariable("tessedit_char_whitelist", whitelist);
-            //Main.AddLog($"Tesseract whitelist for '{Locale}': '{whitelist}'");
-            
-            return engine;
+            LoadEngines();
         }
 
-        private TesseractEngine CreateNumbersOnlyEngine()
+        private void DisposeEngines()
         {
-            var engine = new TesseractEngine(DataPath, Locale);
-            
-            // Minimal settings for numbers-only recognition
-            engine.SetVariable("tessedit_char_whitelist", NumbersOnlyWhitelist);
-            engine.SetVariable("tessedit_zero_rejection", "false");
-            engine.SetVariable("preserve_interword_spaces", "0");
-            
-            return engine;
-        }
-        
-        public void Init()
-        {
-            LoadEngines();
             FirstEngine?.Dispose();
-            FirstEngine = CreateEngine();
+            FirstEngine = null;
             SecondEngine?.Dispose();
-            SecondEngine = CreateEngine();
+            SecondEngine = null;
             NumbersOnlyEngine?.Dispose();
-            NumbersOnlyEngine = CreateNumbersOnlyEngine();
+            NumbersOnlyEngine = null;
+            for (var i = 0; i < Engines.Length; i++)
+            {
+                Engines[i]?.Dispose();
+                Engines[i] = null;
+            }
         }
 
         private void LoadEngines()
         {
-            for (var i = 0; i < 4; i++)
-            {
-                Engines[i]?.Dispose();
+            for (var i = 0; i < Engines.Length; i++)
                 Engines[i] = CreateEngine();
-            }
         }
 
         public void ReloadEngines()
         {
+            DisposeEngines();
+            DataPath = NormalDataPath;
             getLocaleTessdata();
-            LoadEngines();
-            FirstEngine?.Dispose();
-            FirstEngine = CreateEngine();
-            SecondEngine?.Dispose();
+            try
+            {
+                FirstEngine = CreateEngine();
+            }
+            catch (TesseractException)
+            {
+                DataPath = FallbackDataPath;
+                FirstEngine = CreateEngine();
+            }
             SecondEngine = CreateEngine();
-            NumbersOnlyEngine?.Dispose();
             NumbersOnlyEngine = CreateNumbersOnlyEngine();
+            LoadEngines();
         }
         
         private void getLocaleTessdata()

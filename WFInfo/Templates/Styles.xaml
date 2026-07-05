@@ -98,17 +98,25 @@
         <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
         <Setter Property="Control.VerticalContentAlignment" Value="Center"/>
         <Setter Property="Panel.ZIndex" Value="500"/>
-
-        <Style.Triggers>
-            <MultiTrigger>
-                <MultiTrigger.Conditions>
-                    <Condition Property="Button.IsMouseOver" Value="True"/>
-                    <Condition Property="Button.IsEnabled" Value="True"/>
-                </MultiTrigger.Conditions>
-                <Setter Property="Button.BorderBrush" Value="#FF7EB4EA"/>
-                <Setter Property="Panel.ZIndex" Value="1000"/>
-            </MultiTrigger>
-        </Style.Triggers>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="BorderBrush" Value="#FF7EB4EA"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
     <Style x:Key="Label_Button" TargetType="Label">
         <Setter Property="Background" Value="Transparent"/>

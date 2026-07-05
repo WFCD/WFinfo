@@ -15,6 +15,7 @@ using Tesseract;
 using WFInfo.Services.HDRDetection;
 using WFInfo.Services.Screenshot;
 using WFInfo.Services.WindowInfo;
+using WFInfo.Services.WarframeProcess;
 using WFInfo.Settings;
 using WFInfo.LanguageProcessing;
 using Brushes = System.Drawing.Brushes;
@@ -47,7 +48,6 @@ namespace WFInfo
         DEADLOCK,
         LUNAR_RENEWAL,
         POM_2,
-        UNKNOWN = -1,
         AUTO = -2,
         CUSTOM = -3
 
@@ -69,25 +69,25 @@ namespace WFInfo
 
         private static readonly ThemeInfo[] AllThemes = new ThemeInfo[]
         {
-            new ThemeInfo { Primary = Color.FromArgb(190, 169, 102), Secondary = Color.FromArgb(245, 227, 173), ProbeTop = Color.FromArgb( 35,  83, 124), ProbeBot = Color.FromArgb(130, 136, 126) },
-            new ThemeInfo { Primary = Color.FromArgb(153,  31,  35), Secondary = Color.FromArgb(255,  61,  51), ProbeTop = Color.FromArgb( 34,  82, 123), ProbeBot = Color.FromArgb(110,  64,  90) },
-            new ThemeInfo { Primary = Color.FromArgb(238, 193, 105), Secondary = Color.FromArgb(236, 211, 162), ProbeTop = Color.FromArgb( 37,  85, 125), ProbeBot = Color.FromArgb(156, 151, 129) },
-            new ThemeInfo { Primary = Color.FromArgb( 35, 201, 245), Secondary = Color.FromArgb(111, 229, 253), ProbeTop = Color.FromArgb( 34,  83, 125), ProbeBot = Color.FromArgb( 49, 153, 201) },
-            new ThemeInfo { Primary = Color.FromArgb( 57, 105, 192), Secondary = Color.FromArgb(255, 115, 230), ProbeTop = Color.FromArgb( 34,  82, 124), ProbeBot = Color.FromArgb( 60, 102, 172) },
-            new ThemeInfo { Primary = Color.FromArgb(255, 189, 102), Secondary = Color.FromArgb(255, 224, 153), ProbeTop = Color.FromArgb( 34,  83, 124), ProbeBot = Color.FromArgb(162, 147, 125) },
-            new ThemeInfo { Primary = Color.FromArgb( 36, 184, 242), Secondary = Color.FromArgb(255, 241, 191), ProbeTop = Color.FromArgb( 36,  85, 128), ProbeBot = Color.FromArgb( 52, 146, 202) },
-            new ThemeInfo { Primary = Color.FromArgb(140,  38,  92), Secondary = Color.FromArgb(245,  73,  93), ProbeTop = Color.FromArgb( 49,  97, 136), ProbeBot = Color.FromArgb(119,  84, 134) },
-            new ThemeInfo { Primary = Color.FromArgb( 20,  41,  29), Secondary = Color.FromArgb(178, 125,   5), ProbeTop = Color.FromArgb( 49,  97, 138), ProbeBot = Color.FromArgb( 56,  85, 103) },
-            new ThemeInfo { Primary = Color.FromArgb(  9,  78, 106), Secondary = Color.FromArgb(  6, 106,  74), ProbeTop = Color.FromArgb( 46,  96, 137), ProbeBot = Color.FromArgb( 49, 103, 142) },
-            new ThemeInfo { Primary = Color.FromArgb(102, 176, 255), Secondary = Color.FromArgb(255, 255,   0), ProbeTop = Color.FromArgb( 35,  83, 126), ProbeBot = Color.FromArgb( 84, 140, 207) },
-            new ThemeInfo { Primary = Color.FromArgb(255, 255, 255), Secondary = Color.FromArgb(232, 213,  93), ProbeTop = Color.FromArgb( 36,  86, 128), ProbeBot = Color.FromArgb(165, 184, 208) },
-            new ThemeInfo { Primary = Color.FromArgb(158, 159, 167), Secondary = Color.FromArgb(232, 227, 227), ProbeTop = Color.FromArgb( 34,  82, 123), ProbeBot = Color.FromArgb(113, 130, 159) },
-            new ThemeInfo { Primary = Color.FromArgb(140, 119, 147), Secondary = Color.FromArgb(200, 169, 237), ProbeTop = Color.FromArgb( 36,  82, 128), ProbeBot = Color.FromArgb(105, 110, 153) },
-            new ThemeInfo { Primary = Color.FromArgb(253, 132,   2), Secondary = Color.FromArgb(255,  53,   0), ProbeTop = Color.FromArgb( 35,  83, 125), ProbeBot = Color.FromArgb(162, 117,  75) },
-            new ThemeInfo { Primary = Color.FromArgb(200, 100, 200), Secondary = Color.FromArgb(255, 215,   0), ProbeTop = Color.FromArgb( 45,  85, 134), ProbeBot = Color.FromArgb(174, 183, 215) },
-            new ThemeInfo { Primary = Color.FromArgb( 25,  35,  60), Secondary = Color.FromArgb(255, 255, 255), ProbeTop = Color.FromArgb( 35,  83, 126), ProbeBot = Color.FromArgb(163, 181, 207) },
-            new ThemeInfo { Primary = Color.FromArgb(160,  40,  40), Secondary = Color.FromArgb(255, 200, 100), ProbeTop = Color.FromArgb( 39,  83, 124), ProbeBot = Color.FromArgb(168, 181, 205) },
-            new ThemeInfo { Primary = Color.FromArgb(105, 185, 140), Secondary = Color.FromArgb(100, 255, 100), ProbeTop = Color.FromArgb( 34,  84, 124), ProbeBot = Color.FromArgb( 98, 166, 151) },
+            new ThemeInfo { Primary = Color.FromArgb(190, 169, 102), Secondary = Color.FromArgb(245, 227, 173), ProbeTop = Color.FromArgb(189, 168, 101), ProbeBot = Color.FromArgb( 26,  22,  24) },
+            new ThemeInfo { Primary = Color.FromArgb(153,  31,  35), Secondary = Color.FromArgb(255,  61,  51), ProbeTop = Color.FromArgb(152,  31,  35), ProbeBot = Color.FromArgb( 17,   4,   4) },
+            new ThemeInfo { Primary = Color.FromArgb(238, 193, 105), Secondary = Color.FromArgb(236, 211, 162), ProbeTop = Color.FromArgb(237, 192, 104), ProbeBot = Color.FromArgb( 60,  55,  43) },
+            new ThemeInfo { Primary = Color.FromArgb( 35, 201, 245), Secondary = Color.FromArgb(111, 229, 253), ProbeTop = Color.FromArgb( 35, 200, 244), ProbeBot = Color.FromArgb(  7,  39,  63) },
+            new ThemeInfo { Primary = Color.FromArgb( 57, 105, 192), Secondary = Color.FromArgb(255, 115, 230), ProbeTop = Color.FromArgb( 57, 105, 191), ProbeBot = Color.FromArgb(  7,   9,  34) },
+            new ThemeInfo { Primary = Color.FromArgb(255, 189, 102), Secondary = Color.FromArgb(255, 224, 153), ProbeTop = Color.FromArgb(254, 188, 101), ProbeBot = Color.FromArgb( 18,  27,  16) },
+            new ThemeInfo { Primary = Color.FromArgb( 36, 184, 242), Secondary = Color.FromArgb(255, 241, 191), ProbeTop = Color.FromArgb( 36, 183, 241), ProbeBot = Color.FromArgb( 39,  53,  96) },
+            new ThemeInfo { Primary = Color.FromArgb(140,  38,  92), Secondary = Color.FromArgb(245,  73,  93), ProbeTop = Color.FromArgb(139,  38,  91), ProbeBot = Color.FromArgb(220, 211, 197) },
+            new ThemeInfo { Primary = Color.FromArgb( 20,  41,  29), Secondary = Color.FromArgb(178, 125,   5), ProbeTop = Color.FromArgb( 20,  41,  29), ProbeBot = Color.FromArgb(203, 209, 208) },
+            new ThemeInfo { Primary = Color.FromArgb(  9,  78, 106), Secondary = Color.FromArgb(  6, 106,  74), ProbeTop = Color.FromArgb(  9,  78, 105), ProbeBot = Color.FromArgb(183, 204, 207) },
+            new ThemeInfo { Primary = Color.FromArgb(102, 176, 255), Secondary = Color.FromArgb(255, 255,   0), ProbeTop = Color.FromArgb(101, 175, 254), ProbeBot = Color.FromArgb( 15,  31,  61) },
+            new ThemeInfo { Primary = Color.FromArgb(255, 255, 255), Secondary = Color.FromArgb(232, 213,  93), ProbeTop = Color.FromArgb(254, 254, 254), ProbeBot = Color.FromArgb( 35,  60,  70) },
+            new ThemeInfo { Primary = Color.FromArgb(158, 159, 167), Secondary = Color.FromArgb(232, 227, 227), ProbeTop = Color.FromArgb(157, 159, 166), ProbeBot = Color.FromArgb( 19,  12,  21) },
+            new ThemeInfo { Primary = Color.FromArgb(140, 119, 147), Secondary = Color.FromArgb(200, 169, 237), ProbeTop = Color.FromArgb(139, 119, 146), ProbeBot = Color.FromArgb( 41,  11,  85) },
+            new ThemeInfo { Primary = Color.FromArgb(253, 132,   2), Secondary = Color.FromArgb(255,  53,   0), ProbeTop = Color.FromArgb(252, 132,   2), ProbeBot = Color.FromArgb( 27,  26,  27) },
+            new ThemeInfo { Primary = Color.FromArgb(200, 100, 200), Secondary = Color.FromArgb(255, 215,   0), ProbeTop = Color.FromArgb(254, 254, 254), ProbeBot = Color.FromArgb(177,  66, 182) },
+            new ThemeInfo { Primary = Color.FromArgb( 25,  35,  60), Secondary = Color.FromArgb(255, 255, 255), ProbeTop = Color.FromArgb(254, 254, 254), ProbeBot = Color.FromArgb( 30,  40,  62) },
+            new ThemeInfo { Primary = Color.FromArgb(160,  40,  40), Secondary = Color.FromArgb(255, 200, 100), ProbeTop = Color.FromArgb(254, 254, 254), ProbeBot = Color.FromArgb(101,  28,  29) },
+            new ThemeInfo { Primary = Color.FromArgb(105, 185, 140), Secondary = Color.FromArgb(100, 255, 100), ProbeTop = Color.FromArgb(129, 223, 150), ProbeBot = Color.FromArgb( 11,  47,  31) },
         };
 
         public static readonly Color[] ThemePrimary = AllThemes.Select(t => t.Primary).ToArray();
@@ -170,6 +170,7 @@ namespace WFInfo
         private static IReadOnlyApplicationSettings _settings;
         private static IWindowInfoService _window;
         private static IHDRDetectorService _hdrDetector;
+        private static IProcessFinder _process;
 
         private static IScreenshotService _gdiScreenshot;
         private static IScreenshotService _windowsScreenshot;
@@ -179,7 +180,8 @@ namespace WFInfo
         // Or I can make this a scoped service, with each scope being a new screenshot request and dynamically choose the right service using a IScreenshotServiceFactory
         // Unfortunately option 2 means rewriting like half of this thing so I'm sticking with a hack
         public static void Init(ITesseractService tesseractService, ISoundPlayer soundPlayer, IReadOnlyApplicationSettings settings,
-            IWindowInfoService window, IHDRDetectorService hdrDetector, GdiScreenshotService gdiScreenshot, WindowsCaptureScreenshotService windowsScreenshot = null)
+            IWindowInfoService window, IHDRDetectorService hdrDetector, GdiScreenshotService gdiScreenshot, WindowsCaptureScreenshotService windowsScreenshot = null,
+            IProcessFinder process = null)
         {
             Directory.CreateDirectory(Main.AppPath + @"\Debug");
             _tesseractService = tesseractService;
@@ -187,8 +189,10 @@ namespace WFInfo
             _settings = settings;
             _window = window;
             _gdiScreenshot = gdiScreenshot;
+            _process = process;
             _windowsScreenshot = windowsScreenshot;
             _hdrDetector = hdrDetector;
+            uiScaling = 1.0;
 
             // Initialize the language processor factory before tesseract service
             LanguageProcessorFactory.Initialize(settings);
@@ -227,7 +231,7 @@ namespace WFInfo
             Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
 
             DateTime time = DateTime.UtcNow;
-            timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
+            timestamp = time.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture);
             var watch = new Stopwatch();
             watch.Start();
             long start = watch.ElapsedMilliseconds;
@@ -260,14 +264,20 @@ namespace WFInfo
             }
 
 
+            int engineCount = Math.Min(parts.Count, _tesseractService.Engines.Length);
             firstChecks = new string[parts.Count];
-            Task[] tasks = new Task[parts.Count];
-            for (int i = 0; i < parts.Count; i++)
+            Task[] tasks = new Task[engineCount];
+            for (int i = 0; i < engineCount; i++)
             {
                 int tempI = i;
                 tasks[i] = Task.Run(() => { firstChecks[tempI] = OCR.GetTextFromImage(parts[tempI], _tesseractService.Engines[tempI]);});
             }
             Task.WaitAll(tasks);
+            // Process remaining parts sequentially if more parts than engines
+            for (int i = engineCount; i < parts.Count; i++)
+            {
+                firstChecks[i] = OCR.GetTextFromImage(parts[i], _tesseractService.FirstEngine);
+            }
 
             // Remove any empty (or suspiciously short) items from the array
             firstChecks = firstChecks.Where(s => !string.IsNullOrEmpty(s) && PartNameValid(s)).ToArray();
@@ -478,7 +488,7 @@ namespace WFInfo
 
             if (partialScreenshot != null)
             {
-                partialScreenshot.Save(Main.AppPath + @"\Debug\PartBox " + timestamp + ".png");
+                partialScreenshot.Save(Main.AppPath + @"\Debug\PartBox_" + timestamp + ".png");
                 partialScreenshot.Dispose();
                 partialScreenshot = null;
             }
@@ -569,7 +579,7 @@ namespace WFInfo
             #region  debuging image
             /*Debug.WriteLine($"Closest point: {lowestDistancePoint}, with distance: {lowestDistance}");
 
-            timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
+            timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture);
             var img = CaptureScreenshot();
             var pinkP = new Pen(Brushes.Pink);
             var blackP = new Pen(Brushes.Black);
@@ -599,7 +609,7 @@ namespace WFInfo
 
                 g.DrawEllipse(pinkP, new Rectangle(lastClick, new Size(10, 10)));
             }
-            img.Save(Main.AppPath + @"\Debug\GetSelectedReward " + timestamp + ".png");
+            img.Save(Main.AppPath + @"\Debug\GetSelectedReward_" + timestamp + ".png");
             pinkP.Dispose();
             blackP.Dispose();
             img.Dispose();*/
@@ -633,12 +643,12 @@ namespace WFInfo
         {
             if (image == null)
             {
-                image = CaptureScreenshot();
+                image = CaptureThemeRegion();
 
                 if (image == null)
                 {
                     closestThresh = 0;
-                    return WFtheme.UNKNOWN;
+                    return WFtheme.AUTO;
                 }
             }
 
@@ -650,7 +660,7 @@ namespace WFInfo
             double[] weights = ComputeThemeWeights(image);
 
             double max = 0;
-            WFtheme active = WFtheme.UNKNOWN;
+            WFtheme active = WFtheme.AUTO;
             for (int i = 0; i < weights.Length; i++)
             {
                 Debug.Write(weights[i].ToString("F2", Main.culture) + " ");
@@ -672,33 +682,88 @@ namespace WFInfo
 
         private static double[] ComputeThemeWeights(Bitmap image)
         {
-            double[] weights = new double[Enum.GetValues(typeof(WFtheme)).Cast<int>().Max() + 1];
-            double sc = _window.ScreenScaling * Math.Max(uiScaling, 1.0);
-            int startX = (int)(90 * sc);
-            int endX = Math.Min((int)(110 * sc), image.Width);
-            int startY = (int)(65 * sc);
-            int endY = Math.Min((int)(80 * sc), image.Height);
-            int midY = (startY + endY) / 2;
+            int nThemes = Enum.GetValues(typeof(WFtheme)).Cast<int>().Max() + 1;
+            double[] weights = new double[nThemes];
+            if (image == null || image.Height == 0) return weights;
 
-            int tR = 0, tG = 0, tB = 0, tCnt = 0, bR = 0, bG = 0, bB = 0, bCnt = 0;
-            for (int y = startY; y < endY; y++)
+            double sc = _window.ScreenScaling * Math.Max(uiScaling, 0.5);
+            int probeX = (int)Math.Round(150 * sc);
+            int probeY1 = (int)Math.Round(85 * sc);
+            int probeY2 = (int)Math.Round(93 * sc);
+            if (probeX >= image.Width || probeY1 >= image.Height) return weights;
+            probeY2 = Math.Min(probeY2, image.Height - 1);
+            int midY = (probeY1 + probeY2) / 2;
+
+            // Single vertical line through the profile bar (LockBits).
+            int lineH = probeY2 - probeY1 + 1;
+            BitmapData data = image.LockBits(new Rectangle(probeX, probeY1, 1, lineH),
+                ImageLockMode.ReadOnly, image.PixelFormat);
+            int stride = Math.Abs(data.Stride);
+            byte[] pixels = new byte[stride * lineH];
+            Marshal.Copy(data.Scan0, pixels, 0, pixels.Length);
+            image.UnlockBits(data);
+
+            long tR = 0, tG = 0, tB = 0, tCnt = 0, bR = 0, bG = 0, bB = 0, bCnt = 0;
+            for (int row = 0; row < lineH; row++)
             {
-                for (int x = startX; x < endX; x++)
-                {
-                    var c = image.GetPixel(x, y);
-                    if (y < midY) { tR += c.R; tG += c.G; tB += c.B; tCnt++; }
-                    else { bR += c.R; bG += c.G; bB += c.B; bCnt++; }
-                }
+                int idx = row * stride;
+                int r = pixels[idx + 2], g = pixels[idx + 1], b = pixels[idx];
+                int absY = probeY1 + row;
+                if (absY < midY) { tR += r; tG += g; tB += b; tCnt++; }
+                else             { bR += r; bG += g; bB += b; bCnt++; }
             }
 
-            Color avgTop = Color.FromArgb(tR / tCnt, tG / tCnt, tB / tCnt);
-            Color avgBot = Color.FromArgb(bR / bCnt, bG / bCnt, bB / bCnt);
+            Color avgTop = Color.FromArgb((int)(tR / tCnt), (int)(tG / tCnt), (int)(tB / tCnt));
+            Color avgBot = Color.FromArgb((int)(bR / bCnt), (int)(bG / bCnt), (int)(bB / bCnt));
 
-            for (int i = 0; i < weights.Length; i++)
+            for (int i = 0; i < nThemes; i++)
             {
-                int dist = ColorDifference(avgTop, AllThemes[i].ProbeTop)
-                         + ColorDifference(avgBot, AllThemes[i].ProbeBot);
+                double dist = ColorDifference(avgTop, AllThemes[i].ProbeTop)
+                            + ColorDifference(avgBot, AllThemes[i].ProbeBot);
                 weights[i] = 1.0 / (dist + 1);
+            }
+
+            // Normalise to [0, 1] for the caller
+            double maxWeight = 0;
+            for (int i = 0; i < nThemes; i++)
+                if (weights[i] > maxWeight) maxWeight = weights[i];
+            if (maxWeight > 0)
+                for (int i = 0; i < nThemes; i++)
+                    weights[i] /= maxWeight;
+
+            if (_settings != null && _settings.Debug)
+            {
+                try
+                {
+                    string ts = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture);
+                    // Crop 200x200 around probe for ThemeScanArea debug; FullScreenShot_* stays full.
+                    int dbgMargin = 100;
+                    int dbgX = Math.Max(0, probeX - dbgMargin);
+                    int dbgY = Math.Max(0, probeY1 - dbgMargin);
+                    int dbgW = Math.Min(dbgMargin * 2, image.Width - dbgX);
+                    int dbgH = Math.Min(dbgMargin * 2, image.Height - dbgY);
+                    Rectangle dbgRect = new Rectangle(dbgX, dbgY, dbgW, dbgH);
+                    using (Bitmap dbg = image.Clone(dbgRect, image.PixelFormat))
+                    using (Graphics g = Graphics.FromImage(dbg))
+                    {
+                        int dx = probeX - dbgX, dy1 = probeY1 - dbgY, dy2 = probeY2 - dbgY;
+                        using (var pen = new Pen(Color.Red, 2f))
+                        {
+                            g.DrawLine(pen, dx, dy1, dx, dy2);
+                        }
+                        string dir = Main.AppPath + @"\Debug";
+                        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                        string fname = $"ThemeScanArea_{ts}.png";
+                        dbg.Save(dir + @"\" + fname);
+                        Main.AddLog($"ThemeScanArea: {fname}  probe=({probeX},{probeY1}-{probeY2}) mid={midY}  " +
+                            $"top=({avgTop.R},{avgTop.G},{avgTop.B}) bot=({avgBot.R},{avgBot.G},{avgBot.B})  " +
+                            $"scale={sc:F2} ui={uiScaling:F2} dpi={_window.ScreenScaling:F2}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Main.AddLog("ThemeScanArea debug draw failed: " + ex.Message);
+                }
             }
             return weights;
         }
@@ -708,6 +773,40 @@ namespace WFInfo
             if (image == null || image.Height == 0)
                 return new double[0];
             return ComputeThemeWeights(image);
+        }
+
+        internal static (Color top, Color bot, int x, int y1, int y2) GetProbeColors(Bitmap image)
+        {
+            double sc = _window.ScreenScaling * Math.Max(uiScaling, 0.5);
+            int probeX = (int)Math.Round(150 * sc);
+            int probeY1 = (int)Math.Round(85 * sc);
+            int probeY2 = (int)Math.Round(93 * sc);
+            if (probeX >= image.Width || probeY1 >= image.Height)
+                return (Color.Black, Color.Black, probeX, probeY1, probeY2);
+
+            probeY2 = Math.Min(probeY2, image.Height - 1);
+            int midY = (probeY1 + probeY2) / 2;
+            int lineH = probeY2 - probeY1 + 1;
+
+            BitmapData data = image.LockBits(new Rectangle(probeX, probeY1, 1, lineH),
+                ImageLockMode.ReadOnly, image.PixelFormat);
+            int stride = Math.Abs(data.Stride);
+            byte[] pixels = new byte[stride * lineH];
+            Marshal.Copy(data.Scan0, pixels, 0, pixels.Length);
+            image.UnlockBits(data);
+
+            long tR = 0, tG = 0, tB = 0, tCnt = 0, bR = 0, bG = 0, bB = 0, bCnt = 0;
+            for (int row = 0; row < lineH; row++)
+            {
+                int idx = row * stride;
+                int r = pixels[idx + 2], g = pixels[idx + 1], b = pixels[idx];
+                if (probeY1 + row < midY) { tR += r; tG += g; tB += b; tCnt++; }
+                else                      { bR += r; bG += g; bB += b; bCnt++; }
+            }
+
+            var top = Color.FromArgb((int)(tR / tCnt), (int)(tG / tCnt), (int)(tB / tCnt));
+            var bot = Color.FromArgb((int)(bR / bCnt), (int)(bG / bCnt), (int)(bB / bCnt));
+            return (top, bot, probeX, probeY1, probeY2);
         }
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, (int theme, int threshold)> _themeCache =
             new System.Collections.Concurrent.ConcurrentDictionary<int, (int theme, int threshold)>();
@@ -774,22 +873,41 @@ namespace WFInfo
             watch.Start();
             long start = watch.ElapsedMilliseconds;
 
-            //timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
-            try { ExtractPartBoxAutomatically(out uiScaling, out _, fullShot); }
-            catch { Main.AddLog("SnapIt: UI scaling detection failed, using previous value"); }
+            //timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture);
+            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture);
+
+            // Read UI scale from Warframe EE.cfg (native process only, not GFN).
+            // Line: Flash.FlashDrawScale=VALUE  (missing = 100%, float rounding → nearest 5%)
+            double configScale = ReadUiScaleFromConfig();
+            if (configScale > 0)
+            {
+                uiScaling = configScale;
+                Main.AddLog($"SnapIt: Read UI scaling {configScale:P0} from EE.cfg");
+            }
+
+            // Theme detection with correct uiScaling for accurate probe coords
             WFtheme theme = GetThemeWeighted(out _, fullShot);
-            if (theme == WFtheme.UNKNOWN)
+            if ((int)theme < 0)
             {
                 Main.AddLog("SnapIt: Theme detection failed");
                 return;
             }
 
             if (_settings.Debug)
-                snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage " + timestamp + ".png");
+                snapItImage.Save(Main.AppPath + @"\Debug\SnapItImage_" + timestamp + ".png");
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
-            snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered " + timestamp + ".png");
+            snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered_" + timestamp + ".png");
             double imageScale = (double)snapItImageFiltered.Height / snapItImage.Height;
+            // Fallback: detect UI scale from row analysis when config couldn't be read (e.g. GFN)
+            if (configScale <= 0)
+            {
+                double detectedScale = DetectUiScale(rowHits, snapItImageFiltered.Width, snapItImageFiltered.Height, fullShot.Height);
+                if (detectedScale > 0)
+                {
+                    uiScaling = detectedScale;
+                    Main.AddLog($"SnapIt: Detected UI scaling {detectedScale:P0} from row analysis (fallback)");
+                }
+            }
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, snapItImage, rowHits, colHits); 
             long end = watch.ElapsedMilliseconds;
             Main.StatusUpdate("Completed snapit Processing(" + (end - start) + "ms)", 0);
@@ -1120,7 +1238,7 @@ namespace WFInfo
         {
             Bitmap filteredImageClean = new Bitmap(filteredImage);
             DateTime time = DateTime.UtcNow;
-            string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
+            string timestamp = time.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture);
             List<Tuple<List<InventoryItem>, Rectangle>> foundItems = new List<Tuple<List<InventoryItem>, Rectangle>>(); //List containing Tuples of overlapping InventoryItems and their combined bounds
             int numberTooLarge = 0;
             int numberTooFewCharacters = 0;
@@ -1274,8 +1392,9 @@ namespace WFInfo
                         // CJK characters are inherently larger than Latin, so use higher thresholds
                         // Also CJK 3-char words like 리시버/설계도/槍機/藍圖 are valid item name fragments
                         bool isCJK = IsCJKLocale();
-                        int sizeThresholdH = isCJK ? (int)(80 * _window.ScreenScaling) : (int)(50 * _window.ScreenScaling);
-                        int sizeThresholdW = isCJK ? (int)(120 * _window.ScreenScaling) : (int)(84 * _window.ScreenScaling);
+                        double sizeScale = _window.ScreenScaling * Math.Min(uiScaling, 1.0);
+                        int sizeThresholdH = isCJK ? (int)(80 * sizeScale) : (int)(50 * sizeScale);
+                        int sizeThresholdW = isCJK ? (int)(120 * sizeScale) : (int)(84 * sizeScale);
                         int minCharLength = isCJK ? 2 : 3; // CJK packs more info per character
                         
                         if (paddedBounds.Height > sizeThresholdH || paddedBounds.Width > sizeThresholdW)
@@ -1307,7 +1426,7 @@ namespace WFInfo
                     // Max combined width to prevent merging text from different items in the grid
                     // Each item tile is roughly 130-140px wide at 1080p; cap at 160px to allow
                     // multi-line wrapping within one item but prevent cross-item cascading merges
-                    int maxGroupWidth = (int)(180 * _window.ScreenScaling);
+                    int maxGroupWidth = (int)(180 * _window.ScreenScaling * Math.Min(uiScaling, 1.0));
 
                     for (; i >= 0; i--)
                     {
@@ -1429,7 +1548,7 @@ namespace WFInfo
             }
 
             if (_settings.Debug)
-                filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds " + timestamp + ".png");
+                filteredImage.Save(Main.AppPath + @"\Debug\SnapItImageBounds_" + timestamp + ".png");
             return results;
         }
 
@@ -1688,8 +1807,8 @@ namespace WFInfo
                         //debugging markings and save, uncomment as needed
                         //cloneBitmap.SetPixel(xCenter, yCenter, Color.Red);
                         //cloneBitmap.SetPixel(xCenterNew, yCenterNew, Color.Magenta);
-                        //cloneBitmap.Save(Main.AppPath + @"\Debug\NumberCenter_" + i + "_" + j + "_" + sumBlack + " " + timestamp + ".png");
-                        //cloneBitmapColoured.Save(Main.AppPath + @"\Debug\ColoredNumberCenter_" + i + "_" + j + "_" + sumBlack + " " + timestamp + ".png");
+                        //cloneBitmap.Save(Main.AppPath + @"\Debug\NumberCenter_" + i + "_" + j + "_" + sumBlack + "_" + timestamp + ".png");
+                        //cloneBitmapColoured.Save(Main.AppPath + @"\Debug\ColoredNumberCenter_" + i + "_" + j + "_" + sumBlack + "_" + timestamp + ".png");
 
                         //get cloneBitmapColoured as array for fast access
                         imgHeight = cloneBitmapColoured.Height;
@@ -1886,9 +2005,9 @@ namespace WFInfo
             watch.Start();
             long start = watch.ElapsedMilliseconds;
 
-            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture);
+            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture);
             if (_settings.Debug)
-                fullShot.Save(Main.AppPath + @"\Debug\ProfileImage " + timestamp + ".png");
+                fullShot.Save(Main.AppPath + @"\Debug\ProfileImage_" + timestamp + ".png");
             List<InventoryItem> foundParts = FindOwnedItems(fullShot, timestamp, start, watch);
             for (int i = 0; i < foundParts.Count; i++)
             {
@@ -2154,7 +2273,7 @@ namespace WFInfo
                                 prevHit = hitSomething;
                             }
 
-                            //cloneBitmap.Save(Main.AppPath + @"\Debug\ProfileImageClone " + foundItems.Count + " " + timestamp + ".png");
+                            //cloneBitmap.Save(Main.AppPath + @"\Debug\ProfileImageClone_" + foundItems.Count + "_" + timestamp + ".png");
 
 
                             //do OCR
@@ -2184,7 +2303,7 @@ namespace WFInfo
 
             ProfileImageClean.Dispose();
             if (_settings.Debug)
-                ProfileImage.Save(Main.AppPath + @"\Debug\ProfileImageBounds " + timestamp + ".png");
+                ProfileImage.Save(Main.AppPath + @"\Debug\ProfileImageBounds_" + timestamp + ".png");
             darkCyan.Dispose();
             pink.Dispose();
             cyan.Dispose();
@@ -2238,7 +2357,7 @@ namespace WFInfo
 
         public static bool ThemeThresholdFilter(Color test, WFtheme theme)
         {
-            if (theme == WFtheme.CUSTOM || theme == WFtheme.UNKNOWN) //treat unknown as custom, for safety
+            if ((int)theme < 0) //treat sentinel themes as custom, for safety
                 return CustomThresholdFilter(test);
             Color primary = ThemePrimary[(int)theme];
             Color secondary = ThemeSecondary[(int)theme];
@@ -2360,7 +2479,7 @@ namespace WFInfo
         // The top bit (upper case and dots/strings, bdfhijklt) > the juicy bit (lower case, acemnorsuvwxz) > the tails (gjpqy)
         // we ignore the "tippy top" because it has a lot of variance, so we just look at the "bottom half of the top"
         private static readonly int[] TextSegments = new int[] { 2, 4, 16, 21 };
-        private static List<Bitmap> ExtractPartBoxAutomatically(out double scaling, out WFtheme active, Bitmap fullScreen)
+        private static List<Bitmap> ExtractPartBoxAutomatically(out double scaling, out WFtheme active, Bitmap fullScreen, bool suppressDebug = false)
         {
             var watch = new Stopwatch();
             watch.Start();
@@ -2427,7 +2546,7 @@ namespace WFInfo
                 }
             }
 
-            //postFilter.Save(Main.AppPath + @"\Debug\PostFilter" + timestamp + ".png");
+            //postFilter.Save(Main.AppPath + @"\Debug\PostFilter_" + timestamp + ".png");
 
             end = watch.ElapsedMilliseconds;
             Main.AddLog("Filtered Image " + (end - start) + "ms");
@@ -2515,13 +2634,13 @@ namespace WFInfo
                 g.DrawRectangle(Pens.Red, rectangle);
                 g.DrawRectangle(Pens.Chartreuse, uidebug);
             }
-            if (_settings.Debug)
-                fullScreen.Save(Main.AppPath + @"\Debug\BorderScreenshot " + timestamp + ".png");
+            if (_settings.Debug && !suppressDebug)
+                fullScreen.Save(Main.AppPath + @"\Debug\BorderScreenshot_" + timestamp + ".png");
 
 
-            //postFilter.Save(Main.appPath + @"\Debug\DebugBox1 " + timestamp + ".png");
-            if (_settings.Debug)
-                preFilter.Save(Main.AppPath + @"\Debug\FullPartArea " + timestamp + ".png");
+            //postFilter.Save(Main.appPath + @"\Debug\DebugBox1_" + timestamp + ".png");
+            if (_settings.Debug && !suppressDebug)
+                preFilter.Save(Main.AppPath + @"\Debug\FullPartArea_" + timestamp + ".png");
             scaling = topFive[4] + 50; //scaling was sometimes going to 50 despite being set to 100, so taking the value from above that seems to be accurate.
 
             scaling /= 100;
@@ -2551,7 +2670,8 @@ namespace WFInfo
 
             end = watch.ElapsedMilliseconds;
             Main.AddLog("Finished function " + (end - beginning) + "ms");
-            partialScreenshot.Save(Main.AppPath + @"\Debug\PartialScreenshot" + timestamp + ".png");
+            if (!suppressDebug)
+                partialScreenshot.Save(Main.AppPath + @"\Debug\PartialScreenshot_" + timestamp + ".png");
             return FilterAndSeparatePartsFromPartBox(partialScreenshot, active);
         }
 
@@ -2666,7 +2786,7 @@ namespace WFInfo
                     grD.DrawImage(filtered, destRegion, srcRegion, GraphicsUnit.Pixel);
                 ret.Add(newBox);
                 if (_settings.Debug)
-                    newBox.Save(Main.AppPath + @"\Debug\PartBox(" + i + ") " + timestamp + ".png");
+                    newBox.Save(Main.AppPath + @"\Debug\PartBox(" + i + ")_" + timestamp + ".png");
             }
             filtered.Dispose();
             return ret;
@@ -2947,7 +3067,86 @@ namespace WFInfo
             }
         }
 
-        internal static Bitmap CaptureScreenshot()
+        /// <summary>
+        /// Captures 200x200 px around the theme probe area instead of full screen.
+        /// </summary>
+        private static Bitmap CaptureThemeRegion()
+        {
+            _window.UpdateWindow();
+
+            double sc = _window.ScreenScaling * Math.Max(uiScaling, 0.5);
+            int probeX = (int)Math.Round(150 * sc);
+            int probeY1 = (int)Math.Round(85 * sc);
+
+            // Square 100px around the probe column
+            const int margin = 100;
+            const int side = margin * 2;
+            var window = _window.Window;
+
+            int cropX = Math.Max(0, probeX - margin);
+            int cropY = Math.Max(0, probeY1 - margin);
+            cropX = Math.Min(cropX, Math.Max(0, window.Width  - side));
+            cropY = Math.Min(cropY, Math.Max(0, window.Height - side));
+
+            int screenX = window.Left + cropX;
+            int screenY = window.Top  + cropY;
+
+            // Select screenshot service (same logic as CaptureScreenshot)
+            IScreenshotService screenshot;
+            if (_windowsScreenshot == null)
+            {
+                screenshot = _gdiScreenshot;
+            }
+            else
+            {
+                switch (_settings.HdrSupport)
+                {
+                    case HdrSupportEnum.On:
+                        screenshot = _windowsScreenshot;
+                        break;
+                    case HdrSupportEnum.Off:
+                        screenshot = _gdiScreenshot;
+                        break;
+                    case HdrSupportEnum.Auto:
+                        bool isHdr = _hdrDetector.IsHDR;
+                        screenshot = isHdr ? _windowsScreenshot : _gdiScreenshot;
+                        break;
+                    default:
+                        throw new NotImplementedException($"HDR support option '{_settings.HdrSupport}' does not have a corresponding screenshot service.");
+                }
+            }
+
+            if (ReferenceEquals(screenshot, _windowsScreenshot) && !screenshot.IsAvailable)
+            {
+                screenshot = _gdiScreenshot;
+            }
+
+            if (screenshot is GdiScreenshotService)
+            {
+                // Direct region capture via GDI — no full-screen copy
+                Bitmap region = new Bitmap(side, side, PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(region))
+                {
+                    g.CopyFromScreen(screenX, screenY, 0, 0, new Size(side, side), CopyPixelOperation.SourceCopy);
+                }
+                return region;
+            }
+            else
+            {
+                // WindowsCapture: must capture full frame, crop after
+                var images = screenshot.CaptureScreenshot().Result;
+                if (images.Count == 0) return null;
+                using (var full = images.First())
+                {
+                    var cropRect = new Rectangle(cropX, cropY, side, side);
+                    cropRect.Intersect(new Rectangle(0, 0, full.Width, full.Height));
+                    if (cropRect.IsEmpty) return (Bitmap)full.Clone();
+                    return full.Clone(cropRect, full.PixelFormat);
+                }
+            }
+        }
+
+        internal static Bitmap CaptureScreenshot(bool saveDebug = true)
         {
             _window.UpdateWindow();
 
@@ -2994,13 +3193,14 @@ namespace WFInfo
                 return null;
             }
             var image = images.First();
-            image.Save(Main.AppPath + @"\Debug\FullScreenShot " + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + ".png");
+            if (saveDebug)
+                image.Save(Main.AppPath + @"\Debug\FullScreenShot_" + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture) + ".png");
             return image;
         }
 
         internal static void SnapScreenshot()
         {
-            var image = CaptureScreenshot();
+            var image = CaptureScreenshot(saveDebug: false);
             if (image == null)
             {
                 Main.AddLog("SnapIt activation failed: Screenshot failed");
@@ -3107,7 +3307,7 @@ namespace WFInfo
             windowService.UseImage(screenshot);
 
             WFtheme theme = GetThemeWeighted(out _, screenshot);
-            if (theme == WFtheme.UNKNOWN)
+            if ((int)theme < 0)
             {
                 Main.AddLog("Test SnapIt: Theme detection failed");
                 return results;
@@ -3147,6 +3347,7 @@ namespace WFInfo
             _gdiScreenshot = null;
             _windowsScreenshot = null;
             _hdrDetector = hdrDetector;
+            uiScaling = 1.0;
 
             LanguageProcessorFactory.Initialize(settings);
             try
@@ -3173,8 +3374,97 @@ namespace WFInfo
             _windowsScreenshot = null;
             _soundPlayer = null;
             _hdrDetector = null;
+            _process = null;
             _tesseractService = null;
             uiScaling = 1.0;
+        }
+
+        /// <summary>
+        /// Fallback UI scale detection from row-hits analysis. Only used when EE.cfg
+        /// can't be read (GFN streaming, missing config). Uses actual screenshot
+        /// resolution for normalization — no Windows DPI dependency.
+        /// Returns 0.5-1.0 on success, -1 if insufficient text rows.
+        /// </summary>
+        private static double DetectUiScale(int[] rowHits, int imageWidth, int imageHeight, int fullShotHeight)
+        {
+            List<int> rowHeights = new List<int>();
+            int i = 0;
+            while (i < imageHeight)
+            {
+                if ((double)rowHits[i] / imageWidth > _settings.SnapRowTextDensity)
+                {
+                    int j = 0;
+                    while (i + j < imageHeight && (double)rowHits[i + j] / imageWidth > _settings.SnapRowEmptyDensity)
+                        j++;
+                    if (j > 3)
+                        rowHeights.Add(j);
+                    i += j;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            if (rowHeights.Count < 3)
+                return -1;
+
+            double avgRowHeight = 0;
+            foreach (int h in rowHeights)
+                avgRowHeight += h;
+            avgRowHeight /= rowHeights.Count;
+
+            // Expected row height at 100% UI scale, normalized by actual screenshot resolution
+            double referenceRowHeight = GetAdjustedLineHeight() * 0.4;
+            double resolutionRatio = (double)fullShotHeight / 1080.0;
+            double expectedRowHeight = referenceRowHeight * resolutionRatio;
+
+            double scale = avgRowHeight / expectedRowHeight;
+            return Math.Max(0.5, Math.Min(1.0, scale));
+        }
+
+        /// <summary>
+        /// Reads UI scaling from Warframe's EE.cfg (same folder as EE.log).
+        /// Line: Flash.FlashDrawScale=VALUE  (missing = 100%).
+        /// Warframe uses 5% increment steps — float rounding handled.
+        /// Only reads for native Warframe process (not GeForce NOW).
+        /// Returns 0.5-1.25, or -1 if unavailable.
+        /// </summary>
+        private static double ReadUiScaleFromConfig()
+        {
+            if (_process == null || !_process.IsRunning || _process.GameIsStreamed)
+                return -1;
+
+            try
+            {
+                string cfgPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+                    + @"\Warframe\EE.cfg";
+                if (!File.Exists(cfgPath))
+                    return -1;
+
+                foreach (string line in File.ReadLines(cfgPath))
+                {
+                    if (line.StartsWith("Flash.FlashDrawScale=", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string valStr = line.Substring("Flash.FlashDrawScale=".Length).Trim();
+                        if (double.TryParse(valStr, System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out double raw))
+                        {
+                            // Round to nearest 5% increment
+                            int percent = (int)Math.Round(raw * 100.0 / 5.0) * 5;
+                            return Math.Max(0.5, Math.Min(1.25, percent / 100.0));
+                        }
+                        return -1; // parse failed
+                    }
+                }
+                // Line not found → default 100%
+                return 1.0;
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"ReadUiScaleFromConfig failed: {ex.Message}");
+                return -1;
+            }
         }
 
         #endregion

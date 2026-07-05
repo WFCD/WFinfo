@@ -32,10 +32,16 @@ if "%EXE%"=="" (
 
 REM Check for folder argument
 if "%1"=="" (
-    echo Usage: run_theme_tests.bat ^<folder_with_pngs^>
+    echo Usage: run_theme_tests.bat ^<folder_with_pngs^> [uiScale]
     echo.
-    echo Each PNG filename must contain the expected theme name.
+    echo Runs WFInfo.exe --theme-debug on all PNGs in the folder.
+    echo uiScale matches your in-game menu scale ^(e.g. 0.90 for 90%%^).
+    echo Default: 1.0. Use the value your screenshots were captured at.
     echo Examples:
+    echo   run_theme_tests.bat screenshots
+    echo   run_theme_tests.bat screenshots 0.90
+    echo.
+    echo Each PNG filename must contain the expected theme name:
     echo   lunar_renewal.png  -^> LUNAR_RENEWAL
     echo   corpus_screen.png  -^> CORPUS
     echo   grineer_test.png  -^> GRINEER
@@ -47,6 +53,7 @@ if "%1"=="" (
 )
 
 set "TEST_FOLDER=%~1"
+set "UI_SCALE=%~2"
 
 if not exist "%TEST_FOLDER%" (
     echo ERROR: Folder not found: %TEST_FOLDER%
@@ -55,10 +62,15 @@ if not exist "%TEST_FOLDER%" (
 
 echo Executable: %EXE%
 echo Test Folder: %TEST_FOLDER%
+if not "%UI_SCALE%"=="" echo UI Scale: %UI_SCALE%
 echo.
 
 REM Run theme detection tests
-"%EXE%" --theme-debug "%TEST_FOLDER%"
+if not "%UI_SCALE%"=="" (
+    "%EXE%" --theme-debug "%TEST_FOLDER%" "%UI_SCALE%"
+) else (
+    "%EXE%" --theme-debug "%TEST_FOLDER%"
+)
 set "EXIT_CODE=%ERRORLEVEL%"
 
 echo.

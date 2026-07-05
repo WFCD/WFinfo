@@ -12,8 +12,8 @@
         <Rectangle HorizontalAlignment="Left" Height="25" Stroke="#FF646464" VerticalAlignment="Top" Width="300" Fill="#FF0F0F0F"/>
         <Label x:Name="errorText" Content="Fullscreen detected " HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalAlignment="Top" Height="32" Margin="1,23,0,0" Width="298" FontSize="18"/>
         <TextBlock Margin="15,52,15,0" TextWrapping="Wrap" Text="To make the overlay display over top of the game you need to run the game in borderless fullscreen or window" TextAlignment="Center" VerticalAlignment="Top" Height="53"/>
-        <Button Content="Change game display" HorizontalAlignment="Left" Margin="164,100,0,0" VerticalAlignment="Top" Width="121" Background="#FF0F0F0F" Click="NoClick"/>
-        <Button Content="Disable overlay" Margin="26,100,185,0" VerticalAlignment="Top" Background="#FF0F0F0F" Click="DisableOverlayClick"/>
+        <Button Content="Change game display" HorizontalAlignment="Left" Margin="164,100,0,0" VerticalAlignment="Top" Width="121" Style="{StaticResource Button_Button}" Click="NoClick"/>
+        <Button Content="Disable overlay" Margin="26,100,185,0" VerticalAlignment="Top" Style="{StaticResource Button_Button}" Click="DisableOverlayClick"/>
         <Image HorizontalAlignment="Left" Height="23" VerticalAlignment="Center" Width="24" Source="Resources/WFLogo.png" Margin="1,0,0,107" >
         </Image>
         <TextBlock Text="WFinfo" Margin="26,3,0,106" TextAlignment="Left" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" Height="21" Width="129" RenderTransformOrigin="0.5,0.5"/>

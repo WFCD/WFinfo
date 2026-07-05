@@ -118,13 +118,14 @@ namespace WFInfo
                 }
             }
 
-            // Theme detection debug mode: WFInfo.exe --theme-debug <folder>
+            // Theme detection debug mode: WFInfo.exe --theme-debug <folder> [uiScale]
             if (args.Length >= 1 && args[0].Equals("--theme-debug", StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
                     string folder = args.Length > 1 ? args[1] : ".";
-                    int exitCode = ThemeTestRunner.Run(folder);
+                    double overrideScale = args.Length > 2 && double.TryParse(args[2], System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out var u) ? u : -1;
+                    int exitCode = ThemeTestRunner.Run(folder, overrideScale);
                     Environment.ExitCode = exitCode;
                 }
                 catch (Exception ex)

@@ -1452,7 +1452,7 @@ namespace WFInfo
                     {
                         if (csv.Length == 0 && !File.Exists(applicationDirectory + @"\rewardExport.csv"))
                             csv += "Timestamp,ChosenIndex,Reward_0_Name,Reward_0_Plat,Reward_0_Ducats,Reward_1_Name,Reward_1_Plat,Reward_1_Ducats,Reward_2_Name,Reward_2_Plat,Reward_2_Ducats,Reward_3_Name,Reward_3_Plat,Reward_3_Ducats" + Environment.NewLine;
-                        csv += DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssff", Main.culture) + "," + Main.listingHelper.SelectedRewardIndex;
+                        csv += DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture) + "," + Main.listingHelper.SelectedRewardIndex;
                         for (int i = 0; i < 4; i++)
                         {
                             if (i < rewardscreen.Count)
