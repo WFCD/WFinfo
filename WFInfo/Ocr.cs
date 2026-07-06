@@ -908,15 +908,15 @@ namespace WFInfo
             Bitmap snapItImageFiltered = ScaleUpAndFilter(snapItImage, theme, out int[] rowHits, out int[] colHits);
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered_" + timestamp + ".png");
             double imageScale = (double)snapItImageFiltered.Height / snapItImage.Height;
-            // Brute-force scaling detection (old ExtractPartBoxAutomatically approach).
-            // Used when EE.cfg is unavailable OR ForceLegacyScaling is enabled.
+            // Fallback: detect UI scale from row analysis when config couldn't be read (e.g. GFN)
+            // or when ForceLegacyScaling is enabled.
             if (configScale <= 0 || _settings.ForceLegacyScaling)
             {
-                double detectedScale = DetectScalingBruteForce(rowHits, snapItImageFiltered.Width, snapItImageFiltered.Height);
+                double detectedScale = DetectUiScale(rowHits, snapItImageFiltered.Width, snapItImageFiltered.Height, fullShot.Height);
                 if (detectedScale > 0)
                 {
                     uiScaling = detectedScale;
-                    Main.AddLog($"SnapIt: Detected UI scaling {detectedScale:P0} from brute-force fallback");
+                    Main.AddLog($"SnapIt: Detected UI scaling {detectedScale:P0} from row analysis (fallback)");
                 }
             }
             List<InventoryItem> foundParts = FindAllParts(snapItImageFiltered, snapItImage, rowHits, colHits); 
@@ -3380,98 +3380,6 @@ namespace WFInfo
             _process = null;
             _tesseractService = null;
             uiScaling = 1.0;
-        }
-
-        /// <summary>
-        /// Brute-force UI scale detection — the original ExtractPartBoxAutomatically approach.
-        /// Tries scales 50%-100%, scores each against expected TextSegments pixel positions,
-        /// and returns the 5th-best (most robust) candidate.
-        /// Returns 0.5-1.0 on success, -1 on failure.
-        /// </summary>
-        private static double DetectScalingBruteForce(int[] rowHits, int imageWidth, int imageHeight)
-        {
-            if (rowHits == null || rowHits.Length == 0 || imageWidth <= 0 || imageHeight <= 0)
-                return -1;
-
-            int lineHeight = (int)(pixelRewardLineHeight / 2 * _window.ScreenScaling);
-            int topLine_100 = imageHeight - lineHeight;
-            int topLine_50 = lineHeight / 2;
-
-            if (topLine_100 <= topLine_50)
-                return -1;
-
-            double[] percWeights = new double[51];
-            double[] topWeights = new double[51];
-            double[] midWeights = new double[51];
-            double[] botWeights = new double[51];
-
-            double lowestWeight = 0;
-            double scaling = -1;
-
-            for (int i = 0; i <= 50; i++)
-            {
-                int yFromTop = imageHeight - (i * (topLine_100 - topLine_50) / 50 + topLine_50);
-
-                int scale = (50 + i);
-                int scaleWidth = imageWidth * scale / 100;
-
-                int textTop = (int)(_window.ScreenScaling * TextSegments[0] * scale / 100);
-                int textTopBot = (int)(_window.ScreenScaling * TextSegments[1] * scale / 100);
-                int textBothBot = (int)(_window.ScreenScaling * TextSegments[2] * scale / 100);
-                int textTailBot = (int)(_window.ScreenScaling * TextSegments[3] * scale / 100);
-
-                // Bounds check to prevent index-out-of-range
-                if (yFromTop + textTailBot > rowHits.Length || yFromTop < 0)
-                    continue;
-
-                int loc = textTop;
-                for (; loc <= textTopBot; loc++)
-                    topWeights[i] += Math.Abs(scaleWidth * 0.06 - rowHits[yFromTop + loc]);
-
-                loc++;
-                for (; loc < textBothBot; loc++)
-                {
-                    if (rowHits[yFromTop + loc] < scaleWidth / 15)
-                        midWeights[i] += (scaleWidth * 0.26 - rowHits[yFromTop + loc]) * 5;
-                    else
-                        midWeights[i] += Math.Abs(scaleWidth * 0.24 - rowHits[yFromTop + loc]);
-                }
-
-                loc++;
-                for (; loc < textTailBot; loc++)
-                    botWeights[i] += 10 * Math.Abs(scaleWidth * 0.007 - rowHits[yFromTop + loc]);
-
-                topWeights[i] /= textTopBot - textTop + 1;
-                midWeights[i] /= textBothBot - textTopBot - 2;
-                botWeights[i] /= textTailBot - textBothBot - 1;
-                percWeights[i] = topWeights[i] + midWeights[i] + botWeights[i];
-
-                if (scaling == -1 || lowestWeight > percWeights[i])
-                {
-                    scaling = scale;
-                    lowestWeight = percWeights[i];
-                }
-            }
-
-            int[] topFive = new int[] { -1, -1, -1, -1, -1 };
-            for (int i = 0; i <= 50; i++)
-            {
-                int match = 4;
-                while (match != -1 && topFive[match] != -1 && percWeights[i] > percWeights[topFive[match]])
-                    match--;
-
-                if (match != -1)
-                {
-                    for (int move = 0; move < match; move++)
-                        topFive[move] = topFive[move + 1];
-                    topFive[match] = i;
-                }
-            }
-
-            scaling = topFive[4] + 50;
-            scaling /= 100;
-            Main.AddLog($"DetectScalingBruteForce: scaling={scaling:P0}");
-            return scaling;
         }
 
         /// <summary>
