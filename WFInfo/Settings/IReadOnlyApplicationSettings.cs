@@ -91,6 +91,6 @@ namespace WFInfo.Settings
         long FixedAutoDelay { get; }
         string Ignored { get; }
         HdrSupportEnum HdrSupport { get; }
-        bool ForceLegacyScaling { get; }
+        bool ForceLegacyDetection { get; }
     }
 }

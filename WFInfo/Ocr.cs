@@ -644,6 +644,116 @@ namespace WFInfo
         /// <returns></returns>
         public static WFtheme GetThemeWeighted(out double closestThresh, Bitmap image = null)
         {
+            if (_settings.ForceLegacyDetection)
+            {
+                // Skip scan if user manually picked a theme
+                if (_settings.ThemeSelection != WFtheme.AUTO)
+                {
+                    Main.AddLog("Theme overwrite present (legacy), setting to: " + _settings.ThemeSelection.ToString());
+                    closestThresh = 999;
+                    return _settings.ThemeSelection;
+                }
+
+                // Legacy: use full screenshot + trapezoid scan
+                if (image == null)
+                {
+                    image = CaptureScreenshot();
+                    if (image == null)
+                    {
+                        closestThresh = 0;
+                        return WFtheme.AUTO;
+                    }
+                }
+
+                if (image.Height == 0)
+                {
+                    throw new Exception("Image height was 0");
+                }
+
+                int lineHeight = (int)(pixelRewardLineHeight / 2 * _window.ScreenScaling);
+                int mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling);
+                int minWidth = mostWidth / 4;
+
+                double[] weights = new double[Enum.GetValues(typeof(WFtheme)).Cast<int>().Max() + 1];
+
+                // Use LockBits for fast pixel access
+                BitmapData imgData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, image.PixelFormat);
+                int imgStride = Math.Abs(imgData.Stride);
+                byte[] imgBytes = new byte[imgStride * image.Height];
+                Marshal.Copy(imgData.Scan0, imgBytes, 0, imgBytes.Length);
+                image.UnlockBits(imgData);
+                int imgPixelSize = 4; // BGRA
+
+                for (int y = lineHeight; y < image.Height; y++)
+                {
+                    double perc = (y - lineHeight) / (double)(image.Height - lineHeight);
+                    int totWidth = (int)(minWidth * perc + minWidth);
+                    int startX = (mostWidth - totWidth) / 2;
+                    for (int x = 0; x < totWidth; x++)
+                    {
+                        int px = startX + x;
+                        if (px >= image.Width) break;
+                        int idx = y * imgStride + px * imgPixelSize;
+                        Color clr = Color.FromArgb(imgBytes[idx + 3], imgBytes[idx + 2], imgBytes[idx + 1], imgBytes[idx]);
+                        int match = (int)GetClosestTheme(clr, out int thresh);
+                        weights[match] += 1.0 / Math.Pow(thresh + 1, 4);
+                    }
+                }
+
+                double max = 0;
+                WFtheme active = WFtheme.AUTO;
+                for (int i = 0; i < weights.Length; i++)
+                {
+                    Debug.Write(weights[i].ToString("F2", Main.culture) + " ");
+                    if (weights[i] > max)
+                    {
+                        max = weights[i];
+                        active = (WFtheme)i;
+                    }
+                }
+                Main.AddLog("CLOSEST THEME(" + max.ToString("F2", Main.culture) + "): " + active.ToString());
+                closestThresh = max;
+
+                if (_settings.Debug)
+                {
+                    try
+                    {
+                        string ts = DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture);
+                        string dir = Main.AppPath + @"\Debug";
+                        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                        string fname = $"ThemeScanArea_{ts}.png";
+                        using (Bitmap dbg = image.Clone(new Rectangle(0, 0, image.Width, image.Height), image.PixelFormat))
+                        {
+                            using (Graphics g = Graphics.FromImage(dbg))
+                            {
+                                using (var pen = new Pen(Color.Red, 2f))
+                                {
+                                    int leftTop = (mostWidth - minWidth) / 2;
+                                    int rightTop = leftTop + minWidth;
+                                    int leftBot = 0;
+                                    int rightBot = mostWidth;
+                                    g.DrawLine(pen, leftTop, lineHeight, rightTop, lineHeight);
+                                    g.DrawLine(pen, leftBot, dbg.Height - 1, rightBot, dbg.Height - 1);
+                                    g.DrawLine(pen, leftTop, lineHeight, leftBot, dbg.Height - 1);
+                                    g.DrawLine(pen, rightTop, lineHeight, rightBot, dbg.Height - 1);
+                                }
+                                g.DrawString($"Legacy Trapezoid  theme={active}  score={max:F2}",
+                                    new Font(FontFamily.GenericMonospace, 10), Brushes.Chartreuse, 10, 10);
+                            }
+                            dbg.Save(dir + @"\" + fname);
+                        }
+                        Main.AddLog($"ThemeScanArea (legacy trapezoid): {fname}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Main.AddLog("ThemeScanArea legacy debug draw failed: " + ex.Message);
+                    }
+                }
+
+                return active;
+            }
+
+            // Current: probe-based theme detection
             if (image == null)
             {
                 image = CaptureThemeRegion();
@@ -660,27 +770,27 @@ namespace WFInfo
                 throw new Exception("Image height was 0");
             }
 
-            double[] weights = ComputeThemeWeights(image);
+            double[] themeWeights = ComputeThemeWeights(image);
 
-            double max = 0;
-            WFtheme active = WFtheme.AUTO;
-            for (int i = 0; i < weights.Length; i++)
+            double maxWeight = 0;
+            WFtheme activeTheme = WFtheme.AUTO;
+            for (int i = 0; i < themeWeights.Length; i++)
             {
-                Debug.Write(weights[i].ToString("F2", Main.culture) + " ");
-                if (weights[i] > max)
+                Debug.Write(themeWeights[i].ToString("F2", Main.culture) + " ");
+                if (themeWeights[i] > maxWeight)
                 {
-                    max = weights[i];
-                    active = (WFtheme)i;
+                    maxWeight = themeWeights[i];
+                    activeTheme = (WFtheme)i;
                 }
             }
-            Main.AddLog("CLOSEST THEME(" + max.ToString("F2", Main.culture) + "): " + active.ToString());
-            closestThresh = max;
+            Main.AddLog("CLOSEST THEME(" + maxWeight.ToString("F2", Main.culture) + "): " + activeTheme.ToString());
+            closestThresh = maxWeight;
             if (_settings.ThemeSelection != WFtheme.AUTO)
             {
                 Main.AddLog("Theme overwrite present, setting to: " + _settings.ThemeSelection.ToString());
                 return _settings.ThemeSelection;
             }
-            return active;
+            return activeTheme;
         }
 
         private static double[] ComputeThemeWeights(Bitmap image)
@@ -885,7 +995,7 @@ namespace WFInfo
             // Read UI scale from Warframe EE.cfg (native process only, not GFN).
             // Line: Flash.FlashDrawScale=VALUE  (missing = 100%, float rounding → nearest 5%)
             double configScale = -1;
-            if (!_settings.ForceLegacyScaling)
+            if (!_settings.ForceLegacyDetection)
             {
                 configScale = ReadUiScaleFromConfig();
                 if (configScale > 0)
@@ -909,8 +1019,8 @@ namespace WFInfo
             snapItImageFiltered.Save(Main.AppPath + @"\Debug\SnapItImageFiltered_" + timestamp + ".png");
             double imageScale = (double)snapItImageFiltered.Height / snapItImage.Height;
             // Fallback: detect UI scale from row analysis when config couldn't be read (e.g. GFN)
-            // or when ForceLegacyScaling is enabled.
-            if (configScale <= 0 || _settings.ForceLegacyScaling)
+            // or when ForceLegacyDetection is enabled.
+            if (configScale <= 0 || _settings.ForceLegacyDetection)
             {
                 double detectedScale = DetectUiScale(rowHits, snapItImageFiltered.Width, snapItImageFiltered.Height, fullShot.Height);
                 if (detectedScale > 0)
@@ -2491,15 +2601,34 @@ namespace WFInfo
             int lineHeight = (int)(GetAdjustedLineHeight() / 2 * _window.ScreenScaling);
 
             Color clr;
-            int width = fullScreen.Width;
-            int height = fullScreen.Height;
+            int width, height;
             int mostWidth = (int)(pixleRewardWidth * _window.ScreenScaling);
-            int mostLeft = Math.Max(0, (width / 2) - (mostWidth / 2));
-            // Most Top = pixleRewardYDisplay - pixleRewardHeight + GetAdjustedLineHeight()
-            //                   (316          -        235        +       44)    *    1.1    =    137
-            int mostTop = Math.Max(0, height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + GetAdjustedLineHeight()) * _window.ScreenScaling));
-            int mostBot = Math.Min(height, height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * 0.5));
-            mostWidth = Math.Min(mostWidth, width - mostLeft);
+            int mostLeft, mostTop, mostBot;
+
+            if (_settings.ForceLegacyDetection)
+            {
+                // Legacy: use window dimensions for oversized initial crop
+                width = _window.Window.Width;
+                height = _window.Window.Height;
+                mostLeft = (width / 2) - (mostWidth / 2);
+                mostTop = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + pixelRewardLineHeight) * _window.ScreenScaling);
+                mostBot = height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * 0.5);
+                // Clamp to bitmap bounds to prevent clone overflow
+                mostLeft = Math.Max(0, mostLeft);
+                mostTop = Math.Max(0, mostTop);
+                mostBot = Math.Min(fullScreen.Height, mostBot);
+                mostWidth = Math.Min(mostWidth, fullScreen.Width - mostLeft);
+            }
+            else
+            {
+                // Current: use bitmap dimensions with clamping
+                width = fullScreen.Width;
+                height = fullScreen.Height;
+                mostLeft = Math.Max(0, (width / 2) - (mostWidth / 2));
+                mostTop = Math.Max(0, height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight + GetAdjustedLineHeight()) * _window.ScreenScaling));
+                mostBot = Math.Min(height, height / 2 - (int)((pixleRewardYDisplay - pixleRewardHeight) * _window.ScreenScaling * 0.5));
+                mostWidth = Math.Min(mostWidth, width - mostLeft);
+            }
             //Bitmap postFilter = new Bitmap(mostWidth, mostBot - mostTop);
             var rectangle = new Rectangle((int)(mostLeft), (int)(mostTop), mostWidth, mostBot - mostTop);
             Bitmap preFilter;
