@@ -14,7 +14,12 @@ namespace WFInfo.Services.WindowInfo
         { 
             get
             {
-                return Math.Max(Window.Width / 1920.0, Window.Height / 1080.0);
+                // Scale to the constraining dimension (the smaller ratio).
+                // At non-16:9 resolutions the game fits the UI to the narrower axis:
+                //   4:3 (800x600) → width constrains  (0.417 < 0.556)
+                //   21:9 ultrawide → height constrains (1.0 < 1.333)
+                // Pixel-measured from theme stripe at 800x600: y=31 ≈ 72 * 800/1920 = 30.0
+                return Math.Min(Window.Width / 1920.0, Window.Height / 1080.0);
             }
         }
 

@@ -130,6 +130,7 @@ namespace WFInfo.Settings
         public long FixedAutoDelay { get; set; } = 2000L;
         public string Ignored { get; set; } = null;
         public HdrSupportEnum HdrSupport { get; set; } = HdrSupportEnum.Auto;
+        public bool ForceLegacyScaling { get; set; } = false;
         [OnError]
         internal void OnError(StreamingContext context, ErrorContext errorContext)
         {
