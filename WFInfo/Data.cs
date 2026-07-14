@@ -521,155 +521,107 @@ namespace WFInfo
             }
         }
 
-        private bool IsValidFilteredPayload(JObject data)
+        private async Task<(T Data, bool IsFallback, bool IsLocalFallback)> GetTieredData<T>(
+            string upstreamUrl,
+            string fallbackUrl,
+            string localCachePath,
+            string label,
+            Func<T, bool> validate) where T : JToken
+        {
+            // Tier 1: upstream api.warframestat.us
+            try
+            {
+                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+                using (var upstreamResp = await client.GetAsync(upstreamUrl, cts.Token).ConfigureAwait(false))
+                {
+                    if (upstreamResp.IsSuccessStatusCode)
+                    {
+                        string response = await upstreamResp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        T data = JsonConvert.DeserializeObject<T>(response);
+                        if (validate(data))
+                        {
+                            File.WriteAllText(localCachePath, response);
+                            return (data, false, false);
+                        }
+                        Main.AddLog($"Upstream {upstreamUrl} returned invalid payload, trying fallback");
+                    }
+                    else
+                    {
+                        Main.AddLog($"Upstream {upstreamUrl} returned {(int)upstreamResp.StatusCode}, trying fallback");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"Upstream {upstreamUrl} unreachable: {ex.Message}, trying fallback");
+            }
+
+            // Tier 2: WFInfoServer fallback (gzipped, User-Agent required)
+            try
+            {
+                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+                using (var fbReq = new HttpRequestMessage(HttpMethod.Get, fallbackUrl))
+                using (var fbResp = await client.SendAsync(fbReq, cts.Token).ConfigureAwait(false))
+                {
+                    if (fbResp.IsSuccessStatusCode)
+                    {
+                        string response = await fbResp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        T data = JsonConvert.DeserializeObject<T>(response);
+                        if (validate(data))
+                        {
+                            File.WriteAllText(localCachePath, response);
+                            Main.AddLog($"Fallback {label} fetched successfully from {fallbackUrl}");
+                            return (data, true, false);
+                        }
+                        Main.AddLog($"Fallback {fallbackUrl} returned invalid payload");
+                    }
+                    else
+                    {
+                        Main.AddLog($"Fallback {fallbackUrl} returned {(int)fbResp.StatusCode}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"Fallback {fallbackUrl} failed: {ex.Message}");
+            }
+
+            // Tier 3: local file
+            Main.AddLog("Using local fallback file " + localCachePath);
+            if (File.Exists(localCachePath))
+            {
+                string response = File.ReadAllText(localCachePath);
+                T data = JsonConvert.DeserializeObject<T>(response);
+                if (validate(data))
+                    return (data, true, true);
+                Main.AddLog($"Local fallback {localCachePath} has invalid payload");
+            }
+            throw new AggregateException($"No data source available for {label}");
+        }
+
+        private static bool IsValidFilteredPayload(JObject data)
         {
             return data != null && data["relics"] != null && data["eqmt"] != null && data["ignored_items"] != null;
         }
 
         private async Task<(JObject Data, bool IsFallback, bool IsLocalFallback)> GetAllFiltered()
         {
-            // Tier 1: upstream api.warframestat.us
-            try
-            {
-                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
-                using (var upstreamResp = await client.GetAsync(filterAllJSON, cts.Token).ConfigureAwait(false))
-                {
-                    if (upstreamResp.IsSuccessStatusCode)
-                    {
-                        string response = await upstreamResp.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        JObject data = JsonConvert.DeserializeObject<JObject>(response);
-                        if (IsValidFilteredPayload(data))
-                        {
-                            File.WriteAllText(filterAllJsonFallbackPath, response);
-                            return (data, false, false);
-                        }
-                        Main.AddLog($"Upstream {filterAllJSON} returned invalid payload, trying fallback");
-                    }
-                    else
-                    {
-                        Main.AddLog($"Upstream {filterAllJSON} returned {(int)upstreamResp.StatusCode}, trying fallback");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog($"Upstream {filterAllJSON} unreachable: {ex.Message}, trying fallback");
-            }
-
-            // Tier 2: WFInfoServer fallback (gzipped, User-Agent required)
-            try
-            {
-                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
-                using (var fbReq = new HttpRequestMessage(HttpMethod.Get, filterAllJSONFallback))
-                using (var fbResp = await client.SendAsync(fbReq, cts.Token).ConfigureAwait(false))
-                {
-                    if (fbResp.IsSuccessStatusCode)
-                    {
-                        string response = await fbResp.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        JObject data = JsonConvert.DeserializeObject<JObject>(response);
-                        if (IsValidFilteredPayload(data))
-                        {
-                            File.WriteAllText(filterAllJsonFallbackPath, response);
-                            Main.AddLog("Fallback filtered-items fetched successfully from " + filterAllJSONFallback);
-                            return (data, true, false);
-                        }
-                        Main.AddLog($"Fallback {filterAllJSONFallback} returned invalid payload");
-                    }
-                    else
-                    {
-                        Main.AddLog($"Fallback {filterAllJSONFallback} returned {(int)fbResp.StatusCode}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog($"Fallback {filterAllJSONFallback} failed: {ex.Message}");
-            }
-
-            // Tier 3: local file
-            Main.AddLog("Using local fallback file " + filterAllJsonFallbackPath);
-            if (File.Exists(filterAllJsonFallbackPath))
-            {
-                string response = File.ReadAllText(filterAllJsonFallbackPath);
-                JObject data = JsonConvert.DeserializeObject<JObject>(response);
-                if (IsValidFilteredPayload(data))
-                    return (data, true, true);
-                Main.AddLog($"Local fallback {filterAllJsonFallbackPath} has invalid payload");
-            }
-            throw new AggregateException("No data source available for filtered-items");
+            return await GetTieredData<JObject>(
+                filterAllJSON,
+                filterAllJSONFallback,
+                filterAllJsonFallbackPath,
+                "filtered-items",
+                IsValidFilteredPayload).ConfigureAwait(false);
         }
 
         private async Task<(JArray Data, bool IsFallback, bool IsLocalFallback)> GetSheetData()
         {
-            // Tier 1: upstream api.warframestat.us
-            try
-            {
-                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
-                using (var upstreamResp = await client.GetAsync(sheetJsonUrl, cts.Token).ConfigureAwait(false))
-                {
-                    if (upstreamResp.IsSuccessStatusCode)
-                    {
-                        string response = await upstreamResp.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        JArray data = JsonConvert.DeserializeObject<JArray>(response);
-                        if (data != null && data.Count > 0)
-                        {
-                            File.WriteAllText(sheetJsonFallbackPath, response);
-                            return (data, false, false);
-                        }
-                        Main.AddLog($"Upstream {sheetJsonUrl} returned invalid payload, trying fallback");
-                    }
-                    else
-                    {
-                        Main.AddLog($"Upstream {sheetJsonUrl} returned {(int)upstreamResp.StatusCode}, trying fallback");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog($"Upstream {sheetJsonUrl} unreachable: {ex.Message}, trying fallback");
-            }
-
-            // Tier 2: WFInfoServer fallback (gzipped, User-Agent required)
-            try
-            {
-                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
-                using (var fbReq = new HttpRequestMessage(HttpMethod.Get, sheetJsonUrlFallback))
-                using (var fbResp = await client.SendAsync(fbReq, cts.Token).ConfigureAwait(false))
-                {
-                    if (fbResp.IsSuccessStatusCode)
-                    {
-                        string response = await fbResp.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        JArray data = JsonConvert.DeserializeObject<JArray>(response);
-                        if (data != null && data.Count > 0)
-                        {
-                            File.WriteAllText(sheetJsonFallbackPath, response);
-                            Main.AddLog("Fallback prices fetched successfully from " + sheetJsonUrlFallback);
-                            return (data, true, false);
-                        }
-                        Main.AddLog($"Fallback {sheetJsonUrlFallback} returned invalid payload");
-                    }
-                    else
-                    {
-                        Main.AddLog($"Fallback {sheetJsonUrlFallback} returned {(int)fbResp.StatusCode}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Main.AddLog($"Fallback {sheetJsonUrlFallback} failed: {ex.Message}");
-            }
-
-            // Tier 3: local file
-            Main.AddLog("Using local fallback file " + sheetJsonFallbackPath);
-            if (File.Exists(sheetJsonFallbackPath))
-            {
-                string response = File.ReadAllText(sheetJsonFallbackPath);
-                JArray data = JsonConvert.DeserializeObject<JArray>(response);
-                if (data != null && data.Count > 0)
-                    return (data, true, true);
-                Main.AddLog($"Local fallback {sheetJsonFallbackPath} has invalid payload");
-            }
-            throw new AggregateException("No data source available for prices");
+            return await GetTieredData<JArray>(
+                sheetJsonUrl,
+                sheetJsonUrlFallback,
+                sheetJsonFallbackPath,
+                "prices",
+                data => data != null && data.Count > 0).ConfigureAwait(false);
         }
 
         private SemaphoreSlim _DataUpdateSema = new SemaphoreSlim(1);
