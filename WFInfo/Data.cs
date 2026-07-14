@@ -47,6 +47,8 @@ namespace WFInfo
         private bool _isWebSocketAuthenticated = false;
         private const string filterAllJSON = "https://api.warframestat.us/wfinfo/filtered_items";
         private const string sheetJsonUrl = "https://api.warframestat.us/wfinfo/prices";
+        private const string filterAllJSONFallback = "https://wfinfo.duckdns.org:21606/wfinfo/filtered-items";
+        private const string sheetJsonUrlFallback = "https://wfinfo.duckdns.org:21606/wfinfo/prices";
         private const string wfmItemsUrl = "https://api.warframe.market/v2/items";
         public string inGameName = string.Empty;
         readonly HttpClient client;
@@ -106,7 +108,8 @@ namespace WFInfo
             HttpClientHandler handler = new HttpClientHandler
             {
                 Proxy = proxy,
-                UseCookies = false
+                UseCookies = false,
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             };
             client = new HttpClient(handler);
             client.DefaultRequestHeaders.UserAgent.ParseAdd("WFInfo/" + Main.BuildVersion);
@@ -518,56 +521,106 @@ namespace WFInfo
             }
         }
 
-        private async Task<(JObject Data, bool IsFallback)> GetAllFiltered()
+        private async Task<(JObject Data, bool IsFallback, bool IsLocalFallback)> GetAllFiltered()
         {
+            // Tier 1: upstream api.warframestat.us
             try
             {
-                string response = await client.GetStringAsync(filterAllJSON);
-                JObject data = JsonConvert.DeserializeObject<JObject>(response);
-                File.WriteAllText(filterAllJsonFallbackPath, response);
-                return (data, false);
+                var upstreamResp = await client.GetAsync(filterAllJSON).ConfigureAwait(false);
+                if (upstreamResp.IsSuccessStatusCode)
+                {
+                    string response = await upstreamResp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    JObject data = JsonConvert.DeserializeObject<JObject>(response);
+                    File.WriteAllText(filterAllJsonFallbackPath, response);
+                    return (data, false, false);
+                }
+                Main.AddLog($"Upstream {filterAllJSON} returned {(int)upstreamResp.StatusCode}, trying fallback");
             }
             catch (Exception ex)
             {
-                Main.AddLog("Failed to fetch/parse " + filterAllJSON + ", using file " + filterAllJsonFallbackPath + Environment.NewLine + ex.ToString());
-                if (File.Exists(filterAllJsonFallbackPath))
-                {
-                    string response = File.ReadAllText(filterAllJsonFallbackPath);
-                    JObject data = JsonConvert.DeserializeObject<JObject>(response);
-                    return (data, true);
-                }
-                else
-                {
-                    throw new AggregateException("No local fallback found", ex);
-                }
+                Main.AddLog($"Upstream {filterAllJSON} unreachable: {ex.Message}, trying fallback");
             }
-            
+
+            // Tier 2: WFInfoServer fallback (gzipped, User-Agent required)
+            try
+            {
+                var fbReq = new HttpRequestMessage(HttpMethod.Get, filterAllJSONFallback);
+                var fbResp = await client.SendAsync(fbReq).ConfigureAwait(false);
+                if (fbResp.IsSuccessStatusCode)
+                {
+                    string response = await fbResp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    JObject data = JsonConvert.DeserializeObject<JObject>(response);
+                    File.WriteAllText(filterAllJsonFallbackPath, response);
+                    Main.AddLog("Fallback filtered-items fetched successfully from " + filterAllJSONFallback);
+                    return (data, true, false);
+                }
+                Main.AddLog($"Fallback {filterAllJSONFallback} returned {(int)fbResp.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"Fallback {filterAllJSONFallback} failed: {ex.Message}");
+            }
+
+            // Tier 3: local file
+            Main.AddLog("Using local fallback file " + filterAllJsonFallbackPath);
+            if (File.Exists(filterAllJsonFallbackPath))
+            {
+                string response = File.ReadAllText(filterAllJsonFallbackPath);
+                JObject data = JsonConvert.DeserializeObject<JObject>(response);
+                return (data, true, true);
+            }
+            throw new AggregateException("No data source available for filtered-items");
         }
 
-        private async Task<(JArray Data, bool IsFallback)> GetSheetData()
+        private async Task<(JArray Data, bool IsFallback, bool IsLocalFallback)> GetSheetData()
         {
+            // Tier 1: upstream api.warframestat.us
             try
             {
-                string response = await client.GetStringAsync(sheetJsonUrl);
-                JArray data = JsonConvert.DeserializeObject<JArray>(response);
-                File.WriteAllText(sheetJsonFallbackPath, response);
-                return (data, false);
+                var upstreamResp = await client.GetAsync(sheetJsonUrl).ConfigureAwait(false);
+                if (upstreamResp.IsSuccessStatusCode)
+                {
+                    string response = await upstreamResp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    JArray data = JsonConvert.DeserializeObject<JArray>(response);
+                    File.WriteAllText(sheetJsonFallbackPath, response);
+                    return (data, false, false);
+                }
+                Main.AddLog($"Upstream {sheetJsonUrl} returned {(int)upstreamResp.StatusCode}, trying fallback");
             }
             catch (Exception ex)
             {
-                Main.AddLog("Failed to fetch/parse " + sheetJsonUrl + ", using file " + sheetJsonFallbackPath + Environment.NewLine + ex.ToString());
-                if (File.Exists(sheetJsonFallbackPath))
-                {
-                    string response = File.ReadAllText(sheetJsonFallbackPath);
-                    JArray data = JsonConvert.DeserializeObject<JArray>(response);
-                    return (data, true);
-                }
-                else
-                {
-                    throw new AggregateException("No local fallback found", ex);
-                }
+                Main.AddLog($"Upstream {sheetJsonUrl} unreachable: {ex.Message}, trying fallback");
             }
 
+            // Tier 2: WFInfoServer fallback (gzipped, User-Agent required)
+            try
+            {
+                var fbReq = new HttpRequestMessage(HttpMethod.Get, sheetJsonUrlFallback);
+                var fbResp = await client.SendAsync(fbReq).ConfigureAwait(false);
+                if (fbResp.IsSuccessStatusCode)
+                {
+                    string response = await fbResp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    JArray data = JsonConvert.DeserializeObject<JArray>(response);
+                    File.WriteAllText(sheetJsonFallbackPath, response);
+                    Main.AddLog("Fallback prices fetched successfully from " + sheetJsonUrlFallback);
+                    return (data, true, false);
+                }
+                Main.AddLog($"Fallback {sheetJsonUrlFallback} returned {(int)fbResp.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"Fallback {sheetJsonUrlFallback} failed: {ex.Message}");
+            }
+
+            // Tier 3: local file
+            Main.AddLog("Using local fallback file " + sheetJsonFallbackPath);
+            if (File.Exists(sheetJsonFallbackPath))
+            {
+                string response = File.ReadAllText(sheetJsonFallbackPath);
+                JArray data = JsonConvert.DeserializeObject<JArray>(response);
+                return (data, true, true);
+            }
+            throw new AggregateException("No data source available for prices");
         }
 
         private SemaphoreSlim _DataUpdateSema = new SemaphoreSlim(1);
@@ -785,8 +838,8 @@ namespace WFInfo
 
             string marketTimeText;
             string equipmentTimeText;
-            // Skip writing timestamp if fallback data files were relied on
-            if (!allFiltered.IsFallback && !sheetData.IsFallback && !marketItemsIsFallback)
+            // Show "FALLBACK" only when all URLs unreachable and local files used
+            if (!allFiltered.IsLocalFallback && !sheetData.IsLocalFallback && !marketItemsIsFallback)
             {
                 newMarketData["timestamp"] = now;
                 marketTimeText = now.ToString("MMM dd - HH:mm", Main.culture);
@@ -796,7 +849,7 @@ namespace WFInfo
                 marketTimeText = "FALLBACK";
             }
 
-            if (!allFiltered.IsFallback)
+            if (!allFiltered.IsLocalFallback)
             {
                 newEquipmentData["timestamp"] = now;
                 equipmentTimeText = now.ToString("MMM dd - HH:mm", Main.culture);
