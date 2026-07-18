@@ -156,6 +156,19 @@ namespace WFInfo
 
             CleanLegacyTesseractIfNeeded();
             CollectDebugInfo();
+
+            if (!IsVCRedistInstalled())
+            {
+                string message =
+                    "WFInfo requires the Microsoft Visual C++ Redistributable (both x86 and x64).\n\n" +
+                    "Please download and install BOTH from Microsoft:\n" +
+                    "• x86: https://aka.ms/vs/16/release/VC_redist.x86.exe\n" +
+                    "• x64: https://aka.ms/vs/16/release/VC_redist.x64.exe\n\n" +
+                    "After installing, restart WFInfo.";
+                MessageBox.Show(message, "WFInfo V" + version + " — Missing Redistributable", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             tesseract_hotlink_platform_specific_prefix = tesseract_hotlink_prefix;
 
             int filesNeeded = 0;
@@ -208,15 +221,59 @@ namespace WFInfo
 
         }
 
+        private static bool IsVCRedistInstalled()
+        {
+            bool x64Found = false;
+            bool x86Found = false;
+            try
+            {
+                using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32).OpenSubKey("Installer\\Dependencies"))
+                {
+                    if (ndpKey != null)
+                    {
+                        foreach (string item in ndpKey.GetSubKeyNames())
+                        {
+                            if (item.Contains("VC,redist.x64,amd64"))
+                                x64Found = true;
+                            if (item.Contains("VC,redist.x86,x86"))
+                                x86Found = true;
+                            if (x64Found && x86Found)
+                                return true;
+                        }
+                    }
+                }
+            }
+            catch { }
+            return x64Found && x86Found;
+        }
+
         static void MyHandler(object sender, UnhandledExceptionEventArgs args)
         {
             Exception e = (Exception)args.ExceptionObject;
             AddLog("MyHandler caught: " + e.Message);
             AddLog("Runtime terminating: " + args.IsTerminating);
             AddLog(e.StackTrace);
-            AddLog(e.InnerException.Message);
-            AddLog(e.InnerException.StackTrace);
-
+            if (e.InnerException != null)
+            {
+                AddLog(e.InnerException.Message);
+                AddLog(e.InnerException.StackTrace);
+            }
+            if (e is System.DllNotFoundException || e.InnerException is System.DllNotFoundException)
+            {
+                try
+                {
+                    MessageBox.Show(
+                        "WFInfo failed to load a required component (VC++ Redistributable may be missing).\n\n" +
+                        "Please install BOTH:\n" +
+                        "• x86: https://aka.ms/vs/16/release/VC_redist.x86.exe\n" +
+                        "• x64: https://aka.ms/vs/16/release/VC_redist.x64.exe\n\n" +
+                        "After installing, restart WFInfo.",
+                        "WFInfo V" + build_version,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+                catch { }
+            }
         }
 
         public static void AddLog(string argm)
