@@ -131,6 +131,15 @@ namespace WFInfo.Settings
             }
         }
 
+        public long FixedAutoDelay
+        {
+            get => _settings.FixedAutoDelay;
+            set { 
+                _settings.FixedAutoDelay = value;
+                RaisePropertyChanged(); 
+            }
+        }
+
         public int ImageRetentionTime
         {
             get => _settings.ImageRetentionTime;

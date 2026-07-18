@@ -1680,39 +1680,41 @@ namespace WFInfo
             try
             {
                 var watch = Stopwatch.StartNew();
-                long stop = watch.ElapsedMilliseconds + 5000;
-                long wait = watch.ElapsedMilliseconds;
                 long fixedStop = watch.ElapsedMilliseconds + ApplicationSettings.GlobalReadonlySettings.FixedAutoDelay;
+                long pollInterval = ApplicationSettings.GlobalReadonlySettings.AutoDelay;
+                long maxWait = fixedStop + 5000;
+                long wait = fixedStop;
 
                 _window.UpdateWindow();
 
-                if (ApplicationSettings.GlobalReadonlySettings.ThemeSelection == WFtheme.AUTO)
+                // Initial delay: wait FixedAutoDelay before polling
+                long initialRemaining = fixedStop - watch.ElapsedMilliseconds;
+                if (initialRemaining > 0)
+                    await Task.Delay((int)initialRemaining).ConfigureAwait(false);
+
+                // Poll at AutoDelay intervals until theme detected or timeout
+                while (watch.ElapsedMilliseconds < maxWait)
                 {
-                    while (watch.ElapsedMilliseconds < stop)
+                    OCR.GetThemeWeighted(out double diff);
+                    if (diff > 40)
                     {
-                        if (watch.ElapsedMilliseconds <= wait)
-                        {
-                            await Task.Delay(10).ConfigureAwait(false);
-                            continue;
-                        }
-                        wait += ApplicationSettings.GlobalReadonlySettings.AutoDelay;
-                        OCR.GetThemeWeighted(out double diff);
-                        if (!(diff > 40)) continue;
                         long remaining = wait - watch.ElapsedMilliseconds;
                         if (remaining > 0)
                             await Task.Delay((int)remaining).ConfigureAwait(false);
                         Main.AddLog("started auto processing");
                         OCR.ProcessRewardScreen();
-                        break;
+                        watch.Stop();
+                        return;
                     }
-                } else
-                {
-                    long remaining = fixedStop - watch.ElapsedMilliseconds;
-                    if (remaining > 0)
-                        await Task.Delay((int)remaining).ConfigureAwait(false);
-                    Main.AddLog("started auto processing (fixed delay)");
-                    OCR.ProcessRewardScreen();
+                    wait += pollInterval;
+                    long delayMs = wait - watch.ElapsedMilliseconds;
+                    if (delayMs > 0)
+                        await Task.Delay((int)delayMs).ConfigureAwait(false);
                 }
+
+                // Timeout: process anyway
+                Main.AddLog("started auto processing (timeout)");
+                OCR.ProcessRewardScreen();
                 watch.Stop();
             }
             catch (Exception ex)

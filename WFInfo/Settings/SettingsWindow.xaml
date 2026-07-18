@@ -156,28 +156,31 @@
                             <RadioButton x:Name="WindowRadio"
                                          Grid.Column="1"
                                          Content="Window"
-                                         ToolTip="Display rewards in a separate window"
                                          VerticalContentAlignment="Center"
                                          Checked="WindowChecked"
                                          Background="#FFB1D0D9"
                                          BorderBrush="#FF0F0F0F"
-                                         HorizontalAlignment="Center" />
+                                         HorizontalAlignment="Center">
+                                <RadioButton.ToolTip><ToolTip><TextBlock Text="Display rewards in a separate window" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></RadioButton.ToolTip>
+                            </RadioButton>
                             <RadioButton x:Name="OverlayRadio"
                                          Grid.Column="2"
                                          Content="Overlay"
-                                         ToolTip="Display rewards on top of Warframe"
                                          VerticalContentAlignment="Center"
                                          Checked="OverlayChecked"
                                          Background="#FFB1D0D9"
-                                         BorderBrush="#FF0F0F0F" />
+                                         BorderBrush="#FF0F0F0F">
+                                <RadioButton.ToolTip><ToolTip><TextBlock Text="Display rewards on top of Warframe" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></RadioButton.ToolTip>
+                            </RadioButton>
                             <RadioButton x:Name="LightRadio"
                                          Grid.Column="0"
                                          Content="Light"
-                                         ToolTip="Do not display any window at all"
                                          VerticalContentAlignment="Center"
                                          Checked="LightRadioChecked"
                                          Background="#FFB1D0D9"
-                                         BorderBrush="#FF0F0F0F" />
+                                         BorderBrush="#FF0F0F0F">
+                                <RadioButton.ToolTip><ToolTip><TextBlock Text="Do not display any window at all" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></RadioButton.ToolTip>
+                            </RadioButton>
                         </Grid>
                         <Label Content="Rewards display"
                                DockPanel.Dock="Top"
@@ -191,18 +194,21 @@
                     <UniformGrid>
                         <Label Content="Display time" />
                         <TextBox x:Name="Displaytime_number_box"
-                                 ToolTip="The time in milliseconds the overlays will be displayed on screen"
                                  Text="{Binding SettingsViewModel.Delay, Mode=TwoWay}"
-                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$" />
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="The time in milliseconds the overlays will be displayed on screen" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
 
                         <CheckBox x:Name="HighlightCheckbox"
                                   Content="Highlight"
-                                  ToolTip="Highlight the best rewards on the overlay."
-                                  IsChecked="{Binding SettingsViewModel.HighlightRewards, Mode=TwoWay}" />
+                                  IsChecked="{Binding SettingsViewModel.HighlightRewards, Mode=TwoWay}">
+                            <CheckBox.ToolTip><ToolTip><TextBlock Text="Highlight the best rewards on the overlay." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
+                        </CheckBox>
                         <CheckBox x:Name="HighContrastCheckbox"
                                   Content="High contrast"
-                                  ToolTip="Enable High contrast for the overlay."
-                                  IsChecked="{Binding SettingsViewModel.HighContrast, Mode=TwoWay}" />
+                                  IsChecked="{Binding SettingsViewModel.HighContrast, Mode=TwoWay}">
+                            <CheckBox.ToolTip><ToolTip><TextBlock Text="Enable High contrast for the overlay." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
+                        </CheckBox>
                     </UniformGrid>
                 </Border>
                 <Border x:Name="Overlay_sliders"
@@ -219,28 +225,32 @@
                             <Label Content="X"
                                    DockPanel.Dock="Left"
                                    HorizontalContentAlignment="Center"
-                                   Width="32"
-                                   ToolTip="The X Offset of the overlay. Positive values shift the overlay to the right." />
+                                   Width="32">
+                                <Label.ToolTip><ToolTip><TextBlock Text="The X Offset of the overlay. Positive values shift the overlay to the right." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></Label.ToolTip>
+                            </Label>
                             <TextBox x:Name="OverlayXOffset_number_box"
                                      DockPanel.Dock="Left"
-                                     ToolTip="The X Offset of the overlay. Positive values shift the overlay to the right."
                                      TextWrapping="Wrap"
                                      Text="{Binding SettingsViewModel.OverlayXOffsetValue, Mode=TwoWay}"
                                      components:NumericOnlyEntry.RegexFilter="^-?[0-9]*$"
-                                     Width="90" />
+                                     Width="90">
+                                <TextBox.ToolTip><ToolTip><TextBlock Text="The X Offset of the overlay. Positive values shift the overlay to the right." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                            </TextBox>
 
                             <TextBox x:Name="OverlayYOffset_number_box"
                                      DockPanel.Dock="Right"
-                                     ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top."
                                      Width="90"
                                      Text="{Binding SettingsViewModel.OverlayYOffsetValue, Mode=TwoWay
                              , Converter={StaticResource NegateIntConverter}}"
-                                     components:NumericOnlyEntry.RegexFilter="^-?[0-9]*$" />
+                                     components:NumericOnlyEntry.RegexFilter="^-?[0-9]*$">
+                                <TextBox.ToolTip><ToolTip><TextBlock Text="The Y Offset of the overlay. Positive values shift the overlay towards the top." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                            </TextBox>
                             <Label Content="Y"
                                    DockPanel.Dock="Right"
                                    HorizontalContentAlignment="Center"
-                                   Width="32"
-                                   ToolTip="The Y Offset of the overlay. Positive values shift the overlay towards the top." />
+                                   Width="32">
+                                <Label.ToolTip><ToolTip><TextBlock Text="The Y Offset of the overlay. Positive values shift the overlay towards the top." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></Label.ToolTip>
+                            </Label>
                         </DockPanel>
                     </DockPanel>
                 </Border>
@@ -249,17 +259,19 @@
                     <UniformGrid>
                         <Label Content="Min Width (snap)"/>
                         <TextBox x:Name="MinOverlayWidth_number_box"
-                                 ToolTip="The minimum width in pixels snap-it overlays will be displayed on screen"
                                  Text="{Binding SettingsViewModel.MinOverlayWidth, Mode=TwoWay}"
                                  components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
-                                 VerticalAlignment="Top" />
+                                 VerticalAlignment="Top">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="The minimum width in pixels snap-it overlays will be displayed on screen" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
 
                         <Label Content="Max Width (snap)"/>
                         <TextBox x:Name="MaxOverlayWidth_number_box"
-                                 ToolTip="The maximum width in pixels snap-it overlays will be displayed on screen"
                                  Text="{Binding SettingsViewModel.MaxOverlayWidth, Mode=TwoWay}"
                                  components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
-                                 VerticalAlignment="Top" />
+                                 VerticalAlignment="Top">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="The maximum width in pixels snap-it overlays will be displayed on screen" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
 
                     </UniformGrid>
                 </Border>
@@ -268,20 +280,23 @@
                     <UniformGrid>
                         <Label Content="Display time (snap)"/>
                         <TextBox x:Name="SnapItDisplaytime_number_box"
-                                 ToolTip="The time in milliseconds the overlays will be displayed on screen"
                                  Text="{Binding SettingsViewModel.SnapItDelay, Mode=TwoWay}"
                                  components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
-                                 VerticalAlignment="Top" />
+                                 VerticalAlignment="Top">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="The time in milliseconds the overlays will be displayed on screen" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
 
                         <CheckBox x:Name="SnapItemCountCheckbox"
                                   Content="Count Item"
-                                  ToolTip="Scan for item amount using Snap-It"
-                                  IsChecked="{Binding SettingsViewModel.DoSnapItCount, Mode=TwoWay}" />
+                                  IsChecked="{Binding SettingsViewModel.DoSnapItCount, Mode=TwoWay}">
+                            <CheckBox.ToolTip><ToolTip><TextBlock Text="Scan for item amount using Snap-It" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
+                        </CheckBox>
 
                         <CheckBox x:Name="SnapItThreadCheckbox"
                                   Content="Multithread Snap"
-                                  ToolTip="Speed up snap-it using multithreading"
-                                  IsChecked="{Binding SettingsViewModel.SnapMultiThreaded, Mode=TwoWay}" />
+                                  IsChecked="{Binding SettingsViewModel.SnapMultiThreaded, Mode=TwoWay}">
+                            <CheckBox.ToolTip><ToolTip><TextBlock Text="Speed up snap-it using multithreading" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
+                        </CheckBox>
 
                     </UniformGrid>
                 </Border>
@@ -305,11 +320,12 @@
                                  Style="{StaticResource KeyBindTextboxStyle}"
                                  Grid.Row="0"
                                  Grid.Column="1"
-                                 ToolTip="Key to activate the processing. Use modifiers below to achieve other actions"
                                  Text="{Binding SettingsViewModel.ActivationKeyDisplay, Mode=OneWay}"
                                  IsReadOnly="True"
                                  KeyUp="ActivationUp"
-                                 VerticalAlignment="Top" />
+                                 VerticalAlignment="Top">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="Key to activate the processing. Use modifiers below to achieve other actions" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
                         <TextBlock x:Name="hidden"
                                    Focusable="True"
                                    Visibility="Visible"
@@ -329,12 +345,13 @@
                                  Style="{StaticResource KeyBindTextboxStyle}"
                                  Grid.Row="1"
                                  Grid.Column="1"
-                                 ToolTip="Modifier to hold down to start search it"
                                  IsReadOnly="True"
                                  KeyUp="Searchit_key_box_KeyUp"
                                  Text="{Binding SettingsViewModel.SearchItModifierKey,
                                 Converter={StaticResource KeyStringConverter}}"
-                                 VerticalAlignment="Top" />
+                                 VerticalAlignment="Top">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="Modifier to hold down to start search it" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
                         <Label Content="Snap it modifier"
                                Grid.Row="2"
                                Grid.Column="0" />
@@ -342,12 +359,13 @@
                                  Style="{StaticResource KeyBindTextboxStyle}"
                                  Grid.Row="2"
                                  Grid.Column="1"
-                                 ToolTip="Modifier to hold down to start Snap it"
                                  Text="{Binding SettingsViewModel.SnapitModifierKey,
                                 Converter={StaticResource KeyStringConverter}}"
                                  KeyUp="Snapit_key_box_KeyUp"
                                  IsReadOnly="True"
-                                 VerticalAlignment="Top" />
+                                 VerticalAlignment="Top">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="Modifier to hold down to start Snap it" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
                         <Label Content="Master it modifier"
                                Grid.Row="3"
                                Grid.Column="0" />
@@ -355,12 +373,13 @@
                                  Style="{StaticResource KeyBindTextboxStyle}"
                                  Grid.Row="3"
                                  Grid.Column="1"
-                                 ToolTip="Modifier to hold down to start Master it"
                                  Text="{Binding SettingsViewModel.MasterItModifierKey,
                                 Converter={StaticResource KeyStringConverter}}"
                                  IsReadOnly="True"
                                  KeyUp="Masterit_key_box_KeyUp"
-                                 VerticalAlignment="Top" />
+                                 VerticalAlignment="Top">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="Modifier to hold down to start Master it" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
                     </Grid>
                 </Border>
                 <Border DockPanel.Dock="Top"
@@ -369,17 +388,19 @@
                     <UniformGrid>
                         <Label Content="Efficiency min" />
                         <Label Content="Efficiency max" />
-                        <TextBox ToolTip="Anything below this efficiency will be marked as red in snapit"
-                                 Margin="0, 0, 20, 0"
+                        <TextBox Margin="0, 0, 20, 0"
                                  Text="{Binding SettingsViewModel.MinimumEfficiencyValue, Mode=TwoWay}"
                                  components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
                                  AutoWordSelection="True"
-                                 VerticalAlignment="Top" />
-                        <TextBox ToolTip="Anything above this efficiency will be marked as green in snapit"
-                                 Text="{Binding SettingsViewModel.MaximumEfficiencyValue, Mode=TwoWay}"
+                                 VerticalAlignment="Top">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="Anything below this efficiency will be marked as red in snapit" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
+                        <TextBox Text="{Binding SettingsViewModel.MaximumEfficiencyValue, Mode=TwoWay}"
                                  components:NumericOnlyEntry.RegexFilter="^[0-9\.,]+$"
                                  Margin="0, 0, 20, 0"
-                                 VerticalAlignment="Top" />
+                                 VerticalAlignment="Top">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="Anything above this efficiency will be marked as green in snapit" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
                     </UniformGrid>
                 </Border>
                 <Border Padding="0"
@@ -396,7 +417,8 @@
                                 <ColumnDefinition Width="6*"/>
                             </Grid.ColumnDefinitions>
                             <Label Content="Theme" Grid.Column="0"/>
-                            <Label x:Name="ConfigureTheme_button" Grid.Column="1" MouseLeftButtonDown="ConfigureTheme_button_MouseLeftButtonDown" ToolTip="Configure Custom Theme" Margin="0,5,10,5" Padding="3"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+                            <Label x:Name="ConfigureTheme_button" Grid.Column="1" MouseLeftButtonDown="ConfigureTheme_button_MouseLeftButtonDown" Margin="0,5,10,5" Padding="3"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+                                <Label.ToolTip><ToolTip><TextBlock Text="Configure Custom Theme" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></Label.ToolTip>
                                 <Label.Style>
                                     <Style>
                                         <Setter Property="ContentControl.Content">
@@ -432,7 +454,8 @@
                                           Margin="5,4" Template="{DynamicResource ComboBoxTemplate}" Style="{DynamicResource ComboBoxStyle1}" SelectionChanged="themeSelectionComboBox_SelectionChanged"/>
 
                             <Label Visibility="{Binding SettingsViewModel.OsSupportsHDR, Converter={StaticResource BoolVisibilityConverter}}" Content="HDR" Grid.Column="0" Grid.Row="1"/>
-                            <Label Visibility="{Binding SettingsViewModel.OsSupportsHDR, Converter={StaticResource BoolVisibilityConverter}}" Grid.Row="1" Grid.Column="1" ToolTip="Auto - Detect based on game settings&#x0a;On - Always use HDR capture (will slightly change colors) &#x0a;Off - Always use SDR capture (will result in overblown HDR screenshots) &#x0a;&#x0a;It is recommended to use a custom theme with HDR enabled, this mode only compresses the dynamic color range." Margin="0,5,10,5" Padding="3"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+                            <Label Visibility="{Binding SettingsViewModel.OsSupportsHDR, Converter={StaticResource BoolVisibilityConverter}}" Grid.Row="1" Grid.Column="1" Margin="0,5,10,5" Padding="3"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20">
+                                <Label.ToolTip><ToolTip><TextBlock Text="Auto - Detect based on game settings&#x0a;On - Always use HDR capture (will slightly change colors) &#x0a;Off - Always use SDR capture (will result in overblown HDR screenshots) &#x0a;&#x0a;It is recommended to use a custom theme with HDR enabled, this mode only compresses the dynamic color range." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></Label.ToolTip>
                                 <Label.Style>
                                     <Style>
                                         <Setter Property="ContentControl.Content">
@@ -561,8 +584,9 @@
                                 Style="{StaticResource NestedBorder}">
                             <CheckBox x:Name="clipboardCheckbox"
                                       Content="Clipboard"
-                                      ToolTip="Copy the results from the OCR over to the clipboard for easy pasting into chat"
-                                      IsChecked="{Binding SettingsViewModel.Clipboard, Mode=TwoWay}" />
+                                      IsChecked="{Binding SettingsViewModel.Clipboard, Mode=TwoWay}">
+                                <CheckBox.ToolTip><ToolTip><TextBlock Text="Copy the results from the OCR over to the clipboard for easy pasting into chat" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
+                            </CheckBox>
                         </Border>
                         <Border DockPanel.Dock="Top"
                                 Style="{StaticResource NestedBorder}">
@@ -570,20 +594,53 @@
 
                                 <CheckBox x:Name="autoCheckbox"
                                           Content="Auto"
-                                          ToolTip="Automatically detects when the relic screen is visible."
-                                          Click="AutoClicked" />
+                                          Click="AutoClicked">
+                                    <CheckBox.ToolTip><ToolTip><TextBlock Text="Automatically detects when the relic screen is visible." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
+                                </CheckBox>
                                 <CheckBox x:Name="Autolist"
                                           Content="Auto List"
-                                          ToolTip="Spawns a listing dialogue whenever the end of mission is detected, requires auto"
-                                          IsChecked="{Binding SettingsViewModel.AutoList, Mode=TwoWay}" />
+                                          IsChecked="{Binding SettingsViewModel.AutoList, Mode=TwoWay}">
+                                    <CheckBox.ToolTip><ToolTip><TextBlock Text="Spawns a listing dialogue whenever the end of mission is detected, requires auto" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
+                                </CheckBox>
                                 <CheckBox x:Name="Autocsv"
                                           Content="Auto CSV"
-                                          ToolTip="Save reward options and choice to CSV file in application directory (%appdata%/WFInfo%)"
-                                          IsChecked="{Binding SettingsViewModel.AutoCSV, Mode=TwoWay}" />
+                                          IsChecked="{Binding SettingsViewModel.AutoCSV, Mode=TwoWay}">
+                                    <CheckBox.ToolTip><ToolTip><TextBlock Text="Save reward options and choice to CSV file in application directory (%appdata%/WFInfo%)" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
+                                </CheckBox>
                                 <CheckBox x:Name="Autoadd"
                                           Content="Auto Add"
-                                          ToolTip="Spawns a dialogue for increasing owned item count whenever the end of mission is detected, requires auto"
-                                          IsChecked="{Binding SettingsViewModel.AutoCount, Mode=TwoWay}" />
+                                          IsChecked="{Binding SettingsViewModel.AutoCount, Mode=TwoWay}">
+                                    <CheckBox.ToolTip><ToolTip><TextBlock Text="Spawns a dialogue for increasing owned item count whenever the end of mission is detected, requires auto" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
+                                </CheckBox>
+                            </UniformGrid>
+                        </Border>
+                        <Border DockPanel.Dock="Top"
+                                Style="{StaticResource NestedBorder}">
+                            <UniformGrid Rows="2">
+                                <Label Content="Initial delay (ms)">
+                                    <Label.ToolTip>
+                                        <ToolTip><TextBlock Text="Time in milliseconds to wait before polling for reward screen, only used when Auto is enabled (default: 500)" TextWrapping="Wrap" MaxWidth="300"/></ToolTip>
+                                    </Label.ToolTip>
+                                </Label>
+                                <TextBox x:Name="FixedAutoDelay_number_box"
+                                         Text="{Binding SettingsViewModel.FixedAutoDelay, Mode=TwoWay}"
+                                         components:NumericOnlyEntry.RegexFilter="^[0-9]+$">
+                                    <TextBox.ToolTip>
+                                        <ToolTip><TextBlock Text="Time in milliseconds to wait before polling for reward screen, only used when Auto is enabled (default: 500)" TextWrapping="Wrap" MaxWidth="300"/></ToolTip>
+                                    </TextBox.ToolTip>
+                                </TextBox>
+                                <Label Content="Poll interval (ms)">
+                                    <Label.ToolTip>
+                                        <ToolTip><TextBlock Text="Time in milliseconds between theme detection polls, only used when Auto is enabled (default: 500)" TextWrapping="Wrap" MaxWidth="300"/></ToolTip>
+                                    </Label.ToolTip>
+                                </Label>
+                                <TextBox x:Name="AutoDelay_number_box"
+                                         Text="{Binding SettingsViewModel.AutoDelay, Mode=TwoWay}"
+                                         components:NumericOnlyEntry.RegexFilter="^[0-9]+$">
+                                    <TextBox.ToolTip>
+                                        <ToolTip><TextBlock Text="Time in milliseconds between theme detection polls, only used when Auto is enabled (default: 500)" TextWrapping="Wrap" MaxWidth="300"/></ToolTip>
+                                    </TextBox.ToolTip>
+                                </TextBox>
                             </UniformGrid>
                         </Border>
                     </DockPanel>

@@ -69,7 +69,7 @@ namespace WFInfo.Settings
         public bool Debug { get; set; } = false;
         public string Locale { get; set; } = "en";
         public bool Clipboard { get; set; } = false;
-        public long AutoDelay { get; set; } = 250L;
+        public long AutoDelay { get; set; } = 500L;
         public int ImageRetentionTime { get; set; } = 12;
         public string ClipboardTemplate { get; set; } = "-- PC 48 hours avg price by WFM (c) WFInfo";
         public bool SnapitExport { get; set; } = false;
@@ -127,7 +127,7 @@ namespace WFInfo.Settings
         public int CF_sGMin { get; set; } = 0;
         public int CF_sBMax { get; set; } = 255;
         public int CF_sBMin { get; set; } = 0;
-        public long FixedAutoDelay { get; set; } = 2000L;
+        public long FixedAutoDelay { get; set; } = 500L;
         public string Ignored { get; set; } = null;
         public HdrSupportEnum HdrSupport { get; set; } = HdrSupportEnum.Auto;
         public bool ForceLegacyDetection { get; set; } = false;
