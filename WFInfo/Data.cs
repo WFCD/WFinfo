@@ -39,6 +39,9 @@ namespace WFInfo
         private readonly string nameDataPath;
         private readonly string filterAllJsonFallbackPath;
         private readonly string sheetJsonFallbackPath;
+        private readonly string etagsPath;
+        private string filterAllETag;
+        private string sheetJsonETag;
         public string JWT; // JWT is the security key, store this as email+pw combo'
         private ClientWebSocket marketSocket = new ClientWebSocket();
         private CancellationTokenSource marketSocketCancellation = new CancellationTokenSource();
@@ -94,9 +97,11 @@ namespace WFInfo
             nameDataPath = applicationDirectory + @"\name_data.json";
             filterAllJsonFallbackPath = applicationDirectory + @"\fallback_equipment_list.json";
             sheetJsonFallbackPath = applicationDirectory + @"\fallback_price_sheet.json";
+            etagsPath = applicationDirectory + @"\etags.json";
             // wfmItemsFallbackPath will be computed per-request in GetWfmItemList
 
             Directory.CreateDirectory(applicationDirectory);
+            LoadAllETags();
 
             // Create websocket for WFM
             WebProxy proxy = null;
@@ -145,6 +150,45 @@ namespace WFInfo
         private static void SaveDatabase(string path, object db)
         {
             File.WriteAllText(path, JsonConvert.SerializeObject(db, Formatting.Indented));
+        }
+
+        private void LoadAllETags()
+        {
+            filterAllETag = null;
+            sheetJsonETag = null;
+            try
+            {
+                if (File.Exists(etagsPath))
+                {
+                    var obj = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(etagsPath));
+                    if (obj != null)
+                    {
+                        filterAllETag = obj["filtered-items"]?.ToObject<string>();
+                        sheetJsonETag = obj["prices"]?.ToObject<string>();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"Failed to load ETags from {etagsPath}: {ex.Message}");
+            }
+        }
+
+        private void SaveAllETags()
+        {
+            try
+            {
+                var obj = new JObject
+                {
+                    ["filtered-items"] = filterAllETag,
+                    ["prices"] = sheetJsonETag
+                };
+                File.WriteAllText(etagsPath, obj.ToString(Formatting.None));
+            }
+            catch (Exception ex)
+            {
+                Main.AddLog($"Failed to save ETags to {etagsPath}: {ex.Message}");
+            }
         }
 
         public bool IsJwtLoggedIn()
@@ -521,14 +565,15 @@ namespace WFInfo
             }
         }
 
-        private async Task<(T Data, bool IsFallback, bool IsLocalFallback)> GetTieredData<T>(
+        private async Task<(T Data, bool IsFallback, bool IsLocalFallback, string NewETag)> GetTieredData<T>(
             string upstreamUrl,
             string fallbackUrl,
             string localCachePath,
             string label,
-            Func<T, bool> validate) where T : JToken
+            Func<T, bool> validate,
+            string currentETag = null) where T : JToken
         {
-            // Tier 1: upstream api.warframestat.us
+            // Tier 1: upstream api.warframestat.us (no ETag support)
             try
             {
                 using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
@@ -541,7 +586,8 @@ namespace WFInfo
                         if (validate(data))
                         {
                             File.WriteAllText(localCachePath, response);
-                            return (data, false, false);
+                            // api.warframestat.us doesn't support ETags, so no ETag returned
+                            return (data, false, false, null);
                         }
                         Main.AddLog($"Upstream {upstreamUrl} returned invalid payload, trying fallback");
                     }
@@ -556,28 +602,50 @@ namespace WFInfo
                 Main.AddLog($"Upstream {upstreamUrl} unreachable: {ex.Message}, trying fallback");
             }
 
-            // Tier 2: WFInfoServer fallback (gzipped, User-Agent required)
+            // Tier 2: WFInfoServer fallback (gzipped, User-Agent required, supports ETags)
             try
             {
                 using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
                 using (var fbReq = new HttpRequestMessage(HttpMethod.Get, fallbackUrl))
-                using (var fbResp = await client.SendAsync(fbReq, cts.Token).ConfigureAwait(false))
                 {
-                    if (fbResp.IsSuccessStatusCode)
+                    // Add If-None-Match header if we have a stored ETag
+                    if (!string.IsNullOrEmpty(currentETag))
                     {
-                        string response = await fbResp.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        T data = JsonConvert.DeserializeObject<T>(response);
-                        if (validate(data))
-                        {
-                            File.WriteAllText(localCachePath, response);
-                            Main.AddLog($"Fallback {label} fetched successfully from {fallbackUrl}");
-                            return (data, true, false);
-                        }
-                        Main.AddLog($"Fallback {fallbackUrl} returned invalid payload");
+                        fbReq.Headers.TryAddWithoutValidation("If-None-Match", currentETag);
                     }
-                    else
+                    using (var fbResp = await client.SendAsync(fbReq, cts.Token).ConfigureAwait(false))
                     {
-                        Main.AddLog($"Fallback {fallbackUrl} returned {(int)fbResp.StatusCode}");
+                        // Handle 304 Not Modified - use cached data
+                        if (fbResp.StatusCode == HttpStatusCode.NotModified)
+                        {
+                            Main.AddLog($"Fallback {label} unchanged (304), using cached data");
+                            // Read from local cache
+                            if (File.Exists(localCachePath))
+                            {
+                                string response = File.ReadAllText(localCachePath);
+                                T data = JsonConvert.DeserializeObject<T>(response);
+                                if (validate(data))
+                                    return (data, true, false, currentETag);
+                            }
+                            Main.AddLog($"Fallback {label} 304 but no valid cached data");
+                        }
+                        else if (fbResp.IsSuccessStatusCode)
+                        {
+                            string response = await fbResp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            T data = JsonConvert.DeserializeObject<T>(response);
+                            if (validate(data))
+                            {
+                                File.WriteAllText(localCachePath, response);
+                                string newETag = fbResp.Headers.ETag?.Tag;
+                                Main.AddLog($"Fallback {label} fetched successfully from {fallbackUrl}");
+                                return (data, true, false, newETag);
+                            }
+                            Main.AddLog($"Fallback {fallbackUrl} returned invalid payload");
+                        }
+                        else
+                        {
+                            Main.AddLog($"Fallback {fallbackUrl} returned {(int)fbResp.StatusCode}");
+                        }
                     }
                 }
             }
@@ -593,7 +661,7 @@ namespace WFInfo
                 string response = File.ReadAllText(localCachePath);
                 T data = JsonConvert.DeserializeObject<T>(response);
                 if (validate(data))
-                    return (data, true, true);
+                    return (data, true, true, null);
                 Main.AddLog($"Local fallback {localCachePath} has invalid payload");
             }
             throw new AggregateException($"No data source available for {label}");
@@ -604,24 +672,26 @@ namespace WFInfo
             return data != null && data["relics"] != null && data["eqmt"] != null && data["ignored_items"] != null;
         }
 
-        private async Task<(JObject Data, bool IsFallback, bool IsLocalFallback)> GetAllFiltered()
+        private async Task<(JObject Data, bool IsFallback, bool IsLocalFallback, string NewETag)> GetAllFiltered()
         {
             return await GetTieredData<JObject>(
                 filterAllJSON,
                 filterAllJSONFallback,
                 filterAllJsonFallbackPath,
                 "filtered-items",
-                IsValidFilteredPayload).ConfigureAwait(false);
+                IsValidFilteredPayload,
+                filterAllETag).ConfigureAwait(false);
         }
 
-        private async Task<(JArray Data, bool IsFallback, bool IsLocalFallback)> GetSheetData()
+        private async Task<(JArray Data, bool IsFallback, bool IsLocalFallback, string NewETag)> GetSheetData()
         {
             return await GetTieredData<JArray>(
                 sheetJsonUrl,
                 sheetJsonUrlFallback,
                 sheetJsonFallbackPath,
                 "prices",
-                data => data != null && data.Count > 0).ConfigureAwait(false);
+                data => data != null && data.Count > 0,
+                sheetJsonETag).ConfigureAwait(false);
         }
 
         private SemaphoreSlim _DataUpdateSema = new SemaphoreSlim(1);
@@ -751,30 +821,48 @@ namespace WFInfo
             }
 
             string oldMarketTimeText;
-            bool marketIsRecent = false;
-            if (marketData.TryGetValue("version", out _) && (marketData["version"].ToObject<string>() == Main.BuildVersion)
-                && marketData.TryGetValue("timestamp", out var timestamp) && timestamp.ToObject<DateTime>() > now.AddHours(-12))
-            {
-                // market data confirmed to be updated less than 12 hours ago. Actual data age can vary, due to pipeline delays
-                marketIsRecent = true;
-                oldMarketTimeText = timestamp.ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
-            }
-            else
-            {
-                oldMarketTimeText = "UNKNOWN";
-            }
+            string oldEquipmentTimeText;
 
-                string oldEquipmentTimeText;
+            // When ETags are available, always proceed to fetch (304 handling makes it cheap).
+            // Fall back to timestamp-based freshness check only when ETags are absent.
+            bool hasETags = !string.IsNullOrEmpty(filterAllETag) || !string.IsNullOrEmpty(sheetJsonETag);
+
+            bool marketIsRecent = false;
             bool equipmentIsRecent = false;
-            if (equipmentData.TryGetValue("timestamp", out var equipmentTimestamp) && equipmentTimestamp.ToObject<DateTime>() > now.AddHours(-12))
+
+            if (!hasETags)
             {
-                // equipment data confirmed to be updated less than 12 hours ago. Actual data age can vary, due to pipeline delays
-                equipmentIsRecent = true;
-                oldEquipmentTimeText = equipmentTimestamp.ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+                // Legacy timestamp-based freshness check (when ETags not available)
+                if (marketData.TryGetValue("version", out _) && (marketData["version"].ToObject<string>() == Main.BuildVersion)
+                    && marketData.TryGetValue("timestamp", out var timestamp) && timestamp.ToObject<DateTime>() > now.AddHours(-12))
+                {
+                    marketIsRecent = true;
+                    oldMarketTimeText = timestamp.ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+                }
+                else
+                {
+                    oldMarketTimeText = "UNKNOWN";
+                }
+
+                if (equipmentData.TryGetValue("timestamp", out var equipmentTimestamp) && equipmentTimestamp.ToObject<DateTime>() > now.AddHours(-12))
+                {
+                    equipmentIsRecent = true;
+                    oldEquipmentTimeText = equipmentTimestamp.ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture);
+                }
+                else
+                {
+                    oldEquipmentTimeText = "UNKNOWN";
+                }
             }
             else
             {
-                oldEquipmentTimeText = "UNKNOWN";
+                // ETags present — we'll fetch with conditional requests; display current status
+                oldMarketTimeText = marketData.TryGetValue("timestamp", out var ts)
+                    ? ts.ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture)
+                    : "UNKNOWN";
+                oldEquipmentTimeText = equipmentData.TryGetValue("timestamp", out var ets)
+                    ? ets.ToObject<DateTime>().ToString("MMM dd - HH:mm", Main.culture)
+                    : "UNKNOWN";
             }
 
             if (!parseHasFailed && !force && marketIsRecent && equipmentIsRecent)
@@ -789,6 +877,9 @@ namespace WFInfo
 
             var allFiltered = await GetAllFiltered();
             var sheetData = await GetSheetData();
+            filterAllETag = allFiltered.NewETag;
+            sheetJsonETag = sheetData.NewETag;
+            SaveAllETags();
 
             var marketItemsIsFallback = await ReloadItems();
 
