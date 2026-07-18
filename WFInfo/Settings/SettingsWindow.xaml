@@ -605,7 +605,7 @@
                                 <CheckBox x:Name="Autocsv"
                                           Content="Auto CSV"
                                           IsChecked="{Binding SettingsViewModel.AutoCSV, Mode=TwoWay}">
-                                    <CheckBox.ToolTip><ToolTip><TextBlock Text="Save reward options and choice to CSV file in application directory (%appdata%/WFInfo%)" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
+                                    <CheckBox.ToolTip><ToolTip><TextBlock Text="Save reward options and choice to CSV file in application directory (%appdata%\WFInfo)" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
                                 </CheckBox>
                                 <CheckBox x:Name="Autoadd"
                                           Content="Auto Add"

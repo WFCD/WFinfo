@@ -615,7 +615,7 @@ namespace WFInfo
                     }
                     using (var fbResp = await client.SendAsync(fbReq, cts.Token).ConfigureAwait(false))
                     {
-                        // Handle 304 Not Modified - use cached data
+                        // Handle 304 Not Modified - use cached data, retry without ETag if cache invalid
                         if (fbResp.StatusCode == HttpStatusCode.NotModified)
                         {
                             Main.AddLog($"Fallback {label} unchanged (304), using cached data");
@@ -627,7 +627,24 @@ namespace WFInfo
                                 if (validate(data))
                                     return (data, true, false, currentETag);
                             }
-                            Main.AddLog($"Fallback {label} 304 but no valid cached data");
+                            Main.AddLog($"Fallback {label} 304 but no valid cached data, retrying without ETag");
+                            using (var retryReq = new HttpRequestMessage(HttpMethod.Get, fallbackUrl))
+                            using (var retryResp = await client.SendAsync(retryReq, cts.Token).ConfigureAwait(false))
+                            {
+                                if (retryResp.IsSuccessStatusCode)
+                                {
+                                    string retryBody = await retryResp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                                    T retryData = JsonConvert.DeserializeObject<T>(retryBody);
+                                    if (validate(retryData))
+                                    {
+                                        File.WriteAllText(localCachePath, retryBody);
+                                        string newETag = retryResp.Headers.ETag?.Tag;
+                                        Main.AddLog($"Fallback {label} repaired from unconditional response");
+                                        return (retryData, true, false, newETag);
+                                    }
+                                }
+                                Main.AddLog($"Fallback {label} retry also failed or invalid");
+                            }
                         }
                         else if (fbResp.IsSuccessStatusCode)
                         {
@@ -661,7 +678,7 @@ namespace WFInfo
                 string response = File.ReadAllText(localCachePath);
                 T data = JsonConvert.DeserializeObject<T>(response);
                 if (validate(data))
-                    return (data, true, true, null);
+                    return (data, true, true, currentETag);
                 Main.AddLog($"Local fallback {localCachePath} has invalid payload");
             }
             throw new AggregateException($"No data source available for {label}");
@@ -1707,7 +1724,7 @@ namespace WFInfo
                         return;
                     }
                     wait += pollInterval;
-                    long delayMs = wait - watch.ElapsedMilliseconds;
+                    long delayMs = Math.Min(wait - watch.ElapsedMilliseconds, maxWait - watch.ElapsedMilliseconds);
                     if (delayMs > 0)
                         await Task.Delay((int)delayMs).ConfigureAwait(false);
                 }
