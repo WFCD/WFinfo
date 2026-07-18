@@ -1704,6 +1704,17 @@ namespace WFInfo
 
                 _window.UpdateWindow();
 
+                // Read UI scale from Warframe EE.cfg (same as SnapIt does)
+                if (!_settings.ForceLegacyDetection)
+                {
+                    double configScale = OCR.ReadUiScaleFromConfig();
+                    if (configScale > 0)
+                    {
+                        OCR.uiScaling = configScale;
+                        Main.AddLog($"AutoTriggered: Read UI scaling {configScale:P0} from EE.cfg");
+                    }
+                }
+
                 // Initial delay: wait FixedAutoDelay before polling
                 long initialRemaining = fixedStop - watch.ElapsedMilliseconds;
                 if (initialRemaining > 0)
@@ -1713,7 +1724,7 @@ namespace WFInfo
                 while (watch.ElapsedMilliseconds < maxWait)
                 {
                     OCR.GetThemeWeighted(out double diff);
-                    if (diff > 40)
+                    if (diff > 0.005)
                     {
                         long remaining = wait - watch.ElapsedMilliseconds;
                         if (remaining > 0)

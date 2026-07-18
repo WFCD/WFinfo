@@ -754,11 +754,15 @@ namespace WFInfo
             }
 
             // Current: probe-based theme detection
+            int originX = 0, originY = 0;
             if (image == null)
             {
-                image = CaptureThemeRegion();
+                var (crop, ox, oy) = CaptureThemeRegion();
+                image = crop;
+                originX = ox;
+                originY = oy;
 
-                if (image == null)
+                if (image == null || image.Height == 0)
                 {
                     closestThresh = 0;
                     return WFtheme.AUTO;
@@ -770,7 +774,7 @@ namespace WFInfo
                 throw new Exception("Image height was 0");
             }
 
-            double[] themeWeights = ComputeThemeWeights(image);
+            double[] themeWeights = ComputeThemeWeights(image, originX, originY);
 
             double maxWeight = 0;
             WFtheme activeTheme = WFtheme.AUTO;
@@ -793,16 +797,16 @@ namespace WFInfo
             return activeTheme;
         }
 
-        private static double[] ComputeThemeWeights(Bitmap image)
+        private static double[] ComputeThemeWeights(Bitmap image, int originX = 0, int originY = 0)
         {
             int nThemes = Enum.GetValues(typeof(WFtheme)).Cast<int>().Max() + 1;
             double[] weights = new double[nThemes];
             if (image == null || image.Height == 0) return weights;
 
             double sc = _window.ScreenScaling * Math.Max(uiScaling, 0.5);
-            int probeX = (int)Math.Round(150 * sc);
-            int probeY1 = (int)Math.Round(85 * sc);
-            int probeY2 = (int)Math.Round(93 * sc);
+            int probeX = (int)Math.Round(150 * sc) - originX;
+            int probeY1 = (int)Math.Round(85 * sc) - originY;
+            int probeY2 = (int)Math.Round(93 * sc) - originY;
             if (probeX >= image.Width || probeY1 >= image.Height) return weights;
             probeY2 = Math.Min(probeY2, image.Height - 1);
             int midY = (probeY1 + probeY2) / 2;
@@ -839,13 +843,8 @@ namespace WFInfo
                 weights[i] = 1.0 / (dist + 1);
             }
 
-            // Normalise to [0, 1] for the caller
-            double maxWeight = 0;
-            for (int i = 0; i < nThemes; i++)
-                if (weights[i] > maxWeight) maxWeight = weights[i];
-            if (maxWeight > 0)
-                for (int i = 0; i < nThemes; i++)
-                    weights[i] /= maxWeight;
+            // Raw scores (no normalization) — callers need absolute confidence values
+            // for threshold checks (e.g. AutoTriggered diff > threshold).
 
             if (_settings != null && _settings.Debug)
             {
@@ -3201,8 +3200,10 @@ namespace WFInfo
 
         /// <summary>
         /// Captures 200x200 px around the theme probe area instead of full screen.
+        /// Returns the crop bitmap and the window-space origin (cropX, cropY) so the
+        /// caller can translate probe coordinates into crop-local coordinates.
         /// </summary>
-        private static Bitmap CaptureThemeRegion()
+        private static (Bitmap bitmap, int originX, int originY) CaptureThemeRegion()
         {
             _window.UpdateWindow();
 
@@ -3210,7 +3211,7 @@ namespace WFInfo
             int probeX = (int)Math.Round(150 * sc);
             int probeY1 = (int)Math.Round(85 * sc);
 
-            // Square 100px around the probe column
+            // Square 200px around the probe column
             const int margin = 100;
             const int side = margin * 2;
             var window = _window.Window;
@@ -3253,29 +3254,30 @@ namespace WFInfo
                 screenshot = _gdiScreenshot;
             }
 
+            Bitmap region;
             if (screenshot is GdiScreenshotService)
             {
                 // Direct region capture via GDI — no full-screen copy
-                Bitmap region = new Bitmap(side, side, PixelFormat.Format32bppArgb);
+                region = new Bitmap(side, side, PixelFormat.Format32bppArgb);
                 using (Graphics g = Graphics.FromImage(region))
                 {
                     g.CopyFromScreen(screenX, screenY, 0, 0, new Size(side, side), CopyPixelOperation.SourceCopy);
                 }
-                return region;
             }
             else
             {
                 // WindowsCapture: must capture full frame, crop after
                 var images = screenshot.CaptureScreenshot().Result;
-                if (images.Count == 0) return null;
+                if (images.Count == 0) return (null, 0, 0);
                 using (var full = images.First())
                 {
                     var cropRect = new Rectangle(cropX, cropY, side, side);
                     cropRect.Intersect(new Rectangle(0, 0, full.Width, full.Height));
-                    if (cropRect.IsEmpty) return (Bitmap)full.Clone();
-                    return full.Clone(cropRect, full.PixelFormat);
+                    if (cropRect.IsEmpty) region = (Bitmap)full.Clone();
+                    else region = full.Clone(cropRect, full.PixelFormat);
                 }
             }
+            return (region, cropX, cropY);
         }
 
         internal static Bitmap CaptureScreenshot(bool saveDebug = true)
@@ -3562,7 +3564,7 @@ namespace WFInfo
         /// Only reads for native Warframe process (not GeForce NOW).
         /// Returns 0.5-1.25, or -1 if unavailable.
         /// </summary>
-        private static double ReadUiScaleFromConfig()
+        internal static double ReadUiScaleFromConfig()
         {
             if (_process == null || !_process.IsRunning || _process.GameIsStreamed)
                 return -1;
