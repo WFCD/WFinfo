@@ -200,11 +200,11 @@
                         </TextBox>
 
                         <CheckBox x:Name="HighlightCheckbox"
-                                  Content="Highlight"
+                                  Content="Highlight" HorizontalAlignment="Center"
                                   IsChecked="{Binding SettingsViewModel.HighlightRewards, Mode=TwoWay}">
                             <CheckBox.ToolTip><ToolTip><TextBlock Text="Highlight the best rewards on the overlay." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
                         </CheckBox>
-                        <CheckBox x:Name="HighContrastCheckbox"
+                        <CheckBox x:Name="HighContrastCheckbox" HorizontalAlignment="Center"
                                   Content="High contrast"
                                   IsChecked="{Binding SettingsViewModel.HighContrast, Mode=TwoWay}">
                             <CheckBox.ToolTip><ToolTip><TextBlock Text="Enable High contrast for the overlay." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></CheckBox.ToolTip>
@@ -400,6 +400,19 @@
                                  Margin="0, 0, 20, 0"
                                  VerticalAlignment="Top">
                             <TextBox.ToolTip><ToolTip><TextBlock Text="Anything above this efficiency will be marked as green in snapit" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
+                        </TextBox>
+                    </UniformGrid>
+                </Border>
+                <Border DockPanel.Dock="Top"
+                        Padding="15 5 25 5">
+                    <UniformGrid Rows="1">
+                        <Label Content="UI Scale" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Label.ToolTip><ToolTip><TextBlock Text="In-game UI scale override (50-100). 0 = auto (uses EE.cfg or heuristics)." TextWrapping="Wrap" MaxWidth="300"/></ToolTip></Label.ToolTip>
+                        </Label>
+                        <TextBox x:Name="uiScaling_textbox"
+                                 Text="{Binding SettingsViewModel.UserUiScaling, Mode=TwoWay}"
+                                 components:NumericOnlyEntry.RegexFilter="^[0-9]+$">
+                            <TextBox.ToolTip><ToolTip><TextBlock Text="0 = auto, 50-100 = custom UI scale percentage" TextWrapping="Wrap" MaxWidth="300"/></ToolTip></TextBox.ToolTip>
                         </TextBox>
                     </UniformGrid>
                 </Border>

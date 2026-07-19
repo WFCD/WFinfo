@@ -131,6 +131,8 @@ namespace WFInfo.Settings
         public string Ignored { get; set; } = null;
         public HdrSupportEnum HdrSupport { get; set; } = HdrSupportEnum.Auto;
         public bool ForceLegacyDetection { get; set; } = false;
+        [JsonProperty]
+        public int UserUiScaling { get; set; } = 0;
         [OnError]
         internal void OnError(StreamingContext context, ErrorContext errorContext)
         {

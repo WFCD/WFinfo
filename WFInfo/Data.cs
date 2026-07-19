@@ -1705,7 +1705,12 @@ namespace WFInfo
                 _window.UpdateWindow();
 
                 // Read UI scale from Warframe EE.cfg (same as SnapIt does)
-                if (!_settings.ForceLegacyDetection)
+                if (_settings.UserUiScaling > 0)
+                {
+                    OCR.uiScaling = _settings.UserUiScaling / 100.0;
+                    Main.AddLog($"AutoTriggered: Using user-specified UI scaling: {OCR.uiScaling:P0}");
+                }
+                else if (!_settings.ForceLegacyDetection)
                 {
                     double configScale = OCR.ReadUiScaleFromConfig();
                     if (configScale > 0)

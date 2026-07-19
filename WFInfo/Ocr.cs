@@ -233,6 +233,21 @@ namespace WFInfo
             Main.StatusUpdate("Processing...", 0);
             Main.AddLog("----  Triggered Reward Screen Processing  ------------------------------------------------------------------");
 
+            // Read UI scale from Warframe EE.cfg (native process only, not GFN).
+            if (_settings.UserUiScaling > 0)
+            {
+                uiScaling = _settings.UserUiScaling / 100.0;
+                Main.AddLog($"Using user-specified UI scaling: {uiScaling:P0}");
+            }
+            else if (!_settings.ForceLegacyDetection)
+            {
+                double configScale = ReadUiScaleFromConfig();
+                if (configScale > 0)
+                {
+                    uiScaling = configScale;
+                }
+            }
+
             DateTime time = DateTime.UtcNow;
             timestamp = time.ToString("yyyy-MM-dd HH-mm-ssffffff", Main.culture);
             var watch = new Stopwatch();
@@ -257,7 +272,15 @@ namespace WFInfo
 
             try
             {
-				    parts = ExtractPartBoxAutomatically(out uiScaling, out _, bigScreenshot);
+                if (_settings.UserUiScaling > 0)
+                {
+                    // User override: let method use uiScaling for internal crops, but discard auto-detected result
+                    parts = ExtractPartBoxAutomatically(out _, out _, bigScreenshot);
+                }
+                else
+                {
+                    parts = ExtractPartBoxAutomatically(out uiScaling, out _, bigScreenshot);
+                }
             }
             catch (Exception e)
             {
@@ -994,7 +1017,12 @@ namespace WFInfo
             // Read UI scale from Warframe EE.cfg (native process only, not GFN).
             // Line: Flash.FlashDrawScale=VALUE  (missing = 100%, float rounding → nearest 5%)
             double configScale = -1;
-            if (!_settings.ForceLegacyDetection)
+            if (_settings.UserUiScaling > 0)
+            {
+                uiScaling = _settings.UserUiScaling / 100.0;
+                Main.AddLog($"SnapIt: Using user-specified UI scaling: {uiScaling:P0}");
+            }
+            else if (!_settings.ForceLegacyDetection)
             {
                 configScale = ReadUiScaleFromConfig();
                 if (configScale > 0)
@@ -1019,7 +1047,8 @@ namespace WFInfo
             double imageScale = (double)snapItImageFiltered.Height / snapItImage.Height;
             // Fallback: detect UI scale from row analysis when config couldn't be read (e.g. GFN)
             // or when ForceLegacyDetection is enabled.
-            if (configScale <= 0 || _settings.ForceLegacyDetection)
+            // Skip when user has specified a custom UI scaling.
+            if (_settings.UserUiScaling <= 0 && (configScale <= 0 || _settings.ForceLegacyDetection))
             {
                 double detectedScale = DetectUiScale(rowHits, snapItImageFiltered.Width, snapItImageFiltered.Height, fullShot.Height);
                 if (detectedScale > 0)

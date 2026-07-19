@@ -92,5 +92,6 @@ namespace WFInfo.Settings
         string Ignored { get; }
         HdrSupportEnum HdrSupport { get; }
         bool ForceLegacyDetection { get; }
+        int UserUiScaling { get; }
     }
 }

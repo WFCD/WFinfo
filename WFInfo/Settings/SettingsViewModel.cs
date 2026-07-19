@@ -716,6 +716,25 @@ namespace WFInfo.Settings
             }
         }
 
+        public int UserUiScaling
+        {
+            get => _settings.UserUiScaling;
+            set
+            {
+                if (value != 0 && (value < 50 || value > 100))
+                {
+                    _validationErrors[nameof(UserUiScaling)] = "UI Scale must be 0 (auto) or between 50 and 100";
+                }
+                else
+                {
+                    _settings.UserUiScaling = value;
+                    _validationErrors.Remove(nameof(UserUiScaling));
+                    RaisePropertyChanged();
+                }
+                ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(nameof(UserUiScaling)));
+            }
+        }
+
         public bool OsSupportsHDR => ApiInformation.IsTypePresent("Windows.Graphics.Capture.GraphicsCaptureSession");
 
         private static readonly string settingsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\WFInfo\settings.json";  //change to WFInfo after release
