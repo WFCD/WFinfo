@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Forms;
+using System;
+using System.Windows.Threading;
 
 namespace WFInfo
 {
@@ -18,7 +20,7 @@ namespace WFInfo
         private bool searchActive = false;
         private bool showAllEqmt = false;
         private int searchTimerDurationMS = 500;
-        public static Timer searchTimer = new Timer();
+        public DispatcherTimer searchTimer;
         public static string[] searchText;
         public static EquipmentWindow INSTANCE;
 
@@ -26,6 +28,16 @@ namespace WFInfo
         {
             InitializeComponent();
             INSTANCE = this;
+
+            searchTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(searchTimerDurationMS)
+            };
+            searchTimer.Tick += (s, e) =>
+            {
+                searchTimer.Stop();
+                ReapplyFilters();
+            };
         }
 
         private void Hide(object sender, RoutedEventArgs e)
@@ -135,7 +147,7 @@ namespace WFInfo
                 }
                 TreeNode primeType = primeTypes[typeName];
                 primeType.ResetFilter();
-                primeType.FilterOutVaulted();
+                ApplyFilters(primeType);
                 EqmtTree.Items.Add(primeType);
             }
             SortBoxChanged(null, null);
@@ -166,27 +178,17 @@ namespace WFInfo
                 if (showAllEqmt)
                 {
                     EqmtTree.Items.IsLiveSorting = true;
-                    switch (SortBox.SelectedIndex)
+                    var (propertyName, direction) = SortBox.SelectedIndex switch
                     {
-                        case 1:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Plat_Val", System.ComponentModel.ListSortDirection.Descending));
-                            break;
-                        case 2:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Diff_Val", System.ComponentModel.ListSortDirection.Ascending));
-                            break;
-                        case 3:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Owned_Val", System.ComponentModel.ListSortDirection.Descending));
-                            break;
-                        case 4:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Owned_Plat_Val", System.ComponentModel.ListSortDirection.Descending));
-                            break;
-                        case 5:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("Owned_Ducat_Val", System.ComponentModel.ListSortDirection.Descending));
-                            break;
-                        default:
-                            EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription("EqmtName_Sort", System.ComponentModel.ListSortDirection.Ascending));
-                            break;
-                    }
+                        1 => ("Plat_Val", System.ComponentModel.ListSortDirection.Descending),
+                        2 => ("Diff_Val", System.ComponentModel.ListSortDirection.Ascending),
+                        3 => ("Owned_Val", System.ComponentModel.ListSortDirection.Descending),
+                        4 => ("Owned_Plat_Val", System.ComponentModel.ListSortDirection.Descending),
+                        5 => ("Owned_Ducat_Val", System.ComponentModel.ListSortDirection.Descending),
+                        _ => ("EqmtName_Sort", System.ComponentModel.ListSortDirection.Ascending)
+                    };
+                    EqmtTree.Items.SortDescriptions.Add(new System.ComponentModel.SortDescription(propertyName, direction));
+
                     bool i = false;
                     foreach (TreeNode prime in EqmtTree.Items)
                     {
@@ -201,17 +203,15 @@ namespace WFInfo
             }
         }
 
-        private void VaultedClick(object sender, RoutedEventArgs e)
+        private void FilterChanged(object sender, RoutedEventArgs e)
         {
-            if ((bool)vaulted.IsChecked)
-            {
-                foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
-                    primeType.Value.FilterOutVaulted(true);
+            if (sender == completed) incomplete.IsChecked = true;
+            if (sender == incomplete) completed.IsChecked = true;
 
-                RefreshVisibleRelics();
-            }
-            else
-                ReapplyFilters();
+            if (sender == mastered) unmastered.IsChecked = true;
+            if (sender == unmastered) mastered.IsChecked = true;
+
+            StartSearchReapplyTimer();
         }
 
         /// <summary>
@@ -219,19 +219,8 @@ namespace WFInfo
         /// </summary>
         private void StartSearchReapplyTimer()
         {
-            if (searchTimer.Enabled)
-            {
-                searchTimer.Stop();
-            }
-
-            searchTimer.Interval = searchTimerDurationMS;
-            searchTimer.Enabled = true;
-            searchTimer.Tick += (s, e) =>
-            {
-                searchTimer.Enabled = false;
-                searchTimer.Stop();
-                ReapplyFilters();
-            };
+            searchTimer.Stop();
+            searchTimer.Start();
         }
 
         private void TextboxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -301,6 +290,12 @@ namespace WFInfo
                 primeType.Value.ChangeExpandedTo(false);
         }
 
+        private void CategoriesExpand(object sender, RoutedEventArgs e) =>
+            CategoriesPopup.IsOpen = !CategoriesPopup.IsOpen;
+
+        private void CategoriesCollapse(object sender, System.Windows.Input.MouseEventArgs e) =>
+            CategoriesPopup.IsOpen = false;
+
         private void RefreshVisibleRelics()
         {
             int index = 0;
@@ -358,18 +353,34 @@ namespace WFInfo
             EqmtTree.Items.Refresh();
         }
 
+        private void ApplyFilters(TreeNode type)
+        {
+            if (vaulted.IsChecked == false) type.FilterOutVaulted(true);
+            if (unowned.IsChecked == false) type.FilterOutUnowned();
+            if (completed.IsChecked == false) type.FilterOutCompleted();
+            if (incomplete.IsChecked == false) type.FilterOutIncomplete();
+            if (mastered.IsChecked == false) type.FilterOutMastered();
+            if (unmastered.IsChecked == false) type.FilterOutUnmastered();
+
+            if (warframes.IsChecked == false) type.FilterOutEquipment("Warframes");
+            if (primary.IsChecked == false) type.FilterOutEquipment("Primary");
+            if (secondary.IsChecked == false) type.FilterOutEquipment("Secondary");
+            if (melee.IsChecked == false) type.FilterOutEquipment("Melee");
+            if (archwing.IsChecked == false) type.FilterOutEquipment("Archwing");
+            if (companion.IsChecked == false) type.FilterOutEquipment("Companion");
+        }
+
         private void ReapplyFilters()
         {
-            foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
-                primeType.Value.ResetFilter();
-
-            if ((bool)vaulted.IsChecked)
-                foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
-                    primeType.Value.FilterOutVaulted(true);
+            foreach (TreeNode primeType in primeTypes.Values)
+            {
+                primeType.ResetFilter();
+                ApplyFilters(primeType);
+            }
 
             if (searchText != null && searchText.Length != 0)
-                foreach (KeyValuePair<string, TreeNode> primeType in primeTypes)
-                    primeType.Value.FilterSearchText(searchText, false, true);
+                foreach (TreeNode primeType in primeTypes.Values)
+                    primeType.FilterSearchText(searchText, false, true);
 
             RefreshVisibleRelics();
         }

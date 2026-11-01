@@ -1,21 +1,33 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Data;
 using System.Windows.Forms;
+using System.Windows.Threading;
 using Newtonsoft.Json.Linq;
 
 namespace WFInfo
 {
     public class RelicsViewModel : INPC
     {
-        public static RelicsViewModel Instance { get; }= new RelicsViewModel();
+        public static RelicsViewModel Instance { get; } = new RelicsViewModel();
         public RelicsViewModel()
         {
             _relicTreeItems = new List<TreeNode>();
             RelicsItemsView = new ListCollectionView(_relicTreeItems);
             ExpandAllCommand = new SimpleCommand(() => ExpandOrCollapseAll(true));
             CollapseAllCommand = new SimpleCommand(() => ExpandOrCollapseAll(false));
+
+            searchTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(searchTimerDurationMS)
+            };
+            searchTimer.Tick += (s, e) =>
+            {
+                searchTimer.Stop();
+                ReapplyFilters();
+            };
         }
 
         private bool _initialized = false;
@@ -27,23 +39,12 @@ namespace WFInfo
         private bool _hideVaulted = true;
         private readonly List<TreeNode> _rawRelicNodes = new List<TreeNode>();
 
-        public static Timer searchTimer = new Timer();
+        public DispatcherTimer searchTimer;
 
         private void StartSearchReapplyTimer()
         {
-            if (searchTimer.Enabled)
-            {
-                searchTimer.Stop();
-            }
-
-            searchTimer.Interval = searchTimerDurationMS;
-            searchTimer.Enabled = true;
-            searchTimer.Tick += (s, e) =>
-            {
-                searchTimer.Enabled = false;
-                searchTimer.Stop();
-                ReapplyFilters();
-            };
+            searchTimer.Stop();
+            searchTimer.Start();
         }
 
         public string FilterText
@@ -66,17 +67,17 @@ namespace WFInfo
             foreach (TreeNode era in _rawRelicNodes)
                 era.ChangeExpandedTo(expand);
         }
-        
+
         public bool ShowAllRelics
         {
             get => _showAllRelics;
             set
             {
                 foreach (TreeNode era in _rawRelicNodes)
-                foreach (TreeNode relic in era.Children)
-                    relic.topLevel = value;
+                    foreach (TreeNode relic in era.Children)
+                        relic.topLevel = value;
                 SetField(ref _showAllRelics, value);
-                
+
                 _relicTreeItems.Clear();
                 RefreshVisibleRelics();
                 RaisePropertyChanged(nameof(ShowAllRelicsText));
@@ -88,7 +89,7 @@ namespace WFInfo
         {
             get => _hideVaulted;
             set
-            { 
+            {
                 SetField(ref _hideVaulted, value);
                 ReapplyFilters();
             }
@@ -111,7 +112,7 @@ namespace WFInfo
             // 1 - Average intact plat
             // 2 - Average radiant plat
             // 3 - Difference (radiant-intact)
-        
+
             foreach (TreeNode era in _rawRelicNodes)
             {
                 era.Sort(SortBoxSelectedIndex);
@@ -122,21 +123,15 @@ namespace WFInfo
                 RelicsItemsView.SortDescriptions.Clear();
                 //TODO:
                 //_relicTreeItems.IsLiveSorting = true;
-                switch (SortBoxSelectedIndex)
+                var (propertyName, direction) = SortBoxSelectedIndex switch
                 {
-                    case 1:
-                        RelicsItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Intact_Val", System.ComponentModel.ListSortDirection.Descending));
-                        break;
-                    case 2:
-                        RelicsItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Radiant_Val", System.ComponentModel.ListSortDirection.Descending));
-                        break;
-                    case 3:
-                        RelicsItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Bonus_Val", System.ComponentModel.ListSortDirection.Descending));
-                        break;
-                    default:
-                        RelicsItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Name_Sort", System.ComponentModel.ListSortDirection.Ascending));
-                        break;
-                }
+                    1 => ("Intact_Val", System.ComponentModel.ListSortDirection.Descending),
+                    2 => ("Radiant_Val", System.ComponentModel.ListSortDirection.Descending),
+                    3 => ("Bonus_Val", System.ComponentModel.ListSortDirection.Descending),
+                    _ => ("Name_Sort", System.ComponentModel.ListSortDirection.Ascending)
+                };
+
+                RelicsItemsView.SortDescriptions.Add(new System.ComponentModel.SortDescription(propertyName, direction));
 
                 bool i = false;
                 foreach (TreeNode relic in _relicTreeItems)
@@ -157,8 +152,8 @@ namespace WFInfo
             {
                 List<TreeNode> activeNodes = new List<TreeNode>();
                 foreach (TreeNode era in _rawRelicNodes)
-                foreach (TreeNode relic in era.ChildrenFiltered)
-                    activeNodes.Add(relic);
+                    foreach (TreeNode relic in era.ChildrenFiltered)
+                        activeNodes.Add(relic);
 
 
                 for (index = 0; index < _relicTreeItems.Count;)
@@ -203,13 +198,13 @@ namespace WFInfo
 
         public void ReapplyFilters()
         {
-        
+
             foreach (TreeNode era in _rawRelicNodes)
             {
                 era.ResetFilter();
-                if(HideVaulted)
+                if (HideVaulted)
                     era.FilterOutVaulted(true);
-                if(!string.IsNullOrEmpty(FilterText))
+                if (!string.IsNullOrEmpty(FilterText))
                 {
                     var searchText = FilterText.Split(' ');
                     era.FilterSearchText(searchText, false, true);
@@ -229,7 +224,7 @@ namespace WFInfo
             TreeNode neo = new TreeNode("Neo", "", false, 0);
             TreeNode axi = new TreeNode("Axi", "", false, 0);
             TreeNode vanguard = new TreeNode("Vanguard", "", false, 0);
-            _rawRelicNodes.AddRange(new[] { lith, meso, neo, axi, vanguard });
+            _rawRelicNodes.AddRange([lith, meso, neo, axi, vanguard]);
             int eraNum = 0;
             foreach (TreeNode head in _rawRelicNodes)
             {
@@ -245,19 +240,19 @@ namespace WFInfo
                         if (kvp.Key != "vaulted" && Main.dataBase.marketData.TryGetValue(kvp.Value.ToString(), out JToken marketValues))
                         {
                             TreeNode part = new TreeNode(kvp.Value.ToString(), "", false, 0);
-                            part.SetPartText(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), kvp.Key);                           
+                            part.SetPartText(marketValues["plat"].ToObject<double>(), marketValues["ducats"].ToObject<int>(), kvp.Key);
                             relic.AddChild(part);
                         }
                     }
-                                
+
                     relic.SetRelicText();
                     head.AddChild(relic);
-            
+
                     //groupedByAll.Items.Add(relic);
                     //Search.Items.Add(relic);
                 }
-            
-                head.SetEraText();   
+
+                head.SetEraText();
                 head.ResetFilter();
                 head.FilterOutVaulted();
                 head.RecolorChildren();

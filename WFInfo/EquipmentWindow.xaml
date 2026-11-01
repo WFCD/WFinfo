@@ -14,11 +14,54 @@
         <Rectangle Fill="#FF1B1B1B" Stroke="#FF646464" />
         <Label MouseLeftButtonDown="ExpandAll" Content="＋" FontSize="15" ToolTip="Expand All Levels" Padding="0" Margin="0,26,379,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
         <Label MouseLeftButtonDown="CollapseAll" Content="－" FontSize="15" ToolTip="Collapse All Levels" Padding="0" Margin="20,26,359,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top"/>
+        <Label MouseLeftButtonDown="CategoriesExpand" Content="☰ Categories" FontSize="12" Margin="40,26,249,0" Style="{StaticResource Label_Button}" Height="20" VerticalAlignment="Top" HorizontalContentAlignment="Left" Padding="4,0,0,0"/>
 
-        <Grid Margin="1,27,1,0" Height="18" VerticalAlignment="Top">
-            <Rectangle Fill="#FF0F0F0F" Stroke="#FF646464" Margin="-1" />
-            <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Show vaulted items." Click="VaultedClick" IsChecked="True" Margin="52,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-            <!-- <CheckBox x:Name="vaulted" Content="Hide Vaulted" ToolTip="Hide vaulted items." VerticalContentAlignment="Center" Background="#FFB1D0D9" BorderBrush="#FF0F0F0F" Margin="39,-1,0,-1" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="107" FontSize="14" Click="VaultedClick" IsChecked="True"/> -->
+        <Grid Margin="40,27,1,0" Height="18" VerticalAlignment="Top">
+            <Popup x:Name="CategoriesPopup" 
+                StaysOpen="True"
+                Placement="Bottom"
+                MouseLeave="CategoriesCollapse"
+            >
+                <Border Background="#FF1B1B1B" BorderBrush="#FF646464" BorderThickness="1" Padding="5">
+                    <StackPanel>
+                        <StackPanel.Resources>
+                            <Style TargetType="Separator">
+                                <Setter Property="Margin" Value="0,5"/>
+                                <Setter Property="Background" Value="#FF646464"/>
+                            </Style>
+                        </StackPanel.Resources>
+
+                        <CheckBox x:Name="vaulted" Content="Vaulted" Click="FilterChanged" Padding="4,1,0,0" />
+                        <Separator/>
+
+                        <CheckBox x:Name="unowned" Content="Unowned" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" ToolTip="No parts owned" />
+                        <Separator/>
+
+                        <UniformGrid Columns="2">
+                            <CheckBox x:Name="completed" Content="Completed" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" ToolTip="All parts owned"  />
+                            <CheckBox x:Name="incomplete" Content="Incomplete" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" ToolTip="At least 1 part not owned"/>
+                        </UniformGrid>
+                        <Separator/>
+
+                        <UniformGrid Columns="2">
+                            <CheckBox x:Name="mastered" Content="Mastered" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" />
+                            <CheckBox x:Name="unmastered" Content="Unmastered" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" />
+                        </UniformGrid>
+                        <Separator/>
+
+                        <UniformGrid Columns="2">
+                            <CheckBox x:Name="warframes" Content="Warframes" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" />
+                            <CheckBox x:Name="primary" Content="Primary" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" />
+                            <CheckBox x:Name="secondary" Content="Secondary" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" />
+                            <CheckBox x:Name="melee" Content="Melee" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" />
+                            <CheckBox x:Name="archwing" Content="Archwing" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" />
+                            <CheckBox x:Name="companion" Content="Companion" IsChecked="True" Click="FilterChanged" Padding="4,1,0,0" />
+                        </UniformGrid>
+
+                    </StackPanel>
+                </Border>
+            </Popup>
+            
             <TextBox x:Name="textBox" Margin="191,0,0,0" VerticalContentAlignment="Center" Padding="0" Text="Filter Terms" Foreground="#FF646464" TextChanged="TextboxTextChanged" SelectionBrush="#FF7EB4EA" GotFocus="TextBoxFocus" LostFocus="TextBoxLostFocus" BorderBrush="#FF303030" BorderThickness="1,0,0,0"/>
             <Rectangle Stroke="#FF646464" Margin="149,-1,-1,-1"/>
             <Label Content="Filter:" HorizontalAlignment="Left" Margin="155,0,0,0" Padding="0" VerticalContentAlignment="Center" />
