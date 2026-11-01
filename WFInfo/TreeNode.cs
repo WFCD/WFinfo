@@ -108,17 +108,9 @@ namespace WFInfo
 
         public bool topLevel = false;
 
-        public string Era
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        }
+        public string Era { get; set { SetField(ref field, value); } }
 
-        public int SortNum
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = -1;
+        public int SortNum { get; set { SetField(ref field, value); } } = -1;
 
         public string Name
         {
@@ -136,53 +128,21 @@ namespace WFInfo
             set { Name = value; }
         }
 
-        public Brush NameBrush
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = new SolidColorBrush(Color.FromRgb(177, 208, 217));
+        public Brush NameBrush { get; set { SetField(ref field, value); } } = new SolidColorBrush(Color.FromRgb(177, 208, 217));
 
-        public Color NameColor
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = Color.FromRgb(177, 208, 217);
+        public Color NameColor { get; set { SetField(ref field, value); } } = Color.FromRgb(177, 208, 217);
 
-        public Brush Background_Color
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = BACK_BRUSH;
+        public Brush Background_Color { get; set { SetField(ref field, value); } } = BACK_BRUSH;
 
-        public Thickness Col1_Margin1
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = new Thickness(0, 0, 18, 0);
+        public Thickness Col1_Margin1 { get; set { SetField(ref field, value); } } = new Thickness(0, 0, 18, 0);
 
-        public Thickness Col1_Margin2
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = new Thickness(0, 0, 0, 0);
+        public Thickness Col1_Margin2 { get; set { SetField(ref field, value); } } = new Thickness(0, 0, 0, 0);
 
-        public Thickness Col2_Margin1
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = new Thickness(0, 0, 18, 0);
+        public Thickness Col2_Margin1 { get; set { SetField(ref field, value); } } = new Thickness(0, 0, 18, 0);
 
-        public Thickness Col2_Margin2
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = new Thickness(0, 0, 0, 0);
+        public Thickness Col2_Margin2 { get; set { SetField(ref field, value); } } = new Thickness(0, 0, 0, 0);
 
-        public string Vaulted
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        }
+        public string Vaulted { get; set { SetField(ref field, value); } }
 
         public bool IsVaulted()
         {
@@ -592,130 +552,46 @@ namespace WFInfo
         }
 
 
-        public string Col1_Text1
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        } = "INT:";
+        public string Col1_Text1 { get; private set { SetField(ref field, value); } } = "INT:";
 
-        public string Col1_Text2
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        } = "4.4";
+        public string Col1_Text2 { get; private set { SetField(ref field, value); } } = "4.4";
 
-        public ImageSource Col1_Img1
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        } = null;
+        public ImageSource Col1_Img1 { get; private set { SetField(ref field, value); } } = null;
 
-        public string Grid_Shown
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        } = "Visible";
+        public string Grid_Shown { get; private set { SetField(ref field, value); } } = "Visible";
 
-        public string Col1_Img1_Shown
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        } = "Visible";
+        public string Col1_Img1_Shown { get; private set { SetField(ref field, value); } } = "Visible";
 
-        public string Col2_Text1
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        } = "RAD:";
+        public string Col2_Text1 { get; private set { SetField(ref field, value); } } = "RAD:";
 
-        public string Col2_Text2
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        } = "9.9";
+        public string Col2_Text2 { get; private set { SetField(ref field, value); } } = "9.9";
 
-        public string Col2_Text3
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        } = "(+5.5)";
+        public string Col2_Text3 { get; private set { SetField(ref field, value); } } = "(+5.5)";
 
-        public ImageSource Col2_Img1
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        } = null;
+        public ImageSource Col2_Img1 { get; private set { SetField(ref field, value); } } = null;
 
-        public string Col2_Img1_Shown
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        } = "Visible";
+        public string Col2_Img1_Shown { get; private set { SetField(ref field, value); } } = "Visible";
 
-        public double Plat_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
+        public double Plat_Val { get; set { SetField(ref field, value); } } = 0;
 
-        public int Ducat_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
+        public int Ducat_Val { get; set { SetField(ref field, value); } } = 0;
 
-        public int Owned_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
+        public int Owned_Val { get; set { SetField(ref field, value); } } = 0;
 
-        public int Owned_Capped_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
+        public int Owned_Capped_Val { get; set { SetField(ref field, value); } } = 0;
 
-        public double Owned_Plat_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
+        public double Owned_Plat_Val { get; set { SetField(ref field, value); } } = 0;
 
-        public double Owned_Ducat_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
+        public double Owned_Ducat_Val { get; set { SetField(ref field, value); } } = 0;
 
-        public int Count_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
-        public double Diff_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
+        public int Count_Val { get; set { SetField(ref field, value); } } = 0;
+        public double Diff_Val { get; set { SetField(ref field, value); } } = 0;
 
-        public double Intact_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
+        public double Intact_Val { get; set { SetField(ref field, value); } } = 0;
 
-        public double Radiant_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
+        public double Radiant_Val { get; set { SetField(ref field, value); } } = 0;
 
-        public double Bonus_Val
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = 0;
+        public double Bonus_Val { get; set { SetField(ref field, value); } } = 0;
 
         public Visibility IsVisible
         {
@@ -724,7 +600,7 @@ namespace WFInfo
 
         public bool ForceVisibility
         {
-            get { return field; }
+            get;
             set
             {
                 SetField(ref field, value);
@@ -734,7 +610,7 @@ namespace WFInfo
 
         public bool IsExpanded
         {
-            get { return field; }
+            get;
             set
             {
                 SetField(ref field, value);
@@ -743,23 +619,11 @@ namespace WFInfo
             }
         } = false;
 
-        public List<TreeNode> ChildrenFiltered
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        }
+        public List<TreeNode> ChildrenFiltered { get; private set { SetField(ref field, value); } }
 
-        public List<TreeNode> Children
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        }
+        public List<TreeNode> Children { get; private set { SetField(ref field, value); } }
 
-        public bool Mastered
-        {
-            get { return field; }
-            set { SetField(ref field, value); }
-        } = false;
+        public bool Mastered { get; set { SetField(ref field, value); } } = false;
 
         public TreeNode current;
         public void AddChild(TreeNode kid)
@@ -773,23 +637,11 @@ namespace WFInfo
             return Era + " " + Name;
         }
 
-        public ICommand DecrementPart
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        }
+        public ICommand DecrementPart { get; private set { SetField(ref field, value); } }
 
-        public ICommand IncrementPart
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        }
+        public ICommand IncrementPart { get; private set { SetField(ref field, value); } }
 
-        public ICommand MarkComplete
-        {
-            get { return field; }
-            private set { SetField(ref field, value); }
-        }
+        public ICommand MarkComplete { get; private set { SetField(ref field, value); } }
 
         private string dataRef;
 
